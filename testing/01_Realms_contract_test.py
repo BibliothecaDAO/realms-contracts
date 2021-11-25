@@ -1,12 +1,12 @@
 import pytest
 import asyncio
+import random
 from fixtures.account import account_factory
 
 NUM_SIGNING_ACCOUNTS = 2
 
-# Combat stats.
-USER_COMBAT_STATS = [5]*16
-DRUG_LORD_STATS = [3]*16
+# Params
+
 
 @pytest.fixture(scope='module')
 def event_loop():
@@ -35,22 +35,22 @@ async def game_factory(account_factory):
         selector_name='set_address_of_controller',
         calldata=[controller.contract_address])
     engine = await starknet.deploy(
-        source="contracts/01_DopeWars.cairo",
+        source="contracts/01_Realms.cairo",
         constructor_calldata=[controller.contract_address])
-    location_owned = await starknet.deploy(
-        source="contracts/02_LocationOwned.cairo",
+    settling = await starknet.deploy(
+        source="contracts/02A_Settling.cairo",
         constructor_calldata=[controller.contract_address])
-    user_owned = await starknet.deploy(
-        source="contracts/03_UserOwned.cairo",
+    building = await starknet.deploy(
+        source="contracts/03A_Building.cairo",
         constructor_calldata=[controller.contract_address])
-    registry = await starknet.deploy(
-        source="contracts/04_UserRegistry.cairo",
+    resources = await starknet.deploy(
+        source="contracts/04A_Resources.cairo",
         constructor_calldata=[controller.contract_address])
-    combat = await starknet.deploy(
-        source="contracts/05_Combat.cairo",
+    army = await starknet.deploy(
+        source="contracts/05A_Army.cairo",
         constructor_calldata=[controller.contract_address])
-    drug_lord = await starknet.deploy(
-        source="contracts/06_DrugLord.cairo",
+    raiding = await starknet.deploy(
+        source="contracts/06A_Raiding.cairo",
         constructor_calldata=[controller.contract_address])
     pseudorandom = await starknet.deploy(
         source="contracts/07_PseudoRandom.cairo",
@@ -65,36 +65,23 @@ async def game_factory(account_factory):
         selector_name='batch_set_controller_addresses',
         calldata=[
             engine.contract_address,
-            location_owned.contract_address,
-            user_owned.contract_address,
-            registry.contract_address,
-            combat.contract_address,
-            drug_lord.contract_address,
+            settling.contract_address,
+            building.contract_address,
+            resources.contract_address,
+            army.contract_address,
+            raiding.contract_address,
             pseudorandom.contract_address])
     return starknet, accounts, signers, arbiter, controller, engine, \
-        location_owned, user_owned, registry, combat
+        settling, building, resources, army, raiding
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
-async def test_combat(game_factory):
+async def test_account_unique(game_factory):
     starknet, accounts, signers, arbiter, controller, engine, \
         location_owned, user_owned, registry, combat = game_factory
-    user = accounts[1]
-    user_signer = signers[1]
-
-    user_combat_stats = [8]*16
-    drug_lord_combat_stats = [5]*16
-
-    await user_signer.send_transaction(
-        account=user,
-        to=combat.contract_address,
-        selector_name='challenge_current_drug_lord',
-        calldata=user_combat_stats + drug_lord_combat_stats)
-
-    # TODO: Implement the battle and historical save function
-    user_id=0
-    r = await combat.view_combat(user_id)
-    c = r.result.combat_details
-    assert c.winner == 0
-    assert c.move_sequence_3 == 0
-
+    # Test the account deployments.
+    admin_pub = await accounts[0].get_public_key().call()
+    assert admin_pub.result == (signers[0].public_key,)
+    user_1_pub = await accounts[1].get_public_key().call()
+    assert user_1_pub.result == (signers[1].public_key,)
+    assert signers[0].public_key != signers[1].public_key

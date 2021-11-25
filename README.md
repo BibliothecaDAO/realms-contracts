@@ -1,27 +1,13 @@
-# RYO
+# Realms Settling Game
 
-Roll Your Own - A Dope Wars open universe project.
+The Realms Settling Game - based on the Realms derivative NFT of the Loot Project
 
-A modular game engine architecture for the StarkNet L2 roll-up.
+A modular game engine architecture for the StarkNet L2 roll-up - heavily inspired by the pioneering work done by the Dope Ware RYO game [here](https://github.com/dopedao/RYO).
 
 ## What
 
-TI-83 drug wars built as smart contract system.
+Settle your Realm, earn resource, build upgrades and armies, and raid other Realms' resources.
 
-History:
-
-- Background mechanism design notion [here](https://dope-wars.notion.site/dope-22fe2860c3e64b1687db9ba2d70b0bb5).
-- Initial exploration / walkthrough viability testing blog [here](https://perama-v.github.io/cairo/game/world).
-- Expansion for forward compatibility [here](https://perama-v.github.io/cairo/game/aggregated-architecture).
-
-
-Join in:
-
-- Learn about Cairo. A turing-complete language for programs that become proofs.
-- Learn about StarkNet. An Ethereum L2 rollup with:
-    - L1 for data availability
-    - State transitions executed by validity proofs that the EVM checks.
-- Work on anything to do with the game/ecosystem that fits your skills and interest.
 
 ## System architecture
 
@@ -72,8 +58,9 @@ and forwards it on to the destination.
 - Modules (open ended set)
     - Game mechanics (where a player would interact to play)
     - Storage modules (game variables)
-    - L1 connectors/registry (for integrating L1 state/ownership to L2)
-    - Other arbitrary contracts as they are added to the game system.
+    - L1 connectors (for integrating L1 state/ownership to L2)
+    - Other arbitrary contracts
+    - Module state contained in A (e.g 02A_Settling.cairo) and logic in B (02A_Settling.cairo)
 
 For more information see
 
@@ -85,8 +72,8 @@ For more information see
 Clone this repo and use our docker shell to interact with starknet:
 
 ```
-git clone git@github.com:dopedao/RYO.git
-cd RYO
+git clone git@github.com:BibliothecaForAdventurers/RealmsSettling.git
+cd RealmsSettling
 bin/shell starknet --version
 ```
 
@@ -127,7 +114,7 @@ nile compile
 
 Compile an individual contract:
 ```
-nile compile contracts/01_DopeWars.cairo
+nile compile contracts/02A_Settling.cairo
 ```
 
 ### Test
@@ -136,7 +123,7 @@ Run all github actions tests: `bin/test`
 
 Run individual tests
 ```
-bin/shell pytest -s testing/01_DopeWars_contract_test.py
+bin/shell pytest -s testing/02A_Settling_contract_test.py
 ```
 
 ### Deploy
@@ -159,51 +146,12 @@ for anyone wanting to try out Cairo.
 
 Non-coding tasks:
 
-- Review the names of the 'districts' in `mappings/location_travel.csv`. Add interesting
-ones and remove ones that aren't as fun. The regions names are fixed.
-- Revise/sssign scores to all the DOPE wearables/itmes in `mappings/thingxyz_score.csv`.
-E.g., is a `Baseball Bat` or a handgun more powerful, or what is more costly per 'unit'
-`Krokodil` or `Oxycontin`. Might also be interesting to look at documenting/using the
-rarity of each of these items to help inform the score.
-- Create new `mappings/thingxyz_score.csv` for the missing categories (clothes, waist
-armor, name suffixes, etc.).
 
 Quick-coding tasks:
 
-- Game end criterion based on global clock.
-- Potentially separate out tests into different files to reduce the time required for tests.
-Reuse the deployment module across different tests.
-- Outline a rule that can be applied for location travel costs. This
-can be a simple function that uses a dictionary-based lookup table such as the one in module 02.
-This will replace `mappings/location_travel.csv`.
-
 Coding tasks:
 
-- Refine both the likelihood (basis points per user turn) and impact (percentage
-change) that events have and treak the constant at the top of `contracts/01_DopeWars.cairo`.
-E.g., how often should you get mugged, how much money would you lose.
-- Make the market initialisation function smaller (exceeded pedersen builtin, tx_id=302029).
-E.g., break it into 8 separate transactions.
-- User authentication. E.g., signature verification.
-- More testing of held-item binary encoding implementation in `UserRegistry`
-- More testing of effect of wearables on event occurences.
-- Think about the mechanics of the battles in `Combat.cairo`.
-    - How many variables,what they are, how to create a system that
-    forces users to be creative and make tradeoffs in the design of their combat submissions.
-    (e.g., the values they submit during their turn).
-    - Think about how to integrate the non-flexible combat
-    atributes that come from the Hustler (1 item per slot). E.g., how
-    should combate integrate the score that each item has.
-    - Whether a player could have a tree-like decision matrix that
-    they populate with "I would block if punched, and then kick to counter"
-- Extract the global state variables i to separate modules.
-
 Design considerations/todo
-
-- Add health clock. E.g., some events lower health
-- Outline combat mechanics, inputs and structure
-- Consider how side games between turns could be used to inform
-actions on next turn.
 
 
 Welcome:

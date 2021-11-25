@@ -58,12 +58,12 @@ deploy_module () {
 }
 
 # Deploy each module.
-deploy_module "01_DopeWars"
-deploy_module "02_LocationOwned"
-deploy_module "03_UserOwned"
-deploy_module "04_UserRegistry"
-deploy_module "05_Combat"
-deploy_module "06_DrugLord"
+deploy_module "01_Realms"
+deploy_module "02A_Settling"
+deploy_module "03A_Building"
+deploy_module "04A_Resources"
+deploy_module "05A_Army"
+deploy_module "06A_Raiding"
 deploy_module "07_PseudoRandom"
 
 
@@ -85,8 +85,8 @@ nile invoke Arbiter set_address_of_controller $ModuleControllerAddress
 # would make the above deploy commands simpler.
 # Use the Arbiter to save module addresses into the ModuleController.
 nile invoke ModuleController set_initial_module_addresses \
-    $module_01_DopeWars module_02_LocationOwned \
-    $module_03_UserOwned module_04_UserRegistry \
-    $module_05_Combat module_06_DrugLord \
+    $module_01_Realms module_02A_Settling \
+    $module_03A_Building module_04A_Resources \
+    $module_05A_Army module_06A_Raiding \
     $module_07_PseudoRandom
 
