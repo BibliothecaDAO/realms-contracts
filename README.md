@@ -1,33 +1,31 @@
 # Realms Settling Game
 
-The Realms Settling Game - based on the Realms derivative NFT of the Loot Project
+### The Realms Settling Game - based on the Realms derivative NFT of the Loot Project
 
-A modular game engine architecture for the StarkNet L2 roll-up - heavily inspired by the pioneering work done by the Dope Ware RYO game [here](https://github.com/dopedao/RYO).
+A modular game engine architecture for the StarkNet L2 roll-up - Forked & heavily inspired by the pioneering work done by the Dope Ware RYO game [here](https://github.com/dopedao/RYO).
 
-## What
+## What is the game?
 
-Settle your Realm, earn resource, build upgrades and armies, and raid other Realms' resources.
+Settling is an on-chain game of economics and Chivarly built on-top of ZK-STARKS. Earn resources by staking your Realms, raid rivals, steal loot & form on-chain alliances to crush your enemies.
 
+Settling is entirely on-chain; the UI is purely just a client for a distributed backend. Feel free to create your own superior client if you wish.
+
+Picture a million players all asynchronously working the blockchain; harvesting resources, building alliances, & slaying foes. This is Settling.
+
+Settling is all open-source and we encourage people to build modules and contribute.
+
+Requirements: To play be a Lord you require a Realm from the Lootverse. The game will support more Loot derivatives in the future to enrich the gameplay.
+<hr>
 
 ## System architecture
 
 The game mechanics are separated from the game state variables.
-A controller system manages a mapping of modules to deployed addresses
-and a governance module may update the controller.
+
+A controller system manages a mapping of modules to deployed addresses and a governance module may update the controller.
 
 For example all these modules could read and write from the state modules and be connected-but-distinct game interactions:
 
-- Try arbitrage drug markets [Dope Wars module](/module_notes/01_DopeWars.md).
-Manage inventory against risks and try to out-trade other players. Swap coke
-in one region and swoop in to collect cheap Krokodil after a regional drug bust.
-- Try to become a regional Drug Lord by submitting an autobattler to the
-[Combat module](/module_notes/05_Combat.md). Hand crafted strategies submitted
-against the current drug Lord. Winner collects a cut from future regional trades.
-- Try an L3 move-by-move 1v1 fight with another player in the
-[State channel module](/module_notes/08_StateChannel.md). Inventory from your work in
-the drug trades is placed as collateral for the channel. Off-chain messages
-signed by your key ensure that when submitted back to L2 the winnings are enforced.
-High-frequency moves allow for granular game play.
+<hr>
 
 ## Contract hierarchy
 
@@ -38,7 +36,7 @@ Account contract that holds your public key. The contract checks the payload
 and forwards it on to the destination.
 
 - Player Account
-    - A user who controls a Hustler (game character) in the system.
+    - A Lord in the Realmverse. These are holders of Realms.
 - Governance Account
     - An admin who controls the Arbiter.
     - The admin may be an L2 DAO to administer governance decisions
@@ -56,16 +54,18 @@ and forwards it on to the destination.
     - The controller stores where modules can be found, and which modules
     have write access to other modules.
 - Modules (open ended set)
-    - Game mechanics (where a player would interact to play)
-    - Storage modules (game variables)
+    - Game mechanics (where a player would interact to play). 
+    - Storage modules (game variables).
     - L1 connectors (for integrating L1 state/ownership to L2)
     - Other arbitrary contracts
-    - Module state contained in A (e.g 02A_Settling.cairo) and logic in B (02A_Settling.cairo)
+    - Module logic contained in A (e.g 02A_Settling.cairo) and state in B (02B_Settling.cairo)
 
 For more information see
 
 - Modular [system architecture](./system_architecture.md).
 - Descriptions of example modules in [module notes](/module_notes).
+
+<hr>
 
 ## Setup
 
@@ -123,7 +123,7 @@ Run all github actions tests: `bin/test`
 
 Run individual tests
 ```
-bin/shell pytest -s testing/02A_Settling_contract_test.py
+bin/shell pytest -s testing/01_Realms_contract_test.py
 ```
 
 ### Deploy
@@ -138,25 +138,15 @@ permissions system.
 ```
 bin/deploy
 ```
+<hr>
 
-## Next steps
+## Contributing and Nextsteps
 
-Building out parts to make a functional `v1`. Some good entry-level options
-for anyone wanting to try out Cairo.
+Module Priority
+1. Settling
+2. Construction
+3. Resource Upgrading
+4. Army Building
+5. Raiding
 
-Non-coding tasks:
-
-
-Quick-coding tasks:
-
-Coding tasks:
-
-Design considerations/todo
-
-
-Welcome:
-
-- PRs
-- Issues
-- Questions about Cairo
-- Ideas for the game
+Building out parts to make a functional `v1`
