@@ -9,7 +9,7 @@ from starkware.cairo.common.default_dict import (default_dict_new,
 from starkware.starknet.common.syscalls import get_caller_address
 
 from contracts.utils.interfaces import IModuleController
-
+from contracts.tokens.IERC20 import IERC20
 
 ##### Module 02 #####
 #
