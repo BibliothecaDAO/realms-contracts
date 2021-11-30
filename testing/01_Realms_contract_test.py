@@ -56,8 +56,8 @@ async def game_factory(account_factory):
 @pytest.mark.asyncio
 @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
 async def test_account_unique(game_factory):
-    accounts, signers, \
-        = game_factory
+    starknet, accounts, signers, arbiter, controller, engine, \
+        settling, building, resources, army, raiding = game_factory
     # Test the account deployments.
     admin_pub = await accounts[0].get_public_key().call()
     assert admin_pub.result == (signers[0].public_key,)

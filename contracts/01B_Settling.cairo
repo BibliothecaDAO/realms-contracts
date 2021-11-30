@@ -8,8 +8,9 @@ from starkware.cairo.common.default_dict import default_dict_new, default_dict_f
 from starkware.starknet.common.syscalls import get_caller_address
 
 from contracts.utils.interfaces import IModuleController
+from contracts.tokens.IERC20 import IERC20
 
-# #### Module 01B #####
+# #### Module 02 #####
 #
 # This module controls the state of 01A
 #
