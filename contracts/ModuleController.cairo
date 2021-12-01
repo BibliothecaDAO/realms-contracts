@@ -106,11 +106,14 @@ end
 @external
 func set_initial_module_addresses{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        module_01_addr : felt, module_02_addr : felt, module_03_addr : felt):
+        module_01_addr : felt, module_02_addr : felt):
     only_arbiter()
 
     address_of_module_id.write(1, module_01_addr)
     module_id_of_address.write(module_01_addr, 1)
+
+    address_of_module_id.write(2, module_02_addr)
+    module_id_of_address.write(module_02_addr, 2)
 
     return ()
 end

@@ -35,10 +35,10 @@ async def game_factory(account_factory):
         to=arbiter.contract_address,
         selector_name='set_address_of_controller',
         calldata=[controller.contract_address])
-    settlingLogic = await starknet.deploy(
+    settling_logic = await starknet.deploy(
         source="contracts/01A_Settling.cairo",
         constructor_calldata=[controller.contract_address])
-    settlingState = await starknet.deploy(
+    settling_state = await starknet.deploy(
         source="contracts/01B_Settling.cairo",
         constructor_calldata=[controller.contract_address])
     # The admin key controls the arbiter. Use it to have the arbiter
@@ -49,15 +49,15 @@ async def game_factory(account_factory):
         to=arbiter.contract_address,
         selector_name='batch_set_controller_addresses',
         calldata=[
-            settlingLogic.contract_address, settlingState.contract_address])
-    return starknet, accounts, signers, arbiter, controller, settlingLogic, settlingState
+            settling_logic.contract_address, settling_state.contract_address])
+    return starknet, accounts, signers, arbiter, controller, settling_logic, settling_state
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
 async def test_account_unique(game_factory):
-    starknet, accounts, signers, arbiter, controller, engine, \
-        settling, building, resources, army, raiding = game_factory
+    starknet, accounts, signers, arbiter, controller, \
+        settling_logic, settling_state = game_factory
     # Test the account deployments.
     admin_pub = await accounts[0].get_public_key().call()
     assert admin_pub.result == (signers[0].public_key,)
