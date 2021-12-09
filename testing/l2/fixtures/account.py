@@ -17,10 +17,9 @@ async def account_factory(request):
         signer = Signer(DUMMY_PRIVATE + i)
         signers.append(signer)
         account = await starknet.deploy(
-            "contracts/Account.cairo",
+            "contracts/l2/utils/Account.cairo",
             constructor_calldata=[signer.public_key]
         )
-        await account.initialize(account.contract_address).invoke()
         accounts.append(account)
 
         print(f'Account {i} is: {hex(account.contract_address)}')

@@ -1,5 +1,3 @@
-# OpenZepellin commit hash: ffa208c
-
 import pytest
 import asyncio
 from starkware.starknet.testing.starknet import Starknet
@@ -20,36 +18,29 @@ def event_loop():
 async def account_factory():
     starknet = await Starknet.empty()
     account = await starknet.deploy(
-        "contracts/Account.cairo",
+        "contracts/l2/utils/Account.cairo",
         constructor_calldata=[signer.public_key]
     )
 
-    # Keeping the initialize function to set the contract_address
-    # until `this.address` is available
-    await account.initialize(account.contract_address).invoke()
     return starknet, account
 
 
 @pytest.mark.asyncio
-async def test_initializer(account_factory):
+async def test_constructor(account_factory):
     _, account = account_factory
 
     execution_info = await account.get_public_key().call()
     assert execution_info.result == (signer.public_key,)
 
-    execution_info = await account.get_address().call()
-    assert execution_info.result == (account.contract_address,)
-
 
 @pytest.mark.asyncio
 async def test_execute(account_factory):
     starknet, account = account_factory
-    initializable = await starknet.deploy("contracts/Initializable.cairo")
+    initializable = await starknet.deploy("contracts/l2/utils/Initializable.cairo")
 
     execution_info = await initializable.initialized().call()
     assert execution_info.result == (0,)
 
-    # initialize
     await signer.send_transaction(account, initializable.contract_address, 'initialize', [])
 
     execution_info = await initializable.initialized().call()
@@ -57,9 +48,23 @@ async def test_execute(account_factory):
 
 
 @pytest.mark.asyncio
+async def test_return_value(account_factory):
+    starknet, account = account_factory
+    initializable = await starknet.deploy("contracts/l2/utils/Initializable.cairo")
+
+    # initialize, set `initialized = 1`
+    await signer.send_transaction(account, initializable.contract_address, 'initialize', [])
+
+    read_info = await signer.send_transaction(account, initializable.contract_address, 'initialized', [])
+    call_info = await initializable.initialized().call()
+    (call_result, ) = call_info.result
+    assert read_info.result.response == [call_result]  # 1
+
+
+@ pytest.mark.asyncio
 async def test_nonce(account_factory):
     starknet, account = account_factory
-    initializable = await starknet.deploy("contracts/Initializable.cairo")
+    initializable = await starknet.deploy("contracts/l2/utils/Initializable.cairo")
     execution_info = await account.get_nonce().call()
     current_nonce = execution_info.result.res
 

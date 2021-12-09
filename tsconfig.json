@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "target": "es2018",
+        "module": "commonjs",
+        "baseUrl": ".",
+        "strict": true,
+        "esModuleInterop": true,
+        "outDir": "dist",
+        "resolveJsonModule": true
+    },
+    "include": [
+        "./scripts",
+        "./test",
+        "./deploy",
+        "hardhat.config.ts",
+        "./src/types",
+        "other/diamondTest.js"
+    ],
+    "files": [
+        "./hardhat.config.ts"
+    ]
+}
