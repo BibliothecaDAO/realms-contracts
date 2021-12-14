@@ -1,6 +1,3 @@
-# OpenZepellin commit hash: 82341973548104d66cf9c787590233343566e8d1
-
-
 %lang starknet
 %builtins pedersen range_check ecdsa
 

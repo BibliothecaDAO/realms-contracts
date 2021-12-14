@@ -1,6 +1,3 @@
-# OpenZepelling commit hash: 6c1d1ae
-# Used for testing Account.cairo
-
 %lang starknet
 %builtins pedersen range_check
 
@@ -11,8 +8,8 @@ func _initialized() -> (res: felt):
 end
 
 @external
-func initialized{
-        syscall_ptr : felt*,
+func initialized{ 
+        syscall_ptr : felt*, 
         pedersen_ptr : HashBuiltin*,
         range_check_ptr
     }() -> (res: felt):
@@ -22,7 +19,7 @@ end
 
 @external
 func initialize{
-        syscall_ptr : felt*,
+        syscall_ptr : felt*, 
         pedersen_ptr : HashBuiltin*,
         range_check_ptr
     }():

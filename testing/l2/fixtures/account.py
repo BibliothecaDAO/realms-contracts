@@ -1,6 +1,6 @@
 import pytest
 from starkware.starknet.testing.starknet import Starknet
-from utils.Signer import Signer
+from utils import Signer
 
 # Create signers that use a private key to sign transaction objects.
 DUMMY_PRIVATE = 123456789987654321
@@ -17,7 +17,7 @@ async def account_factory(request):
         signer = Signer(DUMMY_PRIVATE + i)
         signers.append(signer)
         account = await starknet.deploy(
-            "contracts/l2/utils/Account.cairo",
+            "contracts/Account.cairo",
             constructor_calldata=[signer.public_key]
         )
         accounts.append(account)
