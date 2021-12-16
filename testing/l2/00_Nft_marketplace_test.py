@@ -56,20 +56,20 @@ async def marketplace_factory():
     # Then save the controller address in the Arbiter.
     # Then deploy Controller address during module deployments.
     lords = await starknet.deploy(
-        source="contracts/token/ERC20.cairo",
+        source="contracts/token/ERC20_Mintable.cairo",
         constructor_calldata=[
             str_to_felt("Lords"),     # name
             str_to_felt("LRD"),       # symbol
             *uint(initial_supply),                # initial supply
-            account.contract_address  # recipient])
+            account.contract_address,
+            account.contract_address   # recipient])
         ]
     )
     realms = await starknet.deploy(
-        source="contracts/token/ERC721.cairo",
+        source="contracts/token/ERC721_Mintable.cairo",
         constructor_calldata=[
-            str_to_felt("Realms (for Adventurers)"),  # name
-            str_to_felt("Realm"),                 # ticker
-            BASE_URI,                           # base_uri
+            str_to_felt("Realms"),  # name
+            str_to_felt("Realms"),                 # ticker
             account.contract_address,           # contract_owner
         ])
 
@@ -144,7 +144,7 @@ async def test_execute_trade(marketplace_factory):
     )
     
     await signer.send_transaction(
-        account, lords.contract_address, 'transfer', [
+        account, lords.contract_address, 'mint', [
             purchaser.contract_address, *uint(transfer_amount)
         ]
     )
@@ -187,11 +187,11 @@ async def test_execute_trade(marketplace_factory):
     assert purchaser_currency_balance.result.balance == uint(transfer_amount - trade_result.result.trade.price)
 
     #Require seller balance to have increase by trade price less fee
-    assert account_currency_balance.result.balance == uint(initial_supply - transfer_amount + trade_result.result.trade.price - fee)
+    assert account_currency_balance.result.balance == uint(initial_supply + trade_result.result.trade.price - fee)
 
 @pytest.mark.asyncio
 async def test_cancel_trade(marketplace_factory):
-    _, account, _, realms, marketplace = marketplace_factory
+    _, account, _, _, marketplace = marketplace_factory
 
 
     await signer.send_transaction(
