@@ -176,6 +176,14 @@ func get_trade{
     }(idx: felt) -> (trade: Trade):
     return _trades.read(idx)
 end
+@view
+func get_trades_by_token{
+        syscall_ptr : felt*, 
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }(idx: felt) -> (trade: Trade):
+    return _trades.read(idx)
+end
 
 @view
 func get_trade_counter{

@@ -150,3 +150,22 @@ func mint{
     ERC20_mint(to, amount)
     return ()
 end
+
+
+#
+# Biblio added
+#
+
+
+@external
+func publicMint{
+        pedersen_ptr: HashBuiltin*, 
+        syscall_ptr: felt*, 
+        range_check_ptr
+    }(amount: Uint256):
+
+    let (caller) = get_caller_address()
+
+    ERC20_mint(caller, amount)
+    return ()
+end

@@ -1,7 +1,5 @@
 import pytest
 import asyncio
-import random
-from fixtures.account import account_factory
 from utils import Signer, uint, str_to_felt, MAX_UINT256, assert_revert
 from starkware.starknet.testing.starknet import Starknet
 from starkware.starkware_utils.error_handling import StarkException
@@ -25,9 +23,9 @@ sixth_token_id = (9999, 9999)
 signer = Signer(123456789987654321)
 user_signer = Signer(123456789987654322)
 
-transfer_amount = 1000
+transfer_amount = 500 * (10 ** 18)
 fee_bips = 500
-initial_supply = 1000000
+initial_supply = 1000000  * (10 ** 18)
 
 @pytest.fixture(scope='module')
 def event_loop():
@@ -44,11 +42,18 @@ async def _erc20_approve(ctx, currency_address, marketplace_address, account, am
 @pytest.fixture(scope='module')
 async def marketplace_factory():
     starknet = await Starknet.empty()
-
+    accounts = []
+    
     account = await starknet.deploy(
         "contracts/Account.cairo",
         constructor_calldata=[signer.public_key]
     )
+    accounts.append(account)
+    purchaser = await starknet.deploy(
+        "contracts/Account.cairo",
+        constructor_calldata=[user_signer.public_key]
+    )
+    accounts.append(purchaser)
 
     # The Controller is the only unchangeable contract.
     # First deploy Arbiter.
@@ -61,8 +66,8 @@ async def marketplace_factory():
             str_to_felt("Lords"),     # name
             str_to_felt("LRD"),       # symbol
             *uint(initial_supply),                # initial supply
-            account.contract_address,
-            account.contract_address   # recipient])
+            accounts[0].contract_address,
+            accounts[0].contract_address   # recipient
         ]
     )
     realms = await starknet.deploy(
@@ -70,7 +75,7 @@ async def marketplace_factory():
         constructor_calldata=[
             str_to_felt("Realms"),  # name
             str_to_felt("Realms"),                 # ticker
-            account.contract_address,           # contract_owner
+            accounts[0].contract_address,           # contract_owner
         ])
 
     marketplace = await starknet.deploy(
@@ -80,51 +85,115 @@ async def marketplace_factory():
             realms.contract_address               # nft address
         ])
 
-    return starknet, account, lords, realms, marketplace
-
+    return starknet, accounts, lords, realms, marketplace
 
 #
-# Mint Realms to User
+# Set Realms Currency Address
 #
 
+@pytest.mark.asyncio
 
+async def test_update_currency_token(marketplace_factory):
+    _, accounts, lords, realms, _ = marketplace_factory
+
+    await signer.send_transaction(
+        accounts[0], realms.contract_address, 'update_currency_token', [
+            lords.contract_address]
+    )
+
+    execution_info = await realms.get_currency_token().call()
+    print(f'Realms Currency Address is: {execution_info.result.currency_token_address}')
+
+    assert execution_info.result.currency_token_address == lords.contract_address
+
+#
+# Mint Realms to Owner
+#
 @pytest.mark.asyncio
 @pytest.mark.parametrize('tokens, number_of_tokens', [
     [first_token_id, 1],
     [second_token_id, 2],
     [third_token_id, 3],
 ])
+
 async def test_mint(marketplace_factory, tokens, number_of_tokens):
-    _, account, _, realms, _ = marketplace_factory
+    _, accounts, _, realms, _ = marketplace_factory
+
+    token_index = number_of_tokens - 1
+    execution_info = await realms.token_at_index(accounts[0].contract_address, token_index).call()
+    print(f'Token at Index {token_index} before mint: {execution_info.result.token}')
 
     await signer.send_transaction(
-        account, realms.contract_address, 'mint', [
-            account.contract_address, *tokens]
+        accounts[0], realms.contract_address, 'mint', [
+            accounts[0].contract_address, *tokens]
     )
 
-    execution_info = await realms.balanceOf(account.contract_address).call()
-    print(f'Realms Balance for user is: {str(execution_info.result.balance)}')
+    execution_info = await realms.balanceOf(accounts[0].contract_address).call()
+    print(f'Realms Balance for owner is: {execution_info.result.balance}')
 
     assert execution_info.result == (uint(number_of_tokens),)
+
+    execution_info = await realms.get_all_tokens_for_owner(accounts[0].contract_address).call()
+    print(f'Tokens for owner are: {execution_info.result.tokens}')
+
+    execution_info = await realms.token_at_index(accounts[0].contract_address, token_index).call()
+    print(f'Token at Index: {execution_info.result.token}')
+
+#
+# Mint user lords and approve realms to spend
+#
+@pytest.mark.asyncio
+
+async def test_user_mint_lords_approve_realms(marketplace_factory):
+    _, accounts, lords, realms, _ = marketplace_factory
+
+    await user_signer.send_transaction(
+        accounts[1], lords.contract_address, 'publicMint', [
+            *uint(transfer_amount)
+        ]
+    )
+    await user_signer.send_transaction(
+        accounts[1], lords.contract_address, 'approve', [
+            realms.contract_address, *uint(transfer_amount)]
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('user_tokens, number_of_user_tokens', [
+    [fourth_token_id, 1],
+    [fifth_token_id, 2],
+    [sixth_token_id, 3],
+])
+async def test_user_mint(marketplace_factory, user_tokens, number_of_user_tokens):
+    _, accounts, lords, realms, marketplace = marketplace_factory
+
+    await user_signer.send_transaction(
+        accounts[1], realms.contract_address, 'publicMint', [
+            *user_tokens]
+    )
+    execution_info = await realms.balanceOf(accounts[1].contract_address).call()
+    print(f'Realms Balance for user is: {str(execution_info.result.balance)}')
+
+    assert execution_info.result == (uint(number_of_user_tokens),)
+
 
 
 #
 # Open Trade with user
 #
 
-
 @pytest.mark.asyncio
 async def test_open_trade(marketplace_factory):
-    _, account, _, realms, marketplace = marketplace_factory
+    _, accounts, _, realms, marketplace = marketplace_factory
 
     await signer.send_transaction(
-        account, realms.contract_address, 'setApprovalForAll', [
+        accounts[0], realms.contract_address, 'setApprovalForAll', [
             marketplace.contract_address, true]
     )
 
     await signer.send_transaction(
-        account, marketplace.contract_address, 'open_trade', [
-            *first_token_id, 420, 1221542]
+        accounts[0], marketplace.contract_address, 'open_trade', [
+            *first_token_id, 40 * (10 ** 18), 1221542]
     )
 
     #Require Trade Counter To Increase
@@ -134,27 +203,22 @@ async def test_open_trade(marketplace_factory):
     trade = await marketplace.get_trade(0).call()
     print(f'New Trade was: {trade.result}')
 
+
 @pytest.mark.asyncio
 async def test_execute_trade(marketplace_factory):
-    starknet, account, lords, realms, marketplace = marketplace_factory
+    starknet, accounts, lords, realms, marketplace = marketplace_factory
 
-    purchaser = await starknet.deploy(
-        "contracts/Account.cairo",
-        constructor_calldata=[user_signer.public_key]
-    )
-    
-    await signer.send_transaction(
-        account, lords.contract_address, 'mint', [
-            purchaser.contract_address, *uint(transfer_amount)
-        ]
-    )
-
-    await _erc20_approve(user_signer, lords.contract_address, marketplace.contract_address, purchaser, 1000)
+    await _erc20_approve(user_signer, lords.contract_address, marketplace.contract_address, accounts[1], 40 * (10 ** 18))
 
     await user_signer.send_transaction(
-        purchaser, marketplace.contract_address, 'execute_trade', [
+        accounts[1], marketplace.contract_address, 'execute_trade', [
             0]
     )
+    execution_info = await realms.get_all_tokens_for_owner(accounts[1].contract_address).call()
+    print(f'Tokens for purhcaser are: {execution_info.result.tokens}')
+
+    execution_info = await realms.get_all_tokens_for_owner(accounts[0].contract_address).call()
+    print(f'Tokens for seller are: {execution_info.result.tokens}')
 
     #Require Trade Status to change
     trade_status = await marketplace.get_trade_status(0).call()
@@ -166,11 +230,11 @@ async def test_execute_trade(marketplace_factory):
     item_owner_of = await realms.ownerOf(trade_item.result.item).call()
     print(f'Owner after execution: {item_owner_of.result.owner}')
 
-    purchaser_currency_balance = await lords.balanceOf(purchaser.contract_address).call()
-    print(f'Purchaser balance after execution: {purchaser_currency_balance.result.balance}')
+    purchaser_currency_balance = await lords.balanceOf(accounts[1].contract_address).call()
+    print(f'accounts[1] balance after execution: {purchaser_currency_balance.result.balance}')
 
-    account_currency_balance = await lords.balanceOf(account.contract_address).call()
-    print(f'Account balance after execution: {account_currency_balance.result.balance}')
+    seller_currency_balance = await lords.balanceOf(accounts[0].contract_address).call()
+    print(f'Accounts balance after execution: {seller_currency_balance.result.balance}')
 
     trade_result = await marketplace.get_trade(0).call()
     print(f'Trade status execution: {trade_result.result.trade}')
@@ -180,29 +244,29 @@ async def test_execute_trade(marketplace_factory):
     #Require Trade status to change to Executed
     assert trade_status.result.status == 1
 
-    #Require purchaser to be the owner of Item from trade
-    assert item_owner_of.result.owner == purchaser.contract_address
+    #Require accounts[1] to be the owner of Item from trade
+    assert item_owner_of.result.owner == accounts[1].contract_address
 
-    #Require purchaser balance to have decresase by trade price
-    assert purchaser_currency_balance.result.balance == uint(transfer_amount - trade_result.result.trade.price)
+    #Require accounts[1] balance to have decresase by trade price and 3x mint price
+    assert purchaser_currency_balance.result.balance == uint(transfer_amount - trade_result.result.trade.price - (3 * 10 * (10 ** 18)))
 
     #Require seller balance to have increase by trade price less fee
-    assert account_currency_balance.result.balance == uint(initial_supply + trade_result.result.trade.price - fee)
+    assert seller_currency_balance.result.balance == uint(initial_supply + trade_result.result.trade.price - fee)
 
 @pytest.mark.asyncio
 async def test_cancel_trade(marketplace_factory):
-    _, account, _, _, marketplace = marketplace_factory
+    _, accounts, _, _, marketplace = marketplace_factory
 
 
     await signer.send_transaction(
-        account, marketplace.contract_address, 'open_trade', [
-            *second_token_id, 420, 1221542]
+        accounts[0], marketplace.contract_address, 'open_trade', [
+            *second_token_id, 40 * (10 ** 18), 1221542]
     )
 
     trade_counter = await marketplace.get_trade_counter().call()
 
     await signer.send_transaction(
-        account, marketplace.contract_address, 'cancel_trade', [
+        accounts[0], marketplace.contract_address, 'cancel_trade', [
             trade_counter.result.trade_counter - 1]
     )
 
