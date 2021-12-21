@@ -25,10 +25,10 @@ async def game_factory(account_factory):
     # Then save the controller address in the Arbiter.
     # Then deploy Controller address during module deployments.
     arbiter = await starknet.deploy(
-        source="contracts/l2/settling_game/Arbiter.cairo",
+        source="contracts/settling_game/Arbiter.cairo",
         constructor_calldata=[admin_account.contract_address])
     controller = await starknet.deploy(
-        source="contracts/l2/settling_game/ModuleController.cairo",
+        source="contracts/settling_game/ModuleController.cairo",
         constructor_calldata=[arbiter.contract_address])
     await admin_key.send_transaction(
         account=admin_account,
@@ -36,10 +36,10 @@ async def game_factory(account_factory):
         selector_name='set_address_of_controller',
         calldata=[controller.contract_address])
     settling_logic = await starknet.deploy(
-        source="contracts/l2/settling_game/01A_Settling.cairo",
+        source="contracts/settling_game/01A_Settling.cairo",
         constructor_calldata=[controller.contract_address])
     settling_state = await starknet.deploy(
-        source="contracts/l2/settling_game/01B_Settling.cairo",
+        source="contracts/settling_game/01B_Settling.cairo",
         constructor_calldata=[controller.contract_address])
     # The admin key controls the arbiter. Use it to have the arbiter
     # set the module deployment addresses in the controller.

@@ -24,32 +24,3 @@ namespace IModuleController:
     func set_initial_module_addresses(module_01_addr : felt, module_02_addr : felt):
     end
 end
-
-@contract_interface
-namespace I03_UserOwned:
-    func user_has_item_read(user_id : felt, item_id : felt) -> (count : felt):
-    end
-    func user_has_item_write(user_id : felt, item_id : felt, count : felt):
-    end
-    func user_in_location_read(user_id : felt) -> (location_id : felt):
-    end
-    func user_in_location_write(user_id : felt, location_id : felt):
-    end
-end
-
-# Declare the interface with which to call the UserRegistry contract.
-@contract_interface
-namespace I04_UserRegistry:
-    func get_user_info(user_id : felt, starknet_pubkey : felt) -> (user_data : felt):
-    end
-    func unpack_score(user_id : felt, index : felt) -> (score : felt):
-    end
-end
-
-@contract_interface
-namespace I07_PseudoRandom:
-    func get_pseudorandom() -> (num_to_use : felt):
-    end
-    func add_to_seed(val0 : felt, val1 : felt) -> (num_to_use : felt):
-    end
-end

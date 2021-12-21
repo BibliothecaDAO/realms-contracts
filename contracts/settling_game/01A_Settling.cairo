@@ -8,8 +8,8 @@ from starkware.cairo.common.hash_state import hash_init, hash_update, HashState
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address
 
-from contracts.l2.settling_game.utils.general import scale
-from contracts.l2.settling_game.utils.interfaces import IModuleController
+from contracts.settling_game.utils.general import scale
+from contracts.settling_game.utils.interfaces import IModuleController
 
 # #### Module 1A #####
 # Base settling contract
