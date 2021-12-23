@@ -18,7 +18,7 @@ async def movement_factory():
 
     # Deploy the movement contract.
     movement = await starknet.deploy(
-        "contracts/l2/ctf_minigame/02_GridMovement.cairo"
+        "contracts/l2/minigame/03_GridMovement.cairo"
     )
 
     # This contract wraps the util contract
