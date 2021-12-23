@@ -123,7 +123,7 @@ Run all github actions tests: `bin/test`
 
 Run individual tests
 ```
-bin/shell pytest -s testing/01_Realms_contract_test.py
+bin/shell pytest -s testing/l2/01_Realms_contract_test.py
 ```
 
 ### Deploy
