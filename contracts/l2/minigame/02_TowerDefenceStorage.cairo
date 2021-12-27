@@ -18,6 +18,12 @@ end
 func latest_game_index( ) -> ( game_idx : felt ):
 end
 
+# Stores the wall health for a given game index
+# Increases through replenishment, dicreases through attacks. 
+@storage_var
+func wall_health( game_idx : felt ) -> ( health : felt ):
+end
+
 # Attributes of a tower for a given tower index
 # Multiple attributes are packed into a single felt
 @storage_var
@@ -57,6 +63,21 @@ func set_latest_game_index{
     only_approved()
 
     latest_game_index.write(  game_idx )
+    return ()
+end
+
+@external
+func get_wall_health{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt) -> ( health : felt ):
+    let (health) = wall_health.read( game_idx )
+    return (health) 
+end
+
+@external
+func set_wall_health{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt, health : felt ):
+    
+    only_approved()
+
+    wall_health.write( game_idx, health)
     return ()
 end
 

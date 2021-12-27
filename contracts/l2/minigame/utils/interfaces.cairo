@@ -33,6 +33,12 @@ namespace I02_TowerStorage:
     func set_latest_game_index( game_idx : felt ):
     end
     
+    # Wall health
+    func get_wall_health( game_idx : felt ) -> ( health : felt ):
+    end
+    func set_wall_health( game_idx : felt, health : felt ):
+    end
+
     # Tower Attributes
     func get_tower_attributes( game_idx : felt, tower_idx : felt ) -> ( attrs_packed : felt ):
     end
