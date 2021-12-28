@@ -31,7 +31,6 @@ func create_game{
         pedersen_ptr : HashBuiltin*,
         range_check_ptr
     }(
-        expiry_timestamp : felt
     ):
     alloc_locals
 
