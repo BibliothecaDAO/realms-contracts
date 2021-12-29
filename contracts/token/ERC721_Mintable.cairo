@@ -33,10 +33,13 @@ func constructor{
     }(
         name: felt,
         symbol: felt,
-        owner: felt
+        owner: felt,
+        currency_address: felt
     ):
     ERC721_initializer(name, symbol)
     Ownable_initializer(owner)
+    currency_token_address.write(currency_address)
+
     return ()
 end
 
