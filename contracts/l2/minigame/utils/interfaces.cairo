@@ -34,9 +34,9 @@ namespace I02_TowerStorage:
     end
     
     # Wall health
-    func get_wall_health( game_idx : felt ) -> ( health : felt ):
+    func get_main_health( game_idx : felt ) -> ( health : felt ):
     end
-    func set_wall_health( game_idx : felt, health : felt ):
+    func set_main_health( game_idx : felt, health : felt ):
     end
 
     # Shield value

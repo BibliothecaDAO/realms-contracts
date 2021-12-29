@@ -21,7 +21,7 @@ end
 # Stores the wall health for a given game index
 # Dicreases when attacks get through the shield. 
 @storage_var
-func wall_health( game_idx : felt ) -> ( health : felt ):
+func main_health( game_idx : felt ) -> ( health : felt ):
 end
 
 # Stores the shield value for a given game index
@@ -73,17 +73,17 @@ func set_latest_game_index{
 end
 
 @external
-func get_wall_health{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt) -> ( health : felt ):
-    let (health) = wall_health.read( game_idx )
+func get_main_health{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt) -> ( health : felt ):
+    let (health) = main_health.read( game_idx )
     return (health) 
 end
 
 @external
-func set_wall_health{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt, health : felt ):
+func set_main_health{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt, health : felt ):
     
     only_approved()
 
-    wall_health.write( game_idx, health)
+    main_health.write( game_idx, health)
     return ()
 end
 

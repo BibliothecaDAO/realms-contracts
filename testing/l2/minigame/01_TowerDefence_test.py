@@ -146,7 +146,7 @@ async def test_shield_and_attack_tower(game_factory):
         ).call()
     assert execution_info.result.res == 990
 
-    execution_info = await tower_defence_storage.get_wall_health(
+    execution_info = await tower_defence_storage.get_main_health(
         1
     ).call()
     assert execution_info.result.health == 9993

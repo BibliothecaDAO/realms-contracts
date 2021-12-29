@@ -61,7 +61,7 @@ func create_game{
     tempvar current_index = latest_index + 1
 
     # Set initial wall health to 10000
-    I02_TowerStorage.set_wall_health(tower_defence_storage, current_index, 10000)
+    I02_TowerStorage.set_main_health(tower_defence_storage, current_index, 10000)
 
     # Update index
     I02_TowerStorage.set_latest_game_index(tower_defence_storage, current_index)
@@ -147,7 +147,7 @@ func attack_tower{
     let (local controller) = controller_address.read()
     let (local element_token) = elements_token_address.read()
     let (local tower_defence_storage) = IModuleController.get_module_address(controller, 2)
-    let (local health) = I02_TowerStorage.get_wall_health(tower_defence_storage, game_idx) 
+    let (local health) = I02_TowerStorage.get_main_health(tower_defence_storage, game_idx) 
 
     let (_, local odd_id) = unsigned_div_rem(tokens_id, 2)
     if odd_id == 1:
@@ -168,9 +168,9 @@ func attack_tower{
         let (local health_remains) = is_le_felt(damage_remaining, health-1)  
         if health_remains == 1:
             tempvar new_health = health - damage_remaining
-            I02_TowerStorage.set_wall_health(tower_defence_storage, game_idx, new_health)
+            I02_TowerStorage.set_main_health(tower_defence_storage, game_idx, new_health)
         else:
-            I02_TowerStorage.set_wall_health(tower_defence_storage, game_idx, 0)
+            I02_TowerStorage.set_main_health(tower_defence_storage, game_idx, 0)
         end
     end
 
