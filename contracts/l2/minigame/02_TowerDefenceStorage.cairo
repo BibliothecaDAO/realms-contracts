@@ -19,9 +19,15 @@ func latest_game_index( ) -> ( game_idx : felt ):
 end
 
 # Stores the wall health for a given game index
-# Increases through replenishment, dicreases through attacks. 
+# Dicreases when attacks get through the shield. 
 @storage_var
 func wall_health( game_idx : felt ) -> ( health : felt ):
+end
+
+# Stores the shield value for a given game index
+# Increases through replenishment, dicreases through attacks. 
+@storage_var
+func shield_value( game_idx : felt, element_id : felt ) -> ( value : felt ):
 end
 
 # Attributes of a tower for a given tower index
@@ -78,6 +84,21 @@ func set_wall_health{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check
     only_approved()
 
     wall_health.write( game_idx, health)
+    return ()
+end
+
+@external
+func get_shield_value{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt, element_id : felt) -> ( value : felt ):
+    let (value) = shield_value.read( game_idx, element_id )
+    return (value) 
+end
+
+@external
+func set_shield_value{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt, element_id : felt, value : felt ):
+    
+    only_approved()
+
+    shield_value.write( game_idx, element_id, value)
     return ()
 end
 

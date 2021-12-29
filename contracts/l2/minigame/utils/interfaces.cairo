@@ -39,6 +39,12 @@ namespace I02_TowerStorage:
     func set_wall_health( game_idx : felt, health : felt ):
     end
 
+    # Shield value
+    func get_shield_value( game_idx : felt, token_id : felt ) -> ( value : felt ):
+    end
+    func set_shield_value( game_idx : felt, token_id : felt, value : felt ):
+    end
+
     # Tower Attributes
     func get_tower_attributes( game_idx : felt, tower_idx : felt ) -> ( attrs_packed : felt ):
     end
