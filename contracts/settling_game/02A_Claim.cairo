@@ -75,10 +75,9 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (r_1) = I02B_Claim.get_resource_level(contract_address=claim_state_address, token_id=token_id, resource=realms_data.resource_1)
     
     assert a[0] = realms_data.resource_1 
-    assert b[0] = 10
+    assert b[0] = r_1
      
     if realms_data.resource_2 != 0:
-        # let (r_2) = I02B_Claim.get_resource_level(contract_address=claim_state_address, token_id=token_id, resource=realms_data.resource_2)
         assert a[1] = realms_data.resource_2
         assert b[1] = 10
         assert count = 2
@@ -87,34 +86,33 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     end
 
     if realms_data.resource_3 != 0:
-        # let (r_3) = I02B_Claim.get_resource_level(contract_address=claim_state_address, token_id=token_id, resource=realms_data.resource_3)
         assert a[2] = realms_data.resource_3
         assert b[2] = 10
-        assert count = 3 
+        assert count = 3
     end
 
     if realms_data.resource_4 != 0:
         assert a[3] = realms_data.resource_4
         assert b[3] = 10
-        let count = 4
+        assert count = 4
     end
 
     if realms_data.resource_5 != 0:
         assert a[4] = realms_data.resource_5
         assert b[4] = 10
-        let count = 5
+        assert count = 5
     end
 
     if realms_data.resource_6 != 0:
         assert a[5] = realms_data.resource_7
         assert b[5] = 10
-        let count = 6
+        assert count = 6
     end
 
     if realms_data.resource_7 != 0:
         assert a[6] = realms_data.resource_7
         assert b[6] = 10 
-        let count = 7
+        assert count = 7
     end    
     
     # # TODO: only allow claim contract to mint
