@@ -7,8 +7,8 @@ from starkware.cairo.common.dict import dict_write, dict_read
 from starkware.cairo.common.default_dict import default_dict_new, default_dict_finalize
 from starkware.starknet.common.syscalls import get_caller_address
 
-from contracts.l2.settling_game.utils.interfaces import IModuleController
-from contracts.l2.tokens.IERC20 import IERC20
+from contracts.settling_game.utils.interfaces import IModuleController
+from contracts.token.IERC20 import IERC20
 
 # #### Module 02 #####
 #

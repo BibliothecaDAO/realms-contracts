@@ -12,15 +12,14 @@ from starkware.cairo.common.uint256 import Uint256, uint256_eq
 from contracts.settling_game.utils.general import scale
 from contracts.settling_game.utils.interfaces import IModuleController
 
+from contracts.settling_game.utils.game_structs import ResourceLevel 
 
 from contracts.token.IERC20 import IERC20
 from contracts.token.ERC1155.IERC1155 import IERC1155
 from contracts.settling_game.realms_IERC721 import realms_IERC721
 
-# #### Module 1A #####
-# Base settling contract
-# Consumes a Realm
-# Sets users stake time
+# #### Module 2B #####
+# Claim & Resource State
 ####################
 
 # ########### Game state ############
@@ -30,6 +29,9 @@ from contracts.settling_game.realms_IERC721 import realms_IERC721
 func controller_address() -> (address : felt):
 end
 
+@storage_var
+func resource_levels(token_id: Uint256, resource_id: felt) -> (level : felt):
+end
 
 # ########### Admin Functions for Testing ############
 # Called on deployment only.
@@ -41,48 +43,23 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     return ()
 end
 
-
-@external
-func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(token_id : Uint256):
+@external 
+func get_resource_level{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(token_id : Uint256, resource : felt) -> (level: felt):
     alloc_locals
-    let (caller) = get_caller_address()
-    let (controller) = controller_address.read()
-    let (realms_address) = IModuleController.get_realms_address(
-        contract_address=controller)
 
-    # # # check owner - TODO be within ERC721
-    let (owner) = realms_IERC721.ownerOf(contract_address=realms_address, token_id=token_id)
-    assert caller = owner
-   
-    # # # settle realm state
+    local l
 
-    # realms_IERC721.settleState(contract_address=realms_address, token_id=token_id, settle_state=1)
-    
-    # check owner of Realm
-    # change erc721 state
-    # TODO: add time staked
-    return ()
+    let (level) = resource_levels.read(token_id, resource)
+
+    if level == 0: 
+        assert l = 10
+    else:
+        assert l = level    
+    end    
+
+    return (level=l)  
 end
 
-@external
-func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(realm_id: felt):
-    # calculate resources from packed struct
-    # add in tax
-
-    # mint resources for user
-    # mint reousrces for wonder tax
-    return ()
-end
-
-@external
-func payment_split{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(realm_id: felt):
-    # calculate resources from packed struct
-    # add in tax
-
-    # mint resources for user
-    # mint reousrces for wonder tax
-    return ()
-end
 
 # Checks write-permission of the calling contract.
 func only_approved{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():

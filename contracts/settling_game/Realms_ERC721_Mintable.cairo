@@ -16,25 +16,17 @@ from contracts.token.IERC20 import IERC20
 
 from contracts.Ownable_base import Ownable_initializer, Ownable_only_owner
 
+from contracts.settling_game.utils.game_structs import RealmData
+
 #
 # Constructor
 #
 
 @constructor
-func constructor{
-        syscall_ptr : felt*, 
-        pedersen_ptr : HashBuiltin*,
-        range_check_ptr
-    }(
-        name: felt,
-        symbol: felt,
-        owner: felt,
-        currency_address: felt
-    ):
+func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        name : felt, symbol : felt, owner : felt):
     ERC721_initializer(name, symbol)
     Ownable_initializer(owner)
-    currency_token_address.write(currency_address)
-
     return ()
 end
 
@@ -109,36 +101,34 @@ end
 
 # # democritus methods for on-chain data
 @storage_var
-func realm_name(realm_id : Uint256) -> (name : felt):
+func realm_name(token_id : Uint256) -> (name : felt):
 end
 
 @storage_var
-func realm_data(realm_id : Uint256) -> (data : felt):
+func realm_data(token_id : Uint256) -> (data : felt):
 end
 
 @storage_var
-func is_settled(realm_id : Uint256) -> (data : felt):
+func is_settled(token_id : Uint256) -> (data : felt):
+end
+
+@view
+func get_is_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(token_id : Uint256) -> (is_settled : felt):
+    let (data) = is_settled.read(token_id)
+    return (data)
+end
+
+@view
+func settleState{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(token_id : Uint256, settle_state : felt) -> ():
+    is_settled.write(token_id, settle_state)
+    return ()
 end
 
 @external
 func get_realm_info{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        realm_id : Uint256) -> (realm_data : felt):
-    let (data) = realm_data.read(realm_id)
+        token_id : Uint256) -> (realm_data : felt):
+    let (data) = realm_data.read(token_id)
     return (data)
-end
-
-struct RealmData:
-    member cities : felt  #
-    member regions : felt  #
-    member rivers : felt  #
-    member harbours : felt  # 
-    member resource_1 : felt  # 
-    member resource_2 : felt  # 
-    member resource_3 : felt  # 
-    member resource_4 : felt  # 
-    member resource_5 : felt  # 
-    member resource_6 : felt  # 
-    member resource_7 : felt  #            
 end
 
 func unpack_realm_data{
