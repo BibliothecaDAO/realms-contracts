@@ -1,5 +1,5 @@
 %lang starknet
-
+from starkware.cairo.common.uint256 import Uint256, uint256_eq
 # These are interfaces that can be imported by other contracts for convenience.
 # All of the functions in an interface must be @view or @external.
 
@@ -7,6 +7,15 @@
 @contract_interface
 namespace IModuleController:
     func get_module_address(module_id : felt) -> (address : felt):
+    end
+
+    func get_lords_address() -> (address : felt):
+    end
+
+    func get_realms_address() -> (address : felt):
+    end
+
+    func get_resources_address() -> (address : felt):
     end
 
     func has_write_access(address_attempting_to_write : felt):
@@ -21,6 +30,12 @@ namespace IModuleController:
     func set_write_access(module_id_doing_writing : felt, module_id_being_written_to : felt):
     end
 
-    func set_initial_module_addresses(module_01_addr : felt, module_02_addr : felt):
+    func set_initial_module_addresses(module_01_addr : felt, module_02_addr : felt, module_03_addr : felt, module_04_addr : felt):
+    end
+end
+
+@contract_interface
+namespace I02B_Claim:
+    func get_resource_level(token_id : Uint256, resource : felt) -> (level: felt):
     end
 end
