@@ -2,7 +2,7 @@
 %builtins pedersen range_check
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
-from starkware.starknet.common.syscalls import get_caller_address
+from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.math_cmp import (is_le_felt)
 from starkware.cairo.common.math import (unsigned_div_rem)
@@ -174,9 +174,21 @@ func attack_tower{
         end
     end
 
-    IERC1155._burn(
-        element_token, 
-        caller, 
+    let (local total_alloc) = I02_TowerStorage.get_total_reward_alloc(tower_defence_storage, game_idx, 1)
+    let (local user_alloc) = I02_TowerStorage.get_user_reward_alloc(tower_defence_storage, game_idx, caller, 1)
+    let (local token_pool) = I02_TowerStorage.get_token_reward_pool(tower_defence_storage, game_idx, tokens_id)
+
+    I02_TowerStorage.set_total_reward_alloc(tower_defence_storage, game_idx, 1, total_alloc + amount)
+    I02_TowerStorage.set_user_reward_alloc(tower_defence_storage, game_idx, caller, 1, user_alloc + amount)
+    I02_TowerStorage.set_token_reward_pool(tower_defence_storage, game_idx, tokens_id, token_pool + amount)
+
+
+    let (local contract_address) = get_contract_address()
+
+    IERC1155.safe_transfer_from(
+        element_token,
+        caller,
+        contract_address,
         tokens_id, 
         amount)
 
@@ -204,11 +216,87 @@ func increase_shield{
     tempvar newValue = value + amount
     I02_TowerStorage.set_shield_value(tower_defence_storage, game_idx, tokens_id, newValue)
 
-    IERC1155._burn(
-        element_token, 
-        caller, 
+    let (local total_alloc) = I02_TowerStorage.get_total_reward_alloc(tower_defence_storage, game_idx, 0)
+    let (local user_alloc) = I02_TowerStorage.get_user_reward_alloc(tower_defence_storage, game_idx, caller, 0)
+    let (local token_pool) = I02_TowerStorage.get_token_reward_pool(tower_defence_storage, game_idx, tokens_id)
+
+
+    I02_TowerStorage.set_total_reward_alloc(tower_defence_storage, game_idx, 0, total_alloc + amount)
+    I02_TowerStorage.set_user_reward_alloc(tower_defence_storage, game_idx, caller, 0, user_alloc + amount)
+    I02_TowerStorage.set_token_reward_pool(tower_defence_storage, game_idx, tokens_id, token_pool + amount)
+
+
+    let (local contract_address) = get_contract_address()
+
+    IERC1155.safe_transfer_from( 
+        element_token,
+        caller,
+        contract_address,
         tokens_id, 
         amount)
     
+    return ()
+end
+
+@external
+func claim_rewards{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }(
+        game_idx : felt
+    ):
+    alloc_locals
+    let (local caller) = get_caller_address()
+    let (local controller) = controller_address.read()
+    let (local tower_defence_storage) = IModuleController.get_module_address(controller, 2)
+    let (local health) = I02_TowerStorage.get_main_health(tower_defence_storage, game_idx) 
+    let (local side_won) = is_le_felt(health, 0) # 0 = Shielders, 1 = Attackers 
+
+    claim_token_reward(
+        game_idx,
+        caller,
+        side_won,
+        6,
+    )
+
+    return ()
+end
+
+func claim_token_reward{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+        game_idx : felt,
+        user : felt, 
+        side : felt, 
+        tokens_idx : felt
+    ):
+    alloc_locals
+    if tokens_idx == 0:
+        return ()
+    end
+    let (local contract_address) = get_contract_address()
+    let (local controller) = controller_address.read()
+    let (local element_token) = elements_token_address.read()
+    let (local tower_defence_storage) = IModuleController.get_module_address(controller, 2)
+
+    let (local total_alloc) = I02_TowerStorage.get_total_reward_alloc(tower_defence_storage, game_idx, side) 
+    let (local user_alloc) = I02_TowerStorage.get_user_reward_alloc(tower_defence_storage, game_idx, user, side) 
+    let (local token_pool) = I02_TowerStorage.get_token_reward_pool(tower_defence_storage, game_idx, tokens_idx)
+
+    let (local alloc_ratio, _) = unsigned_div_rem(total_alloc, user_alloc)
+    let (local user_token_reward, _) = unsigned_div_rem(token_pool, alloc_ratio)  
+
+    IERC1155.safe_transfer_from( 
+        element_token,
+        contract_address,
+        user,
+        tokens_idx, 
+        user_token_reward)
+
+    claim_token_reward(
+        game_idx,
+        user, 
+        side,
+        tokens_idx - 1
+    )
     return ()
 end
