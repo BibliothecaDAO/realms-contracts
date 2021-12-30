@@ -27,7 +27,25 @@ end
 # Stores the shield value for a given game index
 # Increases through replenishment, dicreases through attacks. 
 @storage_var
-func shield_value( game_idx : felt, element_id : felt ) -> ( value : felt ):
+func shield_value( game_idx : felt, token_id : felt ) -> ( value : felt ):
+end
+
+# Tracks total tokens accumulated for a game idx
+# Increases everytime any user contributes elements
+@storage_var
+func token_reward_pool( game_idx : felt, token_id : felt ) -> ( value : felt ):
+end
+
+# Tracks total reward allocations
+# Increases everytime any user contributes to a side (0:shielders,1:attackers)
+@storage_var
+func total_reward_alloc( game_idx : felt, side : felt ) -> ( value : felt ):
+end
+
+# Tracks user reward allocations
+# Increases based on the elements contributed to a battle from a single user
+@storage_var
+func user_reward_alloc( game_idx : felt, user : felt, side : felt ) -> ( value : felt ):
 end
 
 # Attributes of a tower for a given tower index
@@ -88,17 +106,62 @@ func set_main_health{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check
 end
 
 @external
-func get_shield_value{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt, element_id : felt) -> ( value : felt ):
-    let (value) = shield_value.read( game_idx, element_id )
+func get_shield_value{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt, token_id : felt) -> ( value : felt ):
+    let (value) = shield_value.read( game_idx, token_id )
     return (value) 
 end
 
 @external
-func set_shield_value{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt, element_id : felt, value : felt ):
+func set_shield_value{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt, token_id : felt, value : felt ):
     
     only_approved()
 
-    shield_value.write( game_idx, element_id, value)
+    shield_value.write( game_idx, token_id, value)
+    return ()
+end
+
+@external
+func get_token_reward_pool{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt, token_id : felt) -> ( value : felt ):
+    let (value) = token_reward_pool.read( game_idx, token_id )
+    return (value) 
+end
+
+@external
+func set_token_reward_pool{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt, token_id : felt, value : felt ):
+    
+    only_approved()
+
+    token_reward_pool.write( game_idx, token_id, value)
+    return ()
+end
+
+@external
+func get_total_reward_alloc{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt, side : felt) -> ( value : felt ):
+    let (value) = total_reward_alloc.read( game_idx, side )
+    return (value) 
+end
+
+@external
+func set_total_reward_alloc{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt, side : felt, value : felt ):
+    
+    only_approved()
+
+    total_reward_alloc.write( game_idx, side, value)
+    return ()
+end
+
+@external
+func get_user_reward_alloc{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt, user : felt, side : felt) -> ( value : felt ):
+    let (value) = user_reward_alloc.read( game_idx, user, side )
+    return (value) 
+end
+
+@external
+func set_user_reward_alloc{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt, user : felt, side : felt, value : felt ):
+    
+    only_approved()
+
+    user_reward_alloc.write( game_idx, user, side, value)
     return ()
 end
 

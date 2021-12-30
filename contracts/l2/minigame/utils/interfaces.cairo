@@ -45,6 +45,24 @@ namespace I02_TowerStorage:
     func set_shield_value( game_idx : felt, token_id : felt, value : felt ):
     end
 
+    # token reward pool
+    func get_token_reward_pool( game_idx : felt, token_id : felt ) -> ( value : felt ):
+    end
+    func set_token_reward_pool( game_idx : felt, token_id : felt, value : felt ):
+    end
+
+    # Total reward alloc
+    func get_total_reward_alloc( game_idx : felt, side : felt ) -> ( value : felt ):
+    end
+    func set_total_reward_alloc( game_idx : felt, side : felt, value : felt ):
+    end
+
+    # User reward alloc
+    func get_user_reward_alloc( game_idx : felt, user : felt, side : felt ) -> ( value : felt ):
+    end
+    func set_user_reward_alloc( game_idx : felt, user : felt, side : felt, value : felt ):
+    end
+
     # Tower Attributes
     func get_tower_attributes( game_idx : felt, tower_idx : felt ) -> ( attrs_packed : felt ):
     end
