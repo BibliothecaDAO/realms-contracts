@@ -113,13 +113,15 @@ func is_settled(token_id : Uint256) -> (data : felt):
 end
 
 @view
-func get_is_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(token_id : Uint256) -> (is_settled : felt):
+func get_is_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        token_id : Uint256) -> (is_settled : felt):
     let (data) = is_settled.read(token_id)
     return (data)
 end
 
 @view
-func settleState{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(token_id : Uint256, settle_state : felt) -> ():
+func settleState{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        token_id : Uint256, settle_state : felt) -> ():
     is_settled.write(token_id, settle_state)
     return ()
 end
@@ -141,12 +143,12 @@ func unpack_realm_data{
     local syscall_ptr : felt* = syscall_ptr
     local pedersen_ptr : HashBuiltin* = pedersen_ptr
     local bitwise_ptr : BitwiseBuiltin* = bitwise_ptr
-    # 1. Create a 4-bit mask at and to the left of the index
+    # 1. Create a 8-bit mask at and to the left of the index
     # E.g., 000111100 = 2**2 + 2**3 + 2**4 + 2**5
     # E.g.,  2**(i) + 2**(i+1) + 2**(i+2) + 2**(i+3) = (2**i)(15)
     let (power) = pow(2, index)
-    # 1 + 2 + 4 + 8 = 15
-    let mask = 15 * power
+    # 1 + 2 + 4 + 8 + 16 + 32 + 64 + 128 = 15
+    let mask = 255 * power
 
     # 2. Apply mask using bitwise operation: mask AND data.
     let (masked) = bitwise_and(mask, data)
@@ -163,34 +165,34 @@ func fetch_realm_data{
         bitwise_ptr : BitwiseBuiltin*}(realm_id : Uint256) -> (realm_stats : RealmData):
     alloc_locals
 
-    # Indicies are defined in the UserRegistry contract.
-    # Call the UserRegsitry contract to get scores for given user.
     let (local cities) = unpack_realm_data(realm_id, 0)
-    let (local regions) = unpack_realm_data(realm_id, 6)
-    let (local rivers) = unpack_realm_data(realm_id, 12)
-    let (local harbours) = unpack_realm_data(realm_id, 18)
-    let (local resource_1) = unpack_realm_data(realm_id, 24)
-    let (local resource_2) = unpack_realm_data(realm_id, 30)
-    let (local resource_3) = unpack_realm_data(realm_id, 36)
-    let (local resource_4) = unpack_realm_data(realm_id, 42)
-    let (local resource_5) = unpack_realm_data(realm_id, 48)
-    let (local resource_6) = unpack_realm_data(realm_id, 54)
-    let (local resource_7) = unpack_realm_data(realm_id, 60)
+    let (local regions) = unpack_realm_data(realm_id, 8)
+    let (local rivers) = unpack_realm_data(realm_id, 16)
+    let (local harbours) = unpack_realm_data(realm_id, 24)
+    let (local resource_number) = unpack_realm_data(realm_id, 32)
+    let (local resource_1) = unpack_realm_data(realm_id, 40)
+    let (local resource_2) = unpack_realm_data(realm_id, 48)
+    let (local resource_3) = unpack_realm_data(realm_id, 56)
+    let (local resource_4) = unpack_realm_data(realm_id, 64)
+    let (local resource_5) = unpack_realm_data(realm_id, 72)
+    let (local resource_6) = unpack_realm_data(realm_id, 80)
+    let (local resource_7) = unpack_realm_data(realm_id, 88)
+    let (local wonder) = unpack_realm_data(realm_id, 96)
 
-    # Populate struct.
     let realm_stats = RealmData(
         cities=cities,
         regions=regions,
         rivers=rivers,
         harbours=harbours,
+        resource_number=resource_number,
         resource_1=resource_1,
         resource_2=resource_2,
         resource_3=resource_3,
         resource_4=resource_4,
         resource_5=resource_5,
         resource_6=resource_6,
-        resource_7=resource_7                
-        )
+        resource_7=resource_7,
+        wonder=wonder)
     return (realm_stats=realm_stats)
 end
 

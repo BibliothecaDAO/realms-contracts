@@ -18,6 +18,9 @@ namespace IModuleController:
     func get_resources_address() -> (address : felt):
     end
 
+    func get_treasury_address() -> (address : felt):
+    end
+
     func has_write_access(address_attempting_to_write : felt):
     end
 
