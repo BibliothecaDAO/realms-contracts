@@ -168,11 +168,11 @@ struct RealmData:
     member rivers : felt  # eg: 60 rivers = 111100 
     member harbours : felt  #  eg: 10 harbours = 1010 
     member resource_number : felt  #  eg: 4 resource_number = 100 
-    member resource_1 : felt  # eg: 10 resource_1 = 101 
+    member resource_1 : felt  # eg: 5 resource_1 = 101 
     member resource_2 : felt  # eg: 10 resource_2 = 1010 
-    member resource_3 : felt  # eg: 10 resource_3 = 1100 
-    member resource_4 : felt  # eg: 10 resource_4 = 10101
-    member resource_5 : felt  # eg: 10 resource_5 = 0 (0 if no resource)
+    member resource_3 : felt  # eg: 12 resource_3 = 1100 
+    member resource_4 : felt  # eg: 21 resource_4 = 10101
+    member resource_5 : felt  # eg: 9 resource_5 = 1001
     member resource_6 : felt  # eg: 10 resource_6 = 0 (0 if no resource)
     member resource_7 : felt  # eg: 10 resource_7 = 0 (0 if no resource)
     member wonder : felt  # eg: 50 wonder = 110010 (50 wonders)  
@@ -194,7 +194,7 @@ cities = 111 = 00000111
 regions = 100 = 00000100
 rivers = 111100 = 00111100
 harbours = 1010 = 00001010
-resource_number = 00000100
+resource_number = 00000101
 resource_1 = 00000101 
 resource_2 = 00001010 
 resource_3 = 00001100 
@@ -205,23 +205,37 @@ resource_7 = 00000000
 wonder = 00110010
 
 Then concatanate the values
-00110010000000000000000000001001000101010000110000001010000001010000010000001010001111000000010000000111
+00110010000000000000000000001001000101010000110000001010000001010000010100001010001111000000010000000111
 
 
 Then convert to decimal and this is the realms traits to store in the felt:
 
-``
+```
 3961408126101466016618230055943
-``
+```
 
 Then this function will unpack the the decimal into bits
 
-``
-unpack_realm_data()
-``
-
-
-test resource upgrades
 ```
-39007816197
+unpack_realm_data()
+```
+
+
+Same method is used for packing the values of resources needed to upgrade a resource
+
+```
+resource_1 = 5 = 00000101
+resource_2 = 10 = 00001010  
+resource_3 = 12 = 00001100
+resource_4 = 21 = 00010101
+resource_5 = 9 = 00001001
+resource_1_values = 00001010
+resource_2_values = 00001010   
+resource_3_values = 00001010     
+resource_4_values = 00001010   
+resource_5_values = 00001010
+
+00001010000010100000101000001010000010100000100100010101000011000000101000000101
+
+47408855671157818132997
 ```

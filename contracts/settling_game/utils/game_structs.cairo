@@ -41,4 +41,9 @@ struct ResourceUpgradeIds:
     member resource_3 : felt   
     member resource_4 : felt  
     member resource_5 : felt      
+    member resource_1_values : felt  
+    member resource_2_values  : felt  
+    member resource_3_values  : felt   
+    member resource_4_values  : felt  
+    member resource_5_values  : felt       
 end

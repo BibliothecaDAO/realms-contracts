@@ -78,11 +78,11 @@ async def game_factory(account_factory):
     settling_state = await starknet.deploy(
         source="contracts/settling_game/01B_Settling.cairo",
         constructor_calldata=[controller.contract_address])
-    claim_logic = await starknet.deploy(
-        source="contracts/settling_game/02A_Claim.cairo",
+    resources_logic = await starknet.deploy(
+        source="contracts/settling_game/02A_Resources.cairo",
         constructor_calldata=[controller.contract_address])
-    claim_state = await starknet.deploy(
-        source="contracts/settling_game/02B_Claim.cairo",
+    resources_state = await starknet.deploy(
+        source="contracts/settling_game/02B_Resources.cairo",
         constructor_calldata=[controller.contract_address])
     # The admin key controls the arbiter. Use it to have the arbiter
     # set the module deployment addresses in the controller.
@@ -92,9 +92,9 @@ async def game_factory(account_factory):
         to=arbiter.contract_address,
         selector_name='batch_set_controller_addresses',
         calldata=[
-            settling_logic.contract_address, settling_state.contract_address, claim_logic.contract_address, claim_state.contract_address])
+            settling_logic.contract_address, settling_state.contract_address, resources_logic.contract_address, resources_state.contract_address])
 
-    return starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, claim_logic, claim_state
+    return starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state
 
 #
 # Mint Realms to Owner
@@ -107,7 +107,7 @@ async def game_factory(account_factory):
 ])
 @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
 async def test_mint(game_factory, number_of_tokens, tokens):
-    starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, claim_logic, claim_state = game_factory
+    starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state = game_factory
 
     await signer.send_transaction(
         accounts[0], realms.contract_address, 'mint', [
@@ -131,7 +131,7 @@ async def test_mint(game_factory, number_of_tokens, tokens):
 
     # claim resources
     await signer.send_transaction(
-        account=accounts[0], to=claim_logic.contract_address, selector_name='claim_resources', calldata=[*uint(5042)]
+        account=accounts[0], to=resources_logic.contract_address, selector_name='claim_resources', calldata=[*uint(5042)]
     )
 
     
@@ -158,11 +158,11 @@ async def test_mint(game_factory, number_of_tokens, tokens):
 
     # set resource upgrade IDS
     await signer.send_transaction(
-        account=accounts[0], to=claim_state.contract_address, selector_name='set_resource_upgrade_ids', calldata=[5, 39007816197]
+        account=accounts[0], to=resources_state.contract_address, selector_name='set_resource_upgrade_ids', calldata=[5, 47408855671157818132997]
     )
 
     await signer.send_transaction(
-        account=accounts[0], to=claim_state.contract_address, selector_name='upgrade_resource', calldata=[*uint(5042), 
+        account=accounts[0], to=resources_logic.contract_address, selector_name='upgrade_resource', calldata=[*uint(5042), 
         5, 5, 5, 10, 12, 21, 9, 5, 10,10,10,10,10]
     )
 

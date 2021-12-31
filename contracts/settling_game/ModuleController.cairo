@@ -95,6 +95,9 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     # Module 1 can update state of Settling.
     can_write_to.write(1, 2, 1)
 
+    # resources logic to state
+    can_write_to.write(3, 4, 1)
+
     # Contracts
     lords_address.write(_lords_address)
     resources_address.write(_resources_address)

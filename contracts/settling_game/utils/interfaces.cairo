@@ -33,12 +33,20 @@ namespace IModuleController:
     func set_write_access(module_id_doing_writing : felt, module_id_being_written_to : felt):
     end
 
-    func set_initial_module_addresses(module_01_addr : felt, module_02_addr : felt, module_03_addr : felt, module_04_addr : felt):
+    func set_initial_module_addresses(
+            module_01_addr : felt, module_02_addr : felt, module_03_addr : felt,
+            module_04_addr : felt):
     end
 end
 
 @contract_interface
-namespace I02B_Claim:
-    func get_resource_level(token_id : Uint256, resource : felt) -> (level: felt):
+namespace I02B_Resources:
+    func get_resource_level(token_id : Uint256, resource : felt) -> (level : felt):
+    end
+    func get_resource_upgrade_cost(token_id : Uint256, resource : felt) -> (level : felt):
+    end
+    func get_resource_upgrade_ids(resource : felt) -> (level : felt):
+    end
+    func set_resource_level(token_id : Uint256, resource_id : felt, level : felt) -> ():
     end
 end
