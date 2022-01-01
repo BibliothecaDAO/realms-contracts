@@ -64,25 +64,6 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(t
     return ()
 end
 
-@external
-func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(realm_id: felt):
-    # calculate resources from packed struct
-    # add in tax
-
-    # mint resources for user
-    # mint reousrces for wonder tax
-    return ()
-end
-
-@external
-func payment_split{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(realm_id: felt):
-    # calculate resources from packed struct
-    # add in tax
-
-    # mint resources for user
-    # mint reousrces for wonder tax
-    return ()
-end
 
 # Checks write-permission of the calling contract.
 func only_approved{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
