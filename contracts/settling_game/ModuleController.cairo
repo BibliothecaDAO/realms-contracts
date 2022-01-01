@@ -84,10 +84,14 @@ end
 func treasury_address() -> (address : felt):
 end
 
+@storage_var
+func s_realms_address() -> (address : felt):
+end
+
 # #### Constructor #####
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        arbiter_address : felt, _lords_address: felt, _resources_address: felt, _realms_address: felt, _treasury_address: felt):
+        arbiter_address : felt, _lords_address: felt, _resources_address: felt, _realms_address: felt, _treasury_address: felt, _s_realms_address: felt):
     arbiter.write(arbiter_address)
 
     # TODO: add 'set_write_access' here for all the module
@@ -98,11 +102,15 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     # resources logic to state
     can_write_to.write(3, 4, 1)
 
+    # settling to state
+    can_write_to.write(1, 2, 1)
+
     # Contracts
     lords_address.write(_lords_address)
     resources_address.write(_resources_address)
     realms_address.write(_realms_address)
     treasury_address.write(_treasury_address)
+    s_realms_address.write(_s_realms_address)
     return ()
 end
 
@@ -186,6 +194,12 @@ end
 @view
 func get_treasury_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (address : felt):
     let (address) = treasury_address.read()
+    return (address)
+end
+
+@view
+func get_s_realms_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (address : felt):
+    let (address) = s_realms_address.read()
     return (address)
 end
 

@@ -20,7 +20,7 @@ from contracts.token.ERC1155.IERC1155 import IERC1155
 from contracts.settling_game.realms_IERC721 import realms_IERC721
 
 # #### Module 2A #####
-# Allows Player to Claim resources
+# Logic around resource collection / upgrades
 ####################
 
 # Stores the address of the ModuleController.
@@ -46,7 +46,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # realms contract
     let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
-
+    let (s_realms_address) = IModuleController.get_s_realms_address(contract_address=controller)
     # resource contract
     let (resources_address) = IModuleController.get_resources_address(contract_address=controller)
 
@@ -57,8 +57,8 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     # treasury address
     let (treasury_address) = IModuleController.get_treasury_address(contract_address=controller)
 
-    # check owner
-    let (owner) = realms_IERC721.ownerOf(contract_address=realms_address, token_id=token_id)
+    # check owner of sRealm
+    let (owner) = realms_IERC721.ownerOf(contract_address=s_realms_address, token_id=token_id)
     assert caller = owner
 
     # TODO check settled state
@@ -201,7 +201,24 @@ func upgrade_resource{
     end
     if resource_upgrade_ids.resource_5 != token_ids[4]:
         resource_upgrade_ids.resource_5 = resource_upgrade_ids.resource_5 + 1
-    end                
+    end     
+
+    # check correct values
+    if resource_upgrade_ids.resource_1_values != token_values[0]:
+        resource_upgrade_ids.resource_1_values = resource_upgrade_ids.resource_1_values + 1
+    end
+    if resource_upgrade_ids.resource_2_values != token_values[1]:
+        resource_upgrade_ids.resource_2_values = resource_upgrade_ids.resource_2_values + 1
+    end
+    if resource_upgrade_ids.resource_3_values != token_values[2]:
+        resource_upgrade_ids.resource_3_values = resource_upgrade_ids.resource_3_values + 1
+    end
+    if resource_upgrade_ids.resource_4_values != token_values[3]:
+        resource_upgrade_ids.resource_4_values = resource_upgrade_ids.resource_4_values + 1
+    end
+    if resource_upgrade_ids.resource_5_values != token_values[4]:
+        resource_upgrade_ids.resource_5_values = resource_upgrade_ids.resource_5_values + 1
+    end   
 
     # create array of ids and values
     let (local resource_ids : felt*) = alloc()

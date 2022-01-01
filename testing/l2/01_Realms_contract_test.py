@@ -46,6 +46,14 @@ async def game_factory(account_factory):
             admin_account.contract_address,           # contract_owner
         ])
 
+    s_realms = await starknet.deploy(
+        source="contracts/settling_game/S_Realms_ERC721_Mintable.cairo",
+        constructor_calldata=[
+            str_to_felt("SRealms"),  # name
+            str_to_felt("SRealms"),                 # ticker
+            admin_account.contract_address,           # contract_owner
+        ])
+
     resources = await starknet.deploy(
         source="contracts/token/ERC1155/ERC1155_Mintable.cairo",
         constructor_calldata=[
@@ -66,7 +74,7 @@ async def game_factory(account_factory):
         constructor_calldata=[admin_account.contract_address])
     controller = await starknet.deploy(
         source="contracts/settling_game/ModuleController.cairo",
-        constructor_calldata=[arbiter.contract_address, lords.contract_address, resources.contract_address, realms.contract_address, treasury_account.contract_address])
+        constructor_calldata=[arbiter.contract_address, lords.contract_address, resources.contract_address, realms.contract_address, treasury_account.contract_address, s_realms.contract_address])
     await admin_key.send_transaction(
         account=admin_account,
         to=arbiter.contract_address,
@@ -94,7 +102,7 @@ async def game_factory(account_factory):
         calldata=[
             settling_logic.contract_address, settling_state.contract_address, resources_logic.contract_address, resources_state.contract_address])
 
-    return starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state
+    return starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state, s_realms
 
 #
 # Mint Realms to Owner
@@ -107,11 +115,11 @@ async def game_factory(account_factory):
 ])
 @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
 async def test_mint(game_factory, number_of_tokens, tokens):
-    starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state = game_factory
+    starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state, s_realms = game_factory
 
     await signer.send_transaction(
         accounts[0], realms.contract_address, 'mint', [
-            accounts[0].contract_address, *tokens, 2123, 3961408168602764362449331946503]
+            accounts[0].contract_address, *tokens, 2123, 44526227375906105210343834518535]
     )
 
     realm_info = await realms.get_realm_info(uint(5042)).call()
@@ -124,18 +132,33 @@ async def test_mint(game_factory, number_of_tokens, tokens):
     execution_info = await realms.balanceOf(accounts[0].contract_address).call()
     print(f'Realms Balance for owner is: {execution_info.result.balance}')
 
+    # set approval for Settling contract to use Realm
+    await signer.send_transaction(
+        account=accounts[0], to=s_realms.contract_address, selector_name='setApprovalForAll', calldata=[settling_logic.contract_address, 1]
+    )
+
     # settle Realm
     await signer.send_transaction(
         account=accounts[0], to=settling_logic.contract_address, selector_name='settle', calldata=[*uint(5042)]
     )
+
+    await signer.send_transaction(
+        account=accounts[0], to=settling_state.contract_address, selector_name='set_approval', calldata=[]
+    )   
+
+    # check transfer
+    execution_info = await realms.balanceOf(accounts[0].contract_address).call()
+    print(f'Realms Balance for owner is: {execution_info.result.balance}')
 
     # claim resources
     await signer.send_transaction(
         account=accounts[0], to=resources_logic.contract_address, selector_name='claim_resources', calldata=[*uint(5042)]
     )
 
-    
-
+    # settle Realm
+    await signer.send_transaction(
+        account=accounts[0], to=settling_logic.contract_address, selector_name='unsettle', calldata=[*uint(5042)]
+    )
 
 
     player_resource_value = await resources.balanceOf(accounts[0].contract_address, 5).call()
@@ -160,7 +183,7 @@ async def test_mint(game_factory, number_of_tokens, tokens):
     await signer.send_transaction(
         account=accounts[0], to=resources_state.contract_address, selector_name='set_resource_upgrade_ids', calldata=[5, 47408855671157818132997]
     )
-
+    # upgrade resource
     await signer.send_transaction(
         account=accounts[0], to=resources_logic.contract_address, selector_name='upgrade_resource', calldata=[*uint(5042), 
         5, 5, 5, 10, 12, 21, 9, 5, 10,10,10,10,10]

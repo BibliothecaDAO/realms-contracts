@@ -15,6 +15,9 @@ namespace IModuleController:
     func get_realms_address() -> (address : felt):
     end
 
+    func get_s_realms_address() -> (address : felt):
+    end
+
     func get_resources_address() -> (address : felt):
     end
 
@@ -36,6 +39,11 @@ namespace IModuleController:
     func set_initial_module_addresses(
             module_01_addr : felt, module_02_addr : felt, module_03_addr : felt,
             module_04_addr : felt):
+    end
+end
+@contract_interface
+namespace I01B_Settling:
+    func set_time_staked(token_id : Uint256):
     end
 end
 

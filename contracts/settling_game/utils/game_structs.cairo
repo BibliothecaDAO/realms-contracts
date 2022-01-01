@@ -22,7 +22,8 @@ struct RealmData:
     member resource_5 : felt  # 
     member resource_6 : felt  # 
     member resource_7 : felt  #
-    member wonder : felt  #              
+    member wonder : felt  #
+    member order : felt  #              
 end
 
 struct ResourceLevel:
