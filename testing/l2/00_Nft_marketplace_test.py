@@ -53,6 +53,12 @@ async def marketplace_factory(ctx_factory):
     ctx.marketplace = marketplace   
 
     await _erc20_approve(ctx, "user1", ctx.marketplace.contract_address, 40 * (10 ** 18))
+    await ctx.execute(
+        "user1",
+        ctx.realms.contract_address,
+        "setApprovalForAll",
+        [ctx.marketplace.contract_address, true],
+    )
     await _erc20_approve(ctx, "user2", ctx.marketplace.contract_address, 40 * (10 ** 18))
 
     return ctx
@@ -83,15 +89,9 @@ async def test_update_currency_token(marketplace_factory):
 #
 
 @pytest.mark.asyncio
-async def test_open_trade(marketplace_factory):
+async def test_open_trade_and_execute(marketplace_factory):
     ctx = marketplace_factory
 
-    await ctx.execute(
-        "user1",
-        ctx.realms.contract_address,
-        "setApprovalForAll",
-        [ctx.marketplace.contract_address, true],
-    )
     await ctx.execute(
         "user1",
         ctx.marketplace.contract_address,
@@ -106,10 +106,6 @@ async def test_open_trade(marketplace_factory):
     trade = (await ctx.marketplace.get_trade(0).call()).result.trade
     assert trade.status == 0
     assert trade.price == trade_cost
-
-@pytest.mark.asyncio
-async def test_execute_trade(marketplace_factory):
-    ctx = marketplace_factory
 
     await ctx.execute(
         "user2",
