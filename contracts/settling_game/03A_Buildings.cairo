@@ -12,7 +12,8 @@ from starkware.cairo.common.uint256 import Uint256, uint256_eq
 from contracts.settling_game.utils.interfaces import IModuleController, I03B_Buildings
 from contracts.settling_game.utils.general import unpack_data
 
-from contracts.settling_game.utils.game_structs import RealmBuildings, RealmData, RealmBuildingCostIds, RealmBuildingCostValues
+from contracts.settling_game.utils.game_structs import (
+    RealmBuildings, RealmData, RealmBuildingCostIds, RealmBuildingCostValues)
 from contracts.token.IERC20 import IERC20
 from contracts.token.ERC1155.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
@@ -54,10 +55,9 @@ func build{
     let (owner) = realms_IERC721.ownerOf(contract_address=s_realms_address, token_id=token_id)
     assert caller = owner
 
-
-    # realms address    
+    # realms address
     let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
-    
+
     # realms data
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
         contract_address=realms_address, token_id=token_id)
@@ -67,9 +67,10 @@ func build{
         contract_address=controller, module_id=6)
 
     # get current buildings already constructed
-    let (current_building) = I03B_Buildings.get_realm_building_by_id(buildings_state_address, token_id, building_id)
+    let (current_building) = I03B_Buildings.get_realm_building_by_id(
+        buildings_state_address, token_id, building_id)
 
-    # check can build 
+    # check can build
     if building_id == 1:
         if realms_data.regions == current_building:
             return ()
@@ -77,8 +78,19 @@ func build{
     end
 
     # get costs of building
-    let (ids) = fetch_building_cost_ids(building_id)
-    let (values) = fetch_building_cost_values(building_id)
+    let (_token_ids_len, ids) = fetch_building_cost_ids(building_id)
+    let (_token_values_len, values) = fetch_building_cost_values(building_id)
+
+    check_correct_resources(
+        building_id,
+        token_ids_len,
+        token_ids,
+        token_values_len,
+        token_values,
+        _token_ids_len,
+        ids,
+        _token_values_len,
+        values)
 
     # check resources values and ids
 
@@ -89,10 +101,28 @@ func build{
     return ()
 end
 
+func check_correct_resources{
+        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
+        bitwise_ptr : BitwiseBuiltin*}(
+        building_id : felt, token_ids_len : felt, token_ids : felt*, token_values_len : felt,
+        token_values : felt*, ids_len : felt, ids : felt*, values_len : felt, values : felt*):
+    return check_correct_resources(
+        building_id=building_id,
+        token_ids_len=token_ids_len - 1,
+        token_ids=token_ids + 1,
+        token_values_len=token_values_len - 1,
+        token_values=token_values + 1,
+        ids_len=ids_len - 1,
+        ids=ids + 1,
+        values_len=values_len - 1,
+        values=values + 1)
+end
+
 @external
 func fetch_building_cost_ids{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*}(building_id : felt) -> (realm_building_costs : RealmBuildingCostIds):
+        bitwise_ptr : BitwiseBuiltin*}(building_id : felt) -> (
+        realm_building_ids_len : felt, realm_building_ids : felt*):
     alloc_locals
 
     let (controller) = controller_address.read()
@@ -114,25 +144,22 @@ func fetch_building_cost_ids{
     let (local resource_9) = unpack_data(data, 64, 255)
     let (local resource_10) = unpack_data(data, 72, 255)
 
-    return (
-        realm_building_costs=RealmBuildingCostIds(
-        resource_1=resource_1,
-        resource_2=resource_2,
-        resource_3=resource_3,
-        resource_4=resource_4,
-        resource_5=resource_5,
-        resource_6=resource_6,
-        resource_7=resource_7,
-        resource_8=resource_8,
-        resource_9=resource_9,
-        resource_10=resource_10
-        ))
+    let (local resource_ids : felt*) = alloc()
+    local l
+
+    if resource_1 != 0:
+        resource_ids[0] = resource_1
+        l = l; ap++
+    end
+
+    return (l,  resource_ids)
 end
 
 @external
 func fetch_building_cost_values{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*}(building_id : felt) -> (realm_building_costs : RealmBuildingCostValues):
+        bitwise_ptr : BitwiseBuiltin*}(building_id : felt) -> (
+        realm_building_costs_len : felt, realm_building_costs : felt*):
     alloc_locals
 
     let (controller) = controller_address.read()
@@ -154,17 +181,13 @@ func fetch_building_cost_values{
     let (local resource_9_values) = unpack_data(data, 86, 4095)
     let (local resource_10_values) = unpack_data(data, 98, 4095)
 
-    return (
-        realm_building_costs=RealmBuildingCostValues(
-        resource_1_values=resource_1_values,
-        resource_2_values=resource_2_values,
-        resource_3_values=resource_3_values,
-        resource_4_values=resource_4_values,
-        resource_5_values=resource_5_values,
-        resource_6_values=resource_6_values,
-        resource_7_values=resource_7_values,
-        resource_8_values=resource_8_values,
-        resource_9_values=resource_9_values,
-        resource_10_values=resource_10_values
-        ))
+    let (local resource_values : felt*) = alloc()
+    local l
+
+    if resource_1_values != 0:
+        resource_values[0] = resource_1_values
+        l = l; ap++
+    end
+
+    return (l, resource_values)
 end
