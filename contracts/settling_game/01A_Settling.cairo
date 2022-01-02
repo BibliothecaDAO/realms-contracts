@@ -15,24 +15,19 @@ from contracts.settling_game.utils.interfaces import IModuleController, I01B_Set
 
 from contracts.token.IERC20 import IERC20
 from contracts.token.ERC1155.IERC1155 import IERC1155
-from contracts.settling_game.realms_IERC721 import realms_IERC721
-from contracts.settling_game.s_realms_IERC721 import s_realms_IERC721 
-# #### Module 1A #####
-# Base settling contract
-# Consumes a Realm
-# Sets users stake time
-####################
+from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
+from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721 
 
-# ########### Game state ############
+##### Module 1A ###
+#                 #
+# Settling Logic  #
+#                 #
+###################
 
-# Stores the address of the ModuleController.
 @storage_var
 func controller_address() -> (address : felt):
 end
 
-
-# ########### Admin Functions for Testing ############
-# Called on deployment only.
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_of_controller : felt):
@@ -41,7 +36,9 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     return ()
 end
 
-
+# Settles Realm
+# Transfers Realm to State Contract
+# Mints sRealm and sends to user
 @external
 func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(token_id : Uint256):
     alloc_locals
@@ -72,6 +69,9 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(t
     return ()
 end
 
+# UnSettles Realm
+# Transfers Realm to State Contract
+# Burns sRealm and sends to user
 @external
 func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(token_id : Uint256):
     alloc_locals
@@ -98,6 +98,8 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
 
     # TODO: TimeStamp - current Hardcoded
     I01B_Settling.set_time_staked(settle_state_address, token_id) 
+
+    # TOD0: Claim resources if available before unsettling
 
     return ()
 end

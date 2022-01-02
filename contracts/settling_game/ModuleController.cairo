@@ -96,14 +96,15 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
 
     # TODO: add 'set_write_access' here for all the module
     # write patterns known at deployment. E.g., 1->2, 1->3, 5->6.
-    # Module 1 can update state of Settling.
+
+    # settling to state
     can_write_to.write(1, 2, 1)
 
     # resources logic to state
     can_write_to.write(3, 4, 1)
 
-    # settling to state
-    can_write_to.write(1, 2, 1)
+    # buildings to state
+    can_write_to.write(5, 6, 1)
 
     # Contracts
     lords_address.write(_lords_address)
@@ -139,7 +140,7 @@ end
 @external
 func set_initial_module_addresses{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        module_01_addr : felt, module_02_addr : felt, module_03_addr : felt, module_04_addr : felt): 
+        module_01_addr : felt, module_02_addr : felt, module_03_addr : felt, module_04_addr : felt, module_05_addr : felt, module_06_addr : felt): 
     only_arbiter()
 
     address_of_module_id.write(1, module_01_addr)
@@ -153,6 +154,12 @@ func set_initial_module_addresses{
 
     address_of_module_id.write(4, module_04_addr)
     module_id_of_address.write(module_04_addr, 4)    
+
+    address_of_module_id.write(5, module_05_addr)
+    module_id_of_address.write(module_05_addr, 5) 
+
+    address_of_module_id.write(6, module_06_addr)
+    module_id_of_address.write(module_06_addr, 6)         
     return ()
 end
 

@@ -16,17 +16,18 @@ from contracts.settling_game.utils.game_structs import ResourceLevel
 
 from contracts.token.IERC20 import IERC20
 from contracts.token.ERC1155.IERC1155 import IERC1155
-from contracts.settling_game.realms_IERC721 import realms_IERC721
+from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 
 from contracts.settling_game.utils.game_structs import RealmData, ResourceUpgradeIds
 from contracts.settling_game.utils.general import unpack_data 
-# #### Module 2B #####
-# Claim & Resource State
-####################
 
-# ########### Game state ############
 
-# Stores the address of the ModuleController.
+##### Module 2B ##########
+#                        #
+# Claim & Resource State #
+#                        #
+##########################
+
 @storage_var
 func controller_address() -> (address : felt):
 end
@@ -43,12 +44,11 @@ end
 func resource_upgrade_ids(resource_id : felt) -> (ids : felt):
 end
 
-# ########### Admin Functions for Testing ############
-# Called on deployment only.
+
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_of_controller : felt):
-    # Store the address of the only fixed contract in the system.
+
     controller_address.write(address_of_controller)
     return () 
 end
@@ -56,6 +56,7 @@ end
 
 
 ###### SETTERS ######
+
 @external
 func set_resource_upgrade_ids{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
@@ -76,6 +77,7 @@ func set_resource_level{
 end
 
 ###### GETTERS ######
+
 @external
 func get_resource_level{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256, resource : felt) -> (level : felt):
@@ -86,7 +88,7 @@ func get_resource_level{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     let (level) = resource_levels.read(token_id, resource)
 
     if level == 0:
-        assert l = 10
+        assert l = 100
     else:
         assert l = level
     end

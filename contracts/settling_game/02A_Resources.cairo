@@ -13,17 +13,21 @@ from contracts.settling_game.utils.general import scale
 from contracts.settling_game.utils.interfaces import IModuleController, I02B_Resources
 
 from contracts.settling_game.utils.game_structs import RealmData, ResourceUpgradeIds
-from contracts.settling_game.utils.general import unpack_data 
+from contracts.settling_game.utils.general import unpack_data
 
 from contracts.token.IERC20 import IERC20
 from contracts.token.ERC1155.IERC1155 import IERC1155
-from contracts.settling_game.realms_IERC721 import realms_IERC721
+from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 
-# #### Module 2A #####
-# Logic around resource collection / upgrades
-####################
 
-# Stores the address of the ModuleController.
+
+##### Module 2A ##########
+#                        #
+# Claim & Resource Logic #
+#                        #
+##########################
+
+
 @storage_var
 func controller_address() -> (address : felt):
 end
@@ -31,12 +35,14 @@ end
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_of_controller : felt):
-    # Store the address of the only fixed contract in the system.
     controller_address.write(address_of_controller)
     return ()
 end
 
-# claims resources
+# Claims Resources
+# Checks user owns sRealm of Realm
+# Claims resources allocated
+
 @external
 func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256):
@@ -61,7 +67,6 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (owner) = realms_IERC721.ownerOf(contract_address=s_realms_address, token_id=token_id)
     assert caller = owner
 
-    # TODO check settled state
     let (local resource_ids : felt*) = alloc()
     let (local user_mint : felt*) = alloc()
     let (local treasury_mint : felt*) = alloc()
@@ -171,9 +176,14 @@ func upgrade_resource{
     let (caller) = get_caller_address()
     let (controller) = controller_address.read()
 
+
     # resource contract
-    let (resource_address) = IModuleController.get_resources_address(
-        contract_address=controller)
+    let (resource_address) = IModuleController.get_resources_address(contract_address=controller)
+    let (s_realms_address) = IModuleController.get_s_realms_address(contract_address=controller)
+
+    # check owner of sRealm
+    let (owner) = realms_IERC721.ownerOf(contract_address=s_realms_address, token_id=token_id)
+    assert caller = owner
 
     # resources state contract
     let (resources_state_address) = IModuleController.get_module_address(
@@ -201,7 +211,7 @@ func upgrade_resource{
     end
     if resource_upgrade_ids.resource_5 != token_ids[4]:
         resource_upgrade_ids.resource_5 = resource_upgrade_ids.resource_5 + 1
-    end     
+    end
 
     # check correct values
     if resource_upgrade_ids.resource_1_values != token_values[0]:
@@ -218,7 +228,7 @@ func upgrade_resource{
     end
     if resource_upgrade_ids.resource_5_values != token_values[4]:
         resource_upgrade_ids.resource_5_values = resource_upgrade_ids.resource_5_values + 1
-    end   
+    end
 
     # create array of ids and values
     let (local resource_ids : felt*) = alloc()
@@ -250,16 +260,16 @@ func fetch_resource_upgrade_ids{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
         bitwise_ptr : BitwiseBuiltin*}(resource_id : felt) -> (resource_ids : ResourceUpgradeIds):
     alloc_locals
+    
     let (controller) = controller_address.read()
 
-    # resource contract
     # state contract
     let (resources_state_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=4)
 
     let (local data) = I02B_Resources.get_resource_upgrade_ids(resources_state_address, resource_id)
 
-    let (local resource_1) = unpack_data(data, 0, 255) 
+    let (local resource_1) = unpack_data(data, 0, 255)
     let (local resource_2) = unpack_data(data, 8, 255)
     let (local resource_3) = unpack_data(data, 16, 255)
     let (local resource_4) = unpack_data(data, 24, 255)

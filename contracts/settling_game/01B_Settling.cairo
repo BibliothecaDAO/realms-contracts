@@ -10,13 +10,14 @@ from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.interfaces import IModuleController
 from contracts.token.IERC20 import IERC20
-from contracts.settling_game.realms_IERC721 import realms_IERC721
+from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 
-# #### Module 02 #####
-#
-# This module controls the state of 01A
-#
-####################
+##### Module 1B ###
+#                 #
+# Settling State  #
+#                 #
+###################
+
 
 @storage_var
 func controller_address() -> (address : felt):
@@ -26,7 +27,6 @@ end
 func time_staked(token_id : Uint256) -> (time : felt):
 end
 
-# Called on deployment only.
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_of_controller : felt):
@@ -45,7 +45,6 @@ func set_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     return ()
 end
 
-# Setters
 @external
 func set_approval{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
 
@@ -65,7 +64,7 @@ func set_approval{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     return ()
 end
 
-# Setters
+# Getters
 @external
 func get_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256) -> (time : felt):

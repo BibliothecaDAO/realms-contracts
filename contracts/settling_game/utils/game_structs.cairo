@@ -48,3 +48,40 @@ struct ResourceUpgradeIds:
     member resource_4_values  : felt  
     member resource_5_values  : felt       
 end
+
+struct RealmBuildings:
+    member castle : felt
+    member market : felt
+    member aquaduct : felt
+    member ports : felt
+    member barrack : felt
+    member farms : felt
+    member temple : felt
+    member shipyard : felt
+end
+
+struct RealmBuildingCostIds:
+    member resource_1 : felt  
+    member resource_2 : felt  
+    member resource_3 : felt   
+    member resource_4 : felt  
+    member resource_5 : felt
+    member resource_6 : felt  
+    member resource_7 : felt  
+    member resource_8 : felt   
+    member resource_9 : felt  
+    member resource_10 : felt           
+end
+
+struct RealmBuildingCostValues:     
+    member resource_1_values : felt  
+    member resource_2_values  : felt  
+    member resource_3_values  : felt   
+    member resource_4_values  : felt  
+    member resource_5_values  : felt       
+    member resource_6_values : felt  
+    member resource_7_values  : felt  
+    member resource_8_values  : felt   
+    member resource_9_values  : felt  
+    member resource_10_values  : felt     
+end
