@@ -10,29 +10,24 @@ from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.general import scale
-from contracts.settling_game.utils.interfaces import IModuleController
+from contracts.settling_game.utils.interfaces import IModuleController, I01B_Settling 
 
 
 from contracts.token.IERC20 import IERC20
 from contracts.token.ERC1155.IERC1155 import IERC1155
-from contracts.settling_game.realms_IERC721 import realms_IERC721
+from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
+from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721 
 
-# #### Module 1A #####
-# Base settling contract
-# Consumes a Realm
-# Sets users stake time
-####################
+##### Module 1A ###
+#                 #
+# Settling Logic  #
+#                 #
+###################
 
-# ########### Game state ############
-
-# Stores the address of the ModuleController.
 @storage_var
 func controller_address() -> (address : felt):
 end
 
-
-# ########### Admin Functions for Testing ############
-# Called on deployment only.
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_of_controller : felt):
@@ -41,39 +36,70 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     return ()
 end
 
-
+# Settles Realm
+# Transfers Realm to State Contract
+# Mints sRealm and sends to user
 @external
 func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(token_id : Uint256):
     alloc_locals
     let (caller) = get_caller_address()
     let (controller) = controller_address.read()
+
+    # realms address
     let (realms_address) = IModuleController.get_realms_address(
         contract_address=controller)
 
-    # # # check owner - TODO be within ERC721
-    let (owner) = realms_IERC721.ownerOf(contract_address=realms_address, token_id=token_id)
-    assert caller = owner
-   
-    # # # settle realm state
+    # s realms address
+    let (s_realms_address) = IModuleController.get_s_realms_address(
+        contract_address=controller)
 
-    # realms_IERC721.settleState(contract_address=realms_address, token_id=token_id, settle_state=1)
-    
-    # check owner of Realm
-    # change erc721 state
-    # TODO: add time staked
+    # settle address    
+    let (settle_state_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=2)
+
+    # transfer realm into settling state contract
+    realms_IERC721.transferFrom(realms_address, caller, settle_state_address, token_id)
+
+    # mint sRealm
+    s_realms_IERC721.mint(s_realms_address, caller, token_id)
+
+    # TODO: TimeStamp - current Hardcoded
+    I01B_Settling.set_time_staked(settle_state_address, token_id) 
+
     return ()
 end
 
-
-# Checks write-permission of the calling contract.
-func only_approved{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    # Get the address of the module trying to write to this contract.
+# UnSettles Realm
+# Transfers Realm to State Contract
+# Burns sRealm and sends to user
+@external
+func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(token_id : Uint256):
+    alloc_locals
     let (caller) = get_caller_address()
     let (controller) = controller_address.read()
-    # Pass this address on to the ModuleController.
-    # "Does this address have write-authority here?"
-    # Will revert the transaction if not.
-    IModuleController.has_write_access(
-        contract_address=controller, address_attempting_to_write=caller)
+
+    # realms address
+    let (realms_address) = IModuleController.get_realms_address(
+        contract_address=controller)
+
+    # s realms address
+    let (s_realms_address) = IModuleController.get_s_realms_address( 
+        contract_address=controller)
+
+    # settle address    
+    let (settle_state_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=2)
+
+    # transfer realm back to owner
+    realms_IERC721.transferFrom(realms_address, settle_state_address, caller,  token_id)
+
+    # burn sRealm
+    s_realms_IERC721.burn(s_realms_address, token_id)
+
+    # TODO: TimeStamp - current Hardcoded
+    I01B_Settling.set_time_staked(settle_state_address, token_id) 
+
+    # TOD0: Claim resources if available before unsettling
+
     return ()
 end

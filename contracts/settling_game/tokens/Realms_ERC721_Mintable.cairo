@@ -52,13 +52,6 @@ end
 func transferFrom{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
         _from : felt, to : felt, token_id : Uint256):
     ERC721_transferFrom(_from, to, token_id)
-
-    let (from_balance : Uint256) = ERC721_balances.read(account=_from)
-    erase_balance_details(_from, token_id, from_balance.low - 1)
-
-    let (to_balance : Uint256) = ERC721_balances.read(account=to)
-    balance_details.write(to, to_balance.low - 1, token_id)
-
     return ()
 end
 
@@ -178,6 +171,7 @@ func fetch_realm_data{
     let (local resource_6) = unpack_realm_data(realm_id, 80)
     let (local resource_7) = unpack_realm_data(realm_id, 88)
     let (local wonder) = unpack_realm_data(realm_id, 96)
+    let (local order) = unpack_realm_data(realm_id, 104)
 
     let realm_stats = RealmData(
         cities=cities,
@@ -192,7 +186,8 @@ func fetch_realm_data{
         resource_5=resource_5,
         resource_6=resource_6,
         resource_7=resource_7,
-        wonder=wonder)
+        wonder=wonder,
+        order=order) 
     return (realm_stats=realm_stats)
 end
 
