@@ -125,7 +125,7 @@ async def test_mint(game_factory, number_of_tokens, tokens):
 
     await signer.send_transaction(
         accounts[0], realms.contract_address, 'mint', [
-            accounts[0].contract_address, *tokens, 2123, 44526227375906105210343834518535]
+            accounts[0].contract_address, *tokens, 2123, 44526227375906105210343834517767]
     )
 
     # realm_info = await realms.get_realm_info(uint(5042)).call()
@@ -210,16 +210,16 @@ async def test_mint(game_factory, number_of_tokens, tokens):
 
     # set resource upgrade IDS
     await signer.send_transaction(
-        account=accounts[0], to=buildings_state.contract_address, selector_name='set_building_cost_ids', calldata=[1, 47390263963055590408705]
+        account=accounts[0], to=buildings_state.contract_address, selector_name='set_building_cost_ids', calldata=[0, 47390263963055590408705]
     )
 
     # set resource values 
     await signer.send_transaction(
-        account=accounts[0], to=buildings_state.contract_address, selector_name='set_building_cost_values', calldata=[1, 3245978011684776246407343248547850]
+        account=accounts[0], to=buildings_state.contract_address, selector_name='set_building_cost_values', calldata=[0, 3245978011684776246407343248547850]
     )
 
-    ids = await buildings_logic.fetch_building_cost_ids(1).call()
-    values = await buildings_logic.fetch_building_cost_values(1).call()
+    ids = await buildings_logic.fetch_building_cost_ids(0).call()
+    values = await buildings_logic.fetch_building_cost_values(0).call()
     
     print(
         f'Resource 9 Balance for player is: {ids.result[0]}')  
@@ -229,13 +229,13 @@ async def test_mint(game_factory, number_of_tokens, tokens):
     # create building
     await signer.send_transaction(
         account=accounts[0], to=buildings_logic.contract_address, selector_name='build', calldata=[*uint(5042),
-        1, 10, 1, 2, 3, 4, 5,6,7,8,9,10, 10, 10,10,10,10,10, 10,10,10,10,10]
+        0, 10, 1, 2, 3, 4, 5,6,7,8,9,10, 10, 10,10,10,10,10, 10,10,10,10,10]
     )
 
-    await signer.send_transaction(
-        account=accounts[0], to=buildings_logic.contract_address, selector_name='build', calldata=[*uint(5042),
-        1, 10, 1, 2, 3, 4, 5,6,7,8,9,10, 10, 10,10,10,10,10, 10,10,10,10,10]
-    )
+    # await signer.send_transaction(
+    #     account=accounts[0], to=buildings_logic.contract_address, selector_name='build', calldata=[*uint(5042),
+    #     0, 10, 1, 2, 3, 4, 5,6,7,8,9,10, 10, 10,10,10,10,10, 10,10,10,10,10]
+    # )
     
     values = await buildings_logic.fetch_buildings_by_type(uint(5042)).call()
     

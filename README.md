@@ -140,14 +140,14 @@ bin/deploy
 ```
 <hr>
 
-## Contributing and Nextsteps
+## Contributing and next steps
 
 Module Priority
-1. Settling
-2. Construction
-3. Resource Upgrading
-4. Army Building
-5. Raiding
+[x] Settling 
+[x] Buildings
+[x] Resources
+[]  Army Building
+[] Raiding
 
 Building out parts to make a functional `v1`
 
@@ -188,10 +188,11 @@ We will use rivers as an example since it's highest value is 60, which equates t
 So starting from the first value, take the bit number and add on 0 to make an 8 bit number
 
 eg: 
+```
 trait    bit   8 bit number
 
 cities = 111 = 00000111
-regions = 100 = 00000100
+regions = 100 = 00000001
 rivers = 111100 = 00111100
 harbours = 1010 = 00001010
 resource_number = 00000101
@@ -206,13 +207,14 @@ wonder = 00110010
 order = 00000010
 
 Then concatanate the values
-0000001000110010000000000000000000001001000101010000110000001010000001010000010100001010001111000000010000000111
 
+0000001000110010000000000000000000001001000101010000110000001010000001010000010100001010001111000000000100000111
+```
 
 Then convert to decimal and this is the realms traits to store in the felt:
 
 ```
-44526227375906105210343834518535
+44526227375906105210343834517767
 ```
 
 Then this function will unpack the the decimal into bits

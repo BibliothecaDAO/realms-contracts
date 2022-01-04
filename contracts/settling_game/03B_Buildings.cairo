@@ -105,17 +105,3 @@ func get_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
 
     return (buildings=buildings)
 end
-
-
-# @external
-# func get_realm_building_by_id{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-#         token_id : Uint256, building_id : felt) -> (building : felt):
-
-#         let (buildings) = realm_buildings.read(token_id)
-
-#         if building_id == 1:
-#             return (building=buildings.castle) 
-#         end
-
-#     return (building=0) 
-# end
