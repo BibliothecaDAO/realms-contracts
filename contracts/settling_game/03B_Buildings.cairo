@@ -37,7 +37,7 @@ func building_cost_values(building_id : felt) -> (cost_values : felt):
 end
 
 @storage_var
-func realm_buildings(token_id : Uint256) -> (buildings : RealmBuildings):
+func realm_buildings(token_id : Uint256) -> (buildings : felt):
 end
 
 @constructor
@@ -68,6 +68,15 @@ func set_building_cost_values{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     return ()
 end
 
+@external
+func set_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        token_id : Uint256, buildings_value : felt):
+
+        realm_buildings.write(token_id, buildings_value)
+
+    return () 
+end
+
 ###### GETTERS ######
 
 @external
@@ -90,7 +99,7 @@ end
 
 @external
 func get_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256) -> (buildings : RealmBuildings):
+        token_id : Uint256) -> (buildings : felt):
 
         let (buildings) = realm_buildings.read(token_id)
 
@@ -98,15 +107,15 @@ func get_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
 end
 
 
-@external
-func get_realm_building_by_id{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256, building_id : felt) -> (building : felt):
+# @external
+# func get_realm_building_by_id{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+#         token_id : Uint256, building_id : felt) -> (building : felt):
 
-        let (buildings) = realm_buildings.read(token_id)
+#         let (buildings) = realm_buildings.read(token_id)
 
-        if building_id == 1:
-            return (building=buildings.castle) 
-        end
+#         if building_id == 1:
+#             return (building=buildings.castle) 
+#         end
 
-    return (building=0) 
-end
+#     return (building=0) 
+# end

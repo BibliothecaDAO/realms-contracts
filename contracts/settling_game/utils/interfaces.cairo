@@ -66,8 +66,10 @@ namespace I03B_Buildings:
     end
     func get_building_cost_values(building_id : felt) -> (cost : felt):
     end
-    func get_realm_buildings(token_id : Uint256) -> (traits : RealmBuildings):
+    func get_realm_buildings(token_id : Uint256) -> (buildings : felt):
     end
     func get_realm_building_by_id(token_id : Uint256, building_id : felt) -> (building : felt):
     end
+    func set_realm_buildings(token_id : Uint256, buildings_value : felt) -> ():
+    end    
 end

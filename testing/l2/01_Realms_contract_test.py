@@ -128,15 +128,15 @@ async def test_mint(game_factory, number_of_tokens, tokens):
             accounts[0].contract_address, *tokens, 2123, 44526227375906105210343834518535]
     )
 
-    realm_info = await realms.get_realm_info(uint(5042)).call()
-    print(f'Realm Info: {realm_info.result.realm_data}')
+    # realm_info = await realms.get_realm_info(uint(5042)).call()
+    # print(f'Realm Info: {realm_info.result.realm_data}')
 
-    unpacked_realm_info = await realms.fetch_realm_data(uint(5042)).call()
-    print(
-        f'Unpacked Realm Info at: {unpacked_realm_info.result.realm_stats}')
+    # unpacked_realm_info = await realms.fetch_realm_data(uint(5042)).call()
+    # print(
+    #     f'Unpacked Realm Info at: {unpacked_realm_info.result.realm_stats}')
 
-    execution_info = await realms.balanceOf(accounts[0].contract_address).call()
-    print(f'Realms Balance for owner is: {execution_info.result.balance}')
+    # execution_info = await realms.balanceOf(accounts[0].contract_address).call()
+    # print(f'Realms Balance for owner is: {execution_info.result.balance}')
 
     # set approval for Settling contract to use Realm
     await signer.send_transaction(
@@ -218,12 +218,31 @@ async def test_mint(game_factory, number_of_tokens, tokens):
         account=accounts[0], to=buildings_state.contract_address, selector_name='set_building_cost_values', calldata=[1, 3245978011684776246407343248547850]
     )
 
+    ids = await buildings_logic.fetch_building_cost_ids(1).call()
+    values = await buildings_logic.fetch_building_cost_values(1).call()
+    
+    print(
+        f'Resource 9 Balance for player is: {ids.result[0]}')  
+    print(
+        f'Resource 9 Balance for player is: {values.result}') 
+
+    # create building
     await signer.send_transaction(
         account=accounts[0], to=buildings_logic.contract_address, selector_name='build', calldata=[*uint(5042),
-        1, 5, 5, 10, 12, 21, 9, 5, 10,10,10,10,10]
+        1, 10, 1, 2, 3, 4, 5,6,7,8,9,10, 10, 10,10,10,10,10, 10,10,10,10,10]
     )
 
-    # settle Realm
     await signer.send_transaction(
-        account=accounts[0], to=settling_logic.contract_address, selector_name='unsettle', calldata=[*uint(5042)]
+        account=accounts[0], to=buildings_logic.contract_address, selector_name='build', calldata=[*uint(5042),
+        1, 10, 1, 2, 3, 4, 5,6,7,8,9,10, 10, 10,10,10,10,10, 10,10,10,10,10]
     )
+    
+    values = await buildings_logic.fetch_buildings_by_type(uint(5042)).call()
+    
+    print(
+        f'Buildings: {values.result.realm_buildings}')  
+
+    # # settle Realm
+    # await signer.send_transaction(
+    #     account=accounts[0], to=settling_logic.contract_address, selector_name='unsettle', calldata=[*uint(5042)]
+    # )
