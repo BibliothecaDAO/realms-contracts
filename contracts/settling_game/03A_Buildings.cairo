@@ -58,6 +58,9 @@ func build{
     # realms address
     let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
 
+    # resource address
+    let (resource_address) = IModuleController.get_resources_address(contract_address=controller)
+
     # realms data
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
         contract_address=realms_address, token_id=token_id)
@@ -87,11 +90,8 @@ func build{
         _token_values_len,
         values)
 
-    # check resources values and ids
-
-    # burn resource values
-
-    # increment building
+    IERC1155.burn_batch(
+        resource_address, caller, token_ids_len, token_ids, token_values_len, token_values)
 
     return ()
 end
@@ -110,7 +110,7 @@ func build_buildings{
         bitwise_ptr : BitwiseBuiltin*}(
         buildings_state_address : felt, token_id : Uint256, current_realm_buildings : felt,
         building_id : felt):
-    alloc_locals    
+    alloc_locals
     let (caller) = get_caller_address()
     let (controller) = controller_address.read()
 
@@ -121,14 +121,14 @@ func build_buildings{
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
         contract_address=realms_address, token_id=token_id)
 
-    let (local castles) = unpack_data(current_realm_buildings, 0, 255) 
+    let (local castles) = unpack_data(current_realm_buildings, 0, 255)
     let (local market) = unpack_data(current_realm_buildings, 8, 255)
     let (local aquaduct) = unpack_data(current_realm_buildings, 16, 255)
     let (local ports) = unpack_data(current_realm_buildings, 24, 255)
     let (local barrack) = unpack_data(current_realm_buildings, 32, 255)
     let (local farms) = unpack_data(current_realm_buildings, 40, 255)
     let (local temple) = unpack_data(current_realm_buildings, 48, 255)
-    let (local shipyard) = unpack_data(current_realm_buildings, 56, 255) 
+    let (local shipyard) = unpack_data(current_realm_buildings, 56, 255)
 
     let (local buildings : felt*) = alloc()
 
@@ -136,98 +136,98 @@ func build_buildings{
         # check space
         if castles == realms_data.regions:
             assert 1 = 2
-        end 
-        local id_1 =  (castles + 1) * SHIFT_8_1
-        buildings[0] = id_1 
+        end
+        local id_1 = (castles + 1) * SHIFT_8_1
+        buildings[0] = id_1
     else:
         buildings[0] = castles * SHIFT_8_1
-    end  
+    end
 
     if building_id == 1:
         # check space
         if market == realms_data.cities:
             assert 1 = 2
-        end 
-        local id_2 =  (market + 1) * SHIFT_8_2
-        buildings[1] = id_2 
+        end
+        local id_2 = (market + 1) * SHIFT_8_2
+        buildings[1] = id_2
     else:
-        local id_2 = market* SHIFT_8_2
-        buildings[1] = id_2 
+        local id_2 = market * SHIFT_8_2
+        buildings[1] = id_2
     end
 
     if building_id == 2:
         # check space
         if aquaduct == realms_data.rivers:
             assert 1 = 2
-        end 
-        local id_3 =  (aquaduct + 1) * SHIFT_8_3
-        buildings[2] = id_3 
+        end
+        local id_3 = (aquaduct + 1) * SHIFT_8_3
+        buildings[2] = id_3
     else:
         local id_3 = aquaduct * SHIFT_8_3
         buildings[2] = id_3
-    end 
+    end
 
     if building_id == 3:
         # check space
         if ports == realms_data.harbours:
             assert 1 = 2
-        end 
-        local id_4 =  (ports + 1) * SHIFT_8_4
-        buildings[3] = id_4 
+        end
+        local id_4 = (ports + 1) * SHIFT_8_4
+        buildings[3] = id_4
     else:
         local id_4 = ports * SHIFT_8_4
-        buildings[3] = id_4 
-    end 
+        buildings[3] = id_4
+    end
 
     if building_id == 4:
         # check space
         if barrack == realms_data.cities:
             assert 1 = 2
-        end     
-        local id_5 =  (barrack + 1) * SHIFT_8_5
-        buildings[4] = id_5 
+        end
+        local id_5 = (barrack + 1) * SHIFT_8_5
+        buildings[4] = id_5
     else:
         local id_5 = barrack * SHIFT_8_5
-        buildings[4] = id_5 
-    end 
+        buildings[4] = id_5
+    end
 
     if building_id == 5:
         # check space
         if farms == realms_data.cities:
             assert 1 = 2
-        end      
-        local id_6 =  (farms + 1) * SHIFT_8_6
-        buildings[5] = id_6 
+        end
+        local id_6 = (farms + 1) * SHIFT_8_6
+        buildings[5] = id_6
     else:
         local id_6 = farms * SHIFT_8_6
-        buildings[5] = id_6 
-    end 
+        buildings[5] = id_6
+    end
 
     if building_id == 6:
         # check space
         if temple == realms_data.cities:
             assert 1 = 2
-        end     
-        local id_7 =  (temple + 1) * SHIFT_8_7
-        buildings[6] = id_7 
+        end
+        local id_7 = (temple + 1) * SHIFT_8_7
+        buildings[6] = id_7
     else:
         local id_7 = temple * SHIFT_8_7
-        buildings[6] = id_7  
+        buildings[6] = id_7
     end
 
     if building_id == 7:
         # check space
         if shipyard == realms_data.harbours:
             assert 1 = 2
-        end        
-        local id_8 =  (shipyard + 1) * SHIFT_8_8
+        end
+        local id_8 = (shipyard + 1) * SHIFT_8_8
         buildings[7] = id_8
     else:
         local id_8 = shipyard * SHIFT_8_8
-        buildings[7] = id_8  
-    end 
+        buildings[7] = id_8
+    end
 
-    tempvar value = buildings[7] +buildings[6] + buildings[5] + buildings[4] + buildings[3] + buildings[2]+ buildings[1] + buildings[0]
+    tempvar value = buildings[7] + buildings[6] + buildings[5] + buildings[4] + buildings[3] + buildings[2] + buildings[1] + buildings[0]
 
     I03B_Buildings.set_realm_buildings(buildings_state_address, token_id, value)
 
@@ -246,7 +246,7 @@ func check_correct_resources{
     if [token_ids] != [ids]:
         assert 1 = 1 + 1
     end
-    if [token_values] != [values]: 
+    if [token_values] != [values]:
         assert 1 = 1 + 1
     end
 

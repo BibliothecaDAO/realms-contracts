@@ -167,12 +167,12 @@ struct RealmData:
     member regions : felt  # eg: 4 regions = 100 
     member rivers : felt  # eg: 60 rivers = 111100 
     member harbours : felt  #  eg: 10 harbours = 1010 
-    member resource_number : felt  #  eg: 4 resource_number = 100 
-    member resource_1 : felt  # eg: 5 resource_1 = 101 
-    member resource_2 : felt  # eg: 10 resource_2 = 1010 
-    member resource_3 : felt  # eg: 12 resource_3 = 1100 
-    member resource_4 : felt  # eg: 21 resource_4 = 10101
-    member resource_5 : felt  # eg: 9 resource_5 = 1001
+    member resource_number : felt  #  eg: 5 resource_number = 101 
+    member resource_1 : felt  # eg: 1 resource_1 = 1 
+    member resource_2 : felt  # eg: 2 resource_2 = 10 
+    member resource_3 : felt  # eg: 3 resource_3 = 11 
+    member resource_4 : felt  # eg: 4 resource_4 = 100
+    member resource_5 : felt  # eg: 5 resource_5 = 101
     member resource_6 : felt  # eg: 10 resource_6 = 0 (0 if no resource)
     member resource_7 : felt  # eg: 10 resource_7 = 0 (0 if no resource)
     member wonder : felt  # eg: 50 wonder = 110010 (50 wonders)  
@@ -196,11 +196,11 @@ regions = 100 = 00000001
 rivers = 111100 = 00111100
 harbours = 1010 = 00001010
 resource_number = 00000101
-resource_1 = 00000101 
-resource_2 = 00001010 
-resource_3 = 00001100 
-resource_4 = 00010101
-resource_5 = 00001001
+resource_1 = 00000001 
+resource_2 = 00000010 
+resource_3 = 00000011
+resource_4 = 00000100
+resource_5 = 00000101
 resource_6 = 00000000 
 resource_7 = 00000000
 wonder = 00110010
@@ -208,13 +208,13 @@ order = 00000010
 
 Then concatanate the values
 
-0000001000110010000000000000000000001001000101010000110000001010000001010000010100001010001111000000000100000111
+0000001000110010000000000000000000000101000001000000001100000010000000010000010100001010001111000000000100000111
 ```
 
 Then convert to decimal and this is the realms traits to store in the felt:
 
 ```
-44526227375906105210343834517767
+44526227356702393855067989737735
 ```
 
 Then this function will unpack the the decimal into bits
@@ -227,20 +227,20 @@ unpack_realm_data()
 Same method is used for packing the values of resources needed to upgrade a resource
 
 ```
-resource_1 = 5 = 00000101
-resource_2 = 10 = 00001010  
-resource_3 = 12 = 00001100
-resource_4 = 21 = 00010101
-resource_5 = 9 = 00001001
+resource_1 = 1 = 00000001
+resource_2 = 2 = 00000010  
+resource_3 = 3 = 00000011
+resource_4 = 4 = 00000100
+resource_5 = 5 = 00000101
 resource_1_values = 00001010
 resource_2_values = 00001010   
 resource_3_values = 00001010     
 resource_4_values = 00001010   
 resource_5_values = 00001010
 
-00001010000010100000101000001010000010100000100100010101000011000000101000000101
+00001010000010100000101000001010000010100000010100000100000000110000001000000001
 
-47408855671157818132997
+47408855671140352459265
 ```
 
 Same method is used for packing the values of resources needed to build
@@ -252,15 +252,11 @@ resource_2 = 10 = 00000010
 resource_3 = 12 = 00000011
 resource_4 = 21 = 00000100
 resource_5 = 9 = 00000101
-resource_6 = 5 = 00000110
-resource_7 = 10 = 00000111  
-resource_8 = 12 = 00001000
-resource_9 = 21 = 00001001
-resource_10 = 9 = 00001010
 
-00001010000010010000100000000111000001100000010100000100000000110000001000000001
 
-47390263963055590408705
+0000010100000100000000110000001000000001
+
+21542142465
 
 # values 14 bit - max 10000
 resource_1_values = 000000001010
@@ -268,13 +264,8 @@ resource_2_values = 000000001010
 resource_3_values = 000000001010     
 resource_4_values = 000000001010   
 resource_5_values = 000000001010
-resource_6_values = 000000001010
-resource_7_values = 000000001010   
-resource_8_values = 000000001010     
-resource_9_values = 000000001010   
-resource_10_values = 000000001010
 
+000000001010000000001010000000001010000000001010000000001010
 
-000000001010000000001010000000001010000000001010000000001010000000001010000000001010000000001010000000001010000000001010
-3245978011684776246407343248547850
+2815437129687050
 ```
