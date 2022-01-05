@@ -232,7 +232,6 @@ func upgrade_resource{
 
     # create array of ids and values
     let (local resource_ids : felt*) = alloc()
-    let (local resource_values : felt*) = alloc()
 
     assert resource_ids[0] = resource_upgrade_ids.resource_1
     assert resource_ids[1] = resource_upgrade_ids.resource_2
@@ -240,14 +239,9 @@ func upgrade_resource{
     assert resource_ids[3] = resource_upgrade_ids.resource_4
     assert resource_ids[4] = resource_upgrade_ids.resource_5
 
-    assert resource_values[0] = token_values[0]
-    assert resource_values[1] = token_values[1]
-    assert resource_values[2] = token_values[2]
-    assert resource_values[3] = token_values[3]
-    assert resource_values[4] = token_values[4]
 
     # burn resources
-    IERC1155.burn_batch(resource_address, caller, 5, resource_ids, 5, resource_values)
+    IERC1155.burn_batch(resource_address, caller, 5, resource_ids, 5, token_values)
 
     # increase level
     I02B_Resources.set_resource_level(resources_state_address, token_id, resource, level + 1)
@@ -280,7 +274,7 @@ func fetch_resource_upgrade_ids{
     let (local resource_4_values) = unpack_data(data, 64, 255)
     let (local resource_5_values) = unpack_data(data, 72, 255)
 
-    let resource_ids = ResourceUpgradeIds(
+    return (resource_ids=ResourceUpgradeIds(
         resource_1=resource_1,
         resource_2=resource_2,
         resource_3=resource_3,
@@ -290,6 +284,5 @@ func fetch_resource_upgrade_ids{
         resource_2_values=resource_2_values,
         resource_3_values=resource_3_values,
         resource_4_values=resource_4_values,
-        resource_5_values=resource_5_values)
-    return (resource_ids=resource_ids)
+        resource_5_values=resource_5_values))
 end
