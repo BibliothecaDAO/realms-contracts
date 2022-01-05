@@ -14,6 +14,10 @@ from contracts.settling_game.utils.general import unpack_data
 
 from contracts.settling_game.utils.game_structs import (
     RealmBuildings, RealmData, RealmBuildingCostIds, RealmBuildingCostValues)
+
+from contracts.settling_game.utils.constants import (
+    SHIFT_8_1, SHIFT_8_2, SHIFT_8_3, SHIFT_8_4, SHIFT_8_5, SHIFT_8_6, SHIFT_8_7, SHIFT_8_8)
+
 from contracts.token.IERC20 import IERC20
 from contracts.token.ERC1155.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
@@ -90,20 +94,12 @@ func build{
         _token_values_len,
         values)
 
+    # burnt the resources
     IERC1155.burn_batch(
         resource_address, caller, token_ids_len, token_ids, token_values_len, token_values)
 
     return ()
 end
-
-const SHIFT_8_1 = 2 ** 0
-const SHIFT_8_2 = 2 ** 8
-const SHIFT_8_3 = 2 ** 16
-const SHIFT_8_4 = 2 ** 24
-const SHIFT_8_5 = 2 ** 32
-const SHIFT_8_6 = 2 ** 40
-const SHIFT_8_7 = 2 ** 48
-const SHIFT_8_8 = 2 ** 56
 
 func build_buildings{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
@@ -121,109 +117,104 @@ func build_buildings{
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
         contract_address=realms_address, token_id=token_id)
 
-    let (local castles) = unpack_data(current_realm_buildings, 0, 255)
-    let (local market) = unpack_data(current_realm_buildings, 8, 255)
-    let (local aquaduct) = unpack_data(current_realm_buildings, 16, 255)
-    let (local ports) = unpack_data(current_realm_buildings, 24, 255)
-    let (local barrack) = unpack_data(current_realm_buildings, 32, 255)
-    let (local farms) = unpack_data(current_realm_buildings, 40, 255)
-    let (local temple) = unpack_data(current_realm_buildings, 48, 255)
-    let (local shipyard) = unpack_data(current_realm_buildings, 56, 255)
+    # get current buildings on realm
+    let (current_buildings : RealmBuildings) = fetch_buildings_by_type(token_id)
 
+    # make tempvar
     let (local buildings : felt*) = alloc()
 
     if building_id == 0:
         # check space
-        if castles == realms_data.regions:
+        if current_buildings.castles == realms_data.regions:
             assert 1 = 2
         end
-        local id_1 = (castles + 1) * SHIFT_8_1
+        local id_1 = (current_buildings.castles + 1) * SHIFT_8_1
         buildings[0] = id_1
     else:
-        buildings[0] = castles * SHIFT_8_1
+        buildings[0] = current_buildings.castles * SHIFT_8_1
     end
 
     if building_id == 1:
         # check space
-        if market == realms_data.cities:
+        if current_buildings.markets == realms_data.cities:
             assert 1 = 2
         end
-        local id_2 = (market + 1) * SHIFT_8_2
+        local id_2 = (current_buildings.markets + 1) * SHIFT_8_2
         buildings[1] = id_2
     else:
-        local id_2 = market * SHIFT_8_2
+        local id_2 = current_buildings.markets * SHIFT_8_2
         buildings[1] = id_2
     end
 
     if building_id == 2:
         # check space
-        if aquaduct == realms_data.rivers:
+        if current_buildings.aquaducts == realms_data.rivers:
             assert 1 = 2
         end
-        local id_3 = (aquaduct + 1) * SHIFT_8_3
+        local id_3 = (current_buildings.aquaducts + 1) * SHIFT_8_3
         buildings[2] = id_3
     else:
-        local id_3 = aquaduct * SHIFT_8_3
+        local id_3 = current_buildings.aquaducts * SHIFT_8_3
         buildings[2] = id_3
     end
 
     if building_id == 3:
         # check space
-        if ports == realms_data.harbours:
+        if current_buildings.ports == realms_data.harbours:
             assert 1 = 2
         end
-        local id_4 = (ports + 1) * SHIFT_8_4
+        local id_4 = (current_buildings.ports + 1) * SHIFT_8_4
         buildings[3] = id_4
     else:
-        local id_4 = ports * SHIFT_8_4
+        local id_4 = current_buildings.ports * SHIFT_8_4
         buildings[3] = id_4
     end
 
     if building_id == 4:
         # check space
-        if barrack == realms_data.cities:
+        if current_buildings.barracks == realms_data.cities:
             assert 1 = 2
         end
-        local id_5 = (barrack + 1) * SHIFT_8_5
+        local id_5 = (current_buildings.barracks + 1) * SHIFT_8_5
         buildings[4] = id_5
     else:
-        local id_5 = barrack * SHIFT_8_5
+        local id_5 = current_buildings.barracks * SHIFT_8_5
         buildings[4] = id_5
     end
 
     if building_id == 5:
         # check space
-        if farms == realms_data.cities:
+        if current_buildings.farms == realms_data.cities:
             assert 1 = 2
         end
-        local id_6 = (farms + 1) * SHIFT_8_6
+        local id_6 = (current_buildings.farms + 1) * SHIFT_8_6
         buildings[5] = id_6
     else:
-        local id_6 = farms * SHIFT_8_6
+        local id_6 = current_buildings.farms * SHIFT_8_6
         buildings[5] = id_6
     end
 
     if building_id == 6:
         # check space
-        if temple == realms_data.cities:
+        if current_buildings.temples == realms_data.cities:
             assert 1 = 2
         end
-        local id_7 = (temple + 1) * SHIFT_8_7
+        local id_7 = (current_buildings.temples + 1) * SHIFT_8_7
         buildings[6] = id_7
     else:
-        local id_7 = temple * SHIFT_8_7
+        local id_7 = current_buildings.temples * SHIFT_8_7
         buildings[6] = id_7
     end
 
     if building_id == 7:
         # check space
-        if shipyard == realms_data.harbours:
+        if current_buildings.shipyards == realms_data.harbours:
             assert 1 = 2
         end
-        local id_8 = (shipyard + 1) * SHIFT_8_8
+        local id_8 = (current_buildings.shipyards + 1) * SHIFT_8_8
         buildings[7] = id_8
     else:
-        local id_8 = shipyard * SHIFT_8_8
+        local id_8 = current_buildings.shipyards * SHIFT_8_8
         buildings[7] = id_8
     end
 
@@ -479,23 +470,23 @@ func fetch_buildings_by_type{
 
     let (local data) = I03B_Buildings.get_realm_buildings(buildings_state_address, token_id)
 
-    let (local castle) = unpack_data(data, 0, 255)
-    let (local market) = unpack_data(data, 8, 255)
-    let (local aquaduct) = unpack_data(data, 16, 255)
+    let (local castles) = unpack_data(data, 0, 255)
+    let (local markets) = unpack_data(data, 8, 255)
+    let (local aquaducts) = unpack_data(data, 16, 255)
     let (local ports) = unpack_data(data, 24, 255)
-    let (local barrack) = unpack_data(data, 32, 255)
+    let (local barracks) = unpack_data(data, 32, 255)
     let (local farms) = unpack_data(data, 40, 255)
-    let (local temple) = unpack_data(data, 48, 255)
-    let (local shipyard) = unpack_data(data, 56, 255)
+    let (local temples) = unpack_data(data, 48, 255)
+    let (local shipyards) = unpack_data(data, 56, 255)
 
     return (
         realm_buildings=RealmBuildings(
-        castle=castle,
-        market=market,
-        aquaduct=aquaduct,
+        castles=castles,
+        markets=markets,
+        aquaducts=aquaducts,
         ports=ports,
-        barrack=barrack,
+        barracks=barracks,
         farms=farms,
-        temple=temple,
-        shipyard=shipyard))
+        temples=temples,
+        shipyards=shipyards))
 end
