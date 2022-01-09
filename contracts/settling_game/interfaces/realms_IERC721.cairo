@@ -55,4 +55,7 @@ namespace realms_IERC721:
 
     func fetch_realm_data(token_id: Uint256) -> (realm_data : RealmData):
     end
+
+    func bridge_mint(to: felt, token_id: Uint256):
+    end
 end
