@@ -71,4 +71,4 @@ web3==5.24.0
 websockets==9.1
 yarl==1.7.2
 zipp==3.6.0
-dill=0.3.4
+dill==0.3.4

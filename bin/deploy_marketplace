@@ -43,14 +43,14 @@ printf "%s\n" "$(get_address AdminAccount)"
 AdminAddress=$(get_address AdminAccount)
 
 # Lords contract 
-nile deploy ERC20_Mintable 328287282291 5001796 100000 0 0x227fa3a058b59b952fc989597af12e0687c431e4caf9b09f4aba9d4253ab108 0x227fa3a058b59b952fc989597af12e0687c431e4caf9b09f4aba9d4253ab108 \
-    --alias Lords --network $network_type
+nile deploy ERC20_Mintable 328287282291 5001796 100000 0x5b39d5fe25926945c796697ba71156335c37d3049ef6e93c8d61aa47f05c998 0x5b39d5fe25926945c796697ba71156335c37d3049ef6e93c8d61aa47f05c998 \
+    --alias Lords --network goerli
 LordsAddress=$(get_address Lords)
 
 # Realms ERC721 contract
-nile deploy ERC721_Mintable 90595379670387 90595379670387 000001 0 0x227fa3a058b59b952fc989597af12e0687c431e4caf9b09f4aba9d4253ab108 \
-    --alias Realms --network $network_type
+nile deploy ERC721_Mintable 90595379670387 90595379670387 0x5b39d5fe25926945c796697ba71156335c37d3049ef6e93c8d61aa47f05c998 0x056e64aebba96e47de95b2998b2fcc67c40ec2b274e80869edda108156f2c779 \
+    --alias Realms --network goerli
 RealmsAddress=$(get_address Realms)
 
-nile deploy bibliotheca_marketplace 0x00a32b798afe12218acc32adb0edbcc0ce964077986c536feb45257676fac2c9 0x07892d5537bf0621f013b4f58ccbd83ebb1bd3ec0938807e2604af974da0c7c0  \
-    --alias Realms --network $network_type
+nile deploy bibliotheca_marketplace 0x056e64aebba96e47de95b2998b2fcc67c40ec2b274e80869edda108156f2c779  \
+    --alias Marketplace --network goerli
