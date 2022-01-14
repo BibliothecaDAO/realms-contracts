@@ -257,7 +257,7 @@ func claim_rewards{
         game_idx,
         caller,
         side_won,
-        6,
+        2,
     )
 
     return ()
