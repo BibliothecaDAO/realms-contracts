@@ -54,7 +54,7 @@ and forwards it on to the destination.
     - The controller stores where modules can be found, and which modules
     have write access to other modules.
 - Modules (open ended set)
-    - Game mechanics (where a player would interact to play). 
+    - Game mechanics (where a player would interact to play).
     - Storage modules (game variables).
     - L1 connectors (for integrating L1 state/ownership to L2)
     - Other arbitrary contracts
@@ -143,11 +143,11 @@ bin/deploy
 ## Contributing and next steps
 
 Module Priority
-[x] Settling 
-[x] Buildings
-[x] Resources
-[]  Army Building
-[] Raiding
+* [x] Settling
+* [x] Buildings
+* [x] Resources
+* []  Army Building
+* [] Raiding
 
 Building out parts to make a functional `v1`
 
@@ -163,19 +163,20 @@ This technique was borrowed from the Dopewars engine (credit goes to @eth_worm)
 
 ```
 struct RealmData:
-    member cities : felt  # eg: 7 citees = 111 
-    member regions : felt  # eg: 4 regions = 100 
-    member rivers : felt  # eg: 60 rivers = 111100 
-    member harbours : felt  #  eg: 10 harbours = 1010 
-    member resource_number : felt  #  eg: 5 resource_number = 101 
-    member resource_1 : felt  # eg: 1 resource_1 = 1 
-    member resource_2 : felt  # eg: 2 resource_2 = 10 
-    member resource_3 : felt  # eg: 3 resource_3 = 11 
+    member cities : felt  # eg: 7 cities = 111
+    member regions : felt  # eg: 4 regions = 100
+    member rivers : felt  # eg: 60 rivers = 111100
+    member harbours : felt  #  eg: 10 harbours = 1010
+    member resource_number : felt  #  eg: 5 resource_number = 101
+    member resource_1 : felt  # eg: 1 resource_1 = 1
+    member resource_2 : felt  # eg: 2 resource_2 = 10
+    member resource_3 : felt  # eg: 3 resource_3 = 11
     member resource_4 : felt  # eg: 4 resource_4 = 100
     member resource_5 : felt  # eg: 5 resource_5 = 101
-    member resource_6 : felt  # eg: 10 resource_6 = 0 (0 if no resource)
-    member resource_7 : felt  # eg: 10 resource_7 = 0 (0 if no resource)
-    member wonder : felt  # eg: 50 wonder = 110010 (50 wonders)  
+    member resource_6 : felt  # eg: 0 resource_6 = 0 (0 if no resource)
+    member resource_7 : felt  # eg: 0 resource_7 = 0 (0 if no resource)
+    member wonder : felt  # eg: 50 wonder = 110010 (50 wonders)
+    member order : felt # eg: 3 = 11
 end
 ```
 
@@ -183,38 +184,37 @@ end
 
 Define how large the mask is needed for a value.
 
-We will use rivers as an example since it's highest value is 60, which equates to 7 bits. So we will use an 8 bit mask on all values to keep things consistent (this could be what ever you like)
+We will use rivers as an example since it's highest value is 60, which equates to 6 bits. We will use an 8 bit mask on all values to keep things consistent (this could be what ever you like).
 
-So starting from the first value, take the bit number and add on 0 to make an 8 bit number
+Next, take the binary values and create their 8 bit representations, e.g.:
 
-eg: 
+| trait | decimal | binary | 8 bit |
+| ----- | ------- | ------ | ----- |
+|cities|7|111|`00000111`|
+|regions|4|100|`00000100`|
+|rivers|60|111100|`00111100`|
+|harbours|10|1010|`00001010`|
+|resource_number|5|101|`00000101`|
+|resource_1|1|1|`00000001`|
+|resource_2|2|10|`00000010`|
+|resource_3|3|11|`00000011`|
+|resource_4|4|100|`00000100`|
+|resource_5|5|101|`00000101`|
+|resource_6|0|0|`00000000`|
+|resource_7|0|0|`00000000`|
+|wonder|50|110010|`00110010`|
+|order|3|10|`00000011`|
+
+Then concatenate the 8 bit values. This way, you'll get a 112 bit number (14 values * 8 bits for each value). The value for cities (`00000111`) will be the least significant ("rightmost") and the value for order (`00000011`) will be the most significant ("leftmost") position:
+
 ```
-trait    bit   8 bit number
-
-cities = 111 = 00000111
-regions = 100 = 00000001
-rivers = 111100 = 00111100
-harbours = 1010 = 00001010
-resource_number = 00000101
-resource_1 = 00000001 
-resource_2 = 00000010 
-resource_3 = 00000011
-resource_4 = 00000100
-resource_5 = 00000101
-resource_6 = 00000000 
-resource_7 = 00000000
-wonder = 00110010
-order = 00000010
-
-Then concatenate the values
-
-0000001000110010000000000000000000000101000001000000001100000010000000010000010100001010001111000000000100000111
+0000001100110010000000000000000000000101000001000000001100000010000000010000010100001010001111000000010000000111
 ```
 
 Then convert to decimal and this is the realms traits to store in the felt:
 
 ```
-44526227356702393855067989737735
+64808636960354064279015241024519
 ```
 
 Then this function will unpack the the decimal into bits
@@ -223,49 +223,28 @@ Then this function will unpack the the decimal into bits
 unpack_data()
 ```
 
-
-Same method is used for packing the values of resources needed to upgrade a resource
-
-```
-resource_1 = 1 = 00000001
-resource_2 = 2 = 00000010  
-resource_3 = 3 = 00000011
-resource_4 = 4 = 00000100
-resource_5 = 5 = 00000101
-resource_1_values = 00001010
-resource_2_values = 00001010   
-resource_3_values = 00001010     
-resource_4_values = 00001010   
-resource_5_values = 00001010
-
-00001010000010100000101000001010000010100000010100000100000000110000001000000001
-
-47408855671140352459265
-```
-
 Same method is used for packing the values of resources needed to build
 
 ```
 # ids - 8 bit
 resource_1 = 5 = 00000001
-resource_2 = 10 = 00000010  
+resource_2 = 10 = 00000010
 resource_3 = 12 = 00000011
 resource_4 = 21 = 00000100
 resource_5 = 9 = 00000101
-
 
 0000010100000100000000110000001000000001
 
 21542142465
 
-# values 14 bit - max 10000
-resource_1_values = 000000001010
-resource_2_values = 000000001010   
-resource_3_values = 000000001010     
-resource_4_values = 000000001010   
-resource_5_values = 000000001010
+# values 14 bit - max 10000 = 0b10011100010000
+resource_1_values = 00000000001010
+resource_2_values = 00000000001010
+resource_3_values = 00000000001010
+resource_4_values = 00000000001010
+resource_5_values = 00000000001010
 
-000000001010000000001010000000001010000000001010000000001010
+0000000000101000000000001010000000000010100000000000101000000000001010
 
-2815437129687050
+720619923528908810
 ```
