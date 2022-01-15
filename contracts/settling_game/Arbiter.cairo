@@ -25,11 +25,6 @@ end
 func controller_address() -> (address : felt):
 end
 
-# 1=locked.
-@storage_var
-func lock() -> (bool : felt):
-end
-
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_of_owner : felt):
@@ -41,14 +36,10 @@ end
 # Called to save the address of the ModuleController.
 @external
 func set_address_of_controller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        contract_address : felt):
-    let (locked) = lock.read()
-    # Locked starts as zero
-    assert_not_zero(1 - locked)
-    lock.write(1)
+        new_controller_address : felt):
     only_owner()
 
-    controller_address.write(contract_address)
+    controller_address.write(new_controller_address)
     return ()
 end
 
@@ -106,7 +97,7 @@ func batch_set_controller_addresses{
         module_01_addr : felt, module_02_addr : felt, module_03_addr : felt, module_04_addr : felt, module_05_addr : felt, module_06_addr : felt):
     only_owner()
     let (controller) = controller_address.read()
-    IModuleController.set_initial_module_addresses(controller, module_01_addr, module_02_addr, module_03_addr, module_04_addr, module_05_addr, module_06_addr) 
+    IModuleController.set_initial_module_addresses(controller, module_01_addr, module_02_addr, module_03_addr, module_04_addr, module_05_addr, module_06_addr)
     return ()
 end
 
