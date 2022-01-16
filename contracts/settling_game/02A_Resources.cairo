@@ -89,7 +89,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (r_4) = I02B_Resources.get_resource_level(
         contract_address=resources_state_address,
         token_id=token_id,
-        resource=realms_data.resource_5)
+        resource=realms_data.resource_4)
     let (r_5) = I02B_Resources.get_resource_level(
         contract_address=resources_state_address,
         token_id=token_id,
@@ -132,7 +132,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     end
 
     if realms_data.resource_6 != 0:
-        assert resource_ids[5] = realms_data.resource_7
+        assert resource_ids[5] = realms_data.resource_6
         assert user_mint[5] = r_6
         assert treasury_mint[5] = r_6
     end
@@ -249,12 +249,11 @@ func upgrade_resource{
     return ()
 end
 
-@external
 func fetch_resource_upgrade_ids{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
         bitwise_ptr : BitwiseBuiltin*}(resource_id : felt) -> (resource_ids : ResourceUpgradeIds):
     alloc_locals
-    
+
     let (controller) = controller_address.read()
 
     # state contract
