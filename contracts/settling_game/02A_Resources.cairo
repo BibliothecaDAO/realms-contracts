@@ -52,7 +52,10 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # realms contract
     let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
+
+    # sRealms contract
     let (s_realms_address) = IModuleController.get_s_realms_address(contract_address=controller)
+    
     # resource contract
     let (resources_address) = IModuleController.get_resources_address(contract_address=controller)
 

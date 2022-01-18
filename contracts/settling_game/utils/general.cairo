@@ -54,16 +54,6 @@ func unpack_data{
     return (score=result)
 end
 
-const MAX_5 = 2 ** 50
-const SHIFT_5_1 = 2 ** 0
-const SHIFT_5_2 = 2 ** 8
-const SHIFT_5_3 = 2 ** 16
-const SHIFT_5_4 = 2 ** 24
-const SHIFT_5_5 = 2 ** 32
-const SHIFT_5_6 = 2 ** 40
-const SHIFT_5_7 = 2 ** 48
-const SHIFT_5_8 = 2 ** 56
-
 # func pack_realm_building_data{
 #         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*,
 #         range_check_ptr}(data : felt, index : felt, updated_value : felt) -> (value : felt):
