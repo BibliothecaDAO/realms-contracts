@@ -89,6 +89,7 @@ async def _build_copyable_deployment():
         account=compile("contracts/Account.cairo"),
         erc20=compile("contracts/token/ERC20_Mintable.cairo"),
         erc721=compile("contracts/token/ERC721_Enumerable_Mintable_Burnable.cairo"),
+        erc1155=compile("contracts/token/ERC1155/ERC1155_Mintable.cairo"),
     )
 
     signers = dict(
@@ -129,6 +130,16 @@ async def _build_copyable_deployment():
     )
     accounts.realms = realms
 
+    resources = await starknet.deploy(
+        contract_def=defs.erc1155,
+        constructor_calldata=[
+            accounts.admin.contract_address, #recipient
+            2, #token_ids_len
+            1, 2,
+            2, #amounts_len
+            1000, 5000
+        ])
+
     consts = SimpleNamespace(
         REALM_MINT_PRICE=REALM_MINT_PRICE, INITIAL_USER_FUNDS=initial_user_funds
     )
@@ -140,6 +151,7 @@ async def _build_copyable_deployment():
             "transfer",
             [recipient, *uint(amount)],
         )
+
 
     async def _erc20_approve(account_name, contract_address, amount):
         await signers[account_name].send_transaction(
@@ -172,8 +184,18 @@ async def _build_copyable_deployment():
             arbiter=serialize_contract(accounts.arbiter, defs.account.abi),
             lords=serialize_contract(lords, defs.erc20.abi),
             realms=serialize_contract(realms, defs.erc721.abi),
+            resources=serialize_contract(resources, defs.erc1155.abi),
             user1=serialize_contract(accounts.user1, defs.account.abi),
             user2=serialize_contract(accounts.user2, defs.account.abi),
+        ),
+        addresses=SimpleNamespace(
+            admin=accounts.admin.contract_address,
+            arbiter=accounts.arbiter.contract_address,
+            lords=lords.contract_address,
+            realms=realms.contract_address,
+            resources=resources.contract_address,
+            user1=accounts.user1.contract_address,
+            user2=accounts.user2.contract_address,
         ),
     )
 

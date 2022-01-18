@@ -1,0 +1,52 @@
+#!/bin/bash
+set -eu
+
+# Flow:
+## The Controller is the only unchangeable contract.
+## First deploy Arbiter.
+## Then send the Arbiter address during Controller deployment.
+## Then deploy Controller address during module deployments.
+
+# TODO: For a network_type node open a new shell and run:
+# Need to incorporate this into the script.
+# `nile node`
+
+# Network:
+network_type=localhost
+# network_type=mainnet
+
+# localhost is a ShardLabs devnet locally.
+# mainnet is currently Goerli/StarkNet-alpha
+
+
+# Wipe old deployment record if it exists.
+rm $network_type.deployments.txt || echo 'Will create one...'
+
+function get_address () {
+    # Read deployment address from $network_type.deployments.txt
+    local addr=`grep $1 $network_type.deployments.txt | cut -d ':' -f 1`
+    echo $addr
+}
+
+# Public keys of wallets (dummy/placeholder)
+declare -i AdminPubKey=12345678987654321
+declare -i User00PubKey=456456456
+
+# Admin account contract
+nile deploy Account $AdminPubKey \
+    --alias AdminAccount --network $network_type
+AdminAddress=`get_address "AdminAccount"`
+
+# Lords ERC20 contract 
+nile deploy ERC20_Mintable 328287282291 5001796 100000 0x5b39d5fe25926945c796697ba71156335c37d3049ef6e93c8d61aa47f05c998 0x5b39d5fe25926945c796697ba71156335c37d3049ef6e93c8d61aa47f05c998 0x5b39d5fe25926945c796697ba71156335c37d3049ef6e93c8d61aa47f05c998 \
+    --alias Lords --network $network_type
+LordsAddress=`get_address "Lords"`
+
+# Resources ERC1155 contract
+nile deploy ERC1155_Mintable 0x5b39d5fe25926945c796697ba71156335c37d3049ef6e93c8d61aa47f05c998 2 1 1 2 1000 2000 \
+    --alias Resources --network $network_type
+ResourcesAddress=`get_address "Resources"`
+
+# Exchange contract
+nile deploy Exchange_ERC20_1155 $LordsAddress $ResourcesAddress  \
+    --alias Exchange --network $network_type
