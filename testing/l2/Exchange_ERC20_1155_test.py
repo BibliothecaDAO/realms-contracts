@@ -26,8 +26,8 @@ async def test_check_addr(exchange_factory):
 
     res = await exchange.get_currency_address().call()
     print(res.result)
-    assert res.result.address == (ctx.lords.contract_address)
+    assert res.result.currency_address == (ctx.lords.contract_address)
 
     res = await exchange.get_token_address().call()
     print(res.result)
-    assert res.result.address == (ctx.resources.contract_address)
+    assert res.result.token_address == (ctx.resources.contract_address)

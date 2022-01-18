@@ -44,9 +44,8 @@ func get_currency_address {
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
         range_check_ptr
-    }() -> (address: felt):
-    let (address) = currency_address.read()
-    return (address)
+    }() -> (currency_address: felt):
+    return currency_address.read()
 end
 
 @view
@@ -54,7 +53,6 @@ func get_token_address {
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
         range_check_ptr
-    }() -> (address: felt):
-    let (address) = token_address.read()
-    return (address)
+    }() -> (token_address: felt):
+    return token_address.read()
 end
