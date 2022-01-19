@@ -91,7 +91,8 @@ end
 # #### Constructor #####
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        arbiter_address : felt, _lords_address: felt, _resources_address: felt, _realms_address: felt, _treasury_address: felt, _s_realms_address: felt):
+        arbiter_address : felt, _lords_address : felt, _resources_address : felt,
+        _realms_address : felt, _treasury_address : felt, _s_realms_address : felt):
     arbiter.write(arbiter_address)
 
     # TODO: add 'set_write_access' here for all the module
@@ -140,7 +141,8 @@ end
 @external
 func set_initial_module_addresses{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        module_01_addr : felt, module_02_addr : felt, module_03_addr : felt, module_04_addr : felt, module_05_addr : felt, module_06_addr : felt): 
+        module_01_addr : felt, module_02_addr : felt, module_03_addr : felt, module_04_addr : felt,
+        module_05_addr : felt, module_06_addr : felt, module_07_addr : felt):
     only_arbiter()
 
     address_of_module_id.write(1, module_01_addr)
@@ -153,13 +155,16 @@ func set_initial_module_addresses{
     module_id_of_address.write(module_03_addr, 3)
 
     address_of_module_id.write(4, module_04_addr)
-    module_id_of_address.write(module_04_addr, 4)    
+    module_id_of_address.write(module_04_addr, 4)
 
     address_of_module_id.write(5, module_05_addr)
-    module_id_of_address.write(module_05_addr, 5) 
+    module_id_of_address.write(module_05_addr, 5)
 
     address_of_module_id.write(6, module_06_addr)
-    module_id_of_address.write(module_06_addr, 6)         
+    module_id_of_address.write(module_06_addr, 6)
+
+    address_of_module_id.write(7, module_07_addr)
+    module_id_of_address.write(module_07_addr, 7)
     return ()
 end
 
@@ -181,31 +186,36 @@ func get_module_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
 end
 
 @view
-func get_lords_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (address : felt):
+func get_lords_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+        address : felt):
     let (address) = lords_address.read()
     return (address)
 end
 
 @view
-func get_realms_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (address : felt):
+func get_realms_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+        address : felt):
     let (address) = realms_address.read()
     return (address)
 end
 
 @view
-func get_resources_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (address : felt):
+func get_resources_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+        address : felt):
     let (address) = resources_address.read()
     return (address)
 end
 
 @view
-func get_treasury_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (address : felt):
+func get_treasury_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+        address : felt):
     let (address) = treasury_address.read()
     return (address)
 end
 
 @view
-func get_s_realms_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (address : felt):
+func get_s_realms_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+        address : felt):
     let (address) = s_realms_address.read()
     return (address)
 end

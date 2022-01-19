@@ -269,3 +269,12 @@ resource_5_values = 000000001010
 
 2815437129687050
 ```
+
+## Calculator Logic Module
+
+'Storage is expensive, compute is cheap' - I wise man one said this... (@eth_worm)
+
+Calldata will always be expensive on decentralised blockchain. StarkNet allows cheap computation, so where possible we should always compute the value rather than save in the state.
+
+Settling of the Realms contains many computed values that get parsed around the dapp. The calculations for all these should be maintained within a central calculator logic contract. This contract contains no state at all, and can be upgraded easily.
+

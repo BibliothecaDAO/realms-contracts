@@ -12,12 +12,11 @@ from contracts.settling_game.utils.interfaces import IModuleController
 from contracts.token.IERC20 import IERC20
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 
-##### Module 1B ###
+# #### Module 1B ###
 #                 #
 # Settling State  #
 #                 #
 ###################
-
 
 @storage_var
 func controller_address() -> (address : felt):
@@ -38,23 +37,21 @@ end
 # Setters
 @external
 func set_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256):
+        token_id : Uint256, timestamp : felt):
     only_approved()
 
-    time_staked.write(token_id, 10000)
+    time_staked.write(token_id, timestamp)
     return ()
 end
 
 @external
 func set_approval{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-
     let (controller) = controller_address.read()
 
     # realms address
-    let (realms_address) = IModuleController.get_realms_address(
-        contract_address=controller)
+    let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
 
-    # settle address    
+    # settle address
     let (settle_logic_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=1)
 
