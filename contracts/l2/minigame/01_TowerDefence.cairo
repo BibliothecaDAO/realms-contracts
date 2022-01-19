@@ -9,6 +9,7 @@ from starkware.cairo.common.math import (unsigned_div_rem)
 
 from contracts.l2.minigame.utils.interfaces import IModuleController, I02_TowerStorage
 from contracts.l2.tokens.IERC1155 import IERC1155
+from contracts.l2.game_utils.game_structs import ShieldGameRole
 
 ############## Storage ################
 @storage_var
@@ -174,12 +175,12 @@ func attack_tower{
         end
     end
 
-    let (local total_alloc) = I02_TowerStorage.get_total_reward_alloc(tower_defence_storage, game_idx, 1)
-    let (local user_alloc) = I02_TowerStorage.get_user_reward_alloc(tower_defence_storage, game_idx, caller, 1)
+    let (local total_alloc) = I02_TowerStorage.get_total_reward_alloc(tower_defence_storage, game_idx, ShieldGameRole.Attacker)
+    let (local user_alloc) = I02_TowerStorage.get_user_reward_alloc(tower_defence_storage, game_idx, caller, ShieldGameRole.Attacker)
     let (local token_pool) = I02_TowerStorage.get_token_reward_pool(tower_defence_storage, game_idx, tokens_id)
 
-    I02_TowerStorage.set_total_reward_alloc(tower_defence_storage, game_idx, 1, total_alloc + amount)
-    I02_TowerStorage.set_user_reward_alloc(tower_defence_storage, game_idx, caller, 1, user_alloc + amount)
+    I02_TowerStorage.set_total_reward_alloc(tower_defence_storage, game_idx, ShieldGameRole.Attacker, total_alloc + amount)
+    I02_TowerStorage.set_user_reward_alloc(tower_defence_storage, game_idx, caller, ShieldGameRole.Attacker, user_alloc + amount)
     I02_TowerStorage.set_token_reward_pool(tower_defence_storage, game_idx, tokens_id, token_pool + amount)
 
 
@@ -216,13 +217,13 @@ func increase_shield{
     tempvar newValue = value + amount
     I02_TowerStorage.set_shield_value(tower_defence_storage, game_idx, tokens_id, newValue)
 
-    let (local total_alloc) = I02_TowerStorage.get_total_reward_alloc(tower_defence_storage, game_idx, 0)
-    let (local user_alloc) = I02_TowerStorage.get_user_reward_alloc(tower_defence_storage, game_idx, caller, 0)
+    let (local total_alloc) = I02_TowerStorage.get_total_reward_alloc(tower_defence_storage, game_idx, ShieldGameRole.Shielder)
+    let (local user_alloc) = I02_TowerStorage.get_user_reward_alloc(tower_defence_storage, game_idx, caller, ShieldGameRole.Shielder)
     let (local token_pool) = I02_TowerStorage.get_token_reward_pool(tower_defence_storage, game_idx, tokens_id)
 
 
-    I02_TowerStorage.set_total_reward_alloc(tower_defence_storage, game_idx, 0, total_alloc + amount)
-    I02_TowerStorage.set_user_reward_alloc(tower_defence_storage, game_idx, caller, 0, user_alloc + amount)
+    I02_TowerStorage.set_total_reward_alloc(tower_defence_storage, game_idx, ShieldGameRole.Shielder, total_alloc + amount)
+    I02_TowerStorage.set_user_reward_alloc(tower_defence_storage, game_idx, caller, ShieldGameRole.Shielder, user_alloc + amount)
     I02_TowerStorage.set_token_reward_pool(tower_defence_storage, game_idx, tokens_id, token_pool + amount)
 
 
@@ -266,7 +267,7 @@ end
 func claim_token_reward{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
         game_idx : felt,
         user : felt, 
-        side : felt, 
+        side : felt, # from ShieldGameRole
         tokens_idx : felt
     ):
     alloc_locals
