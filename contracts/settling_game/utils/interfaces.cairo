@@ -47,6 +47,8 @@ end
 namespace I01B_Settling:
     func set_time_staked(token_id : Uint256, timestamp : felt):
     end
+    func get_time_staked(token_id : Uint256) -> (time : felt):
+    end
 end
 
 @contract_interface

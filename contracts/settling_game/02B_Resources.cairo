@@ -19,10 +19,9 @@ from contracts.token.ERC1155.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 
 from contracts.settling_game.utils.game_structs import RealmData, ResourceUpgradeIds
-from contracts.settling_game.utils.general import unpack_data 
+from contracts.settling_game.utils.general import unpack_data
 
-
-##### Module 2B ##########
+# #### Module 2B ##########
 #                        #
 # Claim & Resource State #
 #                        #
@@ -44,18 +43,14 @@ end
 func resource_upgrade_ids(resource_id : felt) -> (ids : felt):
 end
 
-
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_of_controller : felt):
-
     controller_address.write(address_of_controller)
-    return () 
+    return ()
 end
 
-
-
-###### SETTERS ######
+# ##### SETTERS ######
 
 @external
 func set_resource_upgrade_ids{
@@ -76,7 +71,7 @@ func set_resource_level{
     return ()
 end
 
-###### GETTERS ######
+# ##### GETTERS ######
 
 @external
 func get_resource_level{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -88,7 +83,7 @@ func get_resource_level{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     let (level) = resource_levels.read(token_id, resource)
 
     if level == 0:
-        assert l = 100
+        assert l = 1000
     else:
         assert l = level
     end
@@ -102,7 +97,7 @@ func get_resource_upgrade_cost{
         bitwise_ptr : BitwiseBuiltin*}(token_id : Uint256, resource_id : felt) -> (level : felt):
     let (data) = resource_upgrade_cost.read(token_id, resource_id)
 
-    return (level=data) 
+    return (level=data)
 end
 
 @external
@@ -111,9 +106,8 @@ func get_resource_upgrade_ids{
         bitwise_ptr : BitwiseBuiltin*}(resource_id : felt) -> (level : felt):
     let (data) = resource_upgrade_ids.read(resource_id)
 
-    return (level=data) 
+    return (level=data)
 end
-
 
 # Checks write-permission of the calling contract.
 func only_approved{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
