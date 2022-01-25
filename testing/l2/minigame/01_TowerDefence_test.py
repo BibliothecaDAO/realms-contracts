@@ -9,6 +9,9 @@ NUM_SIGNING_ACCOUNTS = 4
 LIGHT_TOKEN_ID = 1
 DARK_TOKEN_ID = 2
 
+SHIELD_ROLE = 0
+ATTACK_ROLE = 1
+
 @pytest.fixture(scope='module')
 def event_loop():
     return asyncio.new_event_loop()
@@ -180,6 +183,8 @@ async def test_shield_and_attack_tower(game_factory):
 
     # Player 1 Increases shield by 100 LIGHT
 
+    game_idx = 1
+
     await player_one_key.send_transaction(
         account=player_one_account,
         to=tower_defence.contract_address,
@@ -193,13 +198,13 @@ async def test_shield_and_attack_tower(game_factory):
     execution_info = await elements_token.balance_of(player_one_account.contract_address, LIGHT_TOKEN_ID).call()
     assert execution_info.result.res == 900
 
-    execution_info = await tower_defence_storage.get_shield_value(1,LIGHT_TOKEN_ID).call()
+    execution_info = await tower_defence_storage.get_shield_value(game_idx,LIGHT_TOKEN_ID).call()
     assert execution_info.result.value == 100
 
-    execution_info = await tower_defence_storage.get_user_reward_alloc(1,player_one_account.contract_address,0).call()
+    execution_info = await tower_defence_storage.get_user_reward_alloc(game_idx,player_one_account.contract_address,0).call()
     assert execution_info.result.value == 100
 
-    execution_info = await tower_defence_storage.get_total_reward_alloc(1,0).call()
+    execution_info = await tower_defence_storage.get_total_reward_alloc(game_idx,SHIELD_ROLE).call()
     assert execution_info.result.value == 100
 
     execution_info = await elements_token.balance_of(tower_defence.contract_address,LIGHT_TOKEN_ID).call()
@@ -212,7 +217,7 @@ async def test_shield_and_attack_tower(game_factory):
         to=tower_defence.contract_address,
         selector_name="attack_tower",
         calldata=[
-            1,
+            game_idx,
             DARK_TOKEN_ID, 
             50
         ]
@@ -220,13 +225,13 @@ async def test_shield_and_attack_tower(game_factory):
     execution_info = await elements_token.balance_of(player_two_account.contract_address,DARK_TOKEN_ID).call()
     assert execution_info.result.res == 950
 
-    execution_info = await tower_defence_storage.get_main_health(1).call()
+    execution_info = await tower_defence_storage.get_main_health(game_idx).call()
     assert execution_info.result.health == 10000
 
-    execution_info = await tower_defence_storage.get_shield_value(1,LIGHT_TOKEN_ID).call()
+    execution_info = await tower_defence_storage.get_shield_value(game_idx,LIGHT_TOKEN_ID).call()
     assert execution_info.result.value == 50
 
-    execution_info = await tower_defence_storage.get_user_reward_alloc(1,player_two_account.contract_address,1).call()
+    execution_info = await tower_defence_storage.get_user_reward_alloc(game_idx,player_two_account.contract_address,ATTACK_ROLE).call()
     assert execution_info.result.value == 50
 
     execution_info = await elements_token.balance_of(tower_defence.contract_address,DARK_TOKEN_ID).call()
@@ -239,7 +244,7 @@ async def test_shield_and_attack_tower(game_factory):
         to=tower_defence.contract_address,
         selector_name="increase_shield",
         calldata=[
-            1,
+            game_idx,
             LIGHT_TOKEN_ID,
             400
         ]
@@ -247,19 +252,23 @@ async def test_shield_and_attack_tower(game_factory):
     execution_info = await elements_token.balance_of(player_three_account.contract_address, LIGHT_TOKEN_ID).call()
     assert execution_info.result.res == 600
 
-    execution_info = await tower_defence_storage.get_shield_value(1,LIGHT_TOKEN_ID).call()
+    execution_info = await tower_defence_storage.get_shield_value(game_idx,LIGHT_TOKEN_ID).call()
     assert execution_info.result.value == 450
 
-    execution_info = await tower_defence_storage.get_user_reward_alloc(1,player_three_account.contract_address,0).call()
+    execution_info = await tower_defence_storage.get_user_reward_alloc(game_idx,player_three_account.contract_address,SHIELD_ROLE).call()
     assert execution_info.result.value == 400
 
-    execution_info = await tower_defence_storage.get_total_reward_alloc(1,0).call()
+    execution_info = await tower_defence_storage.get_total_reward_alloc(game_idx,SHIELD_ROLE).call()
     assert execution_info.result.value == 500
 
     execution_info = await elements_token.balance_of(tower_defence.contract_address,LIGHT_TOKEN_ID).call()
     assert execution_info.result.res == 500
 
     # Player 1 claims if tower is alive, should only get 10 DARK
+    # Calculation
+    # Player 1 plays shield role, which has 500 in total pool
+    # Player 1 contributed 100 Light tokens, so alloc_ratio is 500/100 = 5
+    # The shield roles have won, so the claim comes out of the dark pool
 
     execution_info = await elements_token.balance_of(player_one_account.contract_address,DARK_TOKEN_ID).call()
     assert execution_info.result.res == 1000
@@ -268,7 +277,7 @@ async def test_shield_and_attack_tower(game_factory):
         account=player_one_account,
         to=tower_defence.contract_address,
         selector_name="claim_rewards",
-        calldata=[1]
+        calldata=[game_idx]
     )
 
     execution_info = await elements_token.balance_of(player_one_account.contract_address,DARK_TOKEN_ID).call()
