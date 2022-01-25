@@ -1,6 +1,7 @@
 import pytest
 import asyncio
 
+from starkware.starknet.business_logic.state import BlockInfo
 from fixtures.account import account_factory
 from utils.string import str_to_felt
 
@@ -77,10 +78,15 @@ async def game_factory(account_factory):
 @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
 async def test_game_creation(game_factory):
 
-    _, accounts, signers, _, _, _, tower_defence, tower_defence_storage = game_factory
+    starknet, accounts, signers, _, _, _, tower_defence, tower_defence_storage = game_factory
     
     admin_key = signers[0]
     admin_account = accounts[0]
+
+    # Set mock value for get_block_number and get_block_timestamp
+    expected_block_number = 69420
+
+    starknet.state.state.block_info = BlockInfo(expected_block_number, 2343243294)
 
     await admin_key.send_transaction(
         account=admin_account,
@@ -89,8 +95,12 @@ async def test_game_creation(game_factory):
         calldata=[]
     )
 
+    expected_game_index = 1
     execution_info = await tower_defence_storage.get_latest_game_index().call()
-    assert execution_info.result == (1,)
+    assert execution_info.result == (expected_game_index,)
+
+    exec2 = await tower_defence_storage.get_game_start(expected_game_index).call()
+    assert exec2.result == (expected_block_number,)
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)

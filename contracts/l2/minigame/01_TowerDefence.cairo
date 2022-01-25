@@ -2,7 +2,7 @@
 %builtins pedersen range_check
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
-from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
+from starkware.starknet.common.syscalls import get_caller_address, get_contract_address, get_block_number
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.math_cmp import (is_le_felt)
 from starkware.cairo.common.math import (unsigned_div_rem)
@@ -63,6 +63,10 @@ func create_game{
 
     # Set initial wall health to 10000
     I02_TowerStorage.set_main_health(tower_defence_storage, current_index, 10000)
+
+    # Save the game start marker
+    let (block_number) = get_block_number()
+    I02_TowerStorage.set_game_start(tower_defence_storage, current_index, block_number)
 
     # Update index
     I02_TowerStorage.set_latest_game_index(tower_defence_storage, current_index)
