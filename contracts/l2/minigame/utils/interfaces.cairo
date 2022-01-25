@@ -32,6 +32,12 @@ namespace I02_TowerStorage:
     end
     func set_latest_game_index( game_idx : felt ):
     end
+
+    # Game start marker, used in game logic
+    func get_game_start( game_idx : felt ) -> ( started_at : felt ):
+    end
+    func set_game_start( game_idx : felt, started_at : felt ):
+    end
     
     # Wall health
     func get_main_health( game_idx : felt ) -> ( health : felt ):

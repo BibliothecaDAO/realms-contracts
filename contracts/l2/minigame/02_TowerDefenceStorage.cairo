@@ -18,6 +18,11 @@ end
 func latest_game_index( ) -> ( game_idx : felt ):
 end
 
+# The marker to indicate when a game started
+@storage_var
+func game_start( game_idx : felt ) -> ( started_at : felt ):
+end
+
 # Stores the wall health for a given game index
 # Dicreases when attacks get through the shield. 
 @storage_var
@@ -87,6 +92,21 @@ func set_latest_game_index{
     only_approved()
 
     latest_game_index.write(  game_idx )
+    return ()
+end
+
+@external
+func get_game_start{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt ) -> ( started_at : felt ):
+    let (param) = game_start.read( game_idx )
+    return (param)
+end
+
+@external
+func set_game_start{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt, started_at : felt ):
+
+    only_approved()
+
+    game_start.write( game_idx, started_at)
     return ()
 end
 
