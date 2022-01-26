@@ -110,32 +110,44 @@ async def test_game_creation(game_factory):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
-async def test_multiplier(game_factory):
-    starknet, accounts, signers, _, _, _, tower_defence, _ = game_factory
+async def test_time_multiplier(game_factory):
+    _, _, _, _, _, _, tower_defence, _ = game_factory
 
-    admin_signer = signers[0]
-    admin_account = accounts[0]
+    blocks_per_hour = BLOCKS_PER_MINUTE * 60
 
-    # Set mock value for get_block_number and get_block_timestamp
-    mock_block_num = 10
-    starknet.state.state.block_info = BlockInfo(mock_block_num, 123456789)
+    expected_basis_points = [
+        138, # hour 1
+        277, # hour 2
+        # ...
+        5000 # hour 36
+    ]
 
-    await admin_signer.send_transaction(
-        account=admin_account,
-        to=tower_defence.contract_address,
-        selector_name='create_game',
-        calldata=[]
-    )
+    execution_info = await tower_defence.calculate_time_multiplier(
+        0,
+        blocks_per_hour * 0 # First hour
+    ).call()
+    assert execution_info.result.basis_points == expected_basis_points[0]
 
-    game_start_blocknum = 0
-    amount = 10
+    execution_info = await tower_defence.calculate_time_multiplier(
+        0,
+        (blocks_per_hour * 1) + 1 # second hour
+    ).call()
+    assert execution_info.result.basis_points == expected_basis_points[1]
 
-    execution_info = await tower_defence.calculate_time_multiplier(game_start_blocknum, amount).call()
+    execution_info = await tower_defence.calculate_time_multiplier(
+        0,
+        (blocks_per_hour * (HOURS_PER_GAME - 1)) + 1 # last hour
+    ).call()
+    assert execution_info.result.basis_points == expected_basis_points[2]
 
-    print(execution_info.result.amount_multiplied)
-    
-    # TODO: Fix implementation, expectation should be 10 + ~1.3%, not 10
-    assert execution_info.result.amount_multiplied == 10
+    # TODO: Implement this case
+    # execution_info = await tower_defence.calculate_time_multiplier(
+    #     0,
+    #     (blocks_per_hour * (HOURS_PER_GAME + 1)) + 1 # over the last possible game limit
+    # ).call()
+    # assert execution_info.result.basis_points == 5000
+
+
 
 
 @pytest.mark.asyncio

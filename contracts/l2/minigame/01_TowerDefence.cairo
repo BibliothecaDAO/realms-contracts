@@ -327,30 +327,34 @@ func calculate_time_multiplier{
         range_check_ptr
     }(
         game_started_at : felt,
-        amount : felt
-    ) -> ( amount_multiplied ):
+        _current_block_num : felt
+    ) -> ( basis_points ):
     alloc_locals
-    let (current_block_number) = get_block_number()
 
     # Calculate hours passed.     
-    let diff = current_block_number - game_started_at
+    let diff = _current_block_num - game_started_at
     # Ex. 15 sec blocktimes = 4 bpm
     let (local l2BlocksPerMinute) = blocks_per_minute.read()
     let (local minutes,_) = unsigned_div_rem(diff,l2BlocksPerMinute)
     let (local hours,_) = unsigned_div_rem(minutes,60)
+
+    # Offset hours by -1 so that the effect starts at the first hour = 0
+    tempvar offset_hours = hours + 1
     
-    # TODO: Check for overflow
-    # restricting denominator (hours_per_game) should work also
     let (local safe_mul) = pow(base=10,exp=4)
-    
-    let _numerator = hours * safe_mul
+
+    # TODO: Check this for overflow
+    # restricting denominator (hours_per_game) should work also   
+    let _numerator = offset_hours * safe_mul
+
     let (local hpg) = hours_per_game.read()
     let (added_effect,_) = unsigned_div_rem(_numerator, hpg)
 
-    let amount_x_effect = amount * added_effect
-    let (amount_effect_base,_) = unsigned_div_rem(amount_x_effect, 100)
+    # Halve the effect to cap max effect at 50%
+    let (effect_halved,_) = unsigned_div_rem(added_effect, 2)
 
-    return (amount_multiplied = amount + amount_effect_base)
+    # TODO: Enforce maximum cap 
+    return (basis_points=effect_halved)
 
 end
 
