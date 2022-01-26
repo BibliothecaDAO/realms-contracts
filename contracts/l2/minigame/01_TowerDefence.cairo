@@ -358,6 +358,28 @@ func calculate_time_multiplier{
 
 end
 
+# Calculate action amount plus
+# time boost.
+func calc_amount_plus_boost{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }(
+        game_started_at : felt,
+        amount : felt
+    ) -> ( boosted_amount : felt ):
+    alloc_locals
+    let (block_num) = get_block_number()
+
+    let (local basis_points) = calculate_time_multiplier( game_started_at, block_num )
+
+    let amount_x_boost = amount * basis_points
+    # Precision is only 2 decimals, so divide by 100
+    let (boost,_) = unsigned_div_rem(amount_x_boost, 100)
+
+    return (boosted_amount = amount + boost)
+end
+
 # Exponential math
 func pow(base : felt, exp : felt) -> (res):
     if exp == 0:
