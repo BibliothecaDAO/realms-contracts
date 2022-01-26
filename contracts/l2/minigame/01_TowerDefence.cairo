@@ -5,7 +5,7 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address, get_contract_address, get_block_number
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.math_cmp import (is_le_felt)
-from starkware.cairo.common.math import (unsigned_div_rem)
+from starkware.cairo.common.math import (unsigned_div_rem, assert_lt)
 
 from contracts.l2.minigame.utils.interfaces import IModuleController, I02_TowerStorage
 from contracts.l2.tokens.IERC1155 import IERC1155
@@ -18,6 +18,14 @@ end
 
 @storage_var
 func elements_token_address() -> (address : felt):
+end
+
+@storage_var
+func blocks_per_minute() -> ( bpm : felt):
+end
+
+@storage_var
+func hours_per_game() -> ( hpg : felt):
 end
 
 # ############ Structs ################
@@ -35,10 +43,14 @@ func constructor{
         range_check_ptr
     }(
         address_of_controller : felt,
-        address_of_elements_token : felt
+        address_of_elements_token : felt,
+        _blocks_per_min : felt,
+        _hours_per_game : felt
     ):
     controller_address.write(address_of_controller) 
     elements_token_address.write(address_of_elements_token)
+    blocks_per_minute.write(_blocks_per_min)
+    hours_per_game.write(_hours_per_game)
     
     return ()
 end
@@ -304,4 +316,49 @@ func claim_token_reward{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_
         tokens_idx - 1
     )
     return ()
+end
+
+# Calculate the multiplier based on block number
+# to 2 decimals of precision
+@external
+func calculate_time_multiplier{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }(
+        game_started_at : felt,
+        amount : felt
+    ) -> ( amount_multiplied ):
+    alloc_locals
+    let (current_block_number) = get_block_number()
+
+    # Calculate hours passed.     
+    let diff = current_block_number - game_started_at
+    # Ex. 15 sec blocktimes = 4 bpm
+    let (local l2BlocksPerMinute) = blocks_per_minute.read()
+    let (local minutes,_) = unsigned_div_rem(diff,l2BlocksPerMinute)
+    let (local hours,_) = unsigned_div_rem(minutes,60)
+    
+    # TODO: Check for overflow
+    # restricting denominator (hours_per_game) should work also
+    let (local safe_mul) = pow(base=10,exp=4)
+    
+    let _numerator = hours * safe_mul
+    let (local hpg) = hours_per_game.read()
+    let (added_effect,_) = unsigned_div_rem(_numerator, hpg)
+
+    let amount_x_effect = amount * added_effect
+    let (amount_effect_base,_) = unsigned_div_rem(amount_x_effect, 100)
+
+    return (amount_multiplied = amount + amount_effect_base)
+
+end
+
+# Exponential math
+func pow(base : felt, exp : felt) -> (res):
+    if exp == 0:
+        return (res=1)
+    end
+    let (res) = pow(base=base, exp=exp - 1)
+    return (res=res * base)
 end

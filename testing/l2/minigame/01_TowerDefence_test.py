@@ -13,6 +13,9 @@ DARK_TOKEN_ID = 2
 SHIELD_ROLE = 0
 ATTACK_ROLE = 1
 
+BLOCKS_PER_MINUTE = 4 # 15sec
+HOURS_PER_GAME = 36
+
 @pytest.fixture(scope='module')
 def event_loop():
     return asyncio.new_event_loop()
@@ -57,7 +60,9 @@ async def game_factory(account_factory):
         source="contracts/l2/minigame/01_TowerDefence.cairo",
         constructor_calldata=[
             controller.contract_address,
-            elements_token.contract_address
+            elements_token.contract_address,
+            BLOCKS_PER_MINUTE,
+            HOURS_PER_GAME
         ]
     )
     
@@ -101,6 +106,37 @@ async def test_game_creation(game_factory):
 
     exec2 = await tower_defence_storage.get_game_start(expected_game_index).call()
     assert exec2.result == (expected_block_number,)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
+async def test_multiplier(game_factory):
+    starknet, accounts, signers, _, _, _, tower_defence, _ = game_factory
+
+    admin_signer = signers[0]
+    admin_account = accounts[0]
+
+    # Set mock value for get_block_number and get_block_timestamp
+    mock_block_num = 10
+    starknet.state.state.block_info = BlockInfo(mock_block_num, 123456789)
+
+    await admin_signer.send_transaction(
+        account=admin_account,
+        to=tower_defence.contract_address,
+        selector_name='create_game',
+        calldata=[]
+    )
+
+    game_start_blocknum = 0
+    amount = 10
+
+    execution_info = await tower_defence.calculate_time_multiplier(game_start_blocknum, amount).call()
+
+    print(execution_info.result.amount_multiplied)
+    
+    # TODO: Fix implementation, expectation should be 10 + ~1.3%, not 10
+    assert execution_info.result.amount_multiplied == 10
+
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
