@@ -4,7 +4,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address, get_contract_address, get_block_number
 from starkware.cairo.common.uint256 import Uint256
-from starkware.cairo.common.math_cmp import (is_le_felt)
+from starkware.cairo.common.math_cmp import (is_le_felt, is_le)
 from starkware.cairo.common.math import (unsigned_div_rem, assert_lt)
 
 from contracts.l2.minigame.utils.interfaces import IModuleController, I02_TowerStorage
@@ -30,6 +30,11 @@ end
 
 # ############ Structs ################
 # see game_utils/game_structs.cairo
+
+struct GameState:
+    member Active : felt
+    member Expired : felt
+end
 
 # ############ Constants ##############
 const ACTION_TYPE_MOVE = 0
@@ -316,6 +321,46 @@ func claim_token_reward{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_
         tokens_idx - 1
     )
     return ()
+end
+
+# Returns the game state for a game index
+# Games are active if the block number falls within
+# the game start and hours_per_game boundary
+# else the game is considered expired
+@external
+func get_game_state{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }( game_idx : felt ) -> (
+        game_state_enum :  felt # from GameState
+    ):
+    alloc_locals
+    let (local controller) = controller_address.read()
+    let (local element_token) = elements_token_address.read()
+    let (local tower_defence_storage) = IModuleController.get_module_address(controller, 2)
+
+    let (block_num) = get_block_number()
+
+    let (bpm) = blocks_per_minute.read()
+    let (hpg) = hours_per_game.read()
+
+    let (local game_started_at) = I02_TowerStorage.get_game_start(tower_defence_storage, game_idx)
+
+    tempvar diff = block_num - game_started_at
+
+    let (local minutes,_) = unsigned_div_rem(diff,bpm)
+    let (local hours_passed,_) = unsigned_div_rem(minutes,60)
+
+    # Subtract 1 from hours per game because we don't want
+    # games equal or greater (hours_per_game) to be active
+    let (is_within_game_range) = is_le(hours_passed, hpg - 1)
+
+    if is_within_game_range == 1:
+        return (GameState.Active)
+    else:
+        return (GameState.Expired)
+    end
 end
 
 # Calculate the multiplier based on block number

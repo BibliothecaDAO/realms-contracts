@@ -1,5 +1,6 @@
 import pytest
 import asyncio
+import enum
 
 from starkware.starknet.business_logic.state import BlockInfo
 from fixtures.account import account_factory
@@ -12,6 +13,10 @@ DARK_TOKEN_ID = 2
 
 SHIELD_ROLE = 0
 ATTACK_ROLE = 1
+
+class GameState(enum.Enum):
+    Active = 0
+    Expired = 1
 
 BLOCKS_PER_MINUTE = 4 # 15sec
 HOURS_PER_GAME = 36
@@ -147,8 +152,37 @@ async def test_time_multiplier(game_factory):
     # ).call()
     # assert execution_info.result.basis_points == 5000
 
+@pytest.mark.asyncio
+@pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
+async def test_game_state_expiry(game_factory):
 
+    starknet, accounts, signers, _, _, _, tower_defence, _ = game_factory
+    
+    admin_key = signers[0]
+    admin_account = accounts[0]
 
+    # Set mock value for get_block_number
+    mock_block_num = 1
+
+    starknet.state.state.block_info = BlockInfo(mock_block_num, 123456789)
+
+    await admin_key.send_transaction(
+        account=admin_account,
+        to=tower_defence.contract_address,
+        selector_name='create_game',
+        calldata=[]
+    )
+
+    game_idx = 1
+
+    exec_res = await tower_defence.get_game_state(game_idx).call()
+    assert exec_res.result.game_state_enum == GameState.Active.value
+
+    after_max_hours = ((BLOCKS_PER_MINUTE * 60) * HOURS_PER_GAME)
+    starknet.state.state.block_info = BlockInfo(after_max_hours, 123456789)
+
+    exec_res = await tower_defence.get_game_state(game_idx).call()
+    assert exec_res.result.game_state_enum == GameState.Expired.value
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
