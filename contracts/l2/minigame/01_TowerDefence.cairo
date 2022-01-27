@@ -31,7 +31,8 @@ end
 # ############ Structs ################
 # see game_utils/game_structs.cairo
 
-struct GameState:
+# Determined at runtime
+struct GameStatus:
     member Active : felt
     member Expired : felt
 end
@@ -273,6 +274,11 @@ func claim_rewards{
     let (local controller) = controller_address.read()
     let (local tower_defence_storage) = IModuleController.get_module_address(controller, 2)
     let (local health) = I02_TowerStorage.get_main_health(tower_defence_storage, game_idx) 
+
+    # Ensure claiming can occur only when the game clock has expired
+    let (local game_state) = get_game_state( game_idx )
+    assert game_state = GameStatus.Expired
+
     let (local side_won) = is_le_felt(health, 0) # 0 = Shielders, 1 = Attackers 
 
     claim_token_reward(
@@ -357,9 +363,9 @@ func get_game_state{
     let (is_within_game_range) = is_le(hours_passed, hpg - 1)
 
     if is_within_game_range == 1:
-        return (GameState.Active)
+        return (GameStatus.Active)
     else:
-        return (GameState.Expired)
+        return (GameStatus.Expired)
     end
 end
 

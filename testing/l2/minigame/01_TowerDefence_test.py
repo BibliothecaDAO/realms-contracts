@@ -3,6 +3,9 @@ import asyncio
 import enum
 
 from starkware.starknet.business_logic.state import BlockInfo
+from starkware.starkware_utils.error_handling import StarkException
+from starkware.starknet.definitions.error_codes import StarknetErrorCode
+
 from fixtures.account import account_factory
 from utils.string import str_to_felt
 
@@ -14,7 +17,7 @@ DARK_TOKEN_ID = 2
 SHIELD_ROLE = 0
 ATTACK_ROLE = 1
 
-class GameState(enum.Enum):
+class GameStatus(enum.Enum):
     Active = 0
     Expired = 1
 
@@ -176,13 +179,27 @@ async def test_game_state_expiry(game_factory):
     game_idx = 1
 
     exec_res = await tower_defence.get_game_state(game_idx).call()
-    assert exec_res.result.game_state_enum == GameState.Active.value
+    assert exec_res.result.game_state_enum == GameStatus.Active.value
 
-    after_max_hours = ((BLOCKS_PER_MINUTE * 60) * HOURS_PER_GAME)
+    after_max_hours = ((BLOCKS_PER_MINUTE * 60) * HOURS_PER_GAME) + 1
     starknet.state.state.block_info = BlockInfo(after_max_hours, 123456789)
 
     exec_res = await tower_defence.get_game_state(game_idx).call()
-    assert exec_res.result.game_state_enum == GameState.Expired.value
+    assert exec_res.result.game_state_enum == GameStatus.Expired.value
+
+    # Cannot claim rewards when game is expired
+    try:
+        await admin_key.send_transaction(
+            account=admin_account,
+            to=tower_defence.contract_address,
+            selector_name="claim_rewards",
+            calldata=[game_idx]
+        )
+        assert False
+    except StarkException as err:
+        _, error = err.args
+        assert error['code'] == StarknetErrorCode.TRANSACTION_FAILED
+
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
