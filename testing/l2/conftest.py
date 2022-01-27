@@ -161,14 +161,14 @@ async def _build_copyable_deployment():
             [contract_address, *uint(amount)],
         )
 
-    lords_approve_ammount = consts.REALM_MINT_PRICE * 3
+    lords_approve_amount = consts.REALM_MINT_PRICE * 3
 
     async def mint_realms(account_name, token):
         await signers[account_name].send_transaction(
             accounts.__dict__[account_name], realms.contract_address, 'publicMint', [*uint(token)]
         )
 
-    await _erc20_approve("user1", realms.contract_address, lords_approve_ammount)
+    await _erc20_approve("user1", realms.contract_address, lords_approve_amount)
     await give_tokens(accounts.user1.contract_address, initial_user_funds)
     await mint_realms("user1", 23)
     await mint_realms("user1", 7225)
@@ -243,6 +243,7 @@ async def ctx_factory(copyable_deployment):
         return SimpleNamespace(
             starknet=Starknet(starknet_state),
             advance_clock=advance_clock,
+            signers=signers,
             consts=consts,
             execute=execute,
             **contracts,
