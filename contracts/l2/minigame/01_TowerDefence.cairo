@@ -163,14 +163,15 @@ func attack_tower{
     }(
         game_idx : felt,
         tokens_id : felt,
-        amount : felt
+        _amount : felt
     ):
     alloc_locals
     let (local caller) = get_caller_address()
     let (local controller) = controller_address.read()
     let (local element_token) = elements_token_address.read()
     let (local tower_defence_storage) = IModuleController.get_module_address(controller, 2)
-    let (local health) = I02_TowerStorage.get_main_health(tower_defence_storage, game_idx) 
+    let (local health) = I02_TowerStorage.get_main_health(tower_defence_storage, game_idx)
+    let (local game_start) = I02_TowerStorage.get_game_start(tower_defence_storage, game_idx)
 
     let (_, local odd_id) = unsigned_div_rem(tokens_id, 2)
     if odd_id == 1:
@@ -180,14 +181,18 @@ func attack_tower{
     end    
     tempvar target_element = [ap - 1]
     let (local value) = I02_TowerStorage.get_shield_value(tower_defence_storage, game_idx, target_element) 
+
+    # Account for boost
+    let (local boosted_amount ) = calc_amount_plus_boost( game_start, _amount )
+
     # Damage shield and/or destroy
-    let ( local shield_remains) = is_le_felt(amount, value)
+    let ( local shield_remains) = is_le_felt(boosted_amount, value)
     if shield_remains == 1:
-        tempvar newValue = value - amount
+        tempvar newValue = value - boosted_amount
         I02_TowerStorage.set_shield_value(tower_defence_storage, game_idx, target_element, newValue)
     else:
         I02_TowerStorage.set_shield_value(tower_defence_storage, game_idx, target_element, 0)
-        tempvar damage_remaining = amount - value
+        tempvar damage_remaining = boosted_amount - value
         let (local health_remains) = is_le_felt(damage_remaining, health-1)  
         if health_remains == 1:
             tempvar new_health = health - damage_remaining
@@ -201,9 +206,10 @@ func attack_tower{
     let (local user_alloc) = I02_TowerStorage.get_user_reward_alloc(tower_defence_storage, game_idx, caller, ShieldGameRole.Attacker)
     let (local token_pool) = I02_TowerStorage.get_token_reward_pool(tower_defence_storage, game_idx, tokens_id)
 
-    I02_TowerStorage.set_total_reward_alloc(tower_defence_storage, game_idx, ShieldGameRole.Attacker, total_alloc + amount)
-    I02_TowerStorage.set_user_reward_alloc(tower_defence_storage, game_idx, caller, ShieldGameRole.Attacker, user_alloc + amount)
-    I02_TowerStorage.set_token_reward_pool(tower_defence_storage, game_idx, tokens_id, token_pool + amount)
+    # Do not account for boost in alloc calculations
+    I02_TowerStorage.set_total_reward_alloc(tower_defence_storage, game_idx, ShieldGameRole.Attacker, total_alloc + _amount)
+    I02_TowerStorage.set_user_reward_alloc(tower_defence_storage, game_idx, caller, ShieldGameRole.Attacker, user_alloc + _amount)
+    I02_TowerStorage.set_token_reward_pool(tower_defence_storage, game_idx, tokens_id, token_pool + _amount)
 
 
     let (local contract_address) = get_contract_address()
@@ -213,7 +219,7 @@ func attack_tower{
         caller,
         contract_address,
         tokens_id, 
-        amount)
+        _amount)
 
     return()
 end
@@ -226,7 +232,7 @@ func increase_shield{
     }(
         game_idx : felt,
         tokens_id : felt,
-        amount : felt
+        _amount : felt
     ):
     alloc_locals
     let (local caller) = get_caller_address()
@@ -234,19 +240,24 @@ func increase_shield{
     let (local element_token) = elements_token_address.read()
     let (local tower_defence_storage) = IModuleController.get_module_address(controller, 2)
     let (local value) = I02_TowerStorage.get_shield_value(tower_defence_storage, game_idx, tokens_id) 
+    let (local game_start) = I02_TowerStorage.get_game_start(tower_defence_storage, game_idx)
+
+    # Account for boost
+    let (local boosted_amount ) = calc_amount_plus_boost( game_start, _amount )
+
 
     # Increase shield
-    tempvar newValue = value + amount
+    tempvar newValue = value + boosted_amount
     I02_TowerStorage.set_shield_value(tower_defence_storage, game_idx, tokens_id, newValue)
 
     let (local total_alloc) = I02_TowerStorage.get_total_reward_alloc(tower_defence_storage, game_idx, ShieldGameRole.Shielder)
     let (local user_alloc) = I02_TowerStorage.get_user_reward_alloc(tower_defence_storage, game_idx, caller, ShieldGameRole.Shielder)
     let (local token_pool) = I02_TowerStorage.get_token_reward_pool(tower_defence_storage, game_idx, tokens_id)
 
-
-    I02_TowerStorage.set_total_reward_alloc(tower_defence_storage, game_idx, ShieldGameRole.Shielder, total_alloc + amount)
-    I02_TowerStorage.set_user_reward_alloc(tower_defence_storage, game_idx, caller, ShieldGameRole.Shielder, user_alloc + amount)
-    I02_TowerStorage.set_token_reward_pool(tower_defence_storage, game_idx, tokens_id, token_pool + amount)
+    # Do not account for boost in alloc calculations
+    I02_TowerStorage.set_total_reward_alloc(tower_defence_storage, game_idx, ShieldGameRole.Shielder, total_alloc + _amount)
+    I02_TowerStorage.set_user_reward_alloc(tower_defence_storage, game_idx, caller, ShieldGameRole.Shielder, user_alloc + _amount)
+    I02_TowerStorage.set_token_reward_pool(tower_defence_storage, game_idx, tokens_id, token_pool + _amount)
 
 
     let (local contract_address) = get_contract_address()
@@ -256,7 +267,7 @@ func increase_shield{
         caller,
         contract_address,
         tokens_id, 
-        amount)
+        _amount)
     
     return ()
 end
@@ -423,8 +434,8 @@ func calc_amount_plus_boost{
     let (block_num) = get_block_number()
 
     let (local basis_points) = calculate_time_multiplier( game_started_at, block_num )
-
-    let amount_x_boost = amount * basis_points
+    let (amount_base,_) = unsigned_div_rem(amount, 100)
+    let amount_x_boost = amount_base * basis_points
     # Precision is only 2 decimals, so divide by 100
     let (boost,_) = unsigned_div_rem(amount_x_boost, 100)
 

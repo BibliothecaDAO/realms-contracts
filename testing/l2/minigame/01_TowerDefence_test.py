@@ -17,6 +17,9 @@ DARK_TOKEN_ID = 2
 SHIELD_ROLE = 0
 ATTACK_ROLE = 1
 
+# Boost units are in basis points, so every value needs to be multiplied
+BOOST_UNIT_MULTIPLIER = 100
+
 class GameStatus(enum.Enum):
     Active = 0
     Expired = 1
@@ -59,8 +62,8 @@ async def game_factory(account_factory):
             2,
             LIGHT_TOKEN_ID, DARK_TOKEN_ID,
             2,
-            3000,3000,
-            1,1,1,1,1
+            3000 * BOOST_UNIT_MULTIPLIER, 3000 * BOOST_UNIT_MULTIPLIER, # Amounts
+            1,1,1,1,1 # TokenURI struct
         ]
     )
             
@@ -200,12 +203,15 @@ async def test_game_state_expiry(game_factory):
         _, error = err.args
         assert error['code'] == StarknetErrorCode.TRANSACTION_FAILED
 
+# Convenience to calculate boosted amount
+def calc_amount_plus_boost(base_amount, bips):
+    return (base_amount * BOOST_UNIT_MULTIPLIER) + ((base_amount * bips) // 100)
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
 async def test_shield_and_attack_tower(game_factory):
 
-    _, accounts, signers, _, _, elements_token, tower_defence, tower_defence_storage = game_factory
+    starknet, accounts, signers, _, _, elements_token, tower_defence, tower_defence_storage = game_factory
     
     admin_key = signers[0]
     admin_account = accounts[0]
@@ -218,6 +224,17 @@ async def test_shield_and_attack_tower(game_factory):
 
     player_three_key = signers[3]
     player_three_account = accounts[3]
+
+    # Account for time boost
+    # For simplicity the following assertions will assume
+    # game played in the first hour, which has a 138 basis point boost
+    boost_bips = 138
+
+    tower_start_value = 10000
+
+
+    mock_block_num = 1
+    starknet.state.state.block_info = BlockInfo(mock_block_num, 123456789)
 
     await admin_key.send_transaction(
         account=admin_account,
@@ -236,7 +253,9 @@ async def test_shield_and_attack_tower(game_factory):
             2,
             LIGHT_TOKEN_ID, DARK_TOKEN_ID,
             2,
-            1000,1000])
+            1000 * BOOST_UNIT_MULTIPLIER,
+            1000 * BOOST_UNIT_MULTIPLIER
+        ])
 
     await admin_key.send_transaction(
         account=admin_account,
@@ -248,7 +267,9 @@ async def test_shield_and_attack_tower(game_factory):
             2,
             LIGHT_TOKEN_ID, DARK_TOKEN_ID,
             2,
-            1000,1000])
+            1000 * BOOST_UNIT_MULTIPLIER,
+            1000 * BOOST_UNIT_MULTIPLIER
+        ])
 
     await admin_key.send_transaction(
         account=admin_account,
@@ -260,7 +281,9 @@ async def test_shield_and_attack_tower(game_factory):
             2,
             LIGHT_TOKEN_ID, DARK_TOKEN_ID,
             2,
-            1000,1000])
+            1000 * BOOST_UNIT_MULTIPLIER,
+            1000 * BOOST_UNIT_MULTIPLIER
+        ])
   
     await player_one_key.send_transaction(
         account=player_one_account,
@@ -292,6 +315,9 @@ async def test_shield_and_attack_tower(game_factory):
 
     # Player 1 Increases shield by 100 LIGHT
 
+    mock_block_num = 2
+    starknet.state.state.block_info = BlockInfo(mock_block_num, 123456790)
+
     game_idx = 1
 
     await player_one_key.send_transaction(
@@ -299,25 +325,25 @@ async def test_shield_and_attack_tower(game_factory):
         to=tower_defence.contract_address,
         selector_name="increase_shield",
         calldata=[
-            1,
+            game_idx,
             LIGHT_TOKEN_ID,
-            100
+            100 * BOOST_UNIT_MULTIPLIER
         ]
     )
     execution_info = await elements_token.balance_of(player_one_account.contract_address, LIGHT_TOKEN_ID).call()
-    assert execution_info.result.res == 900
+    assert execution_info.result.res == 900 * BOOST_UNIT_MULTIPLIER
 
     execution_info = await tower_defence_storage.get_shield_value(game_idx,LIGHT_TOKEN_ID).call()
-    assert execution_info.result.value == 100
+    assert execution_info.result.value == calc_amount_plus_boost(100, boost_bips)
 
     execution_info = await tower_defence_storage.get_user_reward_alloc(game_idx,player_one_account.contract_address,0).call()
-    assert execution_info.result.value == 100
+    assert execution_info.result.value == 100 * BOOST_UNIT_MULTIPLIER
 
     execution_info = await tower_defence_storage.get_total_reward_alloc(game_idx,SHIELD_ROLE).call()
-    assert execution_info.result.value == 100
+    assert execution_info.result.value == 100 * BOOST_UNIT_MULTIPLIER
 
     execution_info = await elements_token.balance_of(tower_defence.contract_address,LIGHT_TOKEN_ID).call()
-    assert execution_info.result.res == 100
+    assert execution_info.result.res == 100 * BOOST_UNIT_MULTIPLIER
 
     # Player 2 Attacks with 50 DARK
 
@@ -328,23 +354,24 @@ async def test_shield_and_attack_tower(game_factory):
         calldata=[
             game_idx,
             DARK_TOKEN_ID, 
-            50
+            50 * BOOST_UNIT_MULTIPLIER
         ]
     )
     execution_info = await elements_token.balance_of(player_two_account.contract_address,DARK_TOKEN_ID).call()
-    assert execution_info.result.res == 950
+    assert execution_info.result.res == 950 * BOOST_UNIT_MULTIPLIER
 
     execution_info = await tower_defence_storage.get_main_health(game_idx).call()
-    assert execution_info.result.health == 10000
+    assert execution_info.result.health == tower_start_value
 
     execution_info = await tower_defence_storage.get_shield_value(game_idx,LIGHT_TOKEN_ID).call()
-    assert execution_info.result.value == 50
+    shield_val = calc_amount_plus_boost(100, boost_bips) - calc_amount_plus_boost(50, boost_bips)
+    assert execution_info.result.value == shield_val
 
     execution_info = await tower_defence_storage.get_user_reward_alloc(game_idx,player_two_account.contract_address,ATTACK_ROLE).call()
-    assert execution_info.result.value == 50
+    assert execution_info.result.value == 50 * BOOST_UNIT_MULTIPLIER
 
     execution_info = await elements_token.balance_of(tower_defence.contract_address,DARK_TOKEN_ID).call()
-    assert execution_info.result.res == 50
+    assert execution_info.result.res == 50 * BOOST_UNIT_MULTIPLIER
 
     # Player 3 Increases shield by 400 LIGHT
 
@@ -355,23 +382,23 @@ async def test_shield_and_attack_tower(game_factory):
         calldata=[
             game_idx,
             LIGHT_TOKEN_ID,
-            400
+            400 * BOOST_UNIT_MULTIPLIER
         ]
     )
     execution_info = await elements_token.balance_of(player_three_account.contract_address, LIGHT_TOKEN_ID).call()
-    assert execution_info.result.res == 600
+    assert execution_info.result.res == 600 * BOOST_UNIT_MULTIPLIER
 
     execution_info = await tower_defence_storage.get_shield_value(game_idx,LIGHT_TOKEN_ID).call()
-    assert execution_info.result.value == 450
+    assert execution_info.result.value == calc_amount_plus_boost(450, boost_bips)
 
     execution_info = await tower_defence_storage.get_user_reward_alloc(game_idx,player_three_account.contract_address,SHIELD_ROLE).call()
-    assert execution_info.result.value == 400
+    assert execution_info.result.value == 400 * BOOST_UNIT_MULTIPLIER
 
     execution_info = await tower_defence_storage.get_total_reward_alloc(game_idx,SHIELD_ROLE).call()
-    assert execution_info.result.value == 500
+    assert execution_info.result.value == 500 * BOOST_UNIT_MULTIPLIER
 
     execution_info = await elements_token.balance_of(tower_defence.contract_address,LIGHT_TOKEN_ID).call()
-    assert execution_info.result.res == 500
+    assert execution_info.result.res == 500 * BOOST_UNIT_MULTIPLIER
 
     # Player 1 claims if tower is alive, should only get 10 DARK
     # Calculation
@@ -380,7 +407,12 @@ async def test_shield_and_attack_tower(game_factory):
     # The shield roles have won, so the claim comes out of the dark pool
 
     execution_info = await elements_token.balance_of(player_one_account.contract_address,DARK_TOKEN_ID).call()
-    assert execution_info.result.res == 1000
+    assert execution_info.result.res == 1000 * BOOST_UNIT_MULTIPLIER
+
+    # Must claim rewards after game has expired
+    after_max_hours = ((BLOCKS_PER_MINUTE * 60) * HOURS_PER_GAME) + 1
+    starknet.state.state.block_info = BlockInfo(after_max_hours, 123456789)
+
 
     await player_one_key.send_transaction(
         account=player_one_account,
@@ -390,4 +422,4 @@ async def test_shield_and_attack_tower(game_factory):
     )
 
     execution_info = await elements_token.balance_of(player_one_account.contract_address,DARK_TOKEN_ID).call()
-    assert execution_info.result.res == 1010
+    assert execution_info.result.res == 1010 * BOOST_UNIT_MULTIPLIER
