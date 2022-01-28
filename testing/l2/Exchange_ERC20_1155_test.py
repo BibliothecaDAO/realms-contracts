@@ -82,3 +82,6 @@ async def test_add_liquidity(exchange_factory):
     assert res.result.balance == uint(max_currency)
     res = await resources.balanceOf(exchange.contract_address, 1).call()
     assert res.result.balance == token_spent
+    # Check LP tokens
+    res = await exchange.balanceOf(admin_account.contract_address, 1).call()
+    assert res.result.balance == max_currency
