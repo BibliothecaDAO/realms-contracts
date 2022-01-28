@@ -9,7 +9,6 @@ from starkware.cairo.common.alloc import alloc
 #
 # Storage
 #
-
 @storage_var
 func balances(owner : felt, token_id : felt) -> (res : felt):
 end
@@ -62,50 +61,63 @@ end
 func _uri() -> (res : TokenUri):
 end
 
+@storage_var
+func _owner() -> (owner : felt):
+end
+
+
 #
 # Constructor
 #
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        recipient : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt,
-        amounts : felt*, uri_ : TokenUri):
-    # get_caller_address() returns '0' in the constructor;
-    # therefore, recipient parameter is included
-    _mint_batch(recipient, tokens_id_len, tokens_id, amounts_len, amounts)
-
-    # Set uri
-    _set_uri(uri_)
+        recipient : felt, uri_ : TokenUri):
+    _uri.write(uri_)
+    _owner.write(recipient)
 
     return ()
 end
 
-func _set_uri{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(uri_ : TokenUri):
+@external
+func set_uri{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(uri_ : TokenUri):
+    _assert_is_owner()
     _uri.write(uri_)
     return ()
 end
 
+@external
+func set_owner{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(owner : felt):
+    _assert_is_owner()
+    _owner.write(owner)
+    return ()
+end
+
 #
-# Initializer
+# Mint
 #
 
 @external
-func initialize_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-        tokens_id_len : felt, tokens_id : felt*, amounts_len : felt, amounts : felt*,
-        uri_ : TokenUri):
-    let (_initialized) = initialized.read()
-    assert _initialized = 0
-    initialized.write(1)
-    let (sender) = get_caller_address()
-    _mint_batch(sender, tokens_id_len, tokens_id, amounts_len, amounts)
-    # Set uri
-    _set_uri(uri_)
+func mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+        to : felt, token_id : felt, amount : felt) -> ():
+    assert_not_zero(to)
+    _assert_is_owner()
+    _mint(to, token_id, amount)
+    return ()
+end
+
+@external
+func mint_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+        to : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt,
+        amounts : felt*) -> ():
+    assert_not_zero(to)
+    _assert_is_owner()
+    _mint_batch(to, tokens_id_len, tokens_id, amounts_len, amounts)
     return ()
 end
 
 func _mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
         to : felt, token_id : felt, amount : felt) -> ():
-    assert_not_zero(to)
     let (res) = balances.read(owner=to, token_id=token_id)
     balances.write(to, token_id, res + amount)
     return ()
@@ -114,7 +126,6 @@ end
 func _mint_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
         to : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt,
         amounts : felt*) -> ():
-    assert_not_zero(to)
     assert tokens_id_len = amounts_len
 
     if tokens_id_len == 0:
@@ -135,6 +146,12 @@ end
 
 # Returns the same URI for all tokens type ID
 # Client calling the function must replace the {id} substring with the actual token type ID
+@view
+func owner{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (owner : felt):
+    let (owner : felt) = _owner.read()
+    return (owner)
+end
+
 @view
 func uri{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (res : TokenUri):
     let (res) = _uri.read()
@@ -268,12 +285,19 @@ func _assert_is_owner_or_approved{
     return ()
 end
 
+func _assert_is_owner{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}():
+    let (caller) = get_caller_address()
+    let (owner) = _owner.read()
+    assert caller = owner
+    return ()
+end
+
 #
 # Burn
 #
 
 @external
-func _burn{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+func burn{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
         _from : felt, token_id : felt, amount : felt):
     assert_not_zero(_from)
 
@@ -284,7 +308,7 @@ func _burn{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
 end
 
 @external
-func _burn_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+func burn_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
         _from : felt, tokens_id_len : felt, tokens_id : felt*, amounts_len : felt, amounts : felt*):
     assert_not_zero(_from)
 
@@ -292,11 +316,12 @@ func _burn_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_p
     if tokens_id_len == 0:
         return ()
     end
-    _burn(_from, [tokens_id], [amounts])
-    return _burn_batch(
+    burn(_from, [tokens_id], [amounts])
+    return burn_batch(
         _from=_from,
         tokens_id_len=tokens_id_len - 1,
         tokens_id=tokens_id + 1,
         amounts_len=amounts_len - 1,
         amounts=amounts + 1)
 end
+

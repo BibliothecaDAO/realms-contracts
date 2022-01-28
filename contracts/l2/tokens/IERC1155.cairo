@@ -40,18 +40,32 @@ namespace IERC1155:
         ):
     end
 
-    func _burn(
+    func mint(
+        to : felt, 
+        token_id : felt, 
+        amount : felt) -> ():
+    end
+
+    func mint_batch(
+        to : felt, 
+        tokens_id_len : felt, 
+        tokens_id : felt*, 
+        amounts_len : felt, 
+        amounts : felt*) -> ():
+    end
+
+    func burn(
         _from : felt, 
         token_id : felt, 
         amount : felt) -> ():
     end
 
-    func _burn_batch(
+    func burn_batch(
         _from : felt, 
         tokens_id_len : felt, 
         tokens_id : felt*, 
         amounts_len : felt, 
-        amounts : felt*) -> (success: felt):
+        amounts : felt*) -> ():
     end
 
 end
