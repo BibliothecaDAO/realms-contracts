@@ -423,3 +423,36 @@ async def test_shield_and_attack_tower(game_factory):
 
     execution_info = await elements_token.balance_of(player_one_account.contract_address,DARK_TOKEN_ID).call()
     assert execution_info.result.res == 1010 * BOOST_UNIT_MULTIPLIER
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
+async def test_get_game_context_variables(game_factory):
+
+    starknet, accounts, signers, _, _, elements_token, tower_defence, tower_defence_storage = game_factory
+    
+    admin_key = signers[0]
+    admin_account = accounts[0]
+
+    initial_tower_health_val = 10000
+
+    start_block_num = 1
+    starknet.state.state.block_info = BlockInfo(start_block_num, 123456789)
+
+    await admin_key.send_transaction(
+        account=admin_account,
+        to=tower_defence.contract_address,
+        selector_name="create_game",
+        calldata=[]
+    )
+
+    curr_mock_block_num = 2
+    starknet.state.state.block_info = BlockInfo(curr_mock_block_num, 123456789)
+
+    exec_info = await tower_defence.get_game_context_variables().call()
+
+    assert exec_info.result.bpm == BLOCKS_PER_MINUTE
+    assert exec_info.result.hpg == HOURS_PER_GAME
+    assert exec_info.result.curr_block == curr_mock_block_num
+    assert exec_info.result.game_start == start_block_num
+    assert exec_info.result.main_health == initial_tower_health_val
+    assert exec_info.result.curr_boost == 138 # The initial basis points at hour 1
