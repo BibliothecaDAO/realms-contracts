@@ -61,6 +61,34 @@ func constructor{
     return ()
 end
 
+# Convenience function that retrieves relevent
+# game state variables in a single call for quick front-end loading
+@view
+func get_game_context_variables{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }() -> ( bpm, hpg, curr_block, game_start, main_health, curr_boost ):
+    alloc_locals
+    let (controller) = controller_address.read()
+
+    let (tower_defence_storage) = IModuleController.get_module_address(
+        controller, 2)
+    let (latest_index) = I02_TowerStorage.get_latest_game_index(tower_defence_storage)
+    
+    tempvar game_idx = latest_index
+
+    let (local bpm) = blocks_per_minute.read()
+    let (hpg) = hours_per_game.read()
+    let (curr_block) = get_block_number()
+    let (game_start) = I02_TowerStorage.get_game_start(tower_defence_storage, game_idx)
+    let (main_health) = I02_TowerStorage.get_main_health(tower_defence_storage, game_idx)
+
+    let (current_boost) = calculate_time_multiplier( game_start, curr_block )
+
+    return (bpm=bpm, hpg=hpg, curr_block=curr_block, game_start=game_start, main_health=main_health, curr_boost=current_boost)
+end
+
 @external
 func create_game{
         syscall_ptr : felt*,
@@ -344,7 +372,7 @@ end
 # Games are active if the block number falls within
 # the game start and hours_per_game boundary
 # else the game is considered expired
-@external
+@view
 func get_game_state{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
@@ -382,7 +410,7 @@ end
 
 # Calculate the multiplier based on block number
 # to 2 decimals of precision
-@external
+@view
 func calculate_time_multiplier{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
