@@ -59,14 +59,23 @@ async def game_factory(account_factory):
         "contracts/l2/tokens/ERC1155.cairo",
         constructor_calldata=[
             admin_account.contract_address,
+            1,1,1,1,1 # TokenURI struct
+        ]
+    )
+
+    await admin_key.send_transaction(
+        account=admin_account,
+        to=elements_token.contract_address,
+        selector_name='mint_batch',
+        calldata=[
+            admin_account.contract_address,
             2,
             LIGHT_TOKEN_ID, DARK_TOKEN_ID,
             2,
             3000 * BOOST_UNIT_MULTIPLIER, 3000 * BOOST_UNIT_MULTIPLIER, # Amounts
-            1,1,1,1,1 # TokenURI struct
-        ]
-    )
-            
+        ])
+
+    
     tower_defence = await starknet.deploy(
         source="contracts/l2/minigame/01_TowerDefence.cairo",
         constructor_calldata=[
