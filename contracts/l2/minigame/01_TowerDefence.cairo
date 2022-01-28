@@ -95,6 +95,7 @@ func create_game{
         pedersen_ptr : HashBuiltin*,
         range_check_ptr
     }(
+        _init_main_health : felt
     ):
     alloc_locals
 
@@ -107,8 +108,8 @@ func create_game{
     let (local latest_index) = I02_TowerStorage.get_latest_game_index(tower_defence_storage)
     tempvar current_index = latest_index + 1
 
-    # Set initial wall health to 10000
-    I02_TowerStorage.set_main_health(tower_defence_storage, current_index, 10000)
+    # Set main health
+    I02_TowerStorage.set_main_health(tower_defence_storage, current_index, _init_main_health)
 
     # Save the game start marker
     let (block_number) = get_block_number()

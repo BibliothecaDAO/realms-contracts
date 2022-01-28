@@ -20,6 +20,8 @@ ATTACK_ROLE = 1
 # Boost units are in basis points, so every value needs to be multiplied
 BOOST_UNIT_MULTIPLIER = 100
 
+INITIAL_TOWER_HEALTH = 1000 * BOOST_UNIT_MULTIPLIER
+
 class GameStatus(enum.Enum):
     Active = 0
     Expired = 1
@@ -117,7 +119,9 @@ async def test_game_creation(game_factory):
         account=admin_account,
         to=tower_defence.contract_address,
         selector_name='create_game',
-        calldata=[]
+        calldata=[
+            INITIAL_TOWER_HEALTH
+        ]
     )
 
     expected_game_index = 1
@@ -185,7 +189,9 @@ async def test_game_state_expiry(game_factory):
         account=admin_account,
         to=tower_defence.contract_address,
         selector_name='create_game',
-        calldata=[]
+        calldata=[
+            INITIAL_TOWER_HEALTH
+        ]
     )
 
     game_idx = 1
@@ -239,7 +245,7 @@ async def test_shield_and_attack_tower(game_factory):
     # game played in the first hour, which has a 138 basis point boost
     boost_bips = 138
 
-    tower_start_value = 10000
+    tower_start_value = INITIAL_TOWER_HEALTH
 
 
     mock_block_num = 1
@@ -249,7 +255,9 @@ async def test_shield_and_attack_tower(game_factory):
         account=admin_account,
         to=tower_defence.contract_address,
         selector_name="create_game",
-        calldata=[]
+        calldata=[
+            INITIAL_TOWER_HEALTH
+        ]
     )
 
     await admin_key.send_transaction(
@@ -442,7 +450,6 @@ async def test_get_game_context_variables(game_factory):
     admin_key = signers[0]
     admin_account = accounts[0]
 
-    initial_tower_health_val = 10000
 
     start_block_num = 1
     starknet.state.state.block_info = BlockInfo(start_block_num, 123456789)
@@ -451,7 +458,9 @@ async def test_get_game_context_variables(game_factory):
         account=admin_account,
         to=tower_defence.contract_address,
         selector_name="create_game",
-        calldata=[]
+        calldata=[
+            INITIAL_TOWER_HEALTH
+        ]
     )
 
     curr_mock_block_num = 2
@@ -463,5 +472,5 @@ async def test_get_game_context_variables(game_factory):
     assert exec_info.result.hpg == HOURS_PER_GAME
     assert exec_info.result.curr_block == curr_mock_block_num
     assert exec_info.result.game_start == start_block_num
-    assert exec_info.result.main_health == initial_tower_health_val
+    assert exec_info.result.main_health == INITIAL_TOWER_HEALTH
     assert exec_info.result.curr_boost == 138 # The initial basis points at hour 1
