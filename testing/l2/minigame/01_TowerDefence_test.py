@@ -468,6 +468,7 @@ async def test_get_game_context_variables(game_factory):
 
     exec_info = await tower_defence.get_game_context_variables().call()
 
+    assert exec_info.result.game_idx == 1 # Game index starts at 1
     assert exec_info.result.bpm == BLOCKS_PER_MINUTE
     assert exec_info.result.hpg == HOURS_PER_GAME
     assert exec_info.result.curr_block == curr_mock_block_num

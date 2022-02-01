@@ -68,7 +68,7 @@ func get_game_context_variables{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
         range_check_ptr
-    }() -> ( bpm, hpg, curr_block, game_start, main_health, curr_boost ):
+    }() -> ( game_idx, bpm, hpg, curr_block, game_start, main_health, curr_boost ):
     alloc_locals
     let (controller) = controller_address.read()
 
@@ -86,7 +86,7 @@ func get_game_context_variables{
 
     let (current_boost) = calculate_time_multiplier( game_start, curr_block )
 
-    return (bpm=bpm, hpg=hpg, curr_block=curr_block, game_start=game_start, main_health=main_health, curr_boost=current_boost)
+    return (game_idx=game_idx, bpm=bpm, hpg=hpg, curr_block=curr_block, game_start=game_start, main_health=main_health, curr_boost=current_boost)
 end
 
 @external
