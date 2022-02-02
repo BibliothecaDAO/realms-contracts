@@ -1,17 +1,7 @@
 %lang starknet
-%builtins pedersen range_check ecdsa bitwise
-from starkware.cairo.common.bitwise import bitwise_and
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
-from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
-from starkware.cairo.common.alloc import alloc
-from starkware.cairo.common.math import assert_not_zero
-
-from starkware.cairo.common.math import unsigned_div_rem
-from starkware.cairo.common.pow import pow
-
-from contracts.token.IERC20 import IERC20
 
 from contracts.token.ERC721_base import (
     ERC721_name,
@@ -20,30 +10,41 @@ from contracts.token.ERC721_base import (
     ERC721_ownerOf,
     ERC721_getApproved,
     ERC721_isApprovedForAll,
+    ERC721_tokenURI,
 
     ERC721_initializer,
     ERC721_approve, 
-    ERC721_setApprovalForAll, 
-    ERC721_transferFrom,
-    ERC721_safeTransferFrom,
-    ERC721_mint,
-    ERC721_burn
+    ERC721_setApprovalForAll,
+    ERC721_only_token_owner,
+    ERC721_setTokenURI
 )
 
-from contracts.token.ERC721_Metadata_base import (
-    ERC721_Metadata_initializer,
-    ERC721_Metadata_tokenURI,
-    ERC721_Metadata_setTokenURI,
+from contracts.token.ERC721_Enumerable_base import (
+    ERC721_Enumerable_initializer,
+    ERC721_Enumerable_totalSupply,
+    ERC721_Enumerable_tokenByIndex,
+    ERC721_Enumerable_tokenOfOwnerByIndex,
+    ERC721_Enumerable_mint,
+    ERC721_Enumerable_burn,
+    ERC721_Enumerable_transferFrom,
+    ERC721_Enumerable_safeTransferFrom
 )
 
-from contracts.ERC165_base import (
-    ERC165_supports_interface
-)
+from contracts.ERC165_base import ERC165_supports_interface
 
 from contracts.Ownable_base import (
     Ownable_initializer,
     Ownable_only_owner
 )
+
+#added (to move to inherited)
+from starkware.cairo.common.pow import pow
+from starkware.cairo.common.bitwise import bitwise_and
+from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero
+from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
+from contracts.token.IERC20 import IERC20
+from starkware.cairo.common.alloc import alloc
+
 
 #
 # Constructor
@@ -58,11 +59,11 @@ func constructor{
         name: felt,
         symbol: felt,
         owner: felt,
-        currency_address: felt
+        currency_address: felt # allow purchase in Lords
 
     ):
     ERC721_initializer(name, symbol)
-    ERC721_Metadata_initializer()
+    ERC721_Enumerable_initializer()
     Ownable_initializer(owner)
     currency_token_address.write(currency_address) # Biblio added currency address
 
@@ -72,6 +73,36 @@ end
 #
 # Getters
 #
+
+@view
+func totalSupply{
+        pedersen_ptr: HashBuiltin*, 
+        syscall_ptr: felt*, 
+        range_check_ptr
+    }() -> (totalSupply: Uint256):
+    let (totalSupply: Uint256) = ERC721_Enumerable_totalSupply()
+    return (totalSupply)
+end
+
+@view
+func tokenByIndex{
+        pedersen_ptr: HashBuiltin*, 
+        syscall_ptr: felt*, 
+        range_check_ptr
+    }(index: Uint256) -> (tokenId: Uint256):
+    let (tokenId: Uint256) = ERC721_Enumerable_tokenByIndex(index)
+    return (tokenId)
+end
+
+@view
+func tokenOfOwnerByIndex{
+        pedersen_ptr: HashBuiltin*, 
+        syscall_ptr: felt*, 
+        range_check_ptr
+    }(owner: felt, index: Uint256) -> (tokenId: Uint256):
+    let (tokenId: Uint256) = ERC721_Enumerable_tokenOfOwnerByIndex(owner, index)
+    return (tokenId)
+end
 
 @view
 func supportsInterface{
@@ -118,8 +149,8 @@ func ownerOf{
         syscall_ptr : felt*, 
         pedersen_ptr : HashBuiltin*,
         range_check_ptr
-    }(token_id: Uint256) -> (owner: felt):
-    let (owner: felt) = ERC721_ownerOf(token_id)
+    }(tokenId: Uint256) -> (owner: felt):
+    let (owner: felt) = ERC721_ownerOf(tokenId)
     return (owner)
 end
 
@@ -149,10 +180,9 @@ func tokenURI{
         pedersen_ptr: HashBuiltin*, 
         range_check_ptr
     }(tokenId: Uint256) -> (tokenURI: felt):
-    let (tokenURI: felt) = ERC721_Metadata_tokenURI(tokenId)
+    let (tokenURI: felt) = ERC721_tokenURI(tokenId)
     return (tokenURI)
 end
-
 
 #
 # Externals
@@ -188,7 +218,7 @@ func transferFrom{
         to: felt, 
         tokenId: Uint256
     ):
-    ERC721_transferFrom(_from, to, tokenId)
+    ERC721_Enumerable_transferFrom(_from, to, tokenId)
     return ()
 end
 
@@ -200,22 +230,11 @@ func safeTransferFrom{
     }(
         _from: felt, 
         to: felt, 
-        tokenId: Uint256,
-        data_len: felt, 
+        tokenId: Uint256, 
+        data_len: felt,
         data: felt*
     ):
-    ERC721_safeTransferFrom(_from, to, tokenId, data_len, data)
-    return ()
-end
-
-@external
-func setTokenURI{
-        pedersen_ptr: HashBuiltin*, 
-        syscall_ptr: felt*, 
-        range_check_ptr
-    }(tokenId: Uint256, tokenURI: felt):
-    Ownable_only_owner()
-    ERC721_Metadata_setTokenURI(tokenId, tokenURI)
+    ERC721_Enumerable_safeTransferFrom(_from, to, tokenId, data_len, data)
     return ()
 end
 
@@ -226,7 +245,7 @@ func mint{
         range_check_ptr
     }(to: felt, tokenId: Uint256):
     Ownable_only_owner()
-    ERC721_mint(to, tokenId)
+    ERC721_Enumerable_mint(to, tokenId)
     return ()
 end
 
@@ -236,13 +255,23 @@ func burn{
         syscall_ptr: felt*, 
         range_check_ptr
     }(tokenId: Uint256):
+    ERC721_only_token_owner(tokenId)
+    ERC721_Enumerable_burn(tokenId)
+    return ()
+end
+
+@external
+func setTokenURI{
+        pedersen_ptr: HashBuiltin*, 
+        syscall_ptr: felt*, 
+        range_check_ptr
+    }(tokenId: Uint256, tokenURI: felt):
     Ownable_only_owner()
-    ERC721_burn(tokenId)
+    ERC721_setTokenURI(tokenId, tokenURI)
     return ()
 end
 
 
-#
 # Bibliotheca added methods (remove all balance_details functions after events)
 #
 
@@ -401,11 +430,11 @@ func publicMint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_pt
     alloc_locals
 
     let (currency) = currency_token_address.read()
-    let (caller) = get_caller_address()
+    let (caller: felt) = get_caller_address()
     let (contract_address) = get_contract_address()
 
     IERC20.transferFrom(currency, caller, contract_address, Uint256(10 * (10 ** 18), 0))
-    ERC721_mint(caller, token_id)
+    ERC721_Enumerable_mint(caller, token_id)
 
     let (balance : Uint256) = ERC721_balanceOf(caller)
     balance_details.write(caller, balance.low - 1, token_id)
