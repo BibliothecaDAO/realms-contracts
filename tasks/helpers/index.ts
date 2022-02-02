@@ -15,7 +15,7 @@ export function setupDeploymentDir() {
   const path_base = getPathBase()
 
   if (!fs.existsSync(path_base)) {
-    fs.mkdirSync(path_base)
+    fs.mkdirSync(path_base, { recursive: true })
   }
 }
 

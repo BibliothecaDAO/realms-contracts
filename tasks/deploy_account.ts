@@ -1,11 +1,11 @@
 import { Provider, ec, encode, number } from 'starknet'
 import fs from 'fs'
 
-const DEPLOYMENT_PATH_BASE = "./deployments/starknet-goerli"
+const DEPLOYMENT_PATH_BASE = "./tasks/deployments/starknet-goerli"
 
 async function main() {
   if (!fs.existsSync(DEPLOYMENT_PATH_BASE)) {
-    await fs.promises.mkdir(DEPLOYMENT_PATH_BASE)
+    await fs.promises.mkdir(DEPLOYMENT_PATH_BASE, { recursive: true })
   }
 
   if (fs.existsSync(`${DEPLOYMENT_PATH_BASE}/OwnerAccount.json`)) {
