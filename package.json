@@ -1,6 +1,8 @@
 {
   "name": "hardhat-project",
-  "devDependencies": {},
+  "devDependencies": {
+    "node-ts": "^5.1.2"
+  },
   "dependencies": {
     "@0xsequence/erc-1155": "^3.0.4",
     "@chainlink/contracts": "^0.2.2",
@@ -36,6 +38,7 @@
     "prettier-plugin-solidity": "^1.0.0-beta.18",
     "solhint": "^3.3.6",
     "solidity-coverage": "^0.7.17",
+    "starknet": "^2.5.1",
     "truffle-assertions": "^0.9.2",
     "ts-node": "^10.2.1",
     "tsconfig-paths": "^3.11.0",
