@@ -10,8 +10,8 @@ from starkware.starknet.compiler.compile import compile_starknet_files
 from starkware.starknet.testing.starknet import Starknet, StarknetContract
 
 CONTRACT_SRC = [os.path.dirname(__file__), "../..", "contracts"]
-INITIAL_LORDS_SUPPLY = 500000000  * (10 ** 18)
-REALM_MINT_PRICE= 10 * (10 ** 18)
+INITIAL_LORDS_SUPPLY = 500000000 * (10 ** 18)
+REALM_MINT_PRICE = 10 * (10 ** 18)
 
 first_token_id = (5042, 0)
 second_token_id = (7921, 1)
@@ -20,7 +20,8 @@ fourth_token_id = (232, 3453)
 fifth_token_id = (234, 345)
 sixth_token_id = (9999, 9999)
 
-initial_user_funds = 1000  * (10 ** 18)
+initial_user_funds = 1000 * (10 ** 18)
+
 
 def compile(path):
     return compile_starknet_files(
@@ -29,15 +30,18 @@ def compile(path):
         cairo_path=CONTRACT_SRC,
     )
 
+
 async def create_account(starknet, signer, account_def):
     return await starknet.deploy(
         contract_def=account_def,
         constructor_calldata=[signer.public_key],
     )
 
+
 @pytest.fixture(scope="session")
 def event_loop():
     return asyncio.new_event_loop()
+
 
 # StarknetContracts contain an immutable reference to StarknetState, which
 # means if we want to be able to use StarknetState's `copy` method, we cannot
@@ -65,33 +69,33 @@ async def _build_copyable_deployment():
         arbiter=await create_account(starknet, signers.arbiter, defs.account),
         user1=await create_account(starknet, signers.user1, defs.account),
         user2=await create_account(starknet, signers.user2, defs.account),
-
     )
 
     lords = await starknet.deploy(
         contract_def=defs.erc20,
         constructor_calldata=[
-            str_to_felt("Lords"),     # name
-            str_to_felt("LRD"),       # symbol
-            *uint(INITIAL_LORDS_SUPPLY),                # initial supply
-            accounts.admin.contract_address,   # recipient
+            str_to_felt("Lords"),  # name
+            str_to_felt("LRD"),  # symbol
+            *uint(INITIAL_LORDS_SUPPLY),  # initial supply
+            accounts.admin.contract_address,  # recipient
             accounts.admin.contract_address,
-
-        ]
+        ],
     )
+    accounts.lords = lords
 
     realms = await starknet.deploy(
         contract_def=defs.erc721,
         constructor_calldata=[
-            str_to_felt("Realms"),             # name
-            str_to_felt("Realms"),             # ticker
-            accounts.admin.contract_address,   # contract_owner
-            lords.contract_address             # currency_address
-        ])
+            str_to_felt("Realms"),  # name
+            str_to_felt("Realms"),  # ticker
+            accounts.admin.contract_address,  # contract_owner
+            lords.contract_address,  # currency_address
+        ],
+    )
+    accounts.realms = realms
 
     consts = SimpleNamespace(
-        REALM_MINT_PRICE=REALM_MINT_PRICE,
-        INITIAL_USER_FUNDS=initial_user_funds
+        REALM_MINT_PRICE=REALM_MINT_PRICE, INITIAL_USER_FUNDS=initial_user_funds
     )
 
     async def give_tokens(recipient, amount):
@@ -102,24 +106,19 @@ async def _build_copyable_deployment():
             [recipient, *uint(amount)],
         )
 
-
-
     async def _erc20_approve(account_name, contract_address, amount):
         await signers.__dict__[account_name].send_transaction(
             accounts.__dict__[account_name],
             lords.contract_address,
             'approve',
-            [contract_address, *uint(amount)]
-    )
+            [contract_address, *uint(amount)],
+        )
 
     lords_approve_ammount = consts.REALM_MINT_PRICE * 3
 
     async def mint_realms(account_name, token):
         await signers.__dict__[account_name].send_transaction(
-            accounts.__dict__[account_name],
-            realms.contract_address,
-            'publicMint',
-            [*uint(token)]
+            accounts.__dict__[account_name], realms.contract_address, 'publicMint', [*uint(token)]
         )
 
     await _erc20_approve("user1", realms.contract_address, lords_approve_ammount)
@@ -129,12 +128,12 @@ async def _build_copyable_deployment():
 
     await give_tokens(accounts.user2.contract_address, initial_user_funds)
 
-
     return SimpleNamespace(
         starknet=starknet,
         defs=defs,
         consts=consts,
         signers=signers,
+        accounts=accounts,
         addresses=SimpleNamespace(
             admin=accounts.admin.contract_address,
             arbiter=accounts.arbiter.contract_address,
@@ -144,6 +143,7 @@ async def _build_copyable_deployment():
             user2=accounts.user2.contract_address,
         ),
     )
+
 
 @pytest.fixture(scope="session")
 async def copyable_deployment(request):
@@ -157,13 +157,15 @@ async def copyable_deployment(request):
         val = dill.loads(val.encode("cp437"))
     return val
 
+
 @pytest.fixture(scope="session")
 async def ctx_factory(copyable_deployment):
     defs = copyable_deployment.defs
     addresses = copyable_deployment.addresses
     signers = copyable_deployment.signers
     consts = copyable_deployment.consts
-    
+    accs = copyable_deployment.accounts
+
     def make():
         starknet_state = copyable_deployment.starknet.state.copy()
 
@@ -172,21 +174,25 @@ async def ctx_factory(copyable_deployment):
                 state=starknet_state,
                 abi=defs.account.abi,
                 contract_address=addresses.arbiter,
+                deploy_execution_info=accs.arbiter.deploy_execution_info,
             ),
             user1=StarknetContract(
                 state=starknet_state,
                 abi=defs.account.abi,
                 contract_address=addresses.user1,
+                deploy_execution_info=accs.user1.deploy_execution_info,
             ),
             user2=StarknetContract(
                 state=starknet_state,
                 abi=defs.account.abi,
                 contract_address=addresses.user2,
+                deploy_execution_info=accs.user2.deploy_execution_info,
             ),
             admin=StarknetContract(
                 state=starknet_state,
                 abi=defs.account.abi,
                 contract_address=addresses.admin,
+                deploy_execution_info=accs.admin.deploy_execution_info,
             ),
         )
 
@@ -207,11 +213,13 @@ async def ctx_factory(copyable_deployment):
                 state=starknet_state,
                 abi=defs.erc20.abi,
                 contract_address=addresses.lords,
+                deploy_execution_info=accs.lords.deploy_execution_info,
             ),
             realms=StarknetContract(
                 state=starknet_state,
                 abi=defs.erc721.abi,
                 contract_address=addresses.realms,
+                deploy_execution_info=accs.realms.deploy_execution_info,
             ),
         )
 
