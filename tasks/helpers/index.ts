@@ -1,5 +1,6 @@
-import { Provider, ec, encode, number } from 'starknet'
+import { Provider, ec, Signer } from 'starknet'
 import fs from 'fs'
+import { toBN } from 'starknet/dist/utils/number'
 
 export const GOERLI_DEPLOYMENT_PATH_BASE = "./deployments/starknet"
 
@@ -96,4 +97,23 @@ export async function deployContract(contractName: string, contractAlias: string
   logDeployment(result)
 
   return result
+}
+
+export function getSigner() {
+  const path_base = getPathBase()
+  try {  
+    const file = fs.readFileSync(`${path_base}/OwnerAccount.json`)
+
+    const parsed = JSON.parse(file.toString())
+
+    const kp = ec.getKeyPair(toBN(parsed.private_key, 16))
+    const p = new Provider({
+      network: "georli-alpha"
+    })
+    const s = new Signer(p, parsed.address, kp )
+    return s;
+
+  } catch( e ) {
+    console.error("Signing error: ", e)
+  }
 }
