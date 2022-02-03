@@ -134,6 +134,8 @@ func buy_tokens {
         max_currency_amount: Uint256,
         token_id: felt,
         token_amount: felt,
+    ) -> (
+        sold: Uint256
     ):
     #FIXME Add deadline
     #FIXME Recipient as a param
@@ -143,41 +145,15 @@ func buy_tokens {
 
     let (token_addr) = token_address.read()
     let (currency_addr) = currency_address.read()
+    
+    let (currency_res) = currency_reserves.read()
+    let (token_reserves) = IERC1155.balanceOf(token_addr, contract, token_id)
 
     # Transfer max currency
     IERC20.transferFrom(currency_addr, caller, contract, max_currency_amount)
     tempvar syscall_ptr :felt* = syscall_ptr
 
     #FIXME Fees / royalties
-
-    # Calculate token amount and execute
-    currency_to_token(max_currency_amount, token_id, token_amount)
-
-    return ()
-end
-
-
-@view
-func currency_to_token {
-        syscall_ptr : felt*,
-        pedersen_ptr : HashBuiltin*,
-        range_check_ptr
-    }(
-        max_currency_amount: Uint256,
-        token_id: felt,
-        token_amount: felt,
-    ) -> (
-        sold: Uint256
-    ):
-    alloc_locals
-
-    let (caller) = get_caller_address()
-    let (contract) = get_contract_address()
-
-    let (currency_res) = currency_reserves.read()
-    let (currency_addr) = currency_address.read()
-    let (token_addr) = token_address.read()
-    let (token_reserves) = IERC1155.balanceOf(token_addr, contract, token_id)
 
     # Calculate prices
     let (currency_amount) = get_buy_price(Uint256(token_amount, 0), currency_res, Uint256(token_reserves, 0))
