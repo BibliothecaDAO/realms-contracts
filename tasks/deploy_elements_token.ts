@@ -13,7 +13,9 @@ async function main() {
   const ownerAccount = getOwnerAccountInt()
 
   // Magically deploy + write all files and stuff 
-  await deployContract(contractName, "ERC1155_ElementsToken", [ownerAccount, "0"])
+  const tokenURIStruct = ["1","1","1","1","1"]
+
+  await deployContract(contractName, "ERC1155_ElementsToken", [ownerAccount, ...tokenURIStruct])
 }
 
 main()

@@ -23,7 +23,7 @@ async function main() {
 
   const contract = (await fs.promises.readFile("./artifacts/Account.json")).toString()
 
-  const result = await provider.deployContract(contract) // no 0x0 here, just int form
+  const result = await provider.deployContract(contract, [starkKeyInt.toString()]) // no 0x0 here, just int form
 
   fs.writeFileSync(`${DEPLOYMENT_PATH_BASE}/OwnerAccount.json`, JSON.stringify({
     ...result,
