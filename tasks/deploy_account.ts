@@ -1,9 +1,9 @@
 import { Provider, ec, encode, number } from 'starknet'
 import fs from 'fs'
 
-const DEPLOYMENT_PATH_BASE = "./tasks/deployments/starknet-goerli"
+const DEPLOYMENT_PATH_BASE = "./deployments/starknet-goerli"
 
-async function main() {
+export default async function deployAccount() {
   if (!fs.existsSync(DEPLOYMENT_PATH_BASE)) {
     await fs.promises.mkdir(DEPLOYMENT_PATH_BASE, { recursive: true })
   }
@@ -35,6 +35,15 @@ async function main() {
   console.log(`TX: ${result.transaction_hash}`)
   console.log(`Stark Key ${starkKeyInt}`)
   console.log(`Private Key ${keyPair.getPrivate("hex")}`)
+  console.log("waiting for transaaction...")
+  try {
+    await provider.waitForTx(result.transaction_hash)
+    const res = await provider.getTransactionStatus(result.transaction_hash)
+    console.log(res);
+  } catch(e){
+    console.error("Error deploying account: ", e )
+  }
+
 }
 
-main()
+deployAccount()

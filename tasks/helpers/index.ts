@@ -86,15 +86,24 @@ export async function deployContract(contractName: string, contractAlias: string
   const network: any = process.env.NETWORK || "georli-alpha"
   const provider = new Provider({ network })
 
-  console.log("Deploying...")
+  console.log("Deploying..." + contractName)
 
   const contract = (await fs.promises.readFile(`./artifacts/${contractName}.json`)).toString()
 
   const result = await provider.deployContract(contract, args) // no 0x0 here, just int form
 
-  writeDeployment(contractAlias, result)
-  writeNileDeploymentFile(contractName, contractAlias, result)
+  console.log("Waiting for transaction...")
   logDeployment(result)
+
+  try {
+    await provider.waitForTx(result.transaction_hash)
+    const res = await provider.getTransactionStatus(result.transaction_hash)
+    writeDeployment(contractAlias, result)
+    writeNileDeploymentFile(contractName, contractAlias, result)
+    console.log(res);
+  } catch(e){
+    console.error("Error Deploying Contract: ", e )
+  }
 
   return result
 }
