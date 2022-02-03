@@ -5,9 +5,12 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
-from starkware.cairo.common.math import assert_nn, assert_le, unsigned_div_rem, assert_not_zero
+from starkware.cairo.common.math import assert_nn, assert_le, assert_not_zero
+from starkware.cairo.common.math_cmp import is_not_zero
 from starkware.cairo.common.uint256 import (
-    Uint256, uint256_add, uint256_sub, uint256_le, uint256_lt, uint256_check
+    Uint256,
+    uint256_add, uint256_sub, uint256_mul, uint256_unsigned_div_rem,
+    uint256_le, uint256_lt, uint256_check, uint256_eq
 )
 
 from contracts.token.IERC20 import IERC20
@@ -22,6 +25,8 @@ from contracts.token.ERC1155.ERC1155_base import (
     # ERC1155_balances,
     # ERC1155_assert_is_owner_or_approved
 )
+
+#FIXME Non-reentrant
 
 # Contract Address of ERC20 address for this swap contract
 @storage_var
@@ -112,6 +117,117 @@ func add_liquidity {
         #TODO emit LP Added Event
 
     return ()
+end
+
+
+#
+# Swaps
+#
+
+
+@external
+func buy_tokens {
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(
+        max_currency_amount: Uint256,
+        token_id: felt,
+        token_amount: felt,
+    ):
+    #FIXME Add deadline
+    #FIXME Recipient as a param
+    alloc_locals
+    let (caller) = get_caller_address()
+    let (contract) = get_contract_address()
+
+    let (token_addr) = token_address.read()
+    let (currency_addr) = currency_address.read()
+
+    # Transfer max currency
+    IERC20.transferFrom(currency_addr, caller, contract, max_currency_amount)
+    tempvar syscall_ptr :felt* = syscall_ptr
+
+    #FIXME Fees / royalties
+
+    # Calculate token amount and execute
+    currency_to_token(max_currency_amount, token_id, token_amount)
+
+    return ()
+end
+
+
+@view
+func currency_to_token {
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }(
+        max_currency_amount: Uint256,
+        token_id: felt,
+        token_amount: felt,
+    ) -> (
+        sold: Uint256
+    ):
+    alloc_locals
+
+    let (caller) = get_caller_address()
+    let (contract) = get_contract_address()
+
+    let (currency_res) = currency_reserves.read()
+    let (currency_addr) = currency_address.read()
+    let (token_addr) = token_address.read()
+    let (token_reserves) = IERC1155.balanceOf(token_addr, contract, token_id)
+
+    # Calculate prices
+    let (currency_amount) = get_buy_price(Uint256(token_amount, 0), currency_res, Uint256(token_reserves, 0))
+
+    #TODO Fees
+
+    # Calculate refund
+    let (refund_amount) = uint256_sub(max_currency_amount, currency_amount)
+
+    # Update reserves
+    let (new_reserves, _) = uint256_add(currency_res, currency_amount)
+
+    # Transfer refunded currency and purchased tokens
+    IERC20.transfer(currency_addr, caller, refund_amount)
+    tempvar syscall_ptr :felt* = syscall_ptr
+    IERC1155.safeTransferFrom(token_addr, contract, caller, token_id, token_amount)
+
+    return (currency_amount)
+end
+
+
+
+@view
+func get_buy_price {
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }(
+        token_amount: Uint256,
+        currency_reserves: Uint256,
+        token_reserves: Uint256,
+    ) -> (
+        price: Uint256
+    ):
+    alloc_locals
+
+    # Calculate price
+    #FIXME Add fee
+    let (numerator, _) = uint256_mul(currency_reserves, token_amount)
+    # let (numerator, _) = uint256_mul(numerator, Uint256(1000, 0)) TODO Why is this here
+    let (token_res_left) = uint256_sub(token_reserves, token_amount)
+    let (price, remainder) = uint256_unsigned_div_rem(numerator, token_res_left)
+    #FIXME If remainder then add 1
+    # let (is_not_z) = uint256_eq(remainder, Uint256(0, 0))
+    # if is_not_z == (1):
+    #     let (price, _) = uint256_add(price, Uint256(1, 0))
+    # end
+
+    return (price)
+
 end
 
 #
