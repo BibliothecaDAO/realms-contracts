@@ -2,14 +2,14 @@ import { Provider, ec, Signer } from 'starknet'
 import fs from 'fs'
 import { toBN } from 'starknet/dist/utils/number'
 
-export const GOERLI_DEPLOYMENT_PATH_BASE = "./deployments/starknet"
+export const DEPLOYMENT_PATH_BASE = "./minigame-deployments/starknet";
 
-function getPathBase() {
+export function getPathBase() {
   if (process.env.NETWORK && process.env.NETWORK !== "goerli") {
-    return `${GOERLI_DEPLOYMENT_PATH_BASE}-${process.env.NETWORK}`
+    return `${DEPLOYMENT_PATH_BASE}-${process.env.NETWORK}`;
   }
 
-  return `${GOERLI_DEPLOYMENT_PATH_BASE}-goerli`
+  return `${DEPLOYMENT_PATH_BASE}-goerli`;
 }
 
 export function setupDeploymentDir() {

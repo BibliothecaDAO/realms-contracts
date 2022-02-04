@@ -1,7 +1,8 @@
-import { Provider, ec, encode, number } from 'starknet'
-import fs from 'fs'
+import { Provider, ec, encode, number } from "starknet";
+import fs from "fs";
+import { getPathBase } from "./helpers";
 
-const DEPLOYMENT_PATH_BASE = "./deployments/starknet-goerli"
+const DEPLOYMENT_PATH_BASE = getPathBase();
 
 export default async function deployAccount() {
   if (!fs.existsSync(DEPLOYMENT_PATH_BASE)) {
