@@ -175,6 +175,57 @@ func buy_tokens {
 end
 
 
+#FIXME IERC1155 doesn't have a call back when using ERC1155.safeTransfer.
+# User will need to `setApprovalForAll` to this contract, which poses a security risk for repeat transactions.
+@external
+func sell_tokens {
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(
+        min_currency_amount: Uint256,
+        token_id: felt,
+        token_amount: felt,
+    ) -> (
+        sold: Uint256
+    ):
+    #FIXME Add deadline
+    #FIXME Recipient as a param
+    alloc_locals
+    let (caller) = get_caller_address()
+    let (contract) = get_contract_address()
+
+    let (token_addr) = token_address.read()
+    let (currency_addr) = currency_address.read()
+    
+    let (currency_res) = currency_reserves.read()
+    let (token_reserves) = IERC1155.balanceOf(token_addr, contract, token_id)
+
+    # Take the token amount
+    IERC1155.safeTransferFrom(token_addr, caller, contract, token_id, token_amount)
+
+    # Calculate prices
+    let (currency_amount) = get_sell_price(Uint256(token_amount, 0), currency_res, Uint256(token_reserves, 0))
+
+    # Check min_currency_amount
+    let (above_min_curr) = uint256_le(min_currency_amount, currency_amount)
+    assert_not_zero(above_min_curr)
+
+    # Transfer currency
+    IERC20.transfer(currency_addr, caller, currency_amount)
+    tempvar syscall_ptr :felt* = syscall_ptr
+
+    # Update reserves
+    let (new_reserves, _) = uint256_add(currency_res, currency_amount)
+
+    return (currency_amount)
+end
+
+
+#
+# Pricing
+#
+
 
 @view
 func get_buy_price {
@@ -193,7 +244,6 @@ func get_buy_price {
     # Calculate price
     #FIXME Add fee
     let (numerator, _) = uint256_mul(currency_reserves, token_amount)
-    # let (numerator, _) = uint256_mul(numerator, Uint256(1000, 0)) TODO Why is this here
     let (token_res_left) = uint256_sub(token_reserves, token_amount)
     let (price, remainder) = uint256_unsigned_div_rem(numerator, token_res_left)
     #FIXME If remainder then add 1
@@ -202,6 +252,33 @@ func get_buy_price {
     #     let (price, _) = uint256_add(price, Uint256(1, 0))
     # end
 
+    return (price)
+
+end
+
+
+@view
+func get_sell_price {
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }(
+        token_amount: Uint256,
+        currency_reserves: Uint256,
+        token_reserves: Uint256,
+    ) -> (
+        price: Uint256
+    ):
+    alloc_locals
+
+    # Calculate price
+    #FIXME Add fee
+    let (numerator, _) = uint256_mul(token_amount, currency_reserves)
+    let (local denominator: Uint256, is_overflow) = uint256_add(token_reserves, token_amount)
+    assert (is_overflow) = 0
+    let (price, _) = uint256_unsigned_div_rem(numerator, denominator)
+
+    # Rounding errors favour the contract
     return (price)
 
 end
@@ -228,41 +305,11 @@ func get_token_address {
     return token_address.read()
 end
 
-
-
-
-
-# #
-# # Exchange is ERC1155 compliant as LP tokens are ERC1155
-# #
-
-# @external
-# func SetURI{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(uri_ : TokenUri):
-#     ERC1155_URI.write(uri_)
-#     return ()
-# end
-
-# @external
-# func setApprovalForAll{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-#         operator : felt, approved : felt):
-#     let (account) = get_caller_address()
-#     ERC1155_set_approval_for_all(operator, approved)
-#     return ()
-# end
-
-# @external
-# func safeTransferFrom{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-#         sender : felt, recipient : felt, token_id : felt, amount : felt):
-#     ERC1155_assert_is_owner_or_approved(sender)
-#     ERC1155_transfer_from(sender, recipient, token_id, amount)
-#     return ()
-# end
-
-# @external
-# func safeBatchTransferFrom{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-#         sender : felt, recipient : felt, tokens_id_len : felt, tokens_id : felt*,
-#         amounts_len : felt, amounts : felt*):
-#     ERC1155_assert_is_owner_or_approved(sender)
-#     ERC1155_batch_transfer_from(sender, recipient, tokens_id_len, tokens_id, amounts_len, amounts)
-#     return ()
-# end
+@view
+func get_currency_reserves {
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }() -> (currency_reserves: Uint256):
+    return currency_reserves.read()
+end

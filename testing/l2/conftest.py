@@ -137,7 +137,7 @@ async def _build_copyable_deployment():
             2, #token_ids_len
             1, 2,
             2, #amounts_len
-            1000, 5000
+            100000, 5000
         ])
 
     consts = SimpleNamespace(
