@@ -68,7 +68,7 @@ async def game_factory(account_factory):
         constructor_calldata=[
             controller.contract_address,
             elements_token.contract_address,
-            admin_account.contract_address, # TODO Minting Middleware
+            admin_account.contract_address,
         ]
     )
     
@@ -80,6 +80,29 @@ async def game_factory(account_factory):
             elements_module.contract_address
         ])
 
+    tower_defence = await starknet.deploy(
+        source="contracts/l2/minigame/01_TowerDefence.cairo",
+        constructor_calldata=[
+            controller.contract_address,
+            elements_token.contract_address,
+            4, # blocks per minute
+            36 # hours per game
+        ]
+    )
+    
+    tower_defence_storage = await starknet.deploy(
+        source="contracts/l2/minigame/02_TowerDefenceStorage.cairo",
+        constructor_calldata=[controller.contract_address]
+    )
+
+    await admin_key.send_transaction(
+        account=admin_account,
+        to=arbiter.contract_address,
+        selector_name='batch_set_controller_addresses',
+        calldata=[
+            tower_defence.contract_address, tower_defence_storage.contract_address
+        ]
+    )
 
     return starknet, accounts, signers, arbiter, controller, elements_token, elements_module
 
@@ -99,19 +122,28 @@ async def test_elements_minting(game_factory):
     execution_info = await elements_token.balance_of(player_one_account.contract_address, LIGHT_TOKEN_ID).call()
     old_bal = execution_info.result.res
 
+    # Tests will start at game index 0
+    next_game_idx = 1
+
+    l1_address = 2342432432432423
+
+    amount_to_mint = 1000
+
     await admin_key.send_transaction(
         account=admin_account,
         to=elements_module.contract_address,
         selector_name='mint_elements',
         calldata=[
-            player_one_account.contract_address, 
-            2,
-            LIGHT_TOKEN_ID, DARK_TOKEN_ID,
-            2,
-            1000,
-            1000
+            next_game_idx,
+            l1_address,
+            player_one_account.contract_address,
+            LIGHT_TOKEN_ID,
+            amount_to_mint
         ])
 
-
     execution_info = await elements_token.balance_of(player_one_account.contract_address, LIGHT_TOKEN_ID).call()
-    assert execution_info.result.res == old_bal + 1000
+    assert execution_info.result.res == old_bal + amount_to_mint
+
+    execution_info = await elements_module.get_total_minted( LIGHT_TOKEN_ID ).call()
+    assert execution_info.result.total == amount_to_mint
+

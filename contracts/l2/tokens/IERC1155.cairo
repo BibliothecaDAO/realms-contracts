@@ -40,6 +40,9 @@ namespace IERC1155:
         ):
     end
 
+    func set_owner( owner : felt ) -> ():
+    end
+
     func mint(
         to : felt, 
         token_id : felt, 
