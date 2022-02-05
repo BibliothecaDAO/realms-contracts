@@ -1,6 +1,10 @@
 import { Provider, ec, Signer } from 'starknet'
 import fs from 'fs'
 import { toBN } from 'starknet/dist/utils/number'
+import { config as dotenvConfig } from "dotenv";
+import { resolve } from "path";
+
+dotenvConfig({ path: resolve(__dirname, "../../.env") });
 
 export const DEPLOYMENT_PATH_BASE = "./minigame-deployments/starknet";
 
@@ -115,7 +119,13 @@ export function getSigner() {
 
     const parsed = JSON.parse(file.toString())
 
-    const kp = ec.getKeyPair(toBN(parsed.private_key, 16))
+    const privKey = process.env.MINIGAME_ARBITER_PRIVATE_KEY;
+
+    if(privKey == undefined){
+      throw new Error("Attempted to call getSigner() with MINIGAME_ARBITER_PRIVATE_KEY being undefined. Set env value in .env or execution environment.")
+    }
+
+    const kp = ec.getKeyPair(toBN(privKey, 16))
     const p = new Provider({
       network: "georli-alpha"
     })
