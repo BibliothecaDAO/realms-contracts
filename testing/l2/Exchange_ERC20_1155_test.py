@@ -168,7 +168,7 @@ async def sell_and_check(admin_account, admin_signer, lords, resources, exchange
     assert uint(before_lords_bal[0] + currency_diff_required) == after_lords_bal
     assert before_resources_bal - token_to_sell == after_resources_bal
     after_currency_reserve = (await exchange.get_currency_reserves(resource_id).call()).result.currency_reserves[0]
-    assert before_currency_reserve + currency_diff_required == after_currency_reserve
+    assert before_currency_reserve - currency_diff_required == after_currency_reserve
 
 
 @pytest.mark.asyncio
