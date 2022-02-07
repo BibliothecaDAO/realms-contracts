@@ -165,6 +165,7 @@ func buy_tokens {
 
     # Update reserves
     let (new_reserves, _) = uint256_add(currency_res, currency_amount)
+    currency_reserves.write(new_reserves)
 
     # Transfer refunded currency and purchased tokens
     IERC20.transfer(currency_addr, caller, refund_amount)
@@ -216,7 +217,8 @@ func sell_tokens {
     tempvar syscall_ptr :felt* = syscall_ptr
 
     # Update reserves
-    let (new_reserves, _) = uint256_add(currency_res, currency_amount)
+    let (new_reserves) = uint256_sub(currency_res, currency_amount)
+    currency_reserves.write(new_reserves)
 
     return (currency_amount)
 end

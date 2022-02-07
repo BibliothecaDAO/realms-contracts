@@ -108,37 +108,27 @@ def calc_d_x(old_x, old_y, d_y):
     return d_x
 
 
-@pytest.mark.asyncio
-async def test_buy_price(exchange_factory):
-    print("test_buy_price")
-    ctx = exchange_factory
-    admin_signer = ctx.signers['admin']
-    admin_account = ctx.admin
-    exchange = ctx.exchange
-    lords = ctx.lords
-    resources = ctx.resources
-    currency_reserve = 10000
-    token_reserve = 1000
-    token_to_buy = 10
-
-    await provide_liq(admin_signer, admin_account, exchange, lords, resources, currency_reserve, token_reserve)
+async def buy_and_check(admin_account, admin_signer, lords, resources, exchange, token_to_buy):
     before_lords_bal, before_resources_bal = await get_token_bals(admin_account, lords, resources)
 
-    currency_diff_required = math.floor(calc_d_x(currency_reserve, token_reserve, token_to_buy))
+    before_currency_reserve = (await exchange.get_currency_reserves().call()).result.currency_reserves[0]
+    token_reserve = (await resources.balanceOf(exchange.contract_address, 1).call()).result.balance
+
+    currency_diff_required = math.floor(calc_d_x(before_currency_reserve, token_reserve, token_to_buy))
 
     # Check price math
-    res = await exchange.get_buy_price(uint(token_to_buy), uint(currency_reserve), uint(token_reserve)).call()
+    res = await exchange.get_buy_price(uint(token_to_buy), uint(before_currency_reserve), uint(token_reserve)).call()
     assert res.result.price == uint(currency_diff_required)
 
-    # Make purchase
-    usable_currency = currency_diff_required + 10 # Increment max currency to ensure correct buy price is used
-    await set_erc20_allowance(admin_signer, admin_account, lords, exchange.contract_address, usable_currency)
+    # Make sale
+    max_currency = currency_diff_required + 10 # Increment max currency to ensure correct price is used
+    await set_erc20_allowance(admin_signer, admin_account, lords, exchange.contract_address, max_currency)
     await admin_signer.send_transaction(
         admin_account,
         exchange.contract_address,
         'buy_tokens',
         [
-            *uint(usable_currency),
+            *uint(max_currency),
             1,
             token_to_buy,
         ]
@@ -146,18 +136,20 @@ async def test_buy_price(exchange_factory):
     after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources)
     assert uint(before_lords_bal[0] - currency_diff_required) == after_lords_bal
     assert before_resources_bal + token_to_buy == after_resources_bal
+    after_currency_reserve = (await exchange.get_currency_reserves().call()).result.currency_reserves[0]
+    assert before_currency_reserve + currency_diff_required == after_currency_reserve
 
 
 async def sell_and_check(admin_account, admin_signer, lords, resources, exchange, token_to_sell):
     before_lords_bal, before_resources_bal = await get_token_bals(admin_account, lords, resources)
 
-    currency_reserve = (await exchange.get_currency_reserves().call()).result.currency_reserves[0]
+    before_currency_reserve = (await exchange.get_currency_reserves().call()).result.currency_reserves[0]
     token_reserve = (await resources.balanceOf(exchange.contract_address, 1).call()).result.balance
 
-    currency_diff_required = math.floor(-calc_d_x(currency_reserve, token_reserve, -token_to_sell))
+    currency_diff_required = math.floor(-calc_d_x(before_currency_reserve, token_reserve, -token_to_sell))
 
     # Check price math
-    res = await exchange.get_sell_price(uint(token_to_sell), uint(currency_reserve), uint(token_reserve)).call()
+    res = await exchange.get_sell_price(uint(token_to_sell), uint(before_currency_reserve), uint(token_reserve)).call()
     assert res.result.price == uint(currency_diff_required)
 
     # Make sale
@@ -175,6 +167,26 @@ async def sell_and_check(admin_account, admin_signer, lords, resources, exchange
     after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources)
     assert uint(before_lords_bal[0] + currency_diff_required) == after_lords_bal
     assert before_resources_bal - token_to_sell == after_resources_bal
+    after_currency_reserve = (await exchange.get_currency_reserves().call()).result.currency_reserves[0]
+    assert before_currency_reserve + currency_diff_required == after_currency_reserve
+
+
+@pytest.mark.asyncio
+async def test_buy_price(exchange_factory):
+    print("test_buy_price")
+    ctx = exchange_factory
+    admin_signer = ctx.signers['admin']
+    admin_account = ctx.admin
+    exchange = ctx.exchange
+    lords = ctx.lords
+    resources = ctx.resources
+    currency_reserve = 10000
+    token_reserve = 1000
+
+    await provide_liq(admin_signer, admin_account, exchange, lords, resources, currency_reserve, token_reserve)
+    # Buy and check twice
+    await buy_and_check(admin_account, admin_signer, lords, resources, exchange, 10)
+    await buy_and_check(admin_account, admin_signer, lords, resources, exchange, 10)
 
 
 @pytest.mark.asyncio
