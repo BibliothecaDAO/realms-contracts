@@ -130,7 +130,7 @@ async def buy_and_check(admin_account, admin_signer, lords, resources, exchange,
         [
             *uint(max_currency),
             1,
-            token_to_buy,
+            *uint(token_to_buy),
         ]
     )
     after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources)
@@ -161,7 +161,7 @@ async def sell_and_check(admin_account, admin_signer, lords, resources, exchange
         [
             *uint(min_currency),
             1,
-            token_to_sell,
+            *uint(token_to_sell),
         ]
     )
     after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources)

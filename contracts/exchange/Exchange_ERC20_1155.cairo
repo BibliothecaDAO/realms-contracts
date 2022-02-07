@@ -74,7 +74,7 @@ func add_liquidity {
     }(
         max_currency_amount: Uint256,
         token_id: felt,
-        token_amount: felt,
+        token_amount: Uint256,
     ):
         #FIXME add deadline
         alloc_locals
@@ -86,7 +86,7 @@ func add_liquidity {
 
         IERC20.transferFrom(currency_addr, caller, contract, max_currency_amount)
         tempvar syscall_ptr :felt* = syscall_ptr
-        IERC1155.safeTransferFrom(token_addr, caller, contract, token_id, token_amount)
+        IERC1155.safeTransferFrom(token_addr, caller, contract, token_id, token_amount.low)
 
         #FIXME This is only for initial liquidity adds
         # Assert otherwise rounding error could end up being significant on second deposit
@@ -123,7 +123,7 @@ func buy_tokens {
     }(
         max_currency_amount: Uint256,
         token_id: felt,
-        token_amount: felt,
+        token_amount: Uint256,
     ) -> (
         sold: Uint256
     ):
@@ -146,7 +146,7 @@ func buy_tokens {
     #FIXME Fees / royalties
 
     # Calculate prices
-    let (currency_amount) = get_buy_price(Uint256(token_amount, 0), currency_res, Uint256(token_reserves, 0))
+    let (currency_amount) = get_buy_price(token_amount, currency_res, Uint256(token_reserves, 0))
 
     #TODO Fees
 
@@ -160,7 +160,7 @@ func buy_tokens {
     # Transfer refunded currency and purchased tokens
     IERC20.transfer(currency_addr, caller, refund_amount)
     tempvar syscall_ptr :felt* = syscall_ptr
-    IERC1155.safeTransferFrom(token_addr, contract, caller, token_id, token_amount)
+    IERC1155.safeTransferFrom(token_addr, contract, caller, token_id, token_amount.low)
 
     return (currency_amount)
 end
@@ -176,7 +176,7 @@ func sell_tokens {
     }(
         min_currency_amount: Uint256,
         token_id: felt,
-        token_amount: felt,
+        token_amount: Uint256,
     ) -> (
         sold: Uint256
     ):
@@ -193,10 +193,10 @@ func sell_tokens {
     let (token_reserves) = IERC1155.balanceOf(token_addr, contract, token_id)
 
     # Take the token amount
-    IERC1155.safeTransferFrom(token_addr, caller, contract, token_id, token_amount)
+    IERC1155.safeTransferFrom(token_addr, caller, contract, token_id, token_amount.low)
 
     # Calculate prices
-    let (currency_amount) = get_sell_price(Uint256(token_amount, 0), currency_res, Uint256(token_reserves, 0))
+    let (currency_amount) = get_sell_price(token_amount, currency_res, Uint256(token_reserves, 0))
 
     # Check min_currency_amount
     let (above_min_curr) = uint256_le(min_currency_amount, currency_amount)
