@@ -41,7 +41,7 @@ async def set_erc20_allowance(signer, account, erc20, who, amount):
         [who, *uint(amount)]
     )
 
-async def provide_liq(admin_signer, admin_account, exchange, lords, resources, max_currency, token_spent):
+async def provide_liq(admin_signer, admin_account, exchange, lords, resources, max_currency, token_id, token_spent):
     # Approve access
     await set_erc20_allowance(admin_signer, admin_account, lords, exchange.contract_address, max_currency)
     await admin_signer.send_transaction(
@@ -56,7 +56,7 @@ async def provide_liq(admin_signer, admin_account, exchange, lords, resources, m
         admin_account,
         exchange.contract_address,
         'add_liquidity',
-        [*uint(max_currency), 1, token_spent]
+        [*uint(max_currency), token_id, token_spent]
     )
 
 
@@ -85,7 +85,7 @@ async def test_add_liquidity(exchange_factory):
     before_lords_bal, before_resources_bal = await get_token_bals(admin_account, lords, resources)
 
     # Do it
-    await provide_liq(admin_signer, admin_account, exchange, lords, resources, max_currency, token_spent)
+    await provide_liq(admin_signer, admin_account, exchange, lords, resources, max_currency, 1, token_spent)
 
     # After states
     after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources)
@@ -183,7 +183,7 @@ async def test_buy_price(exchange_factory):
     currency_reserve = 10000
     token_reserve = 1000
 
-    await provide_liq(admin_signer, admin_account, exchange, lords, resources, currency_reserve, token_reserve)
+    await provide_liq(admin_signer, admin_account, exchange, lords, resources, currency_reserve, 1, token_reserve)
     # Buy and check twice
     await buy_and_check(admin_account, admin_signer, lords, resources, exchange, 1, 10)
     await buy_and_check(admin_account, admin_signer, lords, resources, exchange, 1, 10)
@@ -201,7 +201,7 @@ async def test_sell_price(exchange_factory):
     currency_reserve = 10000
     token_reserve = 1000
 
-    await provide_liq(admin_signer, admin_account, exchange, lords, resources, currency_reserve, token_reserve)
+    await provide_liq(admin_signer, admin_account, exchange, lords, resources, currency_reserve, 1, token_reserve)
     # Sell and check twice
     await sell_and_check(admin_account, admin_signer, lords, resources, exchange, 1, 10)
     await sell_and_check(admin_account, admin_signer, lords, resources, exchange, 1, 10)
