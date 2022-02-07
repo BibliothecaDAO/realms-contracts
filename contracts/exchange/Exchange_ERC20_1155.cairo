@@ -39,20 +39,13 @@ func token_address() -> (address : felt):
 end
 
 # Current reserves of currency
-#FIXME Per token
 @storage_var
-func currency_reserves() -> (reserves : Uint256):
+func currency_reserves(token_id : felt) -> (reserves : Uint256):
 end
 
-# Combined reserves of curreny
+# Total supplied currency (for LP)
 @storage_var
-func currency_total() -> (total : Uint256):
-end
-
-# Total supplied currency
-#FIXME Per token
-@storage_var
-func supplies_total() -> (total : Uint256):
+func supplies_total(token_id : felt) -> (total : Uint256):
 end
 
 @constructor
@@ -103,13 +96,10 @@ func add_liquidity {
         # assert_not_zero(ok)
 
         # Update currency  reserve size for Token id before transfer
-        currency_reserves.write(max_currency_amount)
+        currency_reserves.write(token_id, max_currency_amount)
 
-        # Update totalCurrency
-        currency_total.write(max_currency_amount)
-
-        # Initial liquidity is amount deposited (Incorrect pricing will be arbitraged)
-        supplies_total.write(max_currency_amount)
+        # Initial liquidity is amount deposited
+        supplies_total.write(token_id, max_currency_amount)
 
         # Mint LP tokens
         ERC1155_mint(caller, token_id, max_currency_amount.low)
@@ -146,7 +136,7 @@ func buy_tokens {
     let (token_addr) = token_address.read()
     let (currency_addr) = currency_address.read()
     
-    let (currency_res) = currency_reserves.read()
+    let (currency_res) = currency_reserves.read(token_id)
     let (token_reserves) = IERC1155.balanceOf(token_addr, contract, token_id)
 
     # Transfer max currency
@@ -165,7 +155,7 @@ func buy_tokens {
 
     # Update reserves
     let (new_reserves, _) = uint256_add(currency_res, currency_amount)
-    currency_reserves.write(new_reserves)
+    currency_reserves.write(token_id, new_reserves)
 
     # Transfer refunded currency and purchased tokens
     IERC20.transfer(currency_addr, caller, refund_amount)
@@ -199,7 +189,7 @@ func sell_tokens {
     let (token_addr) = token_address.read()
     let (currency_addr) = currency_address.read()
     
-    let (currency_res) = currency_reserves.read()
+    let (currency_res) = currency_reserves.read(token_id)
     let (token_reserves) = IERC1155.balanceOf(token_addr, contract, token_id)
 
     # Take the token amount
@@ -218,7 +208,7 @@ func sell_tokens {
 
     # Update reserves
     let (new_reserves) = uint256_sub(currency_res, currency_amount)
-    currency_reserves.write(new_reserves)
+    currency_reserves.write(token_id, new_reserves)
 
     return (currency_amount)
 end
@@ -312,6 +302,10 @@ func get_currency_reserves {
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
         range_check_ptr
-    }() -> (currency_reserves: Uint256):
-    return currency_reserves.read()
+    }(
+        token_id: felt
+    ) -> (
+        currency_reserves: Uint256
+    ):
+    return currency_reserves.read(token_id)
 end
