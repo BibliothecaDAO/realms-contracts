@@ -89,8 +89,8 @@ async def get_token_bals(account, lords, resources, token_id):
 
 
 @pytest.mark.asyncio
-async def test_add_liquidity(exchange_factory):
-    print("test_add_liquidity")
+async def test_liquidity(exchange_factory):
+    print("test_liquidity")
     ctx = exchange_factory
     admin_signer = ctx.signers['admin']
     admin_account = ctx.admin
@@ -132,6 +132,36 @@ async def test_add_liquidity(exchange_factory):
     # Check LP tokens
     res = await exchange.balanceOf(admin_account.contract_address, token_id).call()
     assert res.result.balance == currency_amount * 2
+
+    # Remove liquidity
+    await admin_signer.send_transaction(
+        admin_account,
+        exchange.contract_address, # LP tokens
+        'setApprovalForAll',
+        [exchange.contract_address, True]
+    )
+    await admin_signer.send_transaction(
+        admin_account,
+        exchange.contract_address,
+        'remove_liquidity',
+        [
+            *uint(currency_amount),
+            token_id,
+            *uint(token_spent),
+            *uint(currency_amount), # LP amount directly to currency_amount
+        ]
+    )
+    # After states
+    after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources, token_id)
+    assert uint(before_lords_bal[0] - currency_amount) == after_lords_bal
+    assert before_resources_bal - token_spent == after_resources_bal
+    # Contract balances
+    exchange_lords_bal, exchange_resources_bal = await get_token_bals(exchange, lords, resources, token_id)
+    assert exchange_lords_bal == uint(currency_amount)
+    assert exchange_resources_bal == token_spent
+    # Check LP tokens
+    res = await exchange.balanceOf(admin_account.contract_address, token_id).call()
+    assert res.result.balance == currency_amount
 
 
 def calc_d_x(old_x, old_y, d_y):

@@ -17,13 +17,12 @@ from contracts.token.IERC20 import IERC20
 from contracts.token.ERC1155.IERC1155 import IERC1155
 from contracts.token.ERC1155.ERC1155_struct import TokenUri
 from contracts.token.ERC1155.ERC1155_base import (
-    # ERC1155_transfer_from,
-    # ERC1155_batch_transfer_from,
+    ERC1155_transfer_from,
+    ERC1155_batch_transfer_from,
     ERC1155_mint,
-    # ERC1155_URI,
-    # ERC1155_set_approval_for_all,
-    # ERC1155_balances,
-    # ERC1155_assert_is_owner_or_approved
+    ERC1155_burn,
+    ERC1155_set_approval_for_all,
+    ERC1155_assert_is_owner_or_approved,
 )
 
 #FIXME Non-reentrant
@@ -47,6 +46,8 @@ end
 @storage_var
 func supplies_total(token_id : felt) -> (total : Uint256):
 end
+
+# Note: We use ERC1155_balanceOf(contract_address) to record token reserves
 
 @constructor
 func constructor {
@@ -164,6 +165,63 @@ func add_liquidity {
         ERC1155_mint(caller, token_id, currency_amount.low)
 
         #TODO emit LP Added Event
+
+    return ()
+end
+
+
+@external
+func remove_liquidity {
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(
+        min_currency_amount: Uint256,
+        token_id: felt,
+        min_token_amount: Uint256,
+        lp_amount: Uint256,
+    ):
+        #FIXME add deadline
+        alloc_locals
+        let (caller) = get_caller_address()
+        let (contract) = get_contract_address()
+
+        let (token_addr) = token_address.read()
+        let (currency_addr) = currency_address.read()
+
+        let (lp_total) = supplies_total.read(token_id)
+        let (currency_res) = currency_reserves.read(token_id)
+
+        let (new_supplies) = uint256_sub(lp_total, lp_amount)
+        # It should not be possible to go below zero as LP reflects supply
+        let (above_zero) = uint256_le(Uint256(0, 0), new_supplies)
+        assert_not_zero(above_zero)
+
+        # Calculate percentage of reserves this LP amount is worth
+        # Ignore remainder as it favours holders
+        let (numerator, mul_overflow) = uint256_mul(currency_res, lp_amount)
+        assert mul_overflow = Uint256(0, 0)
+        let (currency_owed, _) = uint256_unsigned_div_rem(numerator, lp_total)
+        let (token_reserves) = IERC1155.balanceOf(token_addr, contract, token_id)
+        let (numerator, mul_overflow) = uint256_mul(Uint256(token_reserves, 0), lp_amount)
+        assert mul_overflow = Uint256(0, 0)
+        let (tokens_owed, _) = uint256_unsigned_div_rem(numerator, lp_total)
+
+        # New totals
+        let (new_currency) = uint256_sub(currency_res, currency_owed)
+
+        # Update storage
+        supplies_total.write(token_id, new_supplies)
+        currency_reserves.write(token_id, new_currency)
+
+        # Take LP tokens
+        ERC1155_burn(caller, token_id, lp_amount.low)
+        # Send currency and tokens
+        IERC20.transfer(currency_addr, caller, currency_owed)
+        tempvar syscall_ptr :felt* = syscall_ptr
+        IERC1155.safeTransferFrom(token_addr, contract, caller, token_id, tokens_owed.low)
+
+        #TODO emit LP Removed Event
 
     return ()
 end
@@ -370,4 +428,33 @@ func get_currency_reserves {
         currency_reserves: Uint256
     ):
     return currency_reserves.read(token_id)
+end
+
+#
+# ERC 1155
+#
+
+@external
+func setApprovalForAll{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+        operator : felt, approved : felt):
+    let (account) = get_caller_address()
+    ERC1155_set_approval_for_all(operator, approved)
+    return ()
+end
+
+@external
+func safeTransferFrom{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+        sender : felt, recipient : felt, token_id : felt, amount : felt):
+    ERC1155_assert_is_owner_or_approved(sender)
+    ERC1155_transfer_from(sender, recipient, token_id, amount)
+    return ()
+end
+
+@external
+func safeBatchTransferFrom{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+        sender : felt, recipient : felt, tokens_id_len : felt, tokens_id : felt*,
+        amounts_len : felt, amounts : felt*):
+    ERC1155_assert_is_owner_or_approved(sender)
+    ERC1155_batch_transfer_from(sender, recipient, tokens_id_len, tokens_id, amounts_len, amounts)
+    return ()
 end
