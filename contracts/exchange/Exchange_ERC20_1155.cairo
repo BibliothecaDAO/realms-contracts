@@ -67,6 +67,50 @@ end
 #
 
 @external
+func initial_liquidity {
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(
+        currency_amount: Uint256,
+        token_id: felt,
+        token_amount: Uint256,
+    ):
+        alloc_locals
+        let (caller) = get_caller_address()
+        let (contract) = get_contract_address()
+
+        let (token_addr) = token_address.read()
+        let (currency_addr) = currency_address.read()
+
+        # Only valid for first liquidity add
+        let (currency_res) = currency_reserves.read(token_id)
+        assert currency_res = Uint256(0, 0)
+
+        IERC20.transferFrom(currency_addr, caller, contract, currency_amount)
+        tempvar syscall_ptr :felt* = syscall_ptr
+        IERC1155.safeTransferFrom(token_addr, caller, contract, token_id, token_amount.low)
+
+        # Assert otherwise rounding error could end up being significant on second deposit
+        let (ok) = uint256_le(Uint256(1000, 0), currency_amount) #FIXME
+        assert_not_zero(ok)
+
+        # Update currency  reserve size for Token id before transfer
+        currency_reserves.write(token_id, currency_amount)
+
+        # Initial liquidity is amount deposited
+        supplies_total.write(token_id, currency_amount)
+
+        # Mint LP tokens
+        ERC1155_mint(caller, token_id, currency_amount.low)
+
+        #TODO emit LP Added Event
+
+    return ()
+end
+
+
+@external
 func add_liquidity {
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
@@ -78,31 +122,46 @@ func add_liquidity {
     ):
         #FIXME add deadline
         alloc_locals
-        let (caller) = get_caller_address() #FIXME method param
+        let (caller) = get_caller_address()
         let (contract) = get_contract_address()
 
         let (token_addr) = token_address.read()
         let (currency_addr) = currency_address.read()
 
-        IERC20.transferFrom(currency_addr, caller, contract, max_currency_amount)
+        let (supplies_total_prev) = supplies_total.read(token_id)
+        let (token_reserves) = IERC1155.balanceOf(token_addr, contract, token_id)
+        let (currency_res) = currency_reserves.read(token_id)
+
+        # Only for subsequent liquidity adds
+        let (above_zero) = uint256_lt(Uint256(0, 0), currency_res)
+        assert_not_zero(above_zero)
+
+        # Required price calc
+        # X/Y = dx/dy
+        # dx = X*dy/Y
+        let (numerator, mul_overflow) = uint256_mul(currency_res, token_amount)
+        assert mul_overflow = Uint256(0, 0)
+        let (currency_amount, _) = uint256_unsigned_div_rem(numerator, Uint256(token_reserves, 0))
+        # Ignore remainder as this favours existing LP holders
+
+        # Check within bounds
+        let (ok) = uint256_le(currency_amount, max_currency_amount)
+        assert_not_zero(ok)
+
+        IERC20.transferFrom(currency_addr, caller, contract, currency_amount)
         tempvar syscall_ptr :felt* = syscall_ptr
         IERC1155.safeTransferFrom(token_addr, caller, contract, token_id, token_amount.low)
 
-        #FIXME This is only for initial liquidity adds
-        # Assert otherwise rounding error could end up being significant on second deposit
-        # let (ok) = uint256_le(max_currency_amount, Uint256(0, 0))
-        # assert_not_zero(ok)
-        # let (ok) = uint256_le(Uint256(1000, 0), max_currency_amount)
-        # assert_not_zero(ok)
-
-        # Update currency  reserve size for Token id before transfer
-        currency_reserves.write(token_id, max_currency_amount)
-
-        # Initial liquidity is amount deposited
-        supplies_total.write(token_id, max_currency_amount)
+        # Stored values
+        let (new_reserves, add_overflow) = uint256_add(currency_res, currency_amount)
+        assert (add_overflow) = 0
+        currency_reserves.write(token_id, new_reserves)
+        let (new_supplies, add_overflow) = uint256_add(supplies_total_prev, currency_amount)
+        assert (add_overflow) = 0
+        supplies_total.write(token_id, new_supplies)
 
         # Mint LP tokens
-        ERC1155_mint(caller, token_id, max_currency_amount.low)
+        ERC1155_mint(caller, token_id, currency_amount.low)
 
         #TODO emit LP Added Event
 
@@ -154,7 +213,8 @@ func buy_tokens {
     let (refund_amount) = uint256_sub(max_currency_amount, currency_amount)
 
     # Update reserves
-    let (new_reserves, _) = uint256_add(currency_res, currency_amount)
+    let (new_reserves, add_overflow) = uint256_add(currency_res, currency_amount)
+    assert add_overflow = 0
     currency_reserves.write(token_id, new_reserves)
 
     # Transfer refunded currency and purchased tokens
@@ -235,7 +295,8 @@ func get_buy_price {
 
     # Calculate price
     #FIXME Add fee
-    let (numerator, _) = uint256_mul(currency_reserves, token_amount)
+    let (numerator, is_overflow) = uint256_mul(currency_reserves, token_amount)
+    assert is_overflow = Uint256(0, 0)
     let (token_res_left) = uint256_sub(token_reserves, token_amount)
     let (price, remainder) = uint256_unsigned_div_rem(numerator, token_res_left)
     #FIXME If remainder then add 1
@@ -265,9 +326,10 @@ func get_sell_price {
 
     # Calculate price
     #FIXME Add fee
-    let (numerator, _) = uint256_mul(token_amount, currency_reserves)
+    let (numerator, mul_overflow) = uint256_mul(token_amount, currency_reserves)
+    assert mul_overflow = Uint256(0, 0)
     let (local denominator: Uint256, is_overflow) = uint256_add(token_reserves, token_amount)
-    assert (is_overflow) = 0
+    assert is_overflow = 0
     let (price, _) = uint256_unsigned_div_rem(numerator, denominator)
 
     # Rounding errors favour the contract

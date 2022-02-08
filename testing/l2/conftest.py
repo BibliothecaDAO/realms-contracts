@@ -134,10 +134,10 @@ async def _build_copyable_deployment():
         contract_def=defs.erc1155,
         constructor_calldata=[
             accounts.admin.contract_address, #recipient
-            2, #token_ids_len
-            1, 2,
-            2, #amounts_len
-            100000, 5000
+            5, #token_ids_len
+            1, 2, 3, 4, 5,
+            5, #amounts_len
+            100000, 5000, 10000, 10000, 10000,
         ])
 
     consts = SimpleNamespace(
