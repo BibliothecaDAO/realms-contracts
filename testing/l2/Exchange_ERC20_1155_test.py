@@ -217,7 +217,7 @@ async def sell_and_check(admin_account, admin_signer, lords, resources, exchange
     assert res.result.price == uint(currency_diff_required)
 
     # Make sale
-    min_currency = currency_diff_required - 10 # Add a bit of fat
+    min_currency = currency_diff_required - 2 # Add a bit of fat
     await admin_signer.send_transaction(
         admin_account,
         exchange.contract_address,
