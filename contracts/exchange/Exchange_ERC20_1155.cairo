@@ -42,9 +42,9 @@ end
 func currency_reserves(token_id : felt) -> (reserves : Uint256):
 end
 
-# Total supplied currency (for LP)
+# Total issued LP totals
 @storage_var
-func supplies_total(token_id : felt) -> (total : Uint256):
+func lp_reserves(token_id : felt) -> (total : Uint256):
 end
 
 # Note: We use ERC1155_balanceOf(contract_address) to record token reserves
@@ -81,16 +81,16 @@ func initial_liquidity {
         let (caller) = get_caller_address()
         let (contract) = get_contract_address()
 
-        let (token_addr) = token_address.read()
-        let (currency_addr) = currency_address.read()
+        let (token_address_) = token_address.read()
+        let (currency_address_) = currency_address.read()
 
         # Only valid for first liquidity add
-        let (currency_res) = currency_reserves.read(token_id)
-        assert currency_res = Uint256(0, 0)
+        let (currency_reserves_) = currency_reserves.read(token_id)
+        assert currency_reserves_ = Uint256(0, 0)
 
-        IERC20.transferFrom(currency_addr, caller, contract, currency_amount)
+        IERC20.transferFrom(currency_address_, caller, contract, currency_amount)
         tempvar syscall_ptr :felt* = syscall_ptr
-        IERC1155.safeTransferFrom(token_addr, caller, contract, token_id, token_amount.low)
+        IERC1155.safeTransferFrom(token_address_, caller, contract, token_id, token_amount.low)
 
         # Assert otherwise rounding error could end up being significant on second deposit
         let (ok) = uint256_le(Uint256(1000, 0), currency_amount) #FIXME
@@ -100,7 +100,7 @@ func initial_liquidity {
         currency_reserves.write(token_id, currency_amount)
 
         # Initial liquidity is amount deposited
-        supplies_total.write(token_id, currency_amount)
+        lp_reserves.write(token_id, currency_amount)
 
         # Mint LP tokens
         ERC1155_mint(caller, token_id, currency_amount.low)
@@ -126,21 +126,21 @@ func add_liquidity {
         let (caller) = get_caller_address()
         let (contract) = get_contract_address()
 
-        let (token_addr) = token_address.read()
-        let (currency_addr) = currency_address.read()
+        let (token_address_) = token_address.read()
+        let (currency_address_) = currency_address.read()
 
-        let (supplies_total_prev) = supplies_total.read(token_id)
-        let (token_reserves) = IERC1155.balanceOf(token_addr, contract, token_id)
-        let (currency_res) = currency_reserves.read(token_id)
+        let (lp_reserves_) = lp_reserves.read(token_id)
+        let (token_reserves) = IERC1155.balanceOf(token_address_, contract, token_id)
+        let (currency_reserves_) = currency_reserves.read(token_id)
 
         # Only for subsequent liquidity adds
-        let (above_zero) = uint256_lt(Uint256(0, 0), currency_res)
+        let (above_zero) = uint256_lt(Uint256(0, 0), currency_reserves_)
         assert_not_zero(above_zero)
 
         # Required price calc
         # X/Y = dx/dy
         # dx = X*dy/Y
-        let (numerator, mul_overflow) = uint256_mul(currency_res, token_amount)
+        let (numerator, mul_overflow) = uint256_mul(currency_reserves_, token_amount)
         assert mul_overflow = Uint256(0, 0)
         let (currency_amount, _) = uint256_unsigned_div_rem(numerator, Uint256(token_reserves, 0))
         # Ignore remainder as this favours existing LP holders
@@ -149,17 +149,17 @@ func add_liquidity {
         let (ok) = uint256_le(currency_amount, max_currency_amount)
         assert_not_zero(ok)
 
-        IERC20.transferFrom(currency_addr, caller, contract, currency_amount)
+        IERC20.transferFrom(currency_address_, caller, contract, currency_amount)
         tempvar syscall_ptr :felt* = syscall_ptr
-        IERC1155.safeTransferFrom(token_addr, caller, contract, token_id, token_amount.low)
+        IERC1155.safeTransferFrom(token_address_, caller, contract, token_id, token_amount.low)
 
         # Stored values
-        let (new_reserves, add_overflow) = uint256_add(currency_res, currency_amount)
+        let (new_reserves, add_overflow) = uint256_add(currency_reserves_, currency_amount)
         assert (add_overflow) = 0
         currency_reserves.write(token_id, new_reserves)
-        let (new_supplies, add_overflow) = uint256_add(supplies_total_prev, currency_amount)
+        let (new_supplies, add_overflow) = uint256_add(lp_reserves_, currency_amount)
         assert (add_overflow) = 0
-        supplies_total.write(token_id, new_supplies)
+        lp_reserves.write(token_id, new_supplies)
 
         # Mint LP tokens
         ERC1155_mint(caller, token_id, currency_amount.low)
@@ -186,40 +186,40 @@ func remove_liquidity {
         let (caller) = get_caller_address()
         let (contract) = get_contract_address()
 
-        let (token_addr) = token_address.read()
-        let (currency_addr) = currency_address.read()
+        let (token_address_) = token_address.read()
+        let (currency_address_) = currency_address.read()
 
-        let (lp_total) = supplies_total.read(token_id)
-        let (currency_res) = currency_reserves.read(token_id)
+        let (lp_reserves_) = lp_reserves.read(token_id)
+        let (currency_reserves_) = currency_reserves.read(token_id)
 
-        let (new_supplies) = uint256_sub(lp_total, lp_amount)
+        let (new_supplies) = uint256_sub(lp_reserves_, lp_amount)
         # It should not be possible to go below zero as LP reflects supply
         let (above_zero) = uint256_le(Uint256(0, 0), new_supplies)
         assert_not_zero(above_zero)
 
         # Calculate percentage of reserves this LP amount is worth
         # Ignore remainder as it favours holders
-        let (numerator, mul_overflow) = uint256_mul(currency_res, lp_amount)
+        let (numerator, mul_overflow) = uint256_mul(currency_reserves_, lp_amount)
         assert mul_overflow = Uint256(0, 0)
-        let (currency_owed, _) = uint256_unsigned_div_rem(numerator, lp_total)
-        let (token_reserves) = IERC1155.balanceOf(token_addr, contract, token_id)
+        let (currency_owed, _) = uint256_unsigned_div_rem(numerator, lp_reserves_)
+        let (token_reserves) = IERC1155.balanceOf(token_address_, contract, token_id)
         let (numerator, mul_overflow) = uint256_mul(Uint256(token_reserves, 0), lp_amount)
         assert mul_overflow = Uint256(0, 0)
-        let (tokens_owed, _) = uint256_unsigned_div_rem(numerator, lp_total)
+        let (tokens_owed, _) = uint256_unsigned_div_rem(numerator, lp_reserves_)
 
         # New totals
-        let (new_currency) = uint256_sub(currency_res, currency_owed)
+        let (new_currency) = uint256_sub(currency_reserves_, currency_owed)
 
         # Update storage
-        supplies_total.write(token_id, new_supplies)
+        lp_reserves.write(token_id, new_supplies)
         currency_reserves.write(token_id, new_currency)
 
         # Take LP tokens
         ERC1155_burn(caller, token_id, lp_amount.low)
         # Send currency and tokens
-        IERC20.transfer(currency_addr, caller, currency_owed)
+        IERC20.transfer(currency_address_, caller, currency_owed)
         tempvar syscall_ptr :felt* = syscall_ptr
-        IERC1155.safeTransferFrom(token_addr, contract, caller, token_id, tokens_owed.low)
+        IERC1155.safeTransferFrom(token_address_, contract, caller, token_id, tokens_owed.low)
 
         #TODO emit LP Removed Event
 
@@ -250,20 +250,20 @@ func buy_tokens {
     let (caller) = get_caller_address()
     let (contract) = get_contract_address()
 
-    let (token_addr) = token_address.read()
-    let (currency_addr) = currency_address.read()
+    let (token_address_) = token_address.read()
+    let (currency_address_) = currency_address.read()
     
-    let (currency_res) = currency_reserves.read(token_id)
-    let (token_reserves) = IERC1155.balanceOf(token_addr, contract, token_id)
+    let (currency_reserves_) = currency_reserves.read(token_id)
+    let (token_reserves) = IERC1155.balanceOf(token_address_, contract, token_id)
 
     # Transfer max currency
-    IERC20.transferFrom(currency_addr, caller, contract, max_currency_amount)
+    IERC20.transferFrom(currency_address_, caller, contract, max_currency_amount)
     tempvar syscall_ptr :felt* = syscall_ptr
 
     #FIXME Fees / royalties
 
     # Calculate prices
-    let (currency_amount) = get_buy_price(token_amount, currency_res, Uint256(token_reserves, 0))
+    let (currency_amount) = get_buy_price(token_amount, currency_reserves_, Uint256(token_reserves, 0))
 
     #TODO Fees
 
@@ -271,14 +271,14 @@ func buy_tokens {
     let (refund_amount) = uint256_sub(max_currency_amount, currency_amount)
 
     # Update reserves
-    let (new_reserves, add_overflow) = uint256_add(currency_res, currency_amount)
+    let (new_reserves, add_overflow) = uint256_add(currency_reserves_, currency_amount)
     assert add_overflow = 0
     currency_reserves.write(token_id, new_reserves)
 
     # Transfer refunded currency and purchased tokens
-    IERC20.transfer(currency_addr, caller, refund_amount)
+    IERC20.transfer(currency_address_, caller, refund_amount)
     tempvar syscall_ptr :felt* = syscall_ptr
-    IERC1155.safeTransferFrom(token_addr, contract, caller, token_id, token_amount.low)
+    IERC1155.safeTransferFrom(token_address_, contract, caller, token_id, token_amount.low)
 
     return (currency_amount)
 end
@@ -304,28 +304,28 @@ func sell_tokens {
     let (caller) = get_caller_address()
     let (contract) = get_contract_address()
 
-    let (token_addr) = token_address.read()
-    let (currency_addr) = currency_address.read()
+    let (token_address_) = token_address.read()
+    let (currency_address_) = currency_address.read()
     
-    let (currency_res) = currency_reserves.read(token_id)
-    let (token_reserves) = IERC1155.balanceOf(token_addr, contract, token_id)
+    let (currency_reserves_) = currency_reserves.read(token_id)
+    let (token_reserves) = IERC1155.balanceOf(token_address_, contract, token_id)
 
     # Take the token amount
-    IERC1155.safeTransferFrom(token_addr, caller, contract, token_id, token_amount.low)
+    IERC1155.safeTransferFrom(token_address_, caller, contract, token_id, token_amount.low)
 
     # Calculate prices
-    let (currency_amount) = get_sell_price(token_amount, currency_res, Uint256(token_reserves, 0))
+    let (currency_amount) = get_sell_price(token_amount, currency_reserves_, Uint256(token_reserves, 0))
 
     # Check min_currency_amount
     let (above_min_curr) = uint256_le(min_currency_amount, currency_amount)
     assert_not_zero(above_min_curr)
 
     # Transfer currency
-    IERC20.transfer(currency_addr, caller, currency_amount)
+    IERC20.transfer(currency_address_, caller, currency_amount)
     tempvar syscall_ptr :felt* = syscall_ptr
 
     # Update reserves
-    let (new_reserves) = uint256_sub(currency_res, currency_amount)
+    let (new_reserves) = uint256_sub(currency_reserves_, currency_amount)
     currency_reserves.write(token_id, new_reserves)
 
     return (currency_amount)
