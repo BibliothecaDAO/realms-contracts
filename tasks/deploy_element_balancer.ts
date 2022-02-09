@@ -14,6 +14,7 @@ const deploy = async () => {
     setupDeploymentDir()
     checkDeployment(contractName)
 
+    const arbiterAddress = getDeployedAddressInt("Arbiter");
     const moduleControllerAddress = getDeployedAddressInt("ModuleController");
     const elementsTokenAddress = getDeployedAddressInt("ERC1155_ElementsToken");  
 
@@ -42,11 +43,25 @@ const deploy = async () => {
         ]
     )
 
+    console.log("set_owner", res)
+
     await defaultProvider.waitForTx(res.transaction_hash);
     const status = await defaultProvider.getTransactionStatus(
       res.transaction_hash
     );
     console.log(status);
+
+    const appointRes = await getSigner().invokeFunction(
+        arbiterAddress,
+        getSelectorFromName("appoint_contract_as_module"),
+        [
+            elementBalancer,
+            "4"
+        ]
+    )
+    console.log("appoint_contract_as_module", appointRes);
+    await defaultProvider.waitForTx(appointRes.transaction_hash)
+    console.log(await defaultProvider.getTransactionStatus(appointRes.transaction_hash));
 }
 
 deploy().catch((e) => console.error(e));
