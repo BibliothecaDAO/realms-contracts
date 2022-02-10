@@ -1,5 +1,6 @@
 import pytest
 import math
+from fractions import Fraction
 from utils import uint
 
 @pytest.fixture(scope='module')
@@ -7,15 +8,16 @@ async def exchange_factory(ctx_factory):
     print("Constructing exchange factory")
     ctx = ctx_factory()
 
-    exchange = await ctx.starknet.deploy(
+    ctx.exchange_fee = 10
+
+    ctx.exchange = await ctx.starknet.deploy(
         source="contracts/exchange/Exchange_ERC20_1155.cairo",
         constructor_calldata=[
             ctx.lords.contract_address,
             ctx.resources.contract_address,
+            *uint(ctx.exchange_fee),
         ]
     )
-
-    ctx.exchange = exchange
 
     return ctx
 
@@ -167,18 +169,19 @@ async def test_liquidity(exchange_factory):
 def calc_d_x(old_x, old_y, d_y):
     """ Find the new value of x in a x*y=k equation given dy. """
     k = old_x * old_y
-    new_x = k / (old_y - d_y)
+    new_x = Fraction(k, (old_y - d_y))
     d_x = new_x - old_x
     return d_x
 
-
-async def buy_and_check(admin_account, admin_signer, lords, resources, exchange, resource_id, token_to_buy):
+async def buy_and_check(admin_account, admin_signer, lords, resources, exchange, resource_id, token_to_buy, fee_percent):
     before_lords_bal, before_resources_bal = await get_token_bals(admin_account, lords, resources, resource_id)
 
     before_currency_reserve = (await exchange.get_currency_reserves(resource_id).call()).result.currency_reserves[0]
     token_reserve = (await resources.balanceOf(exchange.contract_address, resource_id).call()).result.balance
 
-    currency_diff_required = math.floor(calc_d_x(before_currency_reserve, token_reserve, token_to_buy))
+    price = calc_d_x(before_currency_reserve, token_reserve, token_to_buy)
+    fee = price * fee_percent
+    currency_diff_required = math.ceil(price + fee)
 
     # Check price math
     res = await exchange.get_buy_price(uint(token_to_buy), uint(before_currency_reserve), uint(token_reserve)).call()
@@ -204,13 +207,15 @@ async def buy_and_check(admin_account, admin_signer, lords, resources, exchange,
     assert before_currency_reserve + currency_diff_required == after_currency_reserve
 
 
-async def sell_and_check(admin_account, admin_signer, lords, resources, exchange, resource_id, token_to_sell):
+async def sell_and_check(admin_account, admin_signer, lords, resources, exchange, resource_id, token_to_sell, fee_percent):
     before_lords_bal, before_resources_bal = await get_token_bals(admin_account, lords, resources, resource_id)
 
     before_currency_reserve = (await exchange.get_currency_reserves(resource_id).call()).result.currency_reserves[0]
     token_reserve = (await resources.balanceOf(exchange.contract_address, resource_id).call()).result.balance
 
-    currency_diff_required = math.floor(-calc_d_x(before_currency_reserve, token_reserve, -token_to_sell))
+    price = -calc_d_x(before_currency_reserve, token_reserve, -token_to_sell)
+    fee = price * fee_percent
+    currency_diff_required = math.floor(price - fee)
 
     # Check price math
     res = await exchange.get_sell_price(uint(token_to_sell), uint(before_currency_reserve), uint(token_reserve)).call()
@@ -245,13 +250,14 @@ async def test_buy_price(exchange_factory):
     lords = ctx.lords
     resources = ctx.resources
     currency_reserve = 10000
-    token_reserve = 1000
+    token_reserve = 5000
     token_id = 2
+    fee_percent = Fraction(ctx.exchange_fee, 1000)
 
     await initial_liq(admin_signer, admin_account, exchange, lords, resources, currency_reserve, token_id, token_reserve)
     # Buy and check twice
-    await buy_and_check(admin_account, admin_signer, lords, resources, exchange, token_id, 10)
-    await buy_and_check(admin_account, admin_signer, lords, resources, exchange, token_id, 10)
+    await buy_and_check(admin_account, admin_signer, lords, resources, exchange, token_id, 100, fee_percent)
+    await buy_and_check(admin_account, admin_signer, lords, resources, exchange, token_id, 100, fee_percent)
 
 
 @pytest.mark.asyncio
@@ -266,8 +272,9 @@ async def test_sell_price(exchange_factory):
     currency_reserve = 1000
     token_reserve = 1000
     token_id = 3
+    fee_percent = Fraction(ctx.exchange_fee, 1000)
 
     await initial_liq(admin_signer, admin_account, exchange, lords, resources, currency_reserve, token_id, token_reserve)
     # Sell and check twice
-    await sell_and_check(admin_account, admin_signer, lords, resources, exchange, token_id, 10)
-    await sell_and_check(admin_account, admin_signer, lords, resources, exchange, token_id, 10)
+    await sell_and_check(admin_account, admin_signer, lords, resources, exchange, token_id, 100, fee_percent)
+    await sell_and_check(admin_account, admin_signer, lords, resources, exchange, token_id, 100, fee_percent)

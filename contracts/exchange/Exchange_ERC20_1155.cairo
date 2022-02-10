@@ -47,6 +47,11 @@ end
 func lp_reserves(token_id : felt) -> (total : Uint256):
 end
 
+# Liquidity pool rewards in thousandths (e.g. 15 = 1.5% fee)
+@storage_var
+func lp_fee_thousands() -> (lp_fee_thousands : Uint256):
+end
+
 # Note: We use ERC1155_balanceOf(contract_address) to record token reserves
 
 @constructor
@@ -57,9 +62,11 @@ func constructor {
     }(
         currency_address_: felt,
         token_address_: felt,
+        lp_fee_thousands_: Uint256,
     ):
         currency_address.write(currency_address_)
         token_address.write(token_address_)
+        lp_fee_thousands.write(lp_fee_thousands_)
     return ()
 end
 
@@ -299,7 +306,6 @@ func sell_tokens {
         sold: Uint256
     ):
     #FIXME Add deadline
-    #FIXME Recipient as a param
     alloc_locals
     let (caller) = get_caller_address()
     let (contract) = get_contract_address()
@@ -350,19 +356,28 @@ func get_buy_price {
         price: Uint256
     ):
     alloc_locals
+    let (lp_fee_thousands_) = lp_fee_thousands.read()
+    let (lp_fee) = uint256_sub(Uint256(1000, 0), lp_fee_thousands_)
 
     # Calculate price
-    #FIXME Add fee
-    let (numerator, is_overflow) = uint256_mul(currency_reserves, token_amount)
-    assert is_overflow = Uint256(0, 0)
-    let (token_res_left) = uint256_sub(token_reserves, token_amount)
-    let (price, remainder) = uint256_unsigned_div_rem(numerator, token_res_left)
-    #FIXME If remainder then add 1
-    # let (is_not_z) = uint256_eq(remainder, Uint256(0, 0))
-    # if is_not_z == (1):
-    #     let (price, _) = uint256_add(price, Uint256(1, 0))
-    # end
+    let (numerator, mul_overflow) = uint256_mul(currency_reserves, token_amount)
+    assert mul_overflow = Uint256(0, 0)
+    let (denominator) = uint256_sub(token_reserves, token_amount)
 
+    # Add LP fee
+    let (numerator, mul_overflow) = uint256_mul(numerator, Uint256(1000, 0))
+    assert mul_overflow = Uint256(0, 0)
+    let (denominator, mul_overflow) = uint256_mul(denominator, lp_fee)
+    assert mul_overflow = Uint256(0, 0)
+
+    let (price, remainder) = uint256_unsigned_div_rem(numerator, denominator)
+
+    let (is_z) = uint256_eq(remainder, Uint256(0, 0))
+    if is_z == (1):
+        return (price)
+    end
+
+    let (price, _) = uint256_add(price, Uint256(1, 0))
     return (price)
 
 end
@@ -381,15 +396,22 @@ func get_sell_price {
         price: Uint256
     ):
     alloc_locals
+    let (lp_fee_thousands_) = lp_fee_thousands.read()
+    let (lp_fee) = uint256_sub(Uint256(1000, 0), lp_fee_thousands_)
 
     # Calculate price
-    #FIXME Add fee
     let (numerator, mul_overflow) = uint256_mul(token_amount, currency_reserves)
     assert mul_overflow = Uint256(0, 0)
-    let (local denominator: Uint256, is_overflow) = uint256_add(token_reserves, token_amount)
+    let (denominator, is_overflow) = uint256_add(token_reserves, token_amount)
     assert is_overflow = 0
-    let (price, _) = uint256_unsigned_div_rem(numerator, denominator)
 
+    # Add LP fee
+    let (numerator, mul_overflow) = uint256_mul(numerator, lp_fee)
+    assert mul_overflow = Uint256(0, 0)
+    let (denominator, mul_overflow) = uint256_mul(denominator, Uint256(1000, 0))
+    assert mul_overflow = Uint256(0, 0)
+
+    let (price, _) = uint256_unsigned_div_rem(numerator, denominator)
     # Rounding errors favour the contract
     return (price)
 
@@ -428,6 +450,18 @@ func get_currency_reserves {
         currency_reserves: Uint256
     ):
     return currency_reserves.read(token_id)
+end
+
+@view
+func get_lp_fee_thousands {
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }(
+    ) -> (
+        lp_fee_thousands: Uint256
+    ):
+    return lp_fee_thousands.read()
 end
 
 #
