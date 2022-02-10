@@ -4,7 +4,7 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.alloc import alloc
-from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
+from starkware.starknet.common.syscalls import get_caller_address, get_contract_address, get_block_timestamp
 from starkware.cairo.common.math import assert_nn, assert_le, assert_not_zero
 from starkware.cairo.common.math_cmp import is_not_zero
 from starkware.cairo.common.uint256 import (
@@ -127,9 +127,13 @@ func add_liquidity {
         max_currency_amount: Uint256,
         token_id: felt,
         token_amount: Uint256,
+        deadline: felt,
     ):
-        #FIXME add deadline
         alloc_locals
+
+        let (block_timestamp) = get_block_timestamp()
+        assert_le(block_timestamp, deadline)
+
         let (caller) = get_caller_address()
         let (contract) = get_contract_address()
 
@@ -187,9 +191,13 @@ func remove_liquidity {
         token_id: felt,
         min_token_amount: Uint256,
         lp_amount: Uint256,
+        deadline: felt,
     ):
-        #FIXME add deadline
         alloc_locals
+
+        let (block_timestamp) = get_block_timestamp()
+        assert_le(block_timestamp, deadline)
+
         let (caller) = get_caller_address()
         let (contract) = get_contract_address()
 
@@ -248,12 +256,16 @@ func buy_tokens {
         max_currency_amount: Uint256,
         token_id: felt,
         token_amount: Uint256,
+        deadline: felt,
     ) -> (
         sold: Uint256
     ):
-    #FIXME Add deadline
     #FIXME Recipient as a param
     alloc_locals
+
+    let (block_timestamp) = get_block_timestamp()
+    assert_le(block_timestamp, deadline)
+
     let (caller) = get_caller_address()
     let (contract) = get_contract_address()
 
@@ -302,11 +314,16 @@ func sell_tokens {
         min_currency_amount: Uint256,
         token_id: felt,
         token_amount: Uint256,
+        deadline: felt,
     ) -> (
         sold: Uint256
     ):
     #FIXME Add deadline
     alloc_locals
+
+    let (block_timestamp) = get_block_timestamp()
+    assert_le(block_timestamp, deadline)
+
     let (caller) = get_caller_address()
     let (contract) = get_contract_address()
 

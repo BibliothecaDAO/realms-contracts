@@ -1,7 +1,8 @@
 import pytest
+import conftest
 import math
 from fractions import Fraction
-from utils import uint
+from utils import uint, assert_revert
 
 @pytest.fixture(scope='module')
 async def exchange_factory(ctx_factory):
@@ -43,7 +44,11 @@ async def set_erc20_allowance(signer, account, erc20, who, amount):
         [who, *uint(amount)]
     )
 
-async def initial_liq(admin_signer, admin_account, exchange, lords, resources, currency_amount, token_id, token_spent):
+async def initial_liq(admin_signer, admin_account, ctx, currency_amount, token_id, token_spent):
+    exchange = ctx.exchange
+    lords = ctx.lords
+    resources = ctx.resources
+
     # Approve access
     await set_erc20_allowance(admin_signer, admin_account, lords, exchange.contract_address, currency_amount)
     await admin_signer.send_transaction(
@@ -62,7 +67,11 @@ async def initial_liq(admin_signer, admin_account, exchange, lords, resources, c
     )
 
 
-async def add_liq(admin_signer, admin_account, exchange, lords, resources, max_currency, token_id, token_spent):
+async def add_liq(admin_signer, admin_account, ctx, max_currency, token_id, token_spent):
+    exchange = ctx.exchange
+    lords = ctx.lords
+    resources = ctx.resources
+
     # Approve access
     await set_erc20_allowance(admin_signer, admin_account, lords, exchange.contract_address, max_currency)
     await admin_signer.send_transaction(
@@ -73,11 +82,17 @@ async def add_liq(admin_signer, admin_account, exchange, lords, resources, max_c
     )
 
     # Provide liquidity
+    current_time = conftest.get_block_timestamp(ctx.starknet.state)
     await admin_signer.send_transaction(
         admin_account,
         exchange.contract_address,
         'add_liquidity',
-        [*uint(max_currency), token_id, *uint(token_spent)]
+        [
+            *uint(max_currency),
+            token_id,
+            *uint(token_spent),
+            current_time + 1000,
+        ]
     )
 
 
@@ -107,7 +122,7 @@ async def test_liquidity(exchange_factory):
     before_lords_bal, before_resources_bal = await get_token_bals(admin_account, lords, resources, token_id)
 
     # Do it
-    await initial_liq(admin_signer, admin_account, exchange, lords, resources, currency_amount, token_id, token_spent)
+    await initial_liq(admin_signer, admin_account, ctx, currency_amount, token_id, token_spent)
 
     # After states
     after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources, token_id)
@@ -122,7 +137,7 @@ async def test_liquidity(exchange_factory):
     assert res.result.balance == currency_amount
 
     # Add more liquidity using the same spread
-    await add_liq(admin_signer, admin_account, exchange, lords, resources, currency_amount, token_id, token_spent)
+    await add_liq(admin_signer, admin_account, ctx, currency_amount, token_id, token_spent)
     # After states
     after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources, token_id)
     assert uint(before_lords_bal[0] - (currency_amount * 2)) == after_lords_bal
@@ -142,6 +157,7 @@ async def test_liquidity(exchange_factory):
         'setApprovalForAll',
         [exchange.contract_address, True]
     )
+    current_time = conftest.get_block_timestamp(ctx.starknet.state)
     await admin_signer.send_transaction(
         admin_account,
         exchange.contract_address,
@@ -151,6 +167,7 @@ async def test_liquidity(exchange_factory):
             token_id,
             *uint(token_spent),
             *uint(currency_amount), # LP amount directly to currency_amount
+            current_time + 1000,
         ]
     )
     # After states
@@ -173,7 +190,11 @@ def calc_d_x(old_x, old_y, d_y):
     d_x = new_x - old_x
     return d_x
 
-async def buy_and_check(admin_account, admin_signer, lords, resources, exchange, resource_id, token_to_buy, fee_percent):
+async def buy_and_check(admin_account, admin_signer, ctx, resource_id, token_to_buy, fee_percent):
+    exchange = ctx.exchange
+    lords = ctx.lords
+    resources = ctx.resources
+
     before_lords_bal, before_resources_bal = await get_token_bals(admin_account, lords, resources, resource_id)
 
     before_currency_reserve = (await exchange.get_currency_reserves(resource_id).call()).result.currency_reserves[0]
@@ -188,6 +209,7 @@ async def buy_and_check(admin_account, admin_signer, lords, resources, exchange,
     assert res.result.price == uint(currency_diff_required)
 
     # Make sale
+    current_time = conftest.get_block_timestamp(ctx.starknet.state)
     max_currency = currency_diff_required + 10 # Increment max currency to ensure correct price is used
     await set_erc20_allowance(admin_signer, admin_account, lords, exchange.contract_address, max_currency)
     await admin_signer.send_transaction(
@@ -198,6 +220,7 @@ async def buy_and_check(admin_account, admin_signer, lords, resources, exchange,
             *uint(max_currency),
             resource_id,
             *uint(token_to_buy),
+            current_time + 1000,
         ]
     )
     after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources, resource_id)
@@ -207,7 +230,11 @@ async def buy_and_check(admin_account, admin_signer, lords, resources, exchange,
     assert before_currency_reserve + currency_diff_required == after_currency_reserve
 
 
-async def sell_and_check(admin_account, admin_signer, lords, resources, exchange, resource_id, token_to_sell, fee_percent):
+async def sell_and_check(admin_account, admin_signer, ctx, resource_id, token_to_sell, fee_percent):
+    exchange = ctx.exchange
+    lords = ctx.lords
+    resources = ctx.resources
+
     before_lords_bal, before_resources_bal = await get_token_bals(admin_account, lords, resources, resource_id)
 
     before_currency_reserve = (await exchange.get_currency_reserves(resource_id).call()).result.currency_reserves[0]
@@ -222,6 +249,7 @@ async def sell_and_check(admin_account, admin_signer, lords, resources, exchange
     assert res.result.price == uint(currency_diff_required)
 
     # Make sale
+    current_time = conftest.get_block_timestamp(ctx.starknet.state)
     min_currency = currency_diff_required - 2 # Add a bit of fat
     await admin_signer.send_transaction(
         admin_account,
@@ -231,6 +259,7 @@ async def sell_and_check(admin_account, admin_signer, lords, resources, exchange
             *uint(min_currency),
             resource_id,
             *uint(token_to_sell),
+            current_time + 1000,
         ]
     )
     after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources, resource_id)
@@ -246,18 +275,15 @@ async def test_buy_price(exchange_factory):
     ctx = exchange_factory
     admin_signer = ctx.signers['admin']
     admin_account = ctx.admin
-    exchange = ctx.exchange
-    lords = ctx.lords
-    resources = ctx.resources
     currency_reserve = 10000
     token_reserve = 5000
     token_id = 2
     fee_percent = Fraction(ctx.exchange_fee, 1000)
 
-    await initial_liq(admin_signer, admin_account, exchange, lords, resources, currency_reserve, token_id, token_reserve)
+    await initial_liq(admin_signer, admin_account, ctx, currency_reserve, token_id, token_reserve)
     # Buy and check twice
-    await buy_and_check(admin_account, admin_signer, lords, resources, exchange, token_id, 100, fee_percent)
-    await buy_and_check(admin_account, admin_signer, lords, resources, exchange, token_id, 100, fee_percent)
+    await buy_and_check(admin_account, admin_signer, ctx, token_id, 100, fee_percent)
+    await buy_and_check(admin_account, admin_signer, ctx, token_id, 100, fee_percent)
 
 
 @pytest.mark.asyncio
@@ -266,15 +292,98 @@ async def test_sell_price(exchange_factory):
     ctx = exchange_factory
     admin_signer = ctx.signers['admin']
     admin_account = ctx.admin
-    exchange = ctx.exchange
-    lords = ctx.lords
-    resources = ctx.resources
     currency_reserve = 1000
     token_reserve = 1000
     token_id = 3
     fee_percent = Fraction(ctx.exchange_fee, 1000)
 
-    await initial_liq(admin_signer, admin_account, exchange, lords, resources, currency_reserve, token_id, token_reserve)
+    await initial_liq(admin_signer, admin_account, ctx, currency_reserve, token_id, token_reserve)
     # Sell and check twice
-    await sell_and_check(admin_account, admin_signer, lords, resources, exchange, token_id, 100, fee_percent)
-    await sell_and_check(admin_account, admin_signer, lords, resources, exchange, token_id, 100, fee_percent)
+    await sell_and_check(admin_account, admin_signer, ctx, token_id, 100, fee_percent)
+    await sell_and_check(admin_account, admin_signer, ctx, token_id, 100, fee_percent)
+
+
+@pytest.mark.asyncio
+async def test_deadlines_respected(exchange_factory):
+    print("test_deadlines_respected")
+    ctx = exchange_factory
+    admin_signer = ctx.signers['admin']
+    admin_account = ctx.admin
+    exchange = ctx.exchange
+    lords = ctx.lords
+    resources = ctx.resources
+    currency_amount = 10000
+    token_amount = 1000
+    token_id = 1
+    earlier_time = conftest.get_block_timestamp(ctx.starknet.state) - 1000
+
+    # Before states
+    before_lords_bal, before_resources_bal = await get_token_bals(admin_account, lords, resources, token_id)
+    before_ex_lords_bal, before_ex_resources_bal = await get_token_bals(exchange, lords, resources, token_id)
+
+    # Approve access
+    await set_erc20_allowance(admin_signer, admin_account, lords, exchange.contract_address, currency_amount)
+    await admin_signer.send_transaction(
+        admin_account,
+        resources.contract_address,
+        'setApprovalForAll',
+        [exchange.contract_address, True]
+    )
+    # Provide liquidity
+    await assert_revert(admin_signer.send_transaction(
+        admin_account,
+        exchange.contract_address,
+        'add_liquidity',
+        [
+            *uint(currency_amount),
+            token_id,
+            *uint(token_amount),
+            earlier_time,
+        ]
+    ))
+    # Remove liquidity
+    await assert_revert(admin_signer.send_transaction(
+        admin_account,
+        exchange.contract_address,
+        'remove_liquidity',
+        [
+            *uint(currency_amount),
+            token_id,
+            *uint(token_amount),
+            *uint(currency_amount),
+            earlier_time,
+        ]
+    ))
+    # Buy
+    await assert_revert(admin_signer.send_transaction(
+        admin_account,
+        exchange.contract_address,
+        'buy_tokens',
+        [
+            *uint(currency_amount),
+            token_id,
+            *uint(token_amount),
+            earlier_time,
+        ]
+    ))
+    # Sell
+    await assert_revert(admin_signer.send_transaction(
+        admin_account,
+        exchange.contract_address,
+        'sell_tokens',
+        [
+            *uint(currency_amount),
+            token_id,
+            *uint(token_amount),
+            earlier_time,
+        ]
+    ))
+
+    # After states
+    after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources, token_id)
+    after_ex_lords_bal, after_ex_resources_bal = await get_token_bals(exchange, lords, resources, token_id)
+
+    assert before_lords_bal == after_lords_bal
+    assert before_resources_bal == after_resources_bal
+    assert before_ex_lords_bal == after_ex_lords_bal
+    assert before_ex_resources_bal == after_ex_resources_bal
