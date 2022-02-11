@@ -260,7 +260,6 @@ func buy_tokens {
     ) -> (
         sold: Uint256
     ):
-    #FIXME Recipient as a param
     alloc_locals
 
     let (block_timestamp) = get_block_timestamp()
@@ -279,12 +278,8 @@ func buy_tokens {
     IERC20.transferFrom(currency_address_, caller, contract, max_currency_amount)
     tempvar syscall_ptr :felt* = syscall_ptr
 
-    #FIXME Fees / royalties
-
     # Calculate prices
     let (currency_amount) = get_buy_price(token_amount, currency_reserves_, Uint256(token_reserves, 0))
-
-    #TODO Fees
 
     # Calculate refund
     let (refund_amount) = uint256_sub(max_currency_amount, currency_amount)
@@ -318,7 +313,6 @@ func sell_tokens {
     ) -> (
         sold: Uint256
     ):
-    #FIXME Add deadline
     alloc_locals
 
     let (block_timestamp) = get_block_timestamp()
