@@ -181,33 +181,81 @@ async def test_time_multiplier(game_factory):
 @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
 async def test_game_state_expiry(game_factory):
 
-    starknet, accounts, signers, _, _, _, tower_defence, _ = game_factory
+    starknet, accounts, signers, _, _, elements_token, tower_defence, _ = game_factory
     
     admin_key = signers[0]
     admin_account = accounts[0]
+
+    player_one_key = signers[1]
+    player_one_account = accounts[1]
+
 
     # Set mock value for get_block_number
     mock_block_num = 1
 
     starknet.state.state.block_info = BlockInfo(mock_block_num, 123456789)
 
+    small_health = 500
+
+    dark_token_id = 12
+
     await admin_key.send_transaction(
         account=admin_account,
         to=tower_defence.contract_address,
         selector_name='create_game',
         calldata=[
-            INITIAL_TOWER_HEALTH
+            small_health
         ]
     )
 
-    game_idx = 1
+    await admin_key.send_transaction(
+        account=admin_account,
+        to=elements_token.contract_address,
+        selector_name='safe_batch_transfer_from',
+        calldata=[
+            admin_account.contract_address,
+            player_one_account.contract_address, 
+            1,
+            12, # Token IDs
+            1,
+            1000 * BOOST_UNIT_MULTIPLIER
+        ]
+    )
 
+    await player_one_key.send_transaction(
+        account=player_one_account,
+        to=elements_token.contract_address,
+        selector_name="set_approval_for_all",
+        calldata=[
+            tower_defence.contract_address,
+            1
+        ]
+    )
+    game_idx = 1
+    
     exec_res = await tower_defence.get_game_state(game_idx).call()
     assert exec_res.result.game_state_enum == GameStatus.Active.value
+
+    # Bring tower health to 0
+    await player_one_key.send_transaction(
+        account=player_one_account,
+        to=tower_defence.contract_address,
+        selector_name="attack_tower",
+        calldata=[
+            game_idx,
+            dark_token_id,
+            small_health
+        ]
+    )
+
+    exec_res = await tower_defence.get_game_state(game_idx).call()
+    assert exec_res.result.game_state_enum == GameStatus.Expired.value
 
     after_max_hours = ((BLOCKS_PER_MINUTE * 60) * HOURS_PER_GAME) + 1
     starknet.state.state.block_info = BlockInfo(after_max_hours, 123456789)
 
+    # Note: This assertion also works but is meaningless because
+    # game status is already expired. TODO: Create separate test
     exec_res = await tower_defence.get_game_state(game_idx).call()
     assert exec_res.result.game_state_enum == GameStatus.Expired.value
 

@@ -150,6 +150,9 @@ func attack_tower{
     let (local health) = I02_TowerStorage.get_main_health(tower_defence_storage, game_idx)
     let (local game_start) = I02_TowerStorage.get_game_start(tower_defence_storage, game_idx)
 
+    let (local game_status) = get_game_state( game_idx )
+    assert game_status = GameStatus.Active
+
     let (_, local odd_id) = unsigned_div_rem(tokens_id, 2)
     if odd_id == 1:
         [ap] = tokens_id + 1;ap++
@@ -225,6 +228,9 @@ func increase_shield{
     let (local tower_defence_storage) = IModuleController.get_module_address(controller, 2)
     let (local value) = I02_TowerStorage.get_shield_value(tower_defence_storage, game_idx, tokens_id) 
     let (local game_start) = I02_TowerStorage.get_game_start(tower_defence_storage, game_idx)
+
+    let (local game_status) = get_game_state( game_idx )
+    assert game_status = GameStatus.Active
 
     # Account for boost
     let (local boosted_amount ) = calc_amount_plus_boost( game_start, _amount )
@@ -340,6 +346,13 @@ func get_game_state{
     let (local controller) = controller_address.read()
     let (local element_token) = elements_token_address.read()
     let (local tower_defence_storage) = IModuleController.get_module_address(controller, 2)
+    let (local health) = I02_TowerStorage.get_main_health(tower_defence_storage, game_idx)
+
+    let (health_depleted) = is_le_felt( health, 0 )
+
+    if health_depleted == 1:
+        return (GameStatus.Expired)
+    end
 
     let (block_num) = get_block_number()
 
