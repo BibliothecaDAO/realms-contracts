@@ -36,6 +36,15 @@ struct GameStatus:
     member Expired : felt
 end
 
+const TOKEN_BASE_FACTOR = 10
+
+struct ElementTokenOffset:
+    member None : felt
+    member Light : felt
+    member Dark : felt
+    # ... ?
+end
+
 # ############ Constructor ##############
 @constructor
 func constructor{
@@ -127,6 +136,13 @@ func attack_tower{
         _amount : felt
     ):
     alloc_locals
+
+    # Restrict attack action to dark tokens
+    let (local base, local offset) = unsigned_div_rem( tokens_id, TOKEN_BASE_FACTOR )
+    assert offset = ElementTokenOffset.Dark
+    # Make sure token IDs are allowed for this game
+    assert base = game_idx
+    
     let (local caller) = get_caller_address()
     let (local controller) = controller_address.read()
     let (local element_token) = elements_token_address.read()
@@ -196,6 +212,13 @@ func increase_shield{
         _amount : felt
     ):
     alloc_locals
+
+    # Restrict shield action to light tokens
+    let (local base, local offset) = unsigned_div_rem( tokens_id, TOKEN_BASE_FACTOR )
+    assert offset = ElementTokenOffset.Light
+    # Make sure token IDs are allowed for this game
+    assert base = game_idx
+
     let (local caller) = get_caller_address()
     let (local controller) = controller_address.read()
     let (local element_token) = elements_token_address.read()
