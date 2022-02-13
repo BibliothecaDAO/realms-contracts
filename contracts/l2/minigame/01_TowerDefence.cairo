@@ -7,6 +7,11 @@ from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.math_cmp import (is_le_felt, is_le)
 from starkware.cairo.common.math import (unsigned_div_rem, assert_lt)
 
+from contracts.l2.utils.Ownable_base import (
+    Ownable_initializer,
+    Ownable_only_owner
+)
+
 from contracts.l2.minigame.utils.interfaces import IModuleController, I02_TowerStorage
 from contracts.l2.tokens.IERC1155 import IERC1155
 from contracts.l2.game_utils.game_structs import ShieldGameRole
@@ -55,12 +60,15 @@ func constructor{
         address_of_controller : felt,
         address_of_elements_token : felt,
         _blocks_per_min : felt,
-        _hours_per_game : felt
+        _hours_per_game : felt,
+        _owner : felt
     ):
     controller_address.write(address_of_controller) 
     elements_token_address.write(address_of_elements_token)
     blocks_per_minute.write(_blocks_per_min)
     hours_per_game.write(_hours_per_game)
+
+    Ownable_initializer(_owner)
     
     return ()
 end
@@ -102,10 +110,9 @@ func create_game{
         _init_main_health : felt
     ):
     alloc_locals
+    Ownable_only_owner()
 
     let (local controller) = controller_address.read()
-
-    # TODO: Restrict to only_owner
 
     let (local tower_defence_storage) = IModuleController.get_module_address(
         controller, 2)

@@ -95,7 +95,8 @@ async def game_factory(controller_factory):
             ctx.controller.contract_address,
             ctx.elements_token.contract_address,
             BLOCKS_PER_MINUTE,
-            HOURS_PER_GAME
+            HOURS_PER_GAME,
+            ctx.admin.contract_address
         ]
     )
     ctx.tower_defence = tower_defence
@@ -514,3 +515,20 @@ async def test_get_game_context_variables(game_factory):
     assert exec_info.result.game_start == start_block_num
     assert exec_info.result.main_health == INITIAL_TOWER_HEALTH
     assert exec_info.result.curr_boost == 138 # The initial basis points at hour 1
+
+@pytest.mark.asyncio
+async def test_game_start_restrictions(game_factory):
+    starknet = game_factory.starknet
+    tower_defence = game_factory.tower_defence
+    
+    start_block_num = 1
+    starknet.state.state.block_info = BlockInfo(start_block_num, 123456789)
+
+    # Only the admin can start game, not player 1
+    with pytest.raises(StarkException):
+        await game_factory.execute(
+            "player1",
+            tower_defence.contract_address,
+            "create_game",
+            [ INITIAL_TOWER_HEALTH ]
+        )
