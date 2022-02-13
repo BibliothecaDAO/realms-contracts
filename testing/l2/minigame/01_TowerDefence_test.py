@@ -1,15 +1,12 @@
 import pytest
 import asyncio
 import enum
+import logging
 
 from starkware.starknet.business_logic.state import BlockInfo
 from starkware.starkware_utils.error_handling import StarkException
-from starkware.starknet.definitions.error_codes import StarknetErrorCode
 
-from fixtures.account import account_factory
-from utils.string import str_to_felt
-
-NUM_SIGNING_ACCOUNTS = 4
+LOGGER = logging.getLogger(__name__)
 
 TOKEN_BASE_FACTOR = 10
 LIGHT_TOKEN_ID_OFFSET = 1
@@ -31,103 +28,113 @@ BLOCKS_PER_MINUTE = 4 # 15sec
 HOURS_PER_GAME = 36
 
 @pytest.fixture(scope='module')
-def event_loop():
-    return asyncio.new_event_loop()
+async def controller_factory(ctx_factory):
+    ctx = ctx_factory()
 
-@pytest.fixture(scope='module')
-async def game_factory(account_factory):
-    (starknet, accounts, signers) = account_factory
-    admin_key = signers[0]
-    admin_account = accounts[0]
+    admin_account = ctx.admin
 
     # The Controller is the only unchangeable contract.
     # First deploy Arbiter.
     # Then send the Arbiter address during Controller deployment.
     # Then save the controller address in the Arbiter.
     # Then deploy Controller address during module deployments.
-    arbiter = await starknet.deploy(
+    arbiter = await ctx.starknet.deploy(
         source="contracts/l2/settling_game/Arbiter.cairo",
         constructor_calldata=[admin_account.contract_address])
-    controller = await starknet.deploy(
+    ctx.arbiter = arbiter
+    
+    controller = await ctx.starknet.deploy(
         source="contracts/l2/settling_game/ModuleController.cairo",
         constructor_calldata=[arbiter.contract_address])
-    await admin_key.send_transaction(
-        account=admin_account,
-        to=arbiter.contract_address,
-        selector_name='set_address_of_controller',
-        calldata=[controller.contract_address])
-    print(admin_account)
+    ctx.controller = controller
+    
+    await ctx.execute(
+        "admin",
+        ctx.arbiter.contract_address,
+        "set_address_of_controller",
+        [controller.contract_address]
+    )
 
-    elements_token = await starknet.deploy(
+    elements_token = await ctx.starknet.deploy(
         "contracts/l2/tokens/ERC1155.cairo",
         constructor_calldata=[
             admin_account.contract_address,
             1,1,1,1,1 # TokenURI struct
         ]
     )
+    ctx.elements_token = elements_token
 
     # Tests usually use game 1
     game_idx = 1 
     light_token_id = game_idx * TOKEN_BASE_FACTOR + LIGHT_TOKEN_ID_OFFSET
     dark_token_id = game_idx * TOKEN_BASE_FACTOR + DARK_TOKEN_ID_OFFSET
-
-    await admin_key.send_transaction(
-        account=admin_account,
-        to=elements_token.contract_address,
-        selector_name='mint_batch',
-        calldata=[
+    await ctx.execute(
+        "admin",
+        elements_token.contract_address,
+        "mint_batch",
+        [
             admin_account.contract_address,
             2,
             light_token_id, dark_token_id,
             2,
-            3000 * BOOST_UNIT_MULTIPLIER, 3000 * BOOST_UNIT_MULTIPLIER, # Amounts
-        ])
+            5000 * BOOST_UNIT_MULTIPLIER, 5000 * BOOST_UNIT_MULTIPLIER, # Amounts
+        ]
+    )
 
-    
-    tower_defence = await starknet.deploy(
+    return ctx
+
+# These contracts needs to be fresh for each test
+# to keep tests simple and understandable
+@pytest.fixture()
+async def game_factory(controller_factory):
+    ctx = controller_factory
+
+    tower_defence = await ctx.starknet.deploy(
         source="contracts/l2/minigame/01_TowerDefence.cairo",
         constructor_calldata=[
-            controller.contract_address,
-            elements_token.contract_address,
+            ctx.controller.contract_address,
+            ctx.elements_token.contract_address,
             BLOCKS_PER_MINUTE,
             HOURS_PER_GAME
         ]
     )
-    
-    tower_defence_storage = await starknet.deploy(
-        source="contracts/l2/minigame/02_TowerDefenceStorage.cairo",
-        constructor_calldata=[controller.contract_address]
-    )
+    ctx.tower_defence = tower_defence
 
-    await admin_key.send_transaction(
-        account=admin_account,
-        to=arbiter.contract_address,
-        selector_name='batch_set_controller_addresses',
-        calldata=[
-            tower_defence.contract_address, tower_defence_storage.contract_address])
-    return starknet, accounts, signers, arbiter, controller, elements_token, tower_defence, tower_defence_storage
+
+    tower_defence_storage = await ctx.starknet.deploy(
+        source="contracts/l2/minigame/02_TowerDefenceStorage.cairo",
+        constructor_calldata=[ctx.controller.contract_address]
+    )
+    ctx.tower_defence_storage = tower_defence_storage
+
+    await ctx.execute(
+        "admin",
+        ctx.arbiter.contract_address,
+        "batch_set_controller_addresses",
+        [
+            ctx.tower_defence.contract_address,
+            tower_defence_storage.contract_address
+        ]
+    )
+    return ctx
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
 async def test_game_creation(game_factory):
-
-    starknet, accounts, signers, _, _, _, tower_defence, tower_defence_storage = game_factory
     
-    admin_key = signers[0]
-    admin_account = accounts[0]
+    starknet = game_factory.starknet
+    tower_defence = game_factory.tower_defence
+    tower_defence_storage = game_factory.tower_defence_storage
 
     # Set mock value for get_block_number and get_block_timestamp
     expected_block_number = 69420
 
     starknet.state.state.block_info = BlockInfo(expected_block_number, 2343243294)
 
-    await admin_key.send_transaction(
-        account=admin_account,
-        to=tower_defence.contract_address,
-        selector_name='create_game',
-        calldata=[
-            INITIAL_TOWER_HEALTH
-        ]
+    await game_factory.execute(
+        "admin",
+        tower_defence.contract_address,
+        "create_game",
+        [ INITIAL_TOWER_HEALTH ]
     )
 
     expected_game_index = 1
@@ -139,9 +146,8 @@ async def test_game_creation(game_factory):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
 async def test_time_multiplier(game_factory):
-    _, _, _, _, _, _, tower_defence, _ = game_factory
+    tower_defence = game_factory.tower_defence
 
     blocks_per_hour = BLOCKS_PER_MINUTE * 60
 
@@ -178,70 +184,61 @@ async def test_time_multiplier(game_factory):
     # assert execution_info.result.basis_points == 5000
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
 async def test_game_state_expiry(game_factory):
 
-    starknet, accounts, signers, _, _, elements_token, tower_defence, _ = game_factory
+    starknet = game_factory.starknet
+    tower_defence = game_factory.tower_defence
+    elements_token = game_factory.elements_token
     
-    admin_key = signers[0]
-    admin_account = accounts[0]
-
-    player_one_key = signers[1]
-    player_one_account = accounts[1]
-
 
     # Set mock value for get_block_number
-    mock_block_num = 1
+    mock_block_num = 69421
 
-    starknet.state.state.block_info = BlockInfo(mock_block_num, 123456789)
+    starknet.state.state.block_info = BlockInfo(mock_block_num, 2343243296)
 
     small_health = 500
-
-    dark_token_id = 12
-
-    await admin_key.send_transaction(
-        account=admin_account,
-        to=tower_defence.contract_address,
-        selector_name='create_game',
-        calldata=[
-            small_health
-        ]
+    game_idx = 1
+    dark_token_id = game_idx * TOKEN_BASE_FACTOR + DARK_TOKEN_ID_OFFSET
+    await game_factory.execute(
+        "admin",
+        tower_defence.contract_address,
+        "create_game",
+        [ small_health ]
     )
 
-    await admin_key.send_transaction(
-        account=admin_account,
-        to=elements_token.contract_address,
-        selector_name='safe_batch_transfer_from',
-        calldata=[
-            admin_account.contract_address,
-            player_one_account.contract_address, 
+    await game_factory.execute(
+        "admin",
+        elements_token.contract_address,
+        "safe_batch_transfer_from",
+        [
+            game_factory.admin.contract_address,
+            game_factory.player1.contract_address,
             1,
-            12, # Token IDs
+            dark_token_id, # Token IDs
             1,
             1000 * BOOST_UNIT_MULTIPLIER
         ]
     )
 
-    await player_one_key.send_transaction(
-        account=player_one_account,
-        to=elements_token.contract_address,
-        selector_name="set_approval_for_all",
-        calldata=[
+    await game_factory.execute(
+        "player1",
+        elements_token.contract_address,
+        "set_approval_for_all",
+        [
             tower_defence.contract_address,
             1
         ]
     )
-    game_idx = 1
-    
+        
     exec_res = await tower_defence.get_game_state(game_idx).call()
     assert exec_res.result.game_state_enum == GameStatus.Active.value
 
     # Bring tower health to 0
-    await player_one_key.send_transaction(
-        account=player_one_account,
-        to=tower_defence.contract_address,
-        selector_name="attack_tower",
-        calldata=[
+    await game_factory.execute(
+        "player1",
+        tower_defence.contract_address,
+        "attack_tower",
+        [
             game_idx,
             dark_token_id,
             small_health
@@ -251,7 +248,7 @@ async def test_game_state_expiry(game_factory):
     exec_res = await tower_defence.get_game_state(game_idx).call()
     assert exec_res.result.game_state_enum == GameStatus.Expired.value
 
-    after_max_hours = ((BLOCKS_PER_MINUTE * 60) * HOURS_PER_GAME) + 1
+    after_max_hours = mock_block_num + ((BLOCKS_PER_MINUTE * 60) * HOURS_PER_GAME) + 1
     starknet.state.state.block_info = BlockInfo(after_max_hours, 123456789)
 
     # Note: This assertion also works but is meaningless because
@@ -261,11 +258,13 @@ async def test_game_state_expiry(game_factory):
 
     # Cannot claim rewards when game is expired
     with pytest.raises(StarkException):
-        await admin_key.send_transaction(
-            account=admin_account,
-            to=tower_defence.contract_address,
-            selector_name="claim_rewards",
-            calldata=[game_idx]
+        await game_factory.execute(
+            "admin",
+            tower_defence.contract_address,
+            "claim_rewards",
+            [
+                game_idx
+            ]
         )
         
 # Convenience to calculate boosted amount
@@ -273,23 +272,12 @@ def calc_amount_plus_boost(base_amount, bips):
     return (base_amount * BOOST_UNIT_MULTIPLIER) + ((base_amount * bips) // 100)
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
 async def test_shield_and_attack_tower(game_factory):
-
-    starknet, accounts, signers, _, _, elements_token, tower_defence, tower_defence_storage = game_factory
+    starknet = game_factory.starknet
+    tower_defence = game_factory.tower_defence
+    tower_defence_storage = game_factory.tower_defence_storage
+    elements_token = game_factory.elements_token
     
-    admin_key = signers[0]
-    admin_account = accounts[0]
-
-    player_one_key = signers[1]
-    player_one_account = accounts[1]
-
-    player_two_key = signers[2]
-    player_two_account = accounts[2]
-
-    player_three_key = signers[3]
-    player_three_account = accounts[3]
-
     # Account for time boost
     # For simplicity the following assertions will assume
     # game played in the first hour, which has a 138 basis point boost
@@ -297,7 +285,7 @@ async def test_shield_and_attack_tower(game_factory):
 
     tower_start_value = INITIAL_TOWER_HEALTH
 
-    game_idx = 1 
+    game_idx = 1
     # Deterministic token IDs
     light_token_id = game_idx * TOKEN_BASE_FACTOR + LIGHT_TOKEN_ID_OFFSET
     dark_token_id = game_idx * TOKEN_BASE_FACTOR + DARK_TOKEN_ID_OFFSET
@@ -306,114 +294,122 @@ async def test_shield_and_attack_tower(game_factory):
     mock_block_num = 1
     starknet.state.state.block_info = BlockInfo(mock_block_num, 123456789)
 
-    await admin_key.send_transaction(
-        account=admin_account,
-        to=tower_defence.contract_address,
-        selector_name="create_game",
-        calldata=[
-            INITIAL_TOWER_HEALTH
+    await game_factory.execute(
+        "admin",
+        tower_defence.contract_address,
+        "create_game",
+        [ INITIAL_TOWER_HEALTH ]
+    )
+
+    await game_factory.execute(
+        "admin",
+        elements_token.contract_address,
+        "safe_batch_transfer_from",
+        [
+            game_factory.admin.contract_address,
+            game_factory.player1.contract_address,
+            2,
+            light_token_id, dark_token_id,
+            2,
+            1000 * BOOST_UNIT_MULTIPLIER,
+            1000 * BOOST_UNIT_MULTIPLIER
         ]
     )
 
-    await admin_key.send_transaction(
-        account=admin_account,
-        to=elements_token.contract_address,
-        selector_name='safe_batch_transfer_from',
-        calldata=[
-            admin_account.contract_address,
-            player_one_account.contract_address, 
+    await game_factory.execute(
+        "admin",
+        elements_token.contract_address,
+        "safe_batch_transfer_from",
+        [
+            game_factory.admin.contract_address,
+            game_factory.player2.contract_address,
             2,
             light_token_id, dark_token_id,
             2,
             1000 * BOOST_UNIT_MULTIPLIER,
             1000 * BOOST_UNIT_MULTIPLIER
-        ])
+        ]
+    )
 
-    await admin_key.send_transaction(
-        account=admin_account,
-        to=elements_token.contract_address,
-        selector_name='safe_batch_transfer_from',
-        calldata=[
-            admin_account.contract_address,
-            player_two_account.contract_address,            
+    await game_factory.execute(
+        "admin",
+        elements_token.contract_address,
+        "safe_batch_transfer_from",
+        [
+            game_factory.admin.contract_address,
+            game_factory.player3.contract_address,
             2,
             light_token_id, dark_token_id,
             2,
             1000 * BOOST_UNIT_MULTIPLIER,
             1000 * BOOST_UNIT_MULTIPLIER
-        ])
+        ]
+    )
 
-    await admin_key.send_transaction(
-        account=admin_account,
-        to=elements_token.contract_address,
-        selector_name='safe_batch_transfer_from',
-        calldata=[
-            admin_account.contract_address,
-            player_three_account.contract_address,            
-            2,
-            light_token_id, dark_token_id,
-            2,
-            1000 * BOOST_UNIT_MULTIPLIER,
-            1000 * BOOST_UNIT_MULTIPLIER
-        ])
+    await game_factory.execute(
+        "player1",
+        elements_token.contract_address,
+        "set_approval_for_all",
+        [
+            tower_defence.contract_address,
+            1
+        ]
+    )
+
+    await game_factory.execute(
+        "player2",
+        elements_token.contract_address,
+        "set_approval_for_all",
+        [
+            tower_defence.contract_address,
+            1
+        ]
+    )
+
+    await game_factory.execute(
+        "player3",
+        elements_token.contract_address,
+        "set_approval_for_all",
+        [
+            tower_defence.contract_address,
+            1
+        ]
+    )
   
-    await player_one_key.send_transaction(
-        account=player_one_account,
-        to=elements_token.contract_address,
-        selector_name="set_approval_for_all",
-        calldata=[
-            tower_defence.contract_address,
-            1
-        ]
-    )
-    await player_two_key.send_transaction(
-        account=player_two_account,
-        to=elements_token.contract_address,
-        selector_name="set_approval_for_all",
-        calldata=[
-            tower_defence.contract_address,
-            1
-        ]
-    )
-    await player_three_key.send_transaction(
-        account=player_three_account,
-        to=elements_token.contract_address,
-        selector_name="set_approval_for_all",
-        calldata=[
-            tower_defence.contract_address,
-            1
-        ]
-    )
-
     # Player 1 Increases shield by 100 LIGHT
-
-    mock_block_num = 2
-    starknet.state.state.block_info = BlockInfo(mock_block_num, 123456790)
+    mock_block_num = mock_block_num + 24
+    starknet.state.state.block_info = BlockInfo(mock_block_num, 123456791)
 
     # Test token restrictions
     # Cannot use wrong game index - token ID mismatch
     with pytest.raises(StarkException):
-        await player_one_key.send_transaction(
-            account=player_one_account,
-            to=tower_defence.contract_address,
-            selector_name="increase_shield",
-            calldata=[
+        await game_factory.execute(
+            "player1",
+            tower_defence.contract_address,
+            "increase_shield",
+            [
                 2930, # Wrong game index
                 light_token_id,
                 100 * BOOST_UNIT_MULTIPLIER
             ]
         )
 
-    await player_one_key.send_transaction(
-        account=player_one_account,
-        to=tower_defence.contract_address,
-        selector_name="increase_shield",
-        calldata=[
+    
+    await game_factory.execute(
+        "player1",
+        tower_defence.contract_address,
+        "increase_shield",
+        [
             game_idx,
             light_token_id,
             100 * BOOST_UNIT_MULTIPLIER
         ]
     )
+
+    player_one_account = game_factory.player1
+    player_two_account = game_factory.player2
+    player_three_account = game_factory.player3
+
     execution_info = await elements_token.balance_of(player_one_account.contract_address, light_token_id).call()
     assert execution_info.result.res == 900 * BOOST_UNIT_MULTIPLIER
 
@@ -430,14 +426,13 @@ async def test_shield_and_attack_tower(game_factory):
     assert execution_info.result.res == 100 * BOOST_UNIT_MULTIPLIER
 
     # Player 2 Attacks with 50 DARK
-
-    await player_two_key.send_transaction(
-        account=player_two_account,
-        to=tower_defence.contract_address,
-        selector_name="attack_tower",
-        calldata=[
+    await game_factory.execute(
+        "player2",
+        tower_defence.contract_address,
+        "attack_tower",
+        [
             game_idx,
-            dark_token_id, 
+            dark_token_id,
             50 * BOOST_UNIT_MULTIPLIER
         ]
     )
@@ -459,11 +454,11 @@ async def test_shield_and_attack_tower(game_factory):
 
     # Player 3 Increases shield by 400 LIGHT
 
-    await player_three_key.send_transaction(
-        account=player_three_account,
-        to=tower_defence.contract_address,
-        selector_name="increase_shield",
-        calldata=[
+    await game_factory.execute(
+        "player3",
+        tower_defence.contract_address,
+        "increase_shield",
+        [
             game_idx,
             light_token_id,
             400 * BOOST_UNIT_MULTIPLIER
@@ -484,34 +479,27 @@ async def test_shield_and_attack_tower(game_factory):
     execution_info = await elements_token.balance_of(tower_defence.contract_address,light_token_id).call()
     assert execution_info.result.res == 500 * BOOST_UNIT_MULTIPLIER
 
-    execution_info = await elements_token.balance_of(player_one_account.contract_address,dark_token_id).call()
-    assert execution_info.result.res == 1000 * BOOST_UNIT_MULTIPLIER
-
     # Must claim rewards after game has expired
-    after_max_hours = ((BLOCKS_PER_MINUTE * 60) * HOURS_PER_GAME) + 1
+    after_max_hours = mock_block_num + ((BLOCKS_PER_MINUTE * 60) * HOURS_PER_GAME) + 1
     starknet.state.state.block_info = BlockInfo(after_max_hours, 123456789)
 
+    # TODO: Test reward claiming
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
 async def test_get_game_context_variables(game_factory):
 
-    starknet, accounts, signers, _, _, elements_token, tower_defence, tower_defence_storage = game_factory
     
-    admin_key = signers[0]
-    admin_account = accounts[0]
-
-
+    starknet = game_factory.starknet
+    tower_defence = game_factory.tower_defence
+    
     start_block_num = 1
     starknet.state.state.block_info = BlockInfo(start_block_num, 123456789)
 
-    await admin_key.send_transaction(
-        account=admin_account,
-        to=tower_defence.contract_address,
-        selector_name="create_game",
-        calldata=[
-            INITIAL_TOWER_HEALTH
-        ]
+    await game_factory.execute(
+        "admin",
+        tower_defence.contract_address,
+        "create_game",
+        [ INITIAL_TOWER_HEALTH ]
     )
 
     curr_mock_block_num = 2
