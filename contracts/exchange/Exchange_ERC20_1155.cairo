@@ -23,8 +23,6 @@ from contracts.token.ERC1155.ERC1155_base import (
     ERC1155_assert_is_owner_or_approved,
 )
 
-#FIXME Non-reentrant
-
 @event
 func liquidity_added(
         caller: felt,
@@ -134,7 +132,7 @@ func initial_liquidity {
         IERC1155.safeTransferFrom(token_address_, caller, contract, token_id, token_amount.low)
 
         # Assert otherwise rounding error could end up being significant on second deposit
-        let (ok) = uint256_le(Uint256(1000, 0), currency_amount) #FIXME
+        let (ok) = uint256_le(Uint256(1000, 0), currency_amount)
         assert_not_zero(ok)
 
         # Update currency  reserve size for Token id before transfer
