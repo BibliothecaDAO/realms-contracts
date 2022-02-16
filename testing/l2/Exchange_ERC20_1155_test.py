@@ -170,6 +170,32 @@ async def test_liquidity(exchange_factory):
             current_time + 1000,
         ]
     )
+    # Cannot remove liquidity when min amounts not met
+    await assert_revert(admin_signer.send_transaction(
+        admin_account,
+        exchange.contract_address,
+        'remove_liquidity',
+        [
+            *uint(currency_amount + 100),
+            token_id,
+            *uint(token_spent),
+            *uint(currency_amount),
+            current_time + 1000,
+        ]
+    ))
+    await assert_revert(admin_signer.send_transaction(
+        admin_account,
+        exchange.contract_address,
+        'remove_liquidity',
+        [
+            *uint(currency_amount),
+            token_id,
+            *uint(token_spent + 100),
+            *uint(currency_amount),
+            current_time + 1000,
+        ]
+    ))
+
     # After states
     after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources, token_id)
     assert uint(before_lords_bal[0] - currency_amount) == after_lords_bal

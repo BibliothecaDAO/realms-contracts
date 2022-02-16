@@ -258,6 +258,12 @@ func remove_liquidity {
         assert mul_overflow = Uint256(0, 0)
         let (tokens_owed, _) = uint256_unsigned_div_rem(numerator, lp_reserves_)
 
+        # Check minimums
+        let (above_zero) = uint256_le(min_currency_amount, currency_owed)
+        assert_not_zero(above_zero)
+        let (above_zero) = uint256_le(min_token_amount, tokens_owed)
+        assert_not_zero(above_zero)
+
         # New totals
         let (new_currency) = uint256_sub(currency_reserves_, currency_owed)
 
