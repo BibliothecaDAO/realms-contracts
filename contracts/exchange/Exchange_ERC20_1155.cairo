@@ -25,6 +25,42 @@ from contracts.token.ERC1155.ERC1155_base import (
 
 #FIXME Non-reentrant
 
+@event
+func liquidity_added(
+        caller: felt,
+        currency_amount: Uint256,
+        token_id: felt,
+        token_amount: Uint256,
+    ):
+end
+
+@event
+func liquidity_removed(
+        caller: felt,
+        currency_amount: Uint256,
+        token_id: felt,
+        token_amount: Uint256,
+    ):
+end
+
+@event
+func tokens_purchased(
+        caller: felt,
+        currency_sold: Uint256,
+        token_id: felt,
+        tokens_bought: Uint256,
+    ):
+end
+
+@event
+func currency_purchased(
+        caller: felt,
+        currency_bought: Uint256,
+        token_id: felt,
+        tokens_sold: Uint256,
+    ):
+end
+
 # Contract Address of ERC20 address for this swap contract
 @storage_var
 func currency_address() -> (address : felt):
@@ -110,7 +146,8 @@ func initial_liquidity {
         # Mint LP tokens
         ERC1155_mint(caller, token_id, currency_amount.low)
 
-        #TODO emit LP Added Event
+        # Emit event
+        liquidity_added.emit(caller, currency_amount, token_id, token_amount)
 
     return ()
 end
@@ -173,7 +210,8 @@ func add_liquidity {
         # Mint LP tokens
         ERC1155_mint(caller, token_id, currency_amount.low)
 
-        #TODO emit LP Added Event
+        # Emit event
+        liquidity_added.emit(caller, currency_amount, token_id, token_amount)
 
     return ()
 end
@@ -234,7 +272,8 @@ func remove_liquidity {
         tempvar syscall_ptr :felt* = syscall_ptr
         IERC1155.safeTransferFrom(token_address_, contract, caller, token_id, tokens_owed.low)
 
-        #TODO emit LP Removed Event
+        # Emit event
+        liquidity_removed.emit(caller, currency_owed, token_id, tokens_owed)
 
     return ()
 end
@@ -292,6 +331,9 @@ func buy_tokens {
     tempvar syscall_ptr :felt* = syscall_ptr
     IERC1155.safeTransferFrom(token_address_, contract, caller, token_id, token_amount.low)
 
+    # Emit event
+    tokens_purchased.emit(caller, currency_amount, token_id, token_amount)
+
     return (currency_amount)
 end
 
@@ -342,6 +384,9 @@ func sell_tokens {
     # Update reserves
     let (new_reserves) = uint256_sub(currency_reserves_, currency_amount)
     currency_reserves.write(token_id, new_reserves)
+
+    # Emit event
+    currency_purchased.emit(caller, currency_amount, token_id, token_amount)
 
     return (currency_amount)
 end
