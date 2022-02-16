@@ -3,6 +3,7 @@ import {
   checkDeployment,
   deployContract,
   getDeployedAddressInt,
+  getOwnerAccountInt,
   setupDeploymentDir,
 } from "./helpers";
 
@@ -22,11 +23,14 @@ async function main() {
   // Start at 8 hours per game for alpha testing
   const hoursPerGame = "8";
 
+  const owner = getOwnerAccountInt()
+
   await deployContract(contractName, contractName, [
     moduleControllerAddress,
     elementsTokenAddress,
     blocksPerMin,
     hoursPerGame,
+    owner
   ]);
 }
 
