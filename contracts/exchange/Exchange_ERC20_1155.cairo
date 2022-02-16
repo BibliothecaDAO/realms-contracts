@@ -1,6 +1,4 @@
-# Declare this file as a StarkNet contract and set the require builtins.
 %lang starknet
-%builtins pedersen range_check
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.alloc import alloc
