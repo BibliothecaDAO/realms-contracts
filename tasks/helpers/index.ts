@@ -60,10 +60,13 @@ export function writeDeployment(contractAlias: string, result: any) {
 }
 
 export function writeNileDeploymentFile(contractName: string, contractAlias: string, result: any) {
-  if (fs.existsSync(`./goerli.deployments.txt`)) {
-    fs.appendFileSync(`./goerli.deployments.txt`, `\n${result.address}:artifacts/abis/${contractName}.json:${contractAlias}`)
+
+  const deploymentFilename = "./minigame-deployments/goerli.deployments.txt";
+
+  if (fs.existsSync(deploymentFilename)) {
+    fs.appendFileSync(deploymentFilename, `\n${result.address}:artifacts/abis/${contractName}.json:${contractAlias}`)
   } else {
-    fs.writeFileSync(`./goerli.deployments.txt`, `${result.address}:artifacts/abis/${contractName}.json:${contractAlias}`)
+    fs.writeFileSync(deploymentFilename, `${result.address}:artifacts/abis/${contractName}.json:${contractAlias}`)
   }
 }
 
@@ -135,4 +138,9 @@ export function getSigner() {
   } catch( e ) {
     console.error("Signing error: ", e)
   }
+}
+
+export function getVersionSuffix() {
+  const now = new Date()
+  return `${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}`
 }
