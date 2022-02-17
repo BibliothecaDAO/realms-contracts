@@ -5,16 +5,14 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import "./ILootRealmsLockbox.sol";
-import "../arbitrum/ILootRealmsL2.sol";
-import "../arbitrum/utils/IInbox.sol";
-import "../arbitrum/utils/IOutbox.sol";
+import "./IRealmsBridgeLockbox.sol";
+import "./IStarknetCore.sol";
 
-contract LootRealmsLockbox is
+contract RealmsBridgeLockbox is
     OwnableUpgradeable,
     ReentrancyGuardUpgradeable,
     IERC721Receiver,
-    ILootRealmsLockbox
+    IRealmsBridgeLockbox
 {
     IERC721 public realmsContract;
     address public l2ContractAddress;
