@@ -1,3 +1,9 @@
+# Ethers
+ethers/
+
+# Types
+types/
+
 # StarkNet / Cairo
 artifacts/abis/*.json
 artifacts/*.json
