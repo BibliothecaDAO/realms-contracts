@@ -14,8 +14,8 @@ contract RealmsBridgeLockbox is
     IERC721Receiver,
     IRealmsBridgeLockbox
 {
-    IERC721 public realmsContract;
-    address public l2ContractAddress;
+    IERC721 public l1RealmsContract;
+    address public l2BridgeAddress;
     // The StarkNet core contract.
     IStarknetCore starknetCore;
 
@@ -32,14 +32,14 @@ contract RealmsBridgeLockbox is
     mapping(uint256 => address) public tokensToOwners;
 
     function initialize(
-        address _realmsAddress,
-        address _l2ContractAddress,
+        address _l1RealmsAddress,
+        address _l2BridgeAddress,
         address _starknetCoreAddress
     ) public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
-        realmsContract = IERC721(_realmsAddress);
-        l2ContractAddress = _l2ContractAddress;
+        l1RealmsContract = IERC721(_l1RealmsAddress);
+        l2ContractAddress = _l2BridgeAddress;
         starknetCore = IStarknetCore(_starknetCoreAddress);
     }
 
@@ -59,7 +59,8 @@ contract RealmsBridgeLockbox is
         @notice This claims your Realm in L2
     */
     function depositToL2(
-        uint256[] _realmIds
+        uint256[] _realmIds,
+        uint256 _l2AccountAddress
     ) external payable nonReentrant returns (uint256) {
         require(l2ContractAddress != address(0x0), "L2_CONTRACT_ADDRESS_REQUIRED");
         // require(msg.value > 0, "MSG_VALUE_IS_REQUIRED");
@@ -73,15 +74,16 @@ contract RealmsBridgeLockbox is
 
         uint256[] memory payload = new uint256[](2 + (_realmIds.length * 2));
         payload[0] = msg.sender;
-        payload[1] = _realmIds.length * 2; // multiplying because there are low/high values for each uint256
+        payload[1] = _l2AccountAddress;
+        payload[2] = _realmIds.length * 2; // multiplying because there are low/high values for each uint256
         for (uint256 i = 0; i < _realmIds.length; i++) {
           (low, high) = splitUint256(_realmIds[i]);
-          payload[2 + (i * 2)] = low; // save low bits
-          payload[2 + (i * 2) + 1] = high; // save high bits
+          payload[3 + (i * 2)] = low; // save low bits
+          payload[3 + (i * 2) + 1] = high; // save high bits
         }
 
         // Send the message to the StarkNet core contract.
-        starknetCore.sendMessageToL2(l2ContractAddress, DEPOSIT_SELECTOR, payload);
+        starknetCore.sendMessageToL2(l2BridgeAddress, DEPOSIT_SELECTOR, payload);
     }
 
     function withdrawFromL2(uint256 _realmId) public override {
