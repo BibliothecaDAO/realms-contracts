@@ -13,67 +13,68 @@ from contracts.l2.bridge.IBridgeable_ERC721 import IBridgeable_ERC721
 from contracts.Ownable_base import Ownable_initializer, Ownable_only_owner
 
 @storage_var
-func l1_contract_address() -> (res: felt):
+func l1_lockbox_contract_address() -> (res: felt):
 end
 
 @storage_var
-func realms_contract_address() -> (res: felt):
+func l2_realms_contract_address() -> (res: felt):
 end
 
 @constructor
 func constructor{
-        syscall_ptr : felt*, 
-        pedersen_ptr : HashBuiltin*,
+        syscall_ptr: felt*, 
+        pedersen_ptr: HashBuiltin*,
         range_check_ptr
     } (
-        owner : felt,
-        l1_address : felt,
-        realms_address : felt
+        owner: felt,
+        l1_lockbox_address: felt,
+        l2_realms_address: felt
     ):
     Ownable_initializer(owner)
 
-    l1_contract_address.write(l1_address)
-    realms_contract_address.write(realms_address)
+    l1_lockbox_contract_address.write(l1_lockbox_address)
+    l2_realms_contract_address.write(l2_realms_address)
 
     return ()
 end
 
 @l1_handler
 func depositFromL1{
-        syscall_ptr : felt*, 
-        pedersen_ptr : HashBuiltin*,
+        syscall_ptr: felt*, 
+        pedersen_ptr: HashBuiltin*,
         range_check_ptr
     } (
-        from_address : felt, 
-        to : felt, 
-        token_ids_len : felt, 
-        token_ids : felt*
+        from_address: felt, 
+        to: felt, 
+        token_ids_len: felt, 
+        token_ids: felt*
     ):
     alloc_locals
     # Make sure the message was sent by the intended L1 contract.
-    let (address) = l1_contract_address.read()
+    let (address) = l1_lockbox_contract_address.read()
     assert from_address = address
 
-    mint_loop(to, token_ids_len, token_ids)
+    let (realms_address) = l2_realms_contract_address.read()
+
+    mint_loop(to, token_ids_len, token_ids, realms_address)
 
     return ()
 end
 
 func mint_loop{
-        syscall_ptr : felt*, 
-        pedersen_ptr : HashBuiltin*,
+        syscall_ptr: felt*, 
+        pedersen_ptr: HashBuiltin*,
         range_check_ptr
     } (
-        to : felt, 
-        token_ids_len : felt, 
-        token_ids : felt*
+        to: felt, 
+        token_ids_len: felt, 
+        token_ids: felt*,
+        realms_address: felt
     ):
     alloc_locals
     if token_ids_len == 0:
         return ()
     end
-
-    let (realms_address) = realms_contract_address.read()
 
     # Recreate Uin256 from low/high values
     let token_id: Uint256 = Uint256([token_ids], [token_ids + 1])
