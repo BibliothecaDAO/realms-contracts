@@ -81,45 +81,6 @@ func mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
     return ()
 end
 
-@storage_var
-func bridge_contract_address() -> (res : felt):
-end
-
-@external
-func set_bridge_contract_address{
-        pedersen_ptr : HashBuiltin*, 
-        syscall_ptr : felt*, 
-        range_check_ptr
-    } (
-        new_address : felt
-    ):
-    Ownable_only_owner()
-
-    bridge_contract_address.write(new_address)
-
-    return ()
-end
-
-@external
-func bridge_mint{
-        pedersen_ptr : HashBuiltin*, 
-        syscall_ptr : felt*, 
-        range_check_ptr
-    } (
-        to : felt, 
-        token_id : Uint256
-    ):
-    
-    # Check caller to be bridge
-    let (caller) = get_caller_address()
-    let (bridge_address) = bridge_contract_address.read()
-    assert caller = bridge_address
-
-    ERC721_mint(to, token_id)
-
-    return ()
-end
-
 @external
 func burn{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(token_id : Uint256):
     Ownable_only_owner()
