@@ -29,10 +29,10 @@ async def test_check_addr(exchange_factory):
     ctx = exchange_factory
     exchange = ctx.exchange
 
-    res = await exchange.get_currency_address().call()
+    res = await exchange.get_currency_address().invoke()
     assert res.result.currency_address == (ctx.lords.contract_address)
 
-    res = await exchange.get_token_address().call()
+    res = await exchange.get_token_address().invoke()
     assert res.result.token_address == (ctx.resources.contract_address)
 
 
@@ -98,9 +98,9 @@ async def add_liq(admin_signer, admin_account, ctx, max_currency, token_id, toke
 
 async def get_token_bals(account, lords, resources, token_id):
     """ Get the current balances. """
-    res = await lords.balanceOf(account.contract_address).call()
+    res = await lords.balanceOf(account.contract_address).invoke()
     before_lords_bal = res.result.balance
-    res = await resources.balanceOf(account.contract_address, token_id).call()
+    res = await resources.balanceOf(account.contract_address, token_id).invoke()
     before_resources_bal = res.result.balance
     return before_lords_bal, before_resources_bal
 
@@ -133,7 +133,7 @@ async def test_liquidity(exchange_factory):
     assert exchange_lords_bal == uint(currency_amount)
     assert exchange_resources_bal == token_spent
     # Check LP tokens
-    res = await exchange.balanceOf(admin_account.contract_address, token_id).call()
+    res = await exchange.balanceOf(admin_account.contract_address, token_id).invoke()
     assert res.result.balance == currency_amount
 
     # Add more liquidity using the same spread
@@ -147,7 +147,7 @@ async def test_liquidity(exchange_factory):
     assert exchange_lords_bal == uint(currency_amount * 2)
     assert exchange_resources_bal == token_spent * 2
     # Check LP tokens
-    res = await exchange.balanceOf(admin_account.contract_address, token_id).call()
+    res = await exchange.balanceOf(admin_account.contract_address, token_id).invoke()
     assert res.result.balance == currency_amount * 2
 
     # Remove liquidity
@@ -205,7 +205,7 @@ async def test_liquidity(exchange_factory):
     assert exchange_lords_bal == uint(currency_amount)
     assert exchange_resources_bal == token_spent
     # Check LP tokens
-    res = await exchange.balanceOf(admin_account.contract_address, token_id).call()
+    res = await exchange.balanceOf(admin_account.contract_address, token_id).invoke()
     assert res.result.balance == currency_amount
 
 
@@ -223,15 +223,15 @@ async def buy_and_check(admin_account, admin_signer, ctx, resource_id, token_to_
 
     before_lords_bal, before_resources_bal = await get_token_bals(admin_account, lords, resources, resource_id)
 
-    before_currency_reserve = (await exchange.get_currency_reserves(resource_id).call()).result.currency_reserves[0]
-    token_reserve = (await resources.balanceOf(exchange.contract_address, resource_id).call()).result.balance
+    before_currency_reserve = (await exchange.get_currency_reserves(resource_id).invoke()).result.currency_reserves[0]
+    token_reserve = (await resources.balanceOf(exchange.contract_address, resource_id).invoke()).result.balance
 
     price = calc_d_x(before_currency_reserve, token_reserve, token_to_buy)
     fee = price * fee_percent
     currency_diff_required = math.ceil(price + fee)
 
     # Check price math
-    res = await exchange.get_buy_price(uint(token_to_buy), uint(before_currency_reserve), uint(token_reserve)).call()
+    res = await exchange.get_buy_price(uint(token_to_buy), uint(before_currency_reserve), uint(token_reserve)).invoke()
     assert res.result.price == uint(currency_diff_required)
 
     # Make sale
@@ -252,7 +252,7 @@ async def buy_and_check(admin_account, admin_signer, ctx, resource_id, token_to_
     after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources, resource_id)
     assert uint(before_lords_bal[0] - currency_diff_required) == after_lords_bal
     assert before_resources_bal + token_to_buy == after_resources_bal
-    after_currency_reserve = (await exchange.get_currency_reserves(resource_id).call()).result.currency_reserves[0]
+    after_currency_reserve = (await exchange.get_currency_reserves(resource_id).invoke()).result.currency_reserves[0]
     assert before_currency_reserve + currency_diff_required == after_currency_reserve
 
 
@@ -263,15 +263,15 @@ async def sell_and_check(admin_account, admin_signer, ctx, resource_id, token_to
 
     before_lords_bal, before_resources_bal = await get_token_bals(admin_account, lords, resources, resource_id)
 
-    before_currency_reserve = (await exchange.get_currency_reserves(resource_id).call()).result.currency_reserves[0]
-    token_reserve = (await resources.balanceOf(exchange.contract_address, resource_id).call()).result.balance
+    before_currency_reserve = (await exchange.get_currency_reserves(resource_id).invoke()).result.currency_reserves[0]
+    token_reserve = (await resources.balanceOf(exchange.contract_address, resource_id).invoke()).result.balance
 
     price = -calc_d_x(before_currency_reserve, token_reserve, -token_to_sell)
     fee = price * fee_percent
     currency_diff_required = math.floor(price - fee)
 
     # Check price math
-    res = await exchange.get_sell_price(uint(token_to_sell), uint(before_currency_reserve), uint(token_reserve)).call()
+    res = await exchange.get_sell_price(uint(token_to_sell), uint(before_currency_reserve), uint(token_reserve)).invoke()
     assert res.result.price == uint(currency_diff_required)
 
     # Make sale
@@ -291,7 +291,7 @@ async def sell_and_check(admin_account, admin_signer, ctx, resource_id, token_to
     after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources, resource_id)
     assert uint(before_lords_bal[0] + currency_diff_required) == after_lords_bal
     assert before_resources_bal - token_to_sell == after_resources_bal
-    after_currency_reserve = (await exchange.get_currency_reserves(resource_id).call()).result.currency_reserves[0]
+    after_currency_reserve = (await exchange.get_currency_reserves(resource_id).invoke()).result.currency_reserves[0]
     assert before_currency_reserve - currency_diff_required == after_currency_reserve
 
 
