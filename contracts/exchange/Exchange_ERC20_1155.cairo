@@ -125,7 +125,9 @@ func initial_liquidity {
 
         # Only valid for first liquidity add
         let (currency_reserves_) = currency_reserves.read(token_id)
-        assert currency_reserves_ = Uint256(0, 0)
+        with_attr error_message("Only valid for initial liquidity add"):
+            assert currency_reserves_ = Uint256(0, 0)
+        end
 
         IERC20.transferFrom(currency_address_, caller, contract, currency_amount)
         tempvar syscall_ptr :felt* = syscall_ptr
@@ -133,7 +135,9 @@ func initial_liquidity {
 
         # Assert otherwise rounding error could end up being significant on second deposit
         let (ok) = uint256_le(Uint256(1000, 0), currency_amount)
-        assert_not_zero(ok)
+        with_attr error_message("Must supply larger currency for initial deposit"):
+            assert_not_zero(ok)
+        end
 
         # Update currency  reserve size for Token id before transfer
         currency_reserves.write(token_id, currency_amount)
@@ -165,7 +169,9 @@ func add_liquidity {
         alloc_locals
 
         let (block_timestamp) = get_block_timestamp()
-        assert_le(block_timestamp, deadline)
+        with_attr error_message("Deadline exceeded"):
+            assert_le(block_timestamp, deadline)
+        end
 
         let (caller) = get_caller_address()
         let (contract) = get_contract_address()
@@ -174,24 +180,31 @@ func add_liquidity {
         let (currency_address_) = currency_address.read()
 
         let (lp_reserves_) = lp_reserves.read(token_id)
-        let (token_reserves) = IERC1155.balanceOf(token_address_, contract, token_id)
+        let (token_reserves ) = IERC1155.balanceOf(token_address_, contract, token_id)
         let (currency_reserves_) = currency_reserves.read(token_id)
 
         # Only for subsequent liquidity adds
         let (above_zero) = uint256_lt(Uint256(0, 0), currency_reserves_)
-        assert_not_zero(above_zero)
+        with_attr error_message("This method is only for subsequent liquidity additions"):
+            assert_not_zero(above_zero)
+        end
 
         # Required price calc
         # X/Y = dx/dy
         # dx = X*dy/Y
         let (numerator, mul_overflow) = uint256_mul(currency_reserves_, token_amount)
-        assert mul_overflow = Uint256(0, 0)
+        with_attr error_message("Values too large"):
+            assert mul_overflow = Uint256(0, 0)
+        end
         let (currency_amount, _) = uint256_unsigned_div_rem(numerator, Uint256(token_reserves, 0))
         # Ignore remainder as this favours existing LP holders
 
         # Check within bounds
         let (ok) = uint256_le(currency_amount, max_currency_amount)
-        assert_not_zero(ok)
+        with_attr error_message("Price exceeds max currency amount"):
+            assert_not_zero(ok)
+        end
+        
 
         IERC20.transferFrom(currency_address_, caller, contract, currency_amount)
         tempvar syscall_ptr :felt* = syscall_ptr
@@ -199,10 +212,14 @@ func add_liquidity {
 
         # Stored values
         let (new_reserves, add_overflow) = uint256_add(currency_reserves_, currency_amount)
-        assert (add_overflow) = 0
+        with_attr error_message("Currency value overflow"):
+            assert (add_overflow) = 0
+        end
         currency_reserves.write(token_id, new_reserves)
         let (new_supplies, add_overflow) = uint256_add(lp_reserves_, currency_amount)
-        assert (add_overflow) = 0
+        with_attr error_message("LP value overflow"):
+            assert (add_overflow) = 0
+        end
         lp_reserves.write(token_id, new_supplies)
 
         # Mint LP tokens
@@ -230,7 +247,9 @@ func remove_liquidity {
         alloc_locals
 
         let (block_timestamp) = get_block_timestamp()
-        assert_le(block_timestamp, deadline)
+        with_attr error_message("Deadline exceeded"):
+            assert_le(block_timestamp, deadline)
+        end
 
         let (caller) = get_caller_address()
         let (contract) = get_contract_address()
@@ -244,23 +263,33 @@ func remove_liquidity {
         let (new_supplies) = uint256_sub(lp_reserves_, lp_amount)
         # It should not be possible to go below zero as LP reflects supply
         let (above_zero) = uint256_le(Uint256(0, 0), new_supplies)
-        assert_not_zero(above_zero)
+        with_attr error_message("LP total exceeded"):
+            assert_not_zero(above_zero)
+        end
 
         # Calculate percentage of reserves this LP amount is worth
-        # Ignore remainder as it favours holders
         let (numerator, mul_overflow) = uint256_mul(currency_reserves_, lp_amount)
-        assert mul_overflow = Uint256(0, 0)
+        with_attr error_message("Values too large"):
+            assert mul_overflow = Uint256(0, 0)
+        end
         let (currency_owed, _) = uint256_unsigned_div_rem(numerator, lp_reserves_)
         let (token_reserves) = IERC1155.balanceOf(token_address_, contract, token_id)
         let (numerator, mul_overflow) = uint256_mul(Uint256(token_reserves, 0), lp_amount)
-        assert mul_overflow = Uint256(0, 0)
+        with_attr error_message("Values too large"):
+            assert mul_overflow = Uint256(0, 0)
+        end
+        # Ignore remainder as it favours holders
         let (tokens_owed, _) = uint256_unsigned_div_rem(numerator, lp_reserves_)
 
         # Check minimums
         let (above_zero) = uint256_le(min_currency_amount, currency_owed)
-        assert_not_zero(above_zero)
+        with_attr error_message("Minimum currency amount exceeded"):
+            assert_not_zero(above_zero)
+        end
         let (above_zero) = uint256_le(min_token_amount, tokens_owed)
-        assert_not_zero(above_zero)
+        with_attr error_message("Minimum token amount exceeded"):
+            assert_not_zero(above_zero)
+        end
 
         # New totals
         let (new_currency) = uint256_sub(currency_reserves_, currency_owed)
@@ -304,7 +333,9 @@ func buy_tokens {
     alloc_locals
 
     let (block_timestamp) = get_block_timestamp()
-    assert_le(block_timestamp, deadline)
+    with_attr error_message("Deadline exceeded"):
+        assert_le(block_timestamp, deadline)
+    end
 
     let (caller) = get_caller_address()
     let (contract) = get_contract_address()
@@ -327,7 +358,9 @@ func buy_tokens {
 
     # Update reserves
     let (new_reserves, add_overflow) = uint256_add(currency_reserves_, currency_amount)
-    assert add_overflow = 0
+    with_attr error_message("Currency value overflow"):
+        assert add_overflow = 0
+    end
     currency_reserves.write(token_id, new_reserves)
 
     # Transfer refunded currency and purchased tokens
@@ -360,7 +393,9 @@ func sell_tokens {
     alloc_locals
 
     let (block_timestamp) = get_block_timestamp()
-    assert_le(block_timestamp, deadline)
+    with_attr error_message("Deadline exceeded"):
+        assert_le(block_timestamp, deadline)
+    end
 
     let (caller) = get_caller_address()
     let (contract) = get_contract_address()
@@ -379,7 +414,9 @@ func sell_tokens {
 
     # Check min_currency_amount
     let (above_min_curr) = uint256_le(min_currency_amount, currency_amount)
-    assert_not_zero(above_min_curr)
+    with_attr error_message("Minimum currency amount exceeded"):
+        assert_not_zero(above_min_curr)
+    end
 
     # Transfer currency
     IERC20.transfer(currency_address_, caller, currency_amount)
@@ -419,14 +456,20 @@ func get_buy_price {
 
     # Calculate price
     let (numerator, mul_overflow) = uint256_mul(currency_reserves, token_amount)
-    assert mul_overflow = Uint256(0, 0)
+    with_attr error_message("Values too large"):
+        assert mul_overflow = Uint256(0, 0)
+    end
     let (denominator) = uint256_sub(token_reserves, token_amount)
 
     # Add LP fee
     let (numerator, mul_overflow) = uint256_mul(numerator, Uint256(1000, 0))
-    assert mul_overflow = Uint256(0, 0)
+    with_attr error_message("Numerator overflow"):
+        assert mul_overflow = Uint256(0, 0)
+    end
     let (denominator, mul_overflow) = uint256_mul(denominator, lp_fee)
-    assert mul_overflow = Uint256(0, 0)
+    with_attr error_message("Denominator overflow"):
+        assert mul_overflow = Uint256(0, 0)
+    end
 
     let (price, remainder) = uint256_unsigned_div_rem(numerator, denominator)
 
@@ -459,15 +502,23 @@ func get_sell_price {
 
     # Calculate price
     let (numerator, mul_overflow) = uint256_mul(token_amount, currency_reserves)
-    assert mul_overflow = Uint256(0, 0)
+    with_attr error_message("Price numerator overflow"):
+        assert mul_overflow = Uint256(0, 0)
+    end
     let (denominator, is_overflow) = uint256_add(token_reserves, token_amount)
-    assert is_overflow = 0
+    with_attr error_message("Price denominator overflow"):
+        assert is_overflow = 0
+    end
 
     # Add LP fee
     let (numerator, mul_overflow) = uint256_mul(numerator, lp_fee)
-    assert mul_overflow = Uint256(0, 0)
+    with_attr error_message("LP numerator overflow"):
+        assert mul_overflow = Uint256(0, 0)
+    end
     let (denominator, mul_overflow) = uint256_mul(denominator, Uint256(1000, 0))
-    assert mul_overflow = Uint256(0, 0)
+    with_attr error_message("LP denominator overflow"):
+        assert mul_overflow = Uint256(0, 0) 
+    end
 
     let (price, _) = uint256_unsigned_div_rem(numerator, denominator)
     # Rounding errors favour the contract
