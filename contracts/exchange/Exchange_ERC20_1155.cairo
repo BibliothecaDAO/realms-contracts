@@ -500,27 +500,27 @@ func get_sell_price {
     let (lp_fee_thousands_) = lp_fee_thousands.read()
     let (lp_fee) = uint256_sub(Uint256(1000, 0), lp_fee_thousands_)
 
+    # LP fee
+    let (token_amount_w_fee, mul_overflow) = uint256_mul(token_amount, lp_fee)
+    with_attr error_message("LP fee overflow"):
+        assert mul_overflow = Uint256(0, 0)
+    end
+
     # Calculate price
-    let (numerator, mul_overflow) = uint256_mul(token_amount, currency_reserves)
+    let (numerator, mul_overflow) = uint256_mul(token_amount_w_fee, currency_reserves)
     with_attr error_message("Price numerator overflow"):
         assert mul_overflow = Uint256(0, 0)
     end
-    let (denominator, is_overflow) = uint256_add(token_reserves, token_amount)
+    let (denominator, mul_overflow) = uint256_mul(token_reserves, Uint256(1000, 0))
+    with_attr error_message("LP fee buffer denominator overflow"):
+        assert mul_overflow = Uint256(0, 0) 
+    end
+    let (denominator_fee, is_overflow) = uint256_add(denominator, token_amount_w_fee)
     with_attr error_message("Price denominator overflow"):
         assert is_overflow = 0
     end
 
-    # Add LP fee
-    let (numerator, mul_overflow) = uint256_mul(numerator, lp_fee)
-    with_attr error_message("LP numerator overflow"):
-        assert mul_overflow = Uint256(0, 0)
-    end
-    let (denominator, mul_overflow) = uint256_mul(denominator, Uint256(1000, 0))
-    with_attr error_message("LP denominator overflow"):
-        assert mul_overflow = Uint256(0, 0) 
-    end
-
-    let (price, _) = uint256_unsigned_div_rem(numerator, denominator)
+    let (price, _) = uint256_unsigned_div_rem(numerator, denominator_fee)
     # Rounding errors favour the contract
     return (price)
 

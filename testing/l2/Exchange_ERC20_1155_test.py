@@ -1,7 +1,5 @@
 import pytest
 import conftest
-import math
-from fractions import Fraction
 from utils import uint, assert_revert
 
 @pytest.fixture(scope='module')
@@ -9,7 +7,7 @@ async def exchange_factory(ctx_factory):
     print("Constructing exchange factory")
     ctx = ctx_factory()
 
-    ctx.exchange_fee = 10
+    ctx.exchange_fee = 100 # Use high 10% for math tests
 
     ctx.exchange = await ctx.starknet.deploy(
         source="contracts/exchange/Exchange_ERC20_1155.cairo",
@@ -216,7 +214,7 @@ def calc_d_x(old_x, old_y, d_y):
     d_x = new_x - old_x
     return d_x
 
-async def buy_and_check(admin_account, admin_signer, ctx, resource_id, token_to_buy, fee_percent):
+async def buy_and_check(admin_account, admin_signer, ctx, resource_id, token_to_buy, expected_price):
     exchange = ctx.exchange
     lords = ctx.lords
     resources = ctx.resources
@@ -226,17 +224,13 @@ async def buy_and_check(admin_account, admin_signer, ctx, resource_id, token_to_
     before_currency_reserve = (await exchange.get_currency_reserves(resource_id).invoke()).result.currency_reserves[0]
     token_reserve = (await resources.balanceOf(exchange.contract_address, resource_id).invoke()).result.balance
 
-    price = calc_d_x(before_currency_reserve, token_reserve, token_to_buy)
-    fee = price * fee_percent
-    currency_diff_required = math.ceil(price + fee)
-
     # Check price math
     res = await exchange.get_buy_price(uint(token_to_buy), uint(before_currency_reserve), uint(token_reserve)).invoke()
-    assert res.result.price == uint(currency_diff_required)
+    assert res.result.price == uint(expected_price)
 
     # Make sale
     current_time = conftest.get_block_timestamp(ctx.starknet.state)
-    max_currency = currency_diff_required + 10 # Increment max currency to ensure correct price is used
+    max_currency = expected_price + 10 # Increment max currency to ensure correct price is used
     await set_erc20_allowance(admin_signer, admin_account, lords, exchange.contract_address, max_currency)
     await admin_signer.send_transaction(
         admin_account,
@@ -250,13 +244,13 @@ async def buy_and_check(admin_account, admin_signer, ctx, resource_id, token_to_
         ]
     )
     after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources, resource_id)
-    assert uint(before_lords_bal[0] - currency_diff_required) == after_lords_bal
+    assert uint(before_lords_bal[0] - expected_price) == after_lords_bal
     assert before_resources_bal + token_to_buy == after_resources_bal
     after_currency_reserve = (await exchange.get_currency_reserves(resource_id).invoke()).result.currency_reserves[0]
-    assert before_currency_reserve + currency_diff_required == after_currency_reserve
+    assert before_currency_reserve + expected_price == after_currency_reserve
 
 
-async def sell_and_check(admin_account, admin_signer, ctx, resource_id, token_to_sell, fee_percent):
+async def sell_and_check(admin_account, admin_signer, ctx, resource_id, token_to_sell, expected_price):
     exchange = ctx.exchange
     lords = ctx.lords
     resources = ctx.resources
@@ -266,17 +260,13 @@ async def sell_and_check(admin_account, admin_signer, ctx, resource_id, token_to
     before_currency_reserve = (await exchange.get_currency_reserves(resource_id).invoke()).result.currency_reserves[0]
     token_reserve = (await resources.balanceOf(exchange.contract_address, resource_id).invoke()).result.balance
 
-    price = -calc_d_x(before_currency_reserve, token_reserve, -token_to_sell)
-    fee = price * fee_percent
-    currency_diff_required = math.floor(price - fee)
-
     # Check price math
     res = await exchange.get_sell_price(uint(token_to_sell), uint(before_currency_reserve), uint(token_reserve)).invoke()
-    assert res.result.price == uint(currency_diff_required)
+    assert res.result.price == uint(expected_price)
 
     # Make sale
     current_time = conftest.get_block_timestamp(ctx.starknet.state)
-    min_currency = currency_diff_required - 2 # Add a bit of fat
+    min_currency = expected_price - 2 # Add a bit of fat
     await admin_signer.send_transaction(
         admin_account,
         exchange.contract_address,
@@ -289,10 +279,10 @@ async def sell_and_check(admin_account, admin_signer, ctx, resource_id, token_to
         ]
     )
     after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources, resource_id)
-    assert uint(before_lords_bal[0] + currency_diff_required) == after_lords_bal
+    assert uint(before_lords_bal[0] + expected_price) == after_lords_bal
     assert before_resources_bal - token_to_sell == after_resources_bal
     after_currency_reserve = (await exchange.get_currency_reserves(resource_id).invoke()).result.currency_reserves[0]
-    assert before_currency_reserve - currency_diff_required == after_currency_reserve
+    assert before_currency_reserve - expected_price == after_currency_reserve
 
 
 @pytest.mark.asyncio
@@ -304,12 +294,15 @@ async def test_buy_price(exchange_factory):
     currency_reserve = 10000
     token_reserve = 5000
     token_id = 2
-    fee_percent = Fraction(ctx.exchange_fee, 1000)
 
     await initial_liq(admin_signer, admin_account, ctx, currency_reserve, token_id, token_reserve)
-    # Buy and check twice
-    await buy_and_check(admin_account, admin_signer, ctx, token_id, 100, fee_percent)
-    await buy_and_check(admin_account, admin_signer, ctx, token_id, 100, fee_percent)
+    # price = (amnt * cur_res * 1000) / ((tok_res - amnt)  * (1000 - fee))
+    # price = (100 * 10000 * 1000) / ((5000 - 100) * (1000 - 100))
+    # price = 227 (round up)
+    await buy_and_check(admin_account, admin_signer, ctx, token_id, 100, 227)
+    # price = (100 * 10227 * 1000) / ((4900 - 100) * (1000 - 100))
+    # price = 237 (round up)
+    await buy_and_check(admin_account, admin_signer, ctx, token_id, 100, 237)
 
 
 @pytest.mark.asyncio
@@ -321,12 +314,15 @@ async def test_sell_price(exchange_factory):
     currency_reserve = 1000
     token_reserve = 1000
     token_id = 3
-    fee_percent = Fraction(ctx.exchange_fee, 1000)
 
     await initial_liq(admin_signer, admin_account, ctx, currency_reserve, token_id, token_reserve)
-    # Sell and check twice
-    await sell_and_check(admin_account, admin_signer, ctx, token_id, 100, fee_percent)
-    await sell_and_check(admin_account, admin_signer, ctx, token_id, 100, fee_percent)
+    # price = (amnt * cur_res * (1000 - fee)) / ((tok_res * 1000) + (amnt * (1000 - fee)))
+    # price = (100 * 1000 * (1000 - 100)) / (1000 * 1000 + (100 * (1000 - 100)))
+    # price = 82
+    await sell_and_check(admin_account, admin_signer, ctx, token_id, 100, 82)
+    # price = (100 * (1000 - 100) * 918) / (1100 * 1000 + (100 * (1000 - 100)))
+    # price = 69
+    await sell_and_check(admin_account, admin_signer, ctx, token_id, 100, 69)
 
 
 @pytest.mark.asyncio
