@@ -15,7 +15,7 @@ contract RealmsBridgeLockbox is
     IRealmsBridgeLockbox
 {
     IERC721 public l1RealmsContract;
-    address public l2BridgeAddress;
+    uint256 public l2BridgeAddress;
     // The StarkNet core contract.
     IStarknetCore starknetCore;
 
@@ -33,22 +33,22 @@ contract RealmsBridgeLockbox is
 
     function initialize(
         address _l1RealmsAddress,
-        address _l2BridgeAddress,
+        uint256 _l2BridgeAddress,
         address _starknetCoreAddress
     ) public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
         l1RealmsContract = IERC721(_l1RealmsAddress);
-        l2ContractAddress = _l2BridgeAddress;
+        l2BridgeAddress = _l2BridgeAddress;
         starknetCore = IStarknetCore(_starknetCoreAddress);
     }
 
-    function setL2ContractAddress(address _newL2ContractAddress) external onlyOwner {
-        l2ContractAddress = _newL2ContractAddress;
+    function setL2BridgeAddress(uint256 _newAddress) external onlyOwner {
+        l2BridgeAddress = _newAddress;
     }
 
-    function setRealmsContract(address _newRealmsAddress) external onlyOwner {
-        realmsContract = IERC721(_newRealmsAddress);
+    function setL1RealmsContract(address _newRealmsAddress) external onlyOwner {
+        l1RealmsContract = IERC721(_newRealmsAddress);
     }
 
     function setStarknetCore(address _starknetCoreAddress) external onlyOwner {
@@ -59,25 +59,22 @@ contract RealmsBridgeLockbox is
         @notice This claims your Realm in L2
     */
     function depositToL2(
-        uint256[] _realmIds,
+        uint256[] memory _realmIds,
         uint256 _l2AccountAddress
-    ) external payable nonReentrant returns (uint256) {
-        require(l2ContractAddress != address(0x0), "L2_CONTRACT_ADDRESS_REQUIRED");
+    ) external nonReentrant {
+        require(l2BridgeAddress != 0, "L2_CONTRACT_ADDRESS_REQUIRED");
         // require(msg.value > 0, "MSG_VALUE_IS_REQUIRED");
         
         for (uint256 i = 0; i < _realmIds.length; i++) {
-          require(realmsContract.ownerOf(_realmIds[i]) == msg.sender, "SENDER_NOT_REALM_OWNER");
+          require(l1RealmsContract.ownerOf(_realmIds[i]) == msg.sender, "SENDER_NOT_REALM_OWNER");
         }
 
-        // realmsContract.safeTransferFrom(msg.sender, address(this), _realmId);
-        // tokensToOwners[_realmId] = msg.sender;
-
-        uint256[] memory payload = new uint256[](2 + (_realmIds.length * 2));
-        payload[0] = msg.sender;
+        uint256[] memory payload = new uint256[](3 + (_realmIds.length * 2));
+        payload[0] = uint256(uint160(address(msg.sender))); // address should be converted to uint256 first
         payload[1] = _l2AccountAddress;
         payload[2] = _realmIds.length * 2; // multiplying because there are low/high values for each uint256
         for (uint256 i = 0; i < _realmIds.length; i++) {
-          (low, high) = splitUint256(_realmIds[i]);
+          (uint256 low, uint256 high) = splitUint256(_realmIds[i]);
           payload[3 + (i * 2)] = low; // save low bits
           payload[3 + (i * 2) + 1] = high; // save high bits
         }
@@ -86,27 +83,27 @@ contract RealmsBridgeLockbox is
         starknetCore.sendMessageToL2(l2BridgeAddress, DEPOSIT_SELECTOR, payload);
     }
 
-    function withdrawFromL2(uint256 _realmId) public override {
-        IOutbox outbox = IOutbox(inbox.bridge().activeOutbox());
-        address l2Sender = outbox.l2ToL1Sender();
-        require(l2Sender == l2Target, "Only L2");
+    // function withdrawFromL2(uint256 _realmId) public override {
+    //     IOutbox outbox = IOutbox(inbox.bridge().activeOutbox());
+    //     address l2Sender = outbox.l2ToL1Sender();
+    //     require(l2Sender == l2Target, "Only L2");
 
-        // Construct the withdrawal message's payload.
-        uint256[] memory payload = new uint256[](3);
-        payload[0] = MESSAGE_WITHDRAW;
-        payload[1] = user;
-        payload[2] = amount;
+    //     // Construct the withdrawal message's payload.
+    //     uint256[] memory payload = new uint256[](3);
+    //     payload[0] = MESSAGE_WITHDRAW;
+    //     payload[1] = user;
+    //     payload[2] = amount;
 
-        // Consume the message from the StarkNet core contract.
-        // This will revert the (Ethereum) transaction if the message does not exist.
-        starknetCore.consumeMessageFromL2(l2ContractAddress, payload);
+    //     // Consume the message from the StarkNet core contract.
+    //     // This will revert the (Ethereum) transaction if the message does not exist.
+    //     starknetCore.consumeMessageFromL2(l2ContractAddress, payload);
 
-        // Update the L1 balance.
-        userBalances[user] += amount;
+    //     // Update the L1 balance.
+    //     userBalances[user] += amount;
 
-        address _to = tokensToOwners[_realmId];
-        realmsContract.safeTransferFrom(address(this), _to, _realmId);
-    }
+    //     address _to = tokensToOwners[_realmId];
+    //     realmsContract.safeTransferFrom(address(this), _to, _realmId);
+    // }
 
     function splitUint256(uint256 value) internal pure returns (uint256, uint256) {
       uint256 low = value & ((1 << 128) - 1);
