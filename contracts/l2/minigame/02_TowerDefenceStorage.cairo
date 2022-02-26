@@ -72,7 +72,7 @@ address_of_controller : felt):
     return ()
 end
 
-@external
+@view
 func get_latest_game_index{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
@@ -95,7 +95,7 @@ func set_latest_game_index{
     return ()
 end
 
-@external
+@view
 func get_game_start{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt ) -> ( started_at : felt ):
     let (param) = game_start.read( game_idx )
     return (param)
@@ -110,7 +110,7 @@ func set_game_start{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_
     return ()
 end
 
-@external
+@view
 func get_main_health{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt) -> ( health : felt ):
     let (health) = main_health.read( game_idx )
     return (health) 
@@ -125,7 +125,7 @@ func set_main_health{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check
     return ()
 end
 
-@external
+@view
 func get_shield_value{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt, token_id : felt) -> ( value : felt ):
     let (value) = shield_value.read( game_idx, token_id )
     return (value) 
@@ -140,7 +140,7 @@ func set_shield_value{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_chec
     return ()
 end
 
-@external
+@view
 func get_token_reward_pool{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt, token_id : felt) -> ( value : felt ):
     let (value) = token_reward_pool.read( game_idx, token_id )
     return (value) 
@@ -155,7 +155,7 @@ func set_token_reward_pool{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range
     return ()
 end
 
-@external
+@view
 func get_total_reward_alloc{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt, side : felt) -> ( value : felt ):
     let (value) = total_reward_alloc.read( game_idx, side )
     return (value) 
@@ -170,7 +170,7 @@ func set_total_reward_alloc{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,rang
     return ()
 end
 
-@external
+@view
 func get_user_reward_alloc{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt, user : felt, side : felt) -> ( value : felt ):
     let (value) = user_reward_alloc.read( game_idx, user, side )
     return (value) 
@@ -185,7 +185,7 @@ func set_user_reward_alloc{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range
     return ()
 end
 
-@external
+@view
 func get_tower_attributes{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt, tower_idx : felt) -> ( attrs_packed : felt ):
     let (attrs_packed) = tower_attributes.read( game_idx, tower_idx )
     return (attrs_packed) 
@@ -200,7 +200,7 @@ func set_tower_attributes{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_
     return ()
 end
 
-@external
+@view
 func get_tower_count{syscall_ptr : felt*,pedersen_ptr : HashBuiltin*,range_check_ptr}( game_idx : felt ) -> ( count : felt ):
     let (count) = tower_count.read( game_idx )
     return (count)
