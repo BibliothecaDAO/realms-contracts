@@ -1,6 +1,6 @@
 import { defaultProvider } from "starknet";
 import { getSelectorFromName } from "starknet/dist/utils/stark";
-import { getDeployedAddressInt, getSigner, deployContract, getOwnerAccountInt, getVersionSuffix } from "../helpers";
+import { getDeployedAddressInt, getSigner, deployContract, getOwnerAccountInt } from "../helpers";
 
 const main = async () => {
 
@@ -12,14 +12,11 @@ const main = async () => {
     const arbiter = getDeployedAddressInt("Arbiter");
     
     const blocksPerMin = "1";
-    // Start at 8 hours per game for alpha testing
-    const hoursPerGame = "8";
-
-    const versionedName = `${contractName}-${getVersionSuffix()}`
+    const hoursPerGame = "24";
 
     const owner = getOwnerAccountInt();
    
-    await deployContract(contractName, versionedName, [
+    await deployContract(contractName, contractName, [
       moduleControllerAddress,
       elementsTokenAddress,
       blocksPerMin,
@@ -27,7 +24,7 @@ const main = async () => {
       owner
     ]);
 
-    const upgradedModule = getDeployedAddressInt(versionedName);
+    const upgradedModule = getDeployedAddressInt(contractName);
 
     // Appoint the upgrade as module with existing module ID
     const appoint = await getSigner().invokeFunction(
@@ -56,4 +53,4 @@ const main = async () => {
 
 }
 
-main().catch(e => console.error(e))
+main().catch(e => console.error(e.response.data))
