@@ -528,7 +528,7 @@ func get_sell_price {
         pedersen_ptr : HashBuiltin*,
         range_check_ptr
     }(
-        # Exact amount of token to buy
+        # Exact amount of token to sell
         token_amount: Uint256,
         # Currency reserve amount
         currency_reserves: Uint256,

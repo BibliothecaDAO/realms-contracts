@@ -1,10 +1,10 @@
 # Exchange ERC20 ERC1155
 
 The exchange contract allows trades between pairs of ERC20 and ERC1155 contract tokens.
-The contract is based on the [NiftyswapExchange20.sol contract](https://github.com/0xsequence/niftyswap/blob/master/src/contracts/exchange/NiftyswapExchange20.sol) and it's [specifications](https://github.com/0xsequence/niftyswap/blob/master/SPECIFICATIONS.md).
+The contract is based on the [NiftyswapExchange20.sol contract](https://github.com/0xsequence/niftyswap/blob/master/src/contracts/exchange/NiftyswapExchange20.sol) and its [specifications](https://github.com/0xsequence/niftyswap/blob/master/SPECIFICATIONS.md).
 
 One deployed contract will handle pairs between the ERC20 currency and all the tokens on a ERC1155.
-Each pair is has it's price curve tracked individually.
+Each pair has it's price curve tracked individually.
 Price changes on one token pair will not affect another.
 
 The exchange contract itself is ERC1155 compliant and will issue LP tokens with a token type id corresponding to the token type id in the pair.
