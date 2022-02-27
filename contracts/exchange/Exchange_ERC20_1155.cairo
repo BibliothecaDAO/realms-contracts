@@ -376,6 +376,10 @@ func buy_tokens {
 
     # Calculate prices
     let (currency_amount) = get_buy_price(token_amount, currency_reserves_, Uint256(token_reserves, 0))
+    let (above_max_curr) = uint256_le(currency_amount, max_currency_amount)
+    with_attr error_message("Maximum currency amount exceeded"):
+        assert_not_zero(above_max_curr)
+    end
 
     # Calculate refund
     let (refund_amount) = uint256_sub(max_currency_amount, currency_amount)
