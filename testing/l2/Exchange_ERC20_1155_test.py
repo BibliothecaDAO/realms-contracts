@@ -1,4 +1,5 @@
 import pytest
+from fractions import Fraction
 import conftest
 from utils import uint, assert_revert
 
