@@ -305,6 +305,31 @@ async def test_buy_price(exchange_factory):
     # price = 237 (round up)
     await buy_and_check(admin_account, admin_signer, ctx, token_id, 100, 237)
 
+    # Test reduced max fails
+    buy_amount = 100
+    exchange = ctx.exchange
+    lords = ctx.lords
+    resources = ctx.resources
+    before_currency_reserve = (await exchange.get_currency_reserves(token_id).invoke()).result.currency_reserves[0]
+    token_reserve = (await resources.balanceOf(exchange.contract_address, token_id).invoke()).result.balance
+    # Check price math
+    res = await exchange.get_buy_price(uint(buy_amount), uint(before_currency_reserve), uint(token_reserve)).invoke()
+    # Make sale
+    current_time = conftest.get_block_timestamp(ctx.starknet.state)
+    max_currency = res.result.price[0] - 10 # Not enough!
+    await set_erc20_allowance(admin_signer, admin_account, lords, exchange.contract_address, max_currency)
+    await assert_revert(admin_signer.send_transaction(
+        admin_account,
+        exchange.contract_address,
+        'buy_tokens',
+        [
+            *uint(max_currency),
+            token_id,
+            *uint(buy_amount),
+            current_time + 1000,
+        ]
+    ))
+
 
 @pytest.mark.asyncio
 async def test_sell_price(exchange_factory):
@@ -324,6 +349,29 @@ async def test_sell_price(exchange_factory):
     # price = (100 * (1000 - 100) * 918) / (1100 * 1000 + (100 * (1000 - 100)))
     # price = 69
     await sell_and_check(admin_account, admin_signer, ctx, token_id, 100, 69)
+
+    # Test increased min fails
+    sell_amount = 100
+    exchange = ctx.exchange
+    resources = ctx.resources
+    before_currency_reserve = (await exchange.get_currency_reserves(token_id).invoke()).result.currency_reserves[0]
+    token_reserve = (await resources.balanceOf(exchange.contract_address, token_id).invoke()).result.balance
+    # Check price math
+    res = await exchange.get_sell_price(uint(sell_amount), uint(before_currency_reserve), uint(token_reserve)).invoke()
+    # Make sale
+    current_time = conftest.get_block_timestamp(ctx.starknet.state)
+    min_currency = res.result.price[0] + 2 # Increase min amount (will fail)
+    await assert_revert(admin_signer.send_transaction(
+        admin_account,
+        exchange.contract_address,
+        'sell_tokens',
+        [
+            *uint(min_currency),
+            token_id,
+            *uint(sell_amount),
+            current_time + 1000,
+        ]
+    ))
 
 
 @pytest.mark.asyncio
