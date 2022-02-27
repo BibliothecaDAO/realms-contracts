@@ -33,6 +33,20 @@ end
 func hours_per_game() -> ( hpg : felt):
 end
 
+# ############ Events ################
+
+@event
+func game_started(game_idx : felt, initial_main_health : felt ):
+end
+
+@event
+func attack(game_idx : felt, token_id : felt, amount : felt):
+end
+
+@event
+func shield(game_idx : felt, token_id : felt, amount : felt):
+end
+
 # ############ Structs ################
 
 # Determined at runtime
@@ -43,11 +57,9 @@ end
 
 const TOKEN_BASE_FACTOR = 10
 
-struct ElementTokenOffset:
-    member None : felt
-    member Light : felt
-    member Dark : felt
-    # ... ?
+namespace ElementTokenOffset:
+    const Light = 1
+    const Dark = 2
 end
 
 # ############ Constructor ##############
@@ -129,6 +141,8 @@ func create_game{
     # Update index
     I02_TowerStorage.set_latest_game_index(tower_defence_storage, current_index)
 
+    game_started.emit( current_index, _init_main_health )
+
     return ()
 end
 
@@ -198,6 +212,7 @@ func attack_tower{
     I02_TowerStorage.set_user_reward_alloc(tower_defence_storage, game_idx, caller, ShieldGameRole.Attacker, user_alloc + _amount)
     I02_TowerStorage.set_token_reward_pool(tower_defence_storage, game_idx, tokens_id, token_pool + _amount)
 
+    attack.emit( game_idx, tokens_id, _amount )
 
     let (local contract_address) = get_contract_address()
 
@@ -256,6 +271,7 @@ func increase_shield{
     I02_TowerStorage.set_user_reward_alloc(tower_defence_storage, game_idx, caller, ShieldGameRole.Shielder, user_alloc + _amount)
     I02_TowerStorage.set_token_reward_pool(tower_defence_storage, game_idx, tokens_id, token_pool + _amount)
 
+    shield.emit( game_idx, tokens_id, _amount )
 
     let (local contract_address) = get_contract_address()
 
@@ -426,6 +442,7 @@ end
 
 # Calculate action amount plus
 # time boost.
+@view
 func calc_amount_plus_boost{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,

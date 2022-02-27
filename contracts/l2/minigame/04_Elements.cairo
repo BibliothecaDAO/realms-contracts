@@ -32,6 +32,12 @@ end
 func authorized_minter() -> ( minter_middleware : felt):
 end
 
+############## Events ################
+
+@event
+func element_distilled( by : felt, token_id : felt, amount : felt ):
+end
+
 # ############ Constructor ##############
 
 @constructor
@@ -87,6 +93,8 @@ func mint_elements{
 
     # Check if already minted
     let (minted_already) = has_minted.read( from_l1_address, to, next_game_index )
+
+    # TODO: Wrap in with_attr error for better error message
     assert minted_already = 0
     # Prevent minting again for this game
     has_minted.write(from_l1_address, to, next_game_index, 1)
@@ -104,6 +112,8 @@ func mint_elements{
         token_id,
         amount
     )
+
+    element_distilled.emit( to, token_id, amount )
 
     return ()
 

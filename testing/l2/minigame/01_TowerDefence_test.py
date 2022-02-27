@@ -131,7 +131,7 @@ async def test_game_creation(game_factory):
 
     starknet.state.state.block_info = BlockInfo(expected_block_number, 2343243294)
 
-    await game_factory.execute(
+    exec_info = await game_factory.execute(
         "admin",
         tower_defence.contract_address,
         "create_game",
@@ -139,6 +139,9 @@ async def test_game_creation(game_factory):
     )
 
     expected_game_index = 1
+    event = exec_info.raw_events[0]
+    assert event.data == [expected_game_index, INITIAL_TOWER_HEALTH]
+    
     execution_info = await tower_defence_storage.get_latest_game_index().call()
     assert execution_info.result == (expected_game_index,)
 
