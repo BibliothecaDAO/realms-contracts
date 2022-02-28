@@ -113,13 +113,23 @@ func initial_liquidity {
         range_check_ptr,
     }(
         # Amount of currency supplied to LP
-        currency_amount: Uint256,
+        currency_amounts_len: felt,
+        currency_amounts: Uint256*,
         # ERC1155 token id
-        token_id: felt,
+        token_ids_len: felt,
+        token_ids: felt*,
         # Amount of token supplied
-        token_amount: Uint256,
+        token_amounts_len: felt,
+        token_amounts: Uint256*,
     ):
     alloc_locals
+
+    if currency_amounts_len == 0:
+        return ()
+    end
+
+    assert currency_amounts_len = token_ids_len
+    assert token_ids_len = token_amounts_len
 
     let (caller) = get_caller_address()
     let (contract) = get_contract_address()
@@ -128,35 +138,43 @@ func initial_liquidity {
     let (currency_address_) = currency_address.read()
 
     # Only valid for first liquidity add to LP
-    let (currency_reserves_) = currency_reserves.read(token_id)
+    let (currency_reserves_) = currency_reserves.read([token_ids])
     with_attr error_message("Only valid for initial liquidity add"):
         assert currency_reserves_ = Uint256(0, 0)
     end
 
     # Transfer currency and token to exchange
-    IERC20.transferFrom(currency_address_, caller, contract, currency_amount)
+    IERC20.transferFrom(currency_address_, caller, contract, [currency_amounts])
     tempvar syscall_ptr :felt* = syscall_ptr
-    IERC1155.safeTransferFrom(token_address_, caller, contract, token_id, token_amount.low)
+    IERC1155.safeTransferFrom(token_address_, caller, contract, [token_ids], [token_amounts].low)
 
     # Assert otherwise rounding error could end up being significant on second deposit
-    let (ok) = uint256_le(Uint256(1000, 0), currency_amount)
+    let (ok) = uint256_le(Uint256(1000, 0), [currency_amounts])
     with_attr error_message("Must supply larger currency for initial deposit"):
         assert_not_zero(ok)
     end
 
     # Update currency reserve size for token id before transfer
-    currency_reserves.write(token_id, currency_amount)
+    currency_reserves.write([token_ids], [currency_amounts])
 
     # Initial liquidity is currency amount deposited
-    lp_reserves.write(token_id, currency_amount)
+    lp_reserves.write([token_ids], [currency_amounts])
 
     # Mint LP tokens
-    ERC1155_mint(caller, token_id, currency_amount.low)
+    ERC1155_mint(caller, [token_ids], [currency_amounts].low)
 
     # Emit event
-    liquidity_added.emit(caller, currency_amount, token_id, token_amount)
+    liquidity_added.emit(caller, [currency_amounts], [token_ids], [token_amounts])
 
-    return ()
+    # Recurse
+    return initial_liquidity(
+        currency_amounts_len - 1,
+        currency_amounts + 2, # uint
+        token_ids_len - 1,
+        token_ids + 1,
+        token_amounts_len - 1,
+        token_amounts + 2,
+    )
 end
 
 

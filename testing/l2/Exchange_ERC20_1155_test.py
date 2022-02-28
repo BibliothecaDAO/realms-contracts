@@ -3,6 +3,12 @@ from fractions import Fraction
 import conftest
 from utils import uint, assert_revert
 
+def expanded_uint_list(arr):
+    """
+    Convert array of ints into flattened array of uints.
+    """
+    return list(sum([uint(a) for a in arr], ()))
+
 @pytest.fixture(scope='module')
 async def exchange_factory(ctx_factory):
     print("Constructing exchange factory")
@@ -43,13 +49,13 @@ async def set_erc20_allowance(signer, account, erc20, who, amount):
         [who, *uint(amount)]
     )
 
-async def initial_liq(admin_signer, admin_account, ctx, currency_amount, token_id, token_spent):
+async def initial_liq(admin_signer, admin_account, ctx, currency_amounts, token_ids, token_spents):
     exchange = ctx.exchange
     lords = ctx.lords
     resources = ctx.resources
 
     # Approve access
-    await set_erc20_allowance(admin_signer, admin_account, lords, exchange.contract_address, currency_amount)
+    await set_erc20_allowance(admin_signer, admin_account, lords, exchange.contract_address, sum(currency_amounts))
     await admin_signer.send_transaction(
         admin_account,
         resources.contract_address,
@@ -62,7 +68,14 @@ async def initial_liq(admin_signer, admin_account, ctx, currency_amount, token_i
         admin_account,
         exchange.contract_address,
         'initial_liquidity',
-        [*uint(currency_amount), token_id, *uint(token_spent)]
+        [
+            len(currency_amounts),
+            *expanded_uint_list(currency_amounts),
+            len(token_ids),
+            *token_ids,
+            len(token_spents),
+            *expanded_uint_list(token_spents),
+        ]
     )
 
 
@@ -121,7 +134,7 @@ async def test_liquidity(exchange_factory):
     before_lords_bal, before_resources_bal = await get_token_bals(admin_account, lords, resources, token_id)
 
     # Do it
-    await initial_liq(admin_signer, admin_account, ctx, currency_amount, token_id, token_spent)
+    await initial_liq(admin_signer, admin_account, ctx, [currency_amount], [token_id], [token_spent])
 
     # After states
     after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources, token_id)
@@ -252,7 +265,7 @@ async def buy_and_check(admin_account, admin_signer, ctx, resource_ids, token_to
             len(resource_ids),
             *resource_ids,
             len(token_to_buys),
-            *list(sum([uint(b) for b in token_to_buys], ())), #uint values in list and expand
+            *expanded_uint_list(token_to_buys),
             current_time + 1000,
         ]
     )
@@ -306,7 +319,7 @@ async def sell_and_check(admin_account, admin_signer, ctx, resource_ids, token_t
             len(resource_ids),
             *resource_ids,
             len(token_to_sells),
-            *list(sum([uint(b) for b in token_to_sells], ())), #uint values in list and expand
+            *expanded_uint_list(token_to_sells),
             current_time + 1000,
         ]
     )
@@ -335,7 +348,7 @@ async def test_buy_price(exchange_factory):
     token_id = 2
     token_id2 = 4
 
-    await initial_liq(admin_signer, admin_account, ctx, currency_reserve, token_id, token_reserve)
+    await initial_liq(admin_signer, admin_account, ctx, [currency_reserve, currency_reserve], [token_id, token_id2], [token_reserve, token_reserve])
     # price = (amnt * cur_res * 1000) / ((tok_res - amnt)  * (1000 - fee))
     # price = (100 * 10000 * 1000) / ((5000 - 100) * (1000 - 100))
     # price = 227 (round up)
@@ -343,7 +356,6 @@ async def test_buy_price(exchange_factory):
     # price = (100 * 10227 * 1000) / ((4900 - 100) * (1000 - 100))
     # price = 237 (round up)
     # Second value has same LP value, price, amounts as the first buy_and_check request
-    await initial_liq(admin_signer, admin_account, ctx, currency_reserve, token_id2, token_reserve)
     await buy_and_check(admin_account, admin_signer, ctx, [token_id, token_id2], [100, 100], [237, 227])
 
     # Test reduced max fails
@@ -383,7 +395,7 @@ async def test_sell_price(exchange_factory):
     token_id = 3
     token_id2 = 5
 
-    await initial_liq(admin_signer, admin_account, ctx, currency_reserve, token_id, token_reserve)
+    await initial_liq(admin_signer, admin_account, ctx, [currency_reserve, currency_reserve], [token_id, token_id2], [token_reserve, token_reserve])
     # price = (amnt * cur_res * (1000 - fee)) / ((tok_res * 1000) + (amnt * (1000 - fee)))
     # price = (100 * 1000 * (1000 - 100)) / (1000 * 1000 + (100 * (1000 - 100)))
     # price = 82
@@ -391,7 +403,6 @@ async def test_sell_price(exchange_factory):
     # price = (100 * (1000 - 100) * 918) / (1100 * 1000 + (100 * (1000 - 100)))
     # price = 69
     # Second value has same LP value, price, amounts as the first buy_and_check request
-    await initial_liq(admin_signer, admin_account, ctx, currency_reserve, token_id2, token_reserve)
     await sell_and_check(admin_account, admin_signer, ctx, [token_id, token_id2], [100, 100], [69, 82])
 
     # Test increased min fails
