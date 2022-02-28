@@ -79,13 +79,13 @@ async def initial_liq(admin_signer, admin_account, ctx, currency_amounts, token_
     )
 
 
-async def add_liq(admin_signer, admin_account, ctx, max_currency, token_id, token_spent):
+async def add_liq(admin_signer, admin_account, ctx, max_currencies, token_ids, token_spents):
     exchange = ctx.exchange
     lords = ctx.lords
     resources = ctx.resources
 
     # Approve access
-    await set_erc20_allowance(admin_signer, admin_account, lords, exchange.contract_address, max_currency)
+    await set_erc20_allowance(admin_signer, admin_account, lords, exchange.contract_address, sum(max_currencies))
     await admin_signer.send_transaction(
         admin_account,
         resources.contract_address,
@@ -100,9 +100,12 @@ async def add_liq(admin_signer, admin_account, ctx, max_currency, token_id, toke
         exchange.contract_address,
         'add_liquidity',
         [
-            *uint(max_currency),
-            token_id,
-            *uint(token_spent),
+            len(max_currencies),
+            *expanded_uint_list(max_currencies),
+            len(token_ids),
+            *token_ids,
+            len(token_spents),
+            *expanded_uint_list(token_spents),
             current_time + 1000,
         ]
     )
@@ -149,7 +152,7 @@ async def test_liquidity(exchange_factory):
     assert res.result.balance == currency_amount
 
     # Add more liquidity using the same spread
-    await add_liq(admin_signer, admin_account, ctx, currency_amount, token_id, token_spent)
+    await add_liq(admin_signer, admin_account, ctx, [currency_amount], [token_id], [token_spent])
     # After states
     after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources, token_id)
     assert uint(before_lords_bal[0] - (currency_amount * 2)) == after_lords_bal
@@ -175,9 +178,13 @@ async def test_liquidity(exchange_factory):
         exchange.contract_address,
         'remove_liquidity',
         [
+            1,
             *uint(currency_amount),
+            1,
             token_id,
+            1,
             *uint(token_spent),
+            1,
             *uint(currency_amount), # LP amount directly to currency_amount
             current_time + 1000,
         ]
@@ -461,8 +468,11 @@ async def test_deadlines_respected(exchange_factory):
         exchange.contract_address,
         'add_liquidity',
         [
+            1,
             *uint(currency_amount),
+            1,
             token_id,
+            1,
             *uint(token_amount),
             earlier_time,
         ]

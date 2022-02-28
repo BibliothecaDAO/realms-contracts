@@ -20,6 +20,8 @@ Some variables have a trailing underscore `_` to prevent collisions.
 
 *Pair* is used to describe a price curve between the currency and a single token type on the token contract.
 
+Functions named with `_loop` are used for recursive processing of lists of items.
+
 ## Contract Interactions
 
 The contract can be broken into a number of sections:

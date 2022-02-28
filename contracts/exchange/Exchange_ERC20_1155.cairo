@@ -124,12 +124,13 @@ func initial_liquidity {
     ):
     alloc_locals
 
+    # Recursive break
     if currency_amounts_len == 0:
         return ()
     end
 
     assert currency_amounts_len = token_ids_len
-    assert token_ids_len = token_amounts_len
+    assert currency_amounts_len = token_amounts_len
 
     let (caller) = get_caller_address()
     let (contract) = get_contract_address()
@@ -185,20 +186,58 @@ func add_liquidity {
         range_check_ptr,
     }(
         # Maximum amount of currency supplied to LP
-        max_currency_amount: Uint256,
+        max_currency_amounts_len: felt,
+        max_currency_amounts: Uint256*,
         # ERC1155 token id
-        token_id: felt,
+        token_ids_len: felt,
+        token_ids: felt*,
         # Fixed amount of token supplied
-        token_amount: Uint256,
+        token_amounts_len: felt,
+        token_amounts: Uint256*,
         # Maximum time which this transaction can be accepted
         deadline: felt,
     ):
     alloc_locals
 
+    assert max_currency_amounts_len = token_ids_len
+    assert max_currency_amounts_len = token_amounts_len
+
     # Check deadline within bounds
     let (block_timestamp) = get_block_timestamp()
     with_attr error_message("Deadline exceeded"):
         assert_le(block_timestamp, deadline)
+    end
+
+    return add_liquidity_loop(
+        max_currency_amounts_len,
+        max_currency_amounts,
+        token_ids_len,
+        token_ids,
+        token_amounts_len,
+        token_amounts,
+    )
+end
+
+func add_liquidity_loop {
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(
+        # Maximum amount of currency supplied to LP
+        max_currency_amounts_len: felt,
+        max_currency_amounts: Uint256*,
+        # ERC1155 token id
+        token_ids_len: felt,
+        token_ids: felt*,
+        # Fixed amount of token supplied
+        token_amounts_len: felt,
+        token_amounts: Uint256*,
+    ):
+    alloc_locals
+
+    # Recursive break
+    if max_currency_amounts_len == 0:
+        return ()
     end
 
     let (caller) = get_caller_address()
@@ -208,9 +247,9 @@ func add_liquidity {
     let (currency_address_) = currency_address.read()
 
     # Read current reserve levels
-    let (lp_reserves_) = lp_reserves.read(token_id)
-    let (token_reserves ) = IERC1155.balanceOf(token_address_, contract, token_id)
-    let (currency_reserves_) = currency_reserves.read(token_id)
+    let (lp_reserves_) = lp_reserves.read([token_ids])
+    let (token_reserves ) = IERC1155.balanceOf(token_address_, contract, [token_ids])
+    let (currency_reserves_) = currency_reserves.read([token_ids])
 
     # Ensure this method is only called for subsequent liquidity adds
     let (above_zero) = uint256_lt(Uint256(0, 0), currency_reserves_)
@@ -221,7 +260,7 @@ func add_liquidity {
     # Required price calc
     # X/Y = dx/dy
     # dx = X*dy/Y
-    let (numerator, mul_overflow) = uint256_mul(currency_reserves_, token_amount)
+    let (numerator, mul_overflow) = uint256_mul(currency_reserves_, [token_amounts])
     with_attr error_message("Values too large"):
         assert mul_overflow = Uint256(0, 0)
     end
@@ -229,7 +268,7 @@ func add_liquidity {
     # Ignore remainder as this favours existing LP holders
 
     # Check within bounds of the maximum allowed currency spend
-    let (ok) = uint256_le(currency_amount, max_currency_amount)
+    let (ok) = uint256_le(currency_amount, [max_currency_amounts])
     with_attr error_message("Price exceeds max currency amount"):
         assert_not_zero(ok)
     end
@@ -237,27 +276,34 @@ func add_liquidity {
     # Transfer tokens to exchange contract
     IERC20.transferFrom(currency_address_, caller, contract, currency_amount)
     tempvar syscall_ptr :felt* = syscall_ptr
-    IERC1155.safeTransferFrom(token_address_, caller, contract, token_id, token_amount.low)
+    IERC1155.safeTransferFrom(token_address_, caller, contract, [token_ids], [token_amounts].low)
 
     # Update the new currency and LP reserves
     let (new_reserves, add_overflow) = uint256_add(currency_reserves_, currency_amount)
     with_attr error_message("Currency value overflow"):
         assert (add_overflow) = 0
     end
-    currency_reserves.write(token_id, new_reserves)
+    currency_reserves.write([token_ids], new_reserves)
     let (new_supplies, add_overflow) = uint256_add(lp_reserves_, currency_amount)
     with_attr error_message("LP value overflow"):
         assert (add_overflow) = 0
     end
-    lp_reserves.write(token_id, new_supplies)
+    lp_reserves.write([token_ids], new_supplies)
 
     # Mint LP tokens
-    ERC1155_mint(caller, token_id, currency_amount.low)
+    ERC1155_mint(caller, [token_ids], currency_amount.low)
 
     # Emit event
-    liquidity_added.emit(caller, currency_amount, token_id, token_amount)
+    liquidity_added.emit(caller, currency_amount, [token_ids], [token_amounts])
 
-    return ()
+    return add_liquidity_loop(
+        max_currency_amounts_len - 1,
+        max_currency_amounts + 2, # uint
+        token_ids_len - 1,
+        token_ids + 1,
+        token_amounts_len - 1,
+        token_amounts + 2, # uint
+    )
 end
 
 
@@ -268,22 +314,67 @@ func remove_liquidity {
         range_check_ptr,
     }(
         # Minimum amount of currency received from LP
-        min_currency_amount: Uint256,
+        min_currency_amounts_len: felt,
+        min_currency_amounts: Uint256*,
         # ERC1155 token id
-        token_id: felt,
+        token_ids_len: felt,
+        token_ids: felt*,
         # Minimum amount of tokens received from LP
-        min_token_amount: Uint256,
+        min_token_amounts_len: felt,
+        min_token_amounts: Uint256*,
         # Exact amount of LP tokens to spend
-        lp_amount: Uint256,
+        lp_amounts_len: felt,
+        lp_amounts: Uint256*,
         # Maximum time which this transaction can be accepted
         deadline: felt,
     ):
     alloc_locals
 
+    assert min_currency_amounts_len = token_ids_len
+    assert min_currency_amounts_len = min_token_amounts_len
+    assert min_currency_amounts_len = lp_amounts_len
+
     # Check deadline within bounds
     let (block_timestamp) = get_block_timestamp()
     with_attr error_message("Deadline exceeded"):
         assert_le(block_timestamp, deadline)
+    end
+
+    return remove_liquidity_loop(
+        min_currency_amounts_len,
+        min_currency_amounts,
+        token_ids_len,
+        token_ids,
+        min_token_amounts_len,
+        min_token_amounts,
+        lp_amounts_len,
+        lp_amounts,
+    )
+
+end
+
+func remove_liquidity_loop {
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(
+        min_currency_amounts_len: felt,
+        min_currency_amounts: Uint256*,
+        # ERC1155 token id
+        token_ids_len: felt,
+        token_ids: felt*,
+        # Minimum amount of tokens received from LP
+        min_token_amounts_len: felt,
+        min_token_amounts: Uint256*,
+        # Exact amount of LP tokens to spend
+        lp_amounts_len: felt,
+        lp_amounts: Uint256*,
+    ):
+    alloc_locals
+
+    # Recursive break
+    if min_currency_amounts_len == 0:
+        return ()
     end
 
     let (caller) = get_caller_address()
@@ -293,11 +384,11 @@ func remove_liquidity {
     let (currency_address_) = currency_address.read()
 
     # Read current reserve levels
-    let (lp_reserves_) = lp_reserves.read(token_id)
-    let (currency_reserves_) = currency_reserves.read(token_id)
-    let (token_reserves) = IERC1155.balanceOf(token_address_, contract, token_id)
+    let (lp_reserves_) = lp_reserves.read([token_ids])
+    let (currency_reserves_) = currency_reserves.read([token_ids])
+    let (token_reserves) = IERC1155.balanceOf(token_address_, contract, [token_ids])
 
-    let (new_supplies) = uint256_sub(lp_reserves_, lp_amount)
+    let (new_supplies) = uint256_sub(lp_reserves_, [lp_amounts])
     # It should not be possible to go below zero as LP reflects supply
     let (above_zero) = uint256_le(Uint256(0, 0), new_supplies)
     with_attr error_message("LP total exceeded"):
@@ -305,12 +396,12 @@ func remove_liquidity {
     end
 
     # Calculate percentage of reserves this LP amount is worth
-    let (numerator, mul_overflow) = uint256_mul(currency_reserves_, lp_amount)
+    let (numerator, mul_overflow) = uint256_mul(currency_reserves_, [lp_amounts])
     with_attr error_message("Values too large"):
         assert mul_overflow = Uint256(0, 0)
     end
     let (currency_owed, _) = uint256_unsigned_div_rem(numerator, lp_reserves_)
-    let (numerator, mul_overflow) = uint256_mul(Uint256(token_reserves, 0), lp_amount)
+    let (numerator, mul_overflow) = uint256_mul(Uint256(token_reserves, 0), [lp_amounts])
     with_attr error_message("Values too large"):
         assert mul_overflow = Uint256(0, 0)
     end
@@ -318,11 +409,11 @@ func remove_liquidity {
     let (tokens_owed, _) = uint256_unsigned_div_rem(numerator, lp_reserves_)
 
     # Check actual values to receive are above minimum values requested
-    let (above_min) = uint256_le(min_currency_amount, currency_owed)
+    let (above_min) = uint256_le([min_currency_amounts], currency_owed)
     with_attr error_message("Minimum currency amount exceeded"):
         assert_not_zero(above_min)
     end
-    let (above_min) = uint256_le(min_token_amount, tokens_owed)
+    let (above_min) = uint256_le([min_token_amounts], tokens_owed)
     with_attr error_message("Minimum token amount exceeded"):
         assert_not_zero(above_min)
     end
@@ -331,20 +422,29 @@ func remove_liquidity {
     let (new_currency) = uint256_sub(currency_reserves_, currency_owed)
 
     # Update storage
-    lp_reserves.write(token_id, new_supplies)
-    currency_reserves.write(token_id, new_currency)
+    lp_reserves.write([token_ids], new_supplies)
+    currency_reserves.write([token_ids], new_currency)
 
     # Take LP tokens
-    ERC1155_burn(caller, token_id, lp_amount.low)
+    ERC1155_burn(caller, [token_ids], [lp_amounts].low)
     # Send currency and tokens
     IERC20.transfer(currency_address_, caller, currency_owed)
     tempvar syscall_ptr :felt* = syscall_ptr
-    IERC1155.safeTransferFrom(token_address_, contract, caller, token_id, tokens_owed.low)
+    IERC1155.safeTransferFrom(token_address_, contract, caller, [token_ids], tokens_owed.low)
 
     # Emit event
-    liquidity_removed.emit(caller, currency_owed, token_id, tokens_owed)
+    liquidity_removed.emit(caller, currency_owed, [token_ids], tokens_owed)
 
-    return ()
+    return remove_liquidity_loop(
+        min_currency_amounts_len - 1,
+        min_currency_amounts + 2, # uint
+        token_ids_len - 1,
+        token_ids + 1,
+        min_token_amounts_len - 1,
+        min_token_amounts + 2, # uint
+        lp_amounts_len - 1,
+        lp_amounts + 2, # uint
+    )
 end
 
 
@@ -398,9 +498,7 @@ func buy_tokens {
     end
 
     return (currency_amount)
-
 end
-
 
 func buy_tokens_loop {
         syscall_ptr : felt*,
@@ -517,10 +615,8 @@ func sell_tokens {
     end
 
     return (currency_amount)
-
 end
 
-# Internal
 func sell_tokens_loop {
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
