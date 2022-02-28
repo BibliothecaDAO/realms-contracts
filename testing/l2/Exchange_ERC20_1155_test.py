@@ -270,39 +270,58 @@ async def buy_and_check(admin_account, admin_signer, ctx, resource_ids, token_to
     assert uint(before_lords_bal[0] - sum(expected_prices)) == after_lords_bal
 
 
-async def sell_and_check(admin_account, admin_signer, ctx, resource_id, token_to_sell, expected_price):
+async def sell_and_check(admin_account, admin_signer, ctx, resource_ids, token_to_sells, expected_prices):
     exchange = ctx.exchange
     lords = ctx.lords
     resources = ctx.resources
 
-    before_lords_bal, before_resources_bal = await get_token_bals(admin_account, lords, resources, resource_id)
+    # Store before values for asserting after tests
+    befores = []
+    before_lords_bal = 0
 
-    before_currency_reserve = (await exchange.get_currency_reserves(resource_id).invoke()).result.currency_reserves[0]
-    token_reserve = (await resources.balanceOf(exchange.contract_address, resource_id).invoke()).result.balance
+    for i in range(0, len(resource_ids)):
+        before_lords_bal, before_resources_bal = await get_token_bals(admin_account, lords, resources, resource_ids[i])
 
-    # Check price math
-    res = await exchange.get_sell_price(uint(token_to_sell), uint(before_currency_reserve), uint(token_reserve)).invoke()
-    assert res.result.price == uint(expected_price)
+        before_currency_reserve = (await exchange.get_currency_reserves(resource_ids[i]).invoke()).result.currency_reserves[0]
+        token_reserve = (await resources.balanceOf(exchange.contract_address, resource_ids[i]).invoke()).result.balance
+
+        # Check price math
+        res = await exchange.get_sell_price(uint(token_to_sells[i]), uint(before_currency_reserve), uint(token_reserve)).invoke()
+        assert res.result.price == uint(expected_prices[i])
+
+        befores.append({
+            'before_resources_bal': before_resources_bal,
+            'before_currency_reserve': before_currency_reserve,
+        })
 
     # Make sale
     current_time = conftest.get_block_timestamp(ctx.starknet.state)
-    min_currency = expected_price - 2 # Add a bit of fat
+    min_currency = sum(expected_prices) - 2 # Add a bit of fat
     await admin_signer.send_transaction(
         admin_account,
         exchange.contract_address,
         'sell_tokens',
         [
             *uint(min_currency),
-            resource_id,
-            *uint(token_to_sell),
+            len(resource_ids),
+            *resource_ids,
+            len(token_to_sells),
+            *list(sum([uint(b) for b in token_to_sells], ())), #uint values in list and expand
             current_time + 1000,
         ]
     )
-    after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources, resource_id)
-    assert uint(before_lords_bal[0] + expected_price) == after_lords_bal
-    assert before_resources_bal - token_to_sell == after_resources_bal
-    after_currency_reserve = (await exchange.get_currency_reserves(resource_id).invoke()).result.currency_reserves[0]
-    assert before_currency_reserve - expected_price == after_currency_reserve
+
+    # Check values
+    for i in range(0, len(resource_ids)):
+        res = await resources.balanceOf(admin_account.contract_address, resource_ids[i]).invoke()
+        after_resources_bal = res.result.balance
+        assert befores[i]['before_resources_bal'] - token_to_sells[i] == after_resources_bal
+        after_currency_reserve = (await exchange.get_currency_reserves(resource_ids[i]).invoke()).result.currency_reserves[0]
+        assert befores[i]['before_currency_reserve'] - expected_prices[i] == after_currency_reserve
+    # Check lords in bulk
+    res = await lords.balanceOf(admin_account.contract_address).invoke()
+    after_lords_bal = res.result.balance
+    assert uint(before_lords_bal[0] + sum(expected_prices)) == after_lords_bal
 
 
 @pytest.mark.asyncio
@@ -362,15 +381,18 @@ async def test_sell_price(exchange_factory):
     currency_reserve = 1000
     token_reserve = 1000
     token_id = 3
+    token_id2 = 5
 
     await initial_liq(admin_signer, admin_account, ctx, currency_reserve, token_id, token_reserve)
     # price = (amnt * cur_res * (1000 - fee)) / ((tok_res * 1000) + (amnt * (1000 - fee)))
     # price = (100 * 1000 * (1000 - 100)) / (1000 * 1000 + (100 * (1000 - 100)))
     # price = 82
-    await sell_and_check(admin_account, admin_signer, ctx, token_id, 100, 82)
+    await sell_and_check(admin_account, admin_signer, ctx, [token_id], [100], [82])
     # price = (100 * (1000 - 100) * 918) / (1100 * 1000 + (100 * (1000 - 100)))
     # price = 69
-    await sell_and_check(admin_account, admin_signer, ctx, token_id, 100, 69)
+    # Second value has same LP value, price, amounts as the first buy_and_check request
+    await initial_liq(admin_signer, admin_account, ctx, currency_reserve, token_id2, token_reserve)
+    await sell_and_check(admin_account, admin_signer, ctx, [token_id, token_id2], [100, 100], [69, 82])
 
     # Test increased min fails
     sell_amount = 100

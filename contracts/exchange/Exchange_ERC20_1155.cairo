@@ -300,13 +300,13 @@ func remove_liquidity {
     let (tokens_owed, _) = uint256_unsigned_div_rem(numerator, lp_reserves_)
 
     # Check actual values to receive are above minimum values requested
-    let (above_zero) = uint256_le(min_currency_amount, currency_owed)
+    let (above_min) = uint256_le(min_currency_amount, currency_owed)
     with_attr error_message("Minimum currency amount exceeded"):
-        assert_not_zero(above_zero)
+        assert_not_zero(above_min)
     end
-    let (above_zero) = uint256_le(min_token_amount, tokens_owed)
+    let (above_min) = uint256_le(min_token_amount, tokens_owed)
     with_attr error_message("Minimum token amount exceeded"):
-        assert_not_zero(above_zero)
+        assert_not_zero(above_min)
     end
 
     # New totals
@@ -360,15 +360,51 @@ func buy_tokens {
 
     assert token_ids_len = token_amounts_len
 
-    # Recursive break
-    if token_ids_len == 0:
-        return (Uint256(0, 0))
-    end
-
     # Check deadline within bounds
     let (block_timestamp) = get_block_timestamp()
     with_attr error_message("Deadline exceeded"):
         assert_le(block_timestamp, deadline)
+    end
+
+    # Loop
+    let (currency_amount) = buy_tokens_loop(
+        token_ids_len,
+        token_ids,
+        token_amounts_len,
+        token_amounts
+    )
+
+    let (above_max_curr) = uint256_le(currency_amount, max_currency_amount)
+    with_attr error_message("Maximum currency amount exceeded"):
+        assert_not_zero(above_max_curr)
+    end
+
+    return (currency_amount)
+
+end
+
+
+func buy_tokens_loop {
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(
+        # Amount of following arg
+        token_ids_len: felt,
+        # ERC1155 token ids
+        token_ids: felt*,
+        # Amount of following arg
+        token_amounts_len: felt,
+        # Exact amount of tokens to buy
+        token_amounts: Uint256*,
+    ) -> (
+        sold: Uint256
+    ):
+    alloc_locals
+
+    # Recursive break
+    if token_ids_len == 0:
+        return (Uint256(0, 0))
     end
 
     let (caller) = get_caller_address()
@@ -383,17 +419,6 @@ func buy_tokens {
 
     # Calculate prices
     let (currency_amount) = get_buy_price([token_amounts], currency_reserves_, Uint256(token_reserves, 0))
-    let (above_max_curr) = uint256_le(currency_amount, max_currency_amount)
-    with_attr error_message("Maximum currency amount exceeded"):
-        assert_not_zero(above_max_curr)
-    end
-
-    # Calculate remaining currency funds
-    let (above_max_curr) = uint256_le(currency_amount, max_currency_amount)
-    with_attr error_message("Maximum currency amount exceeded"):
-        assert_not_zero(above_max_curr)
-    end
-    let (max_currency_amount_left) = uint256_sub(max_currency_amount, currency_amount)
 
     # Update reserves
     let (new_reserves, add_overflow) = uint256_add(currency_reserves_, currency_amount)
@@ -411,13 +436,11 @@ func buy_tokens {
     tokens_purchased.emit(caller, currency_amount, [token_ids], [token_amounts])
 
     # Recurse
-    let (currency_total) = buy_tokens(
-        max_currency_amount_left,
+    let (currency_total) = buy_tokens_loop(
         token_ids_len - 1,
         token_ids + 1,
         token_amounts_len - 1,
-        token_amounts + 2, # Uint
-        deadline
+        token_amounts + 2 # Uint
     )
     let (currency_sold, add_overflow) = uint256_add(currency_total, currency_amount)
     with_attr error_message("Total currency overflow"):
@@ -438,10 +461,14 @@ func sell_tokens {
     }(
         # Maximum amount of currency to buy
         min_currency_amount: Uint256,
+        # Amount of following arg
+        token_ids_len: felt,
         # ERC1155 token id
-        token_id: felt,
+        token_ids: felt*,
+        # Amount of following arg
+        token_amounts_len: felt,
         # Exact amount of token to sell
-        token_amount: Uint256,
+        token_amounts: Uint256*,
         # Maximum time which this transaction can be accepted
         deadline: felt,
     ) -> (
@@ -449,10 +476,54 @@ func sell_tokens {
     ):
     alloc_locals
 
+    assert token_ids_len = token_amounts_len
+
     # Check deadline within bounds
     let (block_timestamp) = get_block_timestamp()
     with_attr error_message("Deadline exceeded"):
         assert_le(block_timestamp, deadline)
+    end
+
+    # Loop
+    let (currency_amount) = sell_tokens_loop(
+        token_ids_len,
+        token_ids,
+        token_amounts_len,
+        token_amounts
+    )
+
+    # Check min_currency_amount
+    let (above_min) = uint256_le(min_currency_amount, currency_amount)
+    with_attr error_message("Below minimum currency amount"):
+        assert_not_zero(above_min)
+    end
+
+    return (currency_amount)
+
+end
+
+# Internal
+func sell_tokens_loop {
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(
+        # Amount of following arg
+        token_ids_len: felt,
+        # ERC1155 token id
+        token_ids: felt*,
+        # Amount of following arg
+        token_amounts_len: felt,
+        # Exact amount of token to sell
+        token_amounts: Uint256*,
+    ) -> (
+        sold: Uint256
+    ):
+    alloc_locals
+
+    # Recursive break
+    if token_ids_len == 0:
+        return (Uint256(0, 0))
     end
 
     let (caller) = get_caller_address()
@@ -462,20 +533,14 @@ func sell_tokens {
     let (currency_address_) = currency_address.read()
 
     # Read current reserve levels
-    let (currency_reserves_) = currency_reserves.read(token_id)
-    let (token_reserves) = IERC1155.balanceOf(token_address_, contract, token_id)
+    let (currency_reserves_) = currency_reserves.read([token_ids])
+    let (token_reserves) = IERC1155.balanceOf(token_address_, contract, [token_ids])
 
     # Take the token amount
-    IERC1155.safeTransferFrom(token_address_, caller, contract, token_id, token_amount.low)
+    IERC1155.safeTransferFrom(token_address_, caller, contract, [token_ids], [token_amounts].low)
 
     # Calculate prices
-    let (currency_amount) = get_sell_price(token_amount, currency_reserves_, Uint256(token_reserves, 0))
-
-    # Check min_currency_amount
-    let (above_min_curr) = uint256_le(min_currency_amount, currency_amount)
-    with_attr error_message("Minimum currency amount exceeded"):
-        assert_not_zero(above_min_curr)
-    end
+    let (currency_amount) = get_sell_price([token_amounts], currency_reserves_, Uint256(token_reserves, 0))
 
     # Transfer currency
     IERC20.transfer(currency_address_, caller, currency_amount)
@@ -483,12 +548,24 @@ func sell_tokens {
 
     # Update reserves
     let (new_reserves) = uint256_sub(currency_reserves_, currency_amount)
-    currency_reserves.write(token_id, new_reserves)
+    currency_reserves.write([token_ids], new_reserves)
 
     # Emit event
-    currency_purchased.emit(caller, currency_amount, token_id, token_amount)
+    currency_purchased.emit(caller, currency_amount, [token_ids], [token_amounts])
 
-    return (currency_amount)
+    # Recurse
+    let (currency_total) = sell_tokens_loop(
+        token_ids_len - 1,
+        token_ids + 1,
+        token_amounts_len - 1,
+        token_amounts + 2 # Uint
+    )
+    let (currency_owed, add_overflow) = uint256_add(currency_total, currency_amount)
+    with_attr error_message("Total currency overflow"):
+        assert add_overflow = 0
+    end
+
+    return (currency_owed)
 end
 
 
