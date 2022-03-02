@@ -40,11 +40,7 @@ func game_started(game_idx : felt, initial_main_health : felt ):
 end
 
 @event
-func attack(game_idx : felt, token_id : felt, amount : felt):
-end
-
-@event
-func shield(game_idx : felt, token_id : felt, amount : felt):
+func game_action( game_idx : felt, token_id : felt, token_offset : felt, amount : felt, action_type : felt ):
 end
 
 # ############ Structs ################
@@ -60,6 +56,13 @@ const TOKEN_BASE_FACTOR = 10
 namespace ElementTokenOffset:
     const Light = 1
     const Dark = 2
+    # ... what other Elements exist in the Lootverse?
+end
+
+namespace ActionType:
+    const Attack = 1
+    const Shield = 2
+    # ... how can actions affect the Lootverse?
 end
 
 # ############ Constructor ##############
@@ -69,14 +72,14 @@ func constructor{
         pedersen_ptr : HashBuiltin*, 
         range_check_ptr
     }(
-        address_of_controller : felt,
-        address_of_elements_token : felt,
+        _address_of_controller : felt,
+        _address_of_elements_token : felt,
         _blocks_per_min : felt,
         _hours_per_game : felt,
         _owner : felt
     ):
-    controller_address.write(address_of_controller) 
-    elements_token_address.write(address_of_elements_token)
+    controller_address.write(_address_of_controller) 
+    elements_token_address.write(_address_of_elements_token)
     blocks_per_minute.write(_blocks_per_min)
     hours_per_game.write(_hours_per_game)
 
@@ -212,7 +215,7 @@ func attack_tower{
     I02_TowerStorage.set_user_reward_alloc(tower_defence_storage, game_idx, caller, ShieldGameRole.Attacker, user_alloc + _amount)
     I02_TowerStorage.set_token_reward_pool(tower_defence_storage, game_idx, tokens_id, token_pool + _amount)
 
-    attack.emit( game_idx, tokens_id, _amount )
+    game_action.emit( game_idx, tokens_id, offset, _amount, ActionType.Attack )
 
     let (local contract_address) = get_contract_address()
 
@@ -271,7 +274,7 @@ func increase_shield{
     I02_TowerStorage.set_user_reward_alloc(tower_defence_storage, game_idx, caller, ShieldGameRole.Shielder, user_alloc + _amount)
     I02_TowerStorage.set_token_reward_pool(tower_defence_storage, game_idx, tokens_id, token_pool + _amount)
 
-    shield.emit( game_idx, tokens_id, _amount )
+    game_action.emit( game_idx, tokens_id, offset, _amount, ActionType.Shield )
 
     let (local contract_address) = get_contract_address()
 
@@ -305,7 +308,7 @@ func claim_rewards{
 
     let (local side_won) = is_le_felt(health, 0) # 0 = Shielders, 1 = Attackers 
 
-    claim_token_reward(
+    iter_claim_token_reward(
         game_idx,
         caller,
         side_won,
@@ -315,7 +318,7 @@ func claim_rewards{
     return ()
 end
 
-func claim_token_reward{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+func iter_claim_token_reward{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
         game_idx : felt,
         user : felt, 
         side : felt, # from ShieldGameRole
@@ -344,7 +347,7 @@ func claim_token_reward{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_
         tokens_idx, 
         user_token_reward)
 
-    claim_token_reward(
+    iter_claim_token_reward(
         game_idx,
         user, 
         side,
