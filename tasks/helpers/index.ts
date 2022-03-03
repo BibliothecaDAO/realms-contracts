@@ -8,6 +8,9 @@ dotenvConfig({ path: resolve(__dirname, "../../.env") });
 
 export const DEPLOYMENT_PATH_BASE = "./minigame-deployments/starknet";
 
+const network: any = process.env.NETWORK || "georli-alpha"
+export const provider = new Provider({ network })
+
 export function getPathBase() {
   if (process.env.NETWORK && process.env.NETWORK !== "goerli") {
     return `${DEPLOYMENT_PATH_BASE}-${process.env.NETWORK}`;
@@ -32,23 +35,33 @@ export function checkDeployment(contractName: string) {
   }
 }
 
-export function getOwnerAccountInt(): string {
-  const path_base = getPathBase()
+type Account = {
+  transaction_hash: string;
+  address: string;
+  stark_key_hex: string;
+}
 
-  if (process.env.OWNER_ACCOUNT) {
-    return BigInt(process.env.OWNER_ACCOUNT).toString()
-  }
+export function getOwnerAccount(): Account {
+  const path_base = getPathBase()
 
   try {  
     const file = fs.readFileSync(`${path_base}/OwnerAccount.json`)
 
     const parsed = JSON.parse(file.toString())
-
-    return BigInt(parsed.address).toString()
+    return parsed;
   } catch (error) {
     console.log(`No OWNER_ACCOUNT env variable nor "${path_base}/OwnerAccount.json" provided.`)
     throw error
   }
+}
+
+export function getOwnerAccountInt(): string {
+
+  if (process.env.OWNER_ACCOUNT) {
+    return BigInt(process.env.OWNER_ACCOUNT).toString()
+  }
+
+  return BigInt(getOwnerAccount().address).toString()
 }
 
 export function writeDeployment(contractAlias: string, result: any) {
@@ -61,7 +74,7 @@ export function writeDeployment(contractAlias: string, result: any) {
 
 export function writeNileDeploymentFile(contractName: string, contractAlias: string, result: any) {
 
-  const deploymentFilename = "./minigame-deployments/goerli.deployments.txt";
+  const deploymentFilename = "./minigame-deployments/starknet-goerli/goerli.deployments.txt";
 
   if (fs.existsSync(deploymentFilename)) {
     fs.appendFileSync(deploymentFilename, `\n${result.address}:artifacts/abis/${contractName}.json:${contractAlias}`)
@@ -75,7 +88,11 @@ export function logDeployment(result: any) {
   console.log(`TX: ${result.transaction_hash}`)
 }
 
-export function getDeployedAddressInt(contractName: string) {
+export function getDeployedAddressInt(contractName: string): BigInt {
+  return BigInt(getDeployment(contractName).address)
+}
+
+export function getDeployment(contractName: string): { address: string } {
   const path_base = getPathBase()
 
   try {
@@ -83,15 +100,13 @@ export function getDeployedAddressInt(contractName: string) {
 
     const parsed = JSON.parse(file.toString())
 
-    return BigInt(parsed.address).toString()
+    return parsed;
   } catch (error) {
     console.log(`Deployment ${contractName} doesn't exist`)
   }
 }
 
 export async function deployContract(contractName: string, contractAlias: string, args: string[]) {
-  const network: any = process.env.NETWORK || "georli-alpha"
-  const provider = new Provider({ network })
 
   console.log("Deploying..." + contractName)
 
@@ -129,10 +144,7 @@ export function getSigner() {
     }
 
     const kp = ec.getKeyPair(toBN(privKey, 16))
-    const p = new Provider({
-      network: "georli-alpha"
-    })
-    const s = new Signer(p, parsed.address, kp )
+    const s = new Signer(provider, parsed.address, kp )
     return s;
 
   } catch( e ) {
