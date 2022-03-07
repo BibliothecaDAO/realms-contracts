@@ -9,7 +9,7 @@ from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.interfaces import IModuleController
-from contracts.token.IERC20 import IERC20
+from contracts.token.ERC20.interfaces.IERC20 import IERC20
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 
 # #### Module 1B ###

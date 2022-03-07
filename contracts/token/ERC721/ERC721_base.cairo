@@ -13,7 +13,7 @@ from contracts.utils.safemath import (
 
 from contracts.ERC165_base import ERC165_register_interface
 
-from contracts.token.IERC721_Receiver import IERC721_Receiver
+from contracts.token.ERC721.interfaces.IERC721_Receiver import IERC721_Receiver
 
 from contracts.IERC165 import IERC165
 

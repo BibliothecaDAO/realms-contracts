@@ -18,8 +18,8 @@ from contracts.settling_game.utils.game_structs import (
 from contracts.settling_game.utils.constants import (
     SHIFT_8_1, SHIFT_8_2, SHIFT_8_3, SHIFT_8_4, SHIFT_8_5, SHIFT_8_6, SHIFT_8_7, SHIFT_8_8)
 
-from contracts.token.IERC20 import IERC20
-from contracts.token.ERC1155.IERC1155 import IERC1155
+from contracts.token.ERC20.interfaces.IERC20 import IERC20
+from contracts.token.ERC1155.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
 

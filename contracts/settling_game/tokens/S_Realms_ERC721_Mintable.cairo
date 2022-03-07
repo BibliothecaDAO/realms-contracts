@@ -11,15 +11,13 @@ from starkware.cairo.common.math import assert_not_zero
 from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.pow import pow
 
-from contracts.token.IERC20 import IERC20
+from contracts.token.ERC20.interfaces.IERC20 import IERC20
 
-from contracts.token.ERC721_base import (
+from contracts.token.ERC721.ERC721_base import (
     ERC721_name, ERC721_symbol, ERC721_balanceOf, ERC721_ownerOf, ERC721_getApproved,
     ERC721_isApprovedForAll, ERC721_initializer, ERC721_approve, ERC721_setApprovalForAll,
-    ERC721_transferFrom, ERC721_safeTransferFrom, ERC721_mint, ERC721_burn)
-
-from contracts.token.ERC721_Metadata_base import (
-    ERC721_Metadata_initializer, ERC721_Metadata_tokenURI, ERC721_Metadata_setTokenURI)
+    ERC721_transferFrom, ERC721_safeTransferFrom, ERC721_mint, ERC721_burn,
+    ERC721_tokenURI, ERC721_setTokenURI)
 
 from contracts.ERC165_base import ERC165_supports_interface
 
@@ -33,7 +31,6 @@ from contracts.Ownable_base import Ownable_initializer, Ownable_only_owner
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         name : felt, symbol : felt, owner : felt):
     ERC721_initializer(name, symbol)
-    ERC721_Metadata_initializer()
     Ownable_initializer(owner)
 
     return ()
@@ -93,7 +90,7 @@ end
 @view
 func tokenURI{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         tokenId : Uint256) -> (tokenURI : felt):
-    let (tokenURI : felt) = ERC721_Metadata_tokenURI(tokenId)
+    let (tokenURI : felt) = ERC721_tokenURI(tokenId)
     return (tokenURI)
 end
 
@@ -133,7 +130,7 @@ end
 func setTokenURI{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
         tokenId : Uint256, tokenURI : felt):
     Ownable_only_owner()
-    ERC721_Metadata_setTokenURI(tokenId, tokenURI)
+    ERC721_setTokenURI(tokenId, tokenURI)
     return ()
 end
 
