@@ -37,7 +37,7 @@ const EXPLORERS_GUILD = 1
 const PARADE_GROUNDS = 1
 const RESOURCE_FACILITY = 1
 const DOCK = 1
-const WATER_MILL = 1
+const FARMS = 1
 
 # #### Module 4A #####
 #                   #
@@ -48,10 +48,6 @@ const WATER_MILL = 1
 
 @storage_var
 func controller_address() -> (address : felt):
-end
-
-@storage_var
-func time_staked(token_id : Uint256) -> (time : felt):
 end
 
 @constructor
@@ -65,40 +61,45 @@ end
 @view
 func calculateHappiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         tokenId : Uint256) -> (happiness : felt):
+    alloc_locals
     # calculate number of buildings realm has
     # happiness = (culture-(population/100)) + (food-(population/100))
-    let happiness = 10
+    let (local culture : felt) = calculateCulture(tokenId)
+    let (local population : felt) = calculatePopulation(tokenId)
+    let (local food : felt) = calculateFood(tokenId)
+
+    let happiness = (culture - (population / 100)) + (food - (population / 100))
     return (happiness=happiness)
 end
 
 @external
 func calculateCulture{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        tokenId : Uint256):
+        tokenId : Uint256) -> (culture : felt):
     # calculate number of buildings realm has
-
-    return ()
+    let culture = 25 + (AMPHITHEATER) + (GUILD * 5) + (CASTLE * 5) + (FAIRGROUNDS * 5)
+    return (culture=culture)
 end
 
 @external
 func calculatePopulation{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        tokenId : Uint256):
+        tokenId : Uint256) -> (population : felt):
     # calculate number of buildings realm has
-
-    return ()
+    let population = 1000 + (HOUSING * 100)
+    return (population=population)
 end
 
 @external
 func calculateFood{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        tokenId : Uint256):
+        tokenId : Uint256) -> (food : felt):
     # food = 25 + (# of farms) + (2 * # of granaries) + (6 * # of fairgrounds) + (6 * # of royal reserves) + (6 * # of grand markets) - (# of city structures) - (# of troops)
-
-    return ()
+    let food = 25 + (FARMS) + (GRANARY) + (FAIRGROUNDS * 5) + (ROYAL_RESERVE * 5) - (20)
+    return (food=food)
 end
 
 @external
 func calculateTribute{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        tokenId : Uint256):
+        tokenId : Uint256) -> (tribute : felt):
     # calculate number of buildings realm has
 
-    return ()
+    return (tribute=100)
 end

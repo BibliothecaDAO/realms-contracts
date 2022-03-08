@@ -83,7 +83,7 @@ func get_resource_level{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     let (level) = resource_levels.read(token_id, resource)
 
     if level == 0:
-        assert l = 1000
+        assert l = 100
     else:
         assert l = level
     end
