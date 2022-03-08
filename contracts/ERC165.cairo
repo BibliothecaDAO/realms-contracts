@@ -1,5 +1,4 @@
 %lang starknet
-%builtins pedersen range_check
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
 
@@ -13,17 +12,17 @@ func supportsInterface{
         syscall_ptr: felt*, 
         pedersen_ptr: HashBuiltin*, 
         range_check_ptr
-    } (interface_id: felt) -> (success: felt):
-    let (success) = ERC165_supports_interface(interface_id)
+    } (interfaceId: felt) -> (success: felt):
+    let (success) = ERC165_supports_interface(interfaceId)
     return (success)
 end
 
 @external
-func register_interface{
+func registerInterface{
         syscall_ptr: felt*, 
         pedersen_ptr: HashBuiltin*, 
         range_check_ptr
-    } (interface_id: felt):
-    ERC165_register_interface(interface_id)
+    } (interfaceId: felt):
+    ERC165_register_interface(interfaceId)
     return ()
 end

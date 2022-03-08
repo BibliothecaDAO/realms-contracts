@@ -121,8 +121,8 @@ async def test_open_trade_and_execute(marketplace_factory):
     trade_status = (await ctx.marketplace.get_trade_status(trade_counter_initial).call()).result.status
     trade_token_id = (await ctx.marketplace.get_trade_token_id(trade_counter_initial).call()).result.token_id
     item_owner_of = (await ctx.realms.ownerOf(trade_token_id).call()).result.owner
-    purchaser_currency_balance = (await ctx.lords.balanceOf(ctx.accounts.user2.contract_address).call()).result.balance
-    seller_currency_balance = (await ctx.lords.balanceOf(ctx.accounts.user1.contract_address).call()).result.balance
+    purchaser_currency_balance = (await ctx.lords.balanceOf(ctx.user2.contract_address).call()).result.balance
+    seller_currency_balance = (await ctx.lords.balanceOf(ctx.user1.contract_address).call()).result.balance
     trade_result = (await ctx.marketplace.get_trade(trade_counter_initial).call()).result.trade
 
     fee = int(trade_result.price * fee_bips / 10000)
@@ -131,7 +131,7 @@ async def test_open_trade_and_execute(marketplace_factory):
     assert trade_status == 1
 
     #Require user2 to be the new owner of Item from trade
-    assert item_owner_of == ctx.accounts.user2.contract_address
+    assert item_owner_of == ctx.user2.contract_address
 
     #Require user2 balance to have decresase by trade price 
     assert purchaser_currency_balance == uint(ctx.consts.INITIAL_USER_FUNDS - trade_result.price)
