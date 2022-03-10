@@ -51,6 +51,11 @@ struct GameStatus:
     member Expired : felt
 end
 
+# Game tokens cannot be reused across games
+# The base factor is used to deterministically enforce this rule
+# Ex. Token ID = 12
+# Game Index = 12 / BASE_FACTOR = 1
+# Token Offset = 12 % BASE_FACTOR = 2
 const TOKEN_BASE_FACTOR = 10
 
 namespace ElementTokenOffset:
@@ -116,6 +121,7 @@ func get_game_context_variables{
     return (game_idx=game_idx, bpm=bpm, hpg=hpg, curr_block=curr_block, game_start=game_start, main_health=main_health, curr_boost=current_boost)
 end
 
+# See tasks/create_game.ts
 @external
 func create_game{
         syscall_ptr : felt*,
@@ -177,6 +183,7 @@ func attack_tower{
     let (local game_status) = get_game_state( game_idx )
     assert game_status = GameStatus.Active
 
+    # Finds the associated other token
     let (_, local odd_id) = unsigned_div_rem(tokens_id, 2)
     if odd_id == 1:
         [ap] = tokens_id + 1;ap++
