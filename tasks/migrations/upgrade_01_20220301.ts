@@ -1,15 +1,15 @@
 import { defaultProvider } from "starknet";
 import { getSelectorFromName } from "starknet/dist/utils/stark";
-import { getDeployedAddressInt, getSigner, deployContract, getOwnerAccountInt } from "../helpers";
+import { getDeployment, getSigner, deployContract, getOwnerAccountInt } from "../helpers";
 
 const main = async () => {
 
     const contractName = "01_TowerDefence";
   
     // Collect params
-    const moduleControllerAddress = getDeployedAddressInt("ModuleController");
-    const elementsTokenAddress = getDeployedAddressInt("ERC1155_ElementsToken");
-    const arbiter = getDeployedAddressInt("Arbiter");
+    const moduleControllerAddress = getDeployment("ModuleController");
+    const elementsTokenAddress = getDeployment("ERC1155_ElementsToken");
+    const arbiter = getDeployment("Arbiter");
     
     const blocksPerMin = "1";
     const hoursPerGame = "24";
@@ -17,21 +17,21 @@ const main = async () => {
     const owner = getOwnerAccountInt();
    
     await deployContract(contractName, contractName, [
-      moduleControllerAddress,
-      elementsTokenAddress,
+      BigInt(moduleControllerAddress.address).toString(),
+      BigInt(elementsTokenAddress.address).toString(),
       blocksPerMin,
       hoursPerGame,
       owner
     ]);
 
-    const upgradedModule = getDeployedAddressInt(contractName);
+    const upgradedModule = getDeployment(contractName);
 
     // Appoint the upgrade as module with existing module ID
     const appoint = await getSigner().invokeFunction(
-        arbiter,
+        arbiter.address,
         getSelectorFromName("appoint_contract_as_module"),
         [
-            upgradedModule,
+            upgradedModule.address,
             "1"
         ]
     )
@@ -41,7 +41,7 @@ const main = async () => {
     
     // The tower defence needs permission to write to the storage contract
     const permit = await getSigner().invokeFunction(
-        arbiter,
+        arbiter.address,
         getSelectorFromName("approve_module_to_module_write_access"),
         [
             "1",
