@@ -3,7 +3,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 
-from contracts.l2.minigame.utils.interfaces import IModuleController
+from contracts.desiege.utils.interfaces import IModuleController
 
 # ############ TowerDefence Storage ################
 # Contract maintains the storage variables

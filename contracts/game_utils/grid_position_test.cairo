@@ -5,7 +5,7 @@
 %lang starknet
 %builtins pedersen range_check
 
-from contracts.l2.game_utils.grid_position import (unpack_position, pack_position)
+from contracts.game_utils.grid_position import (unpack_position, pack_position)
 
 @external
 func test_unpack_position{

@@ -15,7 +15,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math_cmp import (is_nn_le,is_in_range)
 
-from contracts.l2.game_utils.grid_position import unpack_position
+from contracts.game_utils.grid_position import unpack_position
 
 # Checks movement logic
 # Returns 1 if the movement is allowed, 0 if not

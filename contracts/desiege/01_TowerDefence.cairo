@@ -7,14 +7,14 @@ from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.math_cmp import (is_le_felt, is_le)
 from starkware.cairo.common.math import (unsigned_div_rem, assert_lt)
 
-from contracts.l2.utils.Ownable_base import (
+from contracts.Ownable_base import (
     Ownable_initializer,
     Ownable_only_owner
 )
 
-from contracts.l2.minigame.utils.interfaces import IModuleController, I02_TowerStorage
-from contracts.l2.tokens.IERC1155 import IERC1155
-from contracts.l2.game_utils.game_structs import ShieldGameRole
+from contracts.desiege.utils.interfaces import IModuleController, I02_TowerStorage
+from contracts.tokens.IERC1155 import IERC1155
+from contracts.game_utils.game_structs import ShieldGameRole
 
 ############## Storage ################
 @storage_var

@@ -4,8 +4,8 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
 
-from contracts.l2.minigame.utils.interfaces import IModuleController, I02_TowerStorage
-from contracts.l2.tokens.IERC1155 import IERC1155
+from contracts.desiege.utils.interfaces import IModuleController, I02_TowerStorage
+from contracts.tokens.IERC1155 import IERC1155
 
 ############## Storage ################
 @storage_var
