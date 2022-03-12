@@ -119,8 +119,8 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     assert_not_zero(days)
 
     assert resource_ids[0] = realms_data.resource_1
-    assert user_mint[0] = 1000
-    assert treasury_mint[0] = r_1
+    assert user_mint[0] = ((r_1 * days) * 80) / 100
+    assert treasury_mint[0] = ((r_1 * days) * 20) / 100
 
     if realms_data.resource_2 != 0:
         assert resource_ids[1] = realms_data.resource_2
@@ -130,32 +130,32 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     if realms_data.resource_3 != 0:
         assert resource_ids[2] = realms_data.resource_3
-        assert user_mint[2] = r_3
-        assert treasury_mint[2] = r_3 * days
+        assert user_mint[2] = ((r_3 * days) * 80) / 100
+        assert treasury_mint[2] = ((r_3 * days) * 20) / 100
     end
 
     if realms_data.resource_4 != 0:
         assert resource_ids[3] = realms_data.resource_4
-        assert user_mint[3] = r_4 * days
-        assert treasury_mint[3] = r_4 * days
+        assert user_mint[3] = ((r_4 * days) * 80) / 100
+        assert treasury_mint[3] = ((r_4 * days) * 20) / 100
     end
 
     if realms_data.resource_5 != 0:
         assert resource_ids[4] = realms_data.resource_5
-        assert user_mint[4] = r_5 * days
-        assert treasury_mint[4] = r_5 * days
+        assert user_mint[4] = ((r_5 * days) * 80) / 100
+        assert treasury_mint[4] = ((r_5 * days) * 20) / 100
     end
 
     if realms_data.resource_6 != 0:
         assert resource_ids[5] = realms_data.resource_7
-        assert user_mint[5] = r_6 * days
-        assert treasury_mint[5] = r_6 * days
+        assert user_mint[5] = ((r_6 * days) * 80) / 100
+        assert treasury_mint[5] = ((r_6 * days) * 20) / 100
     end
 
     if realms_data.resource_7 != 0:
         assert resource_ids[6] = realms_data.resource_7
-        assert user_mint[6] = r_7 * days
-        assert treasury_mint[6] = r_7 * days
+        assert user_mint[6] = ((r_7 * days) * 80) / 100
+        assert treasury_mint[6] = ((r_7 * days) * 20) / 100
     end
 
     # mint users
