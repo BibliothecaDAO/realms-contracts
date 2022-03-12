@@ -313,53 +313,18 @@ func claim_rewards{
     let (local game_state) = get_game_state( game_idx )
     assert game_state = GameStatus.Expired
 
+    # This is the game winning condition.
+    # Light wins if health remains above 0.
+    # Dark wins if health equals to 0.
     let (local side_won) = is_le_felt(health, 0) # 0 = Shielders, 1 = Attackers 
 
-    iter_claim_token_reward(
-        game_idx,
-        caller,
-        side_won,
-        2,
-    )
+    let (local total_alloc) = I02_TowerStorage.get_total_reward_alloc(tower_defence_storage, game_idx, side_won)
+    let (local user_alloc) = I02_TowerStorage.get_user_reward_alloc(tower_defence_storage, game_idx, caller, side_won)
 
-    return ()
-end
+    # Rewards TBD
+    # Calling this function does nothing.
+    # This contract can be upgraded.
 
-func iter_claim_token_reward{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-        game_idx : felt,
-        user : felt, 
-        side : felt, # from ShieldGameRole
-        tokens_idx : felt
-    ):
-    alloc_locals
-    if tokens_idx == 0:
-        return ()
-    end
-    let (local contract_address) = get_contract_address()
-    let (local controller) = controller_address.read()
-    let (local element_token) = elements_token_address.read()
-    let (local tower_defence_storage) = IModuleController.get_module_address(controller, 2)
-
-    let (local total_alloc) = I02_TowerStorage.get_total_reward_alloc(tower_defence_storage, game_idx, side) 
-    let (local user_alloc) = I02_TowerStorage.get_user_reward_alloc(tower_defence_storage, game_idx, user, side) 
-    let (local token_pool) = I02_TowerStorage.get_token_reward_pool(tower_defence_storage, game_idx, tokens_idx)
-
-    let (local alloc_ratio, _) = unsigned_div_rem(total_alloc, user_alloc)
-    let (local user_token_reward, _) = unsigned_div_rem(token_pool, alloc_ratio)  
-
-    IERC1155.safe_transfer_from( 
-        element_token,
-        contract_address,
-        user,
-        tokens_idx, 
-        user_token_reward)
-
-    iter_claim_token_reward(
-        game_idx,
-        user, 
-        side,
-        tokens_idx - 1
-    )
     return ()
 end
 
@@ -471,6 +436,23 @@ func calc_amount_plus_boost{
     let (boost,_) = unsigned_div_rem(amount_x_boost, 100)
 
     return (boosted_amount = amount + boost)
+end
+
+@view
+func get_current_boost{
+    syscall_ptr : felt*,
+    pedersen_ptr : HashBuiltin*,
+    range_check_ptr
+}() -> ( boost : felt):
+    alloc_locals
+    let (local controller) = controller_address.read()
+    let (local tower_defence_storage) = IModuleController.get_module_address(controller, 2)
+    let (local game_idx) = I02_TowerStorage.get_latest_game_index(tower_defence_storage)
+    let (local game_start) = I02_TowerStorage.get_game_start(tower_defence_storage, game_idx)
+
+    let (block_num) = get_block_number()
+    let (local basis_points) = calculate_time_multiplier( game_start, block_num )
+    return (boost=basis_points)
 end
 
 # Exponential math
