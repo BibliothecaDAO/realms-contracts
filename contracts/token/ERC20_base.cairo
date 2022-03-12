@@ -195,42 +195,7 @@ func ERC20_decreaseAllowance{
     return ()
 end
 
-<<<<<<< HEAD:contracts/tokens/ERC20.cairo
-@external
-func burnFrom{
-        syscall_ptr : felt*, 
-        pedersen_ptr : HashBuiltin*,
-        range_check_ptr
-    }(
-        user: felt, 
-        amount: Uint256
-    ) -> (success: felt):
-    alloc_locals
-    let (local caller) = get_caller_address()
-    let (local caller_allowance: Uint256) = allowances.read(owner=user, spender=caller)
-
-    # validates amount <= caller_allowance and returns 1 if true   
-    let (enough_balance) = uint256_le(amount, caller_allowance)
-    assert_not_zero(enough_balance)
-
-    _burn(user, amount)
-
-    # subtract allowance
-    let (new_allowance: Uint256) = uint256_sub(caller_allowance, amount)
-    allowances.write(user, caller, new_allowance)
-
-    return (1)
-end
-
-
-#
-# Internals
-#
-
-func _mint{
-=======
 func ERC20_mint{
->>>>>>> main:contracts/token/ERC20_base.cairo
         syscall_ptr : felt*, 
         pedersen_ptr : HashBuiltin*,
         range_check_ptr

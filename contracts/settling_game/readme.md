@@ -146,7 +146,7 @@ Module Priority
 * [x] Settling
 * [x] Buildings
 * [x] Resources
-* [] Army Building
+* []  Army Building
 * [] Raiding
 
 Building out parts to make a functional `v1`
@@ -248,13 +248,3 @@ resource_5_values = 00000000001010
 
 720619923528908810
 ```
-
-
-## Calculator Logic Module
-
-'Storage is expensive, compute is cheap' - I wise man once said this... (@eth_worm)
-
-Calldata will always be expensive on decentralised blockchain. StarkNet allows cheap computation, so where possible we should always compute the value rather than save in the state.
-
-Settling of the Realms contains many computed values that get parsed around the dapp. The calculations for all these should be maintained within a central calculator logic contract. This contract contains no state at all, and can be upgraded easily.
-

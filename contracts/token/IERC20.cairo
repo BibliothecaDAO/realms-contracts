@@ -34,12 +34,5 @@ namespace IERC20:
 
     func approve(spender: felt, amount: Uint256) -> (success: felt):
     end
-
-    func burnFrom(
-            user: felt,
-            amount: Uint256
-        ) -> (success: felt):
-    end
-
 end
 

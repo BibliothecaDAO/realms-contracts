@@ -12,6 +12,8 @@ jobs:
     container: ghcr.io/dopedao/ryo:latest
     steps:
       - uses: actions/checkout@v2
+      - name: install extra python dependencies
+        run: pip3 install 'pytest-xdist[psutil]' dill
       - name: compile
         run: bin/compile
       - name: test
