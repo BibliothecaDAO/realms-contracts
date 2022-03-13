@@ -9,7 +9,9 @@ from starkware.cairo.common.math import (unsigned_div_rem, assert_lt)
 
 from contracts.Ownable_base import (
     Ownable_initializer,
-    Ownable_only_owner
+    Ownable_only_owner,
+    Ownable_transfer_ownership,
+    Ownable_get_owner
 )
 
 from contracts.desiege.utils.interfaces import IModuleController, I02_TowerStorage
@@ -462,4 +464,20 @@ func pow(base : felt, exp : felt) -> (res):
     end
     let (res) = pow(base=base, exp=exp - 1)
     return (res=res * base)
+end
+
+#
+# Ownable Externals
+#
+@view
+func get_owner{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}() -> (owner : felt):
+    let (o) = Ownable_get_owner()
+    return (owner=o)
+end
+
+@external
+func transfer_ownership{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+        next_owner : felt):
+    Ownable_transfer_ownership(next_owner)
+    return()
 end
