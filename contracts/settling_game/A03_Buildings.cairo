@@ -9,7 +9,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
-from contracts.settling_game.utils.interfaces import IModuleController, I03B_Buildings
+from contracts.settling_game.utils.interfaces import IModuleController, IB03_Buildings
 from contracts.settling_game.utils.general import unpack_data
 
 from contracts.settling_game.utils.game_structs import (
@@ -74,7 +74,7 @@ func build{
         contract_address=controller, module_id=6)
 
     # get current buildings already constructed
-    let (current_building) = I03B_Buildings.get_realm_buildings(buildings_state_address, token_id)
+    let (current_building) = IB03_Buildings.get_realm_buildings(buildings_state_address, token_id)
 
     # check can build
     build_buildings(buildings_state_address, token_id, current_building, building_id)
@@ -220,7 +220,7 @@ func build_buildings{
 
     tempvar value = buildings[7] + buildings[6] + buildings[5] + buildings[4] + buildings[3] + buildings[2] + buildings[1] + buildings[0]
 
-    I03B_Buildings.set_realm_buildings(buildings_state_address, token_id, value)
+    IB03_Buildings.set_realm_buildings(buildings_state_address, token_id, value)
 
     return ()
 end
@@ -265,7 +265,7 @@ func fetch_building_cost_ids{
     let (buildings_state_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=6)
 
-    let (local data) = I03B_Buildings.get_building_cost_ids(buildings_state_address, building_id)
+    let (local data) = IB03_Buildings.get_building_cost_ids(buildings_state_address, building_id)
 
     let (local resource_1) = unpack_data(data, 0, 255)
     let (local resource_2) = unpack_data(data, 8, 255)
@@ -367,7 +367,7 @@ func fetch_building_cost_values{
     let (buildings_state_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=6)
 
-    let (local data) = I03B_Buildings.get_building_cost_values(buildings_state_address, building_id)
+    let (local data) = IB03_Buildings.get_building_cost_values(buildings_state_address, building_id)
 
     let (local resource_1_values) = unpack_data(data, 0, 4095)
     let (local resource_2_values) = unpack_data(data, 12, 4095)
@@ -468,7 +468,7 @@ func fetch_buildings_by_type{
     let (buildings_state_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=6)
 
-    let (local data) = I03B_Buildings.get_realm_buildings(buildings_state_address, token_id)
+    let (local data) = IB03_Buildings.get_realm_buildings(buildings_state_address, token_id)
 
     let (local castles) = unpack_data(data, 0, 255)
     let (local markets) = unpack_data(data, 8, 255)

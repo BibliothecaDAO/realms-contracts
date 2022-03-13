@@ -81,25 +81,25 @@ async def game_factory(account_factory):
         selector_name='set_address_of_controller',
         calldata=[controller.contract_address])
     settling_logic = await starknet.deploy(
-        source="contracts/settling_game/01A_Settling.cairo",
+        source="contracts/settling_game/A01_Settling.cairo",
         constructor_calldata=[controller.contract_address])
     settling_state = await starknet.deploy(
-        source="contracts/settling_game/01B_Settling.cairo",
+        source="contracts/settling_game/B01_Settling.cairo",
         constructor_calldata=[controller.contract_address])
     resources_logic = await starknet.deploy(
-        source="contracts/settling_game/02A_Resources.cairo",
+        source="contracts/settling_game/A02_Resources.cairo",
         constructor_calldata=[controller.contract_address])
     resources_state = await starknet.deploy(
-        source="contracts/settling_game/02B_Resources.cairo",
+        source="contracts/settling_game/B02_Resources.cairo",
         constructor_calldata=[controller.contract_address])
     buildings_logic = await starknet.deploy(
-        source="contracts/settling_game/03A_Buildings.cairo",
+        source="contracts/settling_game/A03_Buildings.cairo",
         constructor_calldata=[controller.contract_address])
     buildings_state = await starknet.deploy(
-        source="contracts/settling_game/03B_Buildings.cairo",
+        source="contracts/settling_game/B03_Buildings.cairo",
         constructor_calldata=[controller.contract_address])
     calculator_logic = await starknet.deploy(
-        source="contracts/settling_game/04A_Calculator.cairo",
+        source="contracts/settling_game/A04_Calculator.cairo",
         constructor_calldata=[controller.contract_address])
     # The admin key controls the arbiter. Use it to have the arbiter
     # set the module deployment addresses in the controller.
@@ -185,38 +185,38 @@ async def test_mint(game_factory, number_of_tokens, tokens):
     print(
         f'Resource 5 Balance for player is: {player_resource_value_4.result.balance}')
 
-    # # # set resource upgrade IDS
-    # await signer.send_transaction(
-    #     account=accounts[0], to=resources_state.contract_address, selector_name='set_resource_upgrade_ids', calldata=[5, 47408855671140352459265]
-    # )
-    # # # upgrade resource
-    # await signer.send_transaction(
-    #     account=accounts[0], to=resources_logic.contract_address, selector_name='upgrade_resource', calldata=[*uint(5042),
-    #     5, 5, 1, 2, 3, 4, 5, 5, 10,10,10,10,10]
-    # )
-
-    # _player_resource_value = await resources.balanceOf(accounts[0].contract_address, 5).call()
-    # _player_resource_value_10 = await resources.balanceOf(accounts[0].contract_address, 10).call()
-    # _player_resource_value_12 = await resources.balanceOf(accounts[0].contract_address, 12).call()
-    # _player_resource_value_21 = await resources.balanceOf(accounts[0].contract_address, 21).call()
-    # _player_resource_value_9 = await resources.balanceOf(accounts[0].contract_address, 9).call()
-    # print(
-    #     f'BURNING!')
-    # print(
-    #     f'Resource 5 Balance for player is: {_player_resource_value.result.balance}')
-    # print(
-    #     f'Resource 10 Balance for player is: {_player_resource_value_10.result.balance}')
-    # print(
-    #     f'Resource 12 Balance for player is: {_player_resource_value_12.result.balance}')
-    # print(
-    #     f'Resource 21 Balance for player is: {_player_resource_value_21.result.balance}')
-    # print(
-    #     f'Resource 9 Balance for player is: {_player_resource_value_9.result.balance}')
-
     # # set resource upgrade IDS
-    # await signer.send_transaction(
-    #     account=accounts[0], to=buildings_state.contract_address, selector_name='set_building_cost_ids', calldata=[0, 21542142465]
-    # )
+    await signer.send_transaction(
+        account=accounts[0], to=resources_state.contract_address, selector_name='set_resource_upgrade_ids', calldata=[5, 47408855671140352459265]
+    )
+    # # upgrade resource
+    await signer.send_transaction(
+        account=accounts[0], to=resources_logic.contract_address, selector_name='upgrade_resource', calldata=[*uint(5042),
+        5, 5, 1, 2, 3, 4, 5, 5, 10,10,10,10,10]
+    )
+
+    _player_resource_value = await resources.balanceOf(accounts[0].contract_address, 5).call()
+    _player_resource_value_10 = await resources.balanceOf(accounts[0].contract_address, 10).call()
+    _player_resource_value_12 = await resources.balanceOf(accounts[0].contract_address, 12).call()
+    _player_resource_value_21 = await resources.balanceOf(accounts[0].contract_address, 21).call()
+    _player_resource_value_9 = await resources.balanceOf(accounts[0].contract_address, 9).call()
+    print(
+        f'BURNING!')
+    print(
+        f'Resource 5 Balance for player is: {_player_resource_value.result.balance}')
+    print(
+        f'Resource 10 Balance for player is: {_player_resource_value_10.result.balance}')
+    print(
+        f'Resource 12 Balance for player is: {_player_resource_value_12.result.balance}')
+    print(
+        f'Resource 21 Balance for player is: {_player_resource_value_21.result.balance}')
+    print(
+        f'Resource 9 Balance for player is: {_player_resource_value_9.result.balance}')
+
+    # set resource upgrade IDS
+    await signer.send_transaction(
+        account=accounts[0], to=buildings_state.contract_address, selector_name='set_building_cost_ids', calldata=[0, 21542142465]
+    )
 
     # # set resource values
     # await signer.send_transaction(

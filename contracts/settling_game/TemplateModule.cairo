@@ -4,7 +4,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 
-from contracts.l2.settling_game.utils.interfaces import IModuleController
+from contracts.settling_game.utils.interfaces import IModuleController
 
 ##### Module XX #####
 #
