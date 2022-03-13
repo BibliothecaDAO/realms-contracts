@@ -10,7 +10,7 @@ from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.general import scale
-from contracts.settling_game.utils.interfaces import IModuleController
+from contracts.settling_game.utils.interfaces import IModuleController, I01B_Settling
 from contracts.settling_game.utils.game_structs import (
     RealmBuildings, RealmBuildingCostIds, RealmBuildingCostValues)
 
@@ -102,4 +102,24 @@ func calculateTribute{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     # calculate number of buildings realm has
 
     return (tribute=100)
+end
+
+@external
+func calculateWonderTax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (tax_percentage : felt):
+    # calculate wonder tax 
+    alloc_locals
+
+    let ( controller ) = controller_address.read()
+    let ( settle_state_address ) = IModuleController.get_module_address(
+        contract_address=controller, module_id=2)
+
+    let ( realms_settled ) = I01B_Settling.get_total_realms_settled(contract_address=settle_state_address)
+
+    # TODO:
+    # hardcode a max %
+    # use basis points
+    let tax = (( 8000 / 6400 ) * 5 )
+    # let tax = (( 8000 / realms_settled ) * 5 )
+
+    return (tax_percentage=tax)
 end
