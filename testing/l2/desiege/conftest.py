@@ -71,7 +71,7 @@ async def _build_copyable_deployment():
     logging.warning(CONTRACT_SRC)
 
     defs = SimpleNamespace(
-        account=compile("l2/utils/Account.cairo"),
+        account=compile("Account.cairo"),
     )
 
     signers = dict(

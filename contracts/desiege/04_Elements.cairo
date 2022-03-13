@@ -5,7 +5,7 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
 
 from contracts.desiege.utils.interfaces import IModuleController, I02_TowerStorage
-from contracts.tokens.IERC1155 import IERC1155
+from contracts.token.ERC1155.IERC1155 import IERC1155 
 
 ############## Storage ################
 @storage_var
@@ -125,8 +125,8 @@ func appoint_new_token_owner{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, r
     alloc_locals
     only_authorized_minter()
 
-    let (local element_token) = elements_token_address.read()
-    IERC1155.set_owner(element_token, _new_owner)
+    # let (local element_token) = elements_token_address.read()
+    # IERC1155.set_owner(element_token, _new_owner)
 
     return ()
 end

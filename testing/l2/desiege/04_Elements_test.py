@@ -34,12 +34,12 @@ async def game_factory(ctx_factory):
     # Then save the controller address in the Arbiter.
     # Then deploy Controller address during module deployments.
     arbiter = await ctx.starknet.deploy(
-        source="contracts/l2/settling_game/Arbiter.cairo",
+        source="contracts/desiege/Arbiter.cairo",
         constructor_calldata=[ctx.admin.contract_address])
     ctx.arbiter = arbiter
 
     controller = await ctx.starknet.deploy(
-        source="contracts/l2/settling_game/ModuleController.cairo",
+        source="contracts/desiege/ModuleController.cairo",
         constructor_calldata=[arbiter.contract_address])
     ctx.controller = controller
     await ctx.execute(
@@ -50,16 +50,19 @@ async def game_factory(ctx_factory):
     )
 
     elements_token = await ctx.starknet.deploy(
-        "contracts/l2/tokens/ERC1155.cairo",
+        "contracts/token/ERC1155/ERC1155_Mintable.cairo",
         constructor_calldata=[
             ctx.admin.contract_address,
-            1, 1, 1, 1, 1  # TokenURI struct
+            2,
+            1, 2,
+            2,
+            1000, 5000
         ]
     )
     ctx.elements_token = elements_token
 
     elements_module = await ctx.starknet.deploy(
-        source="contracts/l2/minigame/04_Elements.cairo",
+        source="contracts/desiege/04_Elements.cairo",
         constructor_calldata=[
             controller.contract_address,
             elements_token.contract_address,
@@ -67,15 +70,9 @@ async def game_factory(ctx_factory):
         ]
     )
     ctx.elements_module = elements_module
-    await ctx.execute(
-        "admin",
-        elements_token.contract_address,
-        'set_owner',
-        [elements_module.contract_address]
-    )
 
     tower_defence = await ctx.starknet.deploy(
-        source="contracts/l2/minigame/01_TowerDefence.cairo",
+        source="contracts/desiege/01_TowerDefence.cairo",
         constructor_calldata=[
             controller.contract_address,
             elements_token.contract_address,
@@ -87,7 +84,7 @@ async def game_factory(ctx_factory):
     ctx.tower_defence = tower_defence
 
     tower_defence_storage = await ctx.starknet.deploy(
-        source="contracts/l2/minigame/02_TowerDefenceStorage.cairo",
+        source="contracts/desiege/02_TowerDefenceStorage.cairo",
         constructor_calldata=[controller.contract_address]
     )
     ctx.tower_defence_storage = tower_defence_storage

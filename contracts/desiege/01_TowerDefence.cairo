@@ -13,7 +13,7 @@ from contracts.Ownable_base import (
 )
 
 from contracts.desiege.utils.interfaces import IModuleController, I02_TowerStorage
-from contracts.tokens.IERC1155 import IERC1155
+from contracts.token.ERC1155.IERC1155 import IERC1155
 from contracts.game_utils.game_structs import ShieldGameRole
 
 ############## Storage ################
@@ -226,7 +226,7 @@ func attack_tower{
 
     let (local contract_address) = get_contract_address()
 
-    IERC1155.safe_transfer_from(
+    IERC1155.safeTransferFrom(
         element_token,
         caller,
         contract_address,
@@ -285,7 +285,7 @@ func increase_shield{
 
     let (local contract_address) = get_contract_address()
 
-    IERC1155.safe_transfer_from( 
+    IERC1155.safeTransferFrom(
         element_token,
         caller,
         contract_address,
