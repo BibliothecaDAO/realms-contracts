@@ -50,13 +50,14 @@ async def game_factory(ctx_factory):
     )
 
     elements_token = await ctx.starknet.deploy(
-        "contracts/token/ERC1155/ERC1155_Mintable.cairo",
+        "contracts/token/ERC1155/ERC1155_Mintable_Ownable.cairo",
         constructor_calldata=[
             ctx.admin.contract_address,
             2,
             1, 2,
             2,
-            1000, 5000
+            1000, 5000,
+            ctx.admin.contract_address
         ]
     )
     ctx.elements_token = elements_token

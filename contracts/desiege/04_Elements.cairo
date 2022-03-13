@@ -4,10 +4,14 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
 
-from contracts.desiege.utils.interfaces import IModuleController, I02_TowerStorage
-from contracts.token.ERC1155.IERC1155 import IERC1155 
+from contracts.Ownable_base import (
+    Ownable_initializer, Ownable_only_owner, Ownable_transfer_ownership, Ownable_get_owner)
+from contracts.desiege.utils.interfaces import (
+    IModuleController, I02_TowerStorage, IDivineEclipseElements)
+from contracts.desiege.DivineEclipseElements import ModuleIdentifier_DivineEclipse
+from contracts.token.ERC1155.IERC1155_Ownable import IERC1155
 
-############## Storage ################
+# ############# Storage ################
 @storage_var
 func controller_address() -> (address : felt):
 end
@@ -16,73 +20,41 @@ end
 func elements_token_address() -> (address : felt):
 end
 
-# Stores whether a (L1,L2) address pair has minted
-# for a given game idx
-@storage_var
-func has_minted( l1_address : felt, l2_address : felt, game_idx : felt ) -> ( has_minted : felt ):
-end
-
-# token IDs vary each game so token_id is only param required
-@storage_var
-func total_minted( token_id : felt ) -> ( total : felt ):
-end
-
-# Stores the contract address of the only account able to mint
-@storage_var
-func authorized_minter() -> ( minter_middleware : felt):
-end
-
-############## Events ################
+# ############# Events ################
 
 @event
-func element_distilled( by : felt, token_id : felt, amount : felt ):
+func element_distilled(by : felt, token_id : felt, amount : felt):
 end
 
 # ############ Constructor ##############
 
 @constructor
-func constructor{
-        syscall_ptr : felt*, 
-        pedersen_ptr : HashBuiltin*, 
-        range_check_ptr
-    }(
-        address_of_controller : felt,
-        address_of_elements_token : felt,
-        address_of_minting_middleware : felt
-    ):
-    controller_address.write(address_of_controller) 
+func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        address_of_controller : felt, address_of_elements_token : felt,
+        address_of_minting_middleware : felt):
+    controller_address.write(address_of_controller)
     elements_token_address.write(address_of_elements_token)
 
-    # Minting middleware
-    authorized_minter.write(address_of_minting_middleware)
-    
+    # Minting is controlled by an account
+    Ownable_initializer(address_of_minting_middleware)
+
     return ()
 end
 
-
-############## External Functions ################
+# ############# External Functions ################
 
 @external
-func mint_elements{
-        syscall_ptr : felt*,
-        pedersen_ptr : HashBuiltin*,
-        range_check_ptr
-    }(
-        game_idx : felt,
-        from_l1_address : felt,
-        to : felt,
-        token_id : felt,
-        amount : felt
-    ):
+func mint_elements{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        game_idx : felt, from_l1_address : felt, to : felt, token_id : felt, amount : felt):
     alloc_locals
 
-    only_authorized_minter()
+    Ownable_only_owner()
 
     # Ensure user hasn't minted for the next game
     let (local controller) = controller_address.read()
 
-    let (local tower_defence_storage) = IModuleController.get_module_address(
-        controller, 2)
+    let (local tower_defence_storage) = IModuleController.get_module_address(controller, 2)
+    let (local divine_eclipse_storage) = IModuleController.get_module_address(controller, ModuleIdentifier_DivineEclipse )
     let (local latest_index) = I02_TowerStorage.get_latest_game_index(tower_defence_storage)
 
     tempvar next_game_index = latest_index + 1
@@ -92,78 +64,48 @@ func mint_elements{
     assert game_idx = next_game_index
 
     # Check if already minted
-    let (minted_already) = has_minted.read( from_l1_address, to, next_game_index )
+    let (minted_already) = IDivineEclipseElements.has_minted(divine_eclipse_storage, from_l1_address, next_game_index)
 
     # TODO: Wrap in with_attr error for better error message
     assert minted_already = 0
     # Prevent minting again for this game
-    has_minted.write(from_l1_address, to, next_game_index, 1)
+    IDivineEclipseElements.set_has_minted(divine_eclipse_storage, from_l1_address, next_game_index, 1)
 
     # Increment total minted
-    let (local prev_total) = total_minted.read( token_id )
-
-    total_minted.write( token_id, prev_total + amount )
+    let (local prev_total) = IDivineEclipseElements.total_minted(divine_eclipse_storage, token_id)
+    IDivineEclipseElements.set_total_minted(divine_eclipse_storage, token_id, prev_total + amount)
 
     let (local element_token) = elements_token_address.read()
-    
-    IERC1155.mint(
-        element_token,
-        to,
-        token_id,
-        amount
-    )
 
-    element_distilled.emit( to, token_id, amount )
+    IERC1155.mint(element_token, to, token_id, amount)
+
+    element_distilled.emit(to, token_id, amount)
 
     return ()
-
 end
 
-# This module is considered the owner of the 1155 token contract.
 @external
-func appoint_new_token_owner{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}( _new_owner : felt):
+func transfer_ownership{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        next_owner : felt):
     alloc_locals
-    only_authorized_minter()
+    # Transfer ownership of this contract
+    Ownable_transfer_ownership(next_owner)
+    
+    # Transfer ownership of the 1155 token contract
+    let (local element_token) = elements_token_address.read()
 
-    # let (local element_token) = elements_token_address.read()
-    # IERC1155.set_owner(element_token, _new_owner)
-
+    IERC1155.transfer_ownership( element_token, next_owner)
+    
     return ()
 end
-
-@external
-func set_authorized_minter{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}( minter_middleware : felt):
-    only_authorized_minter()
-    authorized_minter.write(minter_middleware)
-    return ()
-end
-
 
 @view
-func get_total_minted{
-        syscall_ptr : felt*,
-        pedersen_ptr : HashBuiltin*,
-        range_check_ptr
-    }(
-        token_id : felt
-    ) -> ( total : felt ):
-    let (total) = total_minted.read( token_id )
-    return (total=total)
-end
-
-############## Internal Functions ################
-
-# Will revert if caller is not the authorized minter
-func only_authorized_minter{
-        syscall_ptr : felt*,
-        pedersen_ptr : HashBuiltin*,
-        range_check_ptr
-    }():
-
+func get_total_minted{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        token_id : felt) -> (total : felt):
     alloc_locals
-    let (local caller) = get_caller_address()
-    let (allowed_minter) = authorized_minter.read()
-    assert caller = allowed_minter
+    let (local controller) = controller_address.read()
 
-    return ()
+    let (local divine_eclipse_storage) = IModuleController.get_module_address(controller, ModuleIdentifier_DivineEclipse )
+    let (total) = IDivineEclipseElements.total_minted(divine_eclipse_storage, token_id)
+    return (total=total)
 end

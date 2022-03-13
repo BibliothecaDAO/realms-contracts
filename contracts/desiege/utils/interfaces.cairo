@@ -81,3 +81,15 @@ namespace I02_TowerStorage:
     func set_tower_count( game_idx : felt, count : felt ):
     end
 end
+
+@contract_interface
+namespace IDivineEclipseElements:
+    func has_minted( l1_address : felt, game_idx : felt ) -> ( has_minted : felt ):
+    end
+    func set_has_minted( l1_address : felt, game_idx : felt, has_minted : felt ):
+    end
+    func total_minted( token_id : felt ) -> ( total : felt ):
+    end
+    func set_total_minted( token_id : felt, total : felt ):
+    end
+end
