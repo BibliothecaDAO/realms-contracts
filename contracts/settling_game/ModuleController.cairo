@@ -92,7 +92,8 @@ end
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         arbiter_address : felt, _lords_address : felt, _resources_address : felt,
-        _realms_address : felt, _treasury_address : felt, _s_realms_address : felt):
+        _realms_address : felt, _treasury_address : felt, 
+        _s_realms_address : felt):
     arbiter.write(arbiter_address)
 
     # TODO: add 'set_write_access' here for all the module
@@ -142,7 +143,8 @@ end
 func set_initial_module_addresses{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         module_01_addr : felt, module_02_addr : felt, module_03_addr : felt, module_04_addr : felt,
-        module_05_addr : felt, module_06_addr : felt, module_07_addr : felt):
+        module_05_addr : felt, module_06_addr : felt, module_07_addr : felt,
+        module_08_addr : felt):
     only_arbiter()
 
     address_of_module_id.write(1, module_01_addr)
@@ -165,6 +167,9 @@ func set_initial_module_addresses{
 
     address_of_module_id.write(7, module_07_addr)
     module_id_of_address.write(module_07_addr, 7)
+
+    address_of_module_id.write(8, module_08_addr)
+    module_id_of_address.write(module_08_addr, 8)
     return ()
 end
 

@@ -26,6 +26,10 @@ end
 func time_staked(token_id : Uint256) -> (time : felt):
 end
 
+@storage_var
+func total_realms_settled() -> (amount : felt):
+end
+
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_of_controller : felt):
@@ -41,6 +45,15 @@ func set_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     only_approved()
 
     time_staked.write(token_id, timestamp)
+    return ()
+end
+
+@external
+func set_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        amount : felt):
+    only_approved()
+
+    total_realms_settled.write(amount)
     return ()
 end
 
@@ -68,6 +81,14 @@ func get_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (time) = time_staked.read(token_id)
 
     return (time=time)
+end
+
+# Getters
+@external
+func get_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (realms_settled : felt):
+    let (amount) = total_realms_settled.read()
+
+    return (realms_settled=amount)
 end
 
 # Checks write-permission of the calling contract.

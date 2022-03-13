@@ -63,6 +63,10 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(t
     # TODO: TimeStamp - current Hardcoded
     I01B_Settling.set_time_staked(settle_state_address, token_id, block_timestamp)
 
+    # updated settled realms counter
+    let (realms_settled) = I01B_Settling.get_total_realms_settled(contract_address=settle_state_address)
+    I01B_Settling.set_total_realms_settled(settle_state_address, realms_settled + 1)
+
     return ()
 end
 
@@ -96,6 +100,10 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     I01B_Settling.set_time_staked(settle_state_address, token_id, block_timestamp)
 
     # TOD0: Claim resources if available before unsettling
+
+    # updated settled realms counter
+    let (realms_settled) = I01B_Settling.get_total_realms_settled(contract_address=settle_state_address)
+    I01B_Settling.set_total_realms_settled(settle_state_address, realms_settled - 1)
 
     return ()
 end
