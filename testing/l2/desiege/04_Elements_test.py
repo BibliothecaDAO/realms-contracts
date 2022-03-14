@@ -6,11 +6,16 @@ from starkware.starknet.business_logic.state import BlockInfo
 from starkware.starkware_utils.error_handling import StarkException
 from starkware.starknet.definitions.error_codes import StarknetErrorCode
 
+from utils import str_to_felt
+
 LIGHT_TOKEN_ID = 1
 DARK_TOKEN_ID = 2
 
 SHIELD_ROLE = 0
 ATTACK_ROLE = 1
+
+element_balancer_module_id = 4
+divine_eclipse_module_id = str_to_felt('divine-eclipse')
 
 # Boost units are in basis points, so every value needs to be multiplied
 BOOST_UNIT_MULTIPLIER = 100
@@ -53,11 +58,6 @@ async def game_factory(ctx_factory):
         "contracts/token/ERC1155/ERC1155_Mintable_Ownable.cairo",
         constructor_calldata=[
             ctx.admin.contract_address,
-            2,
-            1, 2,
-            2,
-            1000, 5000,
-            ctx.admin.contract_address
         ]
     )
     ctx.elements_token = elements_token
@@ -71,6 +71,26 @@ async def game_factory(ctx_factory):
         ]
     )
     ctx.elements_module = elements_module
+
+    # Ownership of 1155 token must be transferred to module 4
+    await ctx.execute(
+        'admin',
+        elements_token.contract_address,
+        'transferOwnership',
+        [
+            elements_module.contract_address
+        ]
+    )
+
+    await ctx.execute(
+        'admin',
+        arbiter.contract_address,
+        'appoint_contract_as_module',
+        [
+            elements_module.contract_address,
+            element_balancer_module_id
+        ]
+    )
 
     tower_defence = await ctx.starknet.deploy(
         source="contracts/desiege/01_TowerDefence.cairo",
@@ -98,6 +118,30 @@ async def game_factory(ctx_factory):
         ]
     )
 
+    divine_elements_storage = await ctx.starknet.deploy(
+        source="contracts/desiege/DivineEclipseElements.cairo",
+        constructor_calldata=[controller.contract_address]
+    )
+
+    await ctx.execute(
+        'admin',
+        arbiter.contract_address,
+        'appoint_contract_as_module',
+        [
+            divine_elements_storage.contract_address,
+            divine_eclipse_module_id
+        ]
+    )
+
+    await ctx.execute(
+        'admin',
+        arbiter.contract_address,
+        'approve_module_to_module_write_access',
+        [
+            element_balancer_module_id, divine_eclipse_module_id
+        ]
+    )
+
     return ctx
 
 
@@ -107,8 +151,8 @@ async def test_elements_minting(game_factory):
     elements_module = game_factory.elements_module
     elements_token = game_factory.elements_token
 
-    execution_info = await elements_token.balance_of(game_factory.player1.contract_address, LIGHT_TOKEN_ID).call()
-    old_bal = execution_info.result.res
+    execution_info = await elements_token.balanceOf(game_factory.player1.contract_address, LIGHT_TOKEN_ID).call()
+    old_bal = execution_info.result.balance
 
     # Tests will start at game index 0
     next_game_idx = 1
@@ -130,11 +174,11 @@ async def test_elements_minting(game_factory):
         ]
     )
 
-    execution_info = await elements_token.balance_of(
+    execution_info = await elements_token.balanceOf(
         game_factory.player1.contract_address,
         LIGHT_TOKEN_ID
     ).call()
-    assert execution_info.result.res == old_bal + amount_to_mint
+    assert execution_info.result.balance == old_bal + amount_to_mint
 
     execution_info = await elements_module.get_total_minted(LIGHT_TOKEN_ID).call()
     assert execution_info.result.total == amount_to_mint

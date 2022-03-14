@@ -5,8 +5,6 @@ from starkware.starknet.common.syscalls import get_caller_address
 
 from contracts.desiege.utils.interfaces import IModuleController
 
-const ModuleIdentifier_DivineEclipse = 'divine-eclipse'
-
 @storage_var
 func controller_address() -> (address : felt):
 end
@@ -22,6 +20,23 @@ end
 func total_minted( token_id : felt ) -> ( total : felt ):
 end
 
+@constructor
+func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+address_of_controller : felt):
+    controller_address.write(address_of_controller) 
+    return ()
+end
+
+@view
+func get_has_minted{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }( l1_address : felt, game_idx : felt ) -> ( result : felt ):
+    let (minted) = has_minted.read( l1_address, game_idx) 
+    return (result=minted)
+end
+
 @external
 func set_has_minted{
         syscall_ptr : felt*,
@@ -33,6 +48,16 @@ func set_has_minted{
 
     has_minted.write( l1_address, game_idx, minted_bool )
     return ()
+end
+
+@view
+func get_total_minted{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }( token_idx : felt ) -> ( total : felt ):
+    let (total) = total_minted.read( token_idx )
+    return (total)
 end
 
 @external

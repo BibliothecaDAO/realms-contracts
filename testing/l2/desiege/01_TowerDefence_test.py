@@ -58,11 +58,6 @@ async def controller_factory(ctx_factory):
     elements_token = await ctx.starknet.deploy(
         "contracts/token/ERC1155/ERC1155_Mintable_Ownable.cairo",
         constructor_calldata=[
-            admin_account.contract_address,
-            2,
-            1, 2,
-            2,
-            1000, 5000,
             admin_account.contract_address
         ]
     )
@@ -75,7 +70,7 @@ async def controller_factory(ctx_factory):
     await ctx.execute(
         "admin",
         elements_token.contract_address,
-        "mint_batch",
+        "mintBatch",
         [
             admin_account.contract_address,
             2,
@@ -217,7 +212,7 @@ async def test_game_state_expiry(game_factory):
     await game_factory.execute(
         "admin",
         elements_token.contract_address,
-        "safe_batch_transfer_from",
+        "safeBatchTransferFrom",
         [
             game_factory.admin.contract_address,
             game_factory.player1.contract_address,
@@ -231,7 +226,7 @@ async def test_game_state_expiry(game_factory):
     await game_factory.execute(
         "player1",
         elements_token.contract_address,
-        "set_approval_for_all",
+        "setApprovalForAll",
         [
             tower_defence.contract_address,
             1
@@ -263,17 +258,6 @@ async def test_game_state_expiry(game_factory):
     # game status is already expired. TODO: Create separate test
     exec_res = await tower_defence.get_game_state(game_idx).call()
     assert exec_res.result.game_state_enum == GameStatus.Expired.value
-
-    # Cannot claim rewards when game is expired
-    with pytest.raises(StarkException):
-        await game_factory.execute(
-            "admin",
-            tower_defence.contract_address,
-            "claim_rewards",
-            [
-                game_idx
-            ]
-        )
         
 # Convenience to calculate boosted amount
 def calc_amount_plus_boost(base_amount, bips):
@@ -312,7 +296,7 @@ async def test_shield_and_attack_tower(game_factory):
     await game_factory.execute(
         "admin",
         elements_token.contract_address,
-        "safe_batch_transfer_from",
+        "safeBatchTransferFrom",
         [
             game_factory.admin.contract_address,
             game_factory.player1.contract_address,
@@ -327,7 +311,7 @@ async def test_shield_and_attack_tower(game_factory):
     await game_factory.execute(
         "admin",
         elements_token.contract_address,
-        "safe_batch_transfer_from",
+        "safeBatchTransferFrom",
         [
             game_factory.admin.contract_address,
             game_factory.player2.contract_address,
@@ -342,7 +326,7 @@ async def test_shield_and_attack_tower(game_factory):
     await game_factory.execute(
         "admin",
         elements_token.contract_address,
-        "safe_batch_transfer_from",
+        "safeBatchTransferFrom",
         [
             game_factory.admin.contract_address,
             game_factory.player3.contract_address,
@@ -357,7 +341,7 @@ async def test_shield_and_attack_tower(game_factory):
     await game_factory.execute(
         "player1",
         elements_token.contract_address,
-        "set_approval_for_all",
+        "setApprovalForAll",
         [
             tower_defence.contract_address,
             1
@@ -367,7 +351,7 @@ async def test_shield_and_attack_tower(game_factory):
     await game_factory.execute(
         "player2",
         elements_token.contract_address,
-        "set_approval_for_all",
+        "setApprovalForAll",
         [
             tower_defence.contract_address,
             1
@@ -377,7 +361,7 @@ async def test_shield_and_attack_tower(game_factory):
     await game_factory.execute(
         "player3",
         elements_token.contract_address,
-        "set_approval_for_all",
+        "setApprovalForAll",
         [
             tower_defence.contract_address,
             1
@@ -418,8 +402,8 @@ async def test_shield_and_attack_tower(game_factory):
     player_two_account = game_factory.player2
     player_three_account = game_factory.player3
 
-    execution_info = await elements_token.balance_of(player_one_account.contract_address, light_token_id).call()
-    assert execution_info.result.res == 900 * BOOST_UNIT_MULTIPLIER
+    execution_info = await elements_token.balanceOf(player_one_account.contract_address, light_token_id).call()
+    assert execution_info.result.balance == 900 * BOOST_UNIT_MULTIPLIER
 
     execution_info = await tower_defence_storage.get_shield_value(game_idx,light_token_id).call()
     assert execution_info.result.value == calc_amount_plus_boost(100, boost_bips)
@@ -430,8 +414,8 @@ async def test_shield_and_attack_tower(game_factory):
     execution_info = await tower_defence_storage.get_total_reward_alloc(game_idx,SHIELD_ROLE).call()
     assert execution_info.result.value == 100 * BOOST_UNIT_MULTIPLIER
 
-    execution_info = await elements_token.balance_of(tower_defence.contract_address,light_token_id).call()
-    assert execution_info.result.res == 100 * BOOST_UNIT_MULTIPLIER
+    execution_info = await elements_token.balanceOf(tower_defence.contract_address,light_token_id).call()
+    assert execution_info.result.balance == 100 * BOOST_UNIT_MULTIPLIER
 
     # Player 2 Attacks with 50 DARK
     await game_factory.execute(
@@ -444,8 +428,8 @@ async def test_shield_and_attack_tower(game_factory):
             50 * BOOST_UNIT_MULTIPLIER
         ]
     )
-    execution_info = await elements_token.balance_of(player_two_account.contract_address,dark_token_id).call()
-    assert execution_info.result.res == 950 * BOOST_UNIT_MULTIPLIER
+    execution_info = await elements_token.balanceOf(player_two_account.contract_address,dark_token_id).call()
+    assert execution_info.result.balance == 950 * BOOST_UNIT_MULTIPLIER
 
     execution_info = await tower_defence_storage.get_main_health(game_idx).call()
     assert execution_info.result.health == tower_start_value
@@ -457,8 +441,8 @@ async def test_shield_and_attack_tower(game_factory):
     execution_info = await tower_defence_storage.get_user_reward_alloc(game_idx,player_two_account.contract_address,ATTACK_ROLE).call()
     assert execution_info.result.value == 50 * BOOST_UNIT_MULTIPLIER
 
-    execution_info = await elements_token.balance_of(tower_defence.contract_address,dark_token_id).call()
-    assert execution_info.result.res == 50 * BOOST_UNIT_MULTIPLIER
+    execution_info = await elements_token.balanceOf(tower_defence.contract_address,dark_token_id).call()
+    assert execution_info.result.balance == 50 * BOOST_UNIT_MULTIPLIER
 
     # Player 3 Increases shield by 400 LIGHT
 
@@ -472,8 +456,8 @@ async def test_shield_and_attack_tower(game_factory):
             400 * BOOST_UNIT_MULTIPLIER
         ]
     )
-    execution_info = await elements_token.balance_of(player_three_account.contract_address, light_token_id).call()
-    assert execution_info.result.res == 600 * BOOST_UNIT_MULTIPLIER
+    execution_info = await elements_token.balanceOf(player_three_account.contract_address, light_token_id).call()
+    assert execution_info.result.balance == 600 * BOOST_UNIT_MULTIPLIER
 
     execution_info = await tower_defence_storage.get_shield_value(game_idx,light_token_id).call()
     assert execution_info.result.value == calc_amount_plus_boost(450, boost_bips)
@@ -484,8 +468,8 @@ async def test_shield_and_attack_tower(game_factory):
     execution_info = await tower_defence_storage.get_total_reward_alloc(game_idx,SHIELD_ROLE).call()
     assert execution_info.result.value == 500 * BOOST_UNIT_MULTIPLIER
 
-    execution_info = await elements_token.balance_of(tower_defence.contract_address,light_token_id).call()
-    assert execution_info.result.res == 500 * BOOST_UNIT_MULTIPLIER
+    execution_info = await elements_token.balanceOf(tower_defence.contract_address,light_token_id).call()
+    assert execution_info.result.balance == 500 * BOOST_UNIT_MULTIPLIER
 
     # Must claim rewards after game has expired
     after_max_hours = mock_block_num + ((BLOCKS_PER_MINUTE * 60) * HOURS_PER_GAME) + 1

@@ -8,8 +8,9 @@ from contracts.Ownable_base import (
     Ownable_initializer, Ownable_only_owner, Ownable_transfer_ownership, Ownable_get_owner)
 from contracts.desiege.utils.interfaces import (
     IModuleController, I02_TowerStorage, IDivineEclipseElements)
-from contracts.desiege.DivineEclipseElements import ModuleIdentifier_DivineEclipse
-from contracts.token.ERC1155.IERC1155_Ownable import IERC1155
+from contracts.token.ERC1155.IERC1155_Mintable_Ownable import IERC1155
+
+const ModuleIdentifier_DivineEclipse = 'divine-eclipse'
 
 # ############# Storage ################
 @storage_var
@@ -64,7 +65,7 @@ func mint_elements{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     assert game_idx = next_game_index
 
     # Check if already minted
-    let (minted_already) = IDivineEclipseElements.has_minted(divine_eclipse_storage, from_l1_address, next_game_index)
+    let (minted_already) = IDivineEclipseElements.get_has_minted(divine_eclipse_storage, from_l1_address, next_game_index)
 
     # TODO: Wrap in with_attr error for better error message
     assert minted_already = 0
@@ -72,7 +73,7 @@ func mint_elements{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     IDivineEclipseElements.set_has_minted(divine_eclipse_storage, from_l1_address, next_game_index, 1)
 
     # Increment total minted
-    let (local prev_total) = IDivineEclipseElements.total_minted(divine_eclipse_storage, token_id)
+    let (local prev_total) = IDivineEclipseElements.get_total_minted(divine_eclipse_storage, token_id)
     IDivineEclipseElements.set_total_minted(divine_eclipse_storage, token_id, prev_total + amount)
 
     let (local element_token) = elements_token_address.read()
@@ -94,7 +95,7 @@ func transfer_ownership{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     # Transfer ownership of the 1155 token contract
     let (local element_token) = elements_token_address.read()
 
-    IERC1155.transfer_ownership( element_token, next_owner)
+    IERC1155.transferOwnership( element_token, next_owner)
     
     return ()
 end
@@ -106,6 +107,6 @@ func get_total_minted{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     let (local controller) = controller_address.read()
 
     let (local divine_eclipse_storage) = IModuleController.get_module_address(controller, ModuleIdentifier_DivineEclipse )
-    let (total) = IDivineEclipseElements.total_minted(divine_eclipse_storage, token_id)
+    let (total) = IDivineEclipseElements.get_total_minted(divine_eclipse_storage, token_id)
     return (total=total)
 end
