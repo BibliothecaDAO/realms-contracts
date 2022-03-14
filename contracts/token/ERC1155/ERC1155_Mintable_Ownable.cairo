@@ -1,5 +1,4 @@
 %lang starknet
-%builtins pedersen range_check ecdsa
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
@@ -26,7 +25,9 @@ from contracts.token.ERC1155.ERC1155_base import (
     ERC1155_URI,
     ERC1155_set_approval_for_all,
     ERC1155_balances,
-    ERC1155_assert_is_owner_or_approved
+    ERC1155_assert_is_owner_or_approved,
+    balanceOf,
+    balanceOfBatch
 )
 
 #
@@ -35,13 +36,7 @@ from contracts.token.ERC1155.ERC1155_base import (
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        recipient : felt,
-        token_ids_len : felt, 
-        token_ids : felt*, 
-        amounts_len : felt,
-        amounts : felt*,
         owner : felt):
-    ERC1155_initializer(recipient, token_ids_len, token_ids, amounts_len, amounts)
     Ownable_initializer(owner)
     return ()
 end
@@ -92,7 +87,7 @@ func mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
 end
 
 @external
-func mint_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+func mintBatch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
         recipient : felt, token_ids_len : felt, token_ids : felt*, amounts_len : felt,
         amounts : felt*) -> ():
     Ownable_only_owner()
@@ -111,7 +106,7 @@ func burn{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
 end
 
 @external
-func burn_batch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+func burnBatch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
         account : felt, token_ids_len : felt, token_ids : felt*, amounts_len : felt,
         amounts : felt*):
     Ownable_only_owner()
@@ -124,13 +119,13 @@ end
 # Ownable Externals
 #
 @view
-func get_owner{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}() -> (owner : felt):
+func getOwner{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}() -> (owner : felt):
     let (o) = Ownable_get_owner()
     return (owner=o)
 end
 
 @external
-func transfer_ownership{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+func transferOwnership{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
         next_owner : felt):
     Ownable_transfer_ownership(next_owner)
     return()
