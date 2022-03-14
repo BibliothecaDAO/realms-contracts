@@ -1,4 +1,4 @@
-import { Provider, ec, Signer } from 'starknet'
+import { Provider, ec, Account } from 'starknet'
 import fs from 'fs'
 import { toBN } from 'starknet/dist/utils/number'
 import { config as dotenvConfig } from "dotenv";
@@ -35,13 +35,13 @@ export function checkDeployment(contractName: string) {
   }
 }
 
-type Account = {
+type AccountShape = {
   transaction_hash: string;
   address: string;
   stark_key_hex: string;
 }
 
-export function getOwnerAccount(): Account {
+export function getOwnerAccount(): AccountShape {
   const path_base = getPathBase()
 
   try {  
@@ -74,7 +74,7 @@ export function writeDeployment(contractAlias: string, result: any) {
 
 export function writeNileDeploymentFile(contractName: string, contractAlias: string, result: any) {
 
-  const deploymentFilename = "./minigame-deployments/starknet-goerli/goerli.deployments.txt";
+  const deploymentFilename = `./${getPathBase()}/${network}.deployments.txt`;
 
   if (fs.existsSync(deploymentFilename)) {
     fs.appendFileSync(deploymentFilename, `\n${result.address}:artifacts/abis/${contractName}.json:${contractAlias}`)
@@ -112,13 +112,16 @@ export async function deployContract(contractName: string, contractAlias: string
 
   const contract = (await fs.promises.readFile(`./artifacts/${contractName}.json`)).toString()
 
-  const result = await provider.deployContract(contract, args) // no 0x0 here, just int form
+  const result = await provider.deployContract({
+    contract, 
+    constructorCalldata: args
+  })
 
   console.log("Waiting for transaction...")
   logDeployment(result)
 
   try {
-    await provider.waitForTx(result.transaction_hash)
+    await provider.waitForTransaction(result.transaction_hash)
     const res = await provider.getTransactionStatus(result.transaction_hash)
     writeDeployment(contractAlias, result)
     writeNileDeploymentFile(contractName, contractAlias, result)
@@ -137,14 +140,14 @@ export function getSigner() {
 
     const parsed = JSON.parse(file.toString())
 
-    const privKey = process.env.MINIGAME_ARBITER_PRIVATE_KEY;
+    const privKey = process.env.ARBITER_PRIVATE_KEY;
 
-    if(privKey == undefined){
-      throw new Error("Attempted to call getSigner() with MINIGAME_ARBITER_PRIVATE_KEY being undefined. Set env value in .env or execution environment.")
+    if(privKey == undefined || privKey == ""){
+      throw new Error("Attempted to call getSigner() with ARBITER_PRIVATE_KEY being undefined. Set env value in .env or execution environment.")
     }
 
     const kp = ec.getKeyPair(toBN(privKey, 16))
-    const s = new Signer(provider, parsed.address, kp )
+    const s = new Account(provider, parsed.address, kp )
     return s;
 
   } catch( e ) {
