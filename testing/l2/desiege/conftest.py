@@ -71,7 +71,7 @@ async def _build_copyable_deployment():
     logging.warning(CONTRACT_SRC)
 
     defs = SimpleNamespace(
-        account=compile("Account.cairo"),
+        account=compile("openzeppelin/account/Account.cairo"),
     )
 
     signers = dict(
