@@ -115,11 +115,16 @@ func calculateWonderTax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
 
     let ( realms_settled ) = I01B_Settling.get_total_realms_settled(contract_address=settle_state_address)
 
-    # TODO:
-    # hardcode a max %
-    # use basis points
-    let tax = (( 8000 / 6400 ) * 5 )
-    # let tax = (( 8000 / realms_settled ) * 5 )
+    let (less_than_tenth_settled) = is_nn_le(realms_settled, 1600)
 
-    return (tax_percentage=tax)
+    if less_than_tenth_settled == 1:
+        return (tax_percentage=25)
+    else:
+        # TODO:
+        # hardcode a max %
+        # use basis points
+        # let tax = (( 8000 / 6400 ) * 5 )
+        let tax = (( 8000 / realms_settled ) * 5 )
+        return (tax_percentage=tax)
+    end
 end
