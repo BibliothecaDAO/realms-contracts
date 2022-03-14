@@ -1,13 +1,8 @@
-import { Provider, ec, encode, number } from 'starknet'
-import fs from 'fs'
 
-import { checkDeployment, deployContract, getDeployedAddressInt, logDeployment, setupDeploymentDir, writeDeployment, writeNileDeploymentFile } from './helpers'
+import { deployContract, getDeployedAddressInt } from '../helpers'
 
 async function main() {
   const contractName = '02_TowerDefenceStorage'
-
-  setupDeploymentDir()
-  checkDeployment(contractName)
 
   // Collect params
   const moduleControllerAddress = getDeployedAddressInt('ModuleController')

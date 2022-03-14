@@ -32,8 +32,7 @@ export default async function deployAccount() {
 
   fs.writeFileSync(`${DEPLOYMENT_PATH_BASE}/OwnerAccount.json`, JSON.stringify({
     ...result,
-    stark_key_hex: starkKey,
-    private_key: keyPair.getPrivate("hex"),
+    stark_key_hex: starkKey
   }))
 
   console.log(`Deployed at ${result.address}`)

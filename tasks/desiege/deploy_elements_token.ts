@@ -1,13 +1,8 @@
-import { Provider, ec, encode, number } from 'starknet'
-import fs from 'fs'
 
-import { checkDeployment, deployContract, getDeployedAddressInt, getOwnerAccountInt, logDeployment, setupDeploymentDir, writeDeployment, writeNileDeploymentFile } from './helpers'
+import { deployContract, getOwnerAccountInt } from '../helpers'
 
 async function main() {
   const contractName = 'ERC1155'
-
-  setupDeploymentDir()
-  checkDeployment(contractName)
 
   // Collect params
   const ownerAccount = getOwnerAccountInt()

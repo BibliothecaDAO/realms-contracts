@@ -1,6 +1,6 @@
+
 import { toBN } from "starknet/dist/utils/number";
-import { getSelectorFromName } from "starknet/dist/utils/stark";
-import { getDeployment, getSigner, provider } from "./helpers";
+import { getDeployment, getSigner, provider } from "../helpers";
 
 const startGame = async () => {
 
@@ -9,8 +9,8 @@ const startGame = async () => {
     const elements = getDeployment("04_Elements");
 
     const getLatestIndex = await provider.callContract({
-        contract_address: towerDefenceStorage.address,
-        entry_point_selector: getSelectorFromName("get_latest_game_index"),
+        contractAddress: towerDefenceStorage.address,
+        entrypoint: "get_latest_game_index",
         calldata: []
     });
 
@@ -23,15 +23,15 @@ const startGame = async () => {
     const tokenOffsetBase = 10
     
     const lightBalance = await provider.callContract({
-        contract_address: elements.address,
-        entry_point_selector: getSelectorFromName("get_total_minted"),
+        contractAddress: elements.address,
+        entrypoint: "get_total_minted",
         calldata: [
             (((nextIndex) * tokenOffsetBase) + 1).toString()
         ]
     })
     const darkBalance = await provider.callContract({
-        contract_address: elements.address,
-        entry_point_selector: getSelectorFromName("get_total_minted"),
+        contractAddress: elements.address,
+        entrypoint: "get_total_minted",
         calldata: [
             (((nextIndex) * tokenOffsetBase) + 2).toString()
         ]
@@ -67,15 +67,13 @@ const startGame = async () => {
         console.log("Light minted more, setting initial health to ", initialHealth.toString(10))
     }
 
-    const res = await getSigner().invokeFunction(
-        towerDefence.address,
-        getSelectorFromName("create_game"),
-        [
-            initialHealth.toString()
-        ]
-    )
+    const res = await getSigner().execute({
+        contractAddress: towerDefence.address,
+        entrypoint: 'create_game',
+        calldata: [initialHealth]
+    })
 
-    await provider.waitForTx(res.transaction_hash)
+    await provider.waitForTransaction(res.transaction_hash)
     console.log(await provider.getTransactionStatus(res.transaction_hash))
 }
 

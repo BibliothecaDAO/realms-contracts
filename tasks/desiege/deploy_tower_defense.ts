@@ -1,27 +1,22 @@
 
 import {
-  checkDeployment,
   deployContract,
-  getDeployedAddressInt,
+  getDeployment,
   getOwnerAccountInt,
-  setupDeploymentDir,
-} from "./helpers";
+} from "../helpers";
 
 async function main() {
   const contractName = "01_TowerDefence";
 
-  setupDeploymentDir();
-  checkDeployment(contractName);
-
   // Collect params
-  const moduleControllerAddress = getDeployedAddressInt("ModuleController");
-  const elementsTokenAddress = getDeployedAddressInt("ERC1155_ElementsToken");
+  const moduleControllerAddress = getDeployment("ModuleController").address;
+  const elementsTokenAddress = getDeployment("ERC1155_ElementsToken").address;
 
   // Magically deploy + write all files and stuff
 
-  const blocksPerMin = "4";
+  const blocksPerMin = "1";
   // Start at 8 hours per game for alpha testing
-  const hoursPerGame = "8";
+  const hoursPerGame = "24";
 
   const owner = getOwnerAccountInt()
 

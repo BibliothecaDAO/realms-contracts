@@ -1,6 +1,6 @@
 import { Provider, ec, Account } from 'starknet'
 import fs from 'fs'
-import { toBN } from 'starknet/dist/utils/number'
+import { BigNumberish, toBN } from 'starknet/dist/utils/number'
 import { config as dotenvConfig } from "dotenv";
 import { resolve } from "path";
 
@@ -88,8 +88,8 @@ export function logDeployment(result: any) {
   console.log(`TX: ${result.transaction_hash}`)
 }
 
-export function getDeployedAddressInt(contractName: string): BigInt {
-  return BigInt(getDeployment(contractName).address)
+export function getDeployedAddressInt(contractName: string): string {
+  return toBN(getDeployment(contractName).address).toString()
 }
 
 export function getDeployment(contractName: string): { address: string } {
@@ -106,7 +106,7 @@ export function getDeployment(contractName: string): { address: string } {
   }
 }
 
-export async function deployContract(contractName: string, contractAlias: string, args: string[]) {
+export async function deployContract(contractName: string, contractAlias: string, args: BigNumberish[]) {
 
   console.log("Deploying..." + contractName)
 
