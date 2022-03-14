@@ -44,7 +44,7 @@ namespace IModuleController:
     end
 end
 @contract_interface
-namespace IB01_Settling:
+namespace IS01_Settling:
     func set_time_staked(token_id : Uint256, timestamp : felt):
     end
     func get_time_staked(token_id : Uint256) -> (time : felt):
@@ -52,7 +52,7 @@ namespace IB01_Settling:
 end
 
 @contract_interface
-namespace IB02_Resources:
+namespace IS02_Resources:
     func get_resource_level(token_id : Uint256, resource : felt) -> (level : felt):
     end
     func get_resource_upgrade_cost(token_id : Uint256, resource : felt) -> (level : felt):
@@ -64,7 +64,7 @@ namespace IB02_Resources:
 end
 
 @contract_interface
-namespace IB03_Buildings:
+namespace IS03_Buildings:
     func get_building_cost_ids(building_id : felt) -> (cost : felt):
     end
     func get_building_cost_values(building_id : felt) -> (cost : felt):
