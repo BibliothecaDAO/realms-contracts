@@ -1,8 +1,10 @@
 import asyncio
 from collections import namedtuple
+import functools
 import math
-import struct
+import operator
 import os
+import struct
 
 import pytest
 from starkware.starknet.compiler.compile import compile_starknet_files
@@ -19,6 +21,7 @@ Squad = namedtuple(
 )
 PackedSquad = namedtuple('PackedSquad', 'p1 p2 p3 p4 p5 p6 p7')
 
+EMPTY_TROOP = Troop(0, 0, 0, 0, 0, 0, 0)
 WATCHMAN = Troop(1, 1, 1, 1, 3, 4, 1)
 GUARD = Troop(1, 2, 2, 2, 6, 8, 2)
 GUARD_CAPTAIN = Troop(1, 3, 4, 4, 12, 16, 4)
@@ -58,6 +61,13 @@ TROOPS = [
 def build_default_squad() -> Squad:
     troops = [WATCHMAN] * 16 + [GUARD] * 8 + [GUARD_CAPTAIN]
     return Squad(*troops)
+
+
+def build_partial_squad(first_empty_slot: int) -> Squad:
+    troops = [WATCHMAN] * 16 + [GUARD] * 8 + [GUARD_CAPTAIN]
+    empties = [EMPTY_TROOP] * (25 - first_empty_slot)
+    squad = Squad(*(troops[:first_empty_slot] + empties))
+    return squad
 
 
 def pack_squad(squad: Squad) -> PackedSquad:
@@ -282,3 +292,76 @@ async def test_hit_troop(a5_tests):
 
     assert troop.vitality == WATCHMAN.vitality
     assert hits_left == 0
+
+
+@pytest.mark.asyncio
+async def test_squad_to_array(b5_tests):
+    s = build_default_squad()
+    tx = await b5_tests.test_squad_to_array(s).invoke()
+    flattened = functools.reduce(operator.concat, [list(t) for t in s])
+    assert tx.result.a == flattened
+
+
+@pytest.mark.asyncio
+async def test_troop_to_array(b5_tests):
+    for t in TROOPS:
+        tx = await b5_tests.test_troop_to_array(t).invoke()
+        assert tx.result.a == list(t)
+
+
+@pytest.mark.asyncio
+async def test_array_to_squad(b5_tests):
+    s = build_default_squad()
+    flattened = functools.reduce(operator.concat, [list(t) for t in s])
+    tx = await b5_tests.test_array_to_squad(flattened).invoke()
+    print(tx)
+    assert tx.result.s == s
+
+
+@pytest.mark.asyncio
+async def test_array_to_troop(b5_tests):
+    a = list(SNIPER)
+    tx = await b5_tests.test_array_to_troop(a).invoke()
+    assert tx.result.t == SNIPER
+
+
+@pytest.mark.asyncio
+async def test_add_troop_to_squad(b5):
+    partial_squad = build_partial_squad(3)
+
+    # add a tier 1
+    tx = await b5.add_troop_to_squad(SCORPIO, partial_squad).invoke()
+    assert tx.result.updated.t1_4 == SCORPIO
+
+    # add a tier 2
+    tx = await b5.add_troop_to_squad(KNIGHT, partial_squad).invoke()
+    assert tx.result.updated.t2_1 == KNIGHT
+
+    # add a tier 3
+    tx = await b5.add_troop_to_squad(ARCANIST, partial_squad).invoke()
+    assert tx.result.updated.t3_1 == ARCANIST
+
+    # adding to a full squad should fail
+    with pytest.raises(StarkException):
+        squad = build_default_squad()
+        await b5.add_troop_to_squad(GUARD, squad).invoke()
+
+
+@pytest.mark.asyncio
+async def test_find_first_free_troop_slot_in_squad(b5_tests):
+    troop_size = 7  # Cairo's Troop.SIZE, also the number of element in Troop
+    for i in range(25):
+        partial_squad = build_partial_squad(i)
+        tier = 1
+        if i >= 16:
+            tier = 2
+        if i == 24:
+            tier = 3
+
+        tx = await b5_tests.test_find_first_free_troop_slot_in_squad(partial_squad, tier).invoke()
+        assert tx.result.free_slot_index == i * troop_size
+
+    full_squad = build_default_squad()
+    for tier in [1, 2, 3]:
+        with pytest.raises(StarkException):
+            await b5_tests.test_find_first_free_troop_slot_in_squad(full_squad, tier).invoke()

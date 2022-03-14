@@ -212,14 +212,7 @@ func hit_troop{range_check_ptr}(t : Troop, hits : felt) -> (
     end
 end
 
-# func add_troop_to_squad(t : Troop, s : Squad) -> (updated : Squad):
-#     if t.tier == 1:
-#     end
-#     if t.tier == 2:
-#     end
-#     # t.tier == 3
-#     return ()
-# end
+
 
 # TODO:
 # missing API

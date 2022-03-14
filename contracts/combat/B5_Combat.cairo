@@ -4,6 +4,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.bitwise import bitwise_and
 from starkware.cairo.common.cairo_builtins import BitwiseBuiltin
 from starkware.cairo.common.math import assert_not_zero, assert_le, split_int, unsigned_div_rem
+from starkware.cairo.common.memcpy import memcpy
 from starkware.cairo.common.pow import pow
 
 # a min delay between attacks on a Realm; it can't
@@ -53,6 +54,9 @@ struct Troop:
     member vitality : felt
     member wisdom : felt
 end
+
+# TODO: add a t4 Troop that's a Character from our Character module;
+#       it should be optional
 
 # TODO: maybe use vector from 0xnoncents to build the full squad?
 # https://gist.github.com/0xNonCents/11f8488cd800fec49bf4cd89495722b4
@@ -111,6 +115,9 @@ struct SquadStats:
 end
 
 const SHIFT = 0x100  # used for packing
+
+# TODO: stats shouldn't be hardcoded here, take them from a felt that's easy to update
+#       TBD on how that's going to be done, some kind of shared stats module
 
 @view
 func get_troop{range_check_ptr, bitwise_ptr : BitwiseBuiltin*}(troop_id : felt) -> (t : Troop):
@@ -335,7 +342,6 @@ func pack_squad{range_check_ptr}(s : Squad) -> (p : PackedSquad):
     return (PackedSquad(p1=p1, p2=p2, p3=p3, p4=p4, p5=p5, p6=p6, p7=p7))
 end
 
-@view
 func unpack_squad{range_check_ptr}(p : PackedSquad) -> (s : Squad):
     alloc_locals
 
@@ -390,4 +396,235 @@ func unpack_squad{range_check_ptr}(p : PackedSquad) -> (s : Squad):
         t1_7=t1_7, t1_8=t1_8, t1_9=t1_9, t1_10=t1_10, t1_11=t1_11, t1_12=t1_12,
         t1_13=t1_13, t1_14=t1_14, t1_15=t1_15, t1_16=t1_16, t2_1=t2_1, t2_2=t2_2,
         t2_3=t2_3, t2_4=t2_4, t2_5=t2_5, t2_6=t2_6, t2_7=t2_7, t2_8=t2_8, t3_1=t3_1))
+end
+
+func squad_to_array(s : Squad) -> (a_len : felt, a : felt*):
+    alloc_locals
+    let (a) = alloc()
+
+    # tier 1
+    let (len, t1_1) = troop_to_array(s.t1_1)
+    memcpy(a, t1_1, len)
+    let (len, t1_2) = troop_to_array(s.t1_2)
+    memcpy(a + Troop.SIZE, t1_2, len)
+    let (len, t1_3) = troop_to_array(s.t1_3)
+    memcpy(a + Troop.SIZE * 2, t1_3, len)
+    let (len, t1_4) = troop_to_array(s.t1_4)
+    memcpy(a + Troop.SIZE * 3, t1_4, len)
+    let (len, t1_5) = troop_to_array(s.t1_5)
+    memcpy(a + Troop.SIZE * 4, t1_5, len)
+    let (len, t1_6) = troop_to_array(s.t1_6)
+    memcpy(a + Troop.SIZE * 5, t1_6, len)
+    let (len, t1_7) = troop_to_array(s.t1_7)
+    memcpy(a + Troop.SIZE * 6, t1_7, len)
+    let (len, t1_8) = troop_to_array(s.t1_8)
+    memcpy(a + Troop.SIZE * 7, t1_8, len)
+    let (len, t1_9) = troop_to_array(s.t1_9)
+    memcpy(a + Troop.SIZE * 8, t1_9, len)
+    let (len, t1_10) = troop_to_array(s.t1_10)
+    memcpy(a + Troop.SIZE * 9, t1_10, len)
+    let (len, t1_11) = troop_to_array(s.t1_11)
+    memcpy(a + Troop.SIZE * 10, t1_11, len)
+    let (len, t1_12) = troop_to_array(s.t1_12)
+    memcpy(a + Troop.SIZE * 11, t1_12, len)
+    let (len, t1_13) = troop_to_array(s.t1_13)
+    memcpy(a + Troop.SIZE * 12, t1_13, len)
+    let (len, t1_14) = troop_to_array(s.t1_14)
+    memcpy(a + Troop.SIZE * 13, t1_14, len)
+    let (len, t1_15) = troop_to_array(s.t1_15)
+    memcpy(a + Troop.SIZE * 14, t1_15, len)
+    let (len, t1_16) = troop_to_array(s.t1_16)
+    memcpy(a + Troop.SIZE * 15, t1_16, len)
+
+    # tier 2
+    let (len, t2_1) = troop_to_array(s.t2_1)
+    memcpy(a + Troop.SIZE * 16, t2_1, len)
+    let (len, t2_2) = troop_to_array(s.t2_2)
+    memcpy(a + Troop.SIZE * 17, t2_2, len)
+    let (len, t2_3) = troop_to_array(s.t2_3)
+    memcpy(a + Troop.SIZE * 18, t2_3, len)
+    let (len, t2_4) = troop_to_array(s.t2_4)
+    memcpy(a + Troop.SIZE * 19, t2_4, len)
+    let (len, t2_5) = troop_to_array(s.t2_5)
+    memcpy(a + Troop.SIZE * 20, t2_5, len)
+    let (len, t2_6) = troop_to_array(s.t2_6)
+    memcpy(a + Troop.SIZE * 21, t2_6, len)
+    let (len, t2_7) = troop_to_array(s.t2_7)
+    memcpy(a + Troop.SIZE * 22, t2_7, len)
+    let (len, t2_8) = troop_to_array(s.t2_8)
+    memcpy(a + Troop.SIZE * 23, t2_8, len)
+
+    # tier 3
+    let (len, t3_1) = troop_to_array(s.t3_1)
+    memcpy(a + Troop.SIZE * 24, t3_1, len)
+
+    return (Troop.SIZE * 25, a)
+end
+
+func troop_to_array(t : Troop) -> (a_len : felt, a : felt*):
+    let (a) = alloc()
+    assert [a] = t.type
+    assert [a + 1] = t.tier
+    assert [a + 2] = t.agility
+    assert [a + 3] = t.attack
+    assert [a + 4] = t.defense
+    assert [a + 5] = t.vitality
+    assert [a + 6] = t.wisdom
+    return (Troop.SIZE, a)
+end
+
+func array_to_squad(a_len : felt, a : felt*) -> (s : Squad):
+    alloc_locals
+
+    let (t1_1) = array_to_troop(Troop.SIZE, a)
+    let (t1_2) = array_to_troop(Troop.SIZE, a + Troop.SIZE)
+    let (t1_3) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 2)
+    let (t1_4) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 3)
+    let (t1_5) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 4)
+    let (t1_6) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 5)
+    let (t1_7) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 6)
+    let (t1_8) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 7)
+    let (t1_9) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 8)
+    let (t1_10) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 9)
+    let (t1_11) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 10)
+    let (t1_12) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 11)
+    let (t1_13) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 12)
+    let (t1_14) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 13)
+    let (t1_15) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 14)
+    let (t1_16) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 15)
+
+    let (t2_1) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 16)
+    let (t2_2) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 17)
+    let (t2_3) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 18)
+    let (t2_4) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 19)
+    let (t2_5) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 20)
+    let (t2_6) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 21)
+    let (t2_7) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 22)
+    let (t2_8) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 23)
+
+    let (t3_1) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 24)
+
+    return (
+        Squad(t1_1=t1_1, t1_2=t1_2, t1_3=t1_3, t1_4=t1_4, t1_5=t1_5, t1_6=t1_6,
+        t1_7=t1_7, t1_8=t1_8, t1_9=t1_9, t1_10=t1_10, t1_11=t1_11, t1_12=t1_12,
+        t1_13=t1_13, t1_14=t1_14, t1_15=t1_15, t1_16=t1_16, t2_1=t2_1, t2_2=t2_2,
+        t2_3=t2_3, t2_4=t2_4, t2_5=t2_5, t2_6=t2_6, t2_7=t2_7, t2_8=t2_8, t3_1=t3_1))
+end
+
+func array_to_troop(a_len : felt, a : felt*) -> (t : Troop):
+    return (
+        Troop(type=[a], tier=[a + 1], agility=[a + 2], attack=[a + 3], defense=[a + 4], vitality=[a + 5], wisdom=[a + 6]))
+end
+
+@view
+func add_troop_to_squad(t : Troop, s : Squad) -> (updated : Squad):
+    alloc_locals
+
+    let (free_slot) = find_first_free_troop_slot_in_squad(s, t.tier)
+    let (sarr_len, sarr) = squad_to_array(s)
+    let (_, tarr) = troop_to_array(t)
+
+    let (a) = alloc()
+    memcpy(a, sarr, free_slot)
+    memcpy(a + free_slot, tarr, Troop.SIZE)
+    memcpy(
+        a + free_slot + Troop.SIZE,
+        sarr + free_slot + Troop.SIZE,
+        Squad.SIZE - free_slot - Troop.SIZE)
+    let (updated) = array_to_squad(sarr_len, a)
+
+    return (updated)
+end
+
+func find_first_free_troop_slot_in_squad(s : Squad, tier : felt) -> (free_slot_index : felt):
+    # type == 0 just means the slot is free (0 is the default, if no Troop was assigned there, it's going to be 0)
+    if tier == 1:
+        if s.t1_1.type == 0:
+            return (0)
+        end
+        if s.t1_2.type == 0:
+            return (Troop.SIZE)
+        end
+        if s.t1_3.type == 0:
+            return (Troop.SIZE * 2)
+        end
+        if s.t1_4.type == 0:
+            return (Troop.SIZE * 3)
+        end
+        if s.t1_5.type == 0:
+            return (Troop.SIZE * 4)
+        end
+        if s.t1_6.type == 0:
+            return (Troop.SIZE * 5)
+        end
+        if s.t1_7.type == 0:
+            return (Troop.SIZE * 6)
+        end
+        if s.t1_8.type == 0:
+            return (Troop.SIZE * 7)
+        end
+        if s.t1_9.type == 0:
+            return (Troop.SIZE * 8)
+        end
+        if s.t1_10.type == 0:
+            return (Troop.SIZE * 9)
+        end
+        if s.t1_11.type == 0:
+            return (Troop.SIZE * 10)
+        end
+        if s.t1_12.type == 0:
+            return (Troop.SIZE * 11)
+        end
+        if s.t1_13.type == 0:
+            return (Troop.SIZE * 12)
+        end
+        if s.t1_14.type == 0:
+            return (Troop.SIZE * 13)
+        end
+        if s.t1_15.type == 0:
+            return (Troop.SIZE * 14)
+        end
+        if s.t1_16.type == 0:
+            return (Troop.SIZE * 15)
+        end
+    end
+
+    if tier == 2:
+        if s.t2_1.type == 0:
+            return (Troop.SIZE * 16)
+        end
+        if s.t2_2.type == 0:
+            return (Troop.SIZE * 17)
+        end
+        if s.t2_3.type == 0:
+            return (Troop.SIZE * 18)
+        end
+        if s.t2_4.type == 0:
+            return (Troop.SIZE * 19)
+        end
+        if s.t2_5.type == 0:
+            return (Troop.SIZE * 20)
+        end
+        if s.t2_6.type == 0:
+            return (Troop.SIZE * 21)
+        end
+        if s.t2_7.type == 0:
+            return (Troop.SIZE * 22)
+        end
+        if s.t2_8.type == 0:
+            return (Troop.SIZE * 23)
+        end
+    end
+
+    if tier == 3:
+        if s.t3_1.type == 0:
+            return (Troop.SIZE * 24)
+        end
+    end
+
+    with_attr error_message("no free troop slot in squad"):
+        assert 1 = 0
+    end
+
+    return (0)
 end
