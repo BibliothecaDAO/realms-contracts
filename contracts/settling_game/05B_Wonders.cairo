@@ -18,7 +18,7 @@ from contracts.token.ERC20.interfaces.IERC20 import IERC20
 from contracts.token.ERC1155.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 
-from contracts.settling_game.utils.game_structs import RealmData, ResourceUpgradeIds
+from contracts.settling_game.utils.game_structs import RealmData
 from contracts.settling_game.utils.general import unpack_data
 
 # #### Module 5B ##########
@@ -33,6 +33,18 @@ from contracts.settling_game.utils.general import unpack_data
 func controller_address() -> (address : felt):
 end
 
+@storage_var
+func epoch_claimed(address : felt) -> (epoch : felt):
+end
+
+@storage_var
+func wonders_staked(address : felt, epoch : felt) -> (amount : felt):
+end
+
+@storage_var
+func total_wonders_staked(epoch : felt) -> (amount : felt):
+end
+
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_of_controller : felt):
@@ -42,4 +54,71 @@ end
 
 # ##### SETTERS ######
 
+@external
+func set_epoch_claimed{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        address : felt, epoch : felt):
+    only_approved()
+
+    epoch_claimed.write(address, epoch)
+    return ()
+end
+
+@external
+func set_wonders_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        address : felt, epoch : felt, amount : felt):
+    only_approved()
+
+    wonders_staked.write(address, epoch, amount)
+    return ()
+end
+
+@external
+func set_total_wonders_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        epoch : felt, amount : felt):
+    only_approved()
+
+    total_wonders_staked.write(epoch, amount)
+    return ()
+end
+
 # ##### GETTERS ######
+
+@external
+func get_epoch_claimed{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    address : felt) -> (epoch : felt):
+
+    let (epoch) = epoch_claimed.read(address)
+
+    return (epoch=epoch)
+end
+
+@external
+func get_wonders_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    address : felt, epoch : felt) -> (amount : felt):
+
+    let (amount) = wonders_staked.read(address, epoch)
+
+    return (amount=amount)
+end
+
+@external
+func get_total_wonders_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    epoch : felt) -> (amount : felt):
+
+    let (amount) = total_wonders_staked.read(epoch)
+
+    return (amount=amount)
+end
+
+# Checks write-permission of the calling contract.
+func only_approved{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    # Get the address of the module trying to write to this contract.
+    let (caller) = get_caller_address()
+    let (controller) = controller_address.read()
+    # Pass this address on to the ModuleController.
+    # "Does this address have write-authority here?"
+    # Will revert the transaction if not.
+    IModuleController.has_write_access(
+        contract_address=controller, address_attempting_to_write=caller)
+    return ()
+end
