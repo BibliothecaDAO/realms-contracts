@@ -23,6 +23,14 @@ func controller_address() -> (address : felt):
 end
 
 @storage_var
+func genesis() -> (timestamp : felt):
+end
+
+@storage_var
+func epoch_length() -> (time : felt):
+end
+
+@storage_var
 func time_staked(token_id : Uint256) -> (time : felt):
 end
 
@@ -39,6 +47,24 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
 end
 
 # Setters
+@external
+func set_genesis{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        time : felt):
+    only_approved()
+
+    genesis.write(time)
+    return ()
+end
+
+@external
+func set_epoch_length{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        time : felt):
+    only_approved()
+
+    epoch_length.write(time)
+    return ()
+end
+
 @external
 func set_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256, timestamp : felt):
@@ -75,6 +101,20 @@ func set_approval{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
 end
 
 # Getters
+@external
+func get_genesis{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (timestamp : felt):
+    let (timestamp) = genesis.read()
+
+    return (timestamp=timestamp)
+end
+
+@external
+func get_epoch_length{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (time : felt):
+    let (time) = epoch_length.read()
+
+    return (time=time)
+end
+
 @external
 func get_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256) -> (time : felt):
