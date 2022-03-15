@@ -5,7 +5,7 @@ from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le, is_nn, is_nn_le
 from starkware.starknet.common.syscalls import get_block_timestamp
 
-from B5_Combat import (
+from settling_game.S06_Combat import (
     ATTACK_COOLDOWN_PERIOD, COMBAT_TYPE_ATTACK_VS_DEFENSE, COMBAT_TYPE_WISDOM_VS_AGILITY,
     COMBAT_OUTCOME_ATTACKER_WINS, COMBAT_OUTCOME_DEFENDER_WINS, Troop, Squad, SquadStats,
     compute_squad_stats)
@@ -211,8 +211,6 @@ func hit_troop{range_check_ptr}(t : Troop, hits : felt) -> (
         return (ht, 0)
     end
 end
-
-
 
 # TODO:
 # missing API

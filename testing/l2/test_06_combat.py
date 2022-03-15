@@ -7,8 +7,6 @@ import os
 import struct
 
 import pytest
-from starkware.starknet.compiler.compile import compile_starknet_files
-from starkware.starknet.services.api.contract_definition import ContractDefinition
 from starkware.starknet.testing.starknet import Starknet, StarknetContract
 from starkware.starkware_utils.error_handling import StarkException
 
@@ -116,82 +114,35 @@ def pack_squad(squad: Squad) -> PackedSquad:
     return PackedSquad(p1, p2, p3, p4, p5, p6, p7)
 
 
-def contract_dir() -> str:
-    here = os.path.abspath(os.path.dirname(__file__))
-    return here
-
-
-def compile_contract(contract_name: str) -> ContractDefinition:
-    contract_src = os.path.join(contract_dir(), contract_name)
-    return compile_starknet_files(
-        [contract_src], debug_info=True, disable_hint_validation=True, cairo_path=[contract_dir()]
-    )
-
-
-@pytest.fixture(scope="module")
-def event_loop():
-    return asyncio.new_event_loop()
-
-
-@pytest.fixture(scope="module")
-async def starknet() -> Starknet:
-    starknet = await Starknet.empty()
-    return starknet
-
-
-@pytest.fixture(scope="module")
-async def a5(starknet) -> StarknetContract:
-    contract = compile_contract("A5_Combat.cairo")
-    return await starknet.deploy(contract_def=contract)
-
-
-@pytest.fixture(scope="module")
-async def a5_tests(starknet) -> StarknetContract:
-    contract = compile_contract("A5_Combat_tests.cairo")
-    return await starknet.deploy(contract_def=contract)
-
-
-@pytest.fixture(scope="module")
-async def b5(starknet) -> StarknetContract:
-    contract = compile_contract("B5_Combat.cairo")
-    return await starknet.deploy(contract_def=contract)
-
-
-@pytest.fixture(scope="module")
-async def b5_tests(starknet) -> StarknetContract:
-    contract = compile_contract("B5_Combat_tests.cairo")
-    return await starknet.deploy(contract_def=contract)
-
-
 def pack_troop(troop: Troop) -> int:
     return int.from_bytes(struct.pack('<7b', *troop), 'little')
 
 
 @pytest.mark.asyncio
-async def test_get_troop(b5):
+async def test_get_troop(s06_combat):
     for idx, troop in enumerate(TROOPS):
-        tx = await b5.get_troop(idx + 1).invoke()
+        tx = await s06_combat.get_troop(idx + 1).invoke()
         assert troop == tx.result.t
 
     with pytest.raises(StarkException):
-        await b5.get_troop(0).invoke()
+        await s06_combat.get_troop(0).invoke()
 
     with pytest.raises(StarkException):
-        await b5.get_troop(len(TROOPS) + 1).invoke()
+        await s06_combat.get_troop(len(TROOPS) + 1).invoke()
 
 
 @pytest.mark.asyncio
-async def test_unpack_troop(b5_tests):
+async def test_unpack_troop(s06_combat_tests):
     for troop in TROOPS:
         packed = pack_troop(troop)
-        tx = await b5_tests.test_unpack_troop(packed).invoke()
+        tx = await s06_combat_tests.test_unpack_troop(packed).invoke()
         assert troop == tx.result.t
 
 
 @pytest.mark.asyncio
-async def test_compute_squad_stats(b5_tests):
+async def test_compute_squad_stats(s06_combat_tests):
     squad = build_default_squad()
-    tx = await b5_tests.test_compute_squad_stats(squad).invoke()
+    tx = await s06_combat_tests.test_compute_squad_stats(squad).invoke()
     stats = tx.result.stats
 
     assert stats.agility == sum([t.agility for t in squad])
@@ -202,52 +153,52 @@ async def test_compute_squad_stats(b5_tests):
 
 
 @pytest.mark.asyncio
-async def test_pack_squad(b5_tests):
+async def test_pack_squad(s06_combat_tests):
     squad = build_default_squad()
     packed_squad = pack_squad(squad)
-    tx = await b5_tests.test_pack_squad(squad).invoke()
+    tx = await s06_combat_tests.test_pack_squad(squad).invoke()
     assert tx.result.p == packed_squad
 
 
 @pytest.mark.asyncio
-async def test_unpack_squad(b5_tests):
+async def test_unpack_squad(s06_combat_tests):
     squad = build_default_squad()
     packed_squad = pack_squad(squad)
-    tx = await b5_tests.test_unpack_squad(packed_squad).invoke()
+    tx = await s06_combat_tests.test_unpack_squad(packed_squad).invoke()
     assert tx.result.s == squad
 
 
 @pytest.mark.asyncio
-async def test_attack(a5_tests):
+async def test_attack(l06_combat_tests):
     attack_vs_defense = 1
     wisdom_vs_agility = 2
     for attack_type in [attack_vs_defense, wisdom_vs_agility]:
         a = build_default_squad()
         d = build_default_squad()
-        tx = await a5_tests.test_attack(a, d, attack_type).invoke()
+        tx = await l06_combat_tests.test_attack(a, d, attack_type).invoke()
 
         # assuming at least one hit
         assert tx.result.d_after_attack.t1_1.vitality < d.t1_1.vitality
 
 
 @pytest.mark.asyncio
-async def test_compute_min_roll_to_hit(a5_tests):
+async def test_compute_min_roll_to_hit(l06_combat_tests):
     # NOTE: takes about 3 mins to go through the whole combo
     for a in range(20, 120):
         for d in range(20, 120):
             exp = min(math.ceil((a / d) * 7), 12)
-            tx = await a5_tests.test_compute_min_roll_to_hit(a, d).invoke()
+            tx = await l06_combat_tests.test_compute_min_roll_to_hit(a, d).invoke()
             res = tx.result.min_roll
             assert exp == res
 
 
 @pytest.mark.asyncio
-async def test_hit_squad(a5_tests):
+async def test_hit_squad(l06_combat_tests):
     # default squad has a vitality of 144
 
     # partial kill
     squad = build_default_squad()
-    tx = await a5_tests.test_hit_squad(squad, 100).invoke()
+    tx = await l06_combat_tests.test_hit_squad(squad, 100).invoke()
     attacked = tx.result.squad
     assert attacked.t1_1.vitality == 0
     assert attacked.t1_16.vitality == 0
@@ -258,7 +209,7 @@ async def test_hit_squad(a5_tests):
 
     # full kill
     squad = build_default_squad()
-    tx = await a5_tests.test_hit_squad(squad, 144).invoke()
+    tx = await l06_combat_tests.test_hit_squad(squad, 144).invoke()
     attacked = tx.result.squad
     assert attacked.t1_1.vitality == 0
     assert attacked.t1_16.vitality == 0
@@ -268,9 +219,9 @@ async def test_hit_squad(a5_tests):
 
 
 @pytest.mark.asyncio
-async def test_hit_troop(a5_tests):
+async def test_hit_troop(l06_combat_tests):
     # test full kill
-    tx = await a5_tests.test_hit_troop(WATCHMAN, 27).invoke()
+    tx = await l06_combat_tests.test_hit_troop(WATCHMAN, 27).invoke()
     troop = Troop(*tx.result.hit_troop)
     hits_left = tx.result.remaining_hits
 
@@ -278,7 +229,7 @@ async def test_hit_troop(a5_tests):
     assert hits_left == 27 - WATCHMAN.vitality
 
     # test injury
-    tx = await a5_tests.test_hit_troop(WATCHMAN, 2).invoke()
+    tx = await l06_combat_tests.test_hit_troop(WATCHMAN, 2).invoke()
     troop = Troop(*tx.result.hit_troop)
     hits_left = tx.result.remaining_hits
 
@@ -286,7 +237,7 @@ async def test_hit_troop(a5_tests):
     assert hits_left == 0
 
     # test no hit
-    tx = await a5_tests.test_hit_troop(WATCHMAN, 0).invoke()
+    tx = await l06_combat_tests.test_hit_troop(WATCHMAN, 0).invoke()
     troop = Troop(*tx.result.hit_troop)
     hits_left = tx.result.remaining_hits
 
@@ -295,60 +246,59 @@ async def test_hit_troop(a5_tests):
 
 
 @pytest.mark.asyncio
-async def test_squad_to_array(b5_tests):
+async def test_squad_to_array(s06_combat_tests):
     s = build_default_squad()
-    tx = await b5_tests.test_squad_to_array(s).invoke()
+    tx = await s06_combat_tests.test_squad_to_array(s).invoke()
     flattened = functools.reduce(operator.concat, [list(t) for t in s])
     assert tx.result.a == flattened
 
 
 @pytest.mark.asyncio
-async def test_troop_to_array(b5_tests):
+async def test_troop_to_array(s06_combat_tests):
     for t in TROOPS:
-        tx = await b5_tests.test_troop_to_array(t).invoke()
+        tx = await s06_combat_tests.test_troop_to_array(t).invoke()
         assert tx.result.a == list(t)
 
 
 @pytest.mark.asyncio
-async def test_array_to_squad(b5_tests):
+async def test_array_to_squad(s06_combat_tests):
     s = build_default_squad()
     flattened = functools.reduce(operator.concat, [list(t) for t in s])
-    tx = await b5_tests.test_array_to_squad(flattened).invoke()
-    print(tx)
+    tx = await s06_combat_tests.test_array_to_squad(flattened).invoke()
     assert tx.result.s == s
 
 
 @pytest.mark.asyncio
-async def test_array_to_troop(b5_tests):
+async def test_array_to_troop(s06_combat_tests):
     a = list(SNIPER)
-    tx = await b5_tests.test_array_to_troop(a).invoke()
+    tx = await s06_combat_tests.test_array_to_troop(a).invoke()
     assert tx.result.t == SNIPER
 
 
 @pytest.mark.asyncio
-async def test_add_troop_to_squad(b5):
+async def test_add_troop_to_squad(s06_combat):
     partial_squad = build_partial_squad(3)
 
     # add a tier 1
-    tx = await b5.add_troop_to_squad(SCORPIO, partial_squad).invoke()
+    tx = await s06_combat.add_troop_to_squad(SCORPIO, partial_squad).invoke()
     assert tx.result.updated.t1_4 == SCORPIO
 
     # add a tier 2
-    tx = await b5.add_troop_to_squad(KNIGHT, partial_squad).invoke()
+    tx = await s06_combat.add_troop_to_squad(KNIGHT, partial_squad).invoke()
     assert tx.result.updated.t2_1 == KNIGHT
 
     # add a tier 3
-    tx = await b5.add_troop_to_squad(ARCANIST, partial_squad).invoke()
+    tx = await s06_combat.add_troop_to_squad(ARCANIST, partial_squad).invoke()
     assert tx.result.updated.t3_1 == ARCANIST
 
     # adding to a full squad should fail
     with pytest.raises(StarkException):
         squad = build_default_squad()
-        await b5.add_troop_to_squad(GUARD, squad).invoke()
+        await s06_combat.add_troop_to_squad(GUARD, squad).invoke()
 
 
 @pytest.mark.asyncio
-async def test_find_first_free_troop_slot_in_squad(b5_tests):
+async def test_find_first_free_troop_slot_in_squad(s06_combat_tests):
     troop_size = 7  # Cairo's Troop.SIZE, also the number of element in Troop
     for i in range(25):
         partial_squad = build_partial_squad(i)
@@ -358,10 +308,14 @@ async def test_find_first_free_troop_slot_in_squad(b5_tests):
         if i == 24:
             tier = 3
 
-        tx = await b5_tests.test_find_first_free_troop_slot_in_squad(partial_squad, tier).invoke()
+        tx = await s06_combat_tests.test_find_first_free_troop_slot_in_squad(
+            partial_squad, tier
+        ).invoke()
         assert tx.result.free_slot_index == i * troop_size
 
     full_squad = build_default_squad()
     for tier in [1, 2, 3]:
         with pytest.raises(StarkException):
-            await b5_tests.test_find_first_free_troop_slot_in_squad(full_squad, tier).invoke()
+            await s06_combat_tests.test_find_first_free_troop_slot_in_squad(
+                full_squad, tier
+            ).invoke()

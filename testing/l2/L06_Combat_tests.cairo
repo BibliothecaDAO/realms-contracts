@@ -1,10 +1,11 @@
 %lang starknet
 
-from A5_Combat import attack, compute_min_roll_to_hit, hit_troop, hit_squad
-from B5_Combat import Troop, Squad
+from settling_game.L06_Combat import attack, compute_min_roll_to_hit, hit_troop, hit_squad
+from settling_game.S06_Combat import Troop, Squad
 
 @view
-func test_attack{range_check_ptr}(a : Squad, d : Squad, attack_type : felt) -> (d_after_attack : Squad):
+func test_attack{range_check_ptr}(a : Squad, d : Squad, attack_type : felt) -> (
+        d_after_attack : Squad):
     let (d_after_attack) = attack(a, d, attack_type)
     return (d_after_attack)
 end

@@ -1,6 +1,6 @@
 %lang starknet
 
-from B5_Combat import (
+from settling_game.S06_Combat import (
     compute_squad_stats, unpack_troop, pack_squad, unpack_squad, squad_to_array, troop_to_array,
     array_to_squad, array_to_troop, add_troop_to_squad, find_first_free_troop_slot_in_squad,
     PackedSquad, Squad, SquadStats, Troop)
