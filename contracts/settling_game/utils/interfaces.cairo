@@ -45,9 +45,17 @@ namespace IModuleController:
 end
 @contract_interface
 namespace I01B_Settling:
+    func set_genesis(timestamp : felt):
+    end
+    func set_epoch_length(time : felt):
+    end
     func set_time_staked(token_id : Uint256, timestamp : felt):
     end
     func set_total_realms_settled(amount : felt):
+    end
+    func get_genesis() -> (timestamp : felt):
+    end
+    func get_epoch_length() -> (time : felt):
     end
     func get_time_staked(token_id : Uint256) -> (time : felt):
     end
@@ -84,5 +92,26 @@ end
 @contract_interface
 namespace I04A_Calculator:
     func calculateWonderTax() -> (tax_percentage : felt):
+    end
+end
+
+@contract_interface
+namespace I05B_Wonders:
+    func set_epoch_claimed(address : felt, epoch : felt):
+    end
+
+    func set_total_wonders_staked(epoch : felt, amount : felt):
+    end
+
+    func set_wonders_staked(address : felt, epoch : felt, amount : felt):
+    end
+
+    func get_epoch_claimed(address : felt) -> (epoch : felt):
+    end
+
+    func get_total_wonders_staked(epoch : felt) -> (amount : felt):
+    end
+
+    func get_wonders_staked(address : felt, epoch : felt) -> (amount : felt):
     end
 end
