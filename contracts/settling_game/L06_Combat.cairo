@@ -8,7 +8,7 @@ from starkware.starknet.common.syscalls import get_block_timestamp
 from settling_game.S06_Combat import (
     ATTACK_COOLDOWN_PERIOD, COMBAT_TYPE_ATTACK_VS_DEFENSE, COMBAT_TYPE_WISDOM_VS_AGILITY,
     COMBAT_OUTCOME_ATTACKER_WINS, COMBAT_OUTCOME_DEFENDER_WINS, Troop, Squad, SquadStats,
-    compute_squad_stats)
+    Combat_outcome, Combat_step, compute_squad_stats)
 
 # TODO: add owner checks
 
@@ -38,13 +38,15 @@ func Realm_can_be_attacked{syscall_ptr : felt*, range_check_ptr}(realm : felt) -
 end
 
 @view
-func combat{range_check_ptr}(attacker : Squad, defender : Squad, attack_type : felt) -> (
+func combat{range_check_ptr, syscall_ptr : felt*}(attacker : Squad, defender : Squad, attack_type : felt) -> (
         attacker : Squad, defender : Squad, outcome : felt):
     let (attacker_end, defender_end, outcome) = do_combat_turn(attacker, defender, attack_type)
+    # TODO: pass in the Realm IDs to this func so they can be emitted
+    # Combat_outcome.emit(TODO_attacking_realm_id, TODO_defending_realm_id, outcome)
     return (attacker_end, defender_end, outcome)
 end
 
-func do_combat_turn{range_check_ptr}(attacker : Squad, defender : Squad, attack_type : felt) -> (
+func do_combat_turn{range_check_ptr, syscall_ptr : felt*}(attacker : Squad, defender : Squad, attack_type : felt) -> (
         attacker : Squad, defender : Squad, outcome : felt):
     alloc_locals
 
@@ -65,14 +67,15 @@ func do_combat_turn{range_check_ptr}(attacker : Squad, defender : Squad, attack_
     return do_combat_turn(step_attacker, step_defender, attack_type)
 end
 
-func attack{range_check_ptr}(a : Squad, d : Squad, attack_type : felt) -> (d_after_attack : Squad):
+func attack{range_check_ptr, syscall_ptr : felt*}(a : Squad, d : Squad, attack_type : felt) -> (d_after_attack : Squad):
     alloc_locals
 
     let (a_stats) = compute_squad_stats(a)
     let (d_stats) = compute_squad_stats(d)
+    #tempvar hit_points = 0
 
     if attack_type == COMBAT_TYPE_ATTACK_VS_DEFENSE:
-        # attacekr attacks with attack against defense,
+        # attacker attacks with attack against defense,
         # has attack-times dice rolls
         let (min_roll_to_hit) = compute_min_roll_to_hit(a_stats.attack, d_stats.defense)
         let (hit_points) = roll_attack_dice(a_stats.attack, min_roll_to_hit)
@@ -86,7 +89,9 @@ func attack{range_check_ptr}(a : Squad, d : Squad, attack_type : felt) -> (d_aft
         tempvar range_check_ptr = range_check_ptr
     end
 
+    tempvar hit_points = hit_points
     let (d_after_attack) = hit_squad(d, hit_points)
+    Combat_step.emit(a, d, attack_type, hit_points)
     return (d_after_attack)
 end
 

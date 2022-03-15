@@ -116,6 +116,15 @@ end
 
 const SHIFT = 0x100  # used for packing
 
+@event
+func Combat_outcome(attacking_realm_id : felt, defending_realm_id : felt, outcome : felt):
+end
+
+@event
+func Combat_step(
+        attacking_squad : Squad, defending_squad : Squad, attack_type : felt, hit_points : felt):
+end
+
 # TODO: stats shouldn't be hardcoded here, take them from a felt that's easy to update
 #       TBD on how that's going to be done, some kind of shared stats module
 
