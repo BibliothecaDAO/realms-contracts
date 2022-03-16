@@ -32,12 +32,12 @@ export default async function deployAccount() {
 
   fs.writeFileSync(`${DEPLOYMENT_PATH_BASE}/OwnerAccount.json`, JSON.stringify({
     ...result,
-    stark_key_hex: starkKey
+    public_key: starkKey
   }))
 
   console.log(`Deployed at ${result.address}`)
   console.log(`TX: ${result.transaction_hash}`)
-  console.log(`Stark Key ${starkKey}`)
+  console.log(`Public Key ${starkKey}`)
   console.log(`Private Key ${keyPair.getPrivate("hex")}`)
   console.log("waiting for transaaction...")
   try {

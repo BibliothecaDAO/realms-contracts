@@ -18,3 +18,5 @@ Run `npx ts-node ./tasks/desiege/create_game.ts`
 4. `npx ts-node ./tasks/desiege/deploy_tower_defence.ts`
 5. `npx ts-node ./tasks/desiege/deploy_tower_defence_storage.ts`
 6. `npx ts-node ./tasks/desiege/setup_controller_modules.ts`
+7. `npx ts-node ./tasks/desiege/deploy_element_balancer.ts`
+8. `npx ts-node ./tasks/desiege/deploy_divine_eclipse_storage.ts`

@@ -85,7 +85,7 @@ export function writeNileDeploymentFile(contractName: string, contractAlias: str
 
 export function logDeployment(result: any) {
   console.log(`Deployed at ${result.address}`)
-  console.log(`TX: ${result.transaction_hash}`)
+  console.log(`TX: https://goerli.voyager.online/tx/${result.transaction_hash}`)
 }
 
 export function getDeployedAddressInt(contractName: string): string {
@@ -112,8 +112,10 @@ export async function deployContract(contractName: string, contractAlias: string
 
   const contract = (await fs.promises.readFile(`./artifacts/${contractName}.json`)).toString()
 
-  const result = await provider.deployContract({
-    contract, 
+  const signer = getSigner()
+
+  const result = await signer.deployContract({
+    contract,
     constructorCalldata: args
   })
 
@@ -140,13 +142,13 @@ export function getSigner() {
 
     const parsed = JSON.parse(file.toString())
 
-    const privKey = process.env.ARBITER_PRIVATE_KEY;
+    const privKey = process.env.OWNER_PRIVATE_KEY;
 
     if(privKey == undefined || privKey == ""){
-      throw new Error("Attempted to call getSigner() with ARBITER_PRIVATE_KEY being undefined. Set env value in .env or execution environment.")
+      throw new Error("Attempted to call getSigner() with OWNER_PRIVATE_KEY being undefined. Set env value in .env or execution environment.")
     }
 
-    const kp = ec.getKeyPair(toBN(privKey, 16))
+    const kp = ec.getKeyPair(toBN(privKey, "hex"))
     const s = new Account(provider, parsed.address, kp )
     return s;
 

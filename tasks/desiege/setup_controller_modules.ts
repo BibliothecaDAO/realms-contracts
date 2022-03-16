@@ -1,5 +1,5 @@
 
-import { getDeployedAddressInt, provider, getSigner } from "../helpers";
+import { getDeployedAddressInt, getDeployment, provider, getSigner } from "../helpers";
 
 // Re-runs will use the same files
 const deploy = async () => {
@@ -7,27 +7,26 @@ const deploy = async () => {
 
   const towerDefence = getDeployedAddressInt("01_TowerDefence");
   const towerDefenceStorage = getDeployedAddressInt("02_TowerDefenceStorage");
-  const controller = getDeployedAddressInt("ModuleController");
+
+  // The arbiter is the only contract that can modify the controller
+  const arbiter = getDeployment("Arbiter").address;
+
+  const controller = getDeployment("DesiegeModuleController")
+
+  const res = await signer.execute({
+    contractAddress: arbiter,
+    entrypoint: "set_address_of_controller",
+    calldata: [controller.address]
+  });
+
+  console.log(res);
+
+  console.log(await provider.getTransactionStatus(res.transaction_hash))
 
   try {
-    // The arbiter is the only contract that can modify the controller
-    const arbiter = getDeployedAddressInt("Arbiter");
-    const res = await signer.execute({
-      contractAddress: arbiter,
-      entrypoint: "set_address_of_controller",
-      calldata: [controller]
-    });
-
-    console.log(res);
-    await provider.waitForTransaction(res.transaction_hash);
-    const status = await provider.getTransactionStatus(
-      res.transaction_hash
-    );
-    console.log(status);
-
     const batchRes = await signer.execute({
       contractAddress: arbiter,
-      entrypoint: "batch_set_controller_address",
+      entrypoint: "batch_set_controller_addresses",
       calldata: [towerDefence, towerDefenceStorage]
     });
     await provider.waitForTransaction(batchRes.transaction_hash);

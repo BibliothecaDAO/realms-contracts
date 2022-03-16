@@ -31,12 +31,12 @@ const deploy = async () => {
     const res = await getSigner().execute(
         {
             contractAddress: elementsTokenAddress,
-            entrypoint: "set_owner",
+            entrypoint: "transferOwnership",
             calldata: [elementBalancer]
         }
     )
 
-    console.log("set_owner", res)
+    console.log("transferOwnership", res)
 
     await provider.waitForTransaction(res.transaction_hash);
     const status = await provider.getTransactionStatus(
