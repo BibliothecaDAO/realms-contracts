@@ -10,6 +10,10 @@ from settling_game.S06_Combat import (
     COMBAT_OUTCOME_ATTACKER_WINS, COMBAT_OUTCOME_DEFENDER_WINS, Troop, Squad, SquadStats,
     Combat_outcome, Combat_step, compute_squad_stats)
 
+from settling_game.interfaces.ixoroshiro import IXoroshiro
+
+const XOROSHIRO_ADDR = 0x06c4cab9afab0ce564c45e85fe9a7aa7e655a7e0fd53b7aea732814f3a64fbee
+
 # TODO: add owner checks
 
 # TODO: write documentation
@@ -38,7 +42,8 @@ func Realm_can_be_attacked{syscall_ptr : felt*, range_check_ptr}(realm : felt) -
 end
 
 @view
-func combat{range_check_ptr, syscall_ptr : felt*}(attacker : Squad, defender : Squad, attack_type : felt) -> (
+func combat{range_check_ptr, syscall_ptr : felt*}(
+        attacker : Squad, defender : Squad, attack_type : felt) -> (
         attacker : Squad, defender : Squad, outcome : felt):
     let (attacker_end, defender_end, outcome) = do_combat_turn(attacker, defender, attack_type)
     # TODO: pass in the Realm IDs to this func so they can be emitted
@@ -46,7 +51,8 @@ func combat{range_check_ptr, syscall_ptr : felt*}(attacker : Squad, defender : S
     return (attacker_end, defender_end, outcome)
 end
 
-func do_combat_turn{range_check_ptr, syscall_ptr : felt*}(attacker : Squad, defender : Squad, attack_type : felt) -> (
+func do_combat_turn{range_check_ptr, syscall_ptr : felt*}(
+        attacker : Squad, defender : Squad, attack_type : felt) -> (
         attacker : Squad, defender : Squad, outcome : felt):
     alloc_locals
 
@@ -67,29 +73,33 @@ func do_combat_turn{range_check_ptr, syscall_ptr : felt*}(attacker : Squad, defe
     return do_combat_turn(step_attacker, step_defender, attack_type)
 end
 
-func attack{range_check_ptr, syscall_ptr : felt*}(a : Squad, d : Squad, attack_type : felt) -> (d_after_attack : Squad):
+func attack{range_check_ptr, syscall_ptr : felt*}(a : Squad, d : Squad, attack_type : felt) -> (
+        d_after_attack : Squad):
     alloc_locals
 
     let (a_stats) = compute_squad_stats(a)
     let (d_stats) = compute_squad_stats(d)
-    #tempvar hit_points = 0
 
     if attack_type == COMBAT_TYPE_ATTACK_VS_DEFENSE:
         # attacker attacks with attack against defense,
         # has attack-times dice rolls
         let (min_roll_to_hit) = compute_min_roll_to_hit(a_stats.attack, d_stats.defense)
-        let (hit_points) = roll_attack_dice(a_stats.attack, min_roll_to_hit)
+        let (hit_points) = roll_attack_dice(a_stats.attack, min_roll_to_hit, 0)
         tempvar range_check_ptr = range_check_ptr
+        tempvar syscall_ptr : felt* = syscall_ptr
     else:
         # COMBAT_TYPE_WISDOM_VS_AGILITY
         # attacker attacks with wisdom against agility,
         # has wisdom-times dice rolls
         let (min_roll_to_hit) = compute_min_roll_to_hit(a_stats.wisdom, d_stats.agility)
-        let (hit_points) = roll_attack_dice(a_stats.wisdom, min_roll_to_hit)
+        let (hit_points) = roll_attack_dice(a_stats.wisdom, min_roll_to_hit, 0)
         tempvar range_check_ptr = range_check_ptr
+        tempvar syscall_ptr : felt* = syscall_ptr
     end
 
     tempvar hit_points = hit_points
+    tempvar syscall_ptr = syscall_ptr
+
     let (d_after_attack) = hit_squad(d, hit_points)
     Combat_step.emit(a, d, attack_type, hit_points)
     return (d_after_attack)
@@ -116,11 +126,22 @@ func compute_min_roll_to_hit{range_check_ptr}(a : felt, d : felt) -> (min_roll :
     return (t)
 end
 
-func roll_attack_dice(dice_count : felt, hit_threshold : felt) -> (successful_hits : felt):
+func roll_attack_dice{range_check_ptr, syscall_ptr : felt*}(
+        dice_count : felt, hit_threshold : felt, successful_hits_acc) -> (successful_hits : felt):
     # 12 sided dice, 1...12
     # only values >= hit threshold constitute a successful attack
-    # TODO: build this
-    return (33)
+    alloc_locals
+
+    if dice_count == 0:
+        return (successful_hits_acc)
+    end
+
+    # TODO: decide how to integrate with a PRNG
+    # let (rnd) = IXoroshiro.next(contract_address=XOROSHIRO_ADDR)
+    let rnd = 8
+    let (_, r) = unsigned_div_rem(rnd, 12)
+    let (is_successful_hit) = is_le(hit_threshold, r)
+    return roll_attack_dice(dice_count - 1, hit_threshold, successful_hits_acc + is_successful_hit)
 end
 
 func hit_squad{range_check_ptr}(s : Squad, hits : felt) -> (squad : Squad):
