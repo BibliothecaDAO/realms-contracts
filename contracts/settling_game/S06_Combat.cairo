@@ -5,6 +5,7 @@ from starkware.cairo.common.bitwise import bitwise_and
 from starkware.cairo.common.cairo_builtins import BitwiseBuiltin
 from starkware.cairo.common.math import assert_not_zero, assert_le, split_int, unsigned_div_rem
 from starkware.cairo.common.memcpy import memcpy
+from starkware.cairo.common.memset import memset
 from starkware.cairo.common.pow import pow
 
 # a min delay between attacks on a Realm; it can't
@@ -540,6 +541,20 @@ func add_troop_to_squad(t : Troop, s : Squad) -> (updated : Squad):
         a + free_slot + Troop.SIZE,
         sarr + free_slot + Troop.SIZE,
         Squad.SIZE - free_slot - Troop.SIZE)
+    let (updated) = array_to_squad(sarr_len, a)
+
+    return (updated)
+end
+
+@view
+func remove_troop_from_squad(troop_idx : felt, s : Squad) -> (updated : Squad):
+    alloc_locals
+
+    let (sarr_len, sarr) = squad_to_array(s)
+    let (a) = alloc()
+    memcpy(a, sarr, troop_idx * Troop.SIZE)
+    memset(a + troop_idx * Troop.SIZE, 0, Troop.SIZE)
+    memcpy(a + (troop_idx + 1) * Troop.SIZE, sarr, Squad.SIZE - (troop_idx + 1) * Troop.SIZE)
     let (updated) = array_to_squad(sarr_len, a)
 
     return (updated)

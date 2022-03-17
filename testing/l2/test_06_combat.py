@@ -298,6 +298,17 @@ async def test_add_troop_to_squad(s06_combat):
 
 
 @pytest.mark.asyncio
+async def test_remove_troop_from_squad(s06_combat):
+    squad = build_default_squad()
+
+    modified_squad = squad
+    for troop_idx in range(len(squad)):
+        tx = await s06_combat.remove_troop_from_squad(troop_idx, modified_squad).invoke()
+        modified_squad = tx.result.updated
+        assert modified_squad[troop_idx] == EMPTY_TROOP
+
+
+@pytest.mark.asyncio
 async def test_find_first_free_troop_slot_in_squad(s06_combat_tests):
     troop_size = 7  # Cairo's Troop.SIZE, also the number of element in Troop
     for i in range(25):
