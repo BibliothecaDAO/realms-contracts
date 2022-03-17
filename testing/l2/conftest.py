@@ -33,7 +33,6 @@ initial_user_funds = 1000 * (10 ** 18)
 def compile(path) -> ContractDefinition:
     here = os.path.abspath(os.path.dirname(__file__))
 
-
     return compile_starknet_files(
         files=[path],
         debug_info=True,

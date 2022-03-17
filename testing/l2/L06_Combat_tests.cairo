@@ -1,7 +1,7 @@
 %lang starknet
 
-from settling_game.L06_Combat import attack, compute_min_roll_to_hit, hit_troop, hit_squad
-from settling_game.S06_Combat import Troop, Squad
+from contracts.settling_game.L06_Combat import attack, compute_min_roll_to_hit, hit_troop, hit_squad
+from contracts.settling_game.S06_Combat import Troop, Squad
 
 @view
 func test_attack{range_check_ptr, syscall_ptr : felt*}(
