@@ -30,7 +30,7 @@ SCOUT = Troop(2, 1, 4, 3, 1, 1, 1)
 ARCHER = Troop(2, 2, 8, 6, 2, 2, 2)
 SNIPER = Troop(2, 3, 16, 12, 4, 4, 4)
 SCORPIO = Troop(3, 1, 1, 4, 1, 3, 1)
-BAILLISTA = Troop(3, 2, 2, 8, 2, 6, 2)
+BALLISTA = Troop(3, 2, 2, 8, 2, 6, 2)
 CATAPULT = Troop(3, 3, 4, 16, 4, 12, 4)
 APPRENTICE = Troop(2, 1, 2, 2, 1, 1, 4)
 MAGE = Troop(2, 2, 4, 4, 2, 2, 8)
@@ -47,7 +47,7 @@ TROOPS = [
     ARCHER,
     SNIPER,
     SCORPIO,
-    BAILLISTA,
+    BALLISTA,
     CATAPULT,
     APPRENTICE,
     MAGE,

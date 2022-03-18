@@ -8,15 +8,6 @@ from starkware.cairo.common.memcpy import memcpy
 from starkware.cairo.common.memset import memset
 from starkware.cairo.common.pow import pow
 
-# a min delay between attacks on a Realm; it can't
-# be attacked again during cooldown
-const ATTACK_COOLDOWN_PERIOD = 86400  # 1 day
-
-const COMBAT_TYPE_ATTACK_VS_DEFENSE = 1
-const COMBAT_TYPE_WISDOM_VS_AGILITY = 2
-const COMBAT_OUTCOME_ATTACKER_WINS = 1
-const COMBAT_OUTCOME_DEFENDER_WINS = 2
-
 # namespace constants deliberately start at 1 to
 # 1) translate in a straighforward way to "human, 1-based index" land
 # 2) to differentiate between uninitialized value (i.e. 0 in Cairo)
@@ -32,7 +23,7 @@ namespace TroopId:
     const Archer = 8
     const Sniper = 9
     const Scorpio = 10
-    const Baillista = 11
+    const Ballista = 11
     const Catapult = 12
     const Apprentice = 13
     const Mage = 14
@@ -186,7 +177,7 @@ func get_troop{range_check_ptr, bitwise_ptr : BitwiseBuiltin*}(troop_id : felt) 
             Troop(type=TroopType.Siege, tier=1, agility=1, attack=4, defense=1, vitality=3, wisdom=1))
     end
 
-    if troop_id == TroopId.Baillista:
+    if troop_id == TroopId.Ballista:
         return (
             Troop(type=TroopType.Siege, tier=2, agility=2, attack=8, defense=2, vitality=6, wisdom=2))
     end
