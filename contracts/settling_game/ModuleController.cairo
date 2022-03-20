@@ -144,7 +144,7 @@ func set_initial_module_addresses{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         module_01_addr : felt, module_02_addr : felt, module_03_addr : felt, module_04_addr : felt,
         module_05_addr : felt, module_06_addr : felt, module_07_addr : felt,
-        module_08_addr : felt):
+        module_08_addr : felt, module_09_addr : felt):
     only_arbiter()
 
     address_of_module_id.write(1, module_01_addr)
@@ -170,6 +170,9 @@ func set_initial_module_addresses{
 
     address_of_module_id.write(8, module_08_addr)
     module_id_of_address.write(module_08_addr, 8)
+
+    address_of_module_id.write(9, module_09_addr)
+    module_id_of_address.write(module_09_addr, 9)
     return ()
 end
 
