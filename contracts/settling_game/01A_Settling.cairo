@@ -74,29 +74,16 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(t
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
         contract_address=realms_address, token_id=token_id)
 
-    if realms_data.wonder == 1:
+    if realms_data.wonder = 1:
         let (wonders_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=8)
+        contract_address=controller, module_id=9)
 
+        # update info for epoch
         let ( epoch ) = get_current_epoch()
-
-        let (wonders_staked) = I05B_Wonders.get_wonders_staked(contract_address=wonders_state_address, address=caller, epoch=epoch)
-
         let (total_wonders_staked) = I05B_Wonders.get_total_wonders_staked(contract_address=wonders_state_address, epoch=epoch)
-
-        let (epoch_claimed) =  I05B_Wonders.get_epoch_claimed(contract_address=wonders_state_address, address=caller)
-
-        # should do the trick for checking if first time staked, genesis should match Journey's
-        # so 0 is only if empty
-        if epoch_claimed == 0:
-            I05B_Wonders.set_epoch_claimed(contract_address=wonders_state_address, address=caller, epoch=epoch)
-            
-        else:
-            I05B_Wonders.set_wonders_staked(contract_address=wonders_state_address, address=caller, epoch=epoch, amount=wonders_staked + 1)
-
-            I05B_Wonders.set_total_wonders_staked(contract_address=wonders_state_address, epoch=epoch, amount=total_wonders_staked + 1)
-        end
-        return()
+        I05B_Wonders.set_total_wonders_staked(contract_address=wonders_state_address, epoch=epoch, amount=total_wonders_staked + 1)
+ 
+        I05B_Wonders.set_wonder_id_staked(contract_address=wonder_state_address, token_id=token_id, epoch=epoch)
     end
     return ()
 end
@@ -135,6 +122,19 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     # updated settled realms counter
     let (realms_settled) = I01B_Settling.get_total_realms_settled(contract_address=settle_state_address)
     I01B_Settling.set_total_realms_settled(settle_state_address, realms_settled - 1)
+
+    if realms_data.wonder = 1:
+        let (wonders_state_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=9)
+
+        # update info for epoch
+        let ( epoch ) = get_current_epoch()
+        let (total_wonders_staked) = I05B_Wonders.get_total_wonders_staked(contract_address=wonders_state_address, epoch=epoch)
+        I05B_Wonders.set_total_wonders_staked(contract_address=wonders_state_address, epoch=epoch, amount=total_wonders_staked - 1)
+ 
+        I05B_Wonders.set_wonder_id_staked(contract_address=wonder_state_address, token_id=token_id, epoch=0)
+    end
+    return ()
 
     return ()
 end

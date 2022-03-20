@@ -73,7 +73,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (treasury_address) = IModuleController.get_treasury_address(contract_address=controller)
 
     # wonder tax pool address
-    let (wonder_tax_pool_address) = IModuleController.get_module_address(contract_address=controller, module_id=8) # magic number: wonders state mod 
+    let (wonder_tax_pool_address) = IModuleController.get_module_address(contract_address=controller, module_id=9) 
 
     # check owner of sRealm
     let (owner) = realms_IERC721.ownerOf(contract_address=s_realms_address, token_id=token_id)
@@ -126,7 +126,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     # check days greater than zero
     assert_not_zero(days)
 
-    # get user mint and wonder tax
+    # get wonder tax percentage 
     let ( wonder_tax ) = I04A_Calculator.calculateWonderTax(contract_address=calculator_address)
     let wonder_tax_rel_perc = (80 * wonder_tax) / 100
     let user_mint_rel_perc = 80 - wonder_tax_rel_perc
@@ -198,10 +198,20 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         realms_data.resource_number,
         treasury_mint)
 
-    # mint wonder tax
+    # mint wonder tax and update pool
     IERC1155.mint_batch(
         resources_address,
         wonder_tax_pool_address,
+        realms_data.resource_number,
+        resource_ids,
+        realms_data.resource_number,
+        wonder_tax_mint)
+    
+    let ( current_epoch ) = I04A_Calculator.calculateEpoch(calculator_address)
+    
+    I05B_Wonders.batch_set_tax_pool(
+        wonder_tax_pool_address,
+        current_epoch,
         realms_data.resource_number,
         resource_ids,
         realms_data.resource_number,

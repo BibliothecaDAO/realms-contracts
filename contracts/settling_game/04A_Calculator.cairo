@@ -59,6 +59,24 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
 end
 
 @view
+func calculateEpoch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (epoch : felt):
+    let (controller) = controller_address.read()
+
+    let (block_timestamp) = get_block_timestamp()
+    
+    let (settle_state_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=2)
+
+    let (genesis) = I01B_Settling.get_genesis(
+        contract_address=settle_state_address)
+
+    let (epoch_hours) = I01B_Settling.get_epoch_length(
+        contract_address=settle_state_address)
+
+    return (epoch=(block_timestamp - genesis)/(epoch_hours*3600))
+end
+
+@view
 func calculateHappiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         tokenId : Uint256) -> (happiness : felt):
     alloc_locals
