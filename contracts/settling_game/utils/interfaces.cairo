@@ -43,6 +43,7 @@ namespace IModuleController:
             module_07_addr : felt, module_08_addr : felt):
     end
 end
+
 @contract_interface
 namespace I01B_Settling:
     func set_genesis(timestamp : felt):
@@ -91,6 +92,8 @@ end
 
 @contract_interface
 namespace I04A_Calculator:
+    func calculateEpoch() -> (epoch : felt):
+    end
     func calculateWonderTax() -> (tax_percentage : felt):
     end
 end
@@ -99,19 +102,24 @@ end
 namespace I05B_Wonders:
     func set_epoch_claimed(address : felt, epoch : felt):
     end
-
     func set_total_wonders_staked(epoch : felt, amount : felt):
     end
-
-    func set_wonders_staked(address : felt, epoch : felt, amount : felt):
+    func get_wonder_id_staked(token_id : felt, epoch : felt):
     end
-
+    func get_wonder_epoch_upkeep(epoch : felt, token_id : felt, upkept : felt):
+    end
+    func set_tax_pool(epoch : felt, supply : felt):
+    end
+    func batch_set_tax_pool(epoch : felt, token_ids_len : felt, token_ids : felt*, amounts_len : felt, amounts : felt*): 
+    end
     func get_epoch_claimed(address : felt) -> (epoch : felt):
     end
-
     func get_total_wonders_staked(epoch : felt) -> (amount : felt):
     end
-
-    func get_wonders_staked(address : felt, epoch : felt) -> (amount : felt):
+    func get_wonder_id_staked(token_id : felt) -> (epoch : felt):
+    end
+    func get_wonder_epoch_upkeep(epoch : felt, token_id : felt) -> (upkept : felt):
+    end
+    func get_tax_pool(epoch : felt) -> (supply : felt):
     end
 end

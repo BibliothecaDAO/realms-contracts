@@ -38,12 +38,21 @@ func epoch_claimed(address : felt) -> (epoch : felt):
 end
 
 @storage_var
-func wonders_staked(address : felt, epoch : felt) -> (amount : felt):
+func total_wonders_staked(epoch : felt) -> (amount : felt):
 end
 
 @storage_var
-func total_wonders_staked(epoch : felt) -> (amount : felt):
+func wonder_id_staked(token_id : felt) -> (epoch : felt):
 end
+
+@storage_var
+func wonder_epoch_upkeep(epoch : felt, token_id : felt) -> (upkept : felt):
+end
+
+@storage_var
+func tax_pool(epoch : felt, token_id : felt) -> (supply : felt)
+end 
+
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -53,25 +62,6 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
 end
 
 # ##### SETTERS ######
-
-@external
-func set_epoch_claimed{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        address : felt, epoch : felt):
-    only_approved()
-
-    epoch_claimed.write(address, epoch)
-    return ()
-end
-
-@external
-func set_wonders_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        address : felt, epoch : felt, amount : felt):
-    only_approved()
-
-    wonders_staked.write(address, epoch, amount)
-    return ()
-end
-
 @external
 func set_total_wonders_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         epoch : felt, amount : felt):
@@ -81,26 +71,57 @@ func set_total_wonders_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     return ()
 end
 
+@external
+func set_wonder_id_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        token_id : felt, epoch : felt):
+    only_approved()
+
+    wonder_id_staked.write(token_id, epoch)
+    return ()
+end
+
+@external
+func set_wonder_epoch_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        epoch : felt, token_id : felt, upkept : felt):
+    only_approved()
+
+    wonder_epoch_upkeep.write(epoch, token_id, upkept)
+    return ()
+end
+
+@external
+func set_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        epoch : felt, token_id : felt, amount : felt):
+    only_approved()
+
+    tax_pool.write(epoch, token_id, amount)
+    return ()
+end
+
+@external
+func batch_set_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        epoch : felt,
+        token_ids_len : felt, 
+        token_ids : felt*,
+        amounts_len : felt,
+        amounts : felt*):
+    only_approved()
+
+    alloc_locals    
+    # Update tax pool
+    let ( tax_pool ) = get_tax_pool(wonders_state_address, current_epoch, [token_ids])
+    set_tax_pool(epoch, [token_ids], tax_pool + [amounts])
+
+    # Recurse
+    return set_tax_pool(
+    epoch=epoch,
+    token_ids_len=token_ids - 1
+    token_ids=token_ids + 1,
+    amounts_len=amounts_len - 1,
+    amounts=amounts + 1)
+end
+
 # ##### GETTERS ######
-
-@external
-func get_epoch_claimed{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    address : felt) -> (epoch : felt):
-
-    let (epoch) = epoch_claimed.read(address)
-
-    return (epoch=epoch)
-end
-
-@external
-func get_wonders_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    address : felt, epoch : felt) -> (amount : felt):
-
-    let (amount) = wonders_staked.read(address, epoch)
-
-    return (amount=amount)
-end
-
 @external
 func get_total_wonders_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     epoch : felt) -> (amount : felt):
@@ -108,6 +129,33 @@ func get_total_wonders_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     let (amount) = total_wonders_staked.read(epoch)
 
     return (amount=amount)
+end
+
+@external
+func get_wonder_id_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : felt) -> (epoch : felt):
+
+    let (epoch) = wonder_id_staked.read(token_id)
+
+    return (epoch=epoch)
+end
+
+@external
+func get_wonder_epoch_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    epoch : felt, token_id : felt) -> (upkept : felt):
+
+    let (upkept) = wonder_epoch_upkeep.read(epoch, token_id)
+
+    return (upkept=upkept)
+end
+
+@external
+func get_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    epoch : felt, token_id : felt) -> (supply : felt):
+
+    let (supply) = tax_pool.read(epoch, token_id)
+
+    return (supply:supply)
 end
 
 # Checks write-permission of the calling contract.
