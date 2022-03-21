@@ -11,7 +11,7 @@ from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.general import scale
 from contracts.settling_game.utils.interfaces import (
-    IModuleController, I02B_Resources, I01B_Settling)
+    IModuleController, IS02_Resources, IS01_Settling)
 
 from contracts.settling_game.utils.game_structs import RealmData, ResourceUpgradeIds
 from contracts.settling_game.utils.general import unpack_data
@@ -79,38 +79,38 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
         contract_address=realms_address, token_id=token_id)
 
-    let (r_1) = I02B_Resources.get_resource_level(
+    let (r_1) = IS02_Resources.get_resource_level(
         contract_address=resources_state_address,
         token_id=token_id,
         resource=realms_data.resource_1)
-    let (r_2) = I02B_Resources.get_resource_level(
+    let (r_2) = IS02_Resources.get_resource_level(
         contract_address=resources_state_address,
         token_id=token_id,
         resource=realms_data.resource_2)
-    let (r_3) = I02B_Resources.get_resource_level(
+    let (r_3) = IS02_Resources.get_resource_level(
         contract_address=resources_state_address,
         token_id=token_id,
         resource=realms_data.resource_3)
-    let (r_4) = I02B_Resources.get_resource_level(
+    let (r_4) = IS02_Resources.get_resource_level(
         contract_address=resources_state_address,
         token_id=token_id,
         resource=realms_data.resource_5)
-    let (r_5) = I02B_Resources.get_resource_level(
+    let (r_5) = IS02_Resources.get_resource_level(
         contract_address=resources_state_address,
         token_id=token_id,
         resource=realms_data.resource_5)
-    let (r_6) = I02B_Resources.get_resource_level(
+    let (r_6) = IS02_Resources.get_resource_level(
         contract_address=resources_state_address,
         token_id=token_id,
         resource=realms_data.resource_6)
-    let (r_7) = I02B_Resources.get_resource_level(
+    let (r_7) = IS02_Resources.get_resource_level(
         contract_address=resources_state_address,
         token_id=token_id,
         resource=realms_data.resource_7)
 
     # # TODO: only allow claim contract to mint
     # get time staked
-    let (time_staked) = I01B_Settling.get_time_staked(settling_state_address, token_id)
+    let (time_staked) = IS01_Settling.get_time_staked(settling_state_address, token_id)
 
     # calculate days
     let (days) = getAvailableResources(time_staked)
@@ -215,9 +215,9 @@ func upgrade_resource{
     let (resources_state_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=4)
 
-    let (level) = I02B_Resources.get_resource_level(resources_state_address, token_id, resource)
+    let (level) = IS02_Resources.get_resource_level(resources_state_address, token_id, resource)
 
-    let (upgrade_cost) = I02B_Resources.get_resource_upgrade_cost(
+    let (upgrade_cost) = IS02_Resources.get_resource_upgrade_cost(
         resources_state_address, token_id, resource)
 
     let (resource_upgrade_ids : ResourceUpgradeIds) = fetch_resource_upgrade_ids(resource)
@@ -269,7 +269,7 @@ func upgrade_resource{
     IERC1155.burn_batch(resource_address, caller, 5, resource_ids, 5, token_values)
 
     # increase level
-    I02B_Resources.set_resource_level(resources_state_address, token_id, resource, level + 1)
+    IS02_Resources.set_resource_level(resources_state_address, token_id, resource, level + 1)
 
     return ()
 end
@@ -286,7 +286,7 @@ func fetch_resource_upgrade_ids{
     let (resources_state_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=4)
 
-    let (local data) = I02B_Resources.get_resource_upgrade_ids(resources_state_address, resource_id)
+    let (local data) = IS02_Resources.get_resource_upgrade_ids(resources_state_address, resource_id)
 
     let (local resource_1) = unpack_data(data, 0, 255)
     let (local resource_2) = unpack_data(data, 8, 255)

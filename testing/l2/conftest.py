@@ -9,13 +9,14 @@ import time
 from types import SimpleNamespace
 import logging
 from starkware.starknet.compiler.compile import compile_starknet_files
+from starkware.starknet.services.api.contract_definition import ContractDefinition
 from starkware.starknet.testing.starknet import Starknet, StarknetContract
 from starkware.starknet.business_logic.state import BlockInfo
 
 sys.stdout = sys.stderr
 
 
-CONTRACT_SRC = [os.path.dirname(__file__), "../..", "contracts"]
+CONTRACT_SRC = os.path.join(os.path.dirname(__file__), "../..", "contracts")
 INITIAL_LORDS_SUPPLY = 500000000 * (10 ** 18)
 REALM_MINT_PRICE = 10 * (10 ** 18)
 
@@ -29,11 +30,14 @@ sixth_token_id = (9999, 9999)
 initial_user_funds = 1000 * (10 ** 18)
 
 
-def compile(path):
+def compile(path) -> ContractDefinition:
+    here = os.path.abspath(os.path.dirname(__file__))
+
     return compile_starknet_files(
         files=[path],
         debug_info=True,
-        cairo_path=CONTRACT_SRC,
+        disable_hint_validation=True,
+        cairo_path=[CONTRACT_SRC, here],
     )
 
 
@@ -43,6 +47,7 @@ async def create_account(starknet, signer, account_def):
         constructor_calldata=[signer.public_key],
     )
 
+
 def get_block_timestamp(starknet_state):
     return starknet_state.state.block_info.block_timestamp
 
@@ -51,6 +56,8 @@ def set_block_timestamp(starknet_state, timestamp):
     starknet_state.state.block_info = BlockInfo(
         starknet_state.state.block_info.block_number, timestamp
     )
+
+
 # StarknetContracts contain an immutable reference to StarknetState, which
 # means if we want to be able to use StarknetState's `copy` method, we cannot
 # rely on StarknetContracts that were created prior to the copy.
@@ -67,9 +74,16 @@ def serialize_contract(contract, abi):
 def unserialize_contract(starknet_state, serialized_contract):
     return StarknetContract(state=starknet_state, **serialized_contract)
 
+
 @pytest.fixture(scope="session")
 def event_loop():
     return asyncio.new_event_loop()
+
+
+@pytest.fixture(scope="module")
+async def starknet() -> Starknet:
+    starknet = await Starknet.empty()
+    return starknet
 
 
 # StarknetContracts contain an immutable reference to StarknetState, which
@@ -79,7 +93,6 @@ def event_loop():
 # deployment:
 async def _build_copyable_deployment():
     starknet = await Starknet.empty()
-
 
     # initialize a realistic timestamp
     set_block_timestamp(starknet.state, round(time.time()))
@@ -214,9 +227,7 @@ async def ctx_factory(copyable_deployment):
             )
 
         def advance_clock(num_seconds):
-            set_block_timestamp(
-                starknet_state, get_block_timestamp(starknet_state) + num_seconds
-            )
+            set_block_timestamp(starknet_state, get_block_timestamp(starknet_state) + num_seconds)
 
         return SimpleNamespace(
             starknet=Starknet(starknet_state),
@@ -227,3 +238,27 @@ async def ctx_factory(copyable_deployment):
         )
 
     return make
+
+
+@pytest.fixture(scope="module")
+async def l06_combat(starknet) -> StarknetContract:
+    contract = compile("contracts/settling_game/L06_Combat.cairo")
+    return await starknet.deploy(contract_def=contract)
+
+
+@pytest.fixture(scope="module")
+async def l06_combat_tests(starknet) -> StarknetContract:
+    contract = compile("testing/l2/L06_Combat_tests.cairo")
+    return await starknet.deploy(contract_def=contract)
+
+
+@pytest.fixture(scope="module")
+async def s06_combat(starknet) -> StarknetContract:
+    contract = compile("contracts/settling_game/S06_Combat.cairo")
+    return await starknet.deploy(contract_def=contract)
+
+
+@pytest.fixture(scope="module")
+async def s06_combat_tests(starknet) -> StarknetContract:
+    contract = compile("testing/l2/S06_Combat_tests.cairo")
+    return await starknet.deploy(contract_def=contract)
