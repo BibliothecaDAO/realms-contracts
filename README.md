@@ -104,7 +104,7 @@ For more information see
 Clone this repo and use our docker shell to interact with starknet:
 
 ```
-git clone git@github.com:BibliothecaForAdventurers/RealmsSettling.git
+git clone git@github.com:BibliothecaForAdventurers/realms-contracts.git
 cd realms-contracts
 bin/shell starknet --version
 ```
