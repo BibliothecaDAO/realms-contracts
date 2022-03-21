@@ -1,5 +1,6 @@
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/uQnjZhZPfu)
 [![Twitter](https://badgen.net/badge/icon/twitter?icon=twitter&label)](https://twitter.com/LootRealms)
+
 ![This is an image](/R_-100.jpg)
 
 # Realms Settling Game
@@ -8,6 +9,7 @@
 
 A modular game engine architecture for the StarkNet L2 roll-up - Forked & heavily inspired by the pioneering work done by the Dope Ware RYO game [here](https://github.com/dopedao/RYO).
 
+<iframe src="https://discord.com/widget?id=884211910222970891&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
 
 ### Module overview
 
@@ -87,11 +89,6 @@ and forwards it on to the destination.
   - L1 connectors (for integrating L1 state/ownership to L2)
   - Other arbitrary contracts
   - Module logic contained in L (e.g L_Settling.cairo) and state in S (S_Settling.cairo)
-
-For more information see
-
-- Modular [system architecture](./system_architecture.md).
-- Descriptions of example modules in [module notes](/module_notes).
 
 </p>
 </details>
