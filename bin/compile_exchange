@@ -1,0 +1,6 @@
+#!/bin/bash
+set -eu
+
+nile compile contracts/token/*.cairo
+nile compile contracts/Account.cairo
+nile compile contracts/exchange/Exchange_ERC20_1155.cairo
