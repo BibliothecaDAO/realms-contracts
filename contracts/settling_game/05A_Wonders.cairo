@@ -136,7 +136,7 @@ func loop_epochs_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
         let ( amounts_arr ) = alloc()
 
         # Get claimable resources
-        let ( resource_claim_ids_len, resource_claim_ids, resource_claim_amounts_len, resource_claim_amounts ) = loop_resources_claim(
+        loop_resources_claim(
             wonder_state_address,
             token_id,
             current_epoch,
@@ -151,10 +151,10 @@ func loop_epochs_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
             resources_address,
             caller,
             treasury_address,
-            resource_claim_ids_len, 
-            resource_claim_ids, 
-            resource_claim_amounts_len, 
-            resource_claim_amounts)
+            22, 
+            ids_arr, 
+            22, 
+            amounts_arr)
     end
 
     # Recurse
