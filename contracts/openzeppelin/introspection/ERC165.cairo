@@ -1,9 +1,12 @@
+# SPDX-License-Identifier: MIT
+# OpenZeppelin Cairo Contracts v0.1.0 (introspection/ERC165.cairo)
+
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
 from starkware.cairo.common.math import assert_not_equal
 
-from contracts.utils.constants import TRUE
+from contracts.openzeppelin.utils.constants import TRUE
 
 @storage_var
 func ERC165_supported_interfaces(interface_id: felt) -> (is_supported: felt):
@@ -29,8 +32,9 @@ func ERC165_register_interface{
         pedersen_ptr: HashBuiltin*, 
         range_check_ptr
     } (interface_id: felt):
-    # Ensures interface_id is not the invalid interface_id
-    assert_not_equal(interface_id, 0xffffffff)
+    with_attr error_message("ERC165: invalid interface id"):
+        assert_not_equal(interface_id, 0xffffffff)
+    end
     ERC165_supported_interfaces.write(interface_id, TRUE)
     return ()
 end

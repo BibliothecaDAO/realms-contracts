@@ -28,7 +28,6 @@ async def assert_revert(fun):
         _, error = err.args
         assert error['code'] == StarknetErrorCode.TRANSACTION_FAILED
 
-
 def assert_event_emitted(tx_exec_info, from_address, name, data):
     assert Event(
         from_address=from_address,
