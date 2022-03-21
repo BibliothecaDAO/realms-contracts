@@ -129,55 +129,50 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     # get wonder tax percentage 
     let ( wonder_tax ) = I04A_Calculator.calculateWonderTax(contract_address=calculator_address)
     let wonder_tax_rel_perc = (80 * wonder_tax) / 100
+
+    # set minting percentages
+    let treasury_mint_perc = 20 + wonder_tax_rel_perc
     let user_mint_rel_perc = 80 - wonder_tax_rel_perc
 
     assert resource_ids[0] = realms_data.resource_1
     assert user_mint[0] = ((r_1 * days) * user_mint_rel_perc) / 100
-    assert treasury_mint[0] = ((r_1 * days) * 20) / 100
-    assert wonder_tax_mint[0] = ((r_1 * days) * wonder_tax_rel_perc) / 100
-
+    assert treasury_mint[0] = ((r_1 * days) * treasury_mint_perc) / 100
 
     if realms_data.resource_2 != 0:
         assert resource_ids[1] = realms_data.resource_2
         assert user_mint[1] = ((r_2 * days) * user_mint_rel_perc) / 100
-        assert treasury_mint[1] = ((r_2 * days) * 20) / 100
-        assert wonder_tax_mint[1] = ((r_2 * days) * wonder_tax_rel_perc) / 100
+        assert treasury_mint[1] = ((r_2 * days) * treasury_mint_perc) / 100
 
     end
 
     if realms_data.resource_3 != 0:
         assert resource_ids[2] = realms_data.resource_3
         assert user_mint[2] = ((r_3 * days) * user_mint_rel_perc) / 100
-        assert treasury_mint[2] = ((r_3 * days) * 20) / 100
-        assert wonder_tax_mint[2] = ((r_3 * days) * wonder_tax_rel_perc) / 100
+        assert treasury_mint[2] = ((r_3 * days) * treasury_mint_perc) / 100
     end
 
     if realms_data.resource_4 != 0:
         assert resource_ids[3] = realms_data.resource_4
         assert user_mint[3] = ((r_4 * days) * user_mint_rel_perc) / 100
-        assert treasury_mint[3] = ((r_4 * days) * 20) / 100
-        assert wonder_tax_mint[3] = ((r_4 * days) * wonder_tax_rel_perc) / 100
+        assert treasury_mint[3] = ((r_4 * days) * treasury_mint_perc) / 100
     end
 
     if realms_data.resource_5 != 0:
         assert resource_ids[4] = realms_data.resource_5
         assert user_mint[4] = ((r_5 * days) * user_mint_rel_perc) / 100
-        assert treasury_mint[4] = ((r_5 * days) * 20) / 100
-        assert wonder_tax_mint[4] = ((r_5 * days) * wonder_tax_rel_perc) / 100
+        assert treasury_mint[4] = ((r_5 * days) * treasury_mint_perc) / 100
     end
 
     if realms_data.resource_6 != 0:
         assert resource_ids[5] = realms_data.resource_7
         assert user_mint[5] = ((r_6 * days) * user_mint_rel_perc) / 100
-        assert treasury_mint[5] = ((r_6 * days) * 20) / 100
-        assert wonder_tax_mint[5] = ((r_6 * days) * wonder_tax_rel_perc) / 100
+        assert treasury_mint[5] = ((r_6 * days) * treasury_mint_perc) / 100
     end
 
     if realms_data.resource_7 != 0:
         assert resource_ids[6] = realms_data.resource_7
         assert user_mint[6] = ((r_7 * days) * user_mint_rel_perc) / 100
-        assert treasury_mint[6] = ((r_7 * days) * 20) / 100
-        assert wonder_tax_mint[6] = ((r_7 * days) * wonder_tax_rel_perc) / 100
+        assert treasury_mint[6] = ((r_7 * days) * treasury_mint_perc) / 100
     end
 
     # mint users
@@ -198,15 +193,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         realms_data.resource_number,
         treasury_mint)
 
-    # mint wonder tax and update pool
-    IERC1155.mint_batch(
-        resources_address,
-        wonder_tax_pool_address,
-        realms_data.resource_number,
-        resource_ids,
-        realms_data.resource_number,
-        wonder_tax_mint)
-    
+    # update pool
     let ( current_epoch ) = I04A_Calculator.calculateEpoch(calculator_address)
     
     I05B_Wonders.batch_set_tax_pool(

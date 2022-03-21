@@ -45,18 +45,18 @@ func pay_wonder_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     let ( controller ) = controller_address.read()
     let ( caller ) = get_caller_address()
 
+    let ( treasury_address ) = IModuleController.get_treasury_address(contract_address=controller)
     let ( resources_address ) = IModuleController.get_resources_address(contract_address=controller)
     let ( wonder_tax_pool_address ) = IModuleController.get_module_address(contract_address=controller, module_id=9)
 
     # calculator logic contract
-    let (calculator_address) = IModuleController.get_module_address(
+    let ( calculator_address ) = IModuleController.get_module_address(
         contract_address=controller, module_id=7)
 
     # get currenty epoch
     let ( current_epoch ) = I04A_Calculator.calculateEpoch(calculator_address)
 
-    # TODO
-    # ASSERT current_epoch > epoch
+    assert_le(current_epoch, epoch)
 
     # Set upkept for epoch
     I05B_Wonders.set_wonder_epoch_upkeep(epoch=epoch, token_id=token_id, upkept=1)
@@ -70,15 +70,15 @@ func pay_wonder_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     assert upkeep_token_ids[2] = 21
     assert upkeep_token_ids[3] = 22
 
-    assert upkeep_token_amounts[0] = 7
-    assert upkeep_token_amounts[1] = 14
-    assert upkeep_token_amounts[2] = 21
-    assert upkeep_token_amounts[3] = 28
+    assert upkeep_token_amounts[0] = 28
+    assert upkeep_token_amounts[1] = 21
+    assert upkeep_token_amounts[2] = 14
+    assert upkeep_token_amounts[3] = 7
 
     IERC1155.safeBatchTransferFrom(
         resources_address,
         caller,
-        wonder_tax_pool_address,
+        treasury_address,
         4,
         upkeep_token_ids,
         4,
@@ -119,28 +119,38 @@ func loop_epochs_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
         current_epoch : felt, claiming_epoch : felt ):
     alloc_locals
 
-    # stop here if over at latest claimable epoch
+    # stop here if over latest claimable epoch
     let ( local within_max_epoch ) = is_nn_le(claiming_epoch, current_epoch - 1) 
     if within_max_epoch = 0:
         return()
     end
 
     let ( controller ) = controller_address.read()
-    let ( wonder_tax_pool_address ) = IModuleController.get_module_address(contract_address=controller, module_id=9)
+    let ( wonder_state_address ) = IModuleController.get_module_address(contract_address=controller, module_id=9)
 
     let ( epoch_upkept ) = I05B_Wonders.get_wonder_epoch_upkeep(wonders_state_address, epoch, token_id)
     if epoch_upkept = 1:
+        let ( epoch_total_wonders ) = I05B_Wonders.get_total_wonders_staked(contract_address=wonders_state_address, epoch=epoch)
+
+        let ( ids_arr ) = alloc()
+        let ( amounts_arr ) = alloc()
+
         # Get claimable resources
         let ( resource_claim_ids_len, resource_claim_ids, resource_claim_amounts_len, resource_claim_amounts ) = loop_resources_claim(
+            wonder_state_address,
+            token_id,
             current_epoch,
             epoch_total_wonders,
-            1)
+            1,
+            ids_arr,
+            1,
+            amounts_arr)
 
         # Transfer claimable resources
         IERC1155.safeBatchTransferFrom(
             resources_address,
             caller,
-            wonder_tax_pool_address,
+            treasury_address,
             resource_claim_ids_len, 
             resource_claim_ids, 
             resource_claim_amounts_len, 
@@ -166,9 +176,12 @@ func loop_resources_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
             resource_claim_amounts : felt*):
     alloc_locals
 
-    let ( resource_pool ) = I05B_Wonders.get_tax_pool(wonders_state_address, epoch, resource_claim_ids_len + 1)
-    resource_claim_ids[resource_claim_ids_len] = resource_claim_ids_len + 1
-    resource_claim_amounts[resource_claim_ids_len] = resource_pool / epoch_total_wonders 
+    let ( below_max_id ) = is_nn_le(resource_claim_ids_len, 22)
+
+    if below_max_id = 1:
+    let ( resource_pool ) = I05B_Wonders.get_tax_pool(wonders_state_address, epoch, resource_claim_ids_len)
+    resource_claim_ids[resource_claim_ids_len - 1] = resource_claim_ids_len
+    resource_claim_amounts[resource_claim_ids_len - 1] = resource_pool / epoch_total_wonders 
     
     return loop_resources_claim(
         wonders_state_address, epoch, epoch_total_wonders,
@@ -176,4 +189,11 @@ func loop_resources_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
         resource_claim_ids, 
         resource_claim_amounts_len + 1, 
         resource_claim_amounts)
+    else:
+    return (
+        resource_claim_ids_len, 
+        resource_claim_ids, 
+        resource_claim_amounts_len, 
+        resource_claim_amounts))
+    end
 end

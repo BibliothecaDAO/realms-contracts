@@ -114,11 +114,11 @@ func batch_set_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
 
     # Recurse
     return set_tax_pool(
-    epoch=epoch,
-    token_ids_len=token_ids - 1
-    token_ids=token_ids + 1,
-    amounts_len=amounts_len - 1,
-    amounts=amounts + 1)
+        epoch=epoch,
+        token_ids_len=token_ids - 1
+        token_ids=token_ids + 1,
+        amounts_len=amounts_len - 1,
+        amounts=amounts + 1)
 end
 
 # ##### GETTERS ######
