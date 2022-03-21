@@ -4,27 +4,8 @@
 
 A modular game engine architecture for the StarkNet L2 roll-up - Forked & heavily inspired by the pioneering work done by the Dope Ware RYO game [here](https://github.com/dopedao/RYO).
 
-## What is the game?
 
-Settling is an on-chain game of economics and Chivarly built on-top of ZK-STARKS. Earn resources by staking your Realms, raid rivals, steal loot & form on-chain alliances to crush your enemies.
-
-Settling is entirely on-chain; the UI is purely just a client for a distributed backend. Feel free to create your own superior client if you wish.
-
-Picture a million players all asynchronously working the blockchain; harvesting resources, building alliances, & slaying foes. This is Settling.
-
-Settling is all open-source and we encourage people to build modules and contribute.
-
-Requirements: To play be a Lord you require a Realm from the Lootverse. The game will support more Loot derivatives in the future to enrich the gameplay.
-
-<hr>
-
-## System architecture
-
-The game mechanics are separated from the game state variables.
-
-A controller system manages a mapping of modules to deployed addresses and a governance module may update the controller.
-
-For example all these modules could read and write from the state modules and be connected-but-distinct game interactions:
+### Module overview
 
 | Module          | Function                             | Current Status |
 | --------------- | ------------------------------------ | -------------- |
@@ -40,7 +21,37 @@ For example all these modules could read and write from the state modules and be
 
 <hr>
 
-## Contract hierarchy
+## Understanding the code
+<details><summary> 🤔 What is the game?</summary>
+
+<p>
+
+Settling is an on-chain game of economics and Chivarly built on-top of ZK-STARKS. Earn resources by staking your Realms, raid rivals, steal loot & form on-chain alliances to crush your enemies.
+
+Settling is entirely on-chain; the UI is purely just a client for a distributed backend. Feel free to create your own superior client if you wish.
+
+Picture a million players all asynchronously working the blockchain; harvesting resources, building alliances, & slaying foes. This is Settling.
+
+Settling is all open-source and we encourage people to build modules and contribute.
+
+Requirements: To play be a Lord you require a Realm from the Lootverse. The game will support more Loot derivatives in the future to enrich the gameplay.
+
+</p>
+</details>
+<details><summary>🏗️ System architecture</summary>
+<p>
+
+The game mechanics are separated from the game state variables.
+
+A controller system manages a mapping of modules to deployed addresses and a governance module may update the controller.
+
+For example all these modules could read and write from the state modules and be connected-but-distinct game interactions:
+
+</p>
+</details>
+
+<details><summary>📦 Contract hierarchy</summary>
+<p>
 
 It is also worth pointing out that StarkNet has account abstraction
 (see background notes [here](https://perama-v.github.io/cairo/examples/test_accounts/)).
@@ -78,9 +89,16 @@ For more information see
 - Modular [system architecture](./system_architecture.md).
 - Descriptions of example modules in [module notes](/module_notes).
 
+</p>
+</details>
+
 <hr>
 
-## Setup
+## Getting Setup
+
+<details><summary>Initial Setup</summary>
+
+<p>
 
 Clone this repo and use our docker shell to interact with starknet:
 
@@ -98,7 +116,9 @@ to the Goerli Ethereum testnet. Learn more in the Cairo language and StarkNet
 docs [here](https://www.cairo-lang.org/docs/), which also has instructions for manual
 installation if you are not using docker.
 
-### Development workflow
+</p>
+</details>
+<details><summary>Development Workflow</summary>
 
 If you are using VSCode, we provide a development container with all required dependencies.
 When opening VS Code, it should ask you to re-open the project in a container, if it finds
@@ -157,23 +177,34 @@ permissions system.
 ```
 bin/deploy
 ```
+</details>
 
 <hr>
 
-## Contributing and next steps
+## Contributing
+
+<details><summary>Module Priority</summary>
+
+<p>
 
 Module Priority
 
 - [x] Settling
 - [x] Buildings
 - [x] Resources
-- [] Army Building
+- [x] Army Building
 - [] Raiding
+- [] Crafting
+- [] Guilds
 
-Building out parts to make a functional `v1`
+</p>
+</details>
 
-## Binary bit encoding
+<hr>
 
+## Logic Patterns
+
+<details><summary>Binary bit encoding</summary>
 To minimise storage costs (we should always do this where we can) we back felts with binary numbers
 
 For the Realms Data we are storing all the traits, resources and wonders within a single felt.
@@ -270,10 +301,17 @@ resource_5_values = 00000000001010
 720619923528908810
 ```
 
-## Calculator Logic Module
+</details>
+
+<details><summary>Calculator logic</summary>
+<p>
 
 'Storage is expensive, compute is cheap' - I wise man once said this... (@eth_worm)
 
 Calldata will always be expensive on decentralised blockchain. StarkNet allows cheap computation, so where possible we should always compute the value rather than save in the state.
 
 Settling of the Realms contains many computed values that get parsed around the dapp. The calculations for all these should be maintained within a central calculator logic contract. This contract contains no state at all, and can be upgraded easily.
+
+</p>
+</details>
+
