@@ -58,7 +58,7 @@ and forwards it on to the destination.
     - Storage modules (game variables).
     - L1 connectors (for integrating L1 state/ownership to L2)
     - Other arbitrary contracts
-    - Module logic contained in A (e.g 02A_Settling.cairo) and state in B (02B_Settling.cairo)
+    - Module logic contained in L (e.g L_Settling.cairo) and state in S (S_Settling.cairo)
 
 For more information see
 
@@ -73,7 +73,7 @@ Clone this repo and use our docker shell to interact with starknet:
 
 ```
 git clone git@github.com:BibliothecaForAdventurers/RealmsSettling.git
-cd RealmsSettling
+cd realms-contracts
 bin/shell starknet --version
 ```
 
