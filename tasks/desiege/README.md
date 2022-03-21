@@ -4,7 +4,7 @@ Create a contract account, if you haven't already, which can programmatically ex
 
 Run `npx ts-node ./tasks/deploy_account.ts` and view the resulting file. The private key is output in the file and also logged. Save that key and set an environment variable in the `.env` local file.
 
-`ARBITER_PRIVATE_KEY=0x123345....`
+`OWNER_PRIVATE_KEY=0x123345....`
 
 # How to start game
 
