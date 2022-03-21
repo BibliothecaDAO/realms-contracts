@@ -15,6 +15,7 @@ Picture a million players all asynchronously working the blockchain; harvesting 
 Settling is all open-source and we encourage people to build modules and contribute.
 
 Requirements: To play be a Lord you require a Realm from the Lootverse. The game will support more Loot derivatives in the future to enrich the gameplay.
+
 <hr>
 
 ## System architecture
@@ -24,6 +25,18 @@ The game mechanics are separated from the game state variables.
 A controller system manages a mapping of modules to deployed addresses and a governance module may update the controller.
 
 For example all these modules could read and write from the state modules and be connected-but-distinct game interactions:
+
+| Module          | Function                             | Current Status |
+| --------------- | ------------------------------------ | -------------- |
+| Settling        | Manages Settling (staking functions) | In review      |
+| Resources       | Resource management                  | In review      |
+| Buildings       | Buildings management                 | In review      |
+| Calculator      | Calculator management                | In review      |
+| Combat          | Combat simulator                     | In review      |
+| Wonder Tax      | Wonder tax calculator                | In review      |
+| Crafting        | Crafting                             | Draft          |
+| Barbarian Horde | Characters can summon                | Planned        |
+| Guilds          | p2g trading                          | Planned        |
 
 <hr>
 
@@ -36,29 +49,29 @@ Account contract that holds your public key. The contract checks the payload
 and forwards it on to the destination.
 
 - Player Account
-    - A Lord in the Realmverse. These are holders of Realms.
+  - A Lord in the Realmverse. These are holders of Realms.
 - Governance Account
-    - An admin who controls the Arbiter.
-    - The admin may be an L2 DAO to administer governance decisions
+  - An admin who controls the Arbiter.
+  - The admin may be an L2 DAO to administer governance decisions
     voted through on L2, where voting will be cheap.
-    - Governance might enable a new module to have write-access to
+  - Governance might enable a new module to have write-access to
     and important game variable. For example, to change the location
     that a player is currently in. All other modules that read and use location
     would be affected by this.
 - Arbiter (most power in the system).
-    - Can update/add module mappings in ModuleController.
+  - Can update/add module mappings in ModuleController.
 - ModuleController (mapping of deployments to module_ids).
-    - The game 'swichboard' that connects all modules.
-    - Is the reference point for all modules. Modules call this
+  - The game 'swichboard' that connects all modules.
+  - Is the reference point for all modules. Modules call this
     contract as the source of truth for the address of other modules.
-    - The controller stores where modules can be found, and which modules
+  - The controller stores where modules can be found, and which modules
     have write access to other modules.
 - Modules (open ended set)
-    - Game mechanics (where a player would interact to play).
-    - Storage modules (game variables).
-    - L1 connectors (for integrating L1 state/ownership to L2)
-    - Other arbitrary contracts
-    - Module logic contained in L (e.g L_Settling.cairo) and state in S (S_Settling.cairo)
+  - Game mechanics (where a player would interact to play).
+  - Storage modules (game variables).
+  - L1 connectors (for integrating L1 state/ownership to L2)
+  - Other arbitrary contracts
+  - Module logic contained in L (e.g L_Settling.cairo) and state in S (S_Settling.cairo)
 
 For more information see
 
@@ -108,11 +121,13 @@ It will also produce an ABI, which is a mapping of the contract functions
 (used to interact with the contract).
 
 Compile all contracts:
+
 ```
 nile compile
 ```
 
 Compile an individual contract:
+
 ```
 nile compile contracts/02A_Settling.cairo
 ```
@@ -122,6 +137,7 @@ nile compile contracts/02A_Settling.cairo
 Run all github actions tests: `bin/test`
 
 Run individual tests
+
 ```
 bin/shell pytest -s testing/l2/01_Realms_contract_test.py
 ```
@@ -129,25 +145,30 @@ bin/shell pytest -s testing/l2/01_Realms_contract_test.py
 ### Deploy
 
 Start up a local StarkNet devnet with:
+
 ```
 nile node
 ```
+
 Then run the deployment of all the contracts. This uses nile
 and handles passing addresses between the modules to create a
 permissions system.
+
 ```
 bin/deploy
 ```
+
 <hr>
 
 ## Contributing and next steps
 
 Module Priority
-* [x] Settling
-* [x] Buildings
-* [x] Resources
-* [] Army Building
-* [] Raiding
+
+- [x] Settling
+- [x] Buildings
+- [x] Resources
+- [] Army Building
+- [] Raiding
 
 Building out parts to make a functional `v1`
 
@@ -188,24 +209,24 @@ We will use rivers as an example since it's highest value is 60, which equates t
 
 Next, take the binary values and create their 8 bit representations, e.g.:
 
-| trait | decimal | binary | 8 bit |
-| ----- | ------- | ------ | ----- |
-|cities|7|111|`00000111`|
-|regions|4|100|`00000100`|
-|rivers|60|111100|`00111100`|
-|harbours|10|1010|`00001010`|
-|resource_number|5|101|`00000101`|
-|resource_1|1|1|`00000001`|
-|resource_2|2|10|`00000010`|
-|resource_3|3|11|`00000011`|
-|resource_4|4|100|`00000100`|
-|resource_5|5|101|`00000101`|
-|resource_6|0|0|`00000000`|
-|resource_7|0|0|`00000000`|
-|wonder|50|110010|`00110010`|
-|order|3|10|`00000011`|
+| trait           | decimal | binary | 8 bit      |
+| --------------- | ------- | ------ | ---------- |
+| cities          | 7       | 111    | `00000111` |
+| regions         | 4       | 100    | `00000100` |
+| rivers          | 60      | 111100 | `00111100` |
+| harbours        | 10      | 1010   | `00001010` |
+| resource_number | 5       | 101    | `00000101` |
+| resource_1      | 1       | 1      | `00000001` |
+| resource_2      | 2       | 10     | `00000010` |
+| resource_3      | 3       | 11     | `00000011` |
+| resource_4      | 4       | 100    | `00000100` |
+| resource_5      | 5       | 101    | `00000101` |
+| resource_6      | 0       | 0      | `00000000` |
+| resource_7      | 0       | 0      | `00000000` |
+| wonder          | 50      | 110010 | `00110010` |
+| order           | 3       | 10     | `00000011` |
 
-Then concatenate the 8 bit values. This way, you'll get a 112 bit number (14 values * 8 bits for each value). The value for cities (`00000111`) will be the least significant ("rightmost") and the value for order (`00000011`) will be the most significant ("leftmost") position:
+Then concatenate the 8 bit values. This way, you'll get a 112 bit number (14 values \* 8 bits for each value). The value for cities (`00000111`) will be the least significant ("rightmost") and the value for order (`00000011`) will be the most significant ("leftmost") position:
 
 ```
 0000001100110010000000000000000000000101000001000000001100000010000000010000010100001010001111000000010000000111
@@ -249,7 +270,6 @@ resource_5_values = 00000000001010
 720619923528908810
 ```
 
-
 ## Calculator Logic Module
 
 'Storage is expensive, compute is cheap' - I wise man once said this... (@eth_worm)
@@ -257,4 +277,3 @@ resource_5_values = 00000000001010
 Calldata will always be expensive on decentralised blockchain. StarkNet allows cheap computation, so where possible we should always compute the value rather than save in the state.
 
 Settling of the Realms contains many computed values that get parsed around the dapp. The calculations for all these should be maintained within a central calculator logic contract. This contract contains no state at all, and can be upgraded easily.
-
