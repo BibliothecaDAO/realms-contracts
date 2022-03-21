@@ -1,3 +1,4 @@
+![This is an image](/R_-100.jpg)
 # Realms Settling Game
 
 ### The Realms Settling Game - based on the Realms derivative NFT of the Loot Project
