@@ -45,7 +45,7 @@ namespace IModuleController:
 end
 
 @contract_interface
-namespace I01B_Settling:
+namespace IS01_Settling:
     func set_genesis(timestamp : felt):
     end
     func set_epoch_length(time : felt):
@@ -65,7 +65,7 @@ namespace I01B_Settling:
 end
 
 @contract_interface
-namespace I02B_Resources:
+namespace IS02_Resources:
     func get_resource_level(token_id : Uint256, resource : felt) -> (level : felt):
     end
     func get_resource_upgrade_cost(token_id : Uint256, resource : felt) -> (level : felt):
@@ -77,7 +77,7 @@ namespace I02B_Resources:
 end
 
 @contract_interface
-namespace I03B_Buildings:
+namespace IS03_Buildings:
     func get_building_cost_ids(building_id : felt) -> (cost : felt):
     end
     func get_building_cost_values(building_id : felt) -> (cost : felt):
@@ -99,22 +99,22 @@ namespace I04A_Calculator:
 end
 
 @contract_interface
-namespace I05B_Wonders:
+namespace IS05_Wonders:
     func set_total_wonders_staked(epoch : felt, amount : felt):
     end
-    func get_wonder_id_staked(token_id : felt, epoch : felt):
+    func get_wonder_id_staked(token_id : Uint256, epoch : felt):
     end
-    func get_wonder_epoch_upkeep(epoch : felt, token_id : felt, upkept : felt):
+    func get_wonder_epoch_upkeep(epoch : felt, token_id : Uint256, upkept : felt):
     end
     func set_tax_pool(epoch : felt, supply : felt):
     end
-    func batch_set_tax_pool(epoch : felt, token_ids_len : felt, token_ids : felt*, amounts_len : felt, amounts : felt*): 
+    func batch_set_tax_pool(epoch : felt, token_ids_len : felt, token_ids : Uint256*, amounts_len : felt, amounts : felt*): 
     end
     func get_total_wonders_staked(epoch : felt) -> (amount : felt):
     end
-    func get_wonder_id_staked(token_id : felt) -> (epoch : felt):
+    func get_wonder_id_staked(token_id : Uint256) -> (epoch : felt):
     end
-    func get_wonder_epoch_upkeep(epoch : felt, token_id : felt) -> (upkept : felt):
+    func get_wonder_epoch_upkeep(epoch : felt, token_id : Uint256) -> (upkept : felt):
     end
     func get_tax_pool(epoch : felt) -> (supply : felt):
     end

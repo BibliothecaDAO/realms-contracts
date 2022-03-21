@@ -9,13 +9,14 @@ import time
 from types import SimpleNamespace
 import logging
 from starkware.starknet.compiler.compile import compile_starknet_files
+from starkware.starknet.services.api.contract_definition import ContractDefinition
 from starkware.starknet.testing.starknet import Starknet, StarknetContract
 from starkware.starknet.business_logic.state import BlockInfo
 
 sys.stdout = sys.stderr
 
 
-CONTRACT_SRC = [os.path.dirname(__file__), "../..", "contracts"]
+CONTRACT_SRC = os.path.join(os.path.dirname(__file__), "../..", "contracts")
 INITIAL_LORDS_SUPPLY = 500000000 * (10 ** 18)
 REALM_MINT_PRICE = 10 * (10 ** 18)
 
@@ -29,11 +30,14 @@ sixth_token_id = (9999, 9999)
 initial_user_funds = 1000 * (10 ** 18)
 
 
-def compile(path):
+def compile(path) -> ContractDefinition:
+    here = os.path.abspath(os.path.dirname(__file__))
+
     return compile_starknet_files(
         files=[path],
         debug_info=True,
-        cairo_path=CONTRACT_SRC,
+        disable_hint_validation=True,
+        cairo_path=[CONTRACT_SRC, here],
     )
 
 
@@ -43,6 +47,7 @@ async def create_account(starknet, signer, account_def):
         constructor_calldata=[signer.public_key],
     )
 
+
 def get_block_timestamp(starknet_state):
     return starknet_state.state.block_info.block_timestamp
 
@@ -51,6 +56,8 @@ def set_block_timestamp(starknet_state, timestamp):
     starknet_state.state.block_info = BlockInfo(
         starknet_state.state.block_info.block_number, timestamp
     )
+
+
 # StarknetContracts contain an immutable reference to StarknetState, which
 # means if we want to be able to use StarknetState's `copy` method, we cannot
 # rely on StarknetContracts that were created prior to the copy.
@@ -67,9 +74,16 @@ def serialize_contract(contract, abi):
 def unserialize_contract(starknet_state, serialized_contract):
     return StarknetContract(state=starknet_state, **serialized_contract)
 
+
 @pytest.fixture(scope="session")
 def event_loop():
     return asyncio.new_event_loop()
+
+
+@pytest.fixture(scope="module")
+async def starknet() -> Starknet:
+    starknet = await Starknet.empty()
+    return starknet
 
 
 # StarknetContracts contain an immutable reference to StarknetState, which
@@ -80,15 +94,15 @@ def event_loop():
 async def _build_copyable_deployment():
     starknet = await Starknet.empty()
 
-
     # initialize a realistic timestamp
     set_block_timestamp(starknet.state, round(time.time()))
 
     logging.warning(CONTRACT_SRC)
     defs = SimpleNamespace(
-        account=compile("contracts/Account.cairo"),
+        account=compile("openzeppelin/account/Account.cairo"),
         erc20=compile("contracts/token/ERC20_Mintable.cairo"),
         erc721=compile("contracts/token/ERC721_Enumerable_Mintable_Burnable.cairo"),
+        erc1155=compile("contracts/token/ERC1155/ERC1155_Mintable.cairo"),
     )
 
     signers = dict(
@@ -129,6 +143,16 @@ async def _build_copyable_deployment():
     )
     accounts.realms = realms
 
+    resources = await starknet.deploy(
+        contract_def=defs.erc1155,
+        constructor_calldata=[
+            accounts.admin.contract_address, #recipient
+            5, #token_ids_len
+            1, 2, 3, 4, 5,
+            5, #amounts_len
+            100000, 5000, 10000, 10000, 10000,
+        ])
+
     consts = SimpleNamespace(
         REALM_MINT_PRICE=REALM_MINT_PRICE, INITIAL_USER_FUNDS=initial_user_funds
     )
@@ -141,6 +165,7 @@ async def _build_copyable_deployment():
             [recipient, *uint(amount)],
         )
 
+
     async def _erc20_approve(account_name, contract_address, amount):
         await signers[account_name].send_transaction(
             accounts.__dict__[account_name],
@@ -149,14 +174,14 @@ async def _build_copyable_deployment():
             [contract_address, *uint(amount)],
         )
 
-    lords_approve_ammount = consts.REALM_MINT_PRICE * 3
+    lords_approve_amount = consts.REALM_MINT_PRICE * 3
 
     async def mint_realms(account_name, token):
         await signers[account_name].send_transaction(
             accounts.__dict__[account_name], realms.contract_address, 'publicMint', [*uint(token)]
         )
 
-    await _erc20_approve("user1", realms.contract_address, lords_approve_ammount)
+    await _erc20_approve("user1", realms.contract_address, lords_approve_amount)
     await give_tokens(accounts.user1.contract_address, initial_user_funds)
     await mint_realms("user1", 23)
     await mint_realms("user1", 7225)
@@ -172,8 +197,18 @@ async def _build_copyable_deployment():
             arbiter=serialize_contract(accounts.arbiter, defs.account.abi),
             lords=serialize_contract(lords, defs.erc20.abi),
             realms=serialize_contract(realms, defs.erc721.abi),
+            resources=serialize_contract(resources, defs.erc1155.abi),
             user1=serialize_contract(accounts.user1, defs.account.abi),
             user2=serialize_contract(accounts.user2, defs.account.abi),
+        ),
+        addresses=SimpleNamespace(
+            admin=accounts.admin.contract_address,
+            arbiter=accounts.arbiter.contract_address,
+            lords=lords.contract_address,
+            realms=realms.contract_address,
+            resources=resources.contract_address,
+            user1=accounts.user1.contract_address,
+            user2=accounts.user2.contract_address,
         ),
     )
 
@@ -214,16 +249,39 @@ async def ctx_factory(copyable_deployment):
             )
 
         def advance_clock(num_seconds):
-            set_block_timestamp(
-                starknet_state, get_block_timestamp(starknet_state) + num_seconds
-            )
+            set_block_timestamp(starknet_state, get_block_timestamp(starknet_state) + num_seconds)
 
         return SimpleNamespace(
             starknet=Starknet(starknet_state),
             advance_clock=advance_clock,
+            signers=signers,
             consts=consts,
             execute=execute,
             **contracts,
         )
 
     return make
+
+
+@pytest.fixture(scope="module")
+async def l06_combat(starknet) -> StarknetContract:
+    contract = compile("contracts/settling_game/L06_Combat.cairo")
+    return await starknet.deploy(contract_def=contract)
+
+
+@pytest.fixture(scope="module")
+async def l06_combat_tests(starknet) -> StarknetContract:
+    contract = compile("testing/l2/L06_Combat_tests.cairo")
+    return await starknet.deploy(contract_def=contract)
+
+
+@pytest.fixture(scope="module")
+async def s06_combat(starknet) -> StarknetContract:
+    contract = compile("contracts/settling_game/S06_Combat.cairo")
+    return await starknet.deploy(contract_def=contract)
+
+
+@pytest.fixture(scope="module")
+async def s06_combat_tests(starknet) -> StarknetContract:
+    contract = compile("testing/l2/S06_Combat_tests.cairo")
+    return await starknet.deploy(contract_def=contract)

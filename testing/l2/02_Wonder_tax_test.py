@@ -102,7 +102,7 @@ async def game_factory(account_factory):
         source="contracts/settling_game/04A_Calculator.cairo",
         constructor_calldata=[controller.contract_address])
     wonders_state = await starknet.deploy(
-        source="contracts/settling_game/05B_Wonders.cairo",
+        source="contracts/settling_game/S05_Wonders.cairo",
         constructor_calldata=[controller.contract_address])
     # The admin key controls the arbiter. Use it to have the arbiter
     # set the module deployment addresses in the controller.
