@@ -31,6 +31,9 @@ A modular game engine architecture for the StarkNet L2 roll-up - Forked & heavil
 
 <p>
 
+First read the [Master Scroll](https://docs.bibliothecadao.xyz/lootverse-master-scroll/
+). This is our deep dive into everything about the game. The Master Scroll is the source of truth before this readme.
+
 Settling is an on-chain game of economics and Chivarly built on-top of ZK-STARKS. Earn resources by staking your Realms, raid rivals, steal loot & form on-chain alliances to crush your enemies.
 
 Settling is entirely on-chain; the UI is purely just a client for a distributed backend. Feel free to create your own superior client if you wish.
@@ -44,15 +47,12 @@ Requirements: To play be a Lord you require a Realm from the Lootverse. The game
 </p>
 </details>
 <details><summary>🏗️ System architecture</summary>
-<p>
+
 
 The game mechanics are separated from the game state variables.
 
 A controller system manages a mapping of modules to deployed addresses and a governance module may update the controller.
 
-For example all these modules could read and write from the state modules and be connected-but-distinct game interactions:
-
-</p>
 </details>
 
 <details><summary>📦 Contract hierarchy</summary>
