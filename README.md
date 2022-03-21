@@ -3,14 +3,14 @@
 
 ![This is an image](/R_-100.jpg)
 
-# Realms Settling Game
+# 🏰 Realms Settling Game
 
 ### The Realms Settling Game - based on the Realms derivative NFT of the Loot Project
 
 A modular game engine architecture for the StarkNet L2 roll-up - Forked & heavily inspired by the pioneering work done by the Dope Ware RYO game [here](https://github.com/dopedao/RYO).
 
 
-### Module overview
+### Game module overview
 
 | Module          | Function                             | Current Status |
 | --------------- | ------------------------------------ | -------------- |
@@ -183,23 +183,23 @@ bin/deploy
 
 ## Contributing
 
-<details><summary>Module Priority</summary>
-
-<p>
-
-Module Priority
+<details><summary>Modules in progress</summary>
 
 - [x] Settling
 - [x] Buildings
 - [x] Resources
 - [x] Army Building
-- [] Raiding
+- [x] Raiding
 - [] Crafting
 - [] Guilds
 
-</p>
 </details>
 
+<details><summary>Contributing</summary>
+
+We encourage pull requests.
+
+</details>
 <hr>
 
 ## Logic Patterns
@@ -315,3 +315,20 @@ Settling of the Realms contains many computed values that get parsed around the 
 </p>
 </details>
 
+<hr>
+
+## External Reading Sources
+
+StarkNet is very new. Best practices are being discovered. We have amalgamated the best resources we think to guide you on your journey.
+
+<details><summary>Guides & Docs</summary>
+
+- https://perama-v.github.io/cairo/intro/
+- https://hackmd.io/@RoboTeddy/BJZFu56wF
+- https://starknet.io/docs/
+</details>
+<details><summary>Discords to Join</summary>
+
+- [StarkNet](https://discord.gg/XzvgKTTptb)
+- [MatchBox DAO](https://discord.gg/uj7wMxsmYw)
+</details>
