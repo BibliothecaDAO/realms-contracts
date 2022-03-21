@@ -6,12 +6,13 @@ from starkware.cairo.common.math_cmp import is_le, is_nn, is_nn_le
 from starkware.starknet.common.syscalls import get_block_timestamp
 
 from contracts.settling_game.S06_Combat import (
-    Troop, Squad, SquadStats,
-    Combat_outcome, Combat_step, compute_squad_stats)
+    Troop, Squad, SquadStats, Combat_outcome, Combat_step, compute_squad_stats)
 
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 
-const XOROSHIRO_ADDR = 0x06c4cab9afab0ce564c45e85fe9a7aa7e655a7e0fd53b7aea732814f3a64fbee
+@storage_var
+func xoroshiro_addr() -> (addr : felt):
+end
 
 # a min delay between attacks on a Realm; it can't
 # be attacked again during cooldown
@@ -21,6 +22,13 @@ const COMBAT_TYPE_ATTACK_VS_DEFENSE = 1
 const COMBAT_TYPE_WISDOM_VS_AGILITY = 2
 const COMBAT_OUTCOME_ATTACKER_WINS = 1
 const COMBAT_OUTCOME_DEFENDER_WINS = 2
+
+@constructor
+func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        xoroshiro_addr_ : felt):
+    xoroshiro_addr.write(xoroshiro_addr_)
+    return ()
+end
 
 # TODO: add owner checks
 
@@ -50,7 +58,7 @@ func Realm_can_be_attacked{syscall_ptr : felt*, range_check_ptr}(realm : felt) -
 end
 
 @view
-func combat{range_check_ptr, syscall_ptr : felt*}(
+func combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
         attacker : Squad, defender : Squad, attack_type : felt) -> (
         attacker : Squad, defender : Squad, outcome : felt):
     let (attacker_end, defender_end, outcome) = do_combat_turn(attacker, defender, attack_type)
@@ -59,7 +67,7 @@ func combat{range_check_ptr, syscall_ptr : felt*}(
     return (attacker_end, defender_end, outcome)
 end
 
-func do_combat_turn{range_check_ptr, syscall_ptr : felt*}(
+func do_combat_turn{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
         attacker : Squad, defender : Squad, attack_type : felt) -> (
         attacker : Squad, defender : Squad, outcome : felt):
     alloc_locals
@@ -81,8 +89,8 @@ func do_combat_turn{range_check_ptr, syscall_ptr : felt*}(
     return do_combat_turn(step_attacker, step_defender, attack_type)
 end
 
-func attack{range_check_ptr, syscall_ptr : felt*}(a : Squad, d : Squad, attack_type : felt) -> (
-        d_after_attack : Squad):
+func attack{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+        a : Squad, d : Squad, attack_type : felt) -> (d_after_attack : Squad):
     alloc_locals
 
     let (a_stats) = compute_squad_stats(a)
@@ -95,6 +103,7 @@ func attack{range_check_ptr, syscall_ptr : felt*}(a : Squad, d : Squad, attack_t
         let (hit_points) = roll_attack_dice(a_stats.attack, min_roll_to_hit, 0)
         tempvar range_check_ptr = range_check_ptr
         tempvar syscall_ptr : felt* = syscall_ptr
+        tempvar pedersen_ptr = pedersen_ptr
     else:
         # COMBAT_TYPE_WISDOM_VS_AGILITY
         # attacker attacks with wisdom against agility,
@@ -103,10 +112,12 @@ func attack{range_check_ptr, syscall_ptr : felt*}(a : Squad, d : Squad, attack_t
         let (hit_points) = roll_attack_dice(a_stats.wisdom, min_roll_to_hit, 0)
         tempvar range_check_ptr = range_check_ptr
         tempvar syscall_ptr : felt* = syscall_ptr
+        tempvar pedersen_ptr = pedersen_ptr
     end
 
     tempvar hit_points = hit_points
     tempvar syscall_ptr = syscall_ptr
+    tempvar pedersen_ptr = pedersen_ptr
 
     let (d_after_attack) = hit_squad(d, hit_points)
     Combat_step.emit(a, d, attack_type, hit_points)
@@ -134,7 +145,7 @@ func compute_min_roll_to_hit{range_check_ptr}(a : felt, d : felt) -> (min_roll :
     return (t)
 end
 
-func roll_attack_dice{range_check_ptr, syscall_ptr : felt*}(
+func roll_attack_dice{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
         dice_count : felt, hit_threshold : felt, successful_hits_acc) -> (successful_hits : felt):
     # 12 sided dice, 1...12
     # only values >= hit threshold constitute a successful attack
@@ -144,9 +155,8 @@ func roll_attack_dice{range_check_ptr, syscall_ptr : felt*}(
         return (successful_hits_acc)
     end
 
-    # TODO: decide how to integrate with a PRNG
-    # let (rnd) = IXoroshiro.next(contract_address=XOROSHIRO_ADDR)
-    let rnd = 8
+    let (xoroshiro_addr_) = xoroshiro_addr.read()
+    let (rnd) = IXoroshiro.next(contract_address=xoroshiro_addr_)
     let (_, r) = unsigned_div_rem(rnd, 12)
     let (is_successful_hit) = is_le(hit_threshold, r)
     return roll_attack_dice(dice_count - 1, hit_threshold, successful_hits_acc + is_successful_hit)

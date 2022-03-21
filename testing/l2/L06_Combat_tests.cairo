@@ -1,10 +1,11 @@
 %lang starknet
 
+from starkware.cairo.common.cairo_builtins import HashBuiltin
 from contracts.settling_game.L06_Combat import attack, compute_min_roll_to_hit, hit_troop, hit_squad
 from contracts.settling_game.S06_Combat import Troop, Squad
 
 @view
-func test_attack{range_check_ptr, syscall_ptr : felt*}(
+func test_attack{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
         a : Squad, d : Squad, attack_type : felt) -> (d_after_attack : Squad):
     let (d_after_attack) = attack(a, d, attack_type)
     return (d_after_attack)

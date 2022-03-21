@@ -80,7 +80,7 @@ def event_loop():
     return asyncio.new_event_loop()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 async def starknet() -> Starknet:
     starknet = await Starknet.empty()
     return starknet
@@ -146,12 +146,13 @@ async def _build_copyable_deployment():
     resources = await starknet.deploy(
         contract_def=defs.erc1155,
         constructor_calldata=[
-            accounts.admin.contract_address, #recipient
-            5, #token_ids_len
+            accounts.admin.contract_address,  # recipient
+            5,  # token_ids_len
             1, 2, 3, 4, 5,
-            5, #amounts_len
+            5,  # amounts_len
             100000, 5000, 10000, 10000, 10000,
-        ])
+        ],
+    )
 
     consts = SimpleNamespace(
         REALM_MINT_PRICE=REALM_MINT_PRICE, INITIAL_USER_FUNDS=initial_user_funds
@@ -164,7 +165,6 @@ async def _build_copyable_deployment():
             "transfer",
             [recipient, *uint(amount)],
         )
-
 
     async def _erc20_approve(account_name, contract_address, amount):
         await signers[account_name].send_transaction(
@@ -263,16 +263,29 @@ async def ctx_factory(copyable_deployment):
     return make
 
 
+@pytest.fixture(scope="session")
+async def xoroshiro(starknet):
+    contract = compile("contracts/utils/xoroshiro128_starstar.cairo")
+    seed = 0x10AF
+    return await starknet.deploy(contract_def=contract, constructor_calldata=[seed])
+
+
 @pytest.fixture(scope="module")
-async def l06_combat(starknet) -> StarknetContract:
+async def l06_combat(starknet, xoroshiro) -> StarknetContract:
     contract = compile("contracts/settling_game/L06_Combat.cairo")
-    return await starknet.deploy(contract_def=contract)
+    return await starknet.deploy(
+        contract_def=contract, constructor_calldata=[xoroshiro.contract_address]
+    )
 
 
 @pytest.fixture(scope="module")
-async def l06_combat_tests(starknet) -> StarknetContract:
+async def l06_combat_tests(starknet, xoroshiro) -> StarknetContract:
     contract = compile("testing/l2/L06_Combat_tests.cairo")
-    return await starknet.deploy(contract_def=contract)
+    # a quirk of the testing framework, even though the L06_Combat_tests contract
+    # doesn't have a constructor, it somehow calls (I guess) the constructor of
+    # L06_Combat because it imports from it; hence when calling deploy, we need
+    # to pass proper constructor_calldata
+    return await starknet.deploy(contract_def=contract, constructor_calldata=[xoroshiro.contract_address])
 
 
 @pytest.fixture(scope="module")
