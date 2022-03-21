@@ -134,8 +134,7 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
  
         I05B_Wonders.set_wonder_id_staked(contract_address=wonder_state_address, token_id=token_id, epoch=0)
     end
-    return ()
-
+    
     return ()
 end
 

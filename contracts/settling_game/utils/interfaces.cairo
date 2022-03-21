@@ -100,8 +100,6 @@ end
 
 @contract_interface
 namespace I05B_Wonders:
-    func set_epoch_claimed(address : felt, epoch : felt):
-    end
     func set_total_wonders_staked(epoch : felt, amount : felt):
     end
     func get_wonder_id_staked(token_id : felt, epoch : felt):
@@ -111,8 +109,6 @@ namespace I05B_Wonders:
     func set_tax_pool(epoch : felt, supply : felt):
     end
     func batch_set_tax_pool(epoch : felt, token_ids_len : felt, token_ids : felt*, amounts_len : felt, amounts : felt*): 
-    end
-    func get_epoch_claimed(address : felt) -> (epoch : felt):
     end
     func get_total_wonders_staked(epoch : felt) -> (amount : felt):
     end

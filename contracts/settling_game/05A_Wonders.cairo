@@ -87,20 +87,30 @@ end
 
 @external
 func claim_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : felt):
+        token_id : Uint256):
     alloc_locals
+    let ( caller ) = get_caller_address()
     let ( controller ) = controller_address.read()
+    let ( s_realms_address ) = IModuleController.get_s_realms_address(contract_address=controller)
     let ( wonder_tax_pool_address ) = IModuleController.get_module_address(contract_address=controller, module_id=9)
     let ( calculator_address ) = IModuleController.get_module_address(contract_address=controller, module_id=7)
 
-    let ( current_epoch ) = I04A_Calculator.calculateEpoch(calculator_address)
+    # Check that wonder is staked (this also checks if token_id a wonder at all)
     let ( staked_epoch ) = I05B_Wonders.get_wonder_id_staked(wonders_state_address, token_id)
+    assert_not_zero(staked_epoch)
+    
+    # Check that wonder is owned by caller
+    let ( owner_of_wonder ) = s_realms_IERC721.ownerOf(s_realms_address, token_id)
 
-    assert assert_not_zero(staked_epoch)
+    assert owner_of_wonder = caller
+
+    let ( current_epoch ) = I04A_Calculator.calculateEpoch(calculator_address)
 
     loop_epochs_claim(
         current_epoch,
         staked_epoch)
+
+    I05B_Wonders.set_wonder_id_staked(wonders_state_address, token_id, current_epoch - 1)
 
     return ()
 end
