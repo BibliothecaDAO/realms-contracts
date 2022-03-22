@@ -333,7 +333,7 @@ StarkNet is very new. Best practices are being discovered. We have amalgamated t
 - [MatchBox DAO](https://discord.gg/uj7wMxsmYw)
 </details>
 
-## Realms Repository Directory
+## Realms Repositories
 
 The Realms Settling Game spans a number of repositories:
 
