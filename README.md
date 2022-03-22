@@ -14,8 +14,8 @@ This monorepo contains all of the Contracts (StarkNet/Cairo Ethereum/Solidity) f
 | --------- | ----- | ------------------------------- |
 | **[/settling_game](./contracts/settling_game)** | The Realms Settling Game | A modular game engine architecture built on StarkNet. |
 | [/desiege](./contracts/desiege) | Desiege | A web-based team game built on Starknet. |
-| [/token](./contracts/token) | $LORDS | An ERC20 asset underpinning the Realmverse and beyond. |
-| [/L1-Solidity](./contracts/L1-Solidity/) | L1 contracts | A set of L1 contracts including the Journey ($LORDS staking). |
+| [/token](./contracts/token) | Standard Tokens | Standard tokens (ERC721, ERC1155, ERC20) written in Cairo. |
+| [/L1-Solidity](./contracts/L1-Solidity/) | L1 contracts | A set of L1 contracts including the $LORDS, Realms, and the Journey (Realms staking). |
 | [/openzeppelin](./contracts/openzeppelin/) | OpenZeppelin libraries | Ports of common libraries (e.g. ERC721) written in Cairo. |
 | [/game_utils](./contracts/game_utils) | Game Utils | Game utility contracts such as grid positions written in Cairo. |
 | [/loot](./contracts/loot/) | Loot | Loot contracts ported to Cairo. |
