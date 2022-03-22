@@ -16,10 +16,10 @@ This monorepo contains all of the Contracts (StarkNet/Cairo Ethereum/Solidity) f
 | [/desiege](./contracts/desiege) | Desiege | A web-based team game built on Starknet. |
 | [/token](./contracts/token) | $LORDS | An ERC20 asset underpinning the Realmverse and beyond. |
 | [/L1-Solidity](./contracts/L1-Solidity/) | L1 contracts | A set of L1 contracts including the Journey ($LORDS staking). |
-| [/openzeppelin](./contracts/openzeppelin/) | 
+| [/openzeppelin](./contracts/openzeppelin/) | OpenZeppelin libraries | Ports of common libraries (e.g. ERC721) written in Cairo. |
 | [/game_utils](./contracts/game_utils) | Game Utils | Game utility contracts such as grid positions written in Cairo. |
-| [/loot](./contracts/loot/) | Loot contracts ported to Cairo. |
-| [/nft_marketplace](./contracts/nft_marketplace/) | A marketplace for Realms, Dungeons, etc. built on Starknet. |
+| [/loot](./contracts/loot/) | Loot | Loot contracts ported to Cairo. |
+| [/nft_marketplace](./contracts/nft_marketplace/) | NFT Marketplace | A marketplace for Realms, Dungeons, etc. built on Starknet. |
 | [/utils](./contracts/utils) | Cairo utility contracts | Helper contracts such as safemath written in Cairo. |
 
 
