@@ -25,6 +25,7 @@ These tokens can be freely traded or used in other DeFi applications.
 <details><summary> 🤔 What is the exchange?</summary>
 
 <p>
+
 ## Terminology and Naming Conventions
 
 The ERC20 token is defined as the *currency*.
