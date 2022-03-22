@@ -3,19 +3,21 @@
 
 ![This is an image](/realmslogo.jpg)
 
-🤝 Marketplace Contract
+OpenZeppelin Cairo Contracts
 
-### Marketplace - Trade Lootverse NFTs on StarkNet.
+### OpenZeppelin - Cairo Contracts.
 
-This folder contains the code for a marketplace for the Lootverse on StarkNet.
+This folder contains OpenZeppelin standandard Cairo/StarkNet contracts.
 
-**This folder contains Marketplace contracts. If you're looking for another contract, please see the [directory of our Realms Smart Contracts](/).**
+**This folder contains OpenZeppelin contracts. If you're looking for another contract, please see the [directory of our Realms Smart Contracts](/).**
 
-### Loot contract overview
+### OpenZeppelin contract overview
 
 | Module          | Function                             | Current Status |
 | --------------- | ------------------------------------ | -------------- |
-| [bibliotheca_marketplace](./bibliotheca_marketplace.cairo) | Base marketplace contract | In progress |
+| [Account](./account/Account.cairo) | StarkNet account contract | In progress |
+| [ERC165](./introspection/ERC165.cairo) | StarkNet ERC165 Standard | In progress |
+| [constants](./utils/constants.cairo) | StarkNet ERC165 Standard | In progress |
 
 <hr>
 
@@ -91,7 +93,7 @@ nile compile
 Compile an individual contract:
 
 ```
-nile compile contracts/nft_marketplace/bibliotheca_marketplace.cairo
+nile compile contracts/openzeppelin/introspection/ERC165.cairo
 ```
 
 ### Test
