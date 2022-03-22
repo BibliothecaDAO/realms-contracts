@@ -40,6 +40,16 @@ If you want to get involved, join the [Realms x Bibliotheca Discord](https://dis
 
 We encourage pull requests.
 
+1. **Create an [issue](https://github.com/BibliothecaForAdventurers/realms-contracts/issues)** to describe the improvement you're making. Provide as much detail as possible in the beginning so the team understands your improvement.
+2. **Fork the repo** so you can make and test changes in your local repository.
+3. **Test your changes** Follow the procedures for testing in each contract sub-directory (e.g. [/contracts/settling_game](./contracts/settling_game/) and make sure your tests (manual and/or automated) pass.
+4. **Create a pull request** and describe the changes you made. Include a reference to the Issue you created.
+5. **Monitor and resopnd to comments** made by the team around code standards and suggestions. Most pull requests will have some back and forth.
+
+If you have further questions, visit [#builders-chat in our discord](https://discord.gg/yP4BCbRjUs) and make sure to reference your issue number.
+
+Thank you for taking the time to make our project better!
+
 </details>
 <hr>
 
