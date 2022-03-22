@@ -19,11 +19,12 @@ This monorepo contains all of the Contracts (StarkNet/Cairo Ethereum/Solidity) f
 | [/openzeppelin](./contracts/openzeppelin/) | OpenZeppelin libraries | Ports of common libraries (e.g. ERC721) written in Cairo. |
 | [/game_utils](./contracts/game_utils) | Game Utils | Game utility contracts such as grid positions written in Cairo. |
 | [/loot](./contracts/loot/) | Loot | Loot contracts ported to Cairo. |
+| [/exchange](./contracts/exchange/) | Exchange | Allows trades between pairs of ERC20 and ERC1155 contract tokens. |
 | [/nft_marketplace](./contracts/nft_marketplace/) | NFT Marketplace | A marketplace for Realms, Dungeons, etc. built on Starknet. |
 | [/utils](./contracts/utils) | Cairo utility contracts | Helper contracts such as safemath written in Cairo. |
 
 
-## Learn More about Realms
+## Learn more about Realms
 
 First, visit the [Bibliotheca DAO Site](https://bibliothecadao.xyz/) for an overview of our ecosystem.
 
