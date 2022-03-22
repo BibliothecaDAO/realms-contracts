@@ -101,7 +101,7 @@ nile compile
 Compile an individual contract:
 
 ```
-nile compile contracts/01A_TowerDefence.cairo
+nile compile contracts/desiege/01A_TowerDefence.cairo
 ```
 
 ### Test
