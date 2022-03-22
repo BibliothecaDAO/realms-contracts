@@ -67,10 +67,10 @@ func pay_wonder_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     let ( local upkeep_token_ids : Uint256* ) = alloc()
     let ( local upkeep_token_amounts : felt* ) = alloc()
 
-    # assert upkeep_token_ids[0] = Uint256(19, 0)
-    # assert upkeep_token_ids[1] = Uint256(20, 0)
-    # assert upkeep_token_ids[2] = Uint256(21, 0)
-    # assert upkeep_token_ids[3] = Uint256(22, 0)
+    assert upkeep_token_ids[0] = Uint256(19, 0)
+    assert upkeep_token_ids[1] = Uint256(20, 0)
+    assert upkeep_token_ids[2] = Uint256(21, 0)
+    assert upkeep_token_ids[3] = Uint256(22, 0)
 
     assert upkeep_token_amounts[0] = 28
     assert upkeep_token_amounts[1] = 21
