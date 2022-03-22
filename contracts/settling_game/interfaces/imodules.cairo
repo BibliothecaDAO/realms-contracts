@@ -1,8 +1,9 @@
 %lang starknet
-from starkware.cairo.common.uint256 import Uint256, uint256_eq
+
+from starkware.cairo.common.uint256 import Uint256
+
 # These are interfaces that can be imported by other contracts for convenience.
 # All of the functions in an interface must be @view or @external.
-from contracts.settling_game.utils.game_structs import RealmBuildings
 
 # Interface for the ModuleController.
 @contract_interface
@@ -43,10 +44,12 @@ namespace IModuleController:
             module_07_addr : felt):
     end
 end
+
 @contract_interface
 namespace IS01_Settling:
     func set_time_staked(token_id : Uint256, timestamp : felt):
     end
+
     func get_time_staked(token_id : Uint256) -> (time : felt):
     end
 end
@@ -55,10 +58,13 @@ end
 namespace IS02_Resources:
     func get_resource_level(token_id : Uint256, resource : felt) -> (level : felt):
     end
+
     func get_resource_upgrade_cost(token_id : Uint256, resource : felt) -> (level : felt):
     end
+
     func get_resource_upgrade_ids(resource : felt) -> (level : felt):
     end
+
     func set_resource_level(token_id : Uint256, resource_id : felt, level : felt) -> ():
     end
 end
@@ -67,12 +73,16 @@ end
 namespace IS03_Buildings:
     func get_building_cost_ids(building_id : felt) -> (cost : felt):
     end
+
     func get_building_cost_values(building_id : felt) -> (cost : felt):
     end
+
     func get_realm_buildings(token_id : Uint256) -> (buildings : felt):
     end
+
     func get_realm_building_by_id(token_id : Uint256, building_id : felt) -> (building : felt):
     end
+
     func set_realm_buildings(token_id : Uint256, buildings_value : felt) -> ():
     end
 end
