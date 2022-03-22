@@ -50,7 +50,7 @@ func wonder_epoch_upkeep(epoch : felt, token_id : Uint256) -> (upkept : felt):
 end
 
 @storage_var
-func tax_pool(epoch : felt, token_id : Uint256) -> (supply : felt)
+func tax_pool(epoch : felt, token_id : Uint256) -> (supply : felt):
 end 
 
 
@@ -105,17 +105,16 @@ func batch_set_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         token_ids : Uint256*,
         amounts_len : felt,
         amounts : felt*):
-    only_approved()
-
     alloc_locals    
+    only_approved()
     # Update tax pool
-    let ( tax_pool ) = get_tax_pool(wonders_state_address, current_epoch, [token_ids])
+    let ( tax_pool ) = get_tax_pool(epoch, [token_ids])
     set_tax_pool(epoch, [token_ids], tax_pool + [amounts])
 
     # Recurse
-    return set_tax_pool(
+    return batch_set_tax_pool(
         epoch=epoch,
-        token_ids_len=token_ids - 1
+        token_ids_len=token_ids_len - 1,
         token_ids=token_ids + 1,
         amounts_len=amounts_len - 1,
         amounts=amounts + 1)
@@ -155,7 +154,7 @@ func get_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
 
     let (supply) = tax_pool.read(epoch, token_id)
 
-    return (supply:supply)
+    return (supply)
 end
 
 # Checks write-permission of the calling contract.
