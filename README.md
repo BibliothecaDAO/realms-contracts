@@ -44,7 +44,7 @@ We encourage pull requests.
 2. **Fork the repo** so you can make and test changes in your local repository.
 3. **Test your changes** Follow the procedures for testing in each contract sub-directory (e.g. [/contracts/settling_game](./contracts/settling_game/) and make sure your tests (manual and/or automated) pass.
 4. **Create a pull request** and describe the changes you made. Include a reference to the Issue you created.
-5. **Monitor and resopnd to comments** made by the team around code standards and suggestions. Most pull requests will have some back and forth.
+5. **Monitor and respond to comments** made by the team around code standards and suggestions. Most pull requests will have some back and forth.
 
 If you have further questions, visit [#builders-chat in our discord](https://discord.gg/yP4BCbRjUs) and make sure to reference your issue number.
 
