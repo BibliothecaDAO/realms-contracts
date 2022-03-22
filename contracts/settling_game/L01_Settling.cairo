@@ -74,7 +74,7 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(t
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
         contract_address=realms_address, token_id=token_id)
 
-    if realms_data.wonder = 1:
+    if realms_data.wonder == 1:
         let (wonders_state_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=9)
 
@@ -123,7 +123,7 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     let (realms_settled) = IS01_Settling.get_total_realms_settled(contract_address=settle_state_address)
     IS01_Settling.set_total_realms_settled(settle_state_address, realms_settled - 1)
 
-    if realms_data.wonder = 1:
+    if realms_data.wonder == 1:
         let (wonders_state_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=9)
 

@@ -121,7 +121,7 @@ func loop_epochs_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
 
     # stop here if over latest claimable epoch
     let ( local within_max_epoch ) = is_nn_le(claiming_epoch, current_epoch - 1) 
-    if within_max_epoch = 0:
+    if within_max_epoch == 0:
         return()
     end
 
@@ -129,7 +129,7 @@ func loop_epochs_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     let ( wonder_state_address ) = IModuleController.get_module_address(contract_address=controller, module_id=9)
 
     let ( epoch_upkept ) = IS05_Wonders.get_wonder_epoch_upkeep(wonders_state_address, epoch, token_id)
-    if epoch_upkept = 1:
+    if epoch_upkept == 1:
         let ( epoch_total_wonders ) = IS05_Wonders.get_total_wonders_staked(contract_address=wonders_state_address, epoch=epoch)
 
         let ( ids_arr ) = alloc()
@@ -178,7 +178,7 @@ func loop_resources_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
 
     let ( below_max_id ) = is_nn_le(resource_claim_ids_len, 22)
 
-    if below_max_id = 1:
+    if below_max_id == 1:
     let ( resource_pool ) = IS05_Wonders.get_tax_pool(wonders_state_address, epoch, resource_claim_ids_len)
     resource_claim_ids[resource_claim_ids_len - 1] = resource_claim_ids_len
     resource_claim_amounts[resource_claim_ids_len - 1] = resource_pool / epoch_total_wonders 
