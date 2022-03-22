@@ -1,14 +1,11 @@
 %lang starknet
-%builtins pedersen range_check ecdsa bitwise
-from starkware.cairo.common.bitwise import bitwise_and
 
+from starkware.cairo.common.bitwise import bitwise_and
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
 from starkware.cairo.common.alloc import alloc
-from starkware.cairo.common.math import assert_not_zero
-
-from starkware.cairo.common.math import unsigned_div_rem
+from starkware.cairo.common.math import assert_not_zero, unsigned_div_rem
 from starkware.cairo.common.pow import pow
 
 from contracts.token.IERC20 import IERC20
