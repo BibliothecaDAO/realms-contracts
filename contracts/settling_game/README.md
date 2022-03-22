@@ -9,7 +9,7 @@
 
 A modular game engine architecture for the StarkNet L2 roll-up - Forked & heavily inspired by the pioneering work done by the Dope Ware RYO game [here](https://github.com/dopedao/RYO).
 
-**This folder contains Settling Game contracts. If you're looking for another contract, please see the [directory of our Realms Smart Contracts](/).
+**This folder contains Settling Game contracts. If you're looking for another contract, please see the [directory of our Realms Smart Contracts](/).**
 
 ### Game module overview
 
