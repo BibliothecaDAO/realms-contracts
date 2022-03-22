@@ -1,5 +1,7 @@
 %lang starknet
 
+from starkware.cairo.common.cairo_builtins import HashBuiltin
+
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.bitwise import bitwise_and
 from starkware.cairo.common.cairo_builtins import BitwiseBuiltin
@@ -7,6 +9,7 @@ from starkware.cairo.common.math import assert_not_zero, assert_le, split_int, u
 from starkware.cairo.common.memcpy import memcpy
 from starkware.cairo.common.memset import memset
 from starkware.cairo.common.pow import pow
+from starkware.cairo.common.uint256 import Uint256
 
 # namespace constants deliberately start at 1 to
 # 1) translate in a straighforward way to "human, 1-based index" land
@@ -106,7 +109,20 @@ struct SquadStats:
     member wisdom : felt
 end
 
+# this struct holds everything related to a Realm & combat
+# a Realm can have two squads, one used for attacking
+# and another used for defending; this struct holds them
+struct RealmCombatData:
+    member attack_squad : Squad
+    member defending_squad : Squad
+    member last_attacked_at : felt
+end
+
 const SHIFT = 0x100  # used for packing
+
+@storage_var
+func realm_combat_data(realm_id : Uint256) -> (combat_data : RealmCombatData):
+end
 
 @event
 func Combat_outcome(attacking_realm_id : felt, defending_realm_id : felt, outcome : felt):
@@ -116,6 +132,12 @@ end
 func Combat_step(
     attacking_squad : Squad, defending_squad : Squad, attack_type : felt, hit_points : felt
 ):
+end
+
+@view
+func get_realm_combat_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(realm_id : Uint256) -> (combat_data : RealmCombatData):
+    let (combat_data) = realm_combat_data.read(realm_id)
+    return (combat_data)
 end
 
 # TODO: stats shouldn't be hardcoded here, take them from a felt that's easy to update

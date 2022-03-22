@@ -5,6 +5,10 @@ from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le, is_nn, is_nn_le
 from starkware.starknet.common.syscalls import get_block_timestamp
 
+from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
+from contracts.settling_game.utils.interfaces import IModuleController
+from contracts.settling_game.utils.game_structs import RealmData
+
 from contracts.settling_game.S06_Combat import (
     Troop,
     Squad,
@@ -16,8 +20,13 @@ from contracts.settling_game.S06_Combat import (
 
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 
+# address of the ModuleController
 @storage_var
-func xoroshiro_addr() -> (addr : felt):
+func controller_address() -> (address : felt):
+end
+
+@storage_var
+func xoroshiro_address() -> (address : felt):
 end
 
 # a min delay between attacks on a Realm; it can't
@@ -47,19 +56,36 @@ end
 
 # FIXME: function should accept a Realm or a Realm ID a
 #
-func Realm_can_be_attacked{syscall_ptr : felt*, range_check_ptr}(realm : felt) -> (yesno : felt):
+
+@view
+func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        attacking_realm_id : Uint256, defending_realm_id : Uint256) -> (yesno : felt):
+    # TODO: write tests for this
+
     alloc_locals
 
-    tempvar last_attack_at = realm  # TODO
+    let (realm_combat_data : RealmCombatData) = get_realm_combat_data(defending_realm_id)
     let (now) = get_block_timestamp()
-    let diff = now - last_attack_at
+    let diff = now - realm_combat_data.last_attacked_at
     let (was_attacked_recently) = is_le(diff, ATTACK_COOLDOWN_PERIOD)
 
     if was_attacked_recently == 1:
         return (0)
     end
 
-    # TODO: check if the Realm is not friendly
+    let (controller_address_ : felt) = controller_address.read()
+    let (realms_address : felt) = IModuleController.get_realms_address(
+        contract_address=controller_address_)
+
+    let (attacking_realm_data : RealmData) = realms_IERC721.fetch_realm_data(
+        contract_address=realms_address, token_id=attacking_realm_id)
+    let (defending_realm_data : RealmData) = realms_IERC721.fetch_realm_data(
+        contract_address=realms_address, token_id=defending_realm_id)
+
+    if attacking_realm_data.order == defending_realm_data.order:
+        # intra-order attacks are not allowed
+        return (0)
+    end
 
     return (1)
 end
@@ -69,6 +95,7 @@ func combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     attacker : Squad, defender : Squad, attack_type : felt
 ) -> (attacker : Squad, defender : Squad, outcome : felt):
     let (attacker_end, defender_end, outcome) = do_combat_turn(attacker, defender, attack_type)
+    # TODO: do check if the attack can actually transpire
     # TODO: pass in the Realm IDs to this func so they can be emitted
     # Combat_outcome.emit(TODO_attacking_realm_id, TODO_defending_realm_id, outcome)
     return (attacker_end, defender_end, outcome)
@@ -164,8 +191,8 @@ func roll_attack_dice{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashB
         return (successful_hits_acc)
     end
 
-    let (xoroshiro_addr_) = xoroshiro_addr.read()
-    let (rnd) = IXoroshiro.next(contract_address=xoroshiro_addr_)
+    let (xoroshiro_address_) = xoroshiro_address.read()
+    let (rnd) = IXoroshiro.next(contract_address=xoroshiro_address_)
     let (_, r) = unsigned_div_rem(rnd, 12)
     let (is_successful_hit) = is_le(hit_threshold, r)
     return roll_attack_dice(dice_count - 1, hit_threshold, successful_hits_acc + is_successful_hit)
