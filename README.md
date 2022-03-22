@@ -332,3 +332,15 @@ StarkNet is very new. Best practices are being discovered. We have amalgamated t
 - [StarkNet](https://discord.gg/XzvgKTTptb)
 - [MatchBox DAO](https://discord.gg/uj7wMxsmYw)
 </details>
+
+## Realms Repository Directory
+
+The Realms Settling Game spans a number of repositories:
+
+| Contents        | Repository       | Description                                              |
+| --------------- | ---------------- | -------------------------------------------------------- |
+| contracts       | [realms-contracts](https://github.com/BibliothecaForAdventurers/realms-contracts) | Starknet/Cairo and Ethereum/solidity contracts.          |
+| ui, atlas       | [realms-react](https://github.com/BibliothecaForAdventurers/realms-react)     | All user-facing react code (website, Atlas, ui library). |
+| indexer         | [starknet-indexer](https://github.com/BibliothecaForAdventurers/starknet-indexer) | A graphql endpoint for the Lootverse on Starknet.        |
+| bot             | [squire](https://github.com/BibliothecaForAdventurers/squire)           | A Twitter/Discord bot for the Lootverse.                 |
+| subgraph        | [loot-subgraph](https://github.com/BibliothecaForAdventurers/loot-subgraph)    | A subgraph (TheGraph) for the Lootverse on Eth Mainnet.  |
