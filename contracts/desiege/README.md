@@ -9,7 +9,7 @@
 
 Desiege is a player-vs-player experience built on StarkNet. 
 
-**This folder contains Desiege Game contracts. If you're looking for another contract, please see the [directory of our Realms Smart Contracts](/).
+**This folder contains Desiege Game contracts. If you're looking for another contract, please see the [directory of our Realms Smart Contracts](/).**
 
 ### Game module overview
 
