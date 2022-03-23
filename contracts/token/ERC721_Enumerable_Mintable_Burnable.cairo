@@ -30,7 +30,7 @@ from contracts.token.ERC721_Enumerable_base import (
     ERC721_Enumerable_safeTransferFrom
 )
 
-from contracts.ERC165_base import ERC165_supports_interface
+from contracts.openzeppelin.introspection.ERC165 import ERC165_supports_interface
 
 from contracts.Ownable_base import (
     Ownable_initializer,

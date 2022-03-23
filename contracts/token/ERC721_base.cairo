@@ -11,11 +11,13 @@ from contracts.utils.safemath import (
     uint256_checked_sub_le
 )
 
-from contracts.ERC165_base import ERC165_register_interface
+from contracts.openzeppelin.introspection.ERC165 import (
+    ERC165_register_interface,
+    ERC165_supports_interface
+)
+from contracts.openzeppelin.introspection.IERC165 import IERC165
 
 from contracts.token.IERC721_Receiver import IERC721_Receiver
-
-from contracts.IERC165 import IERC165
 
 from contracts.utils.constants import TRUE, FALSE
 
