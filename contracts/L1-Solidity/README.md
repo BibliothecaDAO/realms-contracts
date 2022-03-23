@@ -129,10 +129,4 @@ Thank you for taking the time to make our project better!
 
 The Realms Settling Game spans a number of repositories:
 
-| Content         | Repository       | Description                                              |
-| --------------- | ---------------- | -------------------------------------------------------- |
-| **contracts**       | [realms-contracts](https://github.com/BibliothecaForAdventurers/realms-contracts) | Starknet/Cairo and Ethereum/solidity contracts.          |
-| **ui, atlas**       | [realms-react](https://github.com/BibliothecaForAdventurers/realms-react)     | All user-facing react code (website, Atlas, ui library). |
-| **indexer**         | [starknet-indexer](https://github.com/BibliothecaForAdventurers/starknet-indexer) | A graphql endpoint for the Lootverse on Starknet.        |
-| **bot**             | [squire](https://github.com/BibliothecaForAdventurers/squire)           | A Twitter/Discord bot for the Lootverse.                 |
-| **subgraph**        | [loot-subgraph](https://github.com/BibliothecaForAdventurers/loot-subgraph)    | A subgraph (TheGraph) for the Lootverse on Eth Mainnet.  |
+**[View the list of repositories in /README.md](/README.md#realms-repositories)**
