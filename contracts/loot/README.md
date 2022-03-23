@@ -28,10 +28,14 @@ This folder contains the code to bring Loot items to Starknet for use in the set
 </details>
 <details><summary>🏗️ System architecture</summary>
 
+- TODO: Add system architecture here
+
 </details>
 
 <details><summary>📦 Contract hierarchy</summary>
 <p>
+
+- TODO: Add contract heirarchy here
 
 </p>
 </details>
@@ -128,6 +132,8 @@ bin/deploy
 ## Contributing
 
 <details><summary>Modules in progress</summary>
+
+- TODO: Add modules in progress here
 
 </details>
 

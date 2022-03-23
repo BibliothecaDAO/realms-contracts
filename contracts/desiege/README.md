@@ -36,22 +36,23 @@ Dark players can cast an Attack spell and destroy the city.
 </details>
 <details><summary>🏗️ System architecture</summary>
 
+- TODO: Add system architecture @micksabox
+
 </details>
 
 <details><summary>📦 Contract hierarchy</summary>
 <p>
 
+- TODO: Add contract hierarchy @micksabox
+
 </p>
 </details>
-
 <hr>
 
 ## Getting Setup
 
 <details><summary>Initial Setup</summary>
-
 <p>
-
 Clone this repo and use our docker shell to interact with starknet:
 
 ```
@@ -116,6 +117,8 @@ bin/shell pytest -s testing/l2/desiege/01_TowerDefence_test.py
 
 ### Deploy
 
+- TODO: Add deploy instructions here @micksabox
+
 Start up a local StarkNet devnet with:
 
 ```
@@ -136,7 +139,7 @@ bin/deploy
 ## Contributing
 
 <details><summary>Modules in progress</summary>
-
+- TODO: Add Modules in progress here @micksabox
 </details>
 
 <details><summary>How to Contribute</summary>

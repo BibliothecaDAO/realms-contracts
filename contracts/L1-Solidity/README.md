@@ -31,10 +31,14 @@ Individual L1 contracts live in this folder including $LORDS, the Journey, and o
 </details>
 <details><summary>🏗️ System architecture</summary>
 
+- TODO: Add system architecture here
+
 </details>
 
 <details><summary>📦 Contract hierarchy</summary>
 <p>
+
+- TODO: Add contract heirarchy here
 
 </p>
 </details>
@@ -88,6 +92,8 @@ npm run compile
 
 ### Test
 
+- TODO: Add test instructions here
+
 ### Deploy
 
 </details>
@@ -97,6 +103,8 @@ npm run compile
 ## Contributing
 
 <details><summary>Modules in progress</summary>
+
+- TODO: Add modules in progress here
 
 </details>
 

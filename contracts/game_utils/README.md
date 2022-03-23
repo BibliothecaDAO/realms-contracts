@@ -30,10 +30,14 @@ This folder has a collection of reusable utility contracts for on-chain games (e
 </details>
 <details><summary>🏗️ System architecture</summary>
 
+- TODO: Add system architecture here
+
 </details>
 
 <details><summary>📦 Contract hierarchy</summary>
 <p>
+
+- TODO: Add contract heirarchy here
 
 </p>
 </details>
@@ -130,6 +134,8 @@ bin/deploy
 ## Contributing
 
 <details><summary>Modules in progress</summary>
+
+- TODO: Add modules in progress here
 
 </details>
 

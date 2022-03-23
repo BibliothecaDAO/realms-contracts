@@ -23,17 +23,22 @@ This folder has a collection of reusable utility contracts (e.g. safemath).
 
 ## Understanding the code
 <details><summary> 🤔 What are these utils?</summary>
-
 <p>
+
+- TODO: Add contract description here
 
 </p>
 </details>
 <details><summary>🏗️ System architecture</summary>
 
+- TODO: Add system architecture here
+
 </details>
 
 <details><summary>📦 Contract hierarchy</summary>
 <p>
+
+- TODO: Add contract heirarchy here
 
 </p>
 </details>
@@ -130,6 +135,8 @@ bin/deploy
 ## Contributing
 
 <details><summary>Modules in progress</summary>
+
+- TODO: Add modules in progress here
 
 </details>
 

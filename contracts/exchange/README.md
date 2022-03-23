@@ -179,10 +179,14 @@ There are additional method to support the ERC1155 compliance of LP tokens provi
 </details>
 <details><summary>🏗️ System architecture</summary>
 
+- TODO: Add system architecture here
+
 </details>
 
 <details><summary>📦 Contract hierarchy</summary>
 <p>
+
+- TODO: Add contract heirarchy here
 
 </p>
 </details>
@@ -279,6 +283,8 @@ bin/deploy
 ## Contributing
 
 <details><summary>Modules in progress</summary>
+
+- TODO: Add modules in progress here
 
 </details>
 
