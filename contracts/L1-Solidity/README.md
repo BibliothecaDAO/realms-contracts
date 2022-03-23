@@ -31,10 +31,14 @@ Individual L1 contracts live in this folder including $LORDS, the Journey, and o
 </details>
 <details><summary>🏗️ System architecture</summary>
 
+- TODO: Add system architecture here
+
 </details>
 
 <details><summary>📦 Contract hierarchy</summary>
 <p>
+
+- TODO: Add contract heirarchy here
 
 </p>
 </details>
@@ -88,6 +92,8 @@ npm run compile
 
 ### Test
 
+- TODO: Add test instructions here
+
 ### Deploy
 
 </details>
@@ -97,6 +103,8 @@ npm run compile
 ## Contributing
 
 <details><summary>Modules in progress</summary>
+
+- TODO: Add modules in progress here
 
 </details>
 
@@ -121,10 +129,4 @@ Thank you for taking the time to make our project better!
 
 The Realms Settling Game spans a number of repositories:
 
-| Content         | Repository       | Description                                              |
-| --------------- | ---------------- | -------------------------------------------------------- |
-| **contracts**       | [realms-contracts](https://github.com/BibliothecaForAdventurers/realms-contracts) | Starknet/Cairo and Ethereum/solidity contracts.          |
-| **ui, atlas**       | [realms-react](https://github.com/BibliothecaForAdventurers/realms-react)     | All user-facing react code (website, Atlas, ui library). |
-| **indexer**         | [starknet-indexer](https://github.com/BibliothecaForAdventurers/starknet-indexer) | A graphql endpoint for the Lootverse on Starknet.        |
-| **bot**             | [squire](https://github.com/BibliothecaForAdventurers/squire)           | A Twitter/Discord bot for the Lootverse.                 |
-| **subgraph**        | [loot-subgraph](https://github.com/BibliothecaForAdventurers/loot-subgraph)    | A subgraph (TheGraph) for the Lootverse on Eth Mainnet.  |
+**[View the list of repositories in /README.md](/README.md#realms-repositories)**

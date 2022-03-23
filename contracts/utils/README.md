@@ -23,17 +23,22 @@ This folder has a collection of reusable utility contracts (e.g. safemath).
 
 ## Understanding the code
 <details><summary> 🤔 What are these utils?</summary>
-
 <p>
+
+- TODO: Add contract description here
 
 </p>
 </details>
 <details><summary>🏗️ System architecture</summary>
 
+- TODO: Add system architecture here
+
 </details>
 
 <details><summary>📦 Contract hierarchy</summary>
 <p>
+
+- TODO: Add contract heirarchy here
 
 </p>
 </details>
@@ -131,6 +136,8 @@ bin/deploy
 
 <details><summary>Modules in progress</summary>
 
+- TODO: Add modules in progress here
+
 </details>
 
 <details><summary>How to Contribute</summary>
@@ -168,12 +175,6 @@ StarkNet is very new. Best practices are being discovered. We have amalgamated t
 
 ## Realms Repositories
 
-The Realms Settling Game spans a number of repositories:
+The Realms Settling Game spans a number of repositories.
 
-| Content         | Repository       | Description                                              |
-| --------------- | ---------------- | -------------------------------------------------------- |
-| **contracts**       | [realms-contracts](https://github.com/BibliothecaForAdventurers/realms-contracts) | Starknet/Cairo and Ethereum/solidity contracts.          |
-| **ui, atlas**       | [realms-react](https://github.com/BibliothecaForAdventurers/realms-react)     | All user-facing react code (website, Atlas, ui library). |
-| **indexer**         | [starknet-indexer](https://github.com/BibliothecaForAdventurers/starknet-indexer) | A graphql endpoint for the Lootverse on Starknet.        |
-| **bot**             | [squire](https://github.com/BibliothecaForAdventurers/squire)           | A Twitter/Discord bot for the Lootverse.                 |
-| **subgraph**        | [loot-subgraph](https://github.com/BibliothecaForAdventurers/loot-subgraph)    | A subgraph (TheGraph) for the Lootverse on Eth Mainnet.  |
+**[View the list of repositories in /README.md](/README.md#realms-repositories)**
