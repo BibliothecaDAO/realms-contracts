@@ -7,7 +7,7 @@
 
 ### Desiege - A team-based coordination game built on Starknet.
 
-Desiege is a player-vs-player experience built on StarkNet. 
+Desiege is a Massively PvP experience built on StarkNet.
 
 **This folder contains Desiege Game contracts. If you're looking for another contract, please see the [directory of our Realms Smart Contracts](/).**
 
