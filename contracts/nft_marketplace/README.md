@@ -3,7 +3,7 @@
 
 ![This is an image](/realmslogo.jpg)
 
-🤝 Marketplace Contract
+# 🤝 Marketplace Contract
 
 ### Marketplace - Trade Lootverse NFTs on StarkNet.
 
