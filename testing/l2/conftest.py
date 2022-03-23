@@ -99,7 +99,7 @@ async def _build_copyable_deployment():
 
     logging.warning(CONTRACT_SRC)
     defs = SimpleNamespace(
-        account=compile("openzeppelin/account/Account.cairo"),
+        account=compile("contracts/openzeppelin/account/Account.cairo"),
         erc20=compile("contracts/token/ERC20_Mintable.cairo"),
         erc721=compile("contracts/token/ERC721_Enumerable_Mintable_Burnable.cairo"),
         erc1155=compile("contracts/token/ERC1155/ERC1155_Mintable.cairo"),
