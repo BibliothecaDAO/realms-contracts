@@ -7,8 +7,8 @@ from starkware.cairo.common.uint256 import (
     Uint256, uint256_add, uint256_sub, uint256_lt, uint256_eq, uint256_check)
 
 from contracts.token.ERC721_base import (
-    ERC721_balanceOf, ERC721_ownerOf, ERC721_transferFrom, ERC721_safeTransferFrom, ERC721_mint,
-    ERC721_burn)
+    ERC721_balanceOf, ERC721_ownerOf, ERC721_transferFrom, ERC721_safeTransferFrom, ERC721_mint
+)
 
 from contracts.openzeppelin.introspection.ERC165 import ERC165_register_interface
 
