@@ -9,13 +9,13 @@ from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.general import scale
-from contracts.settling_game.utils.interfaces import IModuleController 
 from contracts.settling_game.utils.game_structs import RealmBuildings, RealmBuildingCostIds, RealmBuildingCostValues
 
 from contracts.token.IERC20 import IERC20
 from contracts.token.ERC1155.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721 
+from contracts.settling_game.interfaces.imodules import IModuleController 
 
 ##### Module 3A #####
 #                   #
