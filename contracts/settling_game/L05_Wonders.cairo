@@ -90,9 +90,39 @@ func pay_wonder_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
 end
 
 @external
+func update_wonder_settlement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        token_id : Uint256 ):
+    alloc_locals
+    only_approved()
+    update_epoch_pool()
+    let ( controller ) = controller_address.read()
+
+    let ( wonders_state_address ) = IModuleController.get_module_address(contract_address=controller, module_id=9)
+
+    # calculator logic contract
+    let ( calculator_address ) = IModuleController.get_module_address(
+        contract_address=controller, module_id=7)
+
+    let ( current_epoch ) = IL04_Calculator.calculateEpoch(calculator_address)
+    let (total_wonders_staked) = IS05_Wonders.get_total_wonders_staked(contract_address=wonders_state_address, epoch=current_epoch)
+
+    let (wonder_id_staked) = IS05_Wonders.get_wonder_id_staked(contract_address=wonders_state_address, token_id=token_id)
+    if wonder_id_staked == 0:
+        IS05_Wonders.set_total_wonders_staked(contract_address=wonders_state_address, epoch=current_epoch, amount=total_wonders_staked + 1)
+        IS05_Wonders.set_wonder_id_staked(contract_address=wonders_state_address, token_id=token_id, epoch=current_epoch)
+    else:
+        IS05_Wonders.set_total_wonders_staked(contract_address=wonders_state_address, epoch=current_epoch, amount=total_wonders_staked - 1)
+        IS05_Wonders.set_wonder_id_staked(contract_address=wonders_state_address, token_id=token_id, epoch=0)
+    end
+    return()
+end
+
+
+@external
 func claim_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256):
     alloc_locals
+    update_epoch_pool()
     let ( caller ) = get_caller_address()
     let ( controller ) = controller_address.read()
     let ( s_realms_address ) = IModuleController.get_s_realms_address(contract_address=controller)
@@ -208,4 +238,43 @@ func loop_resources_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
         resource_claim_amounts_len, 
         resource_claim_amounts)
     end
+end
+
+# Called everytime a user settled, unsettles or claims taxes
+@external
+func update_epoch_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    alloc_locals
+    let ( controller ) = controller_address.read()
+    let ( wonders_state_address ) = IModuleController.get_module_address(contract_address=controller, module_id=9)
+    let ( calculator_address ) = IModuleController.get_module_address(contract_address=controller, module_id=7)
+
+    let ( current_epoch ) = IL04_Calculator.calculateEpoch(calculator_address)
+    let ( last_updated_epoch ) = IS05_Wonders.get_last_updated_epoch(wonders_state_address)
+
+    let epochs_to_update = current_epoch - last_updated_epoch
+
+    if epochs_to_update == 0:
+        return ()
+    else:
+        let updating_epoch = current_epoch - epochs_to_update
+
+        let ( total_wonders_staked ) = IS05_Wonders.get_total_wonders_staked(wonders_state_address, updating_epoch) 
+        IS05_Wonders.set_total_wonders_staked(wonders_state_address, updating_epoch, total_wonders_staked) 
+        IS05_Wonders.set_last_updated_epoch(wonders_state_address, updating_epoch)
+
+        return update_epoch_pool()
+    end
+end
+
+# Checks write-permission of the calling contract.
+func only_approved{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    # Get the address of the module trying to write to this contract.
+    let (caller) = get_caller_address()
+    let (controller) = controller_address.read()
+    # Pass this address on to the ModuleController.
+    # "Does this address have write-authority here?"
+    # Will revert the transaction if not.
+    IModuleController.has_write_access(
+        contract_address=controller, address_attempting_to_write=caller)
+    return ()
 end

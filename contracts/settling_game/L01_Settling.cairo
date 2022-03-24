@@ -74,16 +74,9 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(t
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
         contract_address=realms_address, token_id=token_id)
 
-    if realms_data.wonder == 1:
-        let (wonders_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=9)
-
-        # update info for epoch
-        let ( epoch ) = get_current_epoch()
-        let (total_wonders_staked) = IS05_Wonders.get_total_wonders_staked(contract_address=wonders_state_address, epoch=epoch)
-        IS05_Wonders.set_total_wonders_staked(contract_address=wonders_state_address, epoch=epoch, amount=total_wonders_staked + 1)
- 
-        IS05_Wonders.set_wonder_id_staked(contract_address=wonder_state_address, token_id=token_id, epoch=epoch)
+     if realms_data.wonder == 1:
+        let (wonders_logic_address) = IModuleController.get_module_address(contract_address=controller, module_id=8)
+        IL05_Wonders.update_wonder_settlement(wonders_logic_address)
     end
     return ()
 end
@@ -124,15 +117,8 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     IS01_Settling.set_total_realms_settled(settle_state_address, realms_settled - 1)
 
     if realms_data.wonder == 1:
-        let (wonders_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=9)
-
-        # update info for epoch
-        let ( epoch ) = get_current_epoch()
-        let (total_wonders_staked) = IS05_Wonders.get_total_wonders_staked(contract_address=wonders_state_address, epoch=epoch)
-        IS05_Wonders.set_total_wonders_staked(contract_address=wonders_state_address, epoch=epoch, amount=total_wonders_staked - 1)
- 
-        IS05_Wonders.set_wonder_id_staked(contract_address=wonder_state_address, token_id=token_id, epoch=0)
+        let (wonders_logic_address) = IModuleController.get_module_address(contract_address=controller, module_id=8)
+        IL05_Wonders.update_wonder_settlement(wonders_logic_address)
     end
     
     return ()

@@ -99,8 +99,17 @@ namespace IL04_Calculator:
 end
 
 @contract_interface
+namespace IL05_Wonders:
+    func update_wonder_settlement(token_id : Uint256):
+    end
+end
+
+
+@contract_interface
 namespace IS05_Wonders:
     func set_total_wonders_staked(epoch : felt, amount : felt):
+    end
+    func set_last_updated_epoch(epoch : felt):
     end
     func set_wonder_id_staked(token_id : Uint256, epoch : felt):
     end
@@ -111,6 +120,8 @@ namespace IS05_Wonders:
     func batch_set_tax_pool(epoch : felt, token_ids_len : felt, token_ids : Uint256*, amounts_len : felt, amounts : felt*): 
     end
     func get_total_wonders_staked(epoch : felt) -> (amount : felt):
+    end
+    func get_last_updated_epoch() -> (epoch : felt):
     end
     func get_wonder_id_staked(token_id : Uint256) -> (epoch : felt):
     end

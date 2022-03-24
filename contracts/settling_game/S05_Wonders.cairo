@@ -42,6 +42,10 @@ func total_wonders_staked(epoch : felt) -> (amount : felt):
 end
 
 @storage_var
+func last_updated_epoch() -> (epoch : felt):
+end
+
+@storage_var
 func wonder_id_staked(token_id : Uint256) -> (epoch : felt):
 end
 
@@ -68,6 +72,15 @@ func set_total_wonders_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     only_approved()
 
     total_wonders_staked.write(epoch, amount)
+    return ()
+end
+
+@external
+func set_last_updated_epoch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        epoch : felt):
+    only_approved()
+
+    last_updated_epoch.write(epoch)
     return ()
 end
 
@@ -131,6 +144,13 @@ func get_total_wonders_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     let (amount) = total_wonders_staked.read(epoch)
 
     return (amount=amount)
+end
+
+@external
+func get_last_updated_epoch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (amount : felt):
+    let (epoch) = last_updated_epoch.read()
+
+    return (epoch=epoch)
 end
 
 @external
