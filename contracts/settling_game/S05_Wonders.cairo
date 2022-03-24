@@ -108,6 +108,9 @@ func batch_set_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     alloc_locals    
     only_approved()
     # Update tax pool
+    if token_ids_len == 0:
+        return ()
+    end
     let ( tax_pool ) = get_tax_pool(epoch, [token_ids])
     set_tax_pool(epoch, [token_ids], tax_pool + [amounts])
 
