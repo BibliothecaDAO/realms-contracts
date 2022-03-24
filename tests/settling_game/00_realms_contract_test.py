@@ -1,8 +1,6 @@
 import pytest
 import asyncio
-import random
-from utils import Signer, uint, str_to_felt, MAX_UINT256, assert_revert
-from fixtures.account import account_factory
+from tests.utils import Signer, uint, str_to_felt
 
 NUM_SIGNING_ACCOUNTS = 2
 signer = Signer(123456789987654321)

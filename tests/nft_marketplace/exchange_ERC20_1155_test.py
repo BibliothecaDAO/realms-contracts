@@ -1,7 +1,7 @@
 import pytest
 from fractions import Fraction
-import conftest
-from utils import uint, assert_revert
+import tests.conftest as conftest
+from tests.utils import uint, assert_revert
 
 def expanded_uint_list(arr):
     """
