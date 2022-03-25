@@ -8,12 +8,13 @@ from starkware.cairo.common.uint256 import Uint256, uint256_check
 
 from contracts.utils.safemath import uint256_checked_add, uint256_checked_sub_le
 
-from contracts.openzeppelin.introspection.ERC165 import ERC165_register_interface
+from contracts.openzeppelin.introspection.ERC165 import (
+    ERC165_register_interface,
+    ERC165_supports_interface
+)
 from contracts.openzeppelin.introspection.IERC165 import IERC165
 
 from contracts.token.IERC721_Receiver import IERC721_Receiver
-
-
 
 from contracts.utils.constants import TRUE, FALSE
 

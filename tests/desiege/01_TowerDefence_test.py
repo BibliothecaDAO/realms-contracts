@@ -28,8 +28,8 @@ BLOCKS_PER_MINUTE = 4 # 15sec
 HOURS_PER_GAME = 36
 
 @pytest.fixture(scope='module')
-async def controller_factory(ctx_factory):
-    ctx = ctx_factory()
+async def controller_factory(ctx_factory_desiege):
+    ctx = ctx_factory_desiege()
 
     admin_account = ctx.admin
 
