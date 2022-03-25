@@ -94,7 +94,7 @@ end
 namespace IL04_Calculator:
     func calculateEpoch() -> (epoch : felt):
     end
-    func calculateWonderTax() -> (tax_percentage : felt):
+    func calculate_wonder_tax() -> (tax_percentage : felt):
     end
 end
 
@@ -115,9 +115,9 @@ namespace IS05_Wonders:
     end
     func set_wonder_epoch_upkeep(epoch : felt, token_id : Uint256, upkept : felt):
     end
-    func set_tax_pool(epoch : felt, supply : felt):
+    func set_tax_pool(epoch : felt, resource_id : felt, supply : felt):
     end
-    func batch_set_tax_pool(epoch : felt, token_ids_len : felt, token_ids : Uint256*, amounts_len : felt, amounts : felt*): 
+    func batch_set_tax_pool(epoch : felt, resource_ids_len : felt, resource_ids : felt*, amounts_len : felt, amounts : felt*): 
     end
     func get_total_wonders_staked(epoch : felt) -> (amount : felt):
     end
@@ -127,6 +127,6 @@ namespace IS05_Wonders:
     end
     func get_wonder_epoch_upkeep(epoch : felt, token_id : Uint256) -> (upkept : felt):
     end
-    func get_tax_pool(epoch : felt, token_id : Uint256) -> (supply : felt):
+    func get_tax_pool(epoch : felt, resource_id : felt) -> (supply : felt):
     end
 end

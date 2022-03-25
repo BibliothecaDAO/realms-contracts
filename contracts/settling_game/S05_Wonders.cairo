@@ -21,9 +21,9 @@ from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.utils.game_structs import RealmData
 from contracts.settling_game.utils.general import unpack_data
 
-# #### Module 5B ##########
+# #### Module S05 ##########
 #                        #
-# Wonder Tax Pool State  #
+# Wonders Pool State     #
 #                        #
 ##########################
 
@@ -54,7 +54,7 @@ func wonder_epoch_upkeep(epoch : felt, token_id : Uint256) -> (upkept : felt):
 end
 
 @storage_var
-func tax_pool(epoch : felt, token_id : Uint256) -> (supply : felt):
+func tax_pool(epoch : felt, resource_id : felt) -> (supply : felt):
 end 
 
 
@@ -104,40 +104,40 @@ end
 
 @external
 func set_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        epoch : felt, token_id : Uint256, amount : felt):
+        epoch : felt, resource_id : felt, amount : felt):
     only_approved()
 
-    tax_pool.write(epoch, token_id, amount)
+    tax_pool.write(epoch, resource_id, amount)
     return ()
 end
 
 @external
 func batch_set_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         epoch : felt,
-        token_ids_len : felt, 
-        token_ids : Uint256*,
+        resource_ids_len : felt, 
+        resource_ids : felt*,
         amounts_len : felt,
         amounts : felt*):
     alloc_locals    
     only_approved()
     # Update tax pool
-    if token_ids_len == 0:
+    if resource_ids_len == 0:
         return ()
     end
-    let ( tax_pool ) = get_tax_pool(epoch, [token_ids])
-    set_tax_pool(epoch, [token_ids], tax_pool + [amounts])
+    let ( tax_pool ) = get_tax_pool(epoch, [resource_ids])
+    set_tax_pool(epoch, [resource_ids], tax_pool + [amounts])
 
     # Recurse
     return batch_set_tax_pool(
         epoch=epoch,
-        token_ids_len=token_ids_len - 1,
-        token_ids=token_ids + 1,
+        resource_ids_len=resource_ids_len - 1,
+        resource_ids=resource_ids + 1,
         amounts_len=amounts_len - 1,
         amounts=amounts + 1)
 end
 
 # ##### GETTERS ######
-@external
+@view
 func get_total_wonders_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     epoch : felt) -> (amount : felt):
 
@@ -146,14 +146,14 @@ func get_total_wonders_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     return (amount=amount)
 end
 
-@external
-func get_last_updated_epoch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (amount : felt):
+@view
+func get_last_updated_epoch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (epoch : felt):
     let (epoch) = last_updated_epoch.read()
 
     return (epoch=epoch)
 end
 
-@external
+@view
 func get_wonder_id_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256) -> (epoch : felt):
 
@@ -162,7 +162,7 @@ func get_wonder_id_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
     return (epoch=epoch)
 end
 
-@external
+@view
 func get_wonder_epoch_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     epoch : felt, token_id : Uint256) -> (upkept : felt):
 
@@ -171,11 +171,11 @@ func get_wonder_epoch_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, r
     return (upkept=upkept)
 end
 
-@external
+@view
 func get_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    epoch : felt, token_id : Uint256) -> (supply : felt):
+    epoch : felt, resource_id : felt) -> (supply : felt):
 
-    let (supply) = tax_pool.read(epoch, token_id)
+    let (supply) = tax_pool.read(epoch, resource_id)
 
     return (supply)
 end

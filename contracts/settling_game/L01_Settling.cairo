@@ -10,7 +10,7 @@ from starkware.starknet.common.syscalls import get_caller_address, get_block_tim
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.general import scale
-from contracts.settling_game.utils.interfaces import IModuleController, IS01_Settling
+from contracts.settling_game.utils.interfaces import IModuleController, IS01_Settling, IL05_Wonders
 
 from contracts.token.ERC20.interfaces.IERC20 import IERC20
 from contracts.token.ERC1155.interfaces.IERC1155 import IERC1155
@@ -74,9 +74,10 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(t
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
         contract_address=realms_address, token_id=token_id)
 
-     if realms_data.wonder == 1:
+    if realms_data.wonder == 1:
         let (wonders_logic_address) = IModuleController.get_module_address(contract_address=controller, module_id=8)
-        IL05_Wonders.update_wonder_settlement(wonders_logic_address)
+        IL05_Wonders.update_wonder_settlement(wonders_logic_address, token_id)
+        return ()
     end
     return ()
 end
@@ -116,29 +117,13 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     let (realms_settled) = IS01_Settling.get_total_realms_settled(contract_address=settle_state_address)
     IS01_Settling.set_total_realms_settled(settle_state_address, realms_settled - 1)
 
+    let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
+        contract_address=realms_address, token_id=token_id)
+
     if realms_data.wonder == 1:
         let (wonders_logic_address) = IModuleController.get_module_address(contract_address=controller, module_id=8)
-        IL05_Wonders.update_wonder_settlement(wonders_logic_address)
+        IL05_Wonders.update_wonder_settlement(wonders_logic_address, token_id)
+        return ()
     end
-    
     return ()
-end
-
-# Get current epoch 
-@external
-func get_current_epoch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (epoch : felt):
-    let (controller) = controller_address.read()
-
-    let (block_timestamp) = get_block_timestamp()
-    
-    let (settle_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=2)
-
-    let (genesis) = IS01_Settling.get_genesis(
-        contract_address=settle_state_address)
-
-    let (epoch_hours) = IS01_Settling.get_epoch_length(
-        contract_address=settle_state_address)
-
-    return (epoch=(block_timestamp - genesis)/(epoch_hours*3600))
 end

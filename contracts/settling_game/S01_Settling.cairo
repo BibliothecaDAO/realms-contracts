@@ -101,21 +101,21 @@ func set_approval{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
 end
 
 # Getters
-@external
+@view
 func get_genesis{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (timestamp : felt):
     let (timestamp) = genesis.read()
 
     return (timestamp=timestamp)
 end
 
-@external
+@view
 func get_epoch_length{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (time : felt):
     let (time) = epoch_length.read()
 
     return (time=time)
 end
 
-@external
+@view
 func get_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256) -> (time : felt):
     let (time) = time_staked.read(token_id)
@@ -124,7 +124,7 @@ func get_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 end
 
 # Getters
-@external
+@view
 func get_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (realms_settled : felt):
     let (amount) = total_realms_settled.read()
 

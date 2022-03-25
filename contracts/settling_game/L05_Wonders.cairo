@@ -22,9 +22,9 @@ from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
 
 
-# #### Module 2A ##########
+# #### Module L05 ##########
 #                        #
-# Claim & Resource Logic #
+# Logic for Wonders      #
 #                        #
 ##########################
 
@@ -49,7 +49,7 @@ func pay_wonder_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
 
     let ( treasury_address ) = IModuleController.get_treasury_address(contract_address=controller)
     let ( resources_address ) = IModuleController.get_resources_address(contract_address=controller)
-    let ( wonder_tax_pool_address ) = IModuleController.get_module_address(contract_address=controller, module_id=9)
+    let ( wonders_state_address ) = IModuleController.get_module_address(contract_address=controller, module_id=9)
 
     # calculator logic contract
     let ( calculator_address ) = IModuleController.get_module_address(
@@ -61,7 +61,7 @@ func pay_wonder_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     assert_nn_le(current_epoch, epoch)
 
     # Set upkept for epoch
-    IS05_Wonders.set_wonder_epoch_upkeep(wonder_tax_pool_address, epoch, token_id, 1)
+    IS05_Wonders.set_wonder_epoch_upkeep(wonders_state_address, epoch, token_id, 1)
 
     # Upkeep cost, to be moved
     let ( local upkeep_token_ids : Uint256* ) = alloc()
@@ -221,7 +221,7 @@ func loop_resources_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
 
     assert_in_range(resource_claim_amounts_len, 1, 2**15)
     if below_max_id == 1:
-        let ( resource_pool ) = IS05_Wonders.get_tax_pool(wonders_state_address, epoch, Uint256(resource_claim_ids_len, 0))
+        let ( resource_pool ) = IS05_Wonders.get_tax_pool(wonders_state_address, epoch, resource_claim_ids_len)
         assert resource_claim_ids[resource_claim_ids_len - 1] = resource_claim_ids_len
         assert resource_claim_amounts[resource_claim_ids_len - 1] = resource_pool / epoch_total_wonders 
     

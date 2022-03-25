@@ -11,7 +11,7 @@ from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.general import scale
 from contracts.settling_game.utils.interfaces import (
-    IModuleController, IS02_Resources, IS01_Settling)
+    IModuleController, IS02_Resources, IS01_Settling, IL04_Calculator, IS05_Wonders)
 
 from contracts.settling_game.utils.game_structs import RealmData, ResourceUpgradeIds
 from contracts.settling_game.utils.general import unpack_data
@@ -73,7 +73,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (treasury_address) = IModuleController.get_treasury_address(contract_address=controller)
 
     # wonder tax pool address
-    let (wonder_tax_pool_address) = IModuleController.get_module_address(contract_address=controller, module_id=9) 
+    let (wonders_state_address) = IModuleController.get_module_address(contract_address=controller, module_id=9) 
 
     # check owner of sRealm
     let (owner) = realms_IERC721.ownerOf(contract_address=s_realms_address, token_id=token_id)
@@ -127,7 +127,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     assert_not_zero(days)
 
     # get wonder tax percentage 
-    let ( wonder_tax ) = I04A_Calculator.calculateWonderTax(contract_address=calculator_address)
+    let ( wonder_tax ) = IL04_Calculator.calculate_wonder_tax(contract_address=calculator_address)
     let wonder_tax_rel_perc = (80 * wonder_tax) / 100
 
     # set minting percentages
@@ -194,10 +194,10 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         treasury_mint)
 
     # update pool
-    let ( current_epoch ) = I04A_Calculator.calculateEpoch(calculator_address)
+    let ( current_epoch ) = IL04_Calculator.calculateEpoch(calculator_address)
     
     IS05_Wonders.batch_set_tax_pool(
-        wonder_tax_pool_address,
+        wonders_state_address,
         current_epoch,
         realms_data.resource_number,
         resource_ids,

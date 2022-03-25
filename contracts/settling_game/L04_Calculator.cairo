@@ -6,7 +6,7 @@ from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem, assert_n
 from starkware.cairo.common.math_cmp import is_nn_le
 from starkware.cairo.common.hash_state import hash_init, hash_update, HashState
 from starkware.cairo.common.alloc import alloc
-from starkware.starknet.common.syscalls import get_caller_address
+from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.general import scale
@@ -123,8 +123,8 @@ func calculateTribute{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     return (tribute=100)
 end
 
-@external
-func calculateWonderTax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (tax_percentage : felt):
+@view
+func calculate_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (tax_percentage : felt):
     # calculate wonder tax 
     alloc_locals
 
