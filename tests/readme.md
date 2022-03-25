@@ -14,7 +14,8 @@ To run a specific test:
 
 ```
 -n num_workers          Number of parallel workers, can also use `auto`
--s                      Show output (like prints etc)
+-s                      Show output (like prints etc), prob won't work well with `-n`
+-v                      Verbose
 ```
 
 ## Guidelines

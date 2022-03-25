@@ -272,35 +272,6 @@ async def xoroshiro(starknet):
     return await starknet.deploy(contract_def=contract, constructor_calldata=[seed])
 
 
-@pytest.fixture(scope="module")
-async def l06_combat(starknet, xoroshiro) -> StarknetContract:
-    contract = compile("contracts/settling_game/L06_Combat.cairo")
-    return await starknet.deploy(
-        contract_def=contract, constructor_calldata=[xoroshiro.contract_address]
-    )
-
-
-@pytest.fixture(scope="module")
-async def l06_combat_tests(starknet, xoroshiro) -> StarknetContract:
-    contract = compile("tests/settling_game/L06_Combat_tests.cairo")
-    # a quirk of the testing framework, even though the L06_Combat_tests contract
-    # doesn't have a constructor, it somehow calls (I guess) the constructor of
-    # L06_Combat because it imports from it; hence when calling deploy, we need
-    # to pass proper constructor_calldata
-    return await starknet.deploy(contract_def=contract, constructor_calldata=[xoroshiro.contract_address])
-
-
-@pytest.fixture(scope="module")
-async def s06_combat(starknet) -> StarknetContract:
-    contract = compile("contracts/settling_game/S06_Combat.cairo")
-    return await starknet.deploy(contract_def=contract)
-
-
-@pytest.fixture(scope="module")
-async def s06_combat_tests(starknet) -> StarknetContract:
-    contract = compile("tests/settling_game/S06_Combat_tests.cairo")
-    return await starknet.deploy(contract_def=contract)
-
 @pytest.fixture(scope='module')
 async def account_factory(request):
     num_signers = request.param.get("num_signers", "1")
@@ -335,3 +306,124 @@ async def account_factory(request):
 
     # Note that nonce is an optional argument.
     return starknet, accounts, signers
+
+
+###########################
+# COMBAT specific fixtures
+###########################
+
+@pytest.fixture(scope="module")
+async def l06_combat(starknet, xoroshiro) -> StarknetContract:
+    contract = compile("contracts/settling_game/L06_Combat.cairo")
+    return await starknet.deploy(
+        contract_def=contract, constructor_calldata=[xoroshiro.contract_address]
+    )
+
+
+@pytest.fixture(scope="module")
+async def l06_combat_tests(starknet, xoroshiro) -> StarknetContract:
+    contract = compile("tests/settling_game/L06_Combat_tests.cairo")
+    # a quirk of the testing framework, even though the L06_Combat_tests contract
+    # doesn't have a constructor, it somehow calls (I guess) the constructor of
+    # L06_Combat because it imports from it; hence when calling deploy, we need
+    # to pass proper constructor_calldata
+    return await starknet.deploy(contract_def=contract, constructor_calldata=[xoroshiro.contract_address])
+
+
+@pytest.fixture(scope="module")
+async def s06_combat(starknet) -> StarknetContract:
+    contract = compile("contracts/settling_game/S06_Combat.cairo")
+    return await starknet.deploy(contract_def=contract)
+
+
+@pytest.fixture(scope="module")
+async def s06_combat_tests(starknet) -> StarknetContract:
+    contract = compile("tests/settling_game/S06_Combat_tests.cairo")
+    return await starknet.deploy(contract_def=contract)
+
+
+###########################
+# DESIEGE specific fixtures
+###########################
+
+# StarknetContracts contain an immutable reference to StarknetState, which
+# means if we want to be able to use StarknetState's `copy` method, we cannot
+# rely on StarknetContracts that were created prior to the copy.
+# For that reason, we avoid returning any StarknetContracts in this "copyable"
+# deployment:
+async def _build_copyable_deployment_desiege():
+    starknet = await Starknet.empty()
+
+    logging.warning(CONTRACT_SRC)
+
+    defs = SimpleNamespace(
+        account=compile("contracts/openzeppelin/account/Account.cairo"),
+    )
+
+    signers = dict(
+        admin=Signer(83745982347),
+        player1=Signer(233294204),
+        player2=Signer(233294206),
+        player3=Signer(233294208)
+    )
+
+    accounts = SimpleNamespace(
+        **{
+            name: (await create_account(starknet, signer, defs.account))
+            for name, signer in signers.items()
+        }
+    )
+
+    return SimpleNamespace(
+        starknet=starknet,
+        signers=signers,
+        serialized_contracts=dict(
+            admin=serialize_contract(accounts.admin, defs.account.abi),
+            player1=serialize_contract(accounts.player1, defs.account.abi),
+            player2=serialize_contract(accounts.player2, defs.account.abi),
+            player3=serialize_contract(accounts.player3, defs.account.abi)
+        )
+    )
+
+
+@pytest.fixture(scope="session")
+async def copyable_deployment_desiege(request):
+    CACHE_KEY = "deployment_desiege"
+    val = request.config.cache.get(CACHE_KEY, None)
+    if val is None:
+        val = await _build_copyable_deployment_desiege()
+        res = dill.dumps(val).decode("cp437")
+        request.config.cache.set(CACHE_KEY, res)
+    else:
+        val = dill.loads(val.encode("cp437"))
+    return val
+
+
+@pytest.fixture(scope="session")
+async def ctx_factory_desiege(copyable_deployment_desiege):
+    serialized_contracts = copyable_deployment_desiege.serialized_contracts
+    signers = copyable_deployment_desiege.signers
+
+    def make():
+        starknet_state = copyable_deployment_desiege.starknet.state.copy()
+
+        contracts = {
+            name: unserialize_contract(starknet_state, serialized_contract)
+            for name, serialized_contract in serialized_contracts.items()
+        }
+
+        async def execute(account_name, contract_address, selector_name, calldata):
+            return await signers[account_name].send_transaction(
+                contracts[account_name],
+                contract_address,
+                selector_name,
+                calldata,
+            )
+
+        return SimpleNamespace(
+            starknet=Starknet(starknet_state),
+            execute=execute,
+            **contracts,
+        )
+
+    return make
