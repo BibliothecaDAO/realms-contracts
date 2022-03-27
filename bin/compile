@@ -2,3 +2,7 @@
 set -eu
 
 nile compile
+
+# account contracts
+nile compile --account_contract contracts/openzeppelin/account/Account.cairo
+nile compile --account_contract contracts/openzeppelin/account/IAccount.cairo

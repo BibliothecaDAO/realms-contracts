@@ -20,6 +20,22 @@ To run a specific test:
 
 ## Guidelines
 
+### Template
+
+```python
+<<< imports >>>
+
+<<< constants >>>
+
+<<< custom util functions >>>
+# put common utils in ./tests/utils.py
+
+<<< custom fixtures >>>
+# put common fixtures in ./tests/conftest.py
+
+<<< tests >>>
+```
+
 ### Naming convention
 
 Dirs under `tests/` should reflect dir naming under `contracts/`.
@@ -31,3 +47,17 @@ Module-related test files should have the module id in their name.
 ### Fixtures
 
 Fixtures can be used as test inputs. If a fixture is required across more than one file, it can be put in `conftest.py`
+
+#### Scopes
+
+Use as e.g.: `@pytest.fixture(scope="session")`. From https://docs.pytest.org/en/6.2.x/fixture.html.
+
+>`function`: the default scope, the fixture is destroyed at the end of the test.
+>
+>`class`: the fixture is destroyed during teardown of the last test in the class.
+>
+>`module`: the fixture is destroyed during teardown of the last test in the module.
+>
+>`package`: the fixture is destroyed during teardown of the last test in the package.
+>
+>`session`: the fixture is destroyed at the end of the test session.

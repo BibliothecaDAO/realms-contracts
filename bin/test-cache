@@ -1,4 +1,4 @@
 #!/bin/bash
 set -eu
 
-pytest --cache-clear -s -W ignore::DeprecationWarning ./tests/desiege/build_cache.py
+pytest --cache-clear -s -W ignore::DeprecationWarning ./tests/build_cache.py
