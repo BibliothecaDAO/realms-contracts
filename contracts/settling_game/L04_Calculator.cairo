@@ -10,13 +10,13 @@ from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.general import scale
 from contracts.settling_game.utils.game_structs import (
-    RealmBuildings, RealmBuildingCostIds, RealmBuildingCostValues)
+    RealmBuildings, RealmBuildingCostIds, RealmBuildingCostValues, ModuleIds)
 
 from contracts.token.IERC20 import IERC20
 from contracts.token.ERC1155.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
-from contracts.settling_game.interfaces.imodules import IModuleController
+from contracts.settling_game.interfaces.imodules import IModuleController, IL03_Buildings
 
 const HAPPINESS = 25
 const AMPHITHEATER = 1
@@ -74,25 +74,46 @@ end
 @external
 func calculateCulture{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         tokenId : Uint256) -> (culture : felt):
-    # Calculates culture based on the level of existing buildings
-    # Idea to extend: surplus
-    let culture = 25 + (AMPHITHEATER) + (GUILD * 5) + (CASTLE * 5) + (FAIRGROUNDS * 5)
+    let (controller) = controller_address.read()
+
+    let (buildings_logic_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=ModuleIds.L03_Buildings)
+
+    let (current_buildings : RealmBuildings) = IL03_Buildings.fetch_buildings_by_type(
+        buildings_logic_address, tokenId)
+
+    let culture = 25 + (current_buildings.Amphitheater) + (current_buildings.Guild * 5) + (current_buildings.Castle * 5) + (current_buildings.Fairgrounds * 5)
     return (culture=culture)
 end
 
 @external
 func calculatePopulation{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         tokenId : Uint256) -> (population : felt):
-    # calculate number of buildings realm has
-    let population = 1000 + (HOUSING * 100)
+    let (controller) = controller_address.read()
+
+    let (buildings_logic_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=ModuleIds.L03_Buildings)
+
+    let (current_buildings : RealmBuildings) = IL03_Buildings.fetch_buildings_by_type(
+        buildings_logic_address, tokenId)
+
+    let population = 1000 + (RealmBuildings.Housing * 100)
     return (population=population)
 end
 
 @external
 func calculateFood{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         tokenId : Uint256) -> (food : felt):
+    let (controller) = controller_address.read()
+
+    let (buildings_logic_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=ModuleIds.L03_Buildings)
+
+    let (current_buildings : RealmBuildings) = IL03_Buildings.fetch_buildings_by_type(
+        buildings_logic_address, tokenId)
+
     # food = 25 + (# of farms) + (2 * # of granaries) + (6 * # of fairgrounds) + (6 * # of royal reserves) + (6 * # of grand markets) - (# of city structures) - (# of troops)
-    let food = 25 + (FARMS) + (GRANARY) + (FAIRGROUNDS * 5) + (ROYAL_RESERVE * 5) - (20)
+    let food = 25 + (RealmBuildings.Farms) + (RealmBuildings.Granary) + (RealmBuildings.Fairgrounds * 5) + (RealmBuildings.RoyalReserve * 5) - (20)
     return (food=food)
 end
 

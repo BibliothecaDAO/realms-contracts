@@ -10,7 +10,8 @@ from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.game_structs import (
-    RealmBuildings, RealmData, RealmBuildingCostIds, RealmBuildingCostValues, RealmBuildingsIds)
+    RealmBuildings, RealmData, RealmBuildingCostIds, RealmBuildingCostValues, RealmBuildingsIds,
+    ModuleIds)
 
 from contracts.settling_game.utils.constants import (
     SHIFT_6_1, SHIFT_6_2, SHIFT_6_3, SHIFT_6_4, SHIFT_6_5, SHIFT_6_6, SHIFT_6_7, SHIFT_6_8,
@@ -71,7 +72,7 @@ func build{
 
     # building state address
     let (buildings_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=6)
+        contract_address=controller, module_id=ModuleIds.S03_Buildings)
 
     # get current buildings already constructed
     let (current_building) = IS03_Buildings.get_realm_buildings(buildings_state_address, token_id)
@@ -409,7 +410,7 @@ func fetch_building_cost_ids{
 
     # state contract
     let (buildings_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=6)
+        contract_address=controller, module_id=ModuleIds.S03_Buildings)
 
     let (local data) = IS03_Buildings.get_building_cost_ids(buildings_state_address, building_id)
 
@@ -612,7 +613,7 @@ func fetch_buildings_by_type{
 
     # state contract
     let (buildings_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=6)
+        contract_address=controller, module_id=ModuleIds.S03_Buildings)
 
     let (local data) = IS03_Buildings.get_realm_buildings(buildings_state_address, token_id)
 

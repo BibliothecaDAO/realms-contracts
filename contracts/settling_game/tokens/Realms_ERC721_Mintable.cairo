@@ -8,19 +8,20 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.math import assert_not_zero, unsigned_div_rem
 from starkware.cairo.common.pow import pow
 
-from contracts.token.IERC20 import IERC20
+from contracts.settling_game.utils.general import unpack_data
 
 from contracts.token.ERC721_base import (
     ERC721_name, ERC721_symbol, ERC721_balanceOf, ERC721_ownerOf, ERC721_getApproved,
     ERC721_isApprovedForAll, ERC721_initializer, ERC721_approve, ERC721_setApprovalForAll,
-    ERC721_transferFrom, ERC721_safeTransferFrom, ERC721_mint, ERC721_burn,
-    ERC721_tokenURI, ERC721_setTokenURI)
+    ERC721_transferFrom, ERC721_safeTransferFrom, ERC721_mint, ERC721_burn, ERC721_tokenURI,
+    ERC721_setTokenURI)
 
 from contracts.openzeppelin.introspection.ERC165 import ERC165_supports_interface
 from contracts.openzeppelin.introspection.IERC165 import IERC165
 
 from contracts.Ownable_base import Ownable_initializer, Ownable_only_owner
 from contracts.settling_game.utils.game_structs import RealmData
+
 #
 # Constructor
 #
@@ -150,11 +151,11 @@ func burn{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(tok
     ERC721_burn(tokenId)
     return ()
 end
+
 #
-# Bibliotheca added methods (remove all balance_details functions after events)
+# Bibliotheca added methods
 #
 
-# # democritus methods for on-chain data
 @storage_var
 func realm_name(token_id : Uint256) -> (name : felt):
 end
@@ -174,44 +175,11 @@ func get_is_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     return (data)
 end
 
-@view
-func settleState{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256, settle_state : felt) -> ():
-    is_settled.write(token_id, settle_state)
-    return ()
-end
-
 @external
 func get_realm_info{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256) -> (realm_data : felt):
     let (data) = realm_data.read(token_id)
     return (data)
-end
-
-func unpack_realm_data{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*,
-        range_check_ptr}(realm_id : Uint256, index : felt) -> (score : felt):
-    alloc_locals
-    # User data is a binary encoded value with alternating
-    # 6-bit id followed by a 4-bit score (see top of file).
-    let (local data) = realm_data.read(realm_id)
-    local syscall_ptr : felt* = syscall_ptr
-    local pedersen_ptr : HashBuiltin* = pedersen_ptr
-    local bitwise_ptr : BitwiseBuiltin* = bitwise_ptr
-    # 1. Create a 8-bit mask at and to the left of the index
-    # E.g., 000111100 = 2**2 + 2**3 + 2**4 + 2**5
-    # E.g.,  2**(i) + 2**(i+1) + 2**(i+2) + 2**(i+3) = (2**i)(15)
-    let (power) = pow(2, index)
-    # 1 + 2 + 4 + 8 + 16 + 32 + 64 + 128 = 15
-    let mask = 255 * power
-
-    # 2. Apply mask using bitwise operation: mask AND data.
-    let (masked) = bitwise_and(mask, data)
-
-    # 3. Shift element right by dividing by the order of the mask.
-    let (result, _) = unsigned_div_rem(masked, power)
-
-    return (score=result)
 end
 
 @external
@@ -220,20 +188,22 @@ func fetch_realm_data{
         bitwise_ptr : BitwiseBuiltin*}(realm_id : Uint256) -> (realm_stats : RealmData):
     alloc_locals
 
-    let (local cities) = unpack_realm_data(realm_id, 0)
-    let (local regions) = unpack_realm_data(realm_id, 8)
-    let (local rivers) = unpack_realm_data(realm_id, 16)
-    let (local harbours) = unpack_realm_data(realm_id, 24)
-    let (local resource_number) = unpack_realm_data(realm_id, 32)
-    let (local resource_1) = unpack_realm_data(realm_id, 40)
-    let (local resource_2) = unpack_realm_data(realm_id, 48)
-    let (local resource_3) = unpack_realm_data(realm_id, 56)
-    let (local resource_4) = unpack_realm_data(realm_id, 64)
-    let (local resource_5) = unpack_realm_data(realm_id, 72)
-    let (local resource_6) = unpack_realm_data(realm_id, 80)
-    let (local resource_7) = unpack_realm_data(realm_id, 88)
-    let (local wonder) = unpack_realm_data(realm_id, 96)
-    let (local order) = unpack_realm_data(realm_id, 104)
+    let (local data) = realm_data.read(realm_id)
+
+    let (local cities) = unpack_data(data, 0, 255)
+    let (local regions) = unpack_data(data, 8, 255)
+    let (local rivers) = unpack_data(data, 16, 255)
+    let (local harbours) = unpack_data(data, 24, 255)
+    let (local resource_number) = unpack_data(data, 32, 255)
+    let (local resource_1) = unpack_data(data, 40, 255)
+    let (local resource_2) = unpack_data(data, 48, 255)
+    let (local resource_3) = unpack_data(data, 56, 255)
+    let (local resource_4) = unpack_data(data, 64, 255)
+    let (local resource_5) = unpack_data(data, 72, 255)
+    let (local resource_6) = unpack_data(data, 80, 255)
+    let (local resource_7) = unpack_data(data, 88, 255)
+    let (local wonder) = unpack_data(data, 96, 255)
+    let (local order) = unpack_data(data, 104, 255)
 
     let realm_stats = RealmData(
         cities=cities,

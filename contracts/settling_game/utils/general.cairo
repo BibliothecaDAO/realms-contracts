@@ -5,6 +5,7 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.hash_state import hash_init, hash_update, HashState
 from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.pow import pow
+
 # Computes the unique hash of a list of felts.
 func list_to_hash{pedersen_ptr : HashBuiltin*, range_check_ptr}(list : felt*, list_len : felt) -> (
         hash : felt):

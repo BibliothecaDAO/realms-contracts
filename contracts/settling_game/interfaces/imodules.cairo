@@ -1,6 +1,7 @@
 %lang starknet
 
 from starkware.cairo.common.uint256 import Uint256
+from contracts.settling_game.utils.game_structs import RealmBuildings
 
 # These are interfaces that can be imported by other contracts for convenience.
 # All of the functions in an interface must be @view or @external.
@@ -84,5 +85,11 @@ namespace IS03_Buildings:
     end
 
     func set_realm_buildings(token_id : Uint256, buildings_value : felt) -> ():
+    end
+end
+
+@contract_interface
+namespace IL03_Buildings:
+    func fetch_buildings_by_type(token_id : Uint256) -> (realm_buildings : RealmBuildings):
     end
 end

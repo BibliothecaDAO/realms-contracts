@@ -9,6 +9,7 @@ from starkware.starknet.common.syscalls import get_caller_address, get_block_tim
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.general import scale
+from contracts.settling_game.utils.game_structs import ModuleIds
 
 from contracts.token.IERC20 import IERC20
 from contracts.token.ERC1155.IERC1155 import IERC1155
@@ -51,7 +52,7 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(t
 
     # settle address
     let (settle_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=2)
+        contract_address=controller, module_id=ModuleIds.S01_Settling)
 
     # transfer realm into settling state contract
     realms_IERC721.transferFrom(realms_address, caller, settle_state_address, token_id)
@@ -61,6 +62,7 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(t
 
     # TODO: TimeStamp - current Hardcoded
     IS01_Settling.set_time_staked(settle_state_address, token_id, block_timestamp)
+    # TODO: EMIT SETTLED
 
     return ()
 end
@@ -83,7 +85,7 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
 
     # settle address
     let (settle_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=2)
+        contract_address=controller, module_id=ModuleIds.S01_Settling)
 
     # transfer realm back to owner
     realms_IERC721.transferFrom(realms_address, settle_state_address, caller, token_id)
@@ -95,6 +97,6 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     IS01_Settling.set_time_staked(settle_state_address, token_id, block_timestamp)
 
     # TOD0: Claim resources if available before unsettling
-
+    # TODO: EMIT SETTLED
     return ()
 end

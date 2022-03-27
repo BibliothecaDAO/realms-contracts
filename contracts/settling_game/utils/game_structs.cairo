@@ -150,3 +150,13 @@ namespace RealmBuildingLimitTraitsIds:
     const Farms = TraitsIds.River
     const Hamlet = TraitsIds.River
 end
+
+namespace ModuleIds:
+    const L01_Settling = 1
+    const S01_Settling = 2
+    const L02_Resources = 3
+    const S02_Resources = 4
+    const L03_Buildings = 5
+    const S03_Buildings = 6
+    const L04_Calculator = 7
+end

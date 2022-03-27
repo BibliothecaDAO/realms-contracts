@@ -167,78 +167,77 @@ async def test_mint(game_factory, number_of_tokens, tokens):
         account=accounts[0], to=resources_logic.contract_address, selector_name='claim_resources', calldata=[*uint(5042)]
     )
 
-    # player_resource_value = await resources.balanceOf(accounts[0].contract_address, 1).call()
-    # player_resource_value_1 = await resources.balanceOf(accounts[0].contract_address, 2).call()
-    # player_resource_value_2 = await resources.balanceOf(accounts[0].contract_address, 3).call()
-    # player_resource_value_3 = await resources.balanceOf(accounts[0].contract_address, 4).call()
-    # player_resource_value_4 = await resources.balanceOf(accounts[0].contract_address, 5).call()
-    # print(
-    #     f'Resource 1 Balance for player is: {player_resource_value.result.balance}')
-    # print(
-    #     f'Resource 2 Balance for player is: {player_resource_value_1.result.balance}')
-    # print(
-    #     f'Resource 3 Balance for player is: {player_resource_value_2.result.balance}')
-    # print(
-    #     f'Resource 4 Balance for player is: {player_resource_value_3.result.balance}')
-    # print(
-    #     f'Resource 5 Balance for player is: {player_resource_value_4.result.balance}')
+    player_resource_value = await resources.balanceOf(accounts[0].contract_address, 1).call()
+    player_resource_value_1 = await resources.balanceOf(accounts[0].contract_address, 2).call()
+    player_resource_value_2 = await resources.balanceOf(accounts[0].contract_address, 3).call()
+    player_resource_value_3 = await resources.balanceOf(accounts[0].contract_address, 4).call()
+    player_resource_value_4 = await resources.balanceOf(accounts[0].contract_address, 5).call()
+    print(
+        f'Resource 1 Balance for player is: {player_resource_value.result.balance}')
+    print(
+        f'Resource 2 Balance for player is: {player_resource_value_1.result.balance}')
+    print(
+        f'Resource 3 Balance for player is: {player_resource_value_2.result.balance}')
+    print(
+        f'Resource 4 Balance for player is: {player_resource_value_3.result.balance}')
+    print(
+        f'Resource 5 Balance for player is: {player_resource_value_4.result.balance}')
 
-    # # # set resource upgrade IDS
-    # await signer.send_transaction(
-    #     account=accounts[0], to=resources_state.contract_address, selector_name='set_resource_upgrade_ids', calldata=[5, 47408855671140352459265]
-    # )
-    # # # upgrade resource
-    # await signer.send_transaction(
-    #     account=accounts[0], to=resources_logic.contract_address, selector_name='upgrade_resource', calldata=[*uint(5042),
-    #                                                                                                           5, 5, 1, 2, 3, 4, 5, 5, 10, 10, 10, 10, 10]
-    # )
+    # # set resource upgrade IDS
+    await signer.send_transaction(
+        account=accounts[0], to=resources_state.contract_address, selector_name='set_resource_upgrade_ids', calldata=[5, 47408855671140352459265]
+    )
+    # # upgrade resource
+    await signer.send_transaction(
+        account=accounts[0], to=resources_logic.contract_address, selector_name='upgrade_resource', calldata=[*uint(5042), 5]
+    )
 
-    # _player_resource_value = await resources.balanceOf(accounts[0].contract_address, 5).call()
-    # _player_resource_value_10 = await resources.balanceOf(accounts[0].contract_address, 10).call()
-    # _player_resource_value_12 = await resources.balanceOf(accounts[0].contract_address, 12).call()
-    # _player_resource_value_21 = await resources.balanceOf(accounts[0].contract_address, 21).call()
-    # _player_resource_value_9 = await resources.balanceOf(accounts[0].contract_address, 9).call()
-    # print(
-    #     f'BURNING!')
-    # print(
-    #     f'Resource 5 Balance for player is: {_player_resource_value.result.balance}')
-    # print(
-    #     f'Resource 10 Balance for player is: {_player_resource_value_10.result.balance}')
-    # print(
-    #     f'Resource 12 Balance for player is: {_player_resource_value_12.result.balance}')
-    # print(
-    #     f'Resource 21 Balance for player is: {_player_resource_value_21.result.balance}')
-    # print(
-    #     f'Resource 9 Balance for player is: {_player_resource_value_9.result.balance}')
+    _player_resource_value = await resources.balanceOf(accounts[0].contract_address, 5).call()
+    _player_resource_value_10 = await resources.balanceOf(accounts[0].contract_address, 10).call()
+    _player_resource_value_12 = await resources.balanceOf(accounts[0].contract_address, 12).call()
+    _player_resource_value_21 = await resources.balanceOf(accounts[0].contract_address, 21).call()
+    _player_resource_value_9 = await resources.balanceOf(accounts[0].contract_address, 9).call()
+    print(
+        f'BURNING!')
+    print(
+        f'Resource 5 Balance for player is: {_player_resource_value.result.balance}')
+    print(
+        f'Resource 10 Balance for player is: {_player_resource_value_10.result.balance}')
+    print(
+        f'Resource 12 Balance for player is: {_player_resource_value_12.result.balance}')
+    print(
+        f'Resource 21 Balance for player is: {_player_resource_value_21.result.balance}')
+    print(
+        f'Resource 9 Balance for player is: {_player_resource_value_9.result.balance}')
 
     # set resource upgrade IDS
-    await signer.send_transaction(
-        account=accounts[0], to=buildings_state.contract_address, selector_name='set_building_cost_ids', calldata=[1, 21542142465]
-    )
+    # await signer.send_transaction(
+    #     account=accounts[0], to=buildings_state.contract_address, selector_name='set_building_cost_ids', calldata=[1, 21542142465]
+    # )
 
-    # set resource values
-    await signer.send_transaction(
-        account=accounts[0], to=buildings_state.contract_address, selector_name='set_building_cost_values', calldata=[1, 2815437129687050]
-    )
+    # # set resource values
+    # await signer.send_transaction(
+    #     account=accounts[0], to=buildings_state.contract_address, selector_name='set_building_cost_values', calldata=[1, 2815437129687050]
+    # )
 
-    ids = await buildings_logic.fetch_building_cost_ids(0).call()
-    values = await buildings_logic.fetch_building_cost_values(0).call()
+    # ids = await buildings_logic.fetch_building_cost_ids(0).call()
+    # values = await buildings_logic.fetch_building_cost_values(0).call()
 
-    print(
-        f'Resource 9 Balance for player is: {ids.result[0]}')
-    print(
-        f'Resource 9 Balance for player is: {values.result}')
+    # print(
+    #     f'Resource 9 Balance for player is: {ids.result[0]}')
+    # print(
+    #     f'Resource 9 Balance for player is: {values.result}')
 
-    # create building
-    await signer.send_transaction(
-        account=accounts[0], to=buildings_logic.contract_address, selector_name='build', calldata=[*uint(5042),
-                                                                                                   1, 5, 1, 2, 3, 4, 5, 5, 10, 10, 10, 10, 10]
-    )
+    # # create building
+    # await signer.send_transaction(
+    #     account=accounts[0], to=buildings_logic.contract_address, selector_name='build', calldata=[*uint(5042),
+    #                                                                                                1, 5, 1, 2, 3, 4, 5, 5, 10, 10, 10, 10, 10]
+    # )
 
-    values = await buildings_logic.fetch_buildings_by_type(uint(5042)).call()
+    # values = await buildings_logic.fetch_buildings_by_type(uint(5042)).call()
 
-    print(
-        f'Buildings: {values.result.realm_buildings}')
+    # print(
+    #     f'Buildings: {values.result.realm_buildings}')
 
     # # # settle Realm
     # await signer.send_transaction(
