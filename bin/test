@@ -1,4 +1,4 @@
 #!/bin/bash
 set -eu
 
-pytest -n auto -W ignore::DeprecationWarning ./tests/nft_marketplace/exchange_ERC20_1155_test.py
+pytest -n auto -W ignore::DeprecationWarning
