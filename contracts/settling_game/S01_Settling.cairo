@@ -1,5 +1,4 @@
 %lang starknet
-%builtins pedersen range_check
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import unsigned_div_rem
@@ -8,8 +7,8 @@ from starkware.cairo.common.default_dict import default_dict_new, default_dict_f
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
-from contracts.settling_game.utils.interfaces import IModuleController
 from contracts.token.ERC20.interfaces.IERC20 import IERC20
+from contracts.settling_game.interfaces.imodules import IModuleController
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 
 # #### Module 1B ###

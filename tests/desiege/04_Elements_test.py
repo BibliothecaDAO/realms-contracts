@@ -6,7 +6,7 @@ from starkware.starknet.business_logic.state import BlockInfo
 from starkware.starkware_utils.error_handling import StarkException
 from starkware.starknet.definitions.error_codes import StarknetErrorCode
 
-from utils import str_to_felt
+from tests.utils import str_to_felt
 
 LIGHT_TOKEN_ID = 1
 DARK_TOKEN_ID = 2
@@ -30,8 +30,8 @@ HOURS_PER_GAME = 36
 
 
 @pytest.fixture()
-async def game_factory(ctx_factory):
-    ctx = ctx_factory()
+async def game_factory(ctx_factory_desiege):
+    ctx = ctx_factory_desiege()
 
     # The Controller is the only unchangeable contract.
     # First deploy Arbiter.

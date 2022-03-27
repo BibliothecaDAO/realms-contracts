@@ -1,10 +1,9 @@
 %lang starknet
-%builtins pedersen range_check
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 
-from contracts.settling_game.utils.interfaces import IModuleController
+from contracts.settling_game.interfaces.imodules import IModuleController
 
 ##### Module XX #####
 #
@@ -18,12 +17,12 @@ from contracts.settling_game.utils.interfaces import IModuleController
 # 1. Assign the new module the next available number in the contracts/ folder.
 # 2. Ensure state variables and application logic are in different modules.
 # 3. Expose any modifiable state variables with helper functions 'var_x_write()'.
-# 4. Import any module dependencies from utils.interfaces (above).
+# 4. Import any module dependencies from interfaces.imodules (above).
 # 5. Document which modules this module will interact with (above).
 # 6. Add deployment line to bin/compile bin/deploy.
 # 7. Document which modules this module requires write access to.
 # 8. Write tests in testing/XX_test.py and add to bin/test.
-# 9. +/- Add useful interfaces for this module to utils/interfaces.cairo.
+# 9. +/- Add useful interfaces for this module to interfaces/imodules.cairo.
 # 10. Delete this set of instructions.
 
 @storage_var

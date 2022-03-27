@@ -1,4 +1,11 @@
-# Exchange ERC20 ERC1155
+[![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/uQnjZhZPfu)
+[![Twitter](https://badgen.net/badge/icon/twitter?icon=twitter&label)](https://twitter.com/LootRealms)
+
+![This is an image](/realmslogo.jpg)
+
+# 💰 Exchange
+
+### Exchange - Exchange ERC20 and ERC1155 contract tokens
 
 The exchange contract allows trades between pairs of ERC20 and ERC1155 contract tokens.
 The contract is based on the [NiftyswapExchange20.sol contract](https://github.com/0xsequence/niftyswap/blob/master/src/contracts/exchange/NiftyswapExchange20.sol) and its [specifications](https://github.com/0xsequence/niftyswap/blob/master/SPECIFICATIONS.md).
@@ -9,6 +16,15 @@ Price changes on one token pair will not affect another.
 
 The exchange contract itself is ERC1155 compliant and will issue LP tokens with a token type id corresponding to the token type id in the pair.
 These tokens can be freely traded or used in other DeFi applications.
+
+**This folder contains Exchange contracts. If you're looking for another contract, please see the [directory of our Realms Smart Contracts](/).**
+
+<hr>
+
+## Understanding the code
+<details><summary> 🤔 What is the exchange?</summary>
+
+<p>
 
 ## Terminology and Naming Conventions
 
@@ -158,3 +174,155 @@ The contract does not store a value for the ERC1155 token reserves and instead r
 ### LP ERC 1155 Compliance
 
 There are additional method to support the ERC1155 compliance of LP tokens provided by this contract.
+
+</p>
+</details>
+<details><summary>🏗️ System architecture</summary>
+
+- TODO: Add system architecture here
+
+</details>
+
+<details><summary>📦 Contract hierarchy</summary>
+<p>
+
+- TODO: Add contract heirarchy here
+
+</p>
+</details>
+
+<hr>
+
+## Getting Setup
+
+<details><summary>Initial Setup</summary>
+
+<p>
+
+Clone this repo and use our docker shell to interact with starknet:
+
+```
+git clone git@github.com:BibliothecaForAdventurers/realms-contracts.git
+cd realms-contracts
+bin/shell starknet --version
+```
+
+The CLI allows you to deploy to StarkNet and read/write to contracts
+already deployed. The CLI communicates with a server that StarkNet
+runs, which bundles the requests, executes the program (contracts are
+Cairo programs), creates and aggregates validity proofs, then posts them
+to the Goerli Ethereum testnet. Learn more in the Cairo language and StarkNet
+docs [here](https://www.cairo-lang.org/docs/), which also has instructions for manual
+installation if you are not using docker.
+
+</p>
+</details>
+<details><summary>Development Workflow</summary>
+
+If you are using VSCode, we provide a development container with all required dependencies.
+When opening VS Code, it should ask you to re-open the project in a container, if it finds
+the .devcontainer folder. If not, you can open the Command Palette (`cmd + shift + p`),
+and run “Remote-Containers: Rebuild and Reopen in Container”.
+
+## Outline
+
+Flow:
+
+1. Compile the contract with the CLI
+2. Test using pytest
+3. Deploy with CLI
+4. Interact using the CLI or the explorer
+
+### Compile
+
+The compiler will check the integrity of the code locally.
+It will also produce an ABI, which is a mapping of the contract functions
+(used to interact with the contract).
+
+Compile all contracts:
+
+```
+nile compile
+```
+
+Compile an individual contract:
+
+```
+nile compile contracts/exchange/Exchange_ERC20_1155.cairo
+```
+
+### Test
+
+Run all github actions tests: `bin/test`
+
+Run individual tests
+
+```
+bin/shell pytest -s testing/l2/Exchange_ERC20_1155.test.py
+```
+
+### Deploy
+
+Start up a local StarkNet devnet with:
+
+```
+nile node
+```
+
+Then run the deployment of all the contracts. This uses nile
+and handles passing addresses between the modules to create a
+permissions system.
+
+```
+bin/deploy
+```
+</details>
+
+<hr>
+
+## Contributing
+
+<details><summary>Modules in progress</summary>
+
+- TODO: Add modules in progress here
+
+</details>
+
+<details><summary>How to Contribute</summary>
+
+We encourage pull requests!
+
+1. **Create an [issue](https://github.com/BibliothecaForAdventurers/realms-contracts/issues)** to describe the improvement you're making. Provide as much detail as possible in the beginning so the team understands your improvement.
+2. **Fork the repo** so you can make and test changes in your local repository.
+3. **Test your changes** Follow the procedures for testing in each contract sub-directory (e.g. [/contracts/settling_game](./contracts/settling_game/) and make sure your tests (manual and/or automated) pass.
+4. **Create a pull request** and describe the changes you made. Include a reference to the Issue you created.
+5. **Monitor and respond to comments** made by the team around code standards and suggestions. Most pull requests will have some back and forth.
+
+If you have further questions, visit [#builders-chat in our discord](https://discord.gg/yP4BCbRjUs) and make sure to reference your issue number.
+
+Thank you for taking the time to make our project better!
+
+</details>
+<hr>
+
+## External Reading Sources
+
+StarkNet is very new. Best practices are being discovered. We have amalgamated the best resources we think to guide you on your journey.
+
+<details><summary>Guides & Docs</summary>
+
+- https://perama-v.github.io/cairo/intro/
+- https://hackmd.io/@RoboTeddy/BJZFu56wF
+- https://starknet.io/docs/
+</details>
+<details><summary>Discords to Join</summary>
+
+- [StarkNet](https://discord.gg/XzvgKTTptb)
+- [MatchBox DAO](https://discord.gg/uj7wMxsmYw)
+</details>
+
+## Realms Repositories
+
+The Realms Settling Game spans a number of repositories:
+
+**[View the list of repositories in /README.md](/README.md#realms-repositories)**

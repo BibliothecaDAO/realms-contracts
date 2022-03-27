@@ -10,7 +10,7 @@ from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 from starkware.cairo.common.pow import pow
 from contracts.settling_game.utils.general import scale
-from contracts.settling_game.utils.interfaces import IModuleController
+from contracts.settling_game.interfaces.imodules import IModuleController
 
 from contracts.settling_game.utils.game_structs import ResourceLevel
 

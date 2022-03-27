@@ -13,7 +13,7 @@ from contracts.token.ERC721.ERC721_Enumerable_base import (
     ERC721_Enumerable_tokenOfOwnerByIndex, ERC721_Enumerable_mint, ERC721_Enumerable_burn,
     ERC721_Enumerable_transferFrom, ERC721_Enumerable_safeTransferFrom)
 
-from contracts.ERC165_base import ERC165_supports_interface
+from contracts.openzeppelin.introspection.ERC165 import ERC165_supports_interface
 
 from contracts.Ownable_base import Ownable_initializer, Ownable_only_owner
 

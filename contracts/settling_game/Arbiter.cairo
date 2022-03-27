@@ -1,11 +1,10 @@
 %lang starknet
-%builtins pedersen range_check
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_not_zero
 from starkware.starknet.common.syscalls import get_caller_address
 
-from contracts.settling_game.utils.interfaces import IModuleController
+from contracts.settling_game.interfaces.imodules import IModuleController
 
 # #### Arbiter #####
 #

@@ -1,4 +1,5 @@
 """Utilities for testing Cairo contracts."""
+import pytest
 
 from starkware.cairo.common.hash_state import compute_hash_on_elements
 from starkware.crypto.signature.signature import private_to_stark_key, sign
@@ -10,6 +11,14 @@ from starkware.starknet.business_logic.transaction_execution_objects import Even
 MAX_UINT256 = (2**128 - 1, 2**128 - 1)
 
 TRANSACTION_VERSION = 0
+
+# A stub test that serves no other purpose than to use the ctx_factory
+# fixture which is defined in conftest.py in order to cache it.
+@pytest.mark.asyncio
+async def test_ctx_factory(ctx_factory):
+    ctx = ctx_factory()
+    assert 1 == 1
+
 
 def str_to_felt(text):
     b_text = bytes(text, 'UTF-8')
@@ -36,6 +45,7 @@ def assert_event_emitted(tx_exec_info, from_address, name, data):
         data=data,
     ) in tx_exec_info.raw_events
 
+
 class Signer():
     """
     Utility for sending signed transactions to an Account on Starknet.
@@ -58,11 +68,14 @@ class Signer():
         self.private_key = private_key
         self.public_key = private_to_stark_key(private_key)
 
+
     def sign(self, message_hash):
         return sign(msg_hash=message_hash, priv_key=self.private_key)
 
+
     async def send_transaction(self, account, to, selector_name, calldata, nonce=None, max_fee=0):
         return await self.send_transactions(account, [(to, selector_name, calldata)], nonce, max_fee)
+
 
     async def send_transactions(self, account, calls, nonce=None, max_fee=0):
         if nonce is None:
@@ -90,6 +103,7 @@ def from_call_to_call_array(calls):
         call_array.append(entry)
         calldata.extend(call[2])
     return (call_array, calldata)
+
 
 def hash_multicall(sender, calls, nonce, max_fee):
     hash_array = []

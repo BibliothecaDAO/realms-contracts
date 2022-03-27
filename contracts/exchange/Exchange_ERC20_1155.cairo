@@ -11,8 +11,8 @@ from starkware.cairo.common.uint256 import (
     uint256_le, uint256_lt, uint256_check, uint256_eq
 )
 
-from contracts.token.IERC20 import IERC20
-from contracts.token.ERC1155.IERC1155 import IERC1155
+from contracts.token.ERC20.interfaces.IERC20 import IERC20
+from contracts.token.ERC1155.interfaces.IERC1155 import IERC1155
 from contracts.token.ERC1155.ERC1155_struct import TokenUri
 from contracts.token.ERC1155.ERC1155_base import (
     ERC1155_transfer_from,
