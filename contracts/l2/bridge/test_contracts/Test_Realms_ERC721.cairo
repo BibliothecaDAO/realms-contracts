@@ -140,15 +140,15 @@ func tokenURI{
     return (tokenURI)
 end
 
-@view
-func paused{
-        syscall_ptr: felt*,
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }() -> (paused: felt):
-    let (paused) = Pausable_paused.read()
-    return (paused)
-end
+# @view
+# func paused{
+#         syscall_ptr: felt*,
+#         pedersen_ptr: HashBuiltin*,
+#         range_check_ptr
+#     }() -> (paused: felt):
+#     let (paused) = Pausable_paused.read()
+#     return (paused)
+# end
 
 
 #
@@ -284,11 +284,12 @@ func bridge_mint{
     ):
     alloc_locals
 
+    # Can be called only by L2 Bridge
     let (caller) = get_caller_address()
     let (bridge_address) = l2_bridge_contract_address.read()
-
     assert caller = bridge_address
 
+    # Mint logic here
     ERC721_mint(to, token_id)
 
     return ()
