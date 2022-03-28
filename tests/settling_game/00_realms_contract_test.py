@@ -12,9 +12,9 @@ third_token_id = (0, 13)
 initial_supply = 1000000 * (10 ** 18)
 
 
-@pytest.fixture(scope='module')
-def event_loop():
-    return asyncio.new_event_loop()
+# @pytest.fixture(scope='module')
+# def event_loop():
+#     return asyncio.new_event_loop()
 
 
 @pytest.fixture(scope='module')
