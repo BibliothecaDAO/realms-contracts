@@ -168,6 +168,13 @@ end
 func is_settled(token_id : Uint256) -> (data : felt):
 end
 
+@external
+func set_realm_data{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+        tokenId : Uint256, _realm_data : felt):
+    realm_data.write(tokenId, _realm_data)
+    return ()
+end
+
 @view
 func get_is_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256) -> (is_settled : felt):
@@ -188,22 +195,22 @@ func fetch_realm_data{
         bitwise_ptr : BitwiseBuiltin*}(realm_id : Uint256) -> (realm_stats : RealmData):
     alloc_locals
 
-    let (local data) = realm_data.read(realm_id)
+    let (data) = realm_data.read(realm_id)
 
-    let (local cities) = unpack_data(data, 0, 255)
-    let (local regions) = unpack_data(data, 8, 255)
-    let (local rivers) = unpack_data(data, 16, 255)
-    let (local harbours) = unpack_data(data, 24, 255)
-    let (local resource_number) = unpack_data(data, 32, 255)
-    let (local resource_1) = unpack_data(data, 40, 255)
-    let (local resource_2) = unpack_data(data, 48, 255)
-    let (local resource_3) = unpack_data(data, 56, 255)
-    let (local resource_4) = unpack_data(data, 64, 255)
-    let (local resource_5) = unpack_data(data, 72, 255)
-    let (local resource_6) = unpack_data(data, 80, 255)
-    let (local resource_7) = unpack_data(data, 88, 255)
-    let (local wonder) = unpack_data(data, 96, 255)
-    let (local order) = unpack_data(data, 104, 255)
+    let (cities) = unpack_data(data, 0, 255)
+    let (regions) = unpack_data(data, 8, 255)
+    let (rivers) = unpack_data(data, 16, 255)
+    let (harbours) = unpack_data(data, 24, 255)
+    let (resource_number) = unpack_data(data, 32, 255)
+    let (resource_1) = unpack_data(data, 40, 255)
+    let (resource_2) = unpack_data(data, 48, 255)
+    let (resource_3) = unpack_data(data, 56, 255)
+    let (resource_4) = unpack_data(data, 64, 255)
+    let (resource_5) = unpack_data(data, 72, 255)
+    let (resource_6) = unpack_data(data, 80, 255)
+    let (resource_7) = unpack_data(data, 88, 255)
+    let (wonder) = unpack_data(data, 96, 255)
+    let (order) = unpack_data(data, 104, 255)
 
     let realm_stats = RealmData(
         cities=cities,

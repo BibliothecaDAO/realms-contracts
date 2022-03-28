@@ -18,26 +18,6 @@ from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
 from contracts.settling_game.interfaces.imodules import IModuleController, IL03_Buildings
 
-const HAPPINESS = 25
-const AMPHITHEATER = 1
-const CARPENTER = 1
-const CASTLE = 1
-const DOCK = 1
-const EXPLORERS_GUILD = 1
-const FAIRGROUNDS = 1
-const FARMS = 1
-const GRANARY = 1
-const GRAND_MARKET = 1
-const HOUSING = 1
-const GUILD = 1
-const LOGISTICS_OFFICE = 1
-const OFFICER_ACADEMY = 1
-const PARADE_GROUNDS = 1
-const RESOURCE_FACILITY = 1
-const ROYAL_RESERVE = 1
-const SCHOOL = 1
-const SYMPOSIUM = 1
-
 # #### Module 4A #####
 #                   #
 # Calculator Logic  #
@@ -113,6 +93,8 @@ func calculateFood{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
         buildings_logic_address, tokenId)
 
     # food = 25 + (# of farms) + (2 * # of granaries) + (6 * # of fairgrounds) + (6 * # of royal reserves) + (6 * # of grand markets) - (# of city structures) - (# of troops)
+
+    # TODO @milan add in # of troops
     let food = 25 + (RealmBuildings.Farms) + (RealmBuildings.Granary) + (RealmBuildings.Fairgrounds * 5) + (RealmBuildings.RoyalReserve * 5) - (20)
     return (food=food)
 end

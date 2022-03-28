@@ -14,16 +14,16 @@ buildings = [
 ]
 
 
-realms = json.load(open('scripts/realms.json'))
+realms = json.load(open('data/realms.json'))
 
-resources = json.load(open('scripts/resources.json'))
+resources = json.load(open('data/resources.json'))
 
-orders = json.load(open('scripts/orders.json'))
+orders = json.load(open('data/orders.json'))
 
-wonders = json.load(open('scripts/wonders.json'))
+wonders = json.load(open('data/wonders.json'))
 
 
-def decimalToBinary(n, bitsize):
+def decimalToBinary(n, chunksize):
     bit = []
 
     for x in n:
@@ -33,8 +33,8 @@ def decimalToBinary(n, bitsize):
     reversed_bit = ""
 
     for i in reversed(bit):
-        if len(i) < bitsize:
-            difference = bitsize - len(i)
+        if len(i) < chunksize:
+            difference = chunksize - len(i)
             reversed_bit += ("0" * difference) + i
         else:
             reversed_bit += i
@@ -42,11 +42,11 @@ def decimalToBinary(n, bitsize):
     return int(reversed_bit, 2)
 
 
-def createOutput(value, bitsize):
+def createOutput(value, chunksize):
     # print(value)
     for index, x in enumerate(value):
-        value[index]["costs_bitmap"] = decimalToBinary(x['costs'], bitsize)
-        value[index]["ids_bitmap"] = decimalToBinary(x['ids'], bitsize)
+        value[index]["costs_bitmap"] = decimalToBinary(x['costs'], chunksize)
+        value[index]["ids_bitmap"] = decimalToBinary(x['ids'], chunksize)
     return value
 
 
@@ -108,7 +108,7 @@ def mapRealm(value):
 
 if __name__ == '__main__':
 
-    f = open("scripts/realms_bit.json", "a")
+    f = open("data/realms_bit.json", "a")
     output = []
     for index in range(8000):
         output.append({str(index + 1): mapRealm(realms[str(index + 1)])})

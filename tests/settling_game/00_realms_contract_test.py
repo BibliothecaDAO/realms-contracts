@@ -152,14 +152,14 @@ async def test_mint(game_factory, number_of_tokens, tokens):
     # timeleft = await resources_logic.getAvailableResources().call()
     # print(f'{timeleft.result.time}')
 
-    happiness = await calculator_logic.calculateHappiness(uint(5042)).call()
+    happiness = await calculator_logic.calculateHappiness(uint(5042)).invoke()
     print(f'{happiness.result.happiness}')
     await signer.send_transaction(
         account=accounts[0], to=settling_state.contract_address, selector_name='set_approval', calldata=[]
     )
 
     # check transfer
-    execution_info = await realms.balanceOf(accounts[0].contract_address).call()
+    execution_info = await realms.balanceOf(accounts[0].contract_address).invoke()
     print(f'Realms Balance for owner is: {execution_info.result.balance}')
 
     # claim resources
@@ -167,11 +167,11 @@ async def test_mint(game_factory, number_of_tokens, tokens):
         account=accounts[0], to=resources_logic.contract_address, selector_name='claim_resources', calldata=[*uint(5042)]
     )
 
-    player_resource_value = await resources.balanceOf(accounts[0].contract_address, 1).call()
-    player_resource_value_1 = await resources.balanceOf(accounts[0].contract_address, 2).call()
-    player_resource_value_2 = await resources.balanceOf(accounts[0].contract_address, 3).call()
-    player_resource_value_3 = await resources.balanceOf(accounts[0].contract_address, 4).call()
-    player_resource_value_4 = await resources.balanceOf(accounts[0].contract_address, 5).call()
+    player_resource_value = await resources.balanceOf(accounts[0].contract_address, 1).invoke()
+    player_resource_value_1 = await resources.balanceOf(accounts[0].contract_address, 2).invoke()
+    player_resource_value_2 = await resources.balanceOf(accounts[0].contract_address, 3).invoke()
+    player_resource_value_3 = await resources.balanceOf(accounts[0].contract_address, 4).invoke()
+    player_resource_value_4 = await resources.balanceOf(accounts[0].contract_address, 5).invoke()
     print(
         f'Resource 1 Balance for player is: {player_resource_value.result.balance}')
     print(
@@ -192,11 +192,11 @@ async def test_mint(game_factory, number_of_tokens, tokens):
         account=accounts[0], to=resources_logic.contract_address, selector_name='upgrade_resource', calldata=[*uint(5042), 5]
     )
 
-    _player_resource_value = await resources.balanceOf(accounts[0].contract_address, 5).call()
-    _player_resource_value_10 = await resources.balanceOf(accounts[0].contract_address, 10).call()
-    _player_resource_value_12 = await resources.balanceOf(accounts[0].contract_address, 12).call()
-    _player_resource_value_21 = await resources.balanceOf(accounts[0].contract_address, 21).call()
-    _player_resource_value_9 = await resources.balanceOf(accounts[0].contract_address, 9).call()
+    _player_resource_value = await resources.balanceOf(accounts[0].contract_address, 5).invoke()
+    _player_resource_value_10 = await resources.balanceOf(accounts[0].contract_address, 10).invoke()
+    _player_resource_value_12 = await resources.balanceOf(accounts[0].contract_address, 12).invoke()
+    _player_resource_value_21 = await resources.balanceOf(accounts[0].contract_address, 21).invoke()
+    _player_resource_value_9 = await resources.balanceOf(accounts[0].contract_address, 9).invoke()
     print(
         f'BURNING!')
     print(
