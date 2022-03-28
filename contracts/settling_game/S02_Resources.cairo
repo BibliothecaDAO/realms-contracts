@@ -20,7 +20,7 @@ from contracts.settling_game.interfaces.imodules import IModuleController
 from contracts.settling_game.utils.game_structs import RealmData, ResourceUpgradeIds
 from contracts.settling_game.utils.general import unpack_data
 
-# #### Module 2B ##########
+# #### Module 2B #########
 #                        #
 # Claim & Resource State #
 #                        #
@@ -70,7 +70,9 @@ func set_resource_level{
     return ()
 end
 
-# ##### GETTERS ######
+#
+# GETTERS
+#
 
 @external
 func get_resource_level{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(

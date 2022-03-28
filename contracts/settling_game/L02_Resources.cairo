@@ -37,7 +37,6 @@ end
 # Claims Resources
 # Checks user owns sRealm of Realm
 # Claims resources allocated
-
 @external
 func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256):
