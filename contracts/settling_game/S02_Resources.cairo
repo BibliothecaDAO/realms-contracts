@@ -35,7 +35,7 @@ func resource_levels(token_id : Uint256, resource_id : felt) -> (level : felt):
 end
 
 @storage_var
-func resource_upgrade_cost(token_id : Uint256, resource_id : felt) -> (level : felt):
+func resource_upgrade_cost(resource_id : felt) -> (value : felt):
 end
 
 @storage_var
@@ -56,6 +56,15 @@ func set_resource_upgrade_ids{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
         bitwise_ptr : BitwiseBuiltin*}(resource_id : felt, _resource_upgrade_ids : felt) -> ():
     resource_upgrade_ids.write(resource_id, _resource_upgrade_ids)
+
+    return ()
+end
+
+@external
+func set_resource_upgrade_cost{
+        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
+        bitwise_ptr : BitwiseBuiltin*}(resource_id : felt, _resource_upgrade_values : felt) -> ():
+    resource_upgrade_cost.write(resource_id, _resource_upgrade_values)
 
     return ()
 end
@@ -83,10 +92,11 @@ func get_resource_level{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
 
     let (level) = resource_levels.read(token_id, resource)
 
+    # TODO Change to dynamic figure
     if level == 0:
         assert l = 100
     else:
-        assert l = level
+        assert l = level * 100
     end
 
     return (level=l)

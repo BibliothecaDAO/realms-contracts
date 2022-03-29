@@ -12,6 +12,8 @@ from contracts.settling_game.utils.general import scale
 from contracts.settling_game.utils.game_structs import (
     RealmBuildings, RealmBuildingCostIds, RealmBuildingCostValues)
 
+from contracts.settling_game.utils.constants import TRUE, FALSE
+
 from contracts.token.IERC20 import IERC20
 from contracts.token.ERC1155.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
@@ -21,11 +23,11 @@ from contracts.settling_game.interfaces.imodules import IModuleController
 from contracts.settling_game.utils.library import (
     MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
 
-# #### Module 3A #####
-#                   #
-# Buildings Logic   #
-#                   #
-#####################
+# ____MODULE_L03___BUILDING_STATE
+
+###########
+# STORAGE #
+###########
 
 @storage_var
 func building_cost_ids(building_id : felt) -> (cost_ids : felt):
@@ -39,6 +41,10 @@ end
 func realm_buildings(token_id : Uint256) -> (buildings : felt):
 end
 
+###############
+# CONSTRUCTOR #
+###############
+
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_of_controller : felt):
@@ -47,35 +53,40 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     return ()
 end
 
-# ##### SETTERS ######
+###########
+# SETTERS #
+###########
 
 @external
 func set_building_cost_ids{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        building_id : felt, cost : felt):
+        building_id : felt, cost : felt) -> (success : felt):
     building_cost_ids.write(building_id, cost)
 
-    return ()
+    return (TRUE)
 end
 
 @external
 func set_building_cost_values{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        building_id : felt, cost : felt):
+        building_id : felt, cost : felt) -> (success : felt):
     building_cost_values.write(building_id, cost)
 
-    return ()
+    return (TRUE)
 end
 
 @external
 func set_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256, buildings_value : felt):
+        token_id : Uint256, buildings_value : felt) -> (success : felt):
     MODULE_only_approved()
     realm_buildings.write(token_id, buildings_value)
 
-    return ()
+    return (TRUE)
 end
 
-# ##### GETTERS ######
+###########
+# GETTERS #
+###########
 
+# GETS BUILDING COST IDS
 @external
 func get_building_cost_ids{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         building_id : felt) -> (cost : felt):
@@ -84,6 +95,7 @@ func get_building_cost_ids{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     return (cost=ids)
 end
 
+# GETS BUILDING COSTS VALUES
 @external
 func get_building_cost_values{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         building_id : felt) -> (cost : felt):
@@ -92,6 +104,7 @@ func get_building_cost_values{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     return (cost=cost)
 end
 
+# GETS REALM BUILDS
 @external
 func get_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256) -> (buildings : felt):

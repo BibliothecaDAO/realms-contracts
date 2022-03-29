@@ -11,17 +11,17 @@ from starkware.cairo.common.uint256 import (
 
 from contracts.settling_game.interfaces.imodules import IModuleController
 
-#
-# Storage
-#
+###########
+# STORAGE #
+###########
 
 @storage_var
 func controller_address() -> (address : felt):
 end
 
-#
-# Init
-#
+########
+# INIT #
+########
 
 func MODULE_initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_of_controller : felt):
@@ -29,9 +29,9 @@ func MODULE_initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     return ()
 end
 
-#
-# Getters
-#
+###########
+# GETTERS #
+###########
 
 func MODULE_controller_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         ) -> (address : felt):
@@ -39,16 +39,15 @@ func MODULE_controller_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     return (address)
 end
 
-#
-# Internals
-#
+##########
+# CHECKS #
+##########
 
 func MODULE_only_approved{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    # Get the address of the module trying to write to this contract.
     let (caller) = get_caller_address()
     let (controller) = controller_address.read()
-    # Pass this address on to the ModuleController.
-    # "Does this address have write-authority here?"
+
+    # Pass this address on to the ModuleController
     # Will revert the transaction if not.
     IModuleController.has_write_access(
         contract_address=controller, address_attempting_to_write=caller)

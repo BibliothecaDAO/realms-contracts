@@ -32,7 +32,7 @@ func Settled(owner : felt, token_id : Uint256):
 end
 
 @event
-func UnSettled(owner : felt, spender : felt, value : Uint256):
+func UnSettled(owner : felt, token_id : Uint256):
 end
 
 ###############

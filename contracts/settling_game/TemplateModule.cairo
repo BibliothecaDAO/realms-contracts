@@ -5,17 +5,19 @@ from starkware.starknet.common.syscalls import get_caller_address
 
 from contracts.settling_game.interfaces.imodules import IModuleController
 
-##### Module XX #####
+from contracts.settling_game.utils.library import (
+    MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
+
+# ____MODULE_XXX___BUILDING_STATE
 #
 # This module [module functional description]
 #
 # It predominantly is used by modules [] and uses modules [].
 #
-####################
 
 # Steps - Copy and modify this template contract for new modules.
 # 1. Assign the new module the next available number in the contracts/ folder.
-# 2. Ensure state variables and application logic are in different modules.
+# 2. Ensure state variables and application logic are in different modules. L & S
 # 3. Expose any modifiable state variables with helper functions 'var_x_write()'.
 # 4. Import any module dependencies from interfaces.imodules (above).
 # 5. Document which modules this module will interact with (above).
@@ -25,53 +27,34 @@ from contracts.settling_game.interfaces.imodules import IModuleController
 # 9. +/- Add useful interfaces for this module to interfaces/imodules.cairo.
 # 10. Delete this set of instructions.
 
-@storage_var
-func controller_address() -> (address : felt):
-end
+###############
+# CONSTRUCTOR #
+###############
 
-
-# Called on deployment only.
 @constructor
-func constructor{
-        syscall_ptr : felt*,
-        pedersen_ptr : HashBuiltin*,
-        range_check_ptr
-    }(
-        address_of_controller : felt
-    ):
+func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        address_of_controller : felt):
     # Store the address of the only fixed contract in the system.
-    controller_address.write(address_of_controller)
+    MODULE_initializer(address_of_controller)
     return ()
 end
 
+############
+# EXTERNAL #
+############
 
 # Called by another module to update a global variable.
 @external
-func update_value{
-        syscall_ptr : felt*,
-        pedersen_ptr : HashBuiltin*,
-        range_check_ptr
-    }():
+func update_value{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     # TODO Customise.
-    only_approved()
+    MODULE_only_approved()
     return ()
 end
 
+###########
+# GETTERS #
+###########
 
-# Checks write-permission of the calling contract.
-func only_approved{
-        syscall_ptr : felt*,
-        pedersen_ptr : HashBuiltin*,
-        range_check_ptr
-    }():
-    # Get the address of the module trying to write to this contract.
-    let (caller) = get_caller_address()
-    let (controller) = controller_address.read()
-    # Pass this address on to the ModuleController.
-    # "Does this address have write-authority here?"
-    # Will revert the transaction if not.
-    IModuleController.has_write_access(
-        contract_address=controller,
-        address_attempting_to_write=caller)
-    return ()
-end
+###########
+# SETTERS #
+###########

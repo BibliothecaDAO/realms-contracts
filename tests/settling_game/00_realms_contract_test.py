@@ -62,10 +62,10 @@ async def game_factory(account_factory):
         source="contracts/token/ERC1155/ERC1155_Mintable.cairo",
         constructor_calldata=[
             admin_account.contract_address,
-            2,
-            1, 2,
-            2,
-            1000, 5000
+            6,
+            1, 2, 3, 4, 5, 6,
+            6,
+            100, 100, 100, 100, 100, 100
         ])
 
     # The Controller is the only unchangeable contract.
@@ -124,7 +124,11 @@ async def game_factory(account_factory):
 ])
 @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
 async def test_mint_realm(game_factory, number_of_tokens, tokens):
-    _, accounts, _, _, _, settling_logic, settling_state, realms, _, _, _, _, _, _, _, calculator_logic = game_factory
+    starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state, s_realms, buildings_logic, buildings_state, calculator_logic = game_factory
+
+    ########
+    # MINT #
+    ########
 
     await signer.send_transaction(
         accounts[0], realms.contract_address, 'mint', [
@@ -148,7 +152,10 @@ async def test_mint_realm(game_factory, number_of_tokens, tokens):
         account=accounts[0], to=realms.contract_address, selector_name='setApprovalForAll', calldata=[settling_logic.contract_address, 1]
     )
 
-    # settle Realm
+    ##########
+    # SETTLE #
+    ##########
+
     await signer.send_transaction(
         account=accounts[0], to=settling_logic.contract_address, selector_name='settle', calldata=[*uint(5042)]
     )
@@ -160,78 +167,54 @@ async def test_mint_realm(game_factory, number_of_tokens, tokens):
     print(
         f'🏰 Realms Balance for owner after Staking: {balance_of.result.balance[0]}')
 
-    # timeleft = await resources_logic.getAvailableResources().call()
-    # print(f'{timeleft.result.time}')
+    #############
+    # HAPPINESS #
+    #############
 
-    ############
-    # HAPPINESS
-    ############
-    # happiness = await calculator_logic.calculateHappiness(uint(5042)).invoke()
-    # assert happiness.result.happiness == 25
-    # print(f'😊 Happiness level is {happiness.result.happiness}')
+    happiness = await calculator_logic.calculateHappiness(uint(5042)).invoke()
+    assert happiness.result.happiness == 25
+    print(f'😊 Happiness level is {happiness.result.happiness}')
 
-    # await signer.send_transaction(
-    #     account=accounts[0], to=settling_state.contract_address, selector_name='set_approval', calldata=[]
-    # )
+    await signer.send_transaction(
+        account=accounts[0], to=settling_state.contract_address, selector_name='set_approval', calldata=[]
+    )
 
+    #############
+    # RESOURCES #
+    #############
 
-# @pytest.mark.asyncio
-# @pytest.mark.parametrize('tokens, number_of_tokens', [
-#     [first_token_id, 1]
-# ])
-# @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
-# async def test_claim_resources(game_factory, number_of_tokens, tokens):
-#     starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state, s_realms, buildings_logic, buildings_state, calculator_logic = game_factory
-
-#     # claim resources
-#     await signer.send_transaction(
-#         account=accounts[0], to=resources_logic.contract_address, selector_name='claim_resources', calldata=[*uint(5042)]
-#     )
-
-#     player_resource_value = await resources.balanceOf(accounts[0].contract_address, 1).invoke()
-#     player_resource_value_1 = await resources.balanceOf(accounts[0].contract_address, 2).invoke()
-#     player_resource_value_2 = await resources.balanceOf(accounts[0].contract_address, 3).invoke()
-#     player_resource_value_3 = await resources.balanceOf(accounts[0].contract_address, 4).invoke()
-#     player_resource_value_4 = await resources.balanceOf(accounts[0].contract_address, 5).invoke()
-#     print(
-#         f'Resource 1 Balance for player is: {player_resource_value.result.balance}')
-#     print(
-#         f'Resource 2 Balance for player is: {player_resource_value_1.result.balance}')
-#     print(
-#         f'Resource 3 Balance for player is: {player_resource_value_2.result.balance}')
-#     print(
-#         f'Resource 4 Balance for player is: {player_resource_value_3.result.balance}')
-#     print(
-#         f'Resource 5 Balance for player is: {player_resource_value_4.result.balance}')
-
-    # # set resource upgrade IDS
-    # await signer.send_transaction(
-    #     account=accounts[0], to=resources_state.contract_address, selector_name='set_resource_upgrade_ids', calldata=[5, 47408855671140352459265]
-    # )
-    # # # upgrade resource
-    # await signer.send_transaction(
-    #     account=accounts[0], to=resources_logic.contract_address, selector_name='upgrade_resource', calldata=[*uint(5042), 5]
-    # )
-
-    # _player_resource_value = await resources.balanceOf(accounts[0].contract_address, 5).invoke()
-    # _player_resource_value_10 = await resources.balanceOf(accounts[0].contract_address, 10).invoke()
-    # _player_resource_value_12 = await resources.balanceOf(accounts[0].contract_address, 12).invoke()
-    # _player_resource_value_21 = await resources.balanceOf(accounts[0].contract_address, 21).invoke()
-    # _player_resource_value_9 = await resources.balanceOf(accounts[0].contract_address, 9).invoke()
-    # print(
-    #     f'BURNING!')
-    # print(
-    #     f'Resource 5 Balance for player is: {_player_resource_value.result.balance}')
-    # print(
-    #     f'Resource 10 Balance for player is: {_player_resource_value_10.result.balance}')
-    # print(
-    #     f'Resource 12 Balance for player is: {_player_resource_value_12.result.balance}')
-    # print(
-    #     f'Resource 21 Balance for player is: {_player_resource_value_21.result.balance}')
-    # print(
-    #     f'Resource 9 Balance for player is: {_player_resource_value_9.result.balance}')
+    await signer.send_transaction(
+        account=accounts[0], to=resources_logic.contract_address, selector_name='claim_resources', calldata=[*uint(5042)]
+    )
+    for index in range(22):
+        player_resource_value = await resources.balanceOf(accounts[0].contract_address, index + 1).invoke()
+        print(
+            f'🔥 Resource {index + 1} balance is: {player_resource_value.result.balance}')
 
     # set resource upgrade IDS
+    await signer.send_transaction(
+        account=accounts[0], to=resources_state.contract_address, selector_name='set_resource_upgrade_ids', calldata=[5, 21542142465]
+    )
+
+    await signer.send_transaction(
+        account=accounts[0], to=resources_state.contract_address, selector_name='set_resource_upgrade_cost', calldata=[5, 43118103050]
+    )
+
+    # # upgrade resource
+    await signer.send_transaction(
+        account=accounts[0], to=resources_logic.contract_address, selector_name='upgrade_resource', calldata=[*uint(5042), 5]
+    )
+
+    for index in range(22):
+        player_resource_value = await resources.balanceOf(accounts[0].contract_address, index + 1).invoke()
+        print(
+            f'🔥 Resource {index + 1} balance is: {player_resource_value.result.balance}')
+
+    #############
+    # BUILDINGS #
+    #############
+
+    # # set resource upgrade IDS
     # await signer.send_transaction(
     #     account=accounts[0], to=buildings_state.contract_address, selector_name='set_building_cost_ids', calldata=[1, 21542142465]
     # )
@@ -241,13 +224,13 @@ async def test_mint_realm(game_factory, number_of_tokens, tokens):
     #     account=accounts[0], to=buildings_state.contract_address, selector_name='set_building_cost_values', calldata=[1, 2815437129687050]
     # )
 
-    # ids = await buildings_logic.fetch_building_cost_ids(0).call()
-    # values = await buildings_logic.fetch_building_cost_values(0).call()
+    # ids = await buildings_logic.fetch_building_cost_ids(1).call()
+    # values = await buildings_logic.fetch_building_cost_values(1).call()
 
     # print(
-    #     f'Resource 9 Balance for player is: {ids.result[0]}')
+    #     f'Building 1 Cost IDS: {ids.result[0]}')
     # print(
-    #     f'Resource 9 Balance for player is: {values.result}')
+    #     f'Building 1 Cost Values: {values.result[0]}')
 
     # # create building
     # await signer.send_transaction(
@@ -260,7 +243,10 @@ async def test_mint_realm(game_factory, number_of_tokens, tokens):
     # print(
     #     f'Buildings: {values.result.realm_buildings}')
 
-    # # # settle Realm
+    # ##################
+    # # UNSETTLE REALM #
+    # ##################
+
     # await signer.send_transaction(
     #     account=accounts[0], to=settling_logic.contract_address, selector_name='unsettle', calldata=[*uint(5042)]
     # )
