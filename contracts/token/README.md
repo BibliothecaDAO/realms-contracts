@@ -57,7 +57,7 @@ Clone this repo and use our docker shell to interact with starknet:
 ```
 git clone git@github.com:BibliothecaForAdventurers/realms-contracts.git
 cd realms-contracts
-bin/shell starknet --version
+scripts/shell starknet --version
 ```
 
 The CLI allows you to deploy to StarkNet and read/write to contracts
@@ -106,12 +106,12 @@ nile compile contracts/token/ERC20.cairo
 
 ### Test
 
-Run all github actions tests: `bin/test`
+Run all github actions tests: `scripts/test`
 
 Run individual tests
 
 ```
-bin/shell pytest -s contracts/game_utils/grid_position_test.py
+scripts/shell pytest -s contracts/game_utils/grid_position_test.py
 ```
 
 ### Deploy
@@ -127,7 +127,7 @@ and handles passing addresses between the modules to create a
 permissions system.
 
 ```
-bin/deploy
+scripts/deploy
 ```
 </details>
 

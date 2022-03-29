@@ -1,4 +1,0 @@
-#!/bin/bash
-set -eu
-
-pytest -n auto -W ignore::DeprecationWarning

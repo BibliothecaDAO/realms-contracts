@@ -1,0 +1,6 @@
+#!/bin/bash
+set -eu
+
+export CAIRO_PATH=/workspaces/realms-contracts/openzeppelin/src
+
+nile compile

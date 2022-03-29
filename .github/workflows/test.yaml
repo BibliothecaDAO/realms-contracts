@@ -15,6 +15,6 @@ jobs:
       - name: install extra python dependencies
         run: pip3 install -U 'pytest-xdist[psutil]' dill cairo-lang==0.8.0 cairo-nile==0.5.0
       - name: compile
-        run: bin/compile
+        run: scripts/compile
       - name: test
-        run: bin/test
+        run: scripts/test
