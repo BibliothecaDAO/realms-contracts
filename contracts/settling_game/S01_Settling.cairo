@@ -14,15 +14,21 @@ from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.utils.library import (
     MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
 
-# #### Module 1B ###
-#                 #
-# Settling State  #
-#                 #
-###################
+from contracts.settling_game.utils.constants import TRUE, FALSE
+
+# ___MODULE_S01___SETTLING_STATE
+
+##########
+# EVENTS #
+##########
 
 @storage_var
 func time_staked(token_id : Uint256) -> (time : felt):
 end
+
+###############
+# CONSTRUCTOR #
+###############
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -32,39 +38,37 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     return ()
 end
 
-#
-# Setters
-#
+###########
+# SETTERS #
+###########
 
 @external
 func set_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256, timestamp : felt):
+        token_id : Uint256, timestamp : felt) -> (timestamp : felt):
     MODULE_only_approved()
 
     time_staked.write(token_id, timestamp)
-    return ()
+    return (timestamp)
 end
 
 @external
-func set_approval{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+func set_approval{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+        success : felt):
     let (controller) = MODULE_controller_address()
 
-    # realms address
     let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
-
-    # settle address
     let (settle_logic_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=1)
 
-    # Allow logic to access the erc721 stored
+    # TODO: CHECK IF NEEDED
     realms_IERC721.setApprovalForAll(realms_address, settle_logic_address, 1)
 
-    return ()
+    return (TRUE)
 end
 
-#
-# Getters
-#
+###########
+# GETTERS #
+###########
 
 @external
 func get_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(

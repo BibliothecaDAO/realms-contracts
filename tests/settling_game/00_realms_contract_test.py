@@ -117,10 +117,6 @@ async def game_factory(account_factory):
 
     return starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state, s_realms, buildings_logic, buildings_state, calculator_logic
 
-#
-# Mint Realms to Owner
-#
-
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('tokens, number_of_tokens', [
@@ -130,7 +126,6 @@ async def game_factory(account_factory):
 async def test_mint_realm(game_factory, number_of_tokens, tokens):
     _, accounts, _, _, _, settling_logic, settling_state, realms, _, _, _, _, _, _, _, calculator_logic = game_factory
 
-    # mint realm
     await signer.send_transaction(
         accounts[0], realms.contract_address, 'mint', [
             accounts[0].contract_address, *tokens, 2123, map_realm(json_realms['1'])]
