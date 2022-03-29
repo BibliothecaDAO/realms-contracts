@@ -2,7 +2,7 @@
 
 from starkware.cairo.common.uint256 import Uint256
 
-from contracts.openzeppelin.introspection.ERC165 import ERC165_register_interface
+from openzeppelin.introspection.ERC165 import ERC165_register_interface
 
 @contract_interface
 namespace IERC721:

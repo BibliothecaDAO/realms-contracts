@@ -15,7 +15,7 @@ from contracts.token.ERC721_base import (
     ERC721_transferFrom,
 )
 
-from contracts.openzeppelin.introspection.ERC165 import ERC165_register_interface
+from openzeppelin.introspection.ERC165 import ERC165_register_interface
 
 from contracts.utils.constants import TRUE
 

@@ -21,9 +21,9 @@ from contracts.settling_game.utils.library import (
 # 3. Expose any modifiable state variables with helper functions 'var_x_write()'.
 # 4. Import any module dependencies from interfaces.imodules (above).
 # 5. Document which modules this module will interact with (above).
-# 6. Add deployment line to bin/compile bin/deploy.
+# 6. Add deployment line to scripts/compile scripts/deploy.
 # 7. Document which modules this module requires write access to.
-# 8. Write tests in testing/XX_test.py and add to bin/test.
+# 8. Write tests in testing/XX_test.py and add to scripts/test.
 # 9. +/- Add useful interfaces for this module to interfaces/imodules.cairo.
 # 10. Delete this set of instructions.
 

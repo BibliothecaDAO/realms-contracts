@@ -23,7 +23,7 @@ from contracts.token.ERC721_base import (
     ERC721_setTokenURI
 )
 
-from contracts.openzeppelin.introspection.ERC165 import ERC165_supports_interface
+from openzeppelin.introspection.ERC165 import ERC165_supports_interface
 
 from contracts.Ownable_base import (
     Ownable_initializer,
