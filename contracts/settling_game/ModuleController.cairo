@@ -3,6 +3,9 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_not_zero
 from starkware.starknet.common.syscalls import get_caller_address
+from contracts.settling_game.utils.game_structs import ModuleIds
+
+from contracts.settling_game.utils.constants import TRUE, FALSE
 
 # #### Controller #####
 #
@@ -77,19 +80,19 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
         _realms_address : felt, _treasury_address : felt, _s_realms_address : felt):
     arbiter.write(arbiter_address)
 
-    # TODO: add 'set_write_access' here for all the module
     # write patterns known at deployment. E.g., 1->2, 1->3, 5->6.
 
     # settling to state
-    can_write_to.write(1, 2, 1)
+    can_write_to.write(ModuleIds.L01_Settling, ModuleIds.S01_Settling, TRUE)
 
     # resources logic to state
-    can_write_to.write(3, 4, 1)
+    can_write_to.write(ModuleIds.L02_Resources, ModuleIds.S02_Resources, TRUE)
 
     # buildings to state
-    can_write_to.write(5, 6, 1)
+    can_write_to.write(ModuleIds.L03_Buildings, ModuleIds.S03_Buildings, TRUE)
 
     # Contracts
+    # TODO: Move to namespaces for easy upgradablity
     lords_address.write(_lords_address)
     resources_address.write(_resources_address)
     realms_address.write(_realms_address)
@@ -128,32 +131,32 @@ func set_initial_module_addresses{
     only_arbiter()
 
     # # Settling Logic
-    address_of_module_id.write(1, module_01_addr)
-    module_id_of_address.write(module_01_addr, 1)
+    address_of_module_id.write(ModuleIds.L01_Settling, module_01_addr)
+    module_id_of_address.write(module_01_addr, ModuleIds.L01_Settling)
 
     # # Settling State
-    address_of_module_id.write(2, module_02_addr)
-    module_id_of_address.write(module_02_addr, 2)
+    address_of_module_id.write(ModuleIds.S01_Settling, module_02_addr)
+    module_id_of_address.write(module_02_addr, ModuleIds.S01_Settling)
 
     # # Resources Logic
-    address_of_module_id.write(3, module_03_addr)
-    module_id_of_address.write(module_03_addr, 3)
+    address_of_module_id.write(ModuleIds.L02_Resources, module_03_addr)
+    module_id_of_address.write(module_03_addr, ModuleIds.L02_Resources)
 
     # # Resources State
-    address_of_module_id.write(4, module_04_addr)
-    module_id_of_address.write(module_04_addr, 4)
+    address_of_module_id.write(ModuleIds.S02_Resources, module_04_addr)
+    module_id_of_address.write(module_04_addr, ModuleIds.S02_Resources)
 
     # # Buildings Logic
-    address_of_module_id.write(5, module_05_addr)
-    module_id_of_address.write(module_05_addr, 5)
+    address_of_module_id.write(ModuleIds.L03_Buildings, module_05_addr)
+    module_id_of_address.write(module_05_addr, ModuleIds.L03_Buildings)
 
     # # Buildings State
-    address_of_module_id.write(6, module_06_addr)
-    module_id_of_address.write(module_06_addr, 6)
+    address_of_module_id.write(ModuleIds.S03_Buildings, module_06_addr)
+    module_id_of_address.write(module_06_addr, ModuleIds.S03_Buildings)
 
     # # Calculator Logic
-    address_of_module_id.write(7, module_07_addr)
-    module_id_of_address.write(module_07_addr, 7)
+    address_of_module_id.write(ModuleIds.L04_Calculator, module_07_addr)
+    module_id_of_address.write(module_07_addr, ModuleIds.L04_Calculator)
     return ()
 end
 

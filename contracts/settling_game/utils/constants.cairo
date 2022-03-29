@@ -41,3 +41,6 @@ const SHIFT_6_17 = 2 ** 96
 const SHIFT_6_18 = 2 ** 102
 const SHIFT_6_19 = 2 ** 108
 const SHIFT_6_20 = 2 ** 114
+
+const TRUE = 1
+const FALSE = 0

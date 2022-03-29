@@ -114,6 +114,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     # check days greater than zero
     assert_not_zero(days)
 
+    # TODO: change to safemath functions
     assert resource_ids[0] = realms_data.resource_1
     assert user_mint[0] = ((r_1 * days) * 80) / 100
     assert treasury_mint[0] = ((r_1 * days) * 20) / 100
@@ -184,6 +185,8 @@ func getAvailableResources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
 
     # dummy numbers as no blocktime on local machine
     # this will equal 24 days uncollected
+
+    # TODO: Return unclaimed time back to felt
     let days = (86400 - 3600) / 3600
 
     return (time=days)
@@ -211,11 +214,14 @@ func upgrade_resource{
     let (resources_state_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.S02_Resources)
 
+    # get resource level
     let (level) = IS02_Resources.get_resource_level(resources_state_address, token_id, resource)
 
+    # get upgrade costs
     let (upgrade_cost) = IS02_Resources.get_resource_upgrade_cost(
         resources_state_address, token_id, resource)
 
+    # get upgrade ids
     let (resource_upgrade_ids : ResourceUpgradeIds) = fetch_resource_upgrade_ids(resource)
 
     # create array of ids and values

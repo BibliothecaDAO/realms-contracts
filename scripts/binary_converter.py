@@ -50,7 +50,7 @@ def createOutput(value, chunksize):
     return value
 
 
-def mapRealm(value):
+def map_realm(value):
     traits = []
     resourceIds = []
     wonder = []
@@ -101,8 +101,6 @@ def mapRealm(value):
 
     # concat all together
     meta = traits + resourceLength + resourceIds + wonder + order
-    print(meta)
-    print(decimalToBinary(meta, 8))
     return decimalToBinary(meta, 8)
 
 
@@ -111,7 +109,7 @@ if __name__ == '__main__':
     f = open("data/realms_bit.json", "a")
     output = []
     for index in range(8000):
-        output.append({str(index + 1): mapRealm(realms[str(index + 1)])})
+        output.append({str(index + 1): map_realm(realms[str(index + 1)])})
 
     f.write(str(output))
 

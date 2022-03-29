@@ -197,10 +197,10 @@ func fetch_realm_data{
 
     let (data) = realm_data.read(realm_id)
 
-    let (cities) = unpack_data(data, 0, 255)
-    let (regions) = unpack_data(data, 8, 255)
-    let (rivers) = unpack_data(data, 16, 255)
-    let (harbours) = unpack_data(data, 24, 255)
+    let (regions) = unpack_data(data, 0, 255)
+    let (cities) = unpack_data(data, 8, 255)
+    let (harbours) = unpack_data(data, 16, 255)
+    let (rivers) = unpack_data(data, 24, 255)
     let (resource_number) = unpack_data(data, 32, 255)
     let (resource_1) = unpack_data(data, 40, 255)
     let (resource_2) = unpack_data(data, 48, 255)
@@ -213,10 +213,10 @@ func fetch_realm_data{
     let (order) = unpack_data(data, 104, 255)
 
     let realm_stats = RealmData(
-        cities=cities,
         regions=regions,
-        rivers=rivers,
+        cities=cities,
         harbours=harbours,
+        rivers=rivers,
         resource_number=resource_number,
         resource_1=resource_1,
         resource_2=resource_2,

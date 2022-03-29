@@ -17,10 +17,10 @@ struct RealmStatistics:
 end
 
 struct RealmData:
-    member cities : felt  #
     member regions : felt  #
-    member rivers : felt  #
+    member cities : felt  #
     member harbours : felt  #
+    member rivers : felt  #
     member resource_number : felt  #
     member resource_1 : felt  #
     member resource_2 : felt  #

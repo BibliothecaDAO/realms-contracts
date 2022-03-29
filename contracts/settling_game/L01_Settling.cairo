@@ -17,21 +17,20 @@ from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
 from contracts.settling_game.interfaces.imodules import IModuleController, IS01_Settling
 
+from contracts.settling_game.utils.library import (
+    MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
+
 # #### Module 1A ###
 #                 #
 # Settling Logic  #
 #                 #
 ###################
 
-@storage_var
-func controller_address() -> (address : felt):
-end
-
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_of_controller : felt):
     # Store the address of the only fixed contract in the system.
-    controller_address.write(address_of_controller)
+    MODULE_initializer(address_of_controller)
     return ()
 end
 
@@ -42,7 +41,7 @@ end
 func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(token_id : Uint256):
     alloc_locals
     let (caller) = get_caller_address()
-    let (controller) = controller_address.read()
+    let (controller) = MODULE_controller_address()
     let (block_timestamp) = get_block_timestamp()
     # realms address
     let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
@@ -75,7 +74,7 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
         token_id : Uint256):
     alloc_locals
     let (caller) = get_caller_address()
-    let (controller) = controller_address.read()
+    let (controller) = MODULE_controller_address()
     let (block_timestamp) = get_block_timestamp()
     # realms address
     let (realms_address) = IModuleController.get_realms_address(contract_address=controller)

@@ -18,22 +18,25 @@ from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
 from contracts.settling_game.interfaces.imodules import IModuleController, IL03_Buildings
 
-# #### Module 4A #####
+from contracts.settling_game.utils.library import (
+    MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
+
+# #### Module 4A ####
 #                   #
 # Calculator Logic  #
 #                   #
 #####################
-# This module focus is to calculate the values of the internal multipliers so other modules can use them. The aim is to have this as the core calculator controller that contains no state. It is pure math.
 
-@storage_var
-func controller_address() -> (address : felt):
-end
+# This module focus is to calculate the values of the internal
+# multipliers so other modules can use them. The aim is to have this
+# as the core calculator controller that contains no state.
+# It is pure math.
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_of_controller : felt):
     # Store the address of the only fixed contract in the system.
-    controller_address.write(address_of_controller)
+    MODULE_initializer(address_of_controller)
     return ()
 end
 
@@ -54,7 +57,7 @@ end
 @external
 func calculateCulture{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         tokenId : Uint256) -> (culture : felt):
-    let (controller) = controller_address.read()
+    let (controller) = MODULE_controller_address()
 
     let (buildings_logic_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.L03_Buildings)
@@ -69,7 +72,7 @@ end
 @external
 func calculatePopulation{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         tokenId : Uint256) -> (population : felt):
-    let (controller) = controller_address.read()
+    let (controller) = MODULE_controller_address()
 
     let (buildings_logic_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.L03_Buildings)
@@ -84,7 +87,7 @@ end
 @external
 func calculateFood{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         tokenId : Uint256) -> (food : felt):
-    let (controller) = controller_address.read()
+    let (controller) = MODULE_controller_address()
 
     let (buildings_logic_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.L03_Buildings)

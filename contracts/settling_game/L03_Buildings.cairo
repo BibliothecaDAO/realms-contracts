@@ -24,21 +24,20 @@ from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
 from contracts.settling_game.interfaces.imodules import IModuleController, IS03_Buildings
 
+from contracts.settling_game.utils.library import (
+    MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
+
 # #### Module 3A ####
 #                   #
 # Buildings Logic   #
 #                   #
 #####################
 
-@storage_var
-func controller_address() -> (address : felt):
-end
-
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_of_controller : felt):
     # Store the address of the only fixed contract in the system.
-    controller_address.write(address_of_controller)
+    MODULE_initializer(address_of_controller)
     return ()
 end
 
@@ -51,7 +50,7 @@ func build{
     alloc_locals
 
     let (caller) = get_caller_address()
-    let (controller) = controller_address.read()
+    let (controller) = MODULE_controller_address()
 
     # s realms address
     let (s_realms_address) = IModuleController.get_s_realms_address(contract_address=controller)
@@ -110,7 +109,7 @@ func build_buildings{
         building_id : felt):
     alloc_locals
     let (caller) = get_caller_address()
-    let (controller) = controller_address.read()
+    let (controller) = MODULE_controller_address()
 
     # realms address
     let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
@@ -406,7 +405,7 @@ func fetch_building_cost_ids{
         realm_building_ids_len : felt, realm_building_ids : felt*):
     alloc_locals
 
-    let (controller) = controller_address.read()
+    let (controller) = MODULE_controller_address()
 
     # state contract
     let (buildings_state_address) = IModuleController.get_module_address(
@@ -508,7 +507,7 @@ func fetch_building_cost_values{
         realm_building_costs_len : felt, realm_building_costs : felt*):
     alloc_locals
 
-    let (controller) = controller_address.read()
+    let (controller) = MODULE_controller_address()
 
     # state contract
     let (buildings_state_address) = IModuleController.get_module_address(
@@ -609,7 +608,7 @@ func fetch_buildings_by_type{
         bitwise_ptr : BitwiseBuiltin*}(token_id : Uint256) -> (realm_buildings : RealmBuildings):
     alloc_locals
 
-    let (controller) = controller_address.read()
+    let (controller) = MODULE_controller_address()
 
     # state contract
     let (buildings_state_address) = IModuleController.get_module_address(
