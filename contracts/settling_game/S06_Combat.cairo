@@ -113,8 +113,8 @@ end
 # a Realm can have two squads, one used for attacking
 # and another used for defending; this struct holds them
 struct RealmCombatData:
-    member attack_squad : Squad
-    member defending_squad : Squad
+    member attacking_squad : PackedSquad
+    member defending_squad : PackedSquad
     member last_attacked_at : felt
 end
 
@@ -125,7 +125,7 @@ func realm_combat_data(realm_id : Uint256) -> (combat_data : RealmCombatData):
 end
 
 @event
-func Combat_outcome(attacking_realm_id : felt, defending_realm_id : felt, outcome : felt):
+func Combat_outcome(attacking_realm_id : Uint256, defending_realm_id : Uint256, outcome : felt):
 end
 
 @event
@@ -135,9 +135,16 @@ func Combat_step(
 end
 
 @view
-func get_realm_combat_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(realm_id : Uint256) -> (combat_data : RealmCombatData):
+func get_realm_combat_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        realm_id : Uint256) -> (combat_data : RealmCombatData):
     let (combat_data) = realm_combat_data.read(realm_id)
     return (combat_data)
+end
+
+func set_realm_combat_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        realm_id : Uint256, combat_data : RealmCombatData):
+    realm_combat_data.write(realm_id, combat_data)
+    return ()
 end
 
 # TODO: stats shouldn't be hardcoded here, take them from a felt that's easy to update

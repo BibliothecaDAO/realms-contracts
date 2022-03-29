@@ -3,19 +3,28 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le, is_nn, is_nn_le
-from starkware.starknet.common.syscalls import get_block_timestamp
+from starkware.cairo.common.uint256 import Uint256
+from starkware.starknet.common.syscalls import get_block_timestamp, get_caller_address
 
+from contracts.settling_game.interfaces.imodules import IModuleController
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
-from contracts.settling_game.utils.interfaces import IModuleController
+from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.utils.game_structs import RealmData
+from contracts.utils.constants import TRUE, FALSE
 
 from contracts.settling_game.S06_Combat import (
+    RealmCombatData,
     Troop,
     Squad,
     SquadStats,
+    PackedSquad,
     Combat_outcome,
     Combat_step,
     compute_squad_stats,
+    get_realm_combat_data,
+    set_realm_combat_data,
+    pack_squad,
+    unpack_squad,
 )
 
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
@@ -59,7 +68,8 @@ end
 
 @view
 func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        attacking_realm_id : Uint256, defending_realm_id : Uint256) -> (yesno : felt):
+    attacking_realm_id : Uint256, defending_realm_id : Uint256
+) -> (yesno : felt):
     # TODO: write tests for this
 
     alloc_locals
@@ -70,38 +80,83 @@ func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     let (was_attacked_recently) = is_le(diff, ATTACK_COOLDOWN_PERIOD)
 
     if was_attacked_recently == 1:
-        return (0)
+        return (FALSE)
     end
 
     let (controller_address_ : felt) = controller_address.read()
     let (realms_address : felt) = IModuleController.get_realms_address(
-        contract_address=controller_address_)
+        contract_address=controller_address_
+    )
 
     let (attacking_realm_data : RealmData) = realms_IERC721.fetch_realm_data(
-        contract_address=realms_address, token_id=attacking_realm_id)
+        contract_address=realms_address, token_id=attacking_realm_id
+    )
     let (defending_realm_data : RealmData) = realms_IERC721.fetch_realm_data(
-        contract_address=realms_address, token_id=defending_realm_id)
+        contract_address=realms_address, token_id=defending_realm_id
+    )
 
     if attacking_realm_data.order == defending_realm_data.order:
         # intra-order attacks are not allowed
-        return (0)
+        return (FALSE)
     end
 
-    return (1)
+    return (TRUE)
 end
 
-@view
-func combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
-    attacker : Squad, defender : Squad, attack_type : felt
-) -> (attacker : Squad, defender : Squad, outcome : felt):
-    let (attacker_end, defender_end, outcome) = do_combat_turn(attacker, defender, attack_type)
-    # TODO: do check if the attack can actually transpire
-    # TODO: pass in the Realm IDs to this func so they can be emitted
-    # Combat_outcome.emit(TODO_attacking_realm_id, TODO_defending_realm_id, outcome)
-    return (attacker_end, defender_end, outcome)
+@external
+func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+    attacking_realm_id : Uint256, defending_realm_id : Uint256, attack_type : felt
+) -> (combat_outcome : felt):
+    alloc_locals
+
+    # TODO: uncomment this when the creation of the combat contracts in the test suite is proper
+    # with_attr error_message("caller is not attacking realm owner"):
+    #     let (caller) = get_caller_address()
+    #     let (controller_address_) = controller_address.read()
+    #     let (realms_address) = IModuleController.get_realms_address(contract_address=controller_address_)
+    #     let (owner) = realms_IERC721.ownerOf(contract_address=realms_address, token_id=attacking_realm_id)
+    #     assert caller = owner
+    # end
+
+    with_attr error_message("cannot initiate combat"):
+        let (can_attack) = Realm_can_be_attacked(attacking_realm_id, defending_realm_id)
+        assert can_attack = TRUE
+    end
+
+    let (attacking_realm_data : RealmCombatData) = get_realm_combat_data(attacking_realm_id)
+    let (defending_realm_data : RealmCombatData) = get_realm_combat_data(defending_realm_id)
+
+    let (attacker : Squad) = unpack_squad(attacking_realm_data.attacking_squad)
+    let (defender : Squad) = unpack_squad(defending_realm_data.defending_squad)
+
+    let (attacker_end, defender_end, combat_outcome) = run_combat_loop(
+        attacker, defender, attack_type
+    )
+
+    let (new_attacker : PackedSquad) = pack_squad(attacker_end)
+    let (new_defender : PackedSquad) = pack_squad(defender_end)
+
+    let new_attacking_realm_data = RealmCombatData(
+        attacking_squad=new_attacker,
+        defending_squad=attacking_realm_data.defending_squad,
+        last_attacked_at=attacking_realm_data.last_attacked_at,
+    )
+    set_realm_combat_data(attacking_realm_id, new_attacking_realm_data)
+
+    let (now) = get_block_timestamp()
+    let new_defending_realm_data = RealmCombatData(
+        attacking_squad=defending_realm_data.attacking_squad,
+        defending_squad=new_defender,
+        last_attacked_at=now,
+    )
+    set_realm_combat_data(defending_realm_id, new_defending_realm_data)
+
+    Combat_outcome.emit(attacking_realm_id, defending_realm_id, combat_outcome)
+
+    return (combat_outcome)
 end
 
-func do_combat_turn{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+func run_combat_loop{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     attacker : Squad, defender : Squad, attack_type : felt
 ) -> (attacker : Squad, defender : Squad, outcome : felt):
     alloc_locals
@@ -120,7 +175,7 @@ func do_combat_turn{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBui
         return (step_attacker, step_defender, COMBAT_OUTCOME_DEFENDER_WINS)
     end
 
-    return do_combat_turn(step_attacker, step_defender, attack_type)
+    return run_combat_loop(step_attacker, step_defender, attack_type)
 end
 
 func attack{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(

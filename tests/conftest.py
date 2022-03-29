@@ -284,7 +284,7 @@ async def l06_combat_tests(starknet, xoroshiro) -> StarknetContract:
     # doesn't have a constructor, it somehow calls (I guess) the constructor of
     # L06_Combat because it imports from it; hence when calling deploy, we need
     # to pass proper constructor_calldata
-    return await starknet.deploy(contract_def=contract, constructor_calldata=[xoroshiro.contract_address])
+    return await starknet.deploy(contract_def=contract, constructor_calldata=[11, xoroshiro.contract_address])
 
 
 @pytest.fixture(scope="module")

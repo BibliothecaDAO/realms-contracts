@@ -169,6 +169,18 @@ async def test_unpack_squad(s06_combat_tests):
 
 
 @pytest.mark.asyncio
+async def test_run_combat_loop(l06_combat_tests):
+    attacker = build_default_squad()
+    defender = build_partial_squad(12)
+
+    tx = await l06_combat_tests.test_run_combat_loop(attacker, defender, 1).invoke()
+
+    res = tx.result
+    assert len(res) == 3
+    assert res.outcome == 1  # attacker wins, most likely outcome since defender is weak
+
+
+@pytest.mark.asyncio
 async def test_attack(l06_combat_tests):
     attack_vs_defense = 1
     wisdom_vs_agility = 2

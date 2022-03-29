@@ -144,6 +144,8 @@ namespace ModuleIds:
     const L04_Calculator = 7
     const L05_Wonders = 8
     const S05_Wonders = 9
+    const L06_Combat = 11
+    const S06_Combat = 12
 end
 
 namespace ExternalContractIds:
