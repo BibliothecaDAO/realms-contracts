@@ -106,7 +106,7 @@ end
 func get_resource_upgrade_cost{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
         bitwise_ptr : BitwiseBuiltin*}(token_id : Uint256, resource_id : felt) -> (level : felt):
-    let (data) = resource_upgrade_cost.read(token_id, resource_id)
+    let (data) = resource_upgrade_cost.read(resource_id)
 
     return (level=data)
 end
