@@ -12,28 +12,11 @@ from starkware.starknet.common.syscalls import get_caller_address
 # Is controlled by the Arbiter, who can update addresses.
 # Maintains a generic mapping that is open ended and which
 # can be added to for new modules.
-#
-# A new module is deployed and the address is submitted for
-# a purpose. Purposes are indexed, and their interpretation
-# is off-chain/social.
 
 # Modules are organised by numbers: a particular module (storage
 # of player health, or a new game module) will have a module_id which
 # will be used by other components, even if the underlying contract
 # address changes.
-
-# Flow: An ecosystem contract calls the controller with a module_id,
-# and uses the response to make a call to that contract.
-
-######################
-# Module id descriptions. Do not alter, only append.
-# 1 Dope Wars TI-83 mechanics.
-# 2 Location-owned AMM item/money values of NPC dealers.
-# 3 User-owned (Hustler) item/money values.
-# 4 Hustler L1 trait registry.
-# 5 Combat mechanics.
-# 6 DrugLord storage (king of the hill)
-# 7 PseudoRandom
 
 #######################
 # To be compliant with this system, a new module containint variables
@@ -144,24 +127,31 @@ func set_initial_module_addresses{
         module_05_addr : felt, module_06_addr : felt, module_07_addr : felt):
     only_arbiter()
 
+    # # Settling Logic
     address_of_module_id.write(1, module_01_addr)
     module_id_of_address.write(module_01_addr, 1)
 
+    # # Settling State
     address_of_module_id.write(2, module_02_addr)
     module_id_of_address.write(module_02_addr, 2)
 
+    # # Resources Logic
     address_of_module_id.write(3, module_03_addr)
     module_id_of_address.write(module_03_addr, 3)
 
+    # # Resources State
     address_of_module_id.write(4, module_04_addr)
     module_id_of_address.write(module_04_addr, 4)
 
+    # # Buildings Logic
     address_of_module_id.write(5, module_05_addr)
     module_id_of_address.write(module_05_addr, 5)
 
+    # # Buildings State
     address_of_module_id.write(6, module_06_addr)
     module_id_of_address.write(module_06_addr, 6)
 
+    # # Calculator Logic
     address_of_module_id.write(7, module_07_addr)
     module_id_of_address.write(module_07_addr, 7)
     return ()
@@ -224,6 +214,7 @@ end
 func has_write_access{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_attempting_to_write : felt):
     alloc_locals
+
     # Approves the write-permissions between two modules, ensuring
     # first that the modules are both active (not replaced), and
     # then that write-access has been given.
