@@ -208,25 +208,28 @@ func upgrade_resource{
 
     # check owner of sRealm
     let (owner) = realms_IERC721.ownerOf(contract_address=s_realms_address, token_id=token_id)
-    assert caller = owner
 
-    # resources state contract
+    with_attr error_message("You do not own this Realm"):
+        assert caller = owner
+    end
+
+    # STATE
     let (resources_state_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.S02_Resources)
 
-    # get resource level
+    # GET RESOURCE LEVEL
     let (level) = IS02_Resources.get_resource_level(resources_state_address, token_id, resource)
 
-    # get upgrade costs
+    # GET UPGRADE COSTS
     let (upgrade_cost) = IS02_Resources.get_resource_upgrade_cost(
         resources_state_address, token_id, resource)
 
-    # get upgrade ids
+    # GET UPGRADE IDS
     let (resource_upgrade_ids : ResourceUpgradeIds) = fetch_resource_upgrade_ids(resource)
 
-    # create array of ids and values
-    let (local resource_ids : felt*) = alloc()
-    let (local resource_values : felt*) = alloc()
+    # CREATE TEMP ARRARY
+    let (resource_ids : felt*) = alloc()
+    let (resource_values : felt*) = alloc()
 
     assert resource_ids[0] = resource_upgrade_ids.resource_1
     assert resource_ids[1] = resource_upgrade_ids.resource_2
@@ -240,10 +243,10 @@ func upgrade_resource{
     assert resource_values[3] = resource_upgrade_ids.resource_4_values
     assert resource_values[4] = resource_upgrade_ids.resource_5_values
 
-    # burn resources
+    # BURN RESOURCES
     IERC1155.burn_batch(resource_address, caller, 5, resource_ids, 5, resource_values)
 
-    # increase level
+    # INCREASE LEVEL
     IS02_Resources.set_resource_level(resources_state_address, token_id, resource, level + 1)
 
     return ()

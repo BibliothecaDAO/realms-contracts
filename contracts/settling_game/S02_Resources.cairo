@@ -102,6 +102,7 @@ func get_resource_level{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     return (level=l)
 end
 
+# TODO: Price of Resource upgrades should increase
 @external
 func get_resource_upgrade_cost{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,

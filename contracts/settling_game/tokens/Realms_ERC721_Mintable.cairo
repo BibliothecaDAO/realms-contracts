@@ -137,11 +137,9 @@ end
 
 @external
 func mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-        to : felt, tokenId : Uint256, _realm_name : felt, _realm_data : felt):
+        to : felt, tokenId : Uint256):
     Ownable_only_owner()
     ERC721_mint(to, tokenId)
-    realm_name.write(tokenId, _realm_name)
-    realm_data.write(tokenId, _realm_data)
     return ()
 end
 

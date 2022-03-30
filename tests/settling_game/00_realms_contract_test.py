@@ -11,9 +11,7 @@ json_realms = json.load(open('data/realms.json'))
 NUM_SIGNING_ACCOUNTS = 2
 signer = Signer(123456789987654321)
 # Params
-first_token_id = (5042, 0)
-second_token_id = (7921, 1)
-third_token_id = (0, 13)
+first_token_id = uint(5042)
 
 initial_supply = 1000000 * (10 ** 18)
 
@@ -119,11 +117,8 @@ async def game_factory(account_factory):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('tokens, number_of_tokens', [
-    [first_token_id, 1]
-])
 @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
-async def test_mint_realm(game_factory, number_of_tokens, tokens):
+async def test_mint_realm(game_factory):
     starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state, s_realms, buildings_logic, buildings_state, calculator_logic = game_factory
 
     ########
@@ -131,14 +126,19 @@ async def test_mint_realm(game_factory, number_of_tokens, tokens):
     ########
 
     await signer.send_transaction(
+        accounts[0], realms.contract_address, 'set_realm_data', [
+            *first_token_id, map_realm(json_realms['1'])]
+    )
+
+    await signer.send_transaction(
         accounts[0], realms.contract_address, 'mint', [
-            accounts[0].contract_address, *tokens, 2123, map_realm(json_realms['1'])]
+            accounts[0].contract_address, *first_token_id]
     )
 
     # print realm details
-    realm_info = await realms.get_realm_info(uint(5042)).invoke()
+    realm_info = await realms.get_realm_info(first_token_id).invoke()
     print(f'🏰 Realm Data: {realm_info.result.realm_data}')
-    unpacked_realm_info = await realms.fetch_realm_data(uint(5042)).invoke()
+    unpacked_realm_info = await realms.fetch_realm_data(first_token_id).invoke()
     print(
         f'🏰 Realm Unpacked Data: {unpacked_realm_info.result.realm_stats}')
 
@@ -157,7 +157,7 @@ async def test_mint_realm(game_factory, number_of_tokens, tokens):
     ##########
 
     await signer.send_transaction(
-        account=accounts[0], to=settling_logic.contract_address, selector_name='settle', calldata=[*uint(5042)]
+        account=accounts[0], to=settling_logic.contract_address, selector_name='settle', calldata=[*first_token_id]
     )
     print(f'🏰 Settling Realm...')
 
@@ -171,7 +171,7 @@ async def test_mint_realm(game_factory, number_of_tokens, tokens):
     # HAPPINESS #
     #############
 
-    happiness = await calculator_logic.calculateHappiness(uint(5042)).invoke()
+    happiness = await calculator_logic.calculateHappiness(first_token_id).invoke()
     assert happiness.result.happiness == 25
     print(f'😊 Happiness level is {happiness.result.happiness}')
 
@@ -184,7 +184,7 @@ async def test_mint_realm(game_factory, number_of_tokens, tokens):
     #############
 
     await signer.send_transaction(
-        account=accounts[0], to=resources_logic.contract_address, selector_name='claim_resources', calldata=[*uint(5042)]
+        account=accounts[0], to=resources_logic.contract_address, selector_name='claim_resources', calldata=[*first_token_id]
     )
     for index in range(22):
         player_resource_value = await resources.balanceOf(accounts[0].contract_address, index + 1).invoke()
@@ -202,7 +202,7 @@ async def test_mint_realm(game_factory, number_of_tokens, tokens):
 
     # # upgrade resource
     await signer.send_transaction(
-        account=accounts[0], to=resources_logic.contract_address, selector_name='upgrade_resource', calldata=[*uint(5042), 5]
+        account=accounts[0], to=resources_logic.contract_address, selector_name='upgrade_resource', calldata=[*first_token_id, 5]
     )
 
     for index in range(22):

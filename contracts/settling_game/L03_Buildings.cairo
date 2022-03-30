@@ -95,7 +95,7 @@ func build{
     let (_token_ids_len, ids) = fetch_building_cost_ids(building_id)
     let (_token_values_len, values) = fetch_building_cost_values(building_id)
 
-    # CHECK CORRECT RESOURCES NEEDED TODO: THIS IS NOT NEEDED
+    # CHECK CORRECT RESOURCES NEEDED TODO: THIS IS NOT NEEDED??
     check_correct_resources(
         token_ids_len,
         token_ids,
