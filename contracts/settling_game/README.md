@@ -106,7 +106,7 @@ Clone this repo and use our docker shell to interact with starknet:
 ```
 git clone git@github.com:BibliothecaForAdventurers/realms-contracts.git
 cd realms-contracts
-bin/shell starknet --version
+scripts/shell starknet --version
 ```
 
 The CLI allows you to deploy to StarkNet and read/write to contracts
@@ -143,24 +143,25 @@ It will also produce an ABI, which is a mapping of the contract functions
 
 Compile all contracts:
 
-```
-nile compile
+```bash
+bash scripts/compile
 ```
 
 Compile an individual contract:
 
-```
+```bash
+export CAIRO_PATH=/workspaces/realms-contracts/openzeppelin/src
 nile compile contracts/02A_Settling.cairo
 ```
 
 ### Test
 
-Run all github actions tests: `bin/test`
+Run all github actions tests: `scripts/test`
 
 Run individual tests
 
 ```
-bin/shell pytest -s testing/l2/01_Realms_contract_test.py
+scripts/shell pytest -s testing/l2/01_Realms_contract_test.py
 ```
 
 ### Deploy
@@ -176,7 +177,7 @@ and handles passing addresses between the modules to create a
 permissions system.
 
 ```
-bin/deploy
+scripts/deploy
 ```
 </details>
 

@@ -16,8 +16,8 @@ from contracts.token.ERC721_base import (
     ERC721_transferFrom, ERC721_safeTransferFrom, ERC721_mint, ERC721_burn, ERC721_tokenURI,
     ERC721_setTokenURI)
 
-from contracts.openzeppelin.introspection.ERC165 import ERC165_supports_interface
-from contracts.openzeppelin.introspection.IERC165 import IERC165
+from openzeppelin.introspection.ERC165 import ERC165_supports_interface
+from openzeppelin.introspection.IERC165 import IERC165
 
 from contracts.Ownable_base import Ownable_initializer, Ownable_only_owner
 from contracts.settling_game.utils.game_structs import RealmData
