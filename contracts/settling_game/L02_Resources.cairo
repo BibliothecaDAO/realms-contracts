@@ -2,7 +2,7 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem, assert_not_zero
-from starkware.cairo.common.math_cmp import is_nn_le
+from starkware.cairo.common.math_cmp import is_nn_le, is_le
 from starkware.cairo.common.hash_state import hash_init, hash_update, HashState
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
@@ -10,6 +10,9 @@ from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.game_structs import RealmData, ResourceUpgradeIds, ModuleIds
 from contracts.settling_game.utils.general import scale, unpack_data
+
+from contracts.settling_game.utils.constants import (
+    TRUE, FALSE, VAULT_LENGTH, DAY, VAULT_LENGTH_SECONDS)
 
 from contracts.token.IERC20 import IERC20
 from contracts.token.ERC1155.IERC1155 import IERC1155
@@ -104,15 +107,21 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         token_id=token_id,
         resource=realms_data.resource_7)
 
-    # # TODO: only allow claim contract to mint
     # get time staked
     let (time_staked) = IS01_Settling.get_time_staked(settling_state_address, token_id)
 
     # calculate days
-    let (days) = getAvailableResources(time_staked)
+    let (total_days, remainder) = get_available_resources(time_staked)
+
+    # calculate days
+    let (vault) = get_available_vault_resources(time_staked)
 
     # check days greater than zero
-    assert_not_zero(days)
+    assert_not_zero(total_days + vault)
+
+    IS01_Settling.set_time_staked(settling_state_address, token_id, remainder)
+
+    let days = total_days + vault
 
     # TODO: change to safemath functions
     assert resource_ids[0] = realms_data.resource_1
@@ -155,6 +164,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         assert treasury_mint[6] = ((r_7 * days) * 20) / 100
     end
 
+    # # TODO: only allow claim contract to mint
     # mint users
     IERC1155.mint_batch(
         resources_address,
@@ -177,19 +187,30 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 end
 
 @external
-func getAvailableResources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        last_update : felt) -> (time : felt):
+func get_available_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        last_update : felt) -> (days_accrued : felt, remainder : felt):
     let (block_timestamp) = get_block_timestamp()
-    # Real line commented out for testing
-    # let days = (block_timestamp - last_update) / 3600
 
-    # dummy numbers as no blocktime on local machine
-    # this will equal 24 days uncollected
+    let (days_accrued, seconds_left_over) = unsigned_div_rem(block_timestamp - last_update, DAY)
 
-    # TODO: Return unclaimed time back to felt
-    let days = (86400 - 3600) / 3600
+    return (days_accrued=days_accrued, remainder=seconds_left_over)
+end
 
-    return (time=days)
+func get_available_vault_resources{
+        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(last_update : felt) -> (
+        time : felt):
+    let (block_timestamp) = get_block_timestamp()
+
+    let (days_accrued, seconds_left_over) = unsigned_div_rem(block_timestamp - last_update, DAY)
+
+    # let yes = is_le(VAULT_LENGTH, time)
+
+    # TODO: only if time is above 7 days can you claim
+    if days_accrued == 1:
+        return (days_accrued)
+    else:
+        return (0)
+    end
 end
 
 @external

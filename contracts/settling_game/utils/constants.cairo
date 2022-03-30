@@ -44,3 +44,7 @@ const SHIFT_6_20 = 2 ** 114
 
 const TRUE = 1
 const FALSE = 0
+
+const VAULT_LENGTH = 7  # days
+const DAY = 86400  # sec
+const VAULT_LENGTH_SECONDS = VAULT_LENGTH * DAY

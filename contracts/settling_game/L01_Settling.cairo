@@ -58,7 +58,6 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     alloc_locals
     let (caller) = get_caller_address()
     let (controller) = MODULE_controller_address()
-    let (block_timestamp) = get_block_timestamp()
 
     let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
 
@@ -73,8 +72,8 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     # MINT S_REALM
     s_realms_IERC721.mint(s_realms_address, caller, token_id)
 
-    # TODO: TimeStamp - current Hardcoded
-    IS01_Settling.set_time_staked(settle_state_address, token_id, block_timestamp)
+    # PASS 0 to set the current time
+    IS01_Settling.set_time_staked(settle_state_address, token_id, 0)
 
     # EMIT
     Settled.emit(caller, token_id)
@@ -104,7 +103,8 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     s_realms_IERC721.burn(s_realms_address, token_id)
 
     # TODO: TimeStamp - current Hardcoded
-    IS01_Settling.set_time_staked(settle_state_address, token_id, block_timestamp)
+    # PASS 0 to set the current time
+    IS01_Settling.set_time_staked(settle_state_address, token_id, 0)
 
     # TOD0: Claim resources if available before unsettling
 
