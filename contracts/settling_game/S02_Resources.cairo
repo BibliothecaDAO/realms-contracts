@@ -39,7 +39,7 @@ func resource_upgrade_cost(resource_id : felt) -> (value : felt):
 end
 
 @storage_var
-func resource_upgrade_ids(resource_id : felt) -> (ids : felt):
+func resource_upgrade_value(resource_id : felt) -> (ids : felt):
 end
 
 @constructor
@@ -52,10 +52,10 @@ end
 # ##### SETTERS ######
 
 @external
-func set_resource_upgrade_ids{
+func set_resource_upgrade_value{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
         bitwise_ptr : BitwiseBuiltin*}(resource_id : felt, _resource_upgrade_ids : felt) -> ():
-    resource_upgrade_ids.write(resource_id, _resource_upgrade_ids)
+    resource_upgrade_value.write(resource_id, _resource_upgrade_ids)
 
     return ()
 end
@@ -113,10 +113,10 @@ func get_resource_upgrade_cost{
 end
 
 @external
-func get_resource_upgrade_ids{
+func get_resource_upgrade_value{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
         bitwise_ptr : BitwiseBuiltin*}(resource_id : felt) -> (level : felt):
-    let (data) = resource_upgrade_ids.read(resource_id)
+    let (data) = resource_upgrade_value.read(resource_id)
 
     return (level=data)
 end

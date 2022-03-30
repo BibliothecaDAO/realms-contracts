@@ -231,17 +231,17 @@ func upgrade_resource{
     let (resource_ids : felt*) = alloc()
     let (resource_values : felt*) = alloc()
 
-    assert resource_ids[0] = resource_upgrade_ids.resource_1
-    assert resource_ids[1] = resource_upgrade_ids.resource_2
-    assert resource_ids[2] = resource_upgrade_ids.resource_3
-    assert resource_ids[3] = resource_upgrade_ids.resource_4
-    assert resource_ids[4] = resource_upgrade_ids.resource_5
+    resource_ids[0] = resource_upgrade_ids.resource_1
+    resource_ids[1] = resource_upgrade_ids.resource_2
+    resource_ids[2] = resource_upgrade_ids.resource_3
+    resource_ids[3] = resource_upgrade_ids.resource_4
+    resource_ids[4] = resource_upgrade_ids.resource_5
 
-    assert resource_values[0] = resource_upgrade_ids.resource_1_values
-    assert resource_values[1] = resource_upgrade_ids.resource_2_values
-    assert resource_values[2] = resource_upgrade_ids.resource_3_values
-    assert resource_values[3] = resource_upgrade_ids.resource_4_values
-    assert resource_values[4] = resource_upgrade_ids.resource_5_values
+    resource_values[0] = resource_upgrade_ids.resource_1_values
+    resource_values[1] = resource_upgrade_ids.resource_2_values
+    resource_values[2] = resource_upgrade_ids.resource_3_values
+    resource_values[3] = resource_upgrade_ids.resource_4_values
+    resource_values[4] = resource_upgrade_ids.resource_5_values
 
     # BURN RESOURCES
     IERC1155.burn_batch(resource_address, caller, 5, resource_ids, 5, resource_values)
@@ -260,23 +260,24 @@ func fetch_resource_upgrade_ids{
 
     let (controller) = controller_address.read()
 
-    # state contract
+    # STATE
     let (resources_state_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=4)
 
-    let (local data) = IS02_Resources.get_resource_upgrade_ids(resources_state_address, resource_id)
+    let (data) = IS02_Resources.get_resource_upgrade_value(resources_state_address, resource_id)
 
-    let (local resource_1) = unpack_data(data, 0, 255)
-    let (local resource_2) = unpack_data(data, 8, 255)
-    let (local resource_3) = unpack_data(data, 16, 255)
-    let (local resource_4) = unpack_data(data, 24, 255)
-    let (local resource_5) = unpack_data(data, 32, 255)
-    let (local resource_1_values) = unpack_data(data, 40, 255)
-    let (local resource_2_values) = unpack_data(data, 48, 255)
-    let (local resource_3_values) = unpack_data(data, 56, 255)
-    let (local resource_4_values) = unpack_data(data, 64, 255)
-    let (local resource_5_values) = unpack_data(data, 72, 255)
+    let (resource_1) = unpack_data(data, 0, 255)
+    let (resource_2) = unpack_data(data, 8, 255)
+    let (resource_3) = unpack_data(data, 16, 255)
+    let (resource_4) = unpack_data(data, 24, 255)
+    let (resource_5) = unpack_data(data, 32, 255)
+    let (resource_1_values) = unpack_data(data, 40, 255)
+    let (resource_2_values) = unpack_data(data, 48, 255)
+    let (resource_3_values) = unpack_data(data, 56, 255)
+    let (resource_4_values) = unpack_data(data, 64, 255)
+    let (resource_5_values) = unpack_data(data, 72, 255)
 
+    # TODO: ADD IN DYNAMIC COST ACCORDING TO RESOURCE LEVEL
     return (
         resource_ids=ResourceUpgradeIds(
         resource_1=resource_1,

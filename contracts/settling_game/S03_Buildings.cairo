@@ -75,11 +75,10 @@ end
 
 @external
 func set_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256, buildings_value : felt) -> (success : felt):
-    MODULE_only_approved()
+        token_id : Uint256, buildings_value : felt):
     realm_buildings.write(token_id, buildings_value)
 
-    return (TRUE)
+    return ()
 end
 
 ###########

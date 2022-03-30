@@ -56,9 +56,7 @@ end
 @external
 func build{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*}(
-        token_id : Uint256, building_id : felt, token_ids_len : felt, token_ids : felt*,
-        token_values_len : felt, token_values : felt*) -> (success : felt):
+        bitwise_ptr : BitwiseBuiltin*}(token_id : Uint256, building_id : felt) -> (success : felt):
     alloc_locals
 
     let (caller) = get_caller_address()
@@ -96,19 +94,18 @@ func build{
     let (_token_values_len, values) = fetch_building_cost_values(building_id)
 
     # CHECK CORRECT RESOURCES NEEDED TODO: THIS IS NOT NEEDED??
-    check_correct_resources(
-        token_ids_len,
-        token_ids,
-        token_values_len,
-        token_values,
-        _token_ids_len,
-        ids,
-        _token_values_len,
-        values)
+    # check_correct_resources(
+    #     token_ids_len,
+    #     token_ids,
+    #     token_values_len,
+    #     token_values,
+    #     _token_ids_len,
+    #     ids,
+    #     _token_values_len,
+    #     values)
 
     # BURN RESOURCES
-    IERC1155.burn_batch(
-        resource_address, caller, token_ids_len, token_ids, token_values_len, token_values)
+    IERC1155.burn_batch(resource_address, caller, _token_values_len, ids, _token_values_len, values)
 
     # EMIT
     BuildingBuilt.emit(token_id, building_id)

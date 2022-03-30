@@ -3,13 +3,13 @@ import asyncio
 from starkware.starknet.testing.starknet import Starknet
 from starkware.starkware_utils.error_handling import StarkException
 from starkware.starknet.definitions.error_codes import StarknetErrorCode
-from tests.utils import Signer
+from openzeppelin.tests.utils import Signer
 
 signer = Signer(123456789987654321)
 other = Signer(987654321123456789)
 
-CAIRO_ACCOUNT_CONTRACT = "contracts/openzeppelin/account/Account.cairo"
-CAIRO_INITIALIZABLE_CONTRACT = "contracts/Initializable.cairo"
+CAIRO_ACCOUNT_CONTRACT = "openzeppelin/account/Account.cairo"
+CAIRO_INITIALIZABLE_CONTRACT = "openzeppelin/security/initializable.cairo"
 
 
 @pytest.fixture(scope='module')

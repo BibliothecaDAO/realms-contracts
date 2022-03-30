@@ -119,4 +119,4 @@ if __name__ == '__main__':
     # #     outfile.write(str(createOutput(buildings, 6)))
 
     print(decimalToBinary(resource_ids, 8))
-    print(decimalToBinary(resource_values, 8))
+    print(decimalToBinary(resource_values, 12))

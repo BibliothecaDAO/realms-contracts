@@ -63,7 +63,7 @@ namespace IS02_Resources:
     func get_resource_upgrade_cost(token_id : Uint256, resource : felt) -> (level : felt):
     end
 
-    func get_resource_upgrade_ids(resource : felt) -> (level : felt):
+    func get_resource_upgrade_value(resource : felt) -> (level : felt):
     end
 
     func set_resource_level(token_id : Uint256, resource_id : felt, level : felt) -> ():

@@ -2,7 +2,7 @@ import asyncio
 import pytest
 import dill
 import os
-from tests.utils import Signer, uint, str_to_felt, MAX_UINT256, assert_revert
+from openzeppelin.tests.utils import Signer, uint, str_to_felt
 import sys
 import time
 
@@ -101,9 +101,10 @@ async def _build_copyable_deployment():
 
     logging.warning(CONTRACT_SRC)
     defs = SimpleNamespace(
-        account=compile("contracts/openzeppelin/account/Account.cairo"),
+        account=compile("openzeppelin/account/Account.cairo"),
         erc20=compile("contracts/token/ERC20_Mintable.cairo"),
-        erc721=compile("contracts/token/ERC721_Enumerable_Mintable_Burnable.cairo"),
+        erc721=compile(
+            "contracts/token/ERC721_Enumerable_Mintable_Burnable.cairo"),
         erc1155=compile("contracts/token/ERC1155/ERC1155_Mintable.cairo"),
     )
 
@@ -180,7 +181,8 @@ async def _build_copyable_deployment():
 
     async def mint_realms(account_name, token):
         await signers[account_name].send_transaction(
-            accounts.__dict__[account_name], realms.contract_address, 'publicMint', [*uint(token)]
+            accounts.__dict__[
+                account_name], realms.contract_address, 'publicMint', [*uint(token)]
         )
 
     await _erc20_approve("user1", realms.contract_address, lords_approve_amount)
@@ -251,7 +253,8 @@ async def ctx_factory(copyable_deployment):
             )
 
         def advance_clock(num_seconds):
-            set_block_timestamp(starknet_state, get_block_timestamp(starknet_state) + num_seconds)
+            set_block_timestamp(starknet_state, get_block_timestamp(
+                starknet_state) + num_seconds)
 
         return SimpleNamespace(
             starknet=Starknet(starknet_state),
@@ -284,7 +287,7 @@ async def account_factory(request):
         signer = Signer(DUMMY_PRIVATE + i)
         signers.append(signer)
         account = await starknet.deploy(
-            "contracts/openzeppelin/account/Account.cairo",
+            "openzeppelin/account/Account.cairo",
             constructor_calldata=[signer.public_key]
         )
         accounts.append(account)
@@ -316,7 +319,8 @@ async def account_factory(request):
 async def l06_combat(starknet, xoroshiro) -> StarknetContract:
     contract = compile("contracts/settling_game/L06_Combat.cairo")
     return await starknet.deploy(
-        contract_def=contract, constructor_calldata=[xoroshiro.contract_address]
+        contract_def=contract, constructor_calldata=[
+            xoroshiro.contract_address]
     )
 
 
@@ -357,7 +361,7 @@ async def _build_copyable_deployment_desiege():
     logging.warning(CONTRACT_SRC)
 
     defs = SimpleNamespace(
-        account=compile("contracts/openzeppelin/account/Account.cairo"),
+        account=compile("openzeppelin/account/Account.cairo"),
     )
 
     signers = dict(
