@@ -9,7 +9,7 @@ from starkware.cairo.common.uint256 import (
 )
 # from starkware.cairo.common.eth_utils import assert_valid_eth_address
 
-from starkware.starknet.common.syscalls import get_caller_address
+from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
 from starkware.starknet.common.messages import send_message_to_l1
 
 from contracts.token.IERC721 import IERC721
@@ -174,11 +174,14 @@ func withdraw_loop{
     )
     assert caller = owner
 
+    # address(this) equivalent
+    let (contract_address) = get_contract_address()
+
     # Move token to Bridge
     IERC721.transferFrom(
         contract_address=realms_address,
         _from=caller,
-        to=this,
+        to=contract_address,
         token_id=token_id
     )
  
