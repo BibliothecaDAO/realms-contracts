@@ -14,9 +14,9 @@ Run `npx ts-node ./tasks/desiege/create_game.ts`
 
 1. `npx ts-node ./tasks/settling/deploy_arbiter.ts`
 2. `npx ts-node ./tasks/settling/deploy_module_controller.ts`
-3. `npx ts-node ./tasks/settling/deploy_elements_token.ts`
-4. `npx ts-node ./tasks/settling/deploy_tower_defence.ts`
-5. `npx ts-node ./tasks/settling/deploy_tower_defence_storage.ts`
-6. `npx ts-node ./tasks/settling/setup_controller_modules.ts`
-7. `npx ts-node ./tasks/settling/deploy_element_balancer.ts`
-8. `npx ts-node ./tasks/settling/deploy_divine_eclipse_storage.ts`
+
+# Tokens Deployment - This only has to be done once. These are non-upgradable
+
+1. `npx ts-node ./tasks/settling/deploy_realms.ts`
+2. `npx ts-node ./tasks/settling/deploy_resources.ts`
+3. `npx ts-node ./tasks/settling/deploy_lords.ts`
