@@ -39,12 +39,15 @@ namespace IModuleController:
 
     func set_initial_module_addresses(
             module_01_addr : felt, module_02_addr : felt, module_03_addr : felt,
-            module_04_addr : felt, module_05_addr : felt, module_06_addr : felt):
+            module_04_addr : felt, module_05_addr : felt, module_06_addr : felt,
+            module_07_addr : felt):
     end
 end
 @contract_interface
 namespace I01B_Settling:
-    func set_time_staked(token_id : Uint256):
+    func set_time_staked(token_id : Uint256, timestamp : felt):
+    end
+    func get_time_staked(token_id : Uint256) -> (time : felt):
     end
 end
 
@@ -66,8 +69,10 @@ namespace I03B_Buildings:
     end
     func get_building_cost_values(building_id : felt) -> (cost : felt):
     end
-    func get_realm_buildings(token_id : Uint256) -> (traits : RealmBuildings):
+    func get_realm_buildings(token_id : Uint256) -> (buildings : felt):
     end
     func get_realm_building_by_id(token_id : Uint256, building_id : felt) -> (building : felt):
+    end
+    func set_realm_buildings(token_id : Uint256, buildings_value : felt) -> ():
     end
 end

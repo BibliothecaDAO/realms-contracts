@@ -50,14 +50,14 @@ struct ResourceUpgradeIds:
 end
 
 struct RealmBuildings:
-    member castle : felt
-    member market : felt
-    member aquaduct : felt
+    member castles : felt
+    member markets : felt
+    member aquaducts : felt
     member ports : felt
-    member barrack : felt
+    member barracks : felt
     member farms : felt
-    member temple : felt
-    member shipyard : felt
+    member temples : felt
+    member shipyards : felt
 end
 
 struct RealmBuildingCostIds:

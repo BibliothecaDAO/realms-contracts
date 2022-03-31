@@ -6,11 +6,12 @@ from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem, assert_n
 from starkware.cairo.common.math_cmp import is_nn_le
 from starkware.cairo.common.hash_state import hash_init, hash_update, HashState
 from starkware.cairo.common.alloc import alloc
-from starkware.starknet.common.syscalls import get_caller_address
+from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.general import scale
-from contracts.settling_game.utils.interfaces import IModuleController, I02B_Resources
+from contracts.settling_game.utils.interfaces import (
+    IModuleController, I02B_Resources, I01B_Settling)
 
 from contracts.settling_game.utils.game_structs import RealmData, ResourceUpgradeIds
 from contracts.settling_game.utils.general import unpack_data
@@ -19,14 +20,11 @@ from contracts.token.IERC20 import IERC20
 from contracts.token.ERC1155.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 
-
-
-##### Module 2A ##########
+# #### Module 2A ##########
 #                        #
 # Claim & Resource Logic #
 #                        #
 ##########################
-
 
 @storage_var
 func controller_address() -> (address : felt):
@@ -52,13 +50,20 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # realms contract
     let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
+
+    # sRealms contract
     let (s_realms_address) = IModuleController.get_s_realms_address(contract_address=controller)
+
     # resource contract
     let (resources_address) = IModuleController.get_resources_address(contract_address=controller)
 
     # state contract
     let (resources_state_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=4)
+
+    # settling state contract
+    let (settling_state_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=2)
 
     # treasury address
     let (treasury_address) = IModuleController.get_treasury_address(contract_address=controller)
@@ -103,47 +108,55 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         token_id=token_id,
         resource=realms_data.resource_7)
 
+    # # TODO: only allow claim contract to mint
+    # get time staked
+    let (time_staked) = I01B_Settling.get_time_staked(settling_state_address, token_id)
+
+    # calculate days
+    let (days) = getAvailableResources(time_staked)
+
+    # check days greater than zero
+    assert_not_zero(days)
+
     assert resource_ids[0] = realms_data.resource_1
-    assert user_mint[0] = r_1
+    assert user_mint[0] = 1000
     assert treasury_mint[0] = r_1
 
     if realms_data.resource_2 != 0:
         assert resource_ids[1] = realms_data.resource_2
-        assert user_mint[1] = r_2
-        assert treasury_mint[1] = r_2
+        assert user_mint[1] = ((r_2 * days) * 80) / 100
+        assert treasury_mint[1] = ((r_2 * days) * 20) / 100
     end
 
     if realms_data.resource_3 != 0:
         assert resource_ids[2] = realms_data.resource_3
         assert user_mint[2] = r_3
-        assert treasury_mint[2] = r_3
+        assert treasury_mint[2] = r_3 * days
     end
 
     if realms_data.resource_4 != 0:
         assert resource_ids[3] = realms_data.resource_4
-        assert user_mint[3] = r_4
-        assert treasury_mint[3] = r_4
+        assert user_mint[3] = r_4 * days
+        assert treasury_mint[3] = r_4 * days
     end
 
     if realms_data.resource_5 != 0:
         assert resource_ids[4] = realms_data.resource_5
-        assert user_mint[4] = r_5
-        assert treasury_mint[4] = r_5
+        assert user_mint[4] = r_5 * days
+        assert treasury_mint[4] = r_5 * days
     end
 
     if realms_data.resource_6 != 0:
         assert resource_ids[5] = realms_data.resource_7
-        assert user_mint[5] = r_6
-        assert treasury_mint[5] = r_6
+        assert user_mint[5] = r_6 * days
+        assert treasury_mint[5] = r_6 * days
     end
 
     if realms_data.resource_7 != 0:
         assert resource_ids[6] = realms_data.resource_7
-        assert user_mint[6] = r_7
-        assert treasury_mint[6] = r_7
+        assert user_mint[6] = r_7 * days
+        assert treasury_mint[6] = r_7 * days
     end
-
-    # # TODO: only allow claim contract to mint
 
     # mint users
     IERC1155.mint_batch(
@@ -167,6 +180,20 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 end
 
 @external
+func getAvailableResources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        last_update : felt) -> (time : felt):
+    let (block_timestamp) = get_block_timestamp()
+    # Real line commented out for testing
+    # let days = (block_timestamp - last_update) / 3600
+
+    # dummy numbers as no blocktime on local machine
+    # this will equal 24 days uncollected
+    let days = (86400 - 3600) / 3600
+
+    return (time=days)
+end
+
+@external
 func upgrade_resource{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*,
         range_check_ptr}(
@@ -175,7 +202,6 @@ func upgrade_resource{
     alloc_locals
     let (caller) = get_caller_address()
     let (controller) = controller_address.read()
-
 
     # resource contract
     let (resource_address) = IModuleController.get_resources_address(contract_address=controller)
@@ -232,7 +258,6 @@ func upgrade_resource{
 
     # create array of ids and values
     let (local resource_ids : felt*) = alloc()
-    let (local resource_values : felt*) = alloc()
 
     assert resource_ids[0] = resource_upgrade_ids.resource_1
     assert resource_ids[1] = resource_upgrade_ids.resource_2
@@ -240,14 +265,8 @@ func upgrade_resource{
     assert resource_ids[3] = resource_upgrade_ids.resource_4
     assert resource_ids[4] = resource_upgrade_ids.resource_5
 
-    assert resource_values[0] = token_values[0]
-    assert resource_values[1] = token_values[1]
-    assert resource_values[2] = token_values[2]
-    assert resource_values[3] = token_values[3]
-    assert resource_values[4] = token_values[4]
-
     # burn resources
-    IERC1155.burn_batch(resource_address, caller, 5, resource_ids, 5, resource_values)
+    IERC1155.burn_batch(resource_address, caller, 5, resource_ids, 5, token_values)
 
     # increase level
     I02B_Resources.set_resource_level(resources_state_address, token_id, resource, level + 1)
@@ -260,7 +279,7 @@ func fetch_resource_upgrade_ids{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
         bitwise_ptr : BitwiseBuiltin*}(resource_id : felt) -> (resource_ids : ResourceUpgradeIds):
     alloc_locals
-    
+
     let (controller) = controller_address.read()
 
     # state contract
@@ -280,7 +299,8 @@ func fetch_resource_upgrade_ids{
     let (local resource_4_values) = unpack_data(data, 64, 255)
     let (local resource_5_values) = unpack_data(data, 72, 255)
 
-    let resource_ids = ResourceUpgradeIds(
+    return (
+        resource_ids=ResourceUpgradeIds(
         resource_1=resource_1,
         resource_2=resource_2,
         resource_3=resource_3,
@@ -290,6 +310,5 @@ func fetch_resource_upgrade_ids{
         resource_2_values=resource_2_values,
         resource_3_values=resource_3_values,
         resource_4_values=resource_4_values,
-        resource_5_values=resource_5_values)
-    return (resource_ids=resource_ids)
+        resource_5_values=resource_5_values))
 end

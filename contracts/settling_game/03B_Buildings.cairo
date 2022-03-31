@@ -18,11 +18,11 @@ from contracts.token.ERC1155.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721 
 
-##### Module 3A ###
+##### Module 3A #####
 #                   #
 # Buildings Logic   #
 #                   #
-###################
+#####################
 
 @storage_var
 func controller_address() -> (address : felt):
@@ -37,7 +37,7 @@ func building_cost_values(building_id : felt) -> (cost_values : felt):
 end
 
 @storage_var
-func realm_buildings(token_id : Uint256) -> (buildings : RealmBuildings):
+func realm_buildings(token_id : Uint256) -> (buildings : felt):
 end
 
 @constructor
@@ -68,6 +68,15 @@ func set_building_cost_values{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     return ()
 end
 
+@external
+func set_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        token_id : Uint256, buildings_value : felt):
+
+        realm_buildings.write(token_id, buildings_value)
+
+    return () 
+end
+
 ###### GETTERS ######
 
 @external
@@ -90,23 +99,9 @@ end
 
 @external
 func get_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256) -> (buildings : RealmBuildings):
+        token_id : Uint256) -> (buildings : felt):
 
         let (buildings) = realm_buildings.read(token_id)
 
     return (buildings=buildings)
-end
-
-
-@external
-func get_realm_building_by_id{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256, building_id : felt) -> (building : felt):
-
-        let (buildings) = realm_buildings.read(token_id)
-
-        if building_id == 1:
-            return (building=buildings.castle) 
-        end
-
-    return (building=0) 
 end

@@ -2,21 +2,27 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
 
+from contracts.ERC165_base import (
+    ERC165_supports_interface, 
+    ERC165_register_interface
+)
+
 @view
-func ERC165_supportsInterface{
+func supportsInterface{
         syscall_ptr: felt*, 
         pedersen_ptr: HashBuiltin*, 
         range_check_ptr
-    } (interface_id: felt) -> (success: felt):
-    # 165
-    if interface_id == '0x01ffc9a7':
-        return (1)
-    end
+    } (interfaceId: felt) -> (success: felt):
+    let (success) = ERC165_supports_interface(interfaceId)
+    return (success)
+end
 
-    # The INVALID_ID '0xffffffff' must explicitly return false ('0')
-    # according to EIP721
-    if interface_id == '0xffffffff':
-        return (0)
-    end
-    return (0)
+@external
+func registerInterface{
+        syscall_ptr: felt*, 
+        pedersen_ptr: HashBuiltin*, 
+        range_check_ptr
+    } (interfaceId: felt):
+    ERC165_register_interface(interfaceId)
+    return ()
 end

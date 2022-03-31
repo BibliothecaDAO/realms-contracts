@@ -3,18 +3,10 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
 
+from contracts.utils.constants import TRUE, FALSE
+
 @storage_var
 func Pausable_paused() -> (paused: felt):
-end
-
-@view
-func paused{
-        syscall_ptr: felt*,
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }() -> (paused: felt):
-    let (paused) = Pausable_paused.read()
-    return (paused)
 end
 
 func Pausable_when_not_paused{
@@ -23,7 +15,7 @@ func Pausable_when_not_paused{
         range_check_ptr
     }():
     let (is_paused) = Pausable_paused.read()
-    assert is_paused = 0
+    assert is_paused = FALSE
     return ()
 end
 
@@ -33,7 +25,7 @@ func Pausable_when_paused{
         range_check_ptr
     }():
     let (is_paused) = Pausable_paused.read()
-    assert is_paused = 1
+    assert is_paused = TRUE
     return ()
 end
 
@@ -43,7 +35,7 @@ func Pausable_pause{
         range_check_ptr
     }():
     Pausable_when_not_paused()
-    Pausable_paused.write(1)
+    Pausable_paused.write(TRUE)
     return ()
 end
 
@@ -53,6 +45,6 @@ func Pausable_unpause{
         range_check_ptr
     }():
     Pausable_when_paused()
-    Pausable_paused.write(0)
+    Pausable_paused.write(FALSE)
     return ()
 end

@@ -6,7 +6,7 @@ attrs==21.2.0
 base58==2.1.1
 bitarray==1.2.2
 cachetools==4.2.4
-cairo-lang==0.6.2
+cairo-lang==0.7.0
 cairo-nile==0.3.0
 certifi==2021.10.8
 charset-normalizer==2.0.7
@@ -71,3 +71,4 @@ web3==5.24.0
 websockets==9.1
 yarl==1.7.2
 zipp==3.6.0
+dill==0.3.4
