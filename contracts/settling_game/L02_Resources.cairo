@@ -12,7 +12,8 @@ from contracts.settling_game.utils.game_structs import RealmData, ResourceUpgrad
 from contracts.settling_game.utils.general import scale, unpack_data
 
 from contracts.settling_game.utils.constants import (
-    TRUE, FALSE, VAULT_LENGTH, DAY, VAULT_LENGTH_SECONDS)
+    TRUE, FALSE, VAULT_LENGTH, DAY, VAULT_LENGTH_SECONDS, BASE_RESOURCES_PER_DAY,
+    BASE_LORDS_PER_DAY)
 
 from contracts.token.IERC20 import IERC20
 from contracts.token.ERC1155.IERC1155 import IERC1155
@@ -46,6 +47,9 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     alloc_locals
     let (caller) = get_caller_address()
     let (controller) = controller_address.read()
+
+    # lords contract
+    let (lords_address) = IModuleController.get_lords_address(contract_address=controller)
 
     # realms contract
     let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
@@ -110,61 +114,74 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     # get time staked
     let (time_staked) = IS01_Settling.get_time_staked(settling_state_address, token_id)
 
+    # get time staked
+    let (time_vault_staked) = IS01_Settling.get_time_vault_staked(settling_state_address, token_id)
+
     # calculate days
     let (total_days, remainder) = get_available_resources(time_staked)
 
     # calculate days
-    let (vault) = get_available_vault_resources(time_staked)
+    let (total_vault_days, vault_remainder) = get_available_vault_resources(time_vault_staked)
 
-    # check days greater than zero
-    assert_not_zero(total_days + vault)
+    # check vault days + days greater than zero
+    let days = total_days + total_vault_days
+    assert_not_zero(days)
 
     IS01_Settling.set_time_staked(settling_state_address, token_id, remainder)
 
-    let days = total_days + vault
-
     # TODO: change to safemath functions
     assert resource_ids[0] = realms_data.resource_1
-    assert user_mint[0] = ((r_1 * days) * 80) / 100
-    assert treasury_mint[0] = ((r_1 * days) * 20) / 100
+    assert user_mint[0] = ((r_1 * days) * 80) / BASE_RESOURCES_PER_DAY
+    assert treasury_mint[0] = ((r_1 * days) * 20) / BASE_RESOURCES_PER_DAY
 
     if realms_data.resource_2 != 0:
         assert resource_ids[1] = realms_data.resource_2
-        assert user_mint[1] = ((r_2 * days) * 80) / 100
-        assert treasury_mint[1] = ((r_2 * days) * 20) / 100
+        assert user_mint[1] = ((r_2 * days) * 80) / BASE_RESOURCES_PER_DAY
+        assert treasury_mint[1] = ((r_2 * days) * 20) / BASE_RESOURCES_PER_DAY
     end
 
     if realms_data.resource_3 != 0:
         assert resource_ids[2] = realms_data.resource_3
-        assert user_mint[2] = ((r_3 * days) * 80) / 100
-        assert treasury_mint[2] = ((r_3 * days) * 20) / 100
+        assert user_mint[2] = ((r_3 * days) * 80) / BASE_RESOURCES_PER_DAY
+        assert treasury_mint[2] = ((r_3 * days) * 20) / BASE_RESOURCES_PER_DAY
     end
 
     if realms_data.resource_4 != 0:
         assert resource_ids[3] = realms_data.resource_4
-        assert user_mint[3] = ((r_4 * days) * 80) / 100
-        assert treasury_mint[3] = ((r_4 * days) * 20) / 100
+        assert user_mint[3] = ((r_4 * days) * 80) / BASE_RESOURCES_PER_DAY
+        assert treasury_mint[3] = ((r_4 * days) * 20) / BASE_RESOURCES_PER_DAY
     end
 
     if realms_data.resource_5 != 0:
         assert resource_ids[4] = realms_data.resource_5
-        assert user_mint[4] = ((r_5 * days) * 80) / 100
-        assert treasury_mint[4] = ((r_5 * days) * 20) / 100
+        assert user_mint[4] = ((r_5 * days) * 80) / BASE_RESOURCES_PER_DAY
+        assert treasury_mint[4] = ((r_5 * days) * 20) / BASE_RESOURCES_PER_DAY
     end
 
     if realms_data.resource_6 != 0:
         assert resource_ids[5] = realms_data.resource_7
-        assert user_mint[5] = ((r_6 * days) * 80) / 100
-        assert treasury_mint[5] = ((r_6 * days) * 20) / 100
+        assert user_mint[5] = ((r_6 * days) * 80) / BASE_RESOURCES_PER_DAY
+        assert treasury_mint[5] = ((r_6 * days) * 20) / BASE_RESOURCES_PER_DAY
     end
 
     if realms_data.resource_7 != 0:
         assert resource_ids[6] = realms_data.resource_7
-        assert user_mint[6] = ((r_7 * days) * 80) / 100
-        assert treasury_mint[6] = ((r_7 * days) * 20) / 100
+        assert user_mint[6] = ((r_7 * days) * 80) / BASE_RESOURCES_PER_DAY
+        assert treasury_mint[6] = ((r_7 * days) * 20) / BASE_RESOURCES_PER_DAY
     end
 
-    # # TODO: only allow claim contract to mint
+    let lords_available = Uint256(total_days * BASE_LORDS_PER_DAY, 0)
+
+    # TODO: CAN WE IMPROVE THE GAS OF THIS??
+
+    # approve lords
+    # IERC20.approve(lords_address, treasury_address, lords_available)
+
+    # mint lords
+    IERC20.transferFrom(lords_address, treasury_address, caller, lords_available)
+
+    # TODO: ONLY ALLOW THIS MODULE TO MINT FROM RESOURCE CONTRACT
+
     # mint users
     IERC1155.mint_batch(
         resources_address,
@@ -186,6 +203,10 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     return ()
 end
 
+###########
+# GETTERS #
+###########
+
 @external
 func get_available_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         last_update : felt) -> (days_accrued : felt, remainder : felt):
@@ -193,25 +214,31 @@ func get_available_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, r
 
     let (days_accrued, seconds_left_over) = unsigned_div_rem(block_timestamp - last_update, DAY)
 
-    return (days_accrued=days_accrued, remainder=seconds_left_over)
+    return (days_accrued, seconds_left_over)
 end
 
+@external
 func get_available_vault_resources{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(last_update : felt) -> (
-        time : felt):
+        days_accrued : felt, remainder : felt):
+    alloc_locals
     let (block_timestamp) = get_block_timestamp()
 
     let (days_accrued, seconds_left_over) = unsigned_div_rem(block_timestamp - last_update, DAY)
 
-    # let yes = is_le(VAULT_LENGTH, time)
+    let (yes) = is_le(days_accrued, VAULT_LENGTH_SECONDS)
 
     # TODO: only if time is above 7 days can you claim
-    if days_accrued == 1:
-        return (days_accrued)
-    else:
-        return (0)
+    if yes == 1:
+        return (days_accrued, seconds_left_over)
     end
+
+    return (0, seconds_left_over)
 end
+
+############
+# EXTERNAL #
+############
 
 @external
 func upgrade_resource{

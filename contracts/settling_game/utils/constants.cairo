@@ -48,3 +48,6 @@ const FALSE = 0
 const VAULT_LENGTH = 7  # days
 const DAY = 86400  # sec
 const VAULT_LENGTH_SECONDS = VAULT_LENGTH * DAY
+
+const BASE_RESOURCES_PER_DAY = 100
+const BASE_LORDS_PER_DAY = 25

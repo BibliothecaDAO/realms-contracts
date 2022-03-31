@@ -21,8 +21,8 @@ initial_supply = 1000000 * (10 ** 18)
 first_token_id = uint(1)
 building_id = 1
 
-# 1.5 Days
-stake_time = 129600
+# 1.5 * 7 Days
+stake_time = 129600 * 7
 
 
 @pytest.fixture(scope='module')
@@ -41,8 +41,8 @@ async def game_factory(account_factory):
             str_to_felt("Lords"),     # name
             str_to_felt("LRD"),       # symbol
             *uint(initial_supply),                # initial supply
-            accounts[0].contract_address,
-            accounts[0].contract_address   # recipient
+            treasury_account.contract_address,  # recipient
+            treasury_account.contract_address   # owner
         ]
     )
 
@@ -131,6 +131,11 @@ async def test_mint_realm(game_factory):
     # VALUE SETTERS #
     #################
 
+    # APPROVE RESOURCE CONTRACT FOR LORDS TRANSFERS - SET AT FULL SUPPLY TODO: NEEDS MORE SECURE SYSTEM
+    await signers[1].send_transaction(
+        account=accounts[1], to=lords.contract_address, selector_name='approve', calldata=[resources_logic.contract_address, *uint(initial_supply)]
+    )
+
     # RESOURCES
     # SET VALUES (ids,cost) AT 1,2,3,4,5,10,10,10,10,10
     await signer.send_transaction(
@@ -209,9 +214,9 @@ async def test_mint_realm(game_factory):
     assert culture.result.culture == 25
     print(f'\033[1;31;40m😊 Culture level is {culture.result.culture}\n')
 
-    #############
-    # RESOURCES #
-    #############
+    #####################
+    # RESOURCES & LORDS #
+    #####################
 
     # CLAIM RESOURCES
     await signer.send_transaction(
@@ -221,6 +226,11 @@ async def test_mint_realm(game_factory):
         player_resource_value = await resources.balanceOf(accounts[0].contract_address, index + 1).invoke()
         print(
             f'\033[1;33;40m🔥 Resource {index + 1} balance is: {player_resource_value.result.balance}')
+
+    player_lords_value = await lords.balanceOf(accounts[0].contract_address).invoke()
+
+    print(
+        f'\n \033[1;33;40m$LORDS {player_lords_value.result.balance}\n')
 
     print(
         f'\n \033[1;33;40m🔥 Upgrading Resource.... 🔥\n')

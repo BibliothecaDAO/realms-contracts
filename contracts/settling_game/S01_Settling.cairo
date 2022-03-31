@@ -32,7 +32,7 @@ end
 # THE VAULT STORES THE VESTED RESOURCES, IT CAN ONLY BE ACCESS WHEN A FULL EPOCH WORTH IS AVAILABLE
 # THIS IS CURRENTLY SET AT 7 DAYS
 @storage_var
-func time_vested_staked(token_id : Uint256) -> (time : felt):
+func time_vault_staked(token_id : Uint256) -> (time : felt):
 end
 
 ###############
@@ -51,7 +51,7 @@ end
 # SETTERS #
 ###########
 
-### VARS ###
+# ## VARS ###
 # TIME_LEFT -> WHEN PLAYER CLAIMS, THIS IS THE REMAINDER TO BE PASSED BACK INTO STORAGE
 # THIS ALLOWS FULL DAYS TO BE CLAIMED ONLY AND ALLOWS LESS THAN FULL DAYS TO CONTINUE ACCRUREING
 @external
@@ -66,6 +66,21 @@ func set_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     return ()
 end
 
+# VAULT_TIME_LEFT -> WHEN PLAYER CLAIMS, THIS IS THE REMAINDER TO BE PASSED BACK INTO STORAGE
+# THIS ALLOWS FULL 7 DAYS TO BE CLAIMED ONLY AND ALLOWS LESS THAN FULL DAYS TO CONTINUE ACCRUREING
+@external
+func set_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        token_id : Uint256, time_left : felt):
+    MODULE_only_approved()
+
+    let (block_timestamp) = get_block_timestamp()
+
+    # SETS CURRENT TIME
+    time_vault_staked.write(token_id, block_timestamp - time_left)
+    return ()
+end
+
+# TODO: CHECK IF NEEDED
 @external
 func set_approval{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
         success : felt):
@@ -75,7 +90,6 @@ func set_approval{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     let (settle_logic_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=1)
 
-    # TODO: CHECK IF NEEDED
     realms_IERC721.setApprovalForAll(realms_address, settle_logic_address, 1)
 
     return (TRUE)
@@ -89,6 +103,14 @@ end
 func get_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256) -> (time : felt):
     let (time) = time_staked.read(token_id)
+
+    return (time=time)
+end
+
+@external
+func get_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        token_id : Uint256) -> (time : felt):
+    let (time) = time_vault_staked.read(token_id)
 
     return (time=time)
 end

@@ -60,7 +60,6 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     let (controller) = MODULE_controller_address()
 
     let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
-
     let (s_realms_address) = IModuleController.get_s_realms_address(contract_address=controller)
 
     let (settle_state_address) = IModuleController.get_module_address(
@@ -74,6 +73,7 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
 
     # PASS 0 to set the current time
     IS01_Settling.set_time_staked(settle_state_address, token_id, 0)
+    IS01_Settling.set_time_vault_staked(settle_state_address, token_id, 0)
 
     # EMIT
     Settled.emit(caller, token_id)
@@ -105,6 +105,7 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     # TODO: TimeStamp - current Hardcoded
     # PASS 0 to set the current time
     IS01_Settling.set_time_staked(settle_state_address, token_id, 0)
+    IS01_Settling.set_time_vault_staked(settle_state_address, token_id, 0)
 
     # TOD0: Claim resources if available before unsettling
 

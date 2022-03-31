@@ -51,7 +51,13 @@ namespace IS01_Settling:
     func set_time_staked(token_id : Uint256, time_left : felt):
     end
 
+    func set_time_vault_staked(token_id : Uint256, time_left : felt):
+    end
+
     func get_time_staked(token_id : Uint256) -> (time : felt):
+    end
+
+    func get_time_vault_staked(token_id : Uint256) -> (time : felt):
     end
 end
 
