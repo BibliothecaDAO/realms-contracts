@@ -19,7 +19,7 @@ from contracts.settling_game.utils.constants import (
     SHIFT_6_17, SHIFT_6_18, SHIFT_6_19, SHIFT_6_20, TRUE, FALSE)
 
 from contracts.token.IERC20 import IERC20
-from contracts.token.ERC1155.IERC1155 import IERC1155
+from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
 from contracts.settling_game.interfaces.imodules import IModuleController, IS03_Buildings
@@ -105,7 +105,7 @@ func build{
     #     values)
 
     # BURN RESOURCES
-    IERC1155.burn_batch(resource_address, caller, _token_values_len, ids, _token_values_len, values)
+    IERC1155.burnBatch(resource_address, caller, _token_values_len, ids, _token_values_len, values)
 
     # EMIT
     BuildingBuilt.emit(token_id, building_id)
@@ -391,7 +391,7 @@ end
 func fetch_building_cost_ids{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
         bitwise_ptr : BitwiseBuiltin*}(building_id : felt) -> (
-        realm_building_ids_len : felt, realm_building_ids : felt*):
+        realm_building_ids_len : felt, realm_building_ids : Uint256*):
     alloc_locals
 
     let (controller) = MODULE_controller_address()
@@ -413,74 +413,74 @@ func fetch_building_cost_ids{
     let (resource_9) = unpack_data(data, 64, 255)
     let (resource_10) = unpack_data(data, 72, 255)
 
-    let (resource_ids : felt*) = alloc()
+    let (resource_ids : Uint256*) = alloc()
     let len = 0
 
     if resource_1 != 0:
-        resource_ids[0] = resource_1
+        assert resource_ids[0] = Uint256(resource_1, 0)
         tempvar len = 1
     else:
         tempvar len = len
     end
 
     if resource_2 != 0:
-        resource_ids[1] = resource_2
+        assert resource_ids[1] = Uint256(resource_2, 0)
         tempvar len = 2
     else:
         tempvar len = len
     end
 
     if resource_3 != 0:
-        resource_ids[2] = resource_3
+        assert resource_ids[2] = Uint256(resource_3, 0)
         tempvar len = 3
     else:
         tempvar len = len
     end
 
     if resource_4 != 0:
-        resource_ids[3] = resource_4
+        assert resource_ids[3] = Uint256(resource_4, 0)
         tempvar len = 4
     else:
         tempvar len = len
     end
 
     if resource_5 != 0:
-        resource_ids[4] = resource_5
+        assert resource_ids[4] = Uint256(resource_5, 0)
         tempvar len = 5
     else:
         tempvar len = len
     end
 
     if resource_6 != 0:
-        resource_ids[5] = resource_6
+        assert resource_ids[5] = Uint256(resource_6, 0)
         tempvar len = 6
     else:
         tempvar len = len
     end
 
     if resource_7 != 0:
-        resource_ids[6] = resource_7
+        assert resource_ids[6] = Uint256(resource_7, 0)
         tempvar len = 7
     else:
         tempvar len = len
     end
 
     if resource_8 != 0:
-        resource_ids[7] = resource_8
+        assert resource_ids[7] = Uint256(resource_8, 0)
         tempvar len = 8
     else:
         tempvar len = len
     end
 
     if resource_9 != 0:
-        resource_ids[8] = resource_9
+        assert resource_ids[8] = Uint256(resource_9, 0)
         tempvar len = 9
     else:
         tempvar len = len
     end
 
     if resource_10 != 0:
-        resource_ids[9] = resource_10
+        assert resource_ids[9] = Uint256(resource_10, 0)
         tempvar len = 10
     else:
         tempvar len = len
@@ -493,7 +493,7 @@ end
 func fetch_building_cost_values{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
         bitwise_ptr : BitwiseBuiltin*}(building_id : felt) -> (
-        realm_building_costs_len : felt, realm_building_costs : felt*):
+        realm_building_costs_len : felt, realm_building_costs : Uint256*):
     alloc_locals
 
     let (controller) = MODULE_controller_address()
@@ -515,74 +515,74 @@ func fetch_building_cost_values{
     let (resource_9_values) = unpack_data(data, 96, 4095)
     let (resource_10_values) = unpack_data(data, 108, 4095)
 
-    let (resource_values : felt*) = alloc()
+    let (resource_values : Uint256*) = alloc()
     let len = 0
 
     if resource_1_values != 0:
-        resource_values[0] = resource_1_values
+        assert resource_values[0] = Uint256(resource_1_values, 0)
         tempvar len = 1
     else:
         tempvar len = len
     end
 
     if resource_2_values != 0:
-        resource_values[1] = resource_2_values
+        assert resource_values[1] = Uint256(resource_2_values, 0)
         tempvar len = 2
     else:
         tempvar len = len
     end
 
     if resource_3_values != 0:
-        resource_values[2] = resource_3_values
+        assert resource_values[2] = Uint256(resource_3_values, 0)
         tempvar len = 3
     else:
         tempvar len = len
     end
 
     if resource_4_values != 0:
-        resource_values[3] = resource_4_values
+        assert resource_values[3] = Uint256(resource_4_values, 0)
         tempvar len = 4
     else:
         tempvar len = len
     end
 
     if resource_5_values != 0:
-        resource_values[4] = resource_5_values
+        assert resource_values[4] = Uint256(resource_5_values, 0)
         tempvar len = 5
     else:
         tempvar len = len
     end
 
     if resource_6_values != 0:
-        resource_values[5] = resource_6_values
+        assert resource_values[5] = Uint256(resource_6_values, 0)
         tempvar len = 6
     else:
         tempvar len = len
     end
 
     if resource_7_values != 0:
-        resource_values[6] = resource_7_values
+        assert resource_values[6] = Uint256(resource_7_values, 0)
         tempvar len = 7
     else:
         tempvar len = len
     end
 
     if resource_8_values != 0:
-        resource_values[7] = resource_8_values
+        assert resource_values[7] = Uint256(resource_8_values, 0)
         tempvar len = 8
     else:
         tempvar len = len
     end
 
     if resource_9_values != 0:
-        resource_values[8] = resource_9_values
+        assert resource_values[8] = Uint256(resource_9_values, 0)
         tempvar len = 9
     else:
         tempvar len = len
     end
 
     if resource_10_values != 0:
-        resource_values[9] = resource_10_values
+        assert resource_values[9] = Uint256(resource_10_values, 0)
         tempvar len = 10
     else:
         tempvar len = len

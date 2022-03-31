@@ -63,13 +63,10 @@ async def game_factory(account_factory):
         ])
 
     resources = await starknet.deploy(
-        source="contracts/token/ERC1155/ERC1155_Mintable.cairo",
+        source="contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo",
         constructor_calldata=[
-            admin_account.contract_address,
-            6,
-            1, 2, 3, 4, 5, 6,
-            6,
-            100, 100, 100, 100, 100, 100
+            1234,
+            admin_account.contract_address
         ])
 
     # The Controller is the only unchangeable contract.
@@ -130,6 +127,10 @@ async def test_mint_realm(game_factory):
     #################
     # VALUE SETTERS #
     #################
+
+    await signer.send_transaction(
+        account=accounts[0], to=resources.contract_address, selector_name='mintBatch', calldata=[accounts[0].contract_address, 5, *uint(1), *uint(2), *uint(3), *uint(4), *uint(5), 5, *uint(100), *uint(100), *uint(100), *uint(100), *uint(100)]
+    )
 
     # APPROVE RESOURCE CONTRACT FOR LORDS TRANSFERS - SET AT FULL SUPPLY TODO: NEEDS MORE SECURE SYSTEM
     await signers[1].send_transaction(
@@ -223,9 +224,9 @@ async def test_mint_realm(game_factory):
         account=accounts[0], to=resources_logic.contract_address, selector_name='claim_resources', calldata=[*first_token_id]
     )
     for index in range(22):
-        player_resource_value = await resources.balanceOf(accounts[0].contract_address, index + 1).invoke()
+        player_resource_value = await resources.balanceOf(accounts[0].contract_address, uint(index + 1)).invoke()
         print(
-            f'\033[1;33;40m🔥 Resource {index + 1} balance is: {player_resource_value.result.balance}')
+            f'\033[1;33;40m🔥 Resource {index + 1} balance is: {player_resource_value.result.balance[0]}')
 
     player_lords_value = await lords.balanceOf(accounts[0].contract_address).invoke()
 
@@ -241,9 +242,9 @@ async def test_mint_realm(game_factory):
     )
 
     for index in range(22):
-        player_resource_value = await resources.balanceOf(accounts[0].contract_address, index + 1).invoke()
+        player_resource_value = await resources.balanceOf(accounts[0].contract_address, uint(index + 1)).invoke()
         print(
-            f'\033[1;33;40m🔥 Resource {index + 1} balance is: {player_resource_value.result.balance}')
+            f'\033[1;33;40m🔥 Resource {index + 1} balance is: {player_resource_value.result.balance[0]}')
 
     #############
     # BUILDINGS #

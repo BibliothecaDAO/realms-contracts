@@ -6,7 +6,7 @@ import { resolve } from "path";
 
 dotenvConfig({ path: resolve(__dirname, "../../.env") });
 
-export const DEPLOYMENT_PATH_BASE = "./minigame-deployments/starknet";
+export const DEPLOYMENT_PATH_BASE = "./deployments/starknet";
 
 const network: any = process.env.NETWORK || "georli-alpha"
 export const provider = new Provider({ network })
@@ -44,7 +44,7 @@ type AccountShape = {
 export function getOwnerAccount(): AccountShape {
   const path_base = getPathBase()
 
-  try {  
+  try {
     const file = fs.readFileSync(`${path_base}/OwnerAccount.json`)
 
     const parsed = JSON.parse(file.toString())
@@ -128,8 +128,8 @@ export async function deployContract(contractName: string, contractAlias: string
     writeDeployment(contractAlias, result)
     writeNileDeploymentFile(contractName, contractAlias, result)
     console.log(res);
-  } catch(e){
-    console.error("Error Deploying Contract: ", e )
+  } catch (e) {
+    console.error("Error Deploying Contract: ", e)
   }
 
   return result
@@ -137,22 +137,22 @@ export async function deployContract(contractName: string, contractAlias: string
 
 export function getSigner() {
   const path_base = getPathBase()
-  try {  
+  try {
     const file = fs.readFileSync(`${path_base}/OwnerAccount.json`)
 
     const parsed = JSON.parse(file.toString())
 
     const privKey = process.env.OWNER_PRIVATE_KEY;
 
-    if(privKey == undefined || privKey == ""){
+    if (privKey == undefined || privKey == "") {
       throw new Error("Attempted to call getSigner() with OWNER_PRIVATE_KEY being undefined. Set env value in .env or execution environment.")
     }
 
     const kp = ec.getKeyPair(toBN(privKey, "hex"))
-    const s = new Account(provider, parsed.address, kp )
+    const s = new Account(provider, parsed.address, kp)
     return s;
 
-  } catch( e ) {
+  } catch (e) {
     console.error("Signing error: ", e)
   }
 }

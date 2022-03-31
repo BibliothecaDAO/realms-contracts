@@ -16,7 +16,7 @@ from contracts.settling_game.utils.constants import (
     BASE_LORDS_PER_DAY)
 
 from contracts.token.IERC20 import IERC20
-from contracts.token.ERC1155.IERC1155 import IERC1155
+from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.imodules import (
     IModuleController, IS02_Resources, IS01_Settling)
@@ -75,9 +75,9 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (owner) = realms_IERC721.ownerOf(contract_address=s_realms_address, token_id=token_id)
     assert caller = owner
 
-    let (local resource_ids : felt*) = alloc()
-    let (local user_mint : felt*) = alloc()
-    let (local treasury_mint : felt*) = alloc()
+    let (local resource_ids : Uint256*) = alloc()
+    let (local user_mint : Uint256*) = alloc()
+    let (local treasury_mint : Uint256*) = alloc()
 
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
         contract_address=realms_address, token_id=token_id)
@@ -130,44 +130,44 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     IS01_Settling.set_time_staked(settling_state_address, token_id, remainder)
 
     # TODO: change to safemath functions
-    assert resource_ids[0] = realms_data.resource_1
-    assert user_mint[0] = ((r_1 * days) * 80) / BASE_RESOURCES_PER_DAY
-    assert treasury_mint[0] = ((r_1 * days) * 20) / BASE_RESOURCES_PER_DAY
+    assert resource_ids[0] = Uint256(realms_data.resource_1, 0)
+    assert user_mint[0] = Uint256(((r_1 * days) * 80) / BASE_RESOURCES_PER_DAY, 0)
+    assert treasury_mint[0] = Uint256(((r_1 * days) * 20) / BASE_RESOURCES_PER_DAY, 0)
 
     if realms_data.resource_2 != 0:
-        assert resource_ids[1] = realms_data.resource_2
-        assert user_mint[1] = ((r_2 * days) * 80) / BASE_RESOURCES_PER_DAY
-        assert treasury_mint[1] = ((r_2 * days) * 20) / BASE_RESOURCES_PER_DAY
+        assert resource_ids[1] = Uint256(realms_data.resource_2, 0)
+        assert user_mint[1] = Uint256(((r_2 * days) * 80) / BASE_RESOURCES_PER_DAY, 0)
+        assert treasury_mint[1] = Uint256(((r_2 * days) * 20) / BASE_RESOURCES_PER_DAY, 0)
     end
 
     if realms_data.resource_3 != 0:
-        assert resource_ids[2] = realms_data.resource_3
-        assert user_mint[2] = ((r_3 * days) * 80) / BASE_RESOURCES_PER_DAY
-        assert treasury_mint[2] = ((r_3 * days) * 20) / BASE_RESOURCES_PER_DAY
+        assert resource_ids[2] = Uint256(realms_data.resource_3, 0)
+        assert user_mint[2] = Uint256(((r_3 * days) * 80) / BASE_RESOURCES_PER_DAY, 0)
+        assert treasury_mint[2] = Uint256(((r_3 * days) * 20) / BASE_RESOURCES_PER_DAY, 0)
     end
 
     if realms_data.resource_4 != 0:
-        assert resource_ids[3] = realms_data.resource_4
-        assert user_mint[3] = ((r_4 * days) * 80) / BASE_RESOURCES_PER_DAY
-        assert treasury_mint[3] = ((r_4 * days) * 20) / BASE_RESOURCES_PER_DAY
+        assert resource_ids[3] = Uint256(realms_data.resource_4, 0)
+        assert user_mint[3] = Uint256(((r_4 * days) * 80) / BASE_RESOURCES_PER_DAY, 0)
+        assert treasury_mint[3] = Uint256(((r_4 * days) * 20) / BASE_RESOURCES_PER_DAY, 0)
     end
 
     if realms_data.resource_5 != 0:
-        assert resource_ids[4] = realms_data.resource_5
-        assert user_mint[4] = ((r_5 * days) * 80) / BASE_RESOURCES_PER_DAY
-        assert treasury_mint[4] = ((r_5 * days) * 20) / BASE_RESOURCES_PER_DAY
+        assert resource_ids[4] = Uint256(realms_data.resource_5, 0)
+        assert user_mint[4] = Uint256(((r_5 * days) * 80) / BASE_RESOURCES_PER_DAY, 0)
+        assert treasury_mint[4] = Uint256(((r_5 * days) * 20) / BASE_RESOURCES_PER_DAY, 0)
     end
 
     if realms_data.resource_6 != 0:
-        assert resource_ids[5] = realms_data.resource_7
-        assert user_mint[5] = ((r_6 * days) * 80) / BASE_RESOURCES_PER_DAY
-        assert treasury_mint[5] = ((r_6 * days) * 20) / BASE_RESOURCES_PER_DAY
+        assert resource_ids[5] = Uint256(realms_data.resource_7, 0)
+        assert user_mint[5] = Uint256(((r_6 * days) * 80) / BASE_RESOURCES_PER_DAY, 0)
+        assert treasury_mint[5] = Uint256(((r_6 * days) * 20) / BASE_RESOURCES_PER_DAY, 0)
     end
 
     if realms_data.resource_7 != 0:
-        assert resource_ids[6] = realms_data.resource_7
-        assert user_mint[6] = ((r_7 * days) * 80) / BASE_RESOURCES_PER_DAY
-        assert treasury_mint[6] = ((r_7 * days) * 20) / BASE_RESOURCES_PER_DAY
+        assert resource_ids[6] = Uint256(realms_data.resource_7, 0)
+        assert user_mint[6] = Uint256(((r_7 * days) * 80) / BASE_RESOURCES_PER_DAY, 0)
+        assert treasury_mint[6] = Uint256(((r_7 * days) * 20) / BASE_RESOURCES_PER_DAY, 0)
     end
 
     let lords_available = Uint256(total_days * BASE_LORDS_PER_DAY, 0)
@@ -183,7 +183,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     # TODO: ONLY ALLOW THIS MODULE TO MINT FROM RESOURCE CONTRACT
 
     # mint users
-    IERC1155.mint_batch(
+    IERC1155.mintBatch(
         resources_address,
         caller,
         realms_data.resource_number,
@@ -192,7 +192,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         user_mint)
 
     # mint treasury
-    IERC1155.mint_batch(
+    IERC1155.mintBatch(
         resources_address,
         treasury_address,
         realms_data.resource_number,
@@ -276,23 +276,23 @@ func upgrade_resource{
     let (resource_upgrade_ids : ResourceUpgradeIds) = fetch_resource_upgrade_ids(resource)
 
     # CREATE TEMP ARRARY
-    let (resource_ids : felt*) = alloc()
-    let (resource_values : felt*) = alloc()
+    let (resource_ids : Uint256*) = alloc()
+    let (resource_values : Uint256*) = alloc()
 
-    resource_ids[0] = resource_upgrade_ids.resource_1
-    resource_ids[1] = resource_upgrade_ids.resource_2
-    resource_ids[2] = resource_upgrade_ids.resource_3
-    resource_ids[3] = resource_upgrade_ids.resource_4
-    resource_ids[4] = resource_upgrade_ids.resource_5
+    assert resource_ids[0] = Uint256(resource_upgrade_ids.resource_1, 0)
+    assert resource_ids[1] = Uint256(resource_upgrade_ids.resource_2, 0)
+    assert resource_ids[2] = Uint256(resource_upgrade_ids.resource_3, 0)
+    assert resource_ids[3] = Uint256(resource_upgrade_ids.resource_4, 0)
+    assert resource_ids[4] = Uint256(resource_upgrade_ids.resource_5, 0)
 
-    resource_values[0] = resource_upgrade_ids.resource_1_values
-    resource_values[1] = resource_upgrade_ids.resource_2_values
-    resource_values[2] = resource_upgrade_ids.resource_3_values
-    resource_values[3] = resource_upgrade_ids.resource_4_values
-    resource_values[4] = resource_upgrade_ids.resource_5_values
+    assert resource_values[0] = Uint256(resource_upgrade_ids.resource_1_values, 0)
+    assert resource_values[1] = Uint256(resource_upgrade_ids.resource_2_values, 0)
+    assert resource_values[2] = Uint256(resource_upgrade_ids.resource_3_values, 0)
+    assert resource_values[3] = Uint256(resource_upgrade_ids.resource_4_values, 0)
+    assert resource_values[4] = Uint256(resource_upgrade_ids.resource_5_values, 0)
 
     # BURN RESOURCES
-    IERC1155.burn_batch(resource_address, caller, 5, resource_ids, 5, resource_values)
+    IERC1155.burnBatch(resource_address, caller, 5, resource_ids, 5, resource_values)
 
     # INCREASE LEVEL
     IS02_Resources.set_resource_level(resources_state_address, token_id, resource, level + 1)

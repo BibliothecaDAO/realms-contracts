@@ -21,11 +21,7 @@ from contracts.settling_game.interfaces.imodules import IModuleController, IL03_
 from contracts.settling_game.utils.library import (
     MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
 
-# #### Module 4A ####
-#                   #
-# Calculator Logic  #
-#                   #
-#####################
+# ____MODULE_L04___CONTRACT_LOGIC
 
 # This module focus is to calculate the values of the internal
 # multipliers so other modules can use them. The aim is to have this
