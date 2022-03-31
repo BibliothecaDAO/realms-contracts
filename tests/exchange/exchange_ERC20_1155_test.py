@@ -2,6 +2,7 @@ import pytest
 from fractions import Fraction
 import tests.conftest as conftest
 from tests.utils import uint, assert_revert
+from math import floor
 
 
 def expanded_uint_list(arr):
@@ -17,6 +18,7 @@ async def exchange_factory(ctx_factory):
     ctx = ctx_factory()
 
     ctx.exchange_fee = 100  # Use high 10% for math tests
+    ctx.royalty_fee = 100  # Use high 10% for math tests
 
     ctx.exchange = await ctx.starknet.deploy(
         source="contracts/exchange/Exchange_ERC20_1155.cairo",
@@ -24,6 +26,8 @@ async def exchange_factory(ctx_factory):
             ctx.lords.contract_address,
             ctx.resources.contract_address,
             *uint(ctx.exchange_fee),
+            *uint(ctx.royalty_fee),
+            ctx.user1.contract_address,  # Royalty receiver
         ]
     )
 
@@ -254,6 +258,8 @@ async def buy_and_check(admin_account, admin_signer, ctx, resource_ids, token_to
     # Store before values for asserting after tests
     befores = []
     before_lords_bal = 0
+    res = await lords.balanceOf(ctx.user1.contract_address).invoke()
+    before_royalty_lords = res.result.balance
 
     for i in range(0, len(resource_ids)):
         before_lords_bal, before_resources_bal = await get_token_bals(admin_account, lords, resources, resource_ids[i])
@@ -273,7 +279,7 @@ async def buy_and_check(admin_account, admin_signer, ctx, resource_ids, token_to
     # Make sale
     current_time = conftest.get_block_timestamp(ctx.starknet.state)
     # Increment max currency to ensure correct price is used
-    max_currency = sum(expected_prices) + 10
+    max_currency = floor(sum(expected_prices) * 1.1) + 10
     await set_erc20_allowance(admin_signer, admin_account, lords, exchange.contract_address, max_currency)
     await admin_signer.send_transaction(
         admin_account,
@@ -302,7 +308,15 @@ async def buy_and_check(admin_account, admin_signer, ctx, resource_ids, token_to
     # Check lords in bulk
     res = await lords.balanceOf(admin_account.contract_address).invoke()
     after_lords_bal = res.result.balance
-    assert uint(before_lords_bal[0] - sum(expected_prices)) == after_lords_bal
+    # Calculate prices with royalty included
+    royalties = sum([floor(p * ctx.royalty_fee / 1000)
+                    for p in expected_prices])
+    prices_inc_royalty = sum(expected_prices) + royalties
+    print(expected_prices, prices_inc_royalty)
+    assert uint(before_lords_bal[0] - prices_inc_royalty) == after_lords_bal
+    # Check royalties paid out
+    res = await lords.balanceOf(ctx.user1.contract_address).invoke()
+    assert uint(before_royalty_lords[0] + royalties) == res.result.balance
 
 
 async def sell_and_check(admin_account, admin_signer, ctx, resource_ids, token_to_sells, expected_prices):
@@ -313,6 +327,8 @@ async def sell_and_check(admin_account, admin_signer, ctx, resource_ids, token_t
     # Store before values for asserting after tests
     befores = []
     before_lords_bal = 0
+    res = await lords.balanceOf(ctx.user1.contract_address).invoke()
+    before_royalty_lords = res.result.balance
 
     for i in range(0, len(resource_ids)):
         before_lords_bal, before_resources_bal = await get_token_bals(admin_account, lords, resources, resource_ids[i])
@@ -331,7 +347,8 @@ async def sell_and_check(admin_account, admin_signer, ctx, resource_ids, token_t
 
     # Make sale
     current_time = conftest.get_block_timestamp(ctx.starknet.state)
-    min_currency = sum(expected_prices) - 2  # Add a bit of fat
+    min_currency = floor(sum(expected_prices) * 0.9) - \
+        2  # Royalty + add a bit of fat
     await admin_signer.send_transaction(
         admin_account,
         exchange.contract_address,
@@ -358,7 +375,14 @@ async def sell_and_check(admin_account, admin_signer, ctx, resource_ids, token_t
     # Check lords in bulk
     res = await lords.balanceOf(admin_account.contract_address).invoke()
     after_lords_bal = res.result.balance
-    assert uint(before_lords_bal[0] + sum(expected_prices)) == after_lords_bal
+    # Calculate prices with royalty included
+    royalties = sum([floor(p * ctx.royalty_fee / 1000)
+                    for p in expected_prices])
+    prices_inc_royalty = sum(expected_prices) - royalties
+    assert uint(before_lords_bal[0] + prices_inc_royalty) == after_lords_bal
+    # Check royalties paid out
+    res = await lords.balanceOf(ctx.user1.contract_address).invoke()
+    assert uint(before_royalty_lords[0] + royalties) == res.result.balance
 
 
 @pytest.mark.asyncio
