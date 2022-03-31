@@ -21,10 +21,10 @@ contract RealmsBridgeLockbox is
 
     /* Starknet */
 
-    uint256 constant MESSAGE_WITHDRAW = 0;
+    // uint256 constant MESSAGE_WITHDRAW = 0;
 
     // The selector of the "depositFromL1" @l1_handler at StarkNet contract
-    uint256 constant DEPOSIT_SELECTOR =
+    uint256 constant private DEPOSIT_SELECTOR =
         512408049450392852989582095984328044240489742106100269794433337059943365139;
 
     // Loot ID to Ticket ID
@@ -59,24 +59,28 @@ contract RealmsBridgeLockbox is
         @notice This claims your Realm in L2
     */
     function depositToL2(
-        uint256[] memory _realmIds,
-        uint256 _l2AccountAddress
+        uint256 _l2AccountAddress,
+        uint256[] memory _realmIds
     ) external nonReentrant {
         require(l2BridgeAddress != 0, "L2_CONTRACT_ADDRESS_REQUIRED");
         // require(msg.value > 0, "MSG_VALUE_IS_REQUIRED");
         
         for (uint256 i = 0; i < _realmIds.length; i++) {
-          require(l1RealmsContract.ownerOf(_realmIds[i]) == msg.sender, "SENDER_NOT_REALM_OWNER");
+            address owner = l1RealmsContract.ownerOf(_realmIds[i]);
+            require(owner == msg.sender, "SENDER_NOT_REALM_OWNER");
+
+            // TODO: l1RealmsContract.setApprovalForAll ???
+            l1RealmsContract.safeTransferFrom(owner, address(this), _realmIds[i]);
         }
 
-        uint256[] memory payload = new uint256[](3 + (_realmIds.length * 2));
-        payload[0] = uint256(uint160(address(msg.sender))); // address should be converted to uint256 first
-        payload[1] = _l2AccountAddress;
-        payload[2] = _realmIds.length * 2; // multiplying because there are low/high values for each uint256
+        uint256[] memory payload = new uint256[](2 + (_realmIds.length * 2));
+        // payload[0] = uint256(uint160(address(msg.sender))); // address should be converted to uint256 first
+        payload[0] = _l2AccountAddress;
+        payload[1] = _realmIds.length * 2; // multiplying because there are low/high values for each uint256
         for (uint256 i = 0; i < _realmIds.length; i++) {
           (uint256 low, uint256 high) = splitUint256(_realmIds[i]);
-          payload[3 + (i * 2)] = low; // save low bits
-          payload[3 + (i * 2) + 1] = high; // save high bits
+          payload[2 + (i * 2)] = low; // save low bits
+          payload[2 + (i * 2) + 1] = high; // save high bits
         }
 
         // Send the message to the StarkNet core contract.
