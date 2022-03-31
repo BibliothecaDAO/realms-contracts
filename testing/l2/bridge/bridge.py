@@ -105,7 +105,6 @@ async def test_create_scroll():
       selector_name="depositFromL1",
       calldata=[
         l1_lockbox_contract_address,
-        2222,
         first_account.contract_address,
         2, #
         1, 1  # low, high
