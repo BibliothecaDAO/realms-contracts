@@ -86,6 +86,16 @@ end
 
 # Note: We use ERC1155_balanceOf(contract_address) to record token reserves
 
+# Global royalty fee in thousandths (e.g. 15 = 1.5% fee)
+@storage_var
+func royalty_fee_thousands() -> (royalty_fee_thousands : Uint256):
+end
+
+# Global royalty fee addr
+@storage_var
+func royalty_fee_address() -> (royalty_fee_address : felt):
+end
+
 @constructor
 func constructor {
         syscall_ptr : felt*,
@@ -95,16 +105,41 @@ func constructor {
         currency_address_: felt,
         token_address_: felt,
         lp_fee_thousands_: Uint256,
+        royalty_fee_thousands_: Uint256,
+        royalty_fee_address_: felt,
     ):
     currency_address.write(currency_address_)
     token_address.write(token_address_)
     lp_fee_thousands.write(lp_fee_thousands_)
+    set_royalty_info(royalty_fee_thousands_, royalty_fee_address_)
     return ()
 end
+
+
+#
+# Admin
+#
+
+
+@external
+func set_royalty_info {
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(
+        royalty_fee_thousands_: Uint256,
+        royalty_fee_address_: felt,
+    ):
+    royalty_fee_thousands.write(royalty_fee_thousands_)
+    royalty_fee_address.write(royalty_fee_address_)
+    return ()
+end
+
 
 #
 # Liquidity
 #
+
 
 @external
 func initial_liquidity {
@@ -529,15 +564,22 @@ func buy_tokens_loop {
     let (token_address_) = token_address.read()
     let (currency_address_) = currency_address.read()
 
+    let (royalty_fee_thousands_) = royalty_fee_thousands.read()
+    let (royalty_fee_address_) = royalty_fee_address.read()
+
     # Read current reserve levels
     let (currency_reserves_) = currency_reserves.read([token_ids])
     let (token_reserves) = IERC1155.balanceOf(token_address_, contract, [token_ids])
 
     # Calculate prices
-    let (currency_amount) = get_buy_price([token_amounts], currency_reserves_, Uint256(token_reserves, 0))
+    let (currency_amount_sans_royal) = get_buy_price([token_amounts], currency_reserves_, Uint256(token_reserves, 0))
+
+    # Add royalty fee
+    let (royalty_fee) = get_royalty_for_price(currency_amount_sans_royal)
+    let (currency_amount, _) = uint256_add(currency_amount_sans_royal, royalty_fee) # Overflow will never happen here
 
     # Update reserves
-    let (new_reserves, add_overflow) = uint256_add(currency_reserves_, currency_amount)
+    let (new_reserves, add_overflow) = uint256_add(currency_reserves_, currency_amount_sans_royal)
     with_attr error_message("Currency value overflow"):
         assert add_overflow = 0
     end
@@ -547,6 +589,7 @@ func buy_tokens_loop {
     IERC20.transferFrom(currency_address_, caller, contract, currency_amount)
     tempvar syscall_ptr :felt* = syscall_ptr
     IERC1155.safeTransferFrom(token_address_, contract, caller, [token_ids], [token_amounts].low)
+    IERC20.transfer(currency_address_, royalty_fee_address_, royalty_fee) # Royalty
 
     # Emit event
     tokens_purchased.emit(caller, currency_amount, [token_ids], [token_amounts])
@@ -646,6 +689,9 @@ func sell_tokens_loop {
     let (token_address_) = token_address.read()
     let (currency_address_) = currency_address.read()
 
+    let (royalty_fee_thousands_) = royalty_fee_thousands.read()
+    let (royalty_fee_address_) = royalty_fee_address.read()
+
     # Read current reserve levels
     let (currency_reserves_) = currency_reserves.read([token_ids])
     let (token_reserves) = IERC1155.balanceOf(token_address_, contract, [token_ids])
@@ -654,14 +700,19 @@ func sell_tokens_loop {
     IERC1155.safeTransferFrom(token_address_, caller, contract, [token_ids], [token_amounts].low)
 
     # Calculate prices
-    let (currency_amount) = get_sell_price([token_amounts], currency_reserves_, Uint256(token_reserves, 0))
+    let (currency_amount_sans_royal) = get_sell_price([token_amounts], currency_reserves_, Uint256(token_reserves, 0))
+
+    # Add royalty fee
+    let (royalty_fee) = get_royalty_for_price(currency_amount_sans_royal)
+    let (currency_amount) = uint256_sub(currency_amount_sans_royal, royalty_fee)
 
     # Transfer currency
     IERC20.transfer(currency_address_, caller, currency_amount)
     tempvar syscall_ptr :felt* = syscall_ptr
+    IERC20.transfer(currency_address_, royalty_fee_address_, royalty_fee) # Royalty
 
     # Update reserves
-    let (new_reserves) = uint256_sub(currency_reserves_, currency_amount)
+    let (new_reserves) = uint256_sub(currency_reserves_, currency_amount_sans_royal)
     currency_reserves.write([token_ids], new_reserves)
 
     # Emit event
@@ -687,6 +738,32 @@ end
 # Pricing
 #
 
+
+@view
+func get_royalty_for_price {
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }(
+        # Price without royalty amount
+        price_sans_royalty: Uint256,
+    ) -> (
+        price: Uint256
+    ):
+    alloc_locals
+
+    let (royalty_fee_thousands_) = royalty_fee_thousands.read()
+
+    # Add royalty fee
+    let (currency_mul_royal_thou, mul_overflow) = uint256_mul(price_sans_royalty, royalty_fee_thousands_)
+    with_attr error_message("Royalty too large"):
+        assert mul_overflow = Uint256(0, 0)
+    end
+    let (royalty_fee, _) = uint256_unsigned_div_rem(currency_mul_royal_thou, Uint256(1000, 0)) # Ignore remainder
+
+    return (royalty_fee)
+
+end
 
 @view
 func get_buy_price {
@@ -741,6 +818,30 @@ func get_buy_price {
 
 end
 
+@view
+func get_buy_price_with_royalty {
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }(
+        # Exact amount of token to buy
+        token_amount: Uint256,
+        # Currency reserve amount
+        currency_reserves: Uint256,
+        # Token reserve amount
+        token_reserves: Uint256,
+    ) -> (
+        price: Uint256
+    ):
+    alloc_locals
+
+    let (price_sans_royalty) = get_buy_price(token_amount, currency_reserves, token_reserves)
+    let (royalty_fee) = get_royalty_for_price(price_sans_royalty)
+    let (price, _) = uint256_add(price_sans_royalty, royalty_fee) # Will never overflow
+
+    return (price)
+
+end
 
 @view
 func get_sell_price {
@@ -789,9 +890,36 @@ func get_sell_price {
 
 end
 
+@view
+func get_sell_price_with_royalty {
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }(
+        # Exact amount of token to buy
+        token_amount: Uint256,
+        # Currency reserve amount
+        currency_reserves: Uint256,
+        # Token reserve amount
+        token_reserves: Uint256,
+    ) -> (
+        price: Uint256
+    ):
+    alloc_locals
+
+    let (price_sans_royalty) = get_sell_price(token_amount, currency_reserves, token_reserves)
+    let (royalty_fee) = get_royalty_for_price(price_sans_royalty)
+    let (price) = uint256_sub(price_sans_royalty, royalty_fee)
+
+    return (price)
+
+end
+
+
 #
 # Getters
 #
+
 
 @view
 func get_currency_address {
@@ -836,9 +964,11 @@ func get_lp_fee_thousands {
     return lp_fee_thousands.read()
 end
 
+
 #
 # ERC 1155
 #
+
 
 @external
 func setApprovalForAll{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
