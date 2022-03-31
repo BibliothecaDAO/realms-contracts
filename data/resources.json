@@ -1,0 +1,156 @@
+[
+    {
+        "trait": "Wood",
+        "value": 5015,
+        "colour": "#78350f",
+        "colourClass": "bg-yellow-900 border-yellow-900",
+        "id": 1
+    },
+    {
+        "trait": "Stone",
+        "value": 3941,
+        "colour": "#e0e0e0",
+        "colourClass": "bg-gray-500 text-gray-300 border-gray-300",
+        "id": 2
+    },
+    {
+        "trait": "Coal",
+        "value": 3833,
+        "colour": "#757575",
+        "colourClass": "bg-gray-300 border-gray-600 text-black",
+        "id": 3
+    },
+    {
+        "trait": "Copper",
+        "value": 2643,
+        "colour": "#f59e0b",
+        "colourClass": "bg-yellow-500 border-yellow-900 text-yellow-200",
+        "id": 4
+    },
+    {
+        "trait": "Obsidian",
+        "value": 2216,
+        "colour": "#000000",
+        "colourClass": "bg-black border-black",
+        "id": 5
+    },
+    {
+        "trait": "Silver",
+        "value": 1741,
+        "colour": "#eeeeee",
+        "colourClass": "bg-gray-300 text-gray-50 border-gray-500",
+        "id": 6
+    },
+    {
+        "trait": "Ironwood",
+        "value": 1179,
+        "colour": "#b91c1c",
+        "colourClass": "bg-red-700 border-red-700",
+        "id": 7
+    },
+    {
+        "trait": "Cold Iron",
+        "value": 957,
+        "colour": "#fca5a5",
+        "colourClass": "bg-red-300 text-red-900 border-red-300",
+        "id": 8
+    },
+    {
+        "trait": "Gold",
+        "value": 914,
+        "colour": "#fcd34d",
+        "colourClass": "bg-yellow-300 text-yellow-900 border-yellow-300",
+        "id": 9
+    },
+    {
+        "trait": "Hartwood",
+        "value": 594,
+        "colour": "#fca5a5",
+        "colourClass": "bg-red-300 border-red-300",
+        "id": 10
+    },
+    {
+        "trait": "Diamonds",
+        "value": 300,
+        "colour": "#ccbcfb",
+        "colourClass": "bg-purple-200 text-purple-700 border-purple-700",
+        "id": 11
+    },
+    {
+        "trait": "Sapphire",
+        "value": 247,
+        "colour": "#3b82f6",
+        "colourClass": "bg-blue-500 border-blue-500",
+        "id": 12
+    },
+    {
+        "trait": "Ruby",
+        "value": 239,
+        "colour": "#dc2626",
+        "colourClass": "bg-red-600 border-red-600",
+        "id": 13
+    },
+    {
+        "trait": "Deep Crystal",
+        "value": 239,
+        "colour": "#93c5fd",
+        "colourClass": "bg-blue-300 border-blue-300",
+        "id": 14
+    },
+    {
+        "trait": "Ignium",
+        "value": 172,
+        "colour": "#ef4444",
+        "colourClass": "bg-red-500 text-yellow-200 border-red-500",
+        "id": 15
+    },
+    {
+        "trait": "Ethereal Silica",
+        "value": 162,
+        "colour": "#10b981",
+        "colourClass": "bg-green-500 border-green-500",
+        "id": 16
+    },
+    {
+        "trait": "True Ice",
+        "value": 139,
+        "colour": "#ffffff",
+        "colourClass": "bg-white text-blue-700 border-blue-700",
+        "id": 17
+    },
+    {
+        "trait": "Twilight Quartz",
+        "value": 111,
+        "colour": "#6d28d9",
+        "colourClass": "bg-purple-700 border-purple-700",
+        "id": 18
+    },
+    {
+        "trait": "Alchemical Silver",
+        "value": 93,
+        "colour": "#bdbdbd",
+        "colourClass": "bg-gray-400 border-gray-400",
+        "id": 19
+    },
+    {
+        "trait": "Adamantine",
+        "value": 55,
+        "colour": "#1e3a8a",
+        "colourClass": "bg-blue-900 border-blue-900",
+        "id": 20
+    },
+    {
+        "trait": "Mithral",
+        "value": 37,
+        "colour": "#60a5fa",
+        "colourClass": "bg-blue-400 border-blue-400",
+        "id": 21
+    },
+    {
+        "trait": "Dragonhide",
+        "value": 23,
+        "colour": "#ec4899",
+        "colourClass": "bg-pink-500 border-pink-500",
+        "id": 22
+    }
+]

@@ -1,4 +1,4 @@
 #!/bin/bash
 set -eu
 
-pytest -n auto -W ignore::DeprecationWarning ./testing/l2/00_Nft_marketplace_test.py
+pytest -n auto -W ignore::DeprecationWarning

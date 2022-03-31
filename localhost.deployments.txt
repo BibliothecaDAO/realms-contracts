@@ -1,3 +1,0 @@
-0x00719e519c9f77ea1925f0c7f259451cad534fe280dde571380a7bb9a09f7867:artifacts/abis/Account.json:AdminAccount
-0x0081e877beb306857dd46b04dc3880f58a4e53b106e6da92ddb4442a0a8eaa6b:artifacts/abis/ERC20.json:Lords
-0x02e0de56492efaeda8d9bbf347b95ac7d04ab520c4e0f6a1f166667f4f683418:artifacts/abis/ERC721.json:Realms
