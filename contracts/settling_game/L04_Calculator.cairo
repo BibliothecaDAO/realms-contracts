@@ -72,7 +72,8 @@ func calculateEpoch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     let (epoch_hours) = IS01_Settling.get_epoch_length(
         contract_address=settle_state_address)
 
-    return (epoch=(block_timestamp - genesis)/(epoch_hours*3600))
+    let (epoch, _) = unsigned_div_rem(block_timestamp - genesis, epoch_hours * 3600)
+    return (epoch=epoch)
 end
 
 @view
@@ -141,8 +142,7 @@ func calculate_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
         # TODO:
         # hardcode a max %
         # use basis points
-        # let tax = (( 8000 / 6400 ) * 5 )
-        let tax = (( 8000 / realms_settled ) * 5 )
+        let ( tax, _ ) = unsigned_div_rem(8000 * 5, realms_settled)
         return (tax_percentage=tax)
     end
 end

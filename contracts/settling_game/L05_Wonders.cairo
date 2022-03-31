@@ -36,6 +36,16 @@ end
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_of_controller : felt):
     controller_address.write(address_of_controller)
+
+    let ( calculator_address ) = IModuleController.get_module_address(
+        contract_address=address_of_controller, module_id=7)
+    let ( current_epoch ) = IL04_Calculator.calculateEpoch(calculator_address)
+
+    # initialize last_updated_epoch to current
+    let ( wonders_state_address ) = IModuleController.get_module_address(
+        contract_address=address_of_controller, module_id=9)
+    IS05_Wonders.set_last_updated_epoch(wonders_state_address, current_epoch )
+    
     return ()
 end
 
@@ -54,8 +64,6 @@ func pay_wonder_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     # calculator logic contract
     let ( calculator_address ) = IModuleController.get_module_address(
         contract_address=controller, module_id=7)
-
-    # get currenty epoch
     let ( current_epoch ) = IL04_Calculator.calculateEpoch(calculator_address)
 
     assert_nn_le(current_epoch, epoch)
@@ -64,13 +72,13 @@ func pay_wonder_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     IS05_Wonders.set_wonder_epoch_upkeep(wonders_state_address, epoch, token_id, 1)
 
     # Upkeep cost, to be moved
-    let ( local upkeep_token_ids : Uint256* ) = alloc()
+    let ( local upkeep_token_ids : felt* ) = alloc()
     let ( local upkeep_token_amounts : felt* ) = alloc()
 
-    assert upkeep_token_ids[0] = Uint256(19, 0)
-    assert upkeep_token_ids[1] = Uint256(20, 0)
-    assert upkeep_token_ids[2] = Uint256(21, 0)
-    assert upkeep_token_ids[3] = Uint256(22, 0)
+    assert upkeep_token_ids[0] = 19
+    assert upkeep_token_ids[1] = 20
+    assert upkeep_token_ids[2] = 21
+    assert upkeep_token_ids[3] = 22
 
     assert upkeep_token_amounts[0] = 28
     assert upkeep_token_amounts[1] = 21
@@ -169,8 +177,8 @@ func loop_epochs_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
         let ( resources_address ) = IModuleController.get_resources_address(contract_address=controller)
         let ( epoch_total_wonders ) = IS05_Wonders.get_total_wonders_staked(contract_address=wonders_state_address, epoch=claiming_epoch)
 
-        let ( ids_arr ) = alloc()
-        let ( amounts_arr ) = alloc()
+        let ( ids_arr : felt* ) = alloc()
+        let ( amounts_arr : felt* ) = alloc()
 
         # Get claimable resources
         loop_resources_claim(
@@ -193,13 +201,12 @@ func loop_epochs_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
             22, 
             amounts_arr)
     else:
-
-    # Recurse
-    return loop_epochs_claim(
-        caller,
-        token_id,
-        current_epoch,
-        claiming_epoch + 1)
+        # Recurse
+        return loop_epochs_claim(
+            caller,
+            token_id,
+            current_epoch,
+            claiming_epoch + 1)
     end
     return ()
 end
@@ -222,8 +229,10 @@ func loop_resources_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
     assert_in_range(resource_claim_amounts_len, 1, 2**15)
     if below_max_id == 1:
         let ( resource_pool ) = IS05_Wonders.get_tax_pool(wonders_state_address, epoch, resource_claim_ids_len)
+        let ( resource_claim_amount, _ ) = unsigned_div_rem(resource_pool, epoch_total_wonders) 
+        
         assert resource_claim_ids[resource_claim_ids_len - 1] = resource_claim_ids_len
-        assert resource_claim_amounts[resource_claim_ids_len - 1] = resource_pool / epoch_total_wonders 
+        assert resource_claim_amounts[resource_claim_ids_len - 1] = resource_claim_amount
     
         return loop_resources_claim(
             wonders_state_address, token_id, epoch, epoch_total_wonders,
@@ -231,17 +240,16 @@ func loop_resources_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
             resource_claim_ids, 
             resource_claim_amounts_len + 1, 
             resource_claim_amounts)
-    else:
+    end
     return (
         resource_claim_ids_len, 
         resource_claim_ids, 
         resource_claim_amounts_len, 
         resource_claim_amounts)
-    end
 end
 
-# Called everytime a user settled, unsettles or claims taxes
-@external
+# Called everytime a user settled, unsettles or claims taxes 
+# Recurses for every epoch that passed since last update
 func update_epoch_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     alloc_locals
     let ( controller ) = controller_address.read()
@@ -251,16 +259,19 @@ func update_epoch_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     let ( current_epoch ) = IL04_Calculator.calculateEpoch(calculator_address)
     let ( last_updated_epoch ) = IS05_Wonders.get_last_updated_epoch(wonders_state_address)
 
+    # Epochs that havent been updated since last update or recursion
     let epochs_to_update = current_epoch - last_updated_epoch
 
     if epochs_to_update == 0:
         return ()
     else:
         let updating_epoch = current_epoch - epochs_to_update
-
+        
+        # roll over total wonders staked for the next epoch
         let ( total_wonders_staked ) = IS05_Wonders.get_total_wonders_staked(wonders_state_address, updating_epoch) 
-        IS05_Wonders.set_total_wonders_staked(wonders_state_address, updating_epoch, total_wonders_staked) 
-        IS05_Wonders.set_last_updated_epoch(wonders_state_address, updating_epoch)
+        IS05_Wonders.set_total_wonders_staked(wonders_state_address, updating_epoch + 1, total_wonders_staked) 
+        
+        IS05_Wonders.set_last_updated_epoch(wonders_state_address, updating_epoch + 1)
 
         return update_epoch_pool()
     end
