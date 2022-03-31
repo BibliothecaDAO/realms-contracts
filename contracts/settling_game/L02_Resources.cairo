@@ -8,7 +8,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
-from contracts.settling_game.utils.game_structs import RealmData, ResourceUpgradeIds
+from contracts.settling_game.utils.game_structs import RealmData, ResourceUpgradeIds, ModuleIds
 from contracts.settling_game.utils.general import scale, unpack_data
 
 from contracts.token.ERC20.interfaces.IERC20 import IERC20
@@ -16,7 +16,6 @@ from contracts.token.ERC1155.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.imodules import (
     IModuleController, IS02_Resources, IS01_Settling, IL04_Calculator, IS05_Wonders)
-
 
 # #### Module 2A ##########
 #                        #
@@ -38,7 +37,6 @@ end
 # Claims Resources
 # Checks user owns sRealm of Realm
 # Claims resources allocated
-
 @external
 func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256):
@@ -57,11 +55,11 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # state contract
     let (resources_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=4)
+        contract_address=controller, module_id=ModuleIds.S02_Resources)
 
     # settling state contract
     let (settling_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=2)
+        contract_address=controller, module_id=ModuleIds.S01_Settling)
 
     # calculator logic contract
     let (calculator_address) = IModuleController.get_module_address(
@@ -225,15 +223,15 @@ end
 @external
 func upgrade_resource{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*,
-        range_check_ptr}(
-        token_id : Uint256, resource : felt, token_ids_len : felt, token_ids : felt*,
-        token_values_len : felt, token_values : felt*) -> ():
+        range_check_ptr}(token_id : Uint256, resource : felt) -> ():
     alloc_locals
     let (caller) = get_caller_address()
     let (controller) = controller_address.read()
 
     # resource contract
     let (resource_address) = IModuleController.get_resources_address(contract_address=controller)
+
+    # sRealms contract
     let (s_realms_address) = IModuleController.get_s_realms_address(contract_address=controller)
 
     # check owner of sRealm
@@ -242,7 +240,7 @@ func upgrade_resource{
 
     # resources state contract
     let (resources_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=4)
+        contract_address=controller, module_id=ModuleIds.S02_Resources)
 
     let (level) = IS02_Resources.get_resource_level(resources_state_address, token_id, resource)
 
@@ -251,42 +249,9 @@ func upgrade_resource{
 
     let (resource_upgrade_ids : ResourceUpgradeIds) = fetch_resource_upgrade_ids(resource)
 
-    # check correct ids
-    if resource_upgrade_ids.resource_1 != token_ids[0]:
-        resource_upgrade_ids.resource_1 = resource_upgrade_ids.resource_1 + 1
-    end
-    if resource_upgrade_ids.resource_2 != token_ids[1]:
-        resource_upgrade_ids.resource_2 = resource_upgrade_ids.resource_2 + 1
-    end
-    if resource_upgrade_ids.resource_3 != token_ids[2]:
-        resource_upgrade_ids.resource_3 = resource_upgrade_ids.resource_3 + 1
-    end
-    if resource_upgrade_ids.resource_4 != token_ids[3]:
-        resource_upgrade_ids.resource_4 = resource_upgrade_ids.resource_4 + 1
-    end
-    if resource_upgrade_ids.resource_5 != token_ids[4]:
-        resource_upgrade_ids.resource_5 = resource_upgrade_ids.resource_5 + 1
-    end
-
-    # check correct values
-    if resource_upgrade_ids.resource_1_values != token_values[0]:
-        resource_upgrade_ids.resource_1_values = resource_upgrade_ids.resource_1_values + 1
-    end
-    if resource_upgrade_ids.resource_2_values != token_values[1]:
-        resource_upgrade_ids.resource_2_values = resource_upgrade_ids.resource_2_values + 1
-    end
-    if resource_upgrade_ids.resource_3_values != token_values[2]:
-        resource_upgrade_ids.resource_3_values = resource_upgrade_ids.resource_3_values + 1
-    end
-    if resource_upgrade_ids.resource_4_values != token_values[3]:
-        resource_upgrade_ids.resource_4_values = resource_upgrade_ids.resource_4_values + 1
-    end
-    if resource_upgrade_ids.resource_5_values != token_values[4]:
-        resource_upgrade_ids.resource_5_values = resource_upgrade_ids.resource_5_values + 1
-    end
-
     # create array of ids and values
     let (local resource_ids : felt*) = alloc()
+    let (local resource_values : felt*) = alloc()
 
     assert resource_ids[0] = resource_upgrade_ids.resource_1
     assert resource_ids[1] = resource_upgrade_ids.resource_2
@@ -294,8 +259,14 @@ func upgrade_resource{
     assert resource_ids[3] = resource_upgrade_ids.resource_4
     assert resource_ids[4] = resource_upgrade_ids.resource_5
 
+    assert resource_values[0] = resource_upgrade_ids.resource_1_values
+    assert resource_values[1] = resource_upgrade_ids.resource_2_values
+    assert resource_values[2] = resource_upgrade_ids.resource_3_values
+    assert resource_values[3] = resource_upgrade_ids.resource_4_values
+    assert resource_values[4] = resource_upgrade_ids.resource_5_values
+
     # burn resources
-    IERC1155.burn_batch(resource_address, caller, 5, resource_ids, 5, token_values)
+    IERC1155.burn_batch(resource_address, caller, 5, resource_ids, 5, resource_values)
 
     # increase level
     IS02_Resources.set_resource_level(resources_state_address, token_id, resource, level + 1)
