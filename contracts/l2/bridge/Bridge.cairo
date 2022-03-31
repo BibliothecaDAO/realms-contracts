@@ -130,11 +130,13 @@ func withdrawToL1{
     assert message_payload[0] = to_address
 
     # Collect all token_ids
-    withdraw_loop(to_address, token_ids_len, token_ids, 1, message_payload)
+    withdraw_loop(to_address, token_ids_len, token_ids, 1, message_payload + 1)
 
     # Send a message
     let (l1_lockbox_addr) = l1_lockbox_contract_address.read()
+    
     tempvar payload_size = 1 + (token_ids_len * 2)
+    
     send_message_to_l1(
         to_address=l1_lockbox_addr,
         payload_size=payload_size,
@@ -151,7 +153,7 @@ func withdraw_loop{
     } (
         to: felt, 
         token_ids_len: felt, 
-        token_ids: felt*,
+        token_ids: Uint256*,
         message_payload_len: felt,
         message_payload: felt*
     ):
@@ -164,28 +166,31 @@ func withdraw_loop{
     # Not tested and not sure but this call probably should be here - no big overhead 
     let (realms_address) = l2_realms_contract_address.read()
 
-    let (token_id: Uint256) = [token_ids]
+    let token_id: Uint256 = [token_ids]
 
     # Check if caller is the owner
     let (caller) = get_caller_address()
     let (owner) = IERC721.ownerOf(
         contract_address=realms_address,
-        token_id=token_id
+        tokenId=token_id
     )
     assert caller = owner
 
+    # Move token to Bridge
     # address(this) equivalent
     let (contract_address) = get_contract_address()
-
-    # Move token to Bridge
     IERC721.transferFrom(
         contract_address=realms_address,
         _from=caller,
         to=contract_address,
-        token_id=token_id
+        tokenId=token_id
     )
+
+    # Save to payload
+    assert [message_payload] = token_id.low
+    assert [message_payload + 1] = token_id.high
  
-    withdraw_loop(to, token_ids_len - 1, token_ids + 1)
+    withdraw_loop(to, token_ids_len - 1, token_ids + 1, message_payload_len + 2, message_payload + 2)
 
     return ()
 end
