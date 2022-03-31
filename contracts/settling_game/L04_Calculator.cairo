@@ -38,7 +38,7 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
 end
 
 @view
-func calculateEpoch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (epoch : felt):
+func calculate_epoch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (epoch : felt):
     let (controller) = controller_address.read()
 
     let (block_timestamp) = get_block_timestamp()

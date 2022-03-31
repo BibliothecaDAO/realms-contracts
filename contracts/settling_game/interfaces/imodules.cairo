@@ -107,7 +107,7 @@ end
 
 @contract_interface
 namespace IL04_Calculator:
-    func calculateEpoch() -> (epoch : felt):
+    func calculate_epoch() -> (epoch : felt):
     end
     func calculate_wonder_tax() -> (tax_percentage : felt):
     end
