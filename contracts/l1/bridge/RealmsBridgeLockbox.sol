@@ -87,27 +87,31 @@ contract RealmsBridgeLockbox is
         starknetCore.sendMessageToL2(l2BridgeAddress, DEPOSIT_SELECTOR, payload);
     }
 
-    // function withdrawFromL2(uint256 _realmId) public override {
-    //     IOutbox outbox = IOutbox(inbox.bridge().activeOutbox());
-    //     address l2Sender = outbox.l2ToL1Sender();
-    //     require(l2Sender == l2Target, "Only L2");
+    function withdrawFromL2(
+        address _to,
+        uint256[] memory _realmIds
+    ) public override {
+        require(l2BridgeAddress != 0, "L2_CONTRACT_ADDRESS_REQUIRED");
+        
+        // Construct the withdrawal message's payload.
+        uint256[] memory payload = new uint256[](1 + (_realmIds.length * 2));
 
-    //     // Construct the withdrawal message's payload.
-    //     uint256[] memory payload = new uint256[](3);
-    //     payload[0] = MESSAGE_WITHDRAW;
-    //     payload[1] = user;
-    //     payload[2] = amount;
+        payload[0] = uint256(uint160(address(msg.sender))); // TODO: needs to be tested 
+        
+        for (uint256 i = 0; i < _realmIds.length; i++) {
+          (uint256 low, uint256 high) = splitUint256(_realmIds[i]);
+          payload[1 + (i * 2)] = low; // save low bits
+          payload[1 + (i * 2) + 1] = high; // save high bits
+        }
 
-    //     // Consume the message from the StarkNet core contract.
-    //     // This will revert the (Ethereum) transaction if the message does not exist.
-    //     starknetCore.consumeMessageFromL2(l2ContractAddress, payload);
+        // Consume the message from the StarkNet core contract.
+        // This will revert the (Ethereum) transaction if the message does not exist.
+        starknetCore.consumeMessageFromL2(l2BridgeAddress, payload);
 
-    //     // Update the L1 balance.
-    //     userBalances[user] += amount;
-
-    //     address _to = tokensToOwners[_realmId];
-    //     realmsContract.safeTransferFrom(address(this), _to, _realmId);
-    // }
+        for (uint256 i = 0; i < _realmIds.length; i++) {
+          l1RealmsContract.safeTransferFrom(address(this), _to, _realmIds[i]);
+        }
+    }
 
     function splitUint256(uint256 value) internal pure returns (uint256, uint256) {
       uint256 low = value & ((1 << 128) - 1);
