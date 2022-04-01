@@ -14,7 +14,7 @@ async function main() {
         {
             contractAddress: Realms_ERC721_Mintable,
             entrypoint: "set_realm_data",
-            calldata: [realm.low.toString(), realm.high.toString(), '40564819207303341694527483217926']
+            calldata: [realm.low.toString(), realm.high.toString(), '101412048018258352123039691248900']
         }
     )
 

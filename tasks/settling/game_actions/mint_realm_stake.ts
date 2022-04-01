@@ -10,7 +10,7 @@ async function main() {
     const L01_Settling = getDeployedAddressInt("L01_Settling"); // module id 1
     const Realms_ERC721_Mintable = getDeployedAddressInt("Realms_ERC721_Mintable"); // module id 1
 
-    const realm: Uint256 = bnToUint256("1")
+    const realm: Uint256 = bnToUint256("2")
 
     const mint = await getSigner().execute(
         {
