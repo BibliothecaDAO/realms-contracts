@@ -20,21 +20,17 @@ from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.imodules import (
     IModuleController, IS02_Resources, IS01_Settling)
+from contracts.settling_game.utils.library import (
+    MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
 
 # #### Module 2A ##########
-#                        #
 # Claim & Resource Logic #
-#                        #
 ##########################
-
-@storage_var
-func controller_address() -> (address : felt):
-end
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_of_controller : felt):
-    controller_address.write(address_of_controller)
+    MODULE_initializer(address_of_controller)
     return ()
 end
 
@@ -46,7 +42,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         token_id : Uint256):
     alloc_locals
     let (caller) = get_caller_address()
-    let (controller) = controller_address.read()
+    let (controller) = MODULE_controller_address()
 
     # lords contract
     let (lords_address) = IModuleController.get_lords_address(contract_address=controller)
@@ -246,7 +242,7 @@ func upgrade_resource{
         range_check_ptr}(token_id : Uint256, resource : felt) -> ():
     alloc_locals
     let (caller) = get_caller_address()
-    let (controller) = controller_address.read()
+    let (controller) = MODULE_controller_address()
 
     # resource contract
     let (resource_address) = IModuleController.get_resources_address(contract_address=controller)
@@ -306,7 +302,7 @@ func fetch_resource_upgrade_ids{
         bitwise_ptr : BitwiseBuiltin*}(resource_id : felt) -> (resource_ids : ResourceUpgradeIds):
     alloc_locals
 
-    let (controller) = controller_address.read()
+    let (controller) = MODULE_controller_address()
 
     # STATE
     let (resources_state_address) = IModuleController.get_module_address(

@@ -41,4 +41,4 @@ Run `npx ts-node ./tasks/desiege/create_game.ts`
 
 # Game actions
 
-1. `npx ts-node .tasks/settling/game_actions/mint_realm_stake.ts`
+1. `npx ts-node ./tasks/settling/game_actions/mint_realm_stake.ts`

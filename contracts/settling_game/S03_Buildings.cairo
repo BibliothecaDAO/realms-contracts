@@ -60,6 +60,7 @@ end
 @external
 func set_building_cost_ids{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         building_id : felt, cost : felt) -> (success : felt):
+    MODULE_only_approved()
     building_cost_ids.write(building_id, cost)
 
     return (TRUE)
@@ -68,6 +69,7 @@ end
 @external
 func set_building_cost_values{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         building_id : felt, cost : felt) -> (success : felt):
+    MODULE_only_approved()
     building_cost_values.write(building_id, cost)
 
     return (TRUE)
@@ -76,6 +78,7 @@ end
 @external
 func set_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256, buildings_value : felt):
+    MODULE_only_approved()
     realm_buildings.write(token_id, buildings_value)
 
     return ()

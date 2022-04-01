@@ -84,6 +84,7 @@ end
 @external
 func set_approval{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
         success : felt):
+    MODULE_only_approved()
     let (controller) = MODULE_controller_address()
 
     let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
