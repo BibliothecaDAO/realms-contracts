@@ -12,6 +12,7 @@ from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.utils.game_structs import RealmData
 from contracts.utils.constants import TRUE, FALSE
 
+# TODO: restructure this, because it will pull @external & @view funcs into this contract
 from contracts.settling_game.S06_Combat import (
     RealmCombatData,
     Troop,
@@ -42,8 +43,11 @@ end
 # be attacked again during cooldown
 const ATTACK_COOLDOWN_PERIOD = 86400  # 1 day
 
+# sets the attack type when initiating combat
 const COMBAT_TYPE_ATTACK_VS_DEFENSE = 1
 const COMBAT_TYPE_WISDOM_VS_AGILITY = 2
+
+# used to signal which side won the battle
 const COMBAT_OUTCOME_ATTACKER_WINS = 1
 const COMBAT_OUTCOME_DEFENDER_WINS = 2
 
@@ -350,21 +354,3 @@ func hit_troop{range_check_ptr}(t : Troop, hits : felt) -> (
         return (ht, 0)
     end
 end
-
-# TODO:
-# missing API
-#
-# add Squad to Realm, either to attack or defense slot
-# func add_squad_to_realm(s : Squad, r : Realm, slot : felt):
-# end
-#
-# remove Squad from Realm, either from attack or defense slot
-# func remove_squad_from_realm(r : Realm, slot : felt):
-# end
-#
-# use Squad to attack a Realm
-#
-#
-# move Troop from one Squad to another
-# func transfer_troop(idx : felt, src : Squad, dst : Squad): # -> (dst_index : felt) maybe?
-# end

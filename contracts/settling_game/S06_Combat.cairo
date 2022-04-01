@@ -11,6 +11,10 @@ from starkware.cairo.common.memset import memset
 from starkware.cairo.common.pow import pow
 from starkware.cairo.common.uint256 import Uint256
 
+# used when adding or removing squads to Realms
+const ATTACKING_SQUAD_SLOT = 1
+const DEFENDING_SQUAD_SLOT = 2
+
 # namespace constants deliberately start at 1 to
 # 1) translate in a straighforward way to "human, 1-based index" land
 # 2) to differentiate between uninitialized value (i.e. 0 in Cairo)
@@ -143,8 +147,35 @@ end
 
 func set_realm_combat_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         realm_id : Uint256, combat_data : RealmCombatData):
+    # TODO: owner checks?
     realm_combat_data.write(realm_id, combat_data)
     return ()
+end
+
+# can be used to add, overwrite or remove a Squad from a Realm
+@external
+func update_squad_in_realm{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+        s : Squad, realm_id : Uint256, slot : felt):
+    alloc_locals
+    # TODO: owner checks
+    let (realm_combat_data : RealmCombatData) = get_realm_combat_data(realm_id)
+    let (packed_squad : PackedSquad) = pack_squad(s)
+
+    if slot == ATTACKING_SQUAD_SLOT:
+        let new_realm_combat_data = RealmCombatData(
+            attacking_squad=packed_squad,
+            defending_squad=realm_combat_data.defending_squad,
+            last_attacked_at=realm_combat_data.last_attacked_at)
+        set_realm_combat_data(realm_id, new_realm_combat_data)
+        return ()
+    else:
+        let new_realm_combat_data = RealmCombatData(
+            attacking_squad=realm_combat_data.attacking_squad,
+            defending_squad=packed_squad,
+            last_attacked_at=realm_combat_data.last_attacked_at)
+        set_realm_combat_data(realm_id, new_realm_combat_data)
+        return ()
+    end
 end
 
 # TODO: stats shouldn't be hardcoded here, take them from a felt that's easy to update

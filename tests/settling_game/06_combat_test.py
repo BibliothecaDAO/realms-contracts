@@ -1,13 +1,10 @@
-import asyncio
 from collections import namedtuple
 import functools
 import math
 import operator
-import os
 import struct
 
 import pytest
-from starkware.starknet.testing.starknet import Starknet, StarknetContract
 from starkware.starkware_utils.error_handling import StarkException
 
 
@@ -342,3 +339,37 @@ async def test_find_first_free_troop_slot_in_squad(s06_combat_tests):
             await s06_combat_tests.test_find_first_free_troop_slot_in_squad(
                 full_squad, tier
             ).invoke()
+
+
+@pytest.mark.asyncio
+async def test_update_squad_in_realm(s06_combat):
+    realm_id = (1, 0)
+    packed_empty_squad = PackedSquad(0, 0, 0, 0, 0, 0, 0)
+    default_squad = build_default_squad()
+    packed_default_squad = pack_squad(default_squad)
+
+    tx = await s06_combat.get_realm_combat_data(realm_id).invoke()
+
+    assert tx.result.combat_data.attacking_squad == packed_empty_squad
+    assert tx.result.combat_data.defending_squad == packed_empty_squad
+
+    # set attack slot
+    await s06_combat.update_squad_in_realm(default_squad, realm_id, 1).invoke()
+
+    tx = await s06_combat.get_realm_combat_data(realm_id).invoke()
+    assert tx.result.combat_data.attacking_squad == packed_default_squad
+    assert tx.result.combat_data.defending_squad == packed_empty_squad
+
+    # set defend slot
+    await s06_combat.update_squad_in_realm(default_squad, realm_id, 2).invoke()
+
+    tx = await s06_combat.get_realm_combat_data(realm_id).invoke()
+    assert tx.result.combat_data.attacking_squad == packed_default_squad
+    assert tx.result.combat_data.defending_squad == packed_default_squad
+
+    # try setting wrong slot, noop
+    await s06_combat.update_squad_in_realm(default_squad, realm_id, 9).invoke()
+
+    tx = await s06_combat.get_realm_combat_data(realm_id).invoke()
+    assert tx.result.combat_data.attacking_squad == packed_default_squad
+    assert tx.result.combat_data.defending_squad == packed_default_squad
