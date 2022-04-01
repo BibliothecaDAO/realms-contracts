@@ -3,7 +3,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
-from contracts.token.ERC721_base import (
+from contracts.token.ERC721.ERC721_base import (
     ERC721_name,
     ERC721_symbol,
     ERC721_balanceOf,
@@ -19,7 +19,7 @@ from contracts.token.ERC721_base import (
     ERC721_setTokenURI
 )
 
-from contracts.token.ERC721_Enumerable_base import (
+from contracts.token.ERC721.ERC721_Enumerable_base import (
     ERC721_Enumerable_initializer,
     ERC721_Enumerable_totalSupply,
     ERC721_Enumerable_tokenByIndex,
@@ -42,7 +42,7 @@ from starkware.cairo.common.pow import pow
 from starkware.cairo.common.bitwise import bitwise_and
 from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero
 from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
-from contracts.token.IERC20 import IERC20
+from contracts.token.ERC20.interfaces.IERC20 import IERC20
 from starkware.cairo.common.alloc import alloc
 
 

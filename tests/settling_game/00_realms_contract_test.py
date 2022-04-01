@@ -36,7 +36,7 @@ async def game_factory(account_factory):
 
     # ERC Contracts
     lords = await starknet.deploy(
-        source="contracts/token/ERC20_Mintable.cairo",
+        source="contracts/token/ERC20/ERC20_Mintable.cairo",
         constructor_calldata=[
             str_to_felt("Lords"),     # name
             str_to_felt("LRD"),       # symbol

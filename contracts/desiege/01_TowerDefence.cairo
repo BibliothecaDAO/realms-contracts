@@ -15,7 +15,7 @@ from contracts.Ownable_base import (
 )
 
 from contracts.desiege.utils.interfaces import IModuleController, I02_TowerStorage
-from contracts.token.ERC1155.IERC1155 import IERC1155
+from contracts.token.ERC1155.interfaces.IERC1155 import IERC1155
 from contracts.game_utils.game_structs import ShieldGameRole
 
 ############## Storage ################
