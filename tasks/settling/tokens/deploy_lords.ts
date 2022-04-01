@@ -1,5 +1,5 @@
 
-import { deployContract, getDeployedAddressInt, getOwnerAccountInt } from '../helpers'
+import { deployContract, getDeployedAddressInt, getOwnerAccountInt } from '../../helpers'
 import { toFelt } from 'starknet/dist/utils/number'
 import { BigNumberish, toBN } from 'starknet/dist/utils/number'
 import { Uint256, bnToUint256 } from 'starknet/dist/utils/uint256'
