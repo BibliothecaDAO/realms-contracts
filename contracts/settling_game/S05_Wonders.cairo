@@ -1,4 +1,5 @@
 %lang starknet
+
 from starkware.cairo.common.bitwise import bitwise_and
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem, assert_not_zero
