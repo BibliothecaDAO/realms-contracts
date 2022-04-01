@@ -1,7 +1,7 @@
 %lang starknet
 
 from starkware.cairo.common.uint256 import Uint256
-from contracts.settling_game.utils.game_structs import RealmBuildings
+from contracts.settling_game.utils.game_structs import RealmBuildings, RealmCombatData
 
 # These are interfaces that can be imported by other contracts for convenience.
 # All of the functions in an interface must be @view or @external.
@@ -164,5 +164,14 @@ namespace IS05_Wonders:
     end
 
     func get_tax_pool(epoch : felt, resource_id : felt) -> (supply : felt):
+    end
+end
+
+@contract_interface
+namespace IS06_Combat:
+    func get_realm_combat_data(realm_id : Uint256) -> (combat_data : RealmCombatData):
+    end
+
+    func set_realm_combat_data(realm_id : Uint256, combat_data : RealmCombatData):
     end
 end

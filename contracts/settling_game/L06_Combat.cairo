@@ -6,10 +6,12 @@ from starkware.cairo.common.math_cmp import is_le, is_nn, is_nn_le
 from starkware.cairo.common.uint256 import Uint256
 from starkware.starknet.common.syscalls import get_block_timestamp, get_caller_address
 
-from contracts.settling_game.interfaces.imodules import IModuleController
+from contracts.settling_game.interfaces.imodules import IModuleController, IS06_Combat
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
-from contracts.settling_game.utils.game_structs import RealmData
+from contracts.settling_game.library_combat import compute_squad_stats, pack_squad, unpack_squad
+from contracts.settling_game.utils.game_structs import (
+    ModuleIds, RealmData, RealmCombatData, Troop, Squad, SquadStats, PackedSquad)
 from contracts.utils.constants import TRUE, FALSE
 
 # TODO: restructure this, because it will pull @external & @view funcs into this contract
@@ -29,6 +31,22 @@ from contracts.settling_game.S06_Combat import (
 )
 
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
+#
+# events
+#
+
+@event
+func Combat_outcome(attacking_realm_id : Uint256, defending_realm_id : Uint256, outcome : felt):
+end
+
+@event
+func Combat_step(
+        attacking_squad : Squad, defending_squad : Squad, attack_type : felt, hit_points : felt):
+end
+
+#
+# storage
+#
 
 # address of the ModuleController
 @storage_var
@@ -67,8 +85,13 @@ end
 
 # TODO: take a Realm's wall into consideration when attacking a Realm
 
-# FIXME: function should accept a Realm or a Realm ID a
-#
+# TODO: from convo w/ Loaf:
+# so on a successful raid we need to extract 25% of the vault
+# which i have now added
+# so the owner of the realm can only withdraw after 7 days
+# but a raider can withdraw 25% at a time
+# so we need to add a function to the resources logic that can only be called by the combat module
+# which extracts 25% of the vault
 
 @view
 func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -78,7 +101,12 @@ func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
 
     alloc_locals
 
-    let (realm_combat_data : RealmCombatData) = get_realm_combat_data(defending_realm_id)
+    let (controller) = controller_address.read()
+    let (combat_state_address) = IModuleController.get_module_address(
+        controller, module_id=ModuleIds.S06_Combat)
+    let (realm_combat_data : RealmCombatData) = IS06_Combat.get_realm_combat_data(
+        combat_state_address, defending_realm_id)
+
     let (now) = get_block_timestamp()
     let diff = now - realm_combat_data.last_attacked_at
     let (was_attacked_recently) = is_le(diff, ATTACK_COOLDOWN_PERIOD)
@@ -127,8 +155,13 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
         assert can_attack = TRUE
     end
 
-    let (attacking_realm_data : RealmCombatData) = get_realm_combat_data(attacking_realm_id)
-    let (defending_realm_data : RealmCombatData) = get_realm_combat_data(defending_realm_id)
+    let (controller) = controller_address.read()
+    let (combat_state_address) = IModuleController.get_module_address(
+        controller, module_id=ModuleIds.S06_Combat)
+    let (attacking_realm_data : RealmCombatData) = IS06_Combat.get_realm_combat_data(
+        controller, attacking_realm_id)
+    let (defending_realm_data : RealmCombatData) = IS06_Combat.get_realm_combat_data(
+        controller, defending_realm_id)
 
     let (attacker : Squad) = unpack_squad(attacking_realm_data.attacking_squad)
     let (defender : Squad) = unpack_squad(defending_realm_data.defending_squad)
@@ -143,17 +176,15 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     let new_attacking_realm_data = RealmCombatData(
         attacking_squad=new_attacker,
         defending_squad=attacking_realm_data.defending_squad,
-        last_attacked_at=attacking_realm_data.last_attacked_at,
-    )
-    set_realm_combat_data(attacking_realm_id, new_attacking_realm_data)
+        last_attacked_at=attacking_realm_data.last_attacked_at)
+    IS06_Combat.set_realm_combat_data(controller, attacking_realm_id, new_attacking_realm_data)
 
     let (now) = get_block_timestamp()
     let new_defending_realm_data = RealmCombatData(
         attacking_squad=defending_realm_data.attacking_squad,
         defending_squad=new_defender,
-        last_attacked_at=now,
-    )
-    set_realm_combat_data(defending_realm_id, new_defending_realm_data)
+        last_attacked_at=now)
+    IS06_Combat.set_realm_combat_data(controller, defending_realm_id, new_defending_realm_data)
 
     Combat_outcome.emit(attacking_realm_id, defending_realm_id, combat_outcome)
 

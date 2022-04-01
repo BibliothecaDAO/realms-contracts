@@ -129,17 +129,17 @@ async def test_get_troop(s06_combat):
 
 
 @pytest.mark.asyncio
-async def test_unpack_troop(s06_combat_tests):
+async def test_unpack_troop(library_combat_tests):
     for troop in TROOPS:
         packed = pack_troop(troop)
-        tx = await s06_combat_tests.test_unpack_troop(packed).invoke()
+        tx = await library_combat_tests.test_unpack_troop(packed).invoke()
         assert troop == tx.result.t
 
 
 @pytest.mark.asyncio
-async def test_compute_squad_stats(s06_combat_tests):
+async def test_compute_squad_stats(library_combat_tests):
     squad = build_default_squad()
-    tx = await s06_combat_tests.test_compute_squad_stats(squad).invoke()
+    tx = await library_combat_tests.test_compute_squad_stats(squad).invoke()
     stats = tx.result.stats
 
     assert stats.agility == sum([t.agility for t in squad])
@@ -150,18 +150,18 @@ async def test_compute_squad_stats(s06_combat_tests):
 
 
 @pytest.mark.asyncio
-async def test_pack_squad(s06_combat_tests):
+async def test_pack_squad(library_combat_tests):
     squad = build_default_squad()
     packed_squad = pack_squad(squad)
-    tx = await s06_combat_tests.test_pack_squad(squad).invoke()
+    tx = await library_combat_tests.test_pack_squad(squad).invoke()
     assert tx.result.p == packed_squad
 
 
 @pytest.mark.asyncio
-async def test_unpack_squad(s06_combat_tests):
+async def test_unpack_squad(library_combat_tests):
     squad = build_default_squad()
     packed_squad = pack_squad(squad)
-    tx = await s06_combat_tests.test_unpack_squad(packed_squad).invoke()
+    tx = await library_combat_tests.test_unpack_squad(packed_squad).invoke()
     assert tx.result.s == squad
 
 
