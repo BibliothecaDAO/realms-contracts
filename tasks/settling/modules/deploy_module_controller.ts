@@ -1,5 +1,5 @@
 
-import { deployContract, getDeployedAddressInt, getOwnerAccountInt } from '../helpers'
+import { deployContract, getDeployedAddressInt, getOwnerAccountInt } from '../../helpers'
 
 async function main() {
   const contractName = 'ModuleController'

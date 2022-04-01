@@ -1,4 +1,4 @@
-import { deployContract, getDeployedAddressInt, getOwnerAccountInt, getSigner } from '../helpers'
+import { deployContract, getDeployedAddressInt, getOwnerAccountInt, getSigner } from '../../helpers'
 
 async function main() {
     const contractName = 'S_Realms_ERC721_Mintable'

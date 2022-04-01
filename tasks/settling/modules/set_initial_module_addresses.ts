@@ -1,5 +1,5 @@
 // used to set the initial known module addresses
-import { deployContract, getDeployedAddressInt, getOwnerAccountInt, getSigner } from '../helpers'
+import { deployContract, getDeployedAddressInt, getOwnerAccountInt, getSigner } from '../../helpers'
 
 async function main() {
     const contractName = 'Arbiter'

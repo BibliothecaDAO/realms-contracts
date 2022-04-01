@@ -1,5 +1,5 @@
 
-import { deployContract, getOwnerAccountInt, setupDeploymentDir } from '../helpers'
+import { deployContract, getOwnerAccountInt, setupDeploymentDir } from '../../helpers'
 
 async function main() {
   const contractName = 'Arbiter'

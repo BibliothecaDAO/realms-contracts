@@ -6,10 +6,6 @@ Run `npx ts-node ./tasks/deploy_account.ts` and view the resulting file. The pri
 
 `OWNER_PRIVATE_KEY=0x123345....`
 
-# How to start game
-
-Run `npx ts-node ./tasks/desiege/create_game.ts`
-
 # Tokens Deployment - This only has to be done once. These should be deployed first
 
 1. `npx ts-node ./tasks/settling/tokens/deploy_realms.ts`
@@ -19,13 +15,13 @@ Run `npx ts-node ./tasks/desiege/create_game.ts`
 
 # Settling Deployment Sequence
 
-1. `npx ts-node ./tasks/settling/deploy_arbiter.ts`
-2. `npx ts-node ./tasks/settling/deploy_module_controller.ts`
+1. `npx ts-node ./tasks/settling/modules/deploy_arbiter.ts`
+2. `npx ts-node ./tasks/settling/modules/deploy_module_controller.ts`
 3. `npx ts-node ./tasks/settling/modules/01_deploy_settling.ts`
 4. `npx ts-node ./tasks/settling/modules/02_deploy_resources.ts`
 5. `npx ts-node ./tasks/settling/modules/03_deploy_buildings.ts`
 6. `npx ts-node ./tasks/settling/modules/04_deploy_calculator.ts`
-7. `npx ts-node ./tasks/settling/set_initial_module_addresses.ts` // do last
+7. `npx ts-node ./tasks/settling/modules/set_initial_module_addresses.ts` // do last
 
 # Updating Module
 
@@ -33,7 +29,7 @@ Run `npx ts-node ./tasks/desiege/create_game.ts`
 
 # Helpers
 
-1. `npx ts-node ./tasks/settling/update_s_realms_module_address.ts`
+1. `npx ts-node ./tasks/settling/modules/update_s_realms_module_address.ts`
 
 # Data Setters
 
