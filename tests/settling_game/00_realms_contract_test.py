@@ -106,15 +106,22 @@ async def game_factory(account_factory):
     calculator_logic = await starknet.deploy(
         source="contracts/settling_game/L04_Calculator.cairo",
         constructor_calldata=[controller.contract_address])
+
     # The admin key controls the arbiter. Use it to have the arbiter
     # set the module deployment addresses in the controller.
-
     await admin_key.send_transaction(
         account=admin_account,
         to=arbiter.contract_address,
         selector_name='batch_set_controller_addresses',
         calldata=[
             settling_logic.contract_address, settling_state.contract_address, resources_logic.contract_address, resources_state.contract_address, buildings_logic.contract_address, buildings_state.contract_address, calculator_logic.contract_address])
+
+    await admin_key.send_transaction(
+        account=admin_account,
+        to=s_realms.contract_address,
+        selector_name='Set_module_access',
+        calldata=[
+            settling_logic.contract_address])
 
     return starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state, s_realms, buildings_logic, buildings_state, calculator_logic
 

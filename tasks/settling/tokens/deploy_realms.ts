@@ -1,5 +1,5 @@
 
-import { deployContract, getDeployedAddressInt, getOwnerAccountInt } from '../helpers'
+import { deployContract, getDeployedAddressInt, getOwnerAccountInt } from '../../helpers'
 import { toFelt } from 'starknet/dist/utils/number'
 
 async function main() {

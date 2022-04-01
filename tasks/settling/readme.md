@@ -12,10 +12,10 @@ Run `npx ts-node ./tasks/desiege/create_game.ts`
 
 # Tokens Deployment - This only has to be done once. These should be deployed first
 
-1. `npx ts-node ./tasks/tokens/settling/deploy_realms.ts`
-2. `npx ts-node ./tasks/tokens/settling/deploy_resources.ts`
-3. `npx ts-node ./tasks/tokens/settling/deploy_lords.ts`
-4. `npx ts-node ./tasks/tokens/settling/deploy_s_realms.ts`
+1. `npx ts-node ./tasks/settling/tokens/deploy_realms.ts`
+2. `npx ts-node ./tasks/settling/tokens/deploy_resources.ts`
+3. `npx ts-node ./tasks/settling/tokens/deploy_lords.ts`
+4. `npx ts-node ./tasks/settling/tokens/deploy_s_realms.ts`
 
 # Settling Deployment Sequence
 
@@ -30,3 +30,11 @@ Run `npx ts-node ./tasks/desiege/create_game.ts`
 # Updating Module
 
 1. `npx ts-node ./tasks/settling/modules/update_module_calculator.ts`
+
+# Helpers
+
+1. `npx ts-node ./tasks/settling/update_s_realms_module_address.ts`
+
+# Data Setters
+
+1. `npx ts-node ./tasks/settling/data/set_realms_data.ts`
