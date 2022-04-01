@@ -16,12 +16,10 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 FROM node:16.14.2
 ENV NODE_ENV=production
 
-WORKDIR /app
+WORKDIR /
 
 COPY ["package.json", "yarn.json*", "./"]
 
 RUN yarn install --production
 
 COPY . .
-
-CMD [ "node", "server.js" ]
