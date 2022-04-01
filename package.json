@@ -60,11 +60,6 @@
     "coverage": "cross-env HARDHAT_DEPLOY_FIXTURE=true hardhat coverage",
     "dev": "hardhat node --watch --export contractsInfo.json",
     "local:dev": "hardhat --network localhost deploy --watch",
-    "disburse": "hardhat disburse --network localhost",
-    "upgrade:d:arbRinkeby": "npx hardhat run  scripts/upgradeDiamond.js --network arbitrumRinkeby",
-    "init:d:arbRinkeby": "npx hardhat run  scripts/init.js --network arbitrumRinkeby",
-    "initGameData:arbRinkeby": "npx hardhat run  scripts/initData.js --network arbitrumRinkeby",
-    "getdata:d:arbRinkeby": "npx hardhat run  scripts/getData.js --network arbitrumRinkeby",
-    "initGame:desiege": "npx ts-node tasks/create_game.ts"
+    "disburse": "hardhat disburse --network localhost"
   }
 }
