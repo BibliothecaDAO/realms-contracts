@@ -25,10 +25,15 @@ from contracts.settling_game.interfaces.imodules import (
 from contracts.settling_game.utils.library import (
     MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
 
-# #### Module 2A ##########
-# Claim & Resource Logic #
-##########################
+# ____MODULE_L02___RESOURCES_LOGIC
 
+##########
+# EVENTS #
+##########
+
+###############
+# CONSTRUCTOR #
+###############
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_of_controller : felt):
@@ -36,9 +41,10 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     return ()
 end
 
-# Claims Resources
-# Checks user owns sRealm of Realm
-# Claims resources allocated
+############
+# EXTERNAL #
+############
+
 @external
 func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256):

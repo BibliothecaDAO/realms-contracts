@@ -23,7 +23,7 @@ from contracts.settling_game.interfaces.imodules import IModuleController
 from contracts.settling_game.utils.library import (
     MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
 
-# ____MODULE_L03___BUILDING_STATE
+# ____MODULE_S03___BUILDING_STATE
 
 ###########
 # STORAGE #

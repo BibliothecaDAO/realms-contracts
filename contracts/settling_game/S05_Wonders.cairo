@@ -24,11 +24,11 @@ from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.library import (
     MODULE_only_approved, MODULE_initializer)
 
-# #### Module S05 ##########
-#                        #
-# Wonders Pool State     #
-#                        #
-##########################
+# ____MODULE_S05___WONDERS_STATE
+
+###########
+# STORAGE #
+###########
 
 @storage_var
 func epoch_claimed(address : felt) -> (epoch : felt):
@@ -54,6 +54,9 @@ end
 func tax_pool(epoch : felt, resource_id : felt) -> (supply : felt):
 end 
 
+###############
+# CONSTRUCTOR #
+###############
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -62,7 +65,10 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     return ()
 end
 
-# ##### SETTERS ######
+###########
+# SETTERS #
+###########
+
 @external
 func set_total_wonders_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         epoch : felt, amount : felt):
@@ -133,7 +139,10 @@ func batch_set_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         amounts=amounts + 1)
 end
 
-# ##### GETTERS ######
+###########
+# GETTERS #
+###########
+
 @view
 func get_total_wonders_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     epoch : felt) -> (amount : felt):

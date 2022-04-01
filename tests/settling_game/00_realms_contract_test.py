@@ -155,7 +155,7 @@ async def test_mint_realm(game_factory):
         account=accounts[0], to=buildings_state.contract_address, selector_name='set_building_cost_ids', calldata=[building_id, 21542142465]
     )
 
-    # BUILDING 2 VALUES 10,10,10,10,10
+    # BUILDING 1 VALUES 10,10,10,10,10
     await signer.send_transaction(
         account=accounts[0], to=buildings_state.contract_address, selector_name='set_building_cost_values', calldata=[building_id, 2815437129687050]
     )

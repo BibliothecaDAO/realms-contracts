@@ -24,11 +24,11 @@ from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
 from contracts.settling_game.utils.library import (
     MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
 
-# #### Module L05 ##########
-#                        #
-# Logic for Wonders      #
-#                        #
-##########################
+# ____MODULE_L05___WONDERS_LOGIC
+
+###############
+# CONSTRUCTOR #
+###############
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -46,6 +46,10 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     
     return ()
 end
+
+############
+# EXTERNAL #
+############
 
 @external
 func pay_wonder_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
