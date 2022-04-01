@@ -35,10 +35,13 @@ end
 func time_vault_staked(token_id : Uint256) -> (time : felt):
 end
 
+@storage_var
+func total_realms_settled() -> (amount : felt):
+end
+
 ###############
 # CONSTRUCTOR #
 ###############
-
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_of_controller : felt):
@@ -50,7 +53,6 @@ end
 ###########
 # SETTERS #
 ###########
-
 # ## VARS ###
 # TIME_LEFT -> WHEN PLAYER CLAIMS, THIS IS THE REMAINDER TO BE PASSED BACK INTO STORAGE
 # THIS ALLOWS FULL DAYS TO BE CLAIMED ONLY AND ALLOWS LESS THAN FULL DAYS TO CONTINUE ACCRUREING
@@ -80,6 +82,15 @@ func set_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     return ()
 end
 
+@external
+func set_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        amount : felt):
+    MODULE_only_approved()
+
+    total_realms_settled.write(amount)
+    return ()
+end
+
 # TODO: CHECK IF NEEDED
 @external
 func set_approval{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
@@ -100,7 +111,7 @@ end
 # GETTERS #
 ###########
 
-@external
+@view
 func get_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256) -> (time : felt):
     let (time) = time_staked.read(token_id)
@@ -114,4 +125,11 @@ func get_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     let (time) = time_vault_staked.read(token_id)
 
     return (time=time)
+end
+
+@view
+func get_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (realms_settled : felt):
+    let (amount) = total_realms_settled.read()
+
+    return (realms_settled=amount)
 end

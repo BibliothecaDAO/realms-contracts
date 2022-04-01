@@ -5,18 +5,19 @@ from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem, assert_n
 from starkware.cairo.common.math_cmp import is_nn_le
 from starkware.cairo.common.hash_state import hash_init, hash_update, HashState
 from starkware.cairo.common.alloc import alloc
-from starkware.starknet.common.syscalls import get_caller_address
+from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.general import scale
 from contracts.settling_game.utils.game_structs import (
     RealmBuildings, RealmBuildingCostIds, RealmBuildingCostValues, ModuleIds)
+from contracts.settling_game.utils.constants import TRUE, FALSE, GENESIS_TIMESTAMP, VAULT_LENGTH_SECONDS
 
-from contracts.token.IERC20 import IERC20
-from contracts.token.ERC1155.IERC1155 import IERC1155
+from contracts.token.ERC20.interfaces.IERC20 import IERC20
+from contracts.token.ERC1155.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
-from contracts.settling_game.interfaces.imodules import IModuleController, IL03_Buildings
+from contracts.settling_game.interfaces.imodules import IModuleController, IS01_Settling, IL03_Buildings
 
 from contracts.settling_game.utils.library import (
     MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
@@ -34,6 +35,14 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     # Store the address of the only fixed contract in the system.
     MODULE_initializer(address_of_controller)
     return ()
+end
+
+@view
+func calculate_epoch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (epoch : felt):
+    let (block_timestamp) = get_block_timestamp()
+
+    let (epoch, _) = unsigned_div_rem(block_timestamp - GENESIS_TIMESTAMP, VAULT_LENGTH_SECONDS)
+    return (epoch=epoch)
 end
 
 @view
@@ -104,4 +113,28 @@ func calculateTribute{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     # calculate number of buildings realm has
 
     return (tribute=100)
+end
+
+@view
+func calculate_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (tax_percentage : felt):
+    alloc_locals
+
+    let ( controller ) = MODULE_controller_address()
+
+    let ( settle_state_address ) = IModuleController.get_module_address(
+        contract_address=controller, module_id=ModuleIds.S01_Settling)
+
+    let ( realms_settled ) = IS01_Settling.get_total_realms_settled(contract_address=settle_state_address)
+
+    let ( less_than_tenth_settled ) = is_nn_le(realms_settled, 1600)
+
+    if less_than_tenth_settled == 1:
+        return (tax_percentage=25)
+    else:
+        # TODO:
+        # hardcode a max %
+        # use basis points
+        let ( tax, _ ) = unsigned_div_rem(8000 * 5, realms_settled)
+        return (tax_percentage=tax)
+    end
 end

@@ -12,11 +12,13 @@ from contracts.settling_game.utils.general import scale
 from contracts.settling_game.utils.game_structs import ModuleIds
 from contracts.settling_game.utils.constants import TRUE, FALSE
 
-from contracts.token.IERC20 import IERC20
-from contracts.token.ERC1155.IERC1155 import IERC1155
+from contracts.token.ERC20.interfaces.IERC20 import IERC20
+from contracts.token.ERC1155.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
-from contracts.settling_game.interfaces.imodules import IModuleController, IS01_Settling
+from contracts.settling_game.interfaces.imodules import IModuleController, IS01_Settling, IL05_Wonders
+
+from contracts.settling_game.utils.game_structs import RealmData
 
 from contracts.settling_game.utils.library import (
     MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
@@ -75,9 +77,25 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     IS01_Settling.set_time_staked(settle_state_address, token_id, 0)
     IS01_Settling.set_time_vault_staked(settle_state_address, token_id, 0)
 
+    # UPDATE SETTLED REALMS COUNTER
+    let (realms_settled) = IS01_Settling.get_total_realms_settled(contract_address=settle_state_address)
+    IS01_Settling.set_total_realms_settled(settle_state_address, realms_settled + 1)
+
+    # UPDATE OTHER MODULES
+    let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
+        contract_address=realms_address, token_id=token_id)
+
+    # # UPDATE WONDERS
+    if realms_data.wonder == TRUE:
+        let (wonders_logic_address) = IModuleController.get_module_address(contract_address=controller, module_id=ModuleIds.L05_Wonders)
+        IL05_Wonders.update_wonder_settlement(wonders_logic_address, token_id)
+
+        Settled.emit(caller, token_id)
+        return (TRUE)
+    end
+
     # EMIT
     Settled.emit(caller, token_id)
-
     # RETURN 1 (TRUE)
     return (TRUE)
 end
@@ -109,9 +127,25 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
 
     # TOD0: Claim resources if available before unsettling
 
+    # UPDATE SETTLED REALMS COUNTER
+    let (realms_settled) = IS01_Settling.get_total_realms_settled(contract_address=settle_state_address)
+    IS01_Settling.set_total_realms_settled(settle_state_address, realms_settled - 1)
+
+    # UPDATE OTHER MODULES
+    let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
+        contract_address=realms_address, token_id=token_id)
+
+    # # UPDATE WONDERS
+    if realms_data.wonder == TRUE:
+        let (wonders_logic_address) = IModuleController.get_module_address(contract_address=controller, module_id=ModuleIds.L05_Wonders)
+        IL05_Wonders.update_wonder_settlement(wonders_logic_address, token_id)
+
+        UnSettled.emit(caller, token_id)
+        return (TRUE)
+    end
+
     # EMIT
     UnSettled.emit(caller, token_id)
-
     # RETURN 1 (TRUE)
     return (TRUE)
 end

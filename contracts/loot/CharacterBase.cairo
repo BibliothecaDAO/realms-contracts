@@ -10,7 +10,7 @@ from starkware.starknet.common.syscalls import (get_caller_address, get_contract
 from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem
 from starkware.cairo.common.uint256 import (Uint256, uint256_le)
 
-from contracts.token.IERC721 import IERC721
+from contracts.token.ERC721.interfaces.IERC721 import IERC721
 
 ## Storage of Items
 

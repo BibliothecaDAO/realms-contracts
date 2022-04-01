@@ -14,7 +14,7 @@ from openzeppelin.introspection.ERC165 import (
 )
 from openzeppelin.introspection.IERC165 import IERC165
 
-from contracts.token.IERC721_Receiver import IERC721_Receiver
+from contracts.token.ERC721.interfaces.IERC721_Receiver import IERC721_Receiver
 
 from contracts.utils.constants import TRUE, FALSE
 
