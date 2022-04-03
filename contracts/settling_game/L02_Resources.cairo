@@ -31,6 +31,10 @@ from contracts.settling_game.utils.library import (
 # EVENTS #
 ##########
 
+@event
+func ResourceUpgraded(token_id : Uint256, building_id : felt, level : felt):
+end
+
 ###############
 # CONSTRUCTOR #
 ###############
@@ -124,17 +128,11 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         token_id=token_id,
         resource=realms_data.resource_7)
 
-    # get time staked
-    let (time_staked) = IS01_Settling.get_time_staked(settling_state_address, token_id)
-
-    # get time staked
-    let (time_vault_staked) = IS01_Settling.get_time_vault_staked(settling_state_address, token_id)
-
     # calculate days
-    let (total_days, remainder) = get_available_resources(time_staked)
+    let (total_days, remainder) = get_available_resources(token_id)
 
-    # calculate days
-    let (total_vault_days, vault_remainder) = get_available_vault_resources(time_vault_staked)
+    # calculate vault days
+    let (total_vault_days, vault_remainder) = get_available_vault_resources(token_id)
 
     # check vault days + days greater than zero
     let days = total_days + total_vault_days
@@ -235,7 +233,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     #     realms_data.resource_number,
     #     resource_ids,
     #     realms_data.resource_number,
-    #     wonder_tax_mint)
+    #     treasury_mint)
 
     return ()
 end
@@ -244,9 +242,16 @@ end
 # GETTERS #
 ###########
 
-@external
+@view
 func get_available_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        last_update : felt) -> (days_accrued : felt, remainder : felt):
+        token_id : Uint256) -> (days_accrued : felt, remainder : felt):
+    let (controller) = MODULE_controller_address()
+
+    let (settling_state_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=ModuleIds.S01_Settling)
+
+    let (last_update) = IS01_Settling.get_time_staked(settling_state_address, token_id)
+
     let (block_timestamp) = get_block_timestamp()
 
     let (days_accrued, seconds_left_over) = unsigned_div_rem(block_timestamp - last_update, DAY)
@@ -254,12 +259,19 @@ func get_available_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, r
     return (days_accrued, seconds_left_over)
 end
 
-@external
+@view
 func get_available_vault_resources{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(last_update : felt) -> (
+        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(token_id : Uint256) -> (
         days_accrued : felt, remainder : felt):
     alloc_locals
+    let (controller) = MODULE_controller_address()
+
+    let (settling_state_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=ModuleIds.S01_Settling)
+
     let (block_timestamp) = get_block_timestamp()
+
+    let (last_update) = IS01_Settling.get_time_vault_staked(settling_state_address, token_id)
 
     let (days_accrued, seconds_left_over) = unsigned_div_rem(block_timestamp - last_update, DAY)
 
@@ -333,11 +345,10 @@ func upgrade_resource{
 
     # INCREASE LEVEL
     IS02_Resources.set_resource_level(resources_state_address, token_id, resource, level + 1)
-
+    ResourceUpgraded.emit(token_id, resource, level + 1)
     return ()
 end
 
-@external
 func fetch_resource_upgrade_ids{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
         bitwise_ptr : BitwiseBuiltin*}(resource_id : felt) -> (resource_ids : ResourceUpgradeIds):

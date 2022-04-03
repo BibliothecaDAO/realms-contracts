@@ -70,7 +70,7 @@ end
 # GETTERS
 #
 
-@external
+@view
 func get_resource_level{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256, resource : felt) -> (level : felt):
     alloc_locals
@@ -90,7 +90,7 @@ func get_resource_level{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
 end
 
 # TODO: Price of Resource upgrades should increase
-@external
+@view
 func get_resource_upgrade_cost{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
         bitwise_ptr : BitwiseBuiltin*}(token_id : Uint256, resource_id : felt) -> (level : felt):
@@ -99,7 +99,7 @@ func get_resource_upgrade_cost{
     return (level=data)
 end
 
-@external
+@view
 func get_resource_upgrade_value{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
         bitwise_ptr : BitwiseBuiltin*}(resource_id : felt) -> (level : felt):

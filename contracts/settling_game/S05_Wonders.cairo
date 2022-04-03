@@ -33,7 +33,7 @@ func wonder_epoch_upkeep(epoch : felt, token_id : Uint256) -> (upkept : felt):
 end
 
 @storage_var
-func tax_pool(epoch : felt, resource_id : Uint256) -> (supply : Uint256):
+func tax_pool(epoch : felt, resource_id : Uint256) -> (supply : felt):
 end
 
 ###############
@@ -87,11 +87,8 @@ func set_wonder_epoch_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, r
     return ()
 end
 
-@external
 func set_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        epoch : felt, resource_id : Uint256, amount : Uint256):
-    MODULE_only_approved()
-
+        epoch : felt, resource_id : Uint256, amount : felt):
     tax_pool.write(epoch, resource_id, amount)
     return ()
 end
@@ -99,7 +96,7 @@ end
 @external
 func batch_set_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         epoch : felt, resource_ids_len : felt, resource_ids : Uint256*, amounts_len : felt,
-        amounts : Uint256*):
+        amounts : felt):
     alloc_locals
     MODULE_only_approved()
     # Update tax pool
@@ -108,16 +105,11 @@ func batch_set_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     end
     let (tax_pool) = get_tax_pool(epoch, [resource_ids])
 
-    let (sum, _) = uint256_add(tax_pool, [amounts])
-    set_tax_pool(epoch, [resource_ids], sum)
+    set_tax_pool(epoch, [resource_ids], tax_pool + [amounts])
 
     # Recurse
     return batch_set_tax_pool(
-        epoch=epoch,
-        resource_ids_len=resource_ids_len - 1,
-        resource_ids=resource_ids + 1,
-        amounts_len=amounts_len - 1,
-        amounts=amounts + 1)
+        epoch, resource_ids_len - 1, resource_ids + 1, amounts_len - 1, amounts + 1)
 end
 
 ###########
@@ -158,7 +150,7 @@ end
 
 @view
 func get_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        epoch : felt, resource_id : Uint256) -> (supply : Uint256):
+        epoch : felt, resource_id : Uint256) -> (supply : felt):
     let (supply) = tax_pool.read(epoch, resource_id)
 
     return (supply)

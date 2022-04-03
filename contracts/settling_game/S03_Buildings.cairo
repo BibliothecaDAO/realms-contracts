@@ -76,7 +76,7 @@ end
 ###########
 
 # GETS BUILDING COST IDS
-@external
+@view
 func get_building_cost_ids{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         building_id : felt) -> (cost : felt):
     let (ids) = building_cost_ids.read(building_id)
@@ -85,7 +85,7 @@ func get_building_cost_ids{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
 end
 
 # GETS BUILDING COSTS VALUES
-@external
+@view
 func get_building_cost_values{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         building_id : felt) -> (cost : felt):
     let (cost) = building_cost_values.read(building_id)
@@ -94,7 +94,7 @@ func get_building_cost_values{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
 end
 
 # GETS REALM BUILDS
-@external
+@view
 func get_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256) -> (buildings : felt):
     let (buildings) = realm_buildings.read(token_id)

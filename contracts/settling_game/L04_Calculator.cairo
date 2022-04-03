@@ -21,7 +21,7 @@ from contracts.settling_game.utils.library import (
 
 # ____MODULE_L04___CONTRACT_LOGIC
 
-# This module focus is to calculate the values of the internal
+# This modules focus is to calculate the values of the internal
 # multipliers so other modules can use them. The aim is to have this
 # as the core calculator controller that contains no state.
 # It is pure math.
@@ -61,7 +61,7 @@ func calculateHappiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     return (happiness=happiness)
 end
 
-@external
+@view
 func calculateCulture{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         tokenId : Uint256) -> (culture : felt):
     let (controller) = MODULE_controller_address()
@@ -76,7 +76,7 @@ func calculateCulture{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     return (culture=culture)
 end
 
-@external
+@view
 func calculatePopulation{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         tokenId : Uint256) -> (population : felt):
     let (controller) = MODULE_controller_address()
@@ -91,7 +91,7 @@ func calculatePopulation{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     return (population=population)
 end
 
-@external
+@view
 func calculateFood{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         tokenId : Uint256) -> (food : felt):
     let (controller) = MODULE_controller_address()
@@ -109,7 +109,7 @@ func calculateFood{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     return (food=food)
 end
 
-@external
+@view
 func calculateTribute{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         tokenId : Uint256) -> (tribute : felt):
     # calculate number of buildings realm has

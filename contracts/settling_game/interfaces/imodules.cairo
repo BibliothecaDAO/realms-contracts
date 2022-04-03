@@ -134,7 +134,7 @@ namespace IS05_Wonders:
     func set_tax_pool(epoch : felt, resource_id : felt, supply : felt):
     end
     func batch_set_tax_pool(
-            epoch : felt, resource_ids_len : felt, resource_ids : felt*, amounts_len : felt,
+            epoch : felt, resource_ids_len : felt, resource_ids : Uint256*, amounts_len : felt,
             amounts : felt*):
     end
     func get_total_wonders_staked(epoch : felt) -> (amount : felt):

@@ -120,7 +120,7 @@ func get_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     return (time=time)
 end
 
-@external
+@view
 func get_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256) -> (time : felt):
     let (time) = time_vault_staked.read(token_id)
