@@ -6,12 +6,18 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.messages import send_message_to_l1
-from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
+from starkware.starknet.common.syscalls import (
+    get_caller_address, get_contract_address, get_block_timestamp)
 from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem
 from starkware.cairo.common.uint256 import Uint256, uint256_le
 
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
 from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
+from openzeppelin.access.ownable import Ownable_initializer, Ownable_only_owner
+
+############
+# MAPPINGS #
+############
 
 struct TradeStatus:
     member Open : felt
@@ -26,12 +32,25 @@ struct Trade:
     member price : felt
     member poster : felt
     member status : felt  # from TradeStatus
+    member trade_id : felt
 end
 
 struct TokenTrade:
     member trade : Trade
     member idx : felt
 end
+
+##########
+# EVENTS #
+##########
+
+@event
+func TradeAction(trade : Trade):
+end
+
+###########
+# STORAGE #
+###########
 
 # Indexed list of all trades
 @storage_var
@@ -53,23 +72,34 @@ end
 func protocol_fee_bips() -> (basis_points : felt):
 end
 
-# Temporary revers mapping of open trade to token due to no events TOREMOVE
+# Treasury Account
 @storage_var
-func token_open_trade(token_contract : felt, token_id : Uint256) -> (idx : felt):
+func treasury_address() -> (address : felt):
 end
+
+###############
+# CONSTRUCTOR #
+###############
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        address_of_currency_token : felt):
+        address_of_currency_token : felt, _treasury_address : felt, owner : felt):
     currency_token_address.write(address_of_currency_token)
     trade_counter.write(1)
     protocol_fee_bips.write(500)
+    treasury_address.write(_treasury_address)
+    Ownable_initializer(owner)
     return ()
 end
+
+###################
+# TRADE FUNCTIONS #
+###################
 
 @external
 func open_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         _token_contract : felt, _token_id : Uint256, _price : felt, _expiration : felt):
+    alloc_locals
     let (caller) = get_caller_address()
     let (contract_address) = get_contract_address()
     let (owner_of) = IERC721.ownerOf(_token_contract, _token_id)
@@ -79,13 +109,12 @@ func open_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
     assert owner_of = caller
     assert is_approved = 1
 
-    _trades.write(
+    write_trade(
         trade_count,
-        Trade(token_contract=_token_contract, token_id=_token_id, expiration=_expiration, price=_price, poster=caller, status=TradeStatus.Open))
+        Trade(
+        _token_contract, _token_id, _expiration, _price, caller, TradeStatus.Open, trade_count))
 
-    # Remove after Stark Events
-    token_open_trade.write(_token_contract, _token_id, trade_count)
-
+    # increment
     trade_counter.write(trade_count + 1)
     return ()
 end
@@ -93,30 +122,41 @@ end
 @external
 func execute_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         _trade : felt):
+    alloc_locals
     let (currency) = currency_token_address.read()
 
     let (caller) = get_caller_address()
-    let (contract_address) = get_contract_address()
+    let (_treasury_address) = treasury_address.read()
     let (trade) = _trades.read(_trade)
     let (fee_bips) = protocol_fee_bips.read()
 
     assert trade.status = TradeStatus.Open
 
-    # TODO assert expiration not over (requires StarkNet timestamps)
+    assert_time_in_range(_trade)
 
     # Fee is paid by seller
     let (fee, remainder) = unsigned_div_rem(trade.price * fee_bips, 10000)
     let base_seller_receives = trade.price - fee
 
+    # transfer to poster
     IERC20.transferFrom(currency, caller, trade.poster, Uint256(base_seller_receives, 0))
-    IERC20.transferFrom(currency, caller, contract_address, Uint256(fee, 0))
 
+    # transfer to treasury
+    IERC20.transferFrom(currency, caller, _treasury_address, Uint256(fee, 0))
+
+    # transfer item to buyer
     IERC721.transferFrom(trade.token_contract, trade.poster, caller, trade.token_id)
 
-    _trades.write(
+    write_trade(
         _trade,
-        Trade(token_contract=trade.token_contract, token_id=trade.token_id, expiration=trade.expiration, price=trade.price, poster=trade.poster, status=TradeStatus.Executed))
-    token_open_trade.write(trade.token_contract, trade.token_id, 0)
+        Trade(
+        trade.token_contract,
+        trade.token_id,
+        trade.expiration,
+        trade.price,
+        trade.poster,
+        TradeStatus.Executed,
+        _trade))
 
     return ()
 end
@@ -124,57 +164,82 @@ end
 @external
 func update_price{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         _trade : felt, _price : felt):
-    let (caller) = get_caller_address()
+    alloc_locals
     let (trade) = _trades.read(_trade)
 
     assert trade.status = TradeStatus.Open
 
-    # Require caller to be the poster of the trade
-    assert caller = trade.poster
+    assert_poster(_trade)
+    assert_time_in_range(_trade)
 
-    # TODO assert expiration not over (requires StarkNet timestamps)
-
-    _trades.write(
+    write_trade(
         _trade,
-        Trade(token_contract=trade.token_contract, token_id=trade.token_id, expiration=trade.expiration, price=_price, poster=trade.poster, status=trade.status))
-
+        Trade(trade.token_contract, trade.token_id, trade.expiration, _price, trade.poster, trade.status, _trade))
     return ()
 end
 
 @external
 func cancel_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(_trade : felt):
-    let (caller) = get_caller_address()
+    alloc_locals
     let (trade) = _trades.read(_trade)
 
     assert trade.status = TradeStatus.Open
 
-    # Require caller to be the poster of the trade
-    assert caller = trade.poster
+    assert_poster(_trade)
+    assert_time_in_range(_trade)
 
-    # TODO assert expiration not over (requires StarkNet timestamps)
-
-    _trades.write(
+    write_trade(
         _trade,
-        Trade(token_contract=trade.token_contract, token_id=trade.token_id, expiration=trade.expiration, price=trade.price, poster=trade.poster, status=TradeStatus.Cancelled))
-    token_open_trade.write(trade.token_contract, trade.token_id, 0)
+        Trade(
+        trade.token_contract,
+        trade.token_id,
+        trade.expiration,
+        trade.price,
+        trade.poster,
+        TradeStatus.Cancelled,
+        _trade))
 
     return ()
 end
+
+###########
+# HELPERS #
+###########
+
+func write_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        _trade : felt, trade : Trade):
+    _trades.write(_trade, trade)
+    TradeAction.emit(trade)
+    return ()
+end
+
+func assert_time_in_range{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        _trade : felt):
+    let (block_timestamp) = get_block_timestamp()
+    let (trade) = _trades.read(_trade)
+    # check trade within
+    assert_nn_le(block_timestamp, trade.expiration)
+
+    return ()
+end
+
+func assert_poster{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        _trade : felt):
+    let (caller) = get_caller_address()
+    let (trade) = _trades.read(_trade)
+    assert caller = trade.poster
+
+    return ()
+end
+
+###########
+# GETTERS #
+###########
 
 @view
 func get_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(idx : felt) -> (
         trade : Trade):
     return _trades.read(idx)
-end
-
-@view
-func get_open_trade_by_token{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_contract : felt, token_id : Uint256) -> (trade : TokenTrade):
-    let (idx) = token_open_trade.read(token_contract, token_id)
-    let (_trade : Trade) = _trades.read(idx)
-
-    let indexed_trade = TokenTrade(trade=_trade, idx=idx)
-    return (indexed_trade)
 end
 
 @view
@@ -197,4 +262,33 @@ func get_trade_token_id{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         idx : felt) -> (token_id : Uint256):
     let (trade) = _trades.read(idx)
     return (trade.token_id)
+end
+
+###########
+# SETTERS #
+###########
+
+# Set basis points
+@external
+func set_basis_points{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        basis_points : felt) -> (success : felt):
+    Ownable_only_owner()
+    protocol_fee_bips.write(basis_points)
+    return (1)
+end
+
+@external
+func set_treasury_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        address : felt) -> (success : felt):
+    Ownable_only_owner()
+    treasury_address.write(address)
+    return (1)
+end
+
+@external
+func set_currency_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        address : felt) -> (success : felt):
+    Ownable_only_owner()
+    currency_token_address.write(address)
+    return (1)
 end
