@@ -1,7 +1,7 @@
 # from dotenv import load_dotenv
 import asyncio
 import json
-from openzeppelin.tests.utils import Signer, uint, str_to_felt
+from openzeppelin.tests.utils import Signer, uint, str_to_felt, felt_to_str
 from scripts.binary_converter import map_realm
 # load_dotenv()
 from starkware.cairo.common.hash_state import compute_hash_on_elements
@@ -15,7 +15,8 @@ from starkware.starknet.wallets.account import Account
 
 json_realms = json.load(open('data/realms.json'))
 
-signer = Signer()
+signer = Signer(
+    0x065abfa492a31efe92b3784206de3fa14627322952fb96840e67b82838a5253f)
 
 
 async def mint_realm():

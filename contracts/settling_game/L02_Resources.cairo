@@ -227,13 +227,13 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # update wonder tax pool
     let (current_epoch) = IL04_Calculator.calculate_epoch(calculator_address)
-    # IS05_Wonders.batch_set_tax_pool(
-    #     wonders_state_address,
-    #     current_epoch,
-    #     realms_data.resource_number,
-    #     resource_ids,
-    #     realms_data.resource_number,
-    #     treasury_mint)
+    IS05_Wonders.batch_set_tax_pool(
+        wonders_state_address,
+        current_epoch,
+        realms_data.resource_number,
+        resource_ids,
+        realms_data.resource_number,
+        treasury_mint)
 
     return ()
 end
