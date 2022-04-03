@@ -4,22 +4,17 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_not_zero
 from starkware.starknet.common.syscalls import get_caller_address
 from contracts.settling_game.utils.game_structs import ModuleIds
-
+from starkware.starknet.common.syscalls import get_block_timestamp
 from contracts.settling_game.utils.constants import TRUE, FALSE
 
-# #### Controller #####
+# ____MODULE_CONTROLLER___SETTLING_LOGIC
 #
 # A long-lived open-ended lookup table.
 #
 # Is in control of the addresses game modules use.
-# Is controlled by the Arbiter, who can update addresses.
+# Is controlled by the Arbiter, who can update addresses. This will be a Multisig.
 # Maintains a generic mapping that is open ended and which
 # can be added to for new modules.
-
-# Modules are organised by numbers: a particular module (storage
-# of player health, or a new game module) will have a module_id which
-# will be used by other components, even if the underlying contract
-# address changes.
 
 #######################
 # To be compliant with this system, a new module containint variables
@@ -31,8 +26,10 @@ from contracts.settling_game.utils.constants import TRUE, FALSE
 # This way, new modules can be added to update existing systems a
 # and create new dynamics.
 
-# #### Storage #####
-# Stores the address of the Arbiter contract.
+###########
+# STORAGE #
+###########
+
 @storage_var
 func arbiter() -> (address : felt):
 end
@@ -73,12 +70,23 @@ end
 func s_realms_address() -> (address : felt):
 end
 
-# #### Constructor #####
+@storage_var
+func genesis() -> (time : felt):
+end
+
+###############
+# CONSTRUCTOR #
+###############
+
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         arbiter_address : felt, _lords_address : felt, _resources_address : felt,
         _realms_address : felt, _treasury_address : felt, _s_realms_address : felt):
     arbiter.write(arbiter_address)
+
+    # set genesis
+    let (block_timestamp) = get_block_timestamp()
+    genesis.write(block_timestamp)
 
     # write patterns known at deployment. E.g., 1->2, 1->3, 5->6.
 
@@ -113,7 +121,10 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     return ()
 end
 
-# #### External functions #####
+############
+# EXTERNAL #
+############
+
 # Called by the current Arbiter to replace itself.
 @external
 func appoint_new_arbiter{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -139,8 +150,8 @@ end
 func set_initial_module_addresses{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         module_01_addr : felt, module_02_addr : felt, module_03_addr : felt, module_04_addr : felt,
-        module_05_addr : felt, module_06_addr : felt, module_07_addr : felt,
-        module_08_addr : felt, module_09_addr : felt):
+        module_05_addr : felt, module_06_addr : felt, module_07_addr : felt, module_08_addr : felt,
+        module_09_addr : felt):
     only_arbiter()
 
     # # Settling Logic
@@ -178,9 +189,13 @@ func set_initial_module_addresses{
     # # Wonders State
     address_of_module_id.write(ModuleIds.S05_Wonders, module_09_addr)
     module_id_of_address.write(module_09_addr, ModuleIds.S05_Wonders)
-    
+
     return ()
 end
+
+###########
+# SETTERS #
+###########
 
 # Called to authorise write access of one module to another.
 @external
@@ -191,7 +206,10 @@ func set_write_access{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     return ()
 end
 
-# #### View functions #####
+###########
+# GETTERS #
+###########
+
 @view
 func get_module_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         module_id : felt) -> (address : felt):
@@ -234,7 +252,24 @@ func get_s_realms_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
     return (address)
 end
 
-# Called by a module before it updates internal state.
+@view
+func get_genesis{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+        genesis_time : felt):
+    let (genesis_time) = genesis.read()
+    return (genesis_time=genesis_time)
+end
+
+@view
+func get_arbiter{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+        arbiter_address : felt):
+    let (arbiter_address) = arbiter.read()
+    return (arbiter_address=arbiter_address)
+end
+
+#############
+# INTERNALS #
+#############
+
 @view
 func has_write_access{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_attempting_to_write : felt):
@@ -264,7 +299,10 @@ func has_write_access{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     return ()
 end
 
-# #### Private functions #####
+############
+# PRIVATES #
+############
+
 # Assert that the person calling has authority.
 func only_arbiter{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     alloc_locals

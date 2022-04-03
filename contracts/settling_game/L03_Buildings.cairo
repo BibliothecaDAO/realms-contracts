@@ -18,7 +18,6 @@ from contracts.settling_game.utils.constants import (
     SHIFT_6_9, SHIFT_6_10, SHIFT_6_11, SHIFT_6_12, SHIFT_6_13, SHIFT_6_14, SHIFT_6_15, SHIFT_6_16,
     SHIFT_6_17, SHIFT_6_18, SHIFT_6_19, SHIFT_6_20, TRUE, FALSE)
 
-from contracts.token.ERC20.interfaces.IERC20 import IERC20
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721

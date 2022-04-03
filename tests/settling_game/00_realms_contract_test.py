@@ -36,10 +36,11 @@ async def game_factory(account_factory):
 
     # ERC Contracts
     lords = await starknet.deploy(
-        source="contracts/token/ERC20/ERC20_Mintable.cairo",
+        source="contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo",
         constructor_calldata=[
             str_to_felt("Lords"),     # name
-            str_to_felt("LRD"),       # symbol
+            str_to_felt("LRD"),
+            11,       # symbol
             *uint(initial_supply),                # initial supply
             treasury_account.contract_address,  # recipient
             treasury_account.contract_address   # owner
@@ -106,7 +107,12 @@ async def game_factory(account_factory):
     calculator_logic = await starknet.deploy(
         source="contracts/settling_game/L04_Calculator.cairo",
         constructor_calldata=[controller.contract_address])
-
+    wonders_logic = await starknet.deploy(
+        source="contracts/settling_game/L05_Wonders.cairo",
+        constructor_calldata=[controller.contract_address])
+    wonders_state = await starknet.deploy(
+        source="contracts/settling_game/S05_Wonders.cairo",
+        constructor_calldata=[controller.contract_address])
     # The admin key controls the arbiter. Use it to have the arbiter
     # set the module deployment addresses in the controller.
     await admin_key.send_transaction(
@@ -114,7 +120,7 @@ async def game_factory(account_factory):
         to=arbiter.contract_address,
         selector_name='batch_set_controller_addresses',
         calldata=[
-            settling_logic.contract_address, settling_state.contract_address, resources_logic.contract_address, resources_state.contract_address, buildings_logic.contract_address, buildings_state.contract_address, calculator_logic.contract_address])
+            settling_logic.contract_address, settling_state.contract_address, resources_logic.contract_address, resources_state.contract_address, buildings_logic.contract_address, buildings_state.contract_address, calculator_logic.contract_address, wonders_logic.contract_address, wonders_state.contract_address])
 
     await admin_key.send_transaction(
         account=admin_account,

@@ -101,6 +101,9 @@ async def game_factory(account_factory):
     calculator_logic = await starknet.deploy(
         source="contracts/settling_game/L04_Calculator.cairo",
         constructor_calldata=[controller.contract_address])
+    wonders_logic = await starknet.deploy(
+        source="contracts/settling_game/L05_Wonders.cairo",
+        constructor_calldata=[controller.contract_address])
     wonders_state = await starknet.deploy(
         source="contracts/settling_game/S05_Wonders.cairo",
         constructor_calldata=[controller.contract_address])
@@ -112,10 +115,10 @@ async def game_factory(account_factory):
         to=arbiter.contract_address,
         selector_name='batch_set_controller_addresses',
         calldata=[
-            settling_logic.contract_address, settling_state.contract_address, 
-            resources_logic.contract_address, resources_state.contract_address, 
-            buildings_logic.contract_address, buildings_state.contract_address, 
-            calculator_logic.contract_address,
+            settling_logic.contract_address, settling_state.contract_address,
+            resources_logic.contract_address, resources_state.contract_address,
+            buildings_logic.contract_address, buildings_state.contract_address,
+            calculator_logic.contract_address, wonders_logic.contract_address,
             wonders_state.contract_address
         ])
 
@@ -124,6 +127,7 @@ async def game_factory(account_factory):
 #
 # Mint Realms to Owner
 #
+
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('tokens, number_of_tokens', [
@@ -218,7 +222,6 @@ async def test_tax_formula(game_factory, number_of_tokens, tokens):
         account=accounts[0], to=settling_logic.contract_address, selector_name='settle', calldata=[*uint(5042)]
     )
 
-  
     realms_settled_info = await settling_state.get_total_realms_settled().call()
 
     print(

@@ -190,32 +190,31 @@ export async function getAccountContract(calls: any) {
   try {
     const starkKeyPair = ec.genKeyPair(privKey);
 
+    console.log(starkKeyPair.getPrivate("number").toString())
     // const account = new Account(provider, parsed_address.address, starkKeyPair)
+    // const accountContract = new Contract(
+    //   parsed_abi,
+    //   parsed_address.address
+    // );
 
-    const accountContract = new Contract(
-      parsed_abi,
-      parsed_address.address
-    );
+    // const nonce = (await accountContract.call("get_nonce")).toString();
+    // const msgHash = hash.hashMulticall(parsed_address.address, calls, nonce, "0");
+    // const signature = ec.sign(starkKeyPair, msgHash);
 
-    const nonce = (await accountContract.call("get_nonce")).toString();
+    // const { callArray, calldata } = transformCallsToMulticallArrays(calls);
 
-    const msgHash = hash.hashMulticall(accountContract.address, calls, nonce, "0");
-    const signature = ec.sign(starkKeyPair, msgHash);
-
-    const { callArray, calldata } = transformCallsToMulticallArrays(calls);
-
-    const { transaction_hash: transferTxHash } = await accountContract.__execute__(
-      callArray,
-      calldata,
-      nonce,
-      signature
-    );
+    // const { transaction_hash: transferTxHash } = await accountContract.__execute__(
+    //   callArray,
+    //   calldata,
+    //   nonce,
+    //   signature
+    // );
 
     console.log(`Waiting for Tx to be Accepted on Starknet - Transfer...`);
 
-    await provider.waitForTransaction(transferTxHash);
+    // await provider.waitForTransaction(transferTxHash);
 
-    return { accountContract, nonce };
+    return 1;
 
   } catch (e) {
     console.error("Signing error: ", e)

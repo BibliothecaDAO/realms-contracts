@@ -49,7 +49,6 @@ Requirements: To play be a Lord you require a Realm from the Lootverse. The game
 </details>
 <details><summary>🏗️ System architecture</summary>
 
-
 The game mechanics are separated from the game state variables.
 
 A controller system manages a mapping of modules to deployed addresses and a governance module may update the controller.
@@ -61,6 +60,7 @@ A controller system manages a mapping of modules to deployed addresses and a gov
 
 It is also worth pointing out that StarkNet has account abstraction
 (see background notes [here](https://perama-v.github.io/cairo/examples/test_accounts/)).
+
 This means that transactions are actioned by sending a payload to a personal
 Account contract that holds your public key. The contract checks the payload
 and forwards it on to the destination.

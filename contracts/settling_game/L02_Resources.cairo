@@ -15,13 +15,13 @@ from contracts.settling_game.utils.constants import (
     TRUE, FALSE, VAULT_LENGTH, DAY, VAULT_LENGTH_SECONDS, BASE_RESOURCES_PER_DAY,
     BASE_LORDS_PER_DAY)
 
-from contracts.token.ERC20.interfaces.IERC20 import IERC20
+from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.imodules import (
-    IModuleController, IS02_Resources, IS01_Settling, IL04_Calculator, IS05_Wonders )
-    
+    IModuleController, IS02_Resources, IS01_Settling, IL04_Calculator, IS05_Wonders)
+
 from contracts.settling_game.utils.library import (
     MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
 
@@ -80,7 +80,8 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (treasury_address) = IModuleController.get_treasury_address(contract_address=controller)
 
     # wonder tax pool address
-    let (wonders_state_address) = IModuleController.get_module_address(contract_address=controller, module_id=ModuleIds.S05_Wonders) 
+    let (wonders_state_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=ModuleIds.S05_Wonders)
 
     # check owner of sRealm
     let (owner) = realms_IERC721.ownerOf(contract_address=s_realms_address, token_id=token_id)
@@ -141,16 +142,18 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     IS01_Settling.set_time_staked(settling_state_address, token_id, remainder)
 
-    # get wonder tax percentage 
-    let ( wonder_tax ) = IL04_Calculator.calculate_wonder_tax(contract_address=calculator_address)
-    let ( wonder_tax_rel_perc, _ ) = unsigned_div_rem(80 * wonder_tax, 100)
+    # get wonder tax percentage
+    let (wonder_tax) = IL04_Calculator.calculate_wonder_tax(contract_address=calculator_address)
+    let (wonder_tax_rel_perc, _) = unsigned_div_rem(80 * wonder_tax, 100)
 
     # set minting percentages
     let treasury_mint_perc = 20 + wonder_tax_rel_perc
     let user_mint_rel_perc = 80 - wonder_tax_rel_perc
 
-    let ( user_resource_factor, _ ) = unsigned_div_rem(days * user_mint_rel_perc, BASE_RESOURCES_PER_DAY) 
-    let ( treasury_resource_factor, _ ) = unsigned_div_rem(days * treasury_mint_perc, BASE_RESOURCES_PER_DAY)
+    let (user_resource_factor, _) = unsigned_div_rem(
+        days * user_mint_rel_perc, BASE_RESOURCES_PER_DAY)
+    let (treasury_resource_factor, _) = unsigned_div_rem(
+        days * treasury_mint_perc, BASE_RESOURCES_PER_DAY)
 
     # current
     # TODO: change to safemath functions
@@ -225,14 +228,14 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         treasury_mint)
 
     # update wonder tax pool
-    let ( current_epoch ) = IL04_Calculator.calculate_epoch(calculator_address)
-    IS05_Wonders.batch_set_tax_pool(
-        wonders_state_address,
-        current_epoch,
-        realms_data.resource_number,
-        resource_ids,
-        realms_data.resource_number,
-        wonder_tax_mint)
+    let (current_epoch) = IL04_Calculator.calculate_epoch(calculator_address)
+    # IS05_Wonders.batch_set_tax_pool(
+    #     wonders_state_address,
+    #     current_epoch,
+    #     realms_data.resource_number,
+    #     resource_ids,
+    #     realms_data.resource_number,
+    #     wonder_tax_mint)
 
     return ()
 end

@@ -27,6 +27,12 @@ namespace IModuleController:
     func get_treasury_address() -> (address : felt):
     end
 
+    func get_genesis() -> (genesis_time : felt):
+    end
+
+    func get_arbiter() -> (arbiter : felt):
+    end
+
     func has_write_access(address_attempting_to_write : felt):
     end
 
@@ -115,7 +121,6 @@ namespace IL05_Wonders:
     end
 end
 
-
 @contract_interface
 namespace IS05_Wonders:
     func set_total_wonders_staked(epoch : felt, amount : felt):
@@ -128,7 +133,9 @@ namespace IS05_Wonders:
     end
     func set_tax_pool(epoch : felt, resource_id : felt, supply : felt):
     end
-    func batch_set_tax_pool(epoch : felt, resource_ids_len : felt, resource_ids : felt*, amounts_len : felt, amounts : felt*): 
+    func batch_set_tax_pool(
+            epoch : felt, resource_ids_len : felt, resource_ids : felt*, amounts_len : felt,
+            amounts : felt*):
     end
     func get_total_wonders_staked(epoch : felt) -> (amount : felt):
     end

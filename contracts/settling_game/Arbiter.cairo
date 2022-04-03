@@ -6,15 +6,13 @@ from starkware.starknet.common.syscalls import get_caller_address
 
 from contracts.settling_game.interfaces.imodules import IModuleController
 
-# #### Arbiter #####
-#
-# Is the authority over the ModuleController.
+# ____ARBITER___
+
+# The Arbiter has authority over the ModuleController.
 # Responsible for deciding how the controller administers authority.
 # Can be replaced by a vote-based module by calling the
 # appoint_new_arbiter() in the ModuleController.
 # Has an Owner, that may itself be a multisig account contract.
-#
-###################
 
 @storage_var
 func owner_of_arbiter() -> (owner : felt):

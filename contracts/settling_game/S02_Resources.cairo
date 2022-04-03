@@ -2,26 +2,14 @@
 
 from starkware.cairo.common.bitwise import bitwise_and
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem, assert_not_zero
 from starkware.cairo.common.math_cmp import is_nn_le
 from starkware.cairo.common.hash_state import hash_init, hash_update, HashState
-from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address
-from starkware.cairo.common.uint256 import Uint256, uint256_eq
-from starkware.cairo.common.pow import pow
-from contracts.settling_game.utils.general import scale
-from contracts.settling_game.utils.game_structs import ResourceLevel
+from starkware.cairo.common.uint256 import Uint256
 
-from contracts.token.ERC20.interfaces.IERC20 import IERC20
-from contracts.settling_game.interfaces.IERC1155 import IERC1155
-from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.imodules import IModuleController
-
-from contracts.settling_game.utils.game_structs import RealmData, ResourceUpgradeIds
-from contracts.settling_game.utils.general import unpack_data
-
 from contracts.settling_game.utils.library import (
-    MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
+    MODULE_controller_address, MODULE_only_approved, MODULE_initializer, MODULE_only_arbiter)
 
 # #### Module 2B #########
 # Claim & Resource State #
@@ -52,7 +40,7 @@ end
 func set_resource_upgrade_value{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
         bitwise_ptr : BitwiseBuiltin*}(resource_id : felt, _resource_upgrade_ids : felt) -> ():
-    MODULE_only_approved()
+    # TODO: ONLY ALLOW OWNER
     resource_upgrade_value.write(resource_id, _resource_upgrade_ids)
 
     return ()
@@ -62,7 +50,7 @@ end
 func set_resource_upgrade_cost{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
         bitwise_ptr : BitwiseBuiltin*}(resource_id : felt, _resource_upgrade_values : felt) -> ():
-    MODULE_only_approved()
+    # TODO: ONLY ALLOW OWNER
     resource_upgrade_cost.write(resource_id, _resource_upgrade_values)
 
     return ()

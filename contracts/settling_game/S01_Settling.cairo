@@ -42,6 +42,7 @@ end
 ###############
 # CONSTRUCTOR #
 ###############
+
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_of_controller : felt):
@@ -128,7 +129,8 @@ func get_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
 end
 
 @view
-func get_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (realms_settled : felt):
+func get_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        ) -> (realms_settled : felt):
     let (amount) = total_realms_settled.read()
 
     return (realms_settled=amount)
