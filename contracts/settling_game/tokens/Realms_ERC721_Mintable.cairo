@@ -168,7 +168,7 @@ end
 @external
 func set_realm_data{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
         tokenId : Uint256, _realm_data : felt):
-        ## ONLY OWNER TODO
+    # # ONLY OWNER TODO
     realm_data.write(tokenId, _realm_data)
     return ()
 end
@@ -194,7 +194,7 @@ func fetch_realm_data{
     alloc_locals
 
     let (data) = realm_data.read(realm_id)
-
+    # add name
     let (regions) = unpack_data(data, 0, 255)
     let (cities) = unpack_data(data, 8, 255)
     let (harbours) = unpack_data(data, 16, 255)

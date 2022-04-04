@@ -23,7 +23,7 @@ from contracts.settling_game.utils.library import (
     MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
 
 # TODO:
-# Refactor this file to take into account the Crypts contracts. This will mostly be just changin contract address
+# Refactor this file to take into account the Crypts contracts. This will mostly be just chaning contract address
 # Create Crypts Struct to conform with the Crypts Metadata (game_structs.cairo)
 # Refactor unpacking of crypts data witin the Crypts_ERC721_Mintable.cairo to enable fetching of information
 # Add module to Module controller and add extra module params to Arbiter

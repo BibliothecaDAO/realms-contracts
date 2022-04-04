@@ -437,6 +437,10 @@ async def ctx_factory_desiege(copyable_deployment_desiege):
 initial_supply = 1000000 * (10 ** 18)
 
 
+###########
+# SETTLING#
+###########
+
 @pytest.fixture(scope='session')
 async def game_factory(account_factory):
     (starknet, accounts, signers) = account_factory

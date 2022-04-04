@@ -158,6 +158,7 @@ func Set_module_access{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_c
     return ()
 end
 
+# ONLY ALLOWS MODULE TO MINT S_REALM
 func _check_module_access{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}():
     let (address) = Module_access.read()
     let (caller) = get_caller_address()
