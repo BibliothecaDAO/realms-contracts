@@ -108,7 +108,7 @@ async def test_mint_realm(game_factory):
     await signer.send_transaction(
         account=admin_account, to=resources_logic.contract_address, selector_name='claim_resources', calldata=[*first_token_id]
     )
-    for index in range(22):
+    for index in range(29):
         player_resource_value = await resources.balanceOf(admin_account.contract_address, uint(index + 1)).invoke()
         print(
             f'\033[1;33;40m🔥 Resource {index + 1} balance is: {player_resource_value.result.balance[0]}')
