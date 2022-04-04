@@ -1,3 +1,9 @@
+from starkware.starknet.business_logic.state import BlockInfo
+from starkware.starknet.testing.starknet import Starknet, StarknetContract
+from starkware.starknet.services.api.contract_definition import ContractDefinition
+from starkware.starknet.compiler.compile import compile_starknet_files
+import logging
+from types import SimpleNamespace
 import asyncio
 import pytest
 import dill
@@ -5,13 +11,7 @@ import os
 from openzeppelin.tests.utils import Signer, uint, str_to_felt
 import sys
 import time
-
-from types import SimpleNamespace
-import logging
-from starkware.starknet.compiler.compile import compile_starknet_files
-from starkware.starknet.services.api.contract_definition import ContractDefinition
-from starkware.starknet.testing.starknet import Starknet, StarknetContract
-from starkware.starknet.business_logic.state import BlockInfo
+sys.setrecursionlimit(3000)
 
 sys.stdout = sys.stderr
 
@@ -102,10 +102,14 @@ async def _build_copyable_deployment():
     logging.warning(CONTRACT_SRC)
     defs = SimpleNamespace(
         account=compile("openzeppelin/account/Account.cairo"),
-        erc20=compile("contracts/token/ERC20_Mintable.cairo"),
-        erc721=compile(
-            "contracts/token/ERC721_Enumerable_Mintable_Burnable.cairo"),
-        erc1155=compile("contracts/token/ERC1155/ERC1155_Mintable.cairo"),
+        lords=compile(
+            "contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo"),
+        realms=compile(
+            "contracts/settling_game/tokens/Realms_ERC721_Mintable.cairo"),
+        s_realms=compile(
+            "contracts/settling_game/tokens/S_Realms_ERC721_Mintable.cairo"),
+        resources=compile(
+            "contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo"),
     )
 
     signers = dict(
@@ -123,10 +127,11 @@ async def _build_copyable_deployment():
     )
 
     lords = await starknet.deploy(
-        contract_def=defs.erc20,
+        contract_def=defs.lords,
         constructor_calldata=[
             str_to_felt("Lords"),  # name
             str_to_felt("LRD"),  # symbol
+            11,  # decimal
             *uint(INITIAL_LORDS_SUPPLY),  # initial supply
             accounts.admin.contract_address,  # recipient
             accounts.admin.contract_address,
@@ -136,72 +141,81 @@ async def _build_copyable_deployment():
     logging.warning(accounts)
 
     realms = await starknet.deploy(
-        contract_def=defs.erc721,
+        contract_def=defs.realms,
         constructor_calldata=[
             str_to_felt("Realms"),  # name
             str_to_felt("Realms"),  # ticker
             accounts.admin.contract_address,  # contract_owner
-            lords.contract_address,  # currency_address
         ],
     )
     accounts.realms = realms
 
-    resources = await starknet.deploy(
-        contract_def=defs.erc1155,
+    s_realms = await starknet.deploy(
+        contract_def=defs.s_realms,
         constructor_calldata=[
+            str_to_felt("SRealms"),  # name
+            str_to_felt("SRealms"),  # ticker
+            accounts.admin.contract_address,  # contract_owner
+        ],
+    )
+    accounts.s_realms = s_realms
+
+    resources = await starknet.deploy(
+        contract_def=defs.resources,
+        constructor_calldata=[
+            1234,
             accounts.admin.contract_address,  # recipient
-            5,  # token_ids_len
-            1, 2, 3, 4, 5,
-            5,  # amounts_len
-            100000, 5000, 10000, 10000, 10000,
         ],
     )
 
     consts = SimpleNamespace(
-        REALM_MINT_PRICE=REALM_MINT_PRICE, INITIAL_USER_FUNDS=initial_user_funds
+        REALM_MINT_PRICE=REALM_MINT_PRICE,
+        INITIAL_USER_FUNDS=initial_user_funds
     )
 
-    async def give_tokens(recipient, amount):
-        await signers["admin"].send_transaction(
-            accounts.admin,
-            lords.contract_address,
-            "transfer",
-            [recipient, *uint(amount)],
-        )
+    # async def give_tokens(recipient, amount):
+    #     await signers["admin"].send_transaction(
+    #         accounts.admin,
+    #         lords.contract_address,
+    #         "transfer",
+    #         [recipient, *uint(amount)],
+    #     )
 
-    async def _erc20_approve(account_name, contract_address, amount):
-        await signers[account_name].send_transaction(
-            accounts.__dict__[account_name],
-            lords.contract_address,
-            'approve',
-            [contract_address, *uint(amount)],
-        )
+    # async def _erc20_approve(account_name, contract_address, amount):
+    #     await signers[account_name].send_transaction(
+    #         accounts.__dict__[account_name],
+    #         lords.contract_address,
+    #         'approve',
+    #         [contract_address, *uint(amount)],
+    #     )
 
-    lords_approve_amount = consts.REALM_MINT_PRICE * 3
+    # lords_approve_amount = consts.REALM_MINT_PRICE * 3
 
-    async def mint_realms(account_name, token):
-        await signers[account_name].send_transaction(
-            accounts.__dict__[
-                account_name], realms.contract_address, 'publicMint', [*uint(token)]
-        )
+    # async def mint_realms(account_name, token):
+    #     await signers[account_name].send_transaction(
+    #         accounts.__dict__[
+    #             account_name], realms.contract_address, 'publicMint', [*uint(token)]
+    #     )
 
-    await _erc20_approve("user1", realms.contract_address, lords_approve_amount)
-    await give_tokens(accounts.user1.contract_address, initial_user_funds)
-    await mint_realms("user1", 23)
-    await mint_realms("user1", 7225)
+    # await _erc20_approve("user1", realms.contract_address, lords_approve_amount)
+    # await give_tokens(accounts.user1.contract_address, initial_user_funds)
+    # await mint_realms("user1", 23)
+    # await mint_realms("user1", 7225)
 
-    await give_tokens(accounts.user2.contract_address, initial_user_funds)
+    # await give_tokens(accounts.user2.contract_address, initial_user_funds)
 
     return SimpleNamespace(
         starknet=starknet,
         consts=consts,
         signers=signers,
+        accounts=accounts,
         serialized_contracts=dict(
             admin=serialize_contract(accounts.admin, defs.account.abi),
             arbiter=serialize_contract(accounts.arbiter, defs.account.abi),
-            lords=serialize_contract(lords, defs.erc20.abi),
-            realms=serialize_contract(realms, defs.erc721.abi),
-            resources=serialize_contract(resources, defs.erc1155.abi),
+            lords=serialize_contract(lords, defs.lords.abi),
+            realms=serialize_contract(realms, defs.realms.abi),
+            s_realms=serialize_contract(s_realms, defs.s_realms.abi),
+            resources=serialize_contract(resources, defs.resources.abi),
             user1=serialize_contract(accounts.user1, defs.account.abi),
             user2=serialize_contract(accounts.user2, defs.account.abi),
         ),
@@ -235,6 +249,7 @@ async def ctx_factory(copyable_deployment):
     serialized_contracts = copyable_deployment.serialized_contracts
     signers = copyable_deployment.signers
     consts = copyable_deployment.consts
+    accounts = copyable_deployment.accounts
 
     def make():
         starknet_state = copyable_deployment.starknet.state.copy()
@@ -262,6 +277,7 @@ async def ctx_factory(copyable_deployment):
             signers=signers,
             consts=consts,
             execute=execute,
+            accounts=accounts,
             **contracts,
         )
 

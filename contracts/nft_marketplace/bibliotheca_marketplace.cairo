@@ -13,16 +13,20 @@ from starkware.cairo.common.uint256 import Uint256, uint256_le
 
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
 from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
+
 from openzeppelin.access.ownable import Ownable_initializer, Ownable_only_owner
+
+from openzeppelin.security.pausable import (
+    Pausable_paused, Pausable_pause, Pausable_unpause, Pausable_when_not_paused)
 
 ############
 # MAPPINGS #
 ############
 
-struct TradeStatus:
-    member Open : felt
-    member Executed : felt
-    member Cancelled : felt
+namespace TradeStatus:
+    const Open = 1
+    const Executed = 2
+    const Cancelled = 3
 end
 
 struct Trade:
@@ -33,11 +37,6 @@ struct Trade:
     member poster : felt
     member status : felt  # from TradeStatus
     member trade_id : felt
-end
-
-struct TokenTrade:
-    member trade : Trade
-    member idx : felt
 end
 
 ##########
@@ -100,6 +99,7 @@ end
 func open_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         _token_contract : felt, _token_id : Uint256, _price : felt, _expiration : felt):
     alloc_locals
+    Pausable_when_not_paused()
     let (caller) = get_caller_address()
     let (contract_address) = get_contract_address()
     let (owner_of) = IERC721.ownerOf(_token_contract, _token_id)
@@ -123,6 +123,7 @@ end
 func execute_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         _trade : felt):
     alloc_locals
+    Pausable_when_not_paused()
     let (currency) = currency_token_address.read()
 
     let (caller) = get_caller_address()
@@ -165,6 +166,7 @@ end
 func update_price{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         _trade : felt, _price : felt):
     alloc_locals
+    Pausable_when_not_paused()
     let (trade) = _trades.read(_trade)
 
     assert trade.status = TradeStatus.Open
@@ -181,6 +183,7 @@ end
 @external
 func cancel_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(_trade : felt):
     alloc_locals
+    Pausable_when_not_paused()
     let (trade) = _trades.read(_trade)
 
     assert trade.status = TradeStatus.Open
@@ -264,6 +267,12 @@ func get_trade_token_id{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     return (trade.token_id)
 end
 
+@view
+func paused{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (paused : felt):
+    let (paused) = Pausable_paused.read()
+    return (paused)
+end
+
 ###########
 # SETTERS #
 ###########
@@ -291,4 +300,18 @@ func set_currency_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
     Ownable_only_owner()
     currency_token_address.write(address)
     return (1)
+end
+
+@external
+func pause{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    Ownable_only_owner()
+    Pausable_pause()
+    return ()
+end
+
+@external
+func unpause{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    Ownable_only_owner()
+    Pausable_unpause()
+    return ()
 end
