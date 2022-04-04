@@ -14,6 +14,8 @@ TRANSACTION_VERSION = 0
 
 # A stub test that serves no other purpose than to use the ctx_factory
 # fixture which is defined in conftest.py in order to cache it.
+
+
 @pytest.mark.asyncio
 async def test_ctx_factory(ctx_factory):
     ctx = ctx_factory()
@@ -68,14 +70,11 @@ class Signer():
         self.private_key = private_key
         self.public_key = private_to_stark_key(private_key)
 
-
     def sign(self, message_hash):
         return sign(msg_hash=message_hash, priv_key=self.private_key)
 
-
     async def send_transaction(self, account, to, selector_name, calldata, nonce=None, max_fee=0):
         return await self.send_transactions(account, [(to, selector_name, calldata)], nonce, max_fee)
-
 
     async def send_transactions(self, account, calls, nonce=None, max_fee=0):
         if nonce is None:

@@ -2,7 +2,7 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem, assert_not_zero
-from starkware.cairo.common.math_cmp import is_nn_le
+from starkware.cairo.common.math_cmp import is_nn_le, is_le
 from starkware.cairo.common.hash_state import hash_init, hash_update, HashState
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
@@ -11,38 +11,53 @@ from starkware.cairo.common.uint256 import Uint256, uint256_eq
 from contracts.settling_game.utils.game_structs import RealmData, ResourceUpgradeIds, ModuleIds
 from contracts.settling_game.utils.general import scale, unpack_data
 
-from contracts.token.IERC20 import IERC20
-from contracts.token.ERC1155.IERC1155 import IERC1155
+from contracts.settling_game.utils.constants import (
+    TRUE, FALSE, VAULT_LENGTH, DAY, VAULT_LENGTH_SECONDS, BASE_RESOURCES_PER_DAY,
+    BASE_LORDS_PER_DAY)
+
+from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
+from contracts.settling_game.interfaces.IERC1155 import IERC1155
+
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.imodules import (
-    IModuleController, IS02_Resources, IS01_Settling)
+    IModuleController, IS02_Resources, IS01_Settling, IL04_Calculator, IS05_Wonders)
 
-# #### Module 2A ##########
-#                        #
-# Claim & Resource Logic #
-#                        #
-##########################
+from contracts.settling_game.utils.library import (
+    MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
 
-@storage_var
-func controller_address() -> (address : felt):
+# ____MODULE_L02___RESOURCES_LOGIC
+
+##########
+# EVENTS #
+##########
+
+@event
+func ResourceUpgraded(token_id : Uint256, building_id : felt, level : felt):
 end
 
+###############
+# CONSTRUCTOR #
+###############
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_of_controller : felt):
-    controller_address.write(address_of_controller)
+    MODULE_initializer(address_of_controller)
     return ()
 end
 
-# Claims Resources
-# Checks user owns sRealm of Realm
-# Claims resources allocated
+############
+# EXTERNAL #
+############
+
 @external
 func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256):
     alloc_locals
     let (caller) = get_caller_address()
-    let (controller) = controller_address.read()
+    let (controller) = MODULE_controller_address()
+
+    # lords contract
+    let (lords_address) = IModuleController.get_lords_address(contract_address=controller)
 
     # realms contract
     let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
@@ -61,16 +76,25 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (settling_state_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.S01_Settling)
 
+    # calculator logic contract
+    let (calculator_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=ModuleIds.L04_Calculator)
+
     # treasury address
     let (treasury_address) = IModuleController.get_treasury_address(contract_address=controller)
+
+    # wonder tax pool address
+    let (wonders_state_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=ModuleIds.S05_Wonders)
 
     # check owner of sRealm
     let (owner) = realms_IERC721.ownerOf(contract_address=s_realms_address, token_id=token_id)
     assert caller = owner
 
-    let (local resource_ids : felt*) = alloc()
-    let (local user_mint : felt*) = alloc()
-    let (local treasury_mint : felt*) = alloc()
+    let (local resource_ids : Uint256*) = alloc()
+    let (local user_mint : Uint256*) = alloc()
+    let (local treasury_mint : Uint256*) = alloc()
+    let (local wonder_tax_mint : Uint256*) = alloc()
 
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
         contract_address=realms_address, token_id=token_id)
@@ -104,58 +128,87 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         token_id=token_id,
         resource=realms_data.resource_7)
 
-    # # TODO: only allow claim contract to mint
-    # get time staked
-    let (time_staked) = IS01_Settling.get_time_staked(settling_state_address, token_id)
-
     # calculate days
-    let (days) = getAvailableResources(time_staked)
+    let (total_days, remainder) = get_available_resources(token_id)
 
-    # check days greater than zero
+    # calculate vault days
+    let (total_vault_days, vault_remainder) = get_available_vault_resources(token_id)
+
+    # check vault days + days greater than zero
+    let days = total_days + total_vault_days
     assert_not_zero(days)
 
-    assert resource_ids[0] = realms_data.resource_1
-    assert user_mint[0] = ((r_1 * days) * 80) / 100
-    assert treasury_mint[0] = ((r_1 * days) * 20) / 100
+    IS01_Settling.set_time_staked(settling_state_address, token_id, remainder)
+
+    # get wonder tax percentage
+    let (wonder_tax) = IL04_Calculator.calculate_wonder_tax(contract_address=calculator_address)
+    let (wonder_tax_rel_perc, _) = unsigned_div_rem(80 * wonder_tax, 100)
+
+    # set minting percentages
+    let treasury_mint_perc = 20 + wonder_tax_rel_perc
+    let user_mint_rel_perc = 80 - wonder_tax_rel_perc
+
+    let (user_resource_factor, _) = unsigned_div_rem(
+        days * user_mint_rel_perc, BASE_RESOURCES_PER_DAY)
+    let (treasury_resource_factor, _) = unsigned_div_rem(
+        days * treasury_mint_perc, BASE_RESOURCES_PER_DAY)
+
+    # current
+    # TODO: change to safemath functions
+    assert resource_ids[0] = Uint256(realms_data.resource_1, 0)
+    assert user_mint[0] = Uint256(r_1 * user_resource_factor, 0)
+    assert treasury_mint[0] = Uint256(r_1 * treasury_resource_factor, 0)
 
     if realms_data.resource_2 != 0:
-        assert resource_ids[1] = realms_data.resource_2
-        assert user_mint[1] = ((r_2 * days) * 80) / 100
-        assert treasury_mint[1] = ((r_2 * days) * 20) / 100
+        assert resource_ids[1] = Uint256(realms_data.resource_2, 0)
+        assert user_mint[1] = Uint256(r_2 * user_resource_factor, 0)
+        assert treasury_mint[1] = Uint256(r_2 * treasury_resource_factor, 0)
     end
 
     if realms_data.resource_3 != 0:
-        assert resource_ids[2] = realms_data.resource_3
-        assert user_mint[2] = ((r_3 * days) * 80) / 100
-        assert treasury_mint[2] = ((r_3 * days) * 20) / 100
+        assert resource_ids[2] = Uint256(realms_data.resource_3, 0)
+        assert user_mint[2] = Uint256(r_3 * user_resource_factor, 0)
+        assert treasury_mint[2] = Uint256(r_3 * treasury_resource_factor, 0)
     end
 
     if realms_data.resource_4 != 0:
-        assert resource_ids[3] = realms_data.resource_4
-        assert user_mint[3] = ((r_4 * days) * 80) / 100
-        assert treasury_mint[3] = ((r_4 * days) * 20) / 100
+        assert resource_ids[3] = Uint256(realms_data.resource_4, 0)
+        assert user_mint[3] = Uint256(r_4 * user_resource_factor, 0)
+        assert treasury_mint[3] = Uint256(r_4 * treasury_resource_factor, 0)
     end
 
     if realms_data.resource_5 != 0:
-        assert resource_ids[4] = realms_data.resource_5
-        assert user_mint[4] = ((r_5 * days) * 80) / 100
-        assert treasury_mint[4] = ((r_5 * days) * 20) / 100
+        assert resource_ids[4] = Uint256(realms_data.resource_5, 0)
+        assert user_mint[4] = Uint256(r_5 * user_resource_factor, 0)
+        assert treasury_mint[4] = Uint256(r_5 * treasury_resource_factor, 0)
     end
 
     if realms_data.resource_6 != 0:
-        assert resource_ids[5] = realms_data.resource_7
-        assert user_mint[5] = ((r_6 * days) * 80) / 100
-        assert treasury_mint[5] = ((r_6 * days) * 20) / 100
+        assert resource_ids[5] = Uint256(realms_data.resource_7, 0)
+        assert user_mint[5] = Uint256(r_6 * user_resource_factor, 0)
+        assert treasury_mint[5] = Uint256(r_6 * treasury_resource_factor, 0)
     end
 
     if realms_data.resource_7 != 0:
-        assert resource_ids[6] = realms_data.resource_7
-        assert user_mint[6] = ((r_7 * days) * 80) / 100
-        assert treasury_mint[6] = ((r_7 * days) * 20) / 100
+        assert resource_ids[6] = Uint256(realms_data.resource_7, 0)
+        assert user_mint[6] = Uint256(r_7 * user_resource_factor, 0)
+        assert treasury_mint[6] = Uint256(r_7 * treasury_resource_factor, 0)
     end
 
+    let lords_available = Uint256(total_days * BASE_LORDS_PER_DAY, 0)
+
+    # TODO: CAN WE IMPROVE THE GAS OF THIS??
+
+    # approve lords
+    # IERC20.approve(lords_address, treasury_address, lords_available)
+
+    # mint lords
+    IERC20.transferFrom(lords_address, treasury_address, caller, lords_available)
+
+    # TODO: ONLY ALLOW THIS MODULE TO MINT FROM RESOURCE CONTRACT
+
     # mint users
-    IERC1155.mint_batch(
+    IERC1155.mintBatch(
         resources_address,
         caller,
         realms_data.resource_number,
@@ -164,7 +217,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         user_mint)
 
     # mint treasury
-    IERC1155.mint_batch(
+    IERC1155.mintBatch(
         resources_address,
         treasury_address,
         realms_data.resource_number,
@@ -172,22 +225,69 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         realms_data.resource_number,
         treasury_mint)
 
+    # update wonder tax pool
+    let (current_epoch) = IL04_Calculator.calculate_epoch(calculator_address)
+    # IS05_Wonders.batch_set_tax_pool(
+    #     wonders_state_address,
+    #     current_epoch,
+    #     realms_data.resource_number,
+    #     resource_ids,
+    #     realms_data.resource_number,
+    #     treasury_mint)
+
     return ()
 end
 
-@external
-func getAvailableResources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        last_update : felt) -> (time : felt):
+###########
+# GETTERS #
+###########
+
+@view
+func get_available_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        token_id : Uint256) -> (days_accrued : felt, remainder : felt):
+    let (controller) = MODULE_controller_address()
+
+    let (settling_state_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=ModuleIds.S01_Settling)
+
+    let (last_update) = IS01_Settling.get_time_staked(settling_state_address, token_id)
+
     let (block_timestamp) = get_block_timestamp()
-    # Real line commented out for testing
-    # let days = (block_timestamp - last_update) / 3600
 
-    # dummy numbers as no blocktime on local machine
-    # this will equal 24 days uncollected
-    let days = (86400 - 3600) / 3600
+    let (days_accrued, seconds_left_over) = unsigned_div_rem(block_timestamp - last_update, DAY)
 
-    return (time=days)
+    return (days_accrued, seconds_left_over)
 end
+
+@view
+func get_available_vault_resources{
+        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(token_id : Uint256) -> (
+        days_accrued : felt, remainder : felt):
+    alloc_locals
+    let (controller) = MODULE_controller_address()
+
+    let (settling_state_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=ModuleIds.S01_Settling)
+
+    let (block_timestamp) = get_block_timestamp()
+
+    let (last_update) = IS01_Settling.get_time_vault_staked(settling_state_address, token_id)
+
+    let (days_accrued, seconds_left_over) = unsigned_div_rem(block_timestamp - last_update, DAY)
+
+    let (yes) = is_le(days_accrued, VAULT_LENGTH_SECONDS)
+
+    # TODO: only if time is above 7 days can you claim
+    if yes == 1:
+        return (days_accrued, seconds_left_over)
+    end
+
+    return (0, seconds_left_over)
+end
+
+############
+# EXTERNAL #
+############
 
 @external
 func upgrade_resource{
@@ -195,7 +295,7 @@ func upgrade_resource{
         range_check_ptr}(token_id : Uint256, resource : felt) -> ():
     alloc_locals
     let (caller) = get_caller_address()
-    let (controller) = controller_address.read()
+    let (controller) = MODULE_controller_address()
 
     # resource contract
     let (resource_address) = IModuleController.get_resources_address(contract_address=controller)
@@ -205,69 +305,75 @@ func upgrade_resource{
 
     # check owner of sRealm
     let (owner) = realms_IERC721.ownerOf(contract_address=s_realms_address, token_id=token_id)
-    assert caller = owner
 
-    # resources state contract
+    with_attr error_message("You do not own this Realm"):
+        assert caller = owner
+    end
+
+    # STATE
     let (resources_state_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.S02_Resources)
 
+    # GET RESOURCE LEVEL
     let (level) = IS02_Resources.get_resource_level(resources_state_address, token_id, resource)
 
+    # GET UPGRADE COSTS
     let (upgrade_cost) = IS02_Resources.get_resource_upgrade_cost(
         resources_state_address, token_id, resource)
 
+    # GET UPGRADE IDS
     let (resource_upgrade_ids : ResourceUpgradeIds) = fetch_resource_upgrade_ids(resource)
 
-    # create array of ids and values
-    let (local resource_ids : felt*) = alloc()
-    let (local resource_values : felt*) = alloc()
+    # CREATE TEMP ARRARY
+    let (resource_ids : Uint256*) = alloc()
+    let (resource_values : Uint256*) = alloc()
 
-    assert resource_ids[0] = resource_upgrade_ids.resource_1
-    assert resource_ids[1] = resource_upgrade_ids.resource_2
-    assert resource_ids[2] = resource_upgrade_ids.resource_3
-    assert resource_ids[3] = resource_upgrade_ids.resource_4
-    assert resource_ids[4] = resource_upgrade_ids.resource_5
+    assert resource_ids[0] = Uint256(resource_upgrade_ids.resource_1, 0)
+    assert resource_ids[1] = Uint256(resource_upgrade_ids.resource_2, 0)
+    assert resource_ids[2] = Uint256(resource_upgrade_ids.resource_3, 0)
+    assert resource_ids[3] = Uint256(resource_upgrade_ids.resource_4, 0)
+    assert resource_ids[4] = Uint256(resource_upgrade_ids.resource_5, 0)
 
-    assert resource_values[0] = resource_upgrade_ids.resource_1_values
-    assert resource_values[1] = resource_upgrade_ids.resource_2_values
-    assert resource_values[2] = resource_upgrade_ids.resource_3_values
-    assert resource_values[3] = resource_upgrade_ids.resource_4_values
-    assert resource_values[4] = resource_upgrade_ids.resource_5_values
+    assert resource_values[0] = Uint256(resource_upgrade_ids.resource_1_values, 0)
+    assert resource_values[1] = Uint256(resource_upgrade_ids.resource_2_values, 0)
+    assert resource_values[2] = Uint256(resource_upgrade_ids.resource_3_values, 0)
+    assert resource_values[3] = Uint256(resource_upgrade_ids.resource_4_values, 0)
+    assert resource_values[4] = Uint256(resource_upgrade_ids.resource_5_values, 0)
 
-    # burn resources
-    IERC1155.burn_batch(resource_address, caller, 5, resource_ids, 5, resource_values)
+    # BURN RESOURCES
+    IERC1155.burnBatch(resource_address, caller, 5, resource_ids, 5, resource_values)
 
-    # increase level
+    # INCREASE LEVEL
     IS02_Resources.set_resource_level(resources_state_address, token_id, resource, level + 1)
-
+    ResourceUpgraded.emit(token_id, resource, level + 1)
     return ()
 end
 
-@external
 func fetch_resource_upgrade_ids{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
         bitwise_ptr : BitwiseBuiltin*}(resource_id : felt) -> (resource_ids : ResourceUpgradeIds):
     alloc_locals
 
-    let (controller) = controller_address.read()
+    let (controller) = MODULE_controller_address()
 
-    # state contract
+    # STATE
     let (resources_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=4)
+        contract_address=controller, module_id=ModuleIds.S02_Resources)
 
-    let (local data) = IS02_Resources.get_resource_upgrade_ids(resources_state_address, resource_id)
+    let (data) = IS02_Resources.get_resource_upgrade_value(resources_state_address, resource_id)
 
-    let (local resource_1) = unpack_data(data, 0, 255)
-    let (local resource_2) = unpack_data(data, 8, 255)
-    let (local resource_3) = unpack_data(data, 16, 255)
-    let (local resource_4) = unpack_data(data, 24, 255)
-    let (local resource_5) = unpack_data(data, 32, 255)
-    let (local resource_1_values) = unpack_data(data, 40, 255)
-    let (local resource_2_values) = unpack_data(data, 48, 255)
-    let (local resource_3_values) = unpack_data(data, 56, 255)
-    let (local resource_4_values) = unpack_data(data, 64, 255)
-    let (local resource_5_values) = unpack_data(data, 72, 255)
+    let (resource_1) = unpack_data(data, 0, 255)
+    let (resource_2) = unpack_data(data, 8, 255)
+    let (resource_3) = unpack_data(data, 16, 255)
+    let (resource_4) = unpack_data(data, 24, 255)
+    let (resource_5) = unpack_data(data, 32, 255)
+    let (resource_1_values) = unpack_data(data, 40, 255)
+    let (resource_2_values) = unpack_data(data, 48, 255)
+    let (resource_3_values) = unpack_data(data, 56, 255)
+    let (resource_4_values) = unpack_data(data, 64, 255)
+    let (resource_5_values) = unpack_data(data, 72, 255)
 
+    # TODO: ADD IN DYNAMIC COST ACCORDING TO RESOURCE LEVEL
     return (
         resource_ids=ResourceUpgradeIds(
         resource_1=resource_1,

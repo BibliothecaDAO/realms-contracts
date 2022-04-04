@@ -6,15 +6,13 @@ from starkware.starknet.common.syscalls import get_caller_address
 
 from contracts.settling_game.interfaces.imodules import IModuleController
 
-# #### Arbiter #####
-#
-# Is the authority over the ModuleController.
+# ____ARBITER___
+
+# The Arbiter has authority over the ModuleController.
 # Responsible for deciding how the controller administers authority.
 # Can be replaced by a vote-based module by calling the
 # appoint_new_arbiter() in the ModuleController.
 # Has an Owner, that may itself be a multisig account contract.
-#
-###################
 
 @storage_var
 func owner_of_arbiter() -> (owner : felt):
@@ -103,7 +101,8 @@ end
 func batch_set_controller_addresses{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         module_01_addr : felt, module_02_addr : felt, module_03_addr : felt, module_04_addr : felt,
-        module_05_addr : felt, module_06_addr : felt, module_07_addr : felt):
+        module_05_addr : felt, module_06_addr : felt, module_07_addr : felt, module_08_addr : felt,
+        module_09_addr : felt):
     only_owner()
     let (controller) = controller_address.read()
     IModuleController.set_initial_module_addresses(
@@ -114,7 +113,9 @@ func batch_set_controller_addresses{
         module_04_addr,
         module_05_addr,
         module_06_addr,
-        module_07_addr)
+        module_07_addr,
+        module_08_addr,
+        module_09_addr)
     return ()
 end
 

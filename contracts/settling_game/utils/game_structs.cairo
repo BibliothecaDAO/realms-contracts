@@ -17,10 +17,10 @@ struct RealmStatistics:
 end
 
 struct RealmData:
-    member cities : felt  #
     member regions : felt  #
-    member rivers : felt  #
+    member cities : felt  #
     member harbours : felt  #
+    member rivers : felt  #
     member resource_number : felt  #
     member resource_1 : felt  #
     member resource_2 : felt  #
@@ -159,4 +159,6 @@ namespace ModuleIds:
     const L03_Buildings = 5
     const S03_Buildings = 6
     const L04_Calculator = 7
+    const L05_Wonders = 8
+    const S05_Wonders = 9
 end
