@@ -291,7 +291,7 @@ async def xoroshiro(starknet):
     return await starknet.deploy(contract_def=contract, constructor_calldata=[seed])
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 async def account_factory(request):
     num_signers = request.param.get("num_signers", "1")
     starknet = await Starknet.empty()
@@ -310,20 +310,6 @@ async def account_factory(request):
 
         print(f'Account {i} is: {hex(account.contract_address)}')
 
-    # Initialize network
-
-    # Admin is usually accounts[0], user_1 = accounts[1].
-    # To build a transaction to call func_xyz(arg_1, arg_2)
-    # on a TargetContract:
-
-    # await Signer.send_transaction(
-    #   account=accounts[1],
-    #   to=TargetContract,
-    #   selector_name='func_xyz',
-    #   calldata=[arg_1, arg_2],
-    #   nonce=current_nonce)
-
-    # Note that nonce is an optional argument.
     return starknet, accounts, signers
 
 
@@ -447,3 +433,112 @@ async def ctx_factory_desiege(copyable_deployment_desiege):
         )
 
     return make
+
+initial_supply = 1000000 * (10 ** 18)
+
+
+@pytest.fixture(scope='session')
+async def game_factory(account_factory):
+    (starknet, accounts, signers) = account_factory
+    admin_key = signers[0]
+    admin_account = accounts[0]
+    treasury_account = accounts[1]
+
+    set_block_timestamp(starknet.state, round(time.time()))
+
+    # ERC Contracts
+    lords = await starknet.deploy(
+        source="contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo",
+        constructor_calldata=[
+            str_to_felt("Lords"),     # name
+            str_to_felt("LRD"),
+            11,       # symbol
+            *uint(initial_supply),                # initial supply
+            treasury_account.contract_address,  # recipient
+            treasury_account.contract_address   # owner
+        ]
+    )
+
+    realms = await starknet.deploy(
+        source="contracts/settling_game/tokens/Realms_ERC721_Mintable.cairo",
+        constructor_calldata=[
+            str_to_felt("Realms"),  # name
+            str_to_felt("Realms"),                 # ticker
+            admin_account.contract_address,           # contract_owner
+        ])
+
+    s_realms = await starknet.deploy(
+        source="contracts/settling_game/tokens/S_Realms_ERC721_Mintable.cairo",
+        constructor_calldata=[
+            str_to_felt("SRealms"),  # name
+            str_to_felt("SRealms"),                 # ticker
+            admin_account.contract_address,           # contract_owner
+        ])
+
+    resources = await starknet.deploy(
+        source="contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo",
+        constructor_calldata=[
+            1234,
+            admin_account.contract_address
+        ])
+
+    # The Controller is the only unchangeable contract.
+    # First deploy Arbiter.
+    # Then send the Arbiter address during Controller deployment.
+    # Then save the controller address in the Arbiter.
+    # Then deploy Controller address during module deployments.
+    arbiter = await starknet.deploy(
+        source="contracts/settling_game/Arbiter.cairo",
+        constructor_calldata=[admin_account.contract_address])
+    controller = await starknet.deploy(
+        source="contracts/settling_game/ModuleController.cairo",
+        constructor_calldata=[arbiter.contract_address, lords.contract_address, resources.contract_address, realms.contract_address, treasury_account.contract_address, s_realms.contract_address])
+    await admin_key.send_transaction(
+        account=admin_account,
+        to=arbiter.contract_address,
+        selector_name='set_address_of_controller',
+        calldata=[controller.contract_address])
+    settling_logic = await starknet.deploy(
+        source="contracts/settling_game/L01_Settling.cairo",
+        constructor_calldata=[controller.contract_address])
+    settling_state = await starknet.deploy(
+        source="contracts/settling_game/S01_Settling.cairo",
+        constructor_calldata=[controller.contract_address])
+    resources_logic = await starknet.deploy(
+        source="contracts/settling_game/L02_Resources.cairo",
+        constructor_calldata=[controller.contract_address])
+    resources_state = await starknet.deploy(
+        source="contracts/settling_game/S02_Resources.cairo",
+        constructor_calldata=[controller.contract_address])
+    buildings_logic = await starknet.deploy(
+        source="contracts/settling_game/L03_Buildings.cairo",
+        constructor_calldata=[controller.contract_address])
+    buildings_state = await starknet.deploy(
+        source="contracts/settling_game/S03_Buildings.cairo",
+        constructor_calldata=[controller.contract_address])
+    calculator_logic = await starknet.deploy(
+        source="contracts/settling_game/L04_Calculator.cairo",
+        constructor_calldata=[controller.contract_address])
+    wonders_logic = await starknet.deploy(
+        source="contracts/settling_game/L05_Wonders.cairo",
+        constructor_calldata=[controller.contract_address])
+    wonders_state = await starknet.deploy(
+        source="contracts/settling_game/S05_Wonders.cairo",
+        constructor_calldata=[controller.contract_address])
+    # The admin key controls the arbiter. Use it to have the arbiter
+    # set the module deployment addresses in the controller.
+    await admin_key.send_transaction(
+        account=admin_account,
+        to=arbiter.contract_address,
+        selector_name='batch_set_controller_addresses',
+        calldata=[
+            settling_logic.contract_address, settling_state.contract_address, resources_logic.contract_address, resources_state.contract_address, buildings_logic.contract_address, buildings_state.contract_address, calculator_logic.contract_address, wonders_logic.contract_address, wonders_state.contract_address])
+
+    await admin_key.send_transaction(
+        account=admin_account,
+        to=s_realms.contract_address,
+        selector_name='Set_module_access',
+        calldata=[
+            settling_logic.contract_address])
+
+    return admin_account, treasury_account, starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state, s_realms, buildings_logic, buildings_state, calculator_logic

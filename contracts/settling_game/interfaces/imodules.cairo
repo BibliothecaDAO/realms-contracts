@@ -125,26 +125,36 @@ end
 namespace IS05_Wonders:
     func set_total_wonders_staked(epoch : felt, amount : felt):
     end
+
     func set_last_updated_epoch(epoch : felt):
     end
+
     func set_wonder_id_staked(token_id : Uint256, epoch : felt):
     end
+
     func set_wonder_epoch_upkeep(epoch : felt, token_id : Uint256, upkept : felt):
     end
+
     func set_tax_pool(epoch : felt, resource_id : felt, supply : felt):
     end
+
     func batch_set_tax_pool(
             epoch : felt, resource_ids_len : felt, resource_ids : Uint256*, amounts_len : felt,
             amounts : felt*):
     end
+
     func get_total_wonders_staked(epoch : felt) -> (amount : felt):
     end
+
     func get_last_updated_epoch() -> (epoch : felt):
     end
+
     func get_wonder_id_staked(token_id : Uint256) -> (epoch : felt):
     end
+
     func get_wonder_epoch_upkeep(epoch : felt, token_id : Uint256) -> (upkept : felt):
     end
+
     func get_tax_pool(epoch : felt, resource_id : felt) -> (supply : felt):
     end
 end

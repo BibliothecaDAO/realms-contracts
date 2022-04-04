@@ -96,16 +96,16 @@ end
 @external
 func batch_set_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         epoch : felt, resource_ids_len : felt, resource_ids : Uint256*, amounts_len : felt,
-        amounts : felt):
+        amounts : felt*):
     alloc_locals
     MODULE_only_approved()
     # Update tax pool
     if resource_ids_len == 0:
         return ()
     end
-    # let (tax_pool) = get_tax_pool(epoch, [resource_ids])
+    let (tax_pool) = get_tax_pool(epoch, [resource_ids])
 
-    # set_tax_pool(0, [resource_ids], 0)
+    set_tax_pool(0, [resource_ids], 0)
 
     # Recurse
     return batch_set_tax_pool(
