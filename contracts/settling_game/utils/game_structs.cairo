@@ -43,7 +43,7 @@ struct ResourceLevel:
     member resource_7_level : felt  #
 end
 
-struct ResourceUpgradeIds:
+struct ResourceUpgradeValues:
     member resource_1 : felt
     member resource_2 : felt
     member resource_3 : felt

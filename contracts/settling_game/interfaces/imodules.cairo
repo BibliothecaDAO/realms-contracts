@@ -33,7 +33,7 @@ namespace IModuleController:
     func get_arbiter() -> (arbiter : felt):
     end
 
-    func has_write_access(address_attempting_to_write : felt):
+    func has_write_access(address_attempting_to_write : felt) -> (success : felt):
     end
 
     func appoint_new_arbiter(new_arbiter : felt):

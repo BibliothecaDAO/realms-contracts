@@ -14,7 +14,7 @@ from contracts.settling_game.utils.game_structs import ModuleIds
 from contracts.settling_game.interfaces.imodules import (
     IModuleController, IS02_Resources, IS01_Settling, IL04_Calculator, IS05_Wonders)
 
-from contracts.settling_game.utils.game_structs import RealmData, ResourceUpgradeIds
+from contracts.settling_game.utils.game_structs import RealmData, ResourceUpgradeValues
 from contracts.settling_game.utils.general import unpack_data
 
 from contracts.settling_game.interfaces.IERC1155 import IERC1155

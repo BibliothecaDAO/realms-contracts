@@ -272,7 +272,7 @@ end
 
 @view
 func has_write_access{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        address_attempting_to_write : felt):
+        address_attempting_to_write : felt) -> (success : felt):
     alloc_locals
 
     # Approves the write-permissions between two modules, ensuring
@@ -285,18 +285,27 @@ func has_write_access{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
 
     # Make sure the module has not been replaced.
     let (local current_module_address) = address_of_module_id.read(module_id_being_written_to)
-    assert current_module_address = caller
+
+    if current_module_address != caller:
+        return (0)
+    end
 
     # Get the module id of the contract that is trying to write.
     let (module_id_attempting_to_write) = module_id_of_address.read(address_attempting_to_write)
     # Make sure that module has not been replaced.
     let (local active_address) = address_of_module_id.read(module_id_attempting_to_write)
-    assert active_address = address_attempting_to_write
 
+    if active_address != address_attempting_to_write:
+        return (0)
+    end
     # See if the module has permission.
     let (bool) = can_write_to.read(module_id_attempting_to_write, module_id_being_written_to)
-    assert_not_zero(bool)
-    return ()
+
+    if bool == 0:
+        return (0)
+    end
+
+    return (1)
 end
 
 ############

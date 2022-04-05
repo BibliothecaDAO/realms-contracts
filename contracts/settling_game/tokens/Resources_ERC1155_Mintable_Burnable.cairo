@@ -1,8 +1,10 @@
 %lang starknet
-
+from starkware.cairo.common.math import assert_not_zero
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.uint256 import Uint256
-from openzeppelin.access.ownable import Ownable_only_owner, Ownable_initializer
+from starkware.starknet.common.syscalls import get_caller_address
+from openzeppelin.access.ownable import (
+    Ownable_only_owner, Ownable_initializer, Ownable_owner, Ownable_get_owner)
 from openzeppelin.token.erc1155.library import (
     ERC1155_initializer, ERC1155_supportsInterface, ERC1155_uri, ERC1155_balanceOf,
     ERC1155_balanceOfBatch, ERC1155_isApprovedForAll, ERC1155_setApprovalForAll,
@@ -84,6 +86,7 @@ func mint{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         to : felt, id : Uint256, amount : Uint256):
     # TODO: Restrict
     # Ownable_only_owner()
+    check_can_action()
     ERC1155_mint(to, id, amount)
     return ()
 end
@@ -93,6 +96,7 @@ func mintBatch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
         to : felt, ids_len : felt, ids : Uint256*, amounts_len : felt, amounts : Uint256*):
     # TODO: Restrict
     # Ownable_only_owner()
+    check_can_action()
     ERC1155_mint_batch(to, ids_len, ids, amounts_len, amounts)
     return ()
 end
@@ -112,5 +116,53 @@ func burnBatch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     # TODO: Restrict
     # owner_or_approved(owner=_from)
     ERC1155_burn_batch(_from, ids_len, ids, amounts_len, amounts)
+    return ()
+end
+
+#
+# Bibliotheca added methods
+#
+
+@storage_var
+func Module_access() -> (address : felt):
+end
+
+@external
+func Set_module_access{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+        address : felt):
+    Ownable_only_owner()
+    Module_access.write(address)
+    return ()
+end
+
+func check_caller{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}() -> (
+        value : felt):
+    let (address) = Module_access.read()
+    let (caller) = get_caller_address()
+
+    if address == caller:
+        return (1)
+    end
+
+    return (0)
+end
+
+func check_owner{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}() -> (
+        value : felt):
+    let (caller) = get_caller_address()
+    let (owner) = Ownable_get_owner()
+
+    if caller == owner:
+        return (1)
+    end
+
+    return (0)
+end
+
+func check_can_action{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}():
+    let (caller) = check_caller()
+    let (owner) = check_owner()
+
+    assert_not_zero(owner + caller)
     return ()
 end
