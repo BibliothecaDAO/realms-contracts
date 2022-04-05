@@ -10,7 +10,7 @@ from starkware.starknet.common.syscalls import get_caller_address, get_block_tim
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.general import scale
-from contracts.settling_game.utils.game_structs import ModuleIds
+from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
 from contracts.settling_game.interfaces.imodules import (
     IModuleController, IS02_Resources, IS01_Settling, IL04_Calculator, IS05_Wonders)
 
@@ -48,8 +48,12 @@ func pay_wonder_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     let (controller) = MODULE_controller_address()
     let (caller) = get_caller_address()
 
-    let (treasury_address) = IModuleController.get_treasury_address(contract_address=controller)
-    let (resources_address) = IModuleController.get_resources_address(contract_address=controller)
+    # treasury address
+    let (treasury_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Treasury)
+    # resources address
+    let (resources_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Resources)
     let (wonders_state_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.S05_Wonders)
 
@@ -132,7 +136,9 @@ func claim_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     update_epoch_pool()
     let (caller) = get_caller_address()
     let (controller) = MODULE_controller_address()
-    let (s_realms_address) = IModuleController.get_s_realms_address(contract_address=controller)
+
+    let (s_realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.S_Realms)
     let (wonders_state_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.S05_Wonders)
     let (calculator_address) = IModuleController.get_module_address(
@@ -174,9 +180,12 @@ func loop_epochs_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     let (epoch_upkept) = IS05_Wonders.get_wonder_epoch_upkeep(
         wonders_state_address, claiming_epoch, token_id)
     if epoch_upkept == 1:
-        let (treasury_address) = IModuleController.get_treasury_address(contract_address=controller)
-        let (resources_address) = IModuleController.get_resources_address(
-            contract_address=controller)
+        # treasury address
+        let (treasury_address) = IModuleController.get_external_contract_address(
+            controller, ExternalContractIds.Treasury)
+        # resources address
+        let (resources_address) = IModuleController.get_external_contract_address(
+            controller, ExternalContractIds.Resources)
         let (epoch_total_wonders) = IS05_Wonders.get_total_wonders_staked(
             contract_address=wonders_state_address, epoch=claiming_epoch)
 

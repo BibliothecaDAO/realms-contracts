@@ -17,16 +17,6 @@ from contracts.settling_game.utils.library import (
 func resource_levels(token_id : Uint256, resource_id : felt) -> (level : felt):
 end
 
-# STORE UPGRADE COST LEVEL
-
-@storage_var
-func resource_upgrade_cost(resource_id : felt) -> (value : felt):
-end
-
-@storage_var
-func resource_upgrade_value(resource_id : felt) -> (ids : felt):
-end
-
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         address_of_controller : felt):
@@ -37,26 +27,6 @@ end
 ############
 # EXTERNAL #
 ############
-
-@external
-func set_resource_upgrade_value{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*}(resource_id : felt, _resource_upgrade_ids : felt) -> ():
-    # TODO: ONLY ALLOW OWNER
-    resource_upgrade_value.write(resource_id, _resource_upgrade_ids)
-
-    return ()
-end
-
-@external
-func set_resource_upgrade_cost{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*}(resource_id : felt, _resource_upgrade_values : felt) -> ():
-    # TODO: ONLY ALLOW OWNER
-    resource_upgrade_cost.write(resource_id, _resource_upgrade_values)
-
-    return ()
-end
 
 @external
 func set_resource_level{
@@ -78,22 +48,4 @@ func get_resource_level{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     let (level) = resource_levels.read(token_id, resource)
 
     return (level=level)
-end
-
-# GET RESOURCE UPGRADE COSTS
-@view
-func get_resource_upgrade_cost{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256, resource_id : felt) -> (level : felt):
-    let (data) = resource_upgrade_cost.read(resource_id)
-
-    return (level=data)
-end
-
-# GET RESOURCE UPGRADE VALUES
-@view
-func get_resource_upgrade_value{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        resource_id : felt) -> (level : felt):
-    let (data) = resource_upgrade_value.read(resource_id)
-
-    return (level=data)
 end

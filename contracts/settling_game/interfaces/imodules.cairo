@@ -12,19 +12,7 @@ namespace IModuleController:
     func get_module_address(module_id : felt) -> (address : felt):
     end
 
-    func get_lords_address() -> (address : felt):
-    end
-
-    func get_realms_address() -> (address : felt):
-    end
-
-    func get_s_realms_address() -> (address : felt):
-    end
-
-    func get_resources_address() -> (address : felt):
-    end
-
-    func get_treasury_address() -> (address : felt):
+    func get_external_contract_address(external_contract_id : felt) -> (address : felt):
     end
 
     func get_genesis() -> (genesis_time : felt):
@@ -40,6 +28,9 @@ namespace IModuleController:
     end
 
     func set_address_for_module_id(module_id : felt, module_address : felt):
+    end
+
+    func set_address_for_external_contract(external_contract_id : felt, address : felt):
     end
 
     func set_write_access(module_id_doing_writing : felt, module_id_being_written_to : felt):
@@ -72,10 +63,6 @@ end
 namespace IS02_Resources:
     func get_resource_level(token_id : Uint256, resource : felt) -> (level : felt):
     end
-
-    func get_resource_upgrade_cost(token_id : Uint256, resource : felt) -> (level : felt):
-    end
-
     func get_resource_upgrade_value(resource : felt) -> (level : felt):
     end
 

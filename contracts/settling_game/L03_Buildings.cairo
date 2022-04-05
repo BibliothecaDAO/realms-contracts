@@ -11,7 +11,7 @@ from starkware.cairo.common.uint256 import Uint256, uint256_eq
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.game_structs import (
     RealmBuildings, RealmData, RealmBuildingCostIds, RealmBuildingCostValues, RealmBuildingsIds,
-    ModuleIds)
+    ModuleIds, ExternalContractIds)
 
 from contracts.settling_game.utils.constants import (
     SHIFT_6_1, SHIFT_6_2, SHIFT_6_3, SHIFT_6_4, SHIFT_6_5, SHIFT_6_6, SHIFT_6_7, SHIFT_6_8,
@@ -22,6 +22,7 @@ from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
 from contracts.settling_game.interfaces.imodules import IModuleController, IS03_Buildings
+from contracts.settling_game.interfaces.IStorage import IStorage
 
 from contracts.settling_game.utils.library import (
     MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
@@ -62,17 +63,20 @@ func build{
     let (controller) = MODULE_controller_address()
 
     # S_REALMS_ADDRESS
-    let (s_realms_address) = IModuleController.get_s_realms_address(contract_address=controller)
+    let (s_realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.S_Realms)
 
     # OWNER CHECK
     let (owner) = realms_IERC721.ownerOf(contract_address=s_realms_address, token_id=token_id)
     assert caller = owner
 
     # REALMS ADDRESS
-    let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
+    let (realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Realms)
 
     # RESOURCE ADDRESS
-    let (resource_address) = IModuleController.get_resources_address(contract_address=controller)
+    let (resource_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Resources)
 
     # REALMS DATA
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
@@ -123,7 +127,8 @@ func build_buildings{
     let (controller) = MODULE_controller_address()
 
     # REALMS ADDRESS
-    let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
+    let (realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Realms)
 
     # REALMS DATA
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
@@ -396,10 +401,10 @@ func fetch_building_cost_ids{
     let (controller) = MODULE_controller_address()
 
     # state contract
-    let (buildings_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.S03_Buildings)
+    let (storage_db_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Storage)
 
-    let (data) = IS03_Buildings.get_building_cost_ids(buildings_state_address, building_id)
+    let (data) = IStorage.get_building_cost_ids(storage_db_address, building_id)
 
     let (resource_1) = unpack_data(data, 0, 255)
     let (resource_2) = unpack_data(data, 8, 255)
@@ -498,10 +503,10 @@ func fetch_building_cost_values{
     let (controller) = MODULE_controller_address()
 
     # state contract
-    let (buildings_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.S03_Buildings)
+    let (storage_db_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Storage)
 
-    let (data) = IS03_Buildings.get_building_cost_values(buildings_state_address, building_id)
+    let (data) = IStorage.get_building_cost_values(storage_db_address, building_id)
 
     let (resource_1_values) = unpack_data(data, 0, 4095)
     let (resource_2_values) = unpack_data(data, 12, 4095)

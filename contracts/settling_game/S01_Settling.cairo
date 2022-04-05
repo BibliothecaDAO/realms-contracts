@@ -93,20 +93,20 @@ func set_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
 end
 
 # TODO: CHECK IF NEEDED
-@external
-func set_approval{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-        success : felt):
-    MODULE_only_approved()
-    let (controller) = MODULE_controller_address()
+# @external
+# func set_approval{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+#         success : felt):
+#     MODULE_only_approved()
+#     let (controller) = MODULE_controller_address()
 
-    let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
-    let (settle_logic_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=1)
+# let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
+#     let (settle_logic_address) = IModuleController.get_module_address(
+#         contract_address=controller, module_id=1)
 
-    realms_IERC721.setApprovalForAll(realms_address, settle_logic_address, 1)
+# realms_IERC721.setApprovalForAll(realms_address, settle_logic_address, 1)
 
-    return (TRUE)
-end
+# return (TRUE)
+# end
 
 ###########
 # GETTERS #

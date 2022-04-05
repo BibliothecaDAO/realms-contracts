@@ -8,22 +8,21 @@ from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
-from contracts.settling_game.utils.game_structs import RealmData, ResourceUpgradeValues, ModuleIds
+from contracts.settling_game.utils.game_structs import (
+    RealmData, ResourceUpgradeValues, ModuleIds, ExternalContractIds)
 from contracts.settling_game.utils.general import scale, unpack_data
-
 from contracts.settling_game.utils.constants import (
     TRUE, FALSE, VAULT_LENGTH, DAY, VAULT_LENGTH_SECONDS, BASE_RESOURCES_PER_DAY,
     BASE_LORDS_PER_DAY)
+from contracts.settling_game.utils.library import (
+    MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
 
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
-
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
+from contracts.settling_game.interfaces.IStorage import IStorage
 from contracts.settling_game.interfaces.imodules import (
     IModuleController, IS02_Resources, IS01_Settling, IL04_Calculator, IS05_Wonders)
-
-from contracts.settling_game.utils.library import (
-    MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
 
 # ____MODULE_L02___RESOURCES_LOGIC
 
@@ -57,16 +56,20 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (controller) = MODULE_controller_address()
 
     # lords contract
-    let (lords_address) = IModuleController.get_lords_address(contract_address=controller)
+    let (lords_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Lords)
 
     # realms contract
-    let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
+    let (realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Realms)
 
     # sRealms contract
-    let (s_realms_address) = IModuleController.get_s_realms_address(contract_address=controller)
+    let (s_realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.S_Realms)
 
     # resource contract
-    let (resources_address) = IModuleController.get_resources_address(contract_address=controller)
+    let (resources_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Resources)
 
     # state contract
     let (resources_state_address) = IModuleController.get_module_address(
@@ -81,7 +84,8 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         contract_address=controller, module_id=ModuleIds.L04_Calculator)
 
     # treasury address
-    let (treasury_address) = IModuleController.get_treasury_address(contract_address=controller)
+    let (treasury_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Treasury)
 
     # wonder tax pool address
     let (wonders_state_address) = IModuleController.get_module_address(
@@ -268,10 +272,12 @@ func upgrade_resource{
     let (controller) = MODULE_controller_address()
 
     # resource contract
-    let (resource_address) = IModuleController.get_resources_address(contract_address=controller)
+    let (resource_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Resources)
 
     # sRealms contract
-    let (s_realms_address) = IModuleController.get_s_realms_address(contract_address=controller)
+    let (s_realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.S_Realms)
 
     # check owner of sRealm
     let (owner) = realms_IERC721.ownerOf(contract_address=s_realms_address, token_id=token_id)
@@ -327,10 +333,10 @@ func fetch_resource_upgrade_values{
     let (controller) = MODULE_controller_address()
 
     # STATE
-    let (resources_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.S02_Resources)
+    let (storage_db_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Storage)
 
-    let (data) = IS02_Resources.get_resource_upgrade_value(resources_state_address, resource_id)
+    let (data) = IStorage.get_resource_upgrade_value(storage_db_address, resource_id)
 
     let (resource_1) = unpack_data(data, 0, 255)
     let (resource_2) = unpack_data(data, 8, 255)

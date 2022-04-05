@@ -31,7 +31,7 @@ stake_time = 129600 * 7
 @pytest.mark.asyncio
 @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
 async def test_mint_realm(game_factory):
-    admin_account, treasury_account, starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state, s_realms, buildings_logic, buildings_state, calculator_logic = game_factory
+    admin_account, treasury_account, starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state, s_realms, buildings_logic, buildings_state, calculator_logic, storage = game_factory
 
     #################
     # VALUE SETTERS #
@@ -49,17 +49,17 @@ async def test_mint_realm(game_factory):
     # RESOURCES
     # SET VALUES (ids,cost) AT 1,2,3,4,5,10,10,10,10,10
     await signer.send_transaction(
-        account=admin_account, to=resources_state.contract_address, selector_name='set_resource_upgrade_value', calldata=[5, 47408855671140352459265]
+        account=admin_account, to=storage.contract_address, selector_name='set_resource_upgrade_value', calldata=[5, 47408855671140352459265]
     )
 
     # BUILDING 1 IDS 1,2,3,4,5
     await signer.send_transaction(
-        account=admin_account, to=buildings_state.contract_address, selector_name='set_building_cost_ids', calldata=[building_id, 21542142465]
+        account=admin_account, to=storage.contract_address, selector_name='set_building_cost_ids', calldata=[building_id, 21542142465]
     )
 
     # BUILDING 1 VALUES 10,10,10,10,10
     await signer.send_transaction(
-        account=admin_account, to=buildings_state.contract_address, selector_name='set_building_cost_values', calldata=[building_id, 2815437129687050]
+        account=admin_account, to=storage.contract_address, selector_name='set_building_cost_values', calldata=[building_id, 2815437129687050]
     )
 
     # REALM METADATA
