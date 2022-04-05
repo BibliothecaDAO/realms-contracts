@@ -9,7 +9,7 @@ from starkware.starknet.common.syscalls import get_caller_address, get_block_tim
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.general import scale
-from contracts.settling_game.utils.game_structs import ModuleIds
+from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
 from contracts.settling_game.utils.constants import TRUE, FALSE
 
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
@@ -60,8 +60,10 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     let (caller) = get_caller_address()
     let (controller) = MODULE_controller_address()
 
-    let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
-    let (s_realms_address) = IModuleController.get_s_realms_address(contract_address=controller)
+    let (realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Realms)
+    let (s_realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.S_Realms)
 
     let (settle_state_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.S01_Settling)
@@ -110,8 +112,12 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     let (controller) = MODULE_controller_address()
     let (block_timestamp) = get_block_timestamp()
 
-    let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
-    let (s_realms_address) = IModuleController.get_s_realms_address(contract_address=controller)
+    let (realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Realms)
+
+    let (s_realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.S_Realms)
+
     let (settle_state_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.S01_Settling)
 
@@ -121,7 +127,6 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     # BURN S_REALM
     s_realms_IERC721.burn(s_realms_address, token_id)
 
-    # TODO: TimeStamp - current Hardcoded
     # PASS 0 to set the current time
     IS01_Settling.set_time_staked(settle_state_address, token_id, 0)
     IS01_Settling.set_time_vault_staked(settle_state_address, token_id, 0)

@@ -445,7 +445,7 @@ async def game_factory(account_factory):
     treasury_account = accounts[1]
 
     set_block_timestamp(starknet.state, round(time.time()))
-
+    print('Lords...')
     # ERC Contracts
     lords = await starknet.deploy(
         source="contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo",
@@ -458,7 +458,7 @@ async def game_factory(account_factory):
             treasury_account.contract_address   # owner
         ]
     )
-
+    print('Realms...')
     realms = await starknet.deploy(
         source="contracts/settling_game/tokens/Realms_ERC721_Mintable.cairo",
         constructor_calldata=[
@@ -466,7 +466,7 @@ async def game_factory(account_factory):
             str_to_felt("Realms"),                 # ticker
             admin_account.contract_address,           # contract_owner
         ])
-
+    print('S_Realms...')
     s_realms = await starknet.deploy(
         source="contracts/settling_game/tokens/S_Realms_ERC721_Mintable.cairo",
         constructor_calldata=[
@@ -474,7 +474,7 @@ async def game_factory(account_factory):
             str_to_felt("SRealms"),                 # ticker
             admin_account.contract_address,           # contract_owner
         ])
-
+    print('Resources...')
     resources = await starknet.deploy(
         source="contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo",
         constructor_calldata=[
@@ -482,17 +482,23 @@ async def game_factory(account_factory):
             admin_account.contract_address
         ])
 
+    storage = await starknet.deploy(
+        source="contracts/settling_game/database/Storage.cairo",
+        constructor_calldata=[
+            admin_account.contract_address
+        ])
     # The Controller is the only unchangeable contract.
     # First deploy Arbiter.
     # Then send the Arbiter address during Controller deployment.
     # Then save the controller address in the Arbiter.
     # Then deploy Controller address during module deployments.
+    print('Game...')
     arbiter = await starknet.deploy(
         source="contracts/settling_game/Arbiter.cairo",
         constructor_calldata=[admin_account.contract_address])
     controller = await starknet.deploy(
         source="contracts/settling_game/ModuleController.cairo",
-        constructor_calldata=[arbiter.contract_address, lords.contract_address, resources.contract_address, realms.contract_address, treasury_account.contract_address, s_realms.contract_address])
+        constructor_calldata=[arbiter.contract_address, lords.contract_address, resources.contract_address, realms.contract_address, treasury_account.contract_address, s_realms.contract_address, storage.contract_address])
     await admin_key.send_transaction(
         account=admin_account,
         to=arbiter.contract_address,
@@ -541,4 +547,11 @@ async def game_factory(account_factory):
         calldata=[
             settling_logic.contract_address])
 
-    return admin_account, treasury_account, starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state, s_realms, buildings_logic, buildings_state, calculator_logic
+    await admin_key.send_transaction(
+        account=admin_account,
+        to=resources.contract_address,
+        selector_name='Set_module_access',
+        calldata=[
+            resources_logic.contract_address])
+
+    return admin_account, treasury_account, starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state, s_realms, buildings_logic, buildings_state, calculator_logic, storage

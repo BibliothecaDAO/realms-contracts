@@ -44,23 +44,42 @@ end
 ##########
 
 # MODULE WRITE ACCESS CHECK
-func MODULE_only_approved{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+func only_approved{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+        success : felt):
     let (caller) = get_caller_address()
     let (controller) = controller_address.read()
 
     # Pass this address on to the ModuleController
     # Will revert the transaction if not.
-    IModuleController.has_write_access(
+    let (success) = IModuleController.has_write_access(
         contract_address=controller, address_attempting_to_write=caller)
+    return (success)
+end
+
+func MODULE_only_approved{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    let (success) = only_approved()
+    assert_not_zero(success)
     return ()
 end
 
 # ARBITER WRITE ACCESS CHECK
-func MODULE_only_arbiter{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+func only_arbiter{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+        success : felt):
     alloc_locals
     let (controller) = controller_address.read()
     let (caller) = get_caller_address()
     let (current_arbiter) = IModuleController.get_arbiter(contract_address=controller)
-    assert caller = current_arbiter
+
+    if caller != current_arbiter:
+        return (0)
+    end
+
+    return (1)
+end
+
+func MODULE_only_arbiter{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    alloc_locals
+    let (success) = only_arbiter()
+    assert_not_zero(success)
     return ()
 end

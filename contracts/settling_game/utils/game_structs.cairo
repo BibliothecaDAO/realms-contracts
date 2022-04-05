@@ -9,13 +9,6 @@ namespace TraitsIds:
     const River = 4
 end
 
-struct RealmStatistics:
-    member defence : felt
-    member population : felt
-    member magic : felt
-    member food_supply : felt
-end
-
 struct RealmData:
     member regions : felt  #
     member cities : felt  #
@@ -33,17 +26,7 @@ struct RealmData:
     member order : felt  #
 end
 
-struct ResourceLevel:
-    member resource_1_level : felt  #
-    member resource_2_level : felt  #
-    member resource_3_level : felt  #
-    member resource_4_level : felt  #
-    member resource_5_level : felt  #
-    member resource_6_level : felt  #
-    member resource_7_level : felt  #
-end
-
-struct ResourceUpgradeIds:
+struct ResourceUpgradeValues:
     member resource_1 : felt
     member resource_2 : felt
     member resource_3 : felt
@@ -161,4 +144,13 @@ namespace ModuleIds:
     const L04_Calculator = 7
     const L05_Wonders = 8
     const S05_Wonders = 9
+end
+
+namespace ExternalContractIds:
+    const Lords = 1
+    const Realms = 2
+    const S_Realms = 3
+    const Resources = 4
+    const Treasury = 5
+    const Storage = 6
 end
