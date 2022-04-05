@@ -3,7 +3,7 @@ import json
 
 building_costs = [6, 6, 6, 6, 6, 6, 6, 6, 6]
 
-resource_ids = [1, 2, 3, 4, 5]
+resource_ids = [1, 4, 6]
 resource_values = [10, 10, 10, 10, 10]
 
 buildings = [

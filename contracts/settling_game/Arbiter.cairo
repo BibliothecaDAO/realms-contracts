@@ -8,7 +8,7 @@ from contracts.settling_game.interfaces.imodules import IModuleController
 
 from openzeppelin.access.ownable import (
     Ownable_initializer, Ownable_only_owner, Ownable_transfer_ownership)
-from openzeppelin.utils.constants import TRUE
+from openzeppelin.utils.constants import TRUE, FALSE
 
 # ____ARBITER___
 
@@ -38,11 +38,11 @@ end
 @external
 func set_address_of_controller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         contract_address : felt):
+    Ownable_only_owner()
     let (locked) = lock.read()
     # Locked starts as zero
     assert_not_zero(1 - locked)
     lock.write(1)
-    Ownable_only_owner()
 
     controller_address.write(contract_address)
     return ()

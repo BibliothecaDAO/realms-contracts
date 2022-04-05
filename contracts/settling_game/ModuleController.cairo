@@ -199,7 +199,7 @@ end
 func set_write_access{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         module_id_doing_writing : felt, module_id_being_written_to : felt):
     only_arbiter()
-    can_write_to.write(module_id_doing_writing, module_id_being_written_to, 1)
+    can_write_to.write(module_id_doing_writing, module_id_being_written_to, TRUE)
     return ()
 end
 
@@ -257,7 +257,7 @@ func has_write_access{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     let (local current_module_address) = address_of_module_id.read(module_id_being_written_to)
 
     if current_module_address != caller:
-        return (0)
+        return (FALSE)
     end
 
     # Get the module id of the contract that is trying to write.
@@ -266,16 +266,16 @@ func has_write_access{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     let (local active_address) = address_of_module_id.read(module_id_attempting_to_write)
 
     if active_address != address_attempting_to_write:
-        return (0)
+        return (FALSE)
     end
     # See if the module has permission.
     let (bool) = can_write_to.read(module_id_attempting_to_write, module_id_being_written_to)
 
-    if bool == 0:
-        return (0)
+    if bool == FALSE:
+        return (FALSE)
     end
 
-    return (1)
+    return (TRUE)
 end
 
 ############

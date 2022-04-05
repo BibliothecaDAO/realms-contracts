@@ -397,10 +397,7 @@ func calculate_resource_output{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     local l
     # CALC
     if level == 0:
-        assert l = BASE_RESOURCES_PER_DAY
-    else:
-        assert l = level * BASE_RESOURCES_PER_DAY
+        return (BASE_RESOURCES_PER_DAY)
     end
-
-    return (value=l)
+    return (level * BASE_RESOURCES_PER_DAY)
 end
