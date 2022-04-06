@@ -10,16 +10,28 @@ from starkware.cairo.common.pow import pow
 from starkware.cairo.common.uint256 import Uint256
 
 from contracts.settling_game.utils.game_structs import (
-    TroopId, TroopType, Troop, Squad, PackedSquad, RealmCombatData)
+    TroopId, TroopType, Troop, Squad, PackedSquad, RealmCombatData, TroopCost)
 from contracts.settling_game.library_combat import pack_squad
 
 # used when adding or removing squads to Realms
 const ATTACKING_SQUAD_SLOT = 1
 const DEFENDING_SQUAD_SLOT = 2
 
+#
+# storage
+#
+
 @storage_var
 func realm_combat_data(realm_id : Uint256) -> (combat_data : RealmCombatData):
 end
+
+@storage_var
+func troop_cost(troop_id : felt) -> (cost : TroopCost):
+end
+
+#
+# public
+#
 
 @view
 func get_realm_combat_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -33,6 +45,19 @@ func set_realm_combat_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
         realm_id : Uint256, combat_data : RealmCombatData):
     # TODO: auth checks! but how? this gets called from L06 after a combat
     realm_combat_data.write(realm_id, combat_data)
+    return ()
+end
+
+@view
+func get_troop_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(troop_id : felt) -> (cost : TroopCost):
+    let (cost) = troop_cost.read(troop_id)
+    return (cost)
+end
+
+@external
+func set_troop_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(troop_id : felt, cost : TroopCost):
+    # TODO: auth + range checks on the cost struct
+    troop_cost.write(troop_id, cost)
     return ()
 end
 
@@ -60,6 +85,12 @@ func update_squad_in_realm{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : 
         set_realm_combat_data(realm_id, new_realm_combat_data)
         return ()
     end
+end
+
+# TODO
+@external
+func assemble_squad_from_troops_in_realm{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}():
+    return ()
 end
 
 # TODO: stats shouldn't be hardcoded here, take them from a felt that's easy to update
@@ -205,6 +236,10 @@ func remove_troop_from_squad(troop_idx : felt, s : Squad) -> (updated : Squad):
 
     return (updated)
 end
+
+#
+# private
+#
 
 func squad_to_array(s : Squad) -> (a_len : felt, a : felt*):
     alloc_locals

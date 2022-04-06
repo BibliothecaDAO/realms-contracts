@@ -300,6 +300,12 @@ async def library_combat_tests(starknet) -> StarknetContract:
     return await starknet.deploy(contract_def=contract)
 
 
+@pytest.fixture(scope="module")
+async def utils_general_tests(starknet) -> StarknetContract:
+    contract = compile("tests/settling_game/utils/general_tests.cairo")
+    return await starknet.deploy(contract_def=contract)
+
+
 ###########################
 # DESIEGE specific fixtures
 ###########################

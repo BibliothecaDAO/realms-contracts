@@ -1,10 +1,10 @@
 %lang starknet
 
-from contracts.settling_game.utils.game_structs import Squad, Troop
+from contracts.settling_game.utils.game_structs import Squad, PackedSquad, SquadStats, Troop
 
 from contracts.settling_game.S06_Combat import (
     squad_to_array, troop_to_array, array_to_squad, array_to_troop, add_troop_to_squad,
-    find_first_free_troop_slot_in_squad, PackedSquad, Squad, SquadStats, Troop)
+    find_first_free_troop_slot_in_squad)
 
 @view
 func test_squad_to_array(s : Squad) -> (a_len : felt, a : felt*):

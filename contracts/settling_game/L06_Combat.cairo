@@ -1,17 +1,22 @@
 %lang starknet
 
-from starkware.cairo.common.cairo_builtins import HashBuiltin
+from starkware.cairo.common.alloc import alloc
+from starkware.cairo.common.cairo_builtins import BitwiseBuiltin, HashBuiltin
+from starkware.cairo.common.dict_access import DictAccess
 from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le, is_nn, is_nn_le
 from starkware.cairo.common.uint256 import Uint256
 from starkware.starknet.common.syscalls import get_block_timestamp, get_caller_address
 
+from contracts.token.ERC1155.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.imodules import IModuleController, IS06_Combat
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
-from contracts.settling_game.library_combat import compute_squad_stats, pack_squad, unpack_squad
+from contracts.settling_game.library_combat import (
+    compute_squad_stats, pack_squad, unpack_squad, sum_values_by_key)
 from contracts.settling_game.utils.game_structs import (
-    ModuleIds, RealmData, RealmCombatData, Troop, Squad, SquadStats, PackedSquad)
+    ModuleIds, RealmData, RealmCombatData, Troop, Squad, SquadStats, PackedSquad, TroopCost)
+from contracts.settling_game.utils.general import unpack_data
 from contracts.utils.constants import TRUE, FALSE
 
 # TODO: restructure this, because it will pull @external & @view funcs into this contract
@@ -103,7 +108,7 @@ func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
 
     let (controller) = controller_address.read()
     let (combat_state_address) = IModuleController.get_module_address(
-        controller, module_id=ModuleIds.S06_Combat)
+        controller, ModuleIds.S06_Combat)
     let (realm_combat_data : RealmCombatData) = IS06_Combat.get_realm_combat_data(
         combat_state_address, defending_realm_id)
 
@@ -133,6 +138,52 @@ func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     end
 
     return (TRUE)
+end
+
+@external
+func build_squad_from_troops_in_realm{
+        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
+        bitwise_ptr : BitwiseBuiltin*}(
+        realm_id : Uint256, slot : felt, troop_ids_len : felt, troop_ids : felt*):
+    alloc_locals
+
+    # TODO: auth
+
+    let (caller) = get_caller_address()
+    let (controller) = controller_address.read()
+    let (combat_state_address) = IModuleController.get_module_address(
+        controller, ModuleIds.S06_Combat)
+
+    # get the TroopCost for every Troop to build
+    let (troop_costs : TroopCost*) = alloc()
+    load_troop_costs(combat_state_address, troop_ids_len, troop_ids, 0, troop_costs)
+
+    # destructure the troop_costs array to two arrays, one
+    # holding the IDs of resources and the other one values of resources
+    # that are required to build the Troops
+    let (resource_ids : felt*) = alloc()
+    let (resource_values : felt*) = alloc()
+    let (resource_len : felt) = load_resource_ids_and_values_from_costs(
+        resource_ids, resource_values, troop_ids_len, troop_costs, 0)
+
+    # unify the resources and convert them to a list of Uint256, so that they can
+    # be used in a IERC1155 function call
+    let (d_len : felt, d : DictAccess*) = sum_values_by_key(
+        resource_len, resource_ids, resource_values)
+    let (token_ids : Uint256*) = alloc()
+    let (token_values : Uint256*) = alloc()
+    convert_cost_resources_to_unique_tokens(d_len, d, token_ids, token_values)
+
+    # pay for the squad
+    IERC1155.burn_batch(resource_address, caller, d_len, token_ids, d_len, token_values)
+
+    # assemble the squad
+    # TODO:
+    IS06_Combat.assemble_squad_from_troops_in_realm(combat_state_address)
+
+    # TODO: emit an event?
+
+    return ()
 end
 
 @external
@@ -384,4 +435,98 @@ func hit_troop{range_check_ptr}(t : Troop, hits : felt) -> (
         )
         return (ht, 0)
     end
+end
+
+func load_troop_costs{syscall_ptr : felt*, range_check_ptr}(
+        state_module_address : felt, troop_ids_len : felt, troop_ids : felt*, costs_len : felt,
+        costs : TroopCost*):
+    alloc_locals
+
+    if troop_ids_len == 0:
+        return ()
+    end
+
+    # TODO: make the function accept and return an array so we don't have to do
+    #       cross-contract calls in a loop
+    let (cost : TroopCost) = IS06_Combat.get_troop_cost(state_module_address, [troop_ids])
+    assert [costs + costs_len] = cost
+
+    return load_troop_costs(
+        state_module_address, troop_ids_len - 1, troop_ids + 1, costs_len + 1, costs)
+end
+
+# temporary, only for testing
+# @view
+# func foo{range_check_ptr, bitwise_ptr : BitwiseBuiltin*}(costs_len : felt, costs : TroopCost*) -> (
+#         res_len : felt, res : Uint256*, vals_len : felt, vals : Uint256*):
+#     alloc_locals
+#     let (resource_ids : felt*) = alloc()
+#     let (resource_values : felt*) = alloc()
+#     let (resource_len : felt) = load_resource_ids_and_values_from_costs(
+#         resource_ids, resource_values, costs_len, costs, 0)
+#     let (d_len : felt, d : DictAccess*) = sum_values_by_key(
+#         resource_len, resource_ids, resource_values)
+#     let (token_ids : Uint256*) = alloc()
+#     let (token_values : Uint256*) = alloc()
+#     convert_cost_resources_to_unique_tokens(d_len, d, token_ids, token_values)
+#     return (6, token_ids, 6, token_values)
+# end
+
+# this func has a side-effect of populating the ids and values arrays
+# and it returns the total number of resources as `sum([c.resource_count for c in costs])`
+# which is also the length of the ids and values arrays
+func load_resource_ids_and_values_from_costs{range_check_ptr, bitwise_ptr : BitwiseBuiltin*}(
+        ids : felt*, values : felt*, costs_len : felt, costs : TroopCost*,
+        cummulative_resource_count : felt) -> (total_resource_count : felt):
+    alloc_locals
+
+    if costs_len == 0:
+        return (cummulative_resource_count)
+    end
+
+    let current_cost : TroopCost = [costs]
+    load_single_cost_ids_and_values(current_cost, 0, ids, values)
+
+    return load_resource_ids_and_values_from_costs(
+        ids + current_cost.resource_count,
+        values + current_cost.resource_count,
+        costs_len - 1,
+        costs + TroopCost.SIZE,
+        cummulative_resource_count + current_cost.resource_count)
+end
+
+# TODO: better naming
+func load_single_cost_ids_and_values{range_check_ptr, bitwise_ptr : BitwiseBuiltin*}(
+        cost : TroopCost, idx : felt, ids : felt*, values : felt*):
+    alloc_locals
+
+    if idx == cost.resource_count:
+        return ()
+    end
+
+    # TODO: naming of variables (even in the cost struct) could be better, suggestions?
+    let (token_id) = unpack_data(cost.token_ids, 8 * idx, 255)
+    let (value) = unpack_data(cost.resource_amounts, 8 * idx, 255)
+    assert [ids + idx] = token_id
+    assert [values + idx] = value
+
+    return load_single_cost_ids_and_values(cost, idx + 1, ids, values)
+end
+
+# TODO: better naming
+func convert_cost_resources_to_unique_tokens{range_check_ptr}(
+        len : felt, d : DictAccess*, token_ids : Uint256*, token_values : Uint256*):
+    alloc_locals
+
+    if len == 0:
+        return ()
+    end
+
+    let current_entry : DictAccess = [d]
+    # assuming we will never have token IDs and values with numbers >= 2**128
+    assert [token_ids] = Uint256(low=current_entry.key, high=0)
+    assert [token_values] = Uint256(low=current_entry.new_value, high=0)
+
+    return convert_cost_resources_to_unique_tokens(
+        len - 1, d + DictAccess.SIZE, token_ids + Uint256.SIZE, token_values + Uint256.SIZE)
 end

@@ -1,4 +1,5 @@
 from collections import namedtuple
+from enum import IntEnum
 import functools
 import math
 import operator
@@ -6,6 +7,52 @@ import struct
 
 import pytest
 from starkware.starkware_utils.error_handling import StarkException
+
+# TODO: create a file like game_structs.cairo but for use in python tests
+
+
+class ResourceIds(IntEnum):
+    Wood = 1
+    Stone = 2
+    Coal = 3
+    Copper = 4
+    Obsidian = 5
+    Silver = 6
+    Ironwood = 7
+    ColdIron = 8
+    Gold = 9
+    Hartwood = 10
+    Diamonds = 11
+    Sapphire = 12
+    Ruby = 13
+    DeepCrystal = 14
+    Ignium = 15
+    EtherealSilica = 16
+    TrueIce = 17
+    TwilightQuartz = 18
+    AlchemicalSilver = 19
+    Adamantine = 20
+    Mithral = 21
+    Dragonhide = 22
+
+
+class TroopId(IntEnum):
+    Watchman = 1
+    Guard = 2
+    GuardCaptain = 3
+    Squire = 4
+    Knight = 5
+    KnightCommander = 6
+    Scout = 7
+    Archer = 8
+    Sniper = 9
+    Scorpio = 10
+    Ballista = 11
+    Catapult = 12
+    Apprentice = 13
+    Mage = 14
+    Arcanist = 15
+    GrandMarshal = 16
 
 
 Troop = namedtuple('Troop', 'type tier agility attack defense vitality wisdom')
@@ -15,6 +62,7 @@ Squad = namedtuple(
     + 't2_1 t2_2 t2_3 t2_4 t2_5 t2_6 t2_7 t2_8 t3_1',
 )
 PackedSquad = namedtuple('PackedSquad', 'p1 p2 p3 p4 p5 p6 p7')
+TroopCost = namedtuple('TroopCost', 'resource_count token_ids resource_amounts')
 
 EMPTY_TROOP = Troop(0, 0, 0, 0, 0, 0, 0)
 WATCHMAN = Troop(1, 1, 1, 1, 3, 4, 1)
@@ -51,6 +99,94 @@ TROOPS = [
     ARCANIST,
     GRAND_MARSHAL,
 ]
+
+
+def pack_values(values: list[int]) -> int:
+    return int.from_bytes(struct.pack(f"<{len(values)}b", *values), "little")
+
+
+TROOP_COSTS = {
+    # TODO: fill in all troops
+    TroopId.Watchman: TroopCost(
+        3,
+        pack_values([ResourceIds.Wood, ResourceIds.Copper, ResourceIds.Silver]),
+        pack_values([100, 90, 80]),
+    ),
+    TroopId.Guard: TroopCost(
+        5,
+        pack_values(
+            [
+                ResourceIds.Wood,
+                ResourceIds.Silver,
+                ResourceIds.Ironwood,
+                ResourceIds.ColdIron,
+                ResourceIds.Gold,
+            ]
+        ),
+        pack_values([60, 50, 60, 50, 50]),
+    ),
+    TroopId.GuardCaptain: TroopCost(
+        4,
+        pack_values(
+            [ResourceIds.Wood, ResourceIds.Gold, ResourceIds.Hartwood, ResourceIds.Adamantine]
+        ),
+        pack_values([30, 70, 80, 10]),
+    ),
+    TroopId.Squire: TroopCost(
+        3,
+        pack_values([ResourceIds.Wood, ResourceIds.Copper, ResourceIds.Silver]),
+        pack_values([100, 90, 80]),
+    ),
+    TroopId.Knight: TroopCost(
+        5,
+        pack_values(
+            [
+                ResourceIds.Wood,
+                ResourceIds.Silver,
+                ResourceIds.Ironwood,
+                ResourceIds.ColdIron,
+                ResourceIds.Gold,
+            ]
+        ),
+        pack_values([60, 50, 60, 50, 50]),
+    ),
+    TroopId.KnightCommander: TroopCost(
+        9,
+        pack_values(
+            [
+                ResourceIds.Wood,
+                ResourceIds.Gold,
+                ResourceIds.Hartwood,
+                ResourceIds.Ruby,
+                ResourceIds.DeepCrystal,
+                ResourceIds.Ignium,
+                ResourceIds.TrueIce,
+                ResourceIds.Adamantine,
+                ResourceIds.Dragonhide,
+            ]
+        ),
+        pack_values([30, 70, 80, 2, 20, 20, 20, 10, 1]),
+    ),
+    TroopId.Scout: TroopCost(
+        3,
+        pack_values([ResourceIds.Wood, ResourceIds.Copper, ResourceIds.Silver]),
+        pack_values([100, 90, 80]),
+    ),
+    TroopId.Archer: TroopCost(
+        6,
+        pack_values(
+            [
+                ResourceIds.Wood,
+                ResourceIds.Silver,
+                ResourceIds.Ironwood,
+                ResourceIds.ColdIron,
+                ResourceIds.Gold,
+                ResourceIds.Mithral,
+            ]
+        ),
+        pack_values([60, 50, 60, 50, 50, 1]),
+    ),
+}
 
 
 def build_default_squad() -> Squad:
@@ -112,7 +248,7 @@ def pack_squad(squad: Squad) -> PackedSquad:
 
 
 def pack_troop(troop: Troop) -> int:
-    return int.from_bytes(struct.pack('<7b', *troop), 'little')
+    return int.from_bytes(struct.pack("<7b", *troop), "little")
 
 
 @pytest.mark.asyncio
@@ -373,3 +509,18 @@ async def test_update_squad_in_realm(s06_combat):
     tx = await s06_combat.get_realm_combat_data(realm_id).invoke()
     assert tx.result.combat_data.attacking_squad == packed_default_squad
     assert tx.result.combat_data.defending_squad == packed_default_squad
+
+
+@pytest.mark.asyncio
+async def test_get_set_troop_cost(s06_combat_tests):
+    for troop_id, troop_cost in TROOP_COSTS.items():
+        await s06_combat_tests.set_troop_cost(troop_id, troop_cost).invoke()
+        tx = await s06_combat_tests.get_troop_cost(troop_id).invoke()
+        assert tx.result.cost == troop_cost
+
+
+# @pytest.mark.asyncio
+# async def test_foo(l06_combat):
+#     calldata = [TROOP_COSTS[TroopId.Watchman], TROOP_COSTS[TroopId.Watchman], TROOP_COSTS[TroopId.GuardCaptain]]
+#     tx = await l06_combat.foo(calldata).invoke()
+#     print(tx)

@@ -157,6 +157,35 @@ namespace ExternalContractIds:
     const Storage = 6
 end
 
+namespace ResourceIds:
+    const Wood = 1
+    const Stone = 2
+    const Coal = 3
+    const Cooper = 4
+    const Obsidian = 5
+    const Silver = 6
+    const Ironwood = 7
+    const ColdIron = 8
+    const Gold = 9
+    const Hartwood = 10
+    const Diamonds = 11
+    const Sapphire = 12
+    const Ruby = 13
+    const DeepCrystal = 14
+    const Ignium = 15
+    const EtherealSilica = 16
+    const TrueIce = 17
+    const TwilightQuartz = 18
+    const AlchemicalSilver = 19
+    const Adamantine = 20
+    const Mithral = 21
+    const Dragonhide = 22
+    # IMPORTANT: if you're adding to this enum
+    # make sure the SIZE is one greater than the
+    # maximal value; certain algorithms depend on that
+    const SIZE = 23
+end
+
 namespace TroopId:
     const Watchman = 1
     const Guard = 2
@@ -255,4 +284,14 @@ struct RealmCombatData:
     member attacking_squad : PackedSquad
     member defending_squad : PackedSquad
     member last_attacked_at : felt
+end
+
+# struct holding how much resources does it cost to build a Troop
+struct TroopCost:
+    # in total, how many unique resources does a troop cost
+    member resource_count : felt
+    # packed IDs of the necessary resources
+    member token_ids : felt
+    # packed amounts of each resource
+    member resource_amounts : felt
 end
