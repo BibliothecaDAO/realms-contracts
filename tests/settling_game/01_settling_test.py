@@ -40,30 +40,30 @@ async def test_mint_realm(game_factory):
     # VALUE SETTERS #
     #################
 
-    # await signer.send_transaction(
-    #     account=admin_account, to=resources.contract_address, selector_name='mintBatch', calldata=[admin_account.contract_address, 5, *uint(1), *uint(2), *uint(3), *uint(4), *uint(5), 5, *uint(100), *uint(100), *uint(100), *uint(100), *uint(100)]
-    # )
+    await signer.send_transaction(
+        account=admin_account, to=resources.contract_address, selector_name='mintBatch', calldata=[admin_account.contract_address, 5, *uint(1), *uint(2), *uint(3), *uint(4), *uint(5), 5, *uint(100), *uint(100), *uint(100), *uint(100), *uint(100)]
+    )
 
     # # APPROVE RESOURCE CONTRACT FOR LORDS TRANSFERS - SET AT FULL SUPPLY TODO: NEEDS MORE SECURE SYSTEM
     await signers[1].send_transaction(
         account=treasury_account, to=lords.contract_address, selector_name='approve', calldata=[resources_logic.contract_address, *uint(initial_supply)]
     )
 
-    # # RESOURCES
-    # # SET VALUES (ids,cost) AT 1,2,3,4,5,10,10,10,10,10
-    # await signer.send_transaction(
-    #     account=admin_account, to=storage.contract_address, selector_name='set_resource_upgrade_value', calldata=[5, 47408855671140352459265]
-    # )
+    # RESOURCES
+    # SET VALUES (ids,cost) AT 1,2,3,4,5,10,10,10,10,10
+    await signer.send_transaction(
+        account=admin_account, to=storage.contract_address, selector_name='set_resource_upgrade_value', calldata=[5, 47408855671140352459265]
+    )
 
-    # # BUILDING 1 IDS 1,2,3,4,5
-    # await signer.send_transaction(
-    #     account=admin_account, to=storage.contract_address, selector_name='set_building_cost_ids', calldata=[building_id, 21542142465]
-    # )
+    # BUILDING 1 IDS 1,2,3,4,5
+    await signer.send_transaction(
+        account=admin_account, to=storage.contract_address, selector_name='set_building_cost_ids', calldata=[building_id, 21542142465]
+    )
 
-    # # BUILDING 1 VALUES 10,10,10,10,10
-    # await signer.send_transaction(
-    #     account=admin_account, to=storage.contract_address, selector_name='set_building_cost_values', calldata=[building_id, 2815437129687050]
-    # )
+    # BUILDING 1 VALUES 10,10,10,10,10
+    await signer.send_transaction(
+        account=admin_account, to=storage.contract_address, selector_name='set_building_cost_values', calldata=[building_id, 2815437129687050]
+    )
 
     # REALM METADATA
 
@@ -113,17 +113,17 @@ async def test_mint_realm(game_factory):
     # 😊 STATS #
     ############
 
-    # happiness = await calculator_logic.calculateHappiness(first_token_id).invoke()
-    # assert happiness.result.happiness == 25
-    # print(f'\033[1;31;40m😊 Happiness level is {happiness.result.happiness}\n')
+    happiness = await calculator_logic.calculateHappiness(first_token_id).invoke()
+    assert happiness.result.happiness == 25
+    print(f'\033[1;31;40m😊 Happiness level is {happiness.result.happiness}\n')
 
-    # culture = await calculator_logic.calculateCulture(first_token_id).invoke()
-    # assert culture.result.culture == 25
-    # print(f'\033[1;31;40m😊 Culture level is {culture.result.culture}\n')
+    culture = await calculator_logic.calculateCulture(first_token_id).invoke()
+    assert culture.result.culture == 25
+    print(f'\033[1;31;40m😊 Culture level is {culture.result.culture}\n')
 
-    # tax_percentage_info = await calculator_logic.calculate_wonder_tax().call()
-    # print(
-    #     f'\033[1;31;40m😊 Wonder Tax {tax_percentage_info.result.tax_percentage}\n')
+    tax_percentage_info = await calculator_logic.calculate_wonder_tax().call()
+    print(
+        f'\033[1;31;40m😊 Wonder Tax {tax_percentage_info.result.tax_percentage}\n')
 
     #####################
     # RESOURCES & LORDS #
@@ -137,12 +137,12 @@ async def test_mint_realm(game_factory):
     await show_lords_balance(admin_account, lords)
 
     # # UPGRADE RESOURCE
-    # print(
-    #     f'\n \033[1;33;40m🔥 Upgrading Resource.... 🔥\n')
+    print(
+        f'\n \033[1;33;40m🔥 Upgrading Resource.... 🔥\n')
 
-    # await signer.send_transaction(
-    #     account=admin_account, to=resources_logic.contract_address, selector_name='upgrade_resource', calldata=[*first_token_id, 5]
-    # )
+    await signer.send_transaction(
+        account=admin_account, to=resources_logic.contract_address, selector_name='upgrade_resource', calldata=[*first_token_id, 5]
+    )
 
     await show_resource_balance(admin_account, resources)
 
@@ -153,22 +153,22 @@ async def test_mint_realm(game_factory):
     # BUILDINGS #
     #############
 
-    # ids = await buildings_logic.fetch_building_cost_ids(building_id).call()
-    # values = await buildings_logic.fetch_building_cost_values(building_id).call()
+    ids = await buildings_logic.fetch_building_cost_ids(building_id).call()
+    values = await buildings_logic.fetch_building_cost_values(building_id).call()
 
-    # print(
-    #     f'Building {building_id} Cost IDS: {ids.result[0]}')
-    # print(
-    #     f'Building {building_id} Cost Values: {values.result[0]}')
+    print(
+        f'Building {building_id} Cost IDS: {ids.result[0]}')
+    print(
+        f'Building {building_id} Cost Values: {values.result[0]}')
 
-    # # create building
-    # await signer.send_transaction(
-    #     account=admin_account, to=buildings_logic.contract_address, selector_name='build', calldata=[*first_token_id, building_id])
+    # create building
+    await signer.send_transaction(
+        account=admin_account, to=buildings_logic.contract_address, selector_name='build', calldata=[*first_token_id, building_id])
 
-    # values = await buildings_logic.fetch_buildings_by_type(first_token_id).call()
+    values = await buildings_logic.fetch_buildings_by_type(first_token_id).call()
 
-    # print(
-    #     f'Realm {first_token_id} buildings: {values.result.realm_buildings}')
+    print(
+        f'Realm {first_token_id} buildings: {values.result.realm_buildings}')
 
     ##################
     # UNSETTLE REALM #
@@ -178,7 +178,7 @@ async def test_mint_realm(game_factory):
         account=admin_account, to=settling_logic.contract_address, selector_name='unsettle', calldata=[*first_token_id]
     )
     await show_resource_balance(admin_account, resources)
-    await checks_realms_balance(admin_account, realms, 1)
+    await checks_realms_balance(admin_account, realms, 2)
 
 #########
 # CALLS #
