@@ -71,6 +71,14 @@ namespace IS02_Resources:
 end
 
 @contract_interface
+namespace IL02_Resources:
+    func check_if_claimable(token_id : Uint256) -> (can_claim : felt):
+    end
+    func claim_resources(token_id : Uint256):
+    end
+end
+
+@contract_interface
 namespace IS03_Buildings:
     func get_building_cost_ids(building_id : felt) -> (cost : felt):
     end

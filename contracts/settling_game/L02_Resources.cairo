@@ -247,16 +247,36 @@ func get_available_vault_resources{
 
     let (last_update) = IS01_Settling.get_time_vault_staked(settling_state_address, token_id)
 
+    # calc days remaining
     let (days_accrued, seconds_left_over) = unsigned_div_rem(block_timestamp - last_update, DAY)
 
-    let (yes) = is_le(days_accrued, VAULT_LENGTH_SECONDS)
+    # returns true if days <= vault_length -1 (we minus 1 so the user can claim when they have 7 days)
+    let (less_than) = is_le(days_accrued, VAULT_LENGTH - 1)
 
-    # TODO: only if time is above 7 days can you claim
-    if yes == 1:
-        return (days_accrued, seconds_left_over)
+    # return no days and no remainder
+    if less_than == TRUE:
+        return (0, 0)
     end
 
-    return (0, seconds_left_over)
+    # else return days and remainder
+    return (days_accrued, seconds_left_over)
+end
+
+@view
+func check_if_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        token_id : Uint256) -> (can_claim : felt):
+    alloc_locals
+    let (days, _) = get_available_resources(token_id)
+    let (epochs, _) = get_available_vault_resources(token_id)
+
+    # add in 1 to allow user to claim 1 day if available
+    let (less_than) = is_le(days + epochs + 1, 1)
+
+    if less_than == TRUE:
+        return (FALSE)
+    end
+
+    return (TRUE)
 end
 
 ############

@@ -25,7 +25,12 @@ wonder_token_id = uint(839)
 building_id = 1
 
 # 1.5 * 7 Days
-stake_time = 129600 * 7
+DAYS = 86400
+STAKED_DAYS = 7
+
+LORDS_RATE = 25
+RESOURCES = 100
+stake_time = DAYS * STAKED_DAYS
 
 
 @pytest.mark.asyncio
@@ -118,7 +123,7 @@ async def test_mint_realm(game_factory):
     player_lords_value = await lords.balanceOf(admin_account.contract_address).invoke()
     print(
         f'\n \033[1;33;40m$LORDS {player_lords_value.result.balance[0]}\n')
-    assert player_lords_value.result.balance[0] == 250
+    assert player_lords_value.result.balance[0] == LORDS_RATE * STAKED_DAYS
 
     # UPGRADE RESOURCE
     print(
