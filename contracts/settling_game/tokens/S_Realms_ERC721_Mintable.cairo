@@ -2,7 +2,7 @@
 # OpenZeppelin Cairo Contracts v0.1.0 (token/erc721/ERC721_Mintable_Burnable.cairo)
 
 %lang starknet
-
+from starkware.cairo.common.math import assert_not_zero
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
 from starkware.cairo.common.uint256 import Uint256
 from starkware.starknet.common.syscalls import get_caller_address
@@ -15,7 +15,7 @@ from openzeppelin.token.erc721.library import (
 
 from openzeppelin.introspection.ERC165 import ERC165_supports_interface
 
-from openzeppelin.access.ownable import Ownable_initializer, Ownable_only_owner
+from openzeppelin.access.ownable import Ownable_initializer, Ownable_only_owner, Ownable_get_owner
 
 #
 # Constructor
@@ -130,14 +130,14 @@ end
 @external
 func mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
         to : felt, tokenId : Uint256):
-    _check_module_access()
+    check_can_action()
     ERC721_mint(to, tokenId)
     return ()
 end
 
 @external
 func burn{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(tokenId : Uint256):
-    ERC721_only_token_owner(tokenId)
+    check_can_action()
     ERC721_burn(tokenId)
     return ()
 end
@@ -159,11 +159,35 @@ func Set_module_access{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_c
 end
 
 # ONLY ALLOWS MODULE TO MINT S_REALM
-func _check_module_access{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}():
+
+func check_caller{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}() -> (
+        value : felt):
     let (address) = Module_access.read()
     let (caller) = get_caller_address()
 
-    assert address = caller
+    if address == caller:
+        return (1)
+    end
 
+    return (0)
+end
+
+func check_owner{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}() -> (
+        value : felt):
+    let (caller) = get_caller_address()
+    let (owner) = Ownable_get_owner()
+
+    if caller == owner:
+        return (1)
+    end
+
+    return (0)
+end
+
+func check_can_action{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}():
+    let (caller) = check_caller()
+    let (owner) = check_owner()
+
+    assert_not_zero(owner + caller)
     return ()
 end

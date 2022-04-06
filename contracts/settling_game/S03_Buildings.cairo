@@ -17,14 +17,6 @@ from contracts.settling_game.utils.library import (
 ###########
 
 @storage_var
-func building_cost_ids(building_id : felt) -> (cost_ids : felt):
-end
-
-@storage_var
-func building_cost_values(building_id : felt) -> (cost_values : felt):
-end
-
-@storage_var
 func realm_buildings(token_id : Uint256) -> (buildings : felt):
 end
 
@@ -45,24 +37,6 @@ end
 ###########
 
 @external
-func set_building_cost_ids{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        building_id : felt, cost : felt) -> (success : felt):
-    # TODO: ONLY ALLOW OWNER
-    building_cost_ids.write(building_id, cost)
-
-    return (TRUE)
-end
-
-@external
-func set_building_cost_values{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        building_id : felt, cost : felt) -> (success : felt):
-    # TODO: ONLY ALLOW OWNER
-    building_cost_values.write(building_id, cost)
-
-    return (TRUE)
-end
-
-@external
 func set_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256, buildings_value : felt):
     MODULE_only_approved()
@@ -74,24 +48,6 @@ end
 ###########
 # GETTERS #
 ###########
-
-# GETS BUILDING COST IDS
-@view
-func get_building_cost_ids{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        building_id : felt) -> (cost : felt):
-    let (ids) = building_cost_ids.read(building_id)
-
-    return (cost=ids)
-end
-
-# GETS BUILDING COSTS VALUES
-@view
-func get_building_cost_values{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        building_id : felt) -> (cost : felt):
-    let (cost) = building_cost_values.read(building_id)
-
-    return (cost=cost)
-end
 
 # GETS REALM BUILDS
 @view

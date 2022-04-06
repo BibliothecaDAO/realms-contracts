@@ -3,7 +3,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_not_zero
 from starkware.starknet.common.syscalls import get_caller_address
-from contracts.settling_game.utils.game_structs import ModuleIds
+from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
 from starkware.starknet.common.syscalls import get_block_timestamp
 from contracts.settling_game.utils.constants import TRUE, FALSE
 
@@ -49,25 +49,9 @@ end
 func can_write_to(doing_writing : felt, being_written_to : felt) -> (bool : felt):
 end
 
-# Contract addresses
+# NON Module Address Lookup table
 @storage_var
-func lords_address() -> (address : felt):
-end
-
-@storage_var
-func resources_address() -> (address : felt):
-end
-
-@storage_var
-func realms_address() -> (address : felt):
-end
-
-@storage_var
-func treasury_address() -> (address : felt):
-end
-
-@storage_var
-func s_realms_address() -> (address : felt):
+func external_contract_table(external_contract_id : felt) -> (address : felt):
 end
 
 @storage_var
@@ -81,7 +65,8 @@ end
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         arbiter_address : felt, _lords_address : felt, _resources_address : felt,
-        _realms_address : felt, _treasury_address : felt, _s_realms_address : felt):
+        _realms_address : felt, _treasury_address : felt, _s_realms_address : felt,
+        _storage_address : felt):
     arbiter.write(arbiter_address)
 
     # set genesis
@@ -111,19 +96,31 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     # wonders logic to state
     can_write_to.write(ModuleIds.L05_Wonders, ModuleIds.S05_Wonders, TRUE)
 
-    # Contracts
-    # TODO: Move to namespaces for easy upgradablity
-    lords_address.write(_lords_address)
-    resources_address.write(_resources_address)
-    realms_address.write(_realms_address)
-    treasury_address.write(_treasury_address)
-    s_realms_address.write(_s_realms_address)
+    # Lookup table for NON module contracts
+    external_contract_table.write(ExternalContractIds.Lords, _lords_address)
+    external_contract_table.write(ExternalContractIds.Realms, _realms_address)
+    external_contract_table.write(ExternalContractIds.S_Realms, _s_realms_address)
+    external_contract_table.write(ExternalContractIds.Resources, _resources_address)
+    external_contract_table.write(ExternalContractIds.Treasury, _treasury_address)
+    external_contract_table.write(ExternalContractIds.Storage, _storage_address)
+
     return ()
 end
 
 ############
 # EXTERNAL #
 ############
+
+# Called by the Arbiter to set new address mappings.
+@external
+func set_address_for_external_contract{
+        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        external_contract_id : felt, contract_address : felt):
+    only_arbiter()
+    external_contract_table.write(external_contract_id, contract_address)
+
+    return ()
+end
 
 # Called by the current Arbiter to replace itself.
 @external
@@ -202,7 +199,7 @@ end
 func set_write_access{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         module_id_doing_writing : felt, module_id_being_written_to : felt):
     only_arbiter()
-    can_write_to.write(module_id_doing_writing, module_id_being_written_to, 1)
+    can_write_to.write(module_id_doing_writing, module_id_being_written_to, TRUE)
     return ()
 end
 
@@ -218,37 +215,10 @@ func get_module_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
 end
 
 @view
-func get_lords_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-        address : felt):
-    let (address) = lords_address.read()
-    return (address)
-end
-
-@view
-func get_realms_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-        address : felt):
-    let (address) = realms_address.read()
-    return (address)
-end
-
-@view
-func get_resources_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-        address : felt):
-    let (address) = resources_address.read()
-    return (address)
-end
-
-@view
-func get_treasury_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-        address : felt):
-    let (address) = treasury_address.read()
-    return (address)
-end
-
-@view
-func get_s_realms_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-        address : felt):
-    let (address) = s_realms_address.read()
+func get_external_contract_address{
+        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        external_contract_id : felt) -> (address : felt):
+    let (address) = external_contract_table.read(external_contract_id)
     return (address)
 end
 
@@ -272,7 +242,7 @@ end
 
 @view
 func has_write_access{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        address_attempting_to_write : felt):
+        address_attempting_to_write : felt) -> (success : felt):
     alloc_locals
 
     # Approves the write-permissions between two modules, ensuring
@@ -285,18 +255,27 @@ func has_write_access{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
 
     # Make sure the module has not been replaced.
     let (local current_module_address) = address_of_module_id.read(module_id_being_written_to)
-    assert current_module_address = caller
+
+    if current_module_address != caller:
+        return (FALSE)
+    end
 
     # Get the module id of the contract that is trying to write.
     let (module_id_attempting_to_write) = module_id_of_address.read(address_attempting_to_write)
     # Make sure that module has not been replaced.
     let (local active_address) = address_of_module_id.read(module_id_attempting_to_write)
-    assert active_address = address_attempting_to_write
 
+    if active_address != address_attempting_to_write:
+        return (FALSE)
+    end
     # See if the module has permission.
     let (bool) = can_write_to.read(module_id_attempting_to_write, module_id_being_written_to)
-    assert_not_zero(bool)
-    return ()
+
+    if bool == FALSE:
+        return (FALSE)
+    end
+
+    return (TRUE)
 end
 
 ############
