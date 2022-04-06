@@ -5,22 +5,19 @@ from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem, assert_n
 from starkware.cairo.common.math_cmp import is_nn_le
 from starkware.cairo.common.hash_state import hash_init, hash_update, HashState
 from starkware.cairo.common.alloc import alloc
-from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
+from starkware.starknet.common.syscalls import (
+    get_caller_address, get_block_timestamp, get_contract_address)
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
-from contracts.settling_game.utils.general import scale
-from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
+from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds, RealmData
 from contracts.settling_game.utils.constants import TRUE, FALSE
+from contracts.settling_game.utils.library import (
+    MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
 
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
 from contracts.settling_game.interfaces.imodules import (
     IModuleController, IS01_Settling, IL05_Wonders, IL02_Resources)
-
-from contracts.settling_game.utils.game_structs import RealmData
-
-from contracts.settling_game.utils.library import (
-    MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
 
 # ____MODULE_L01___SETTLING_LOGIC
 
@@ -59,6 +56,7 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     alloc_locals
     let (caller) = get_caller_address()
     let (controller) = MODULE_controller_address()
+    let (contract_address) = get_contract_address()
 
     let (realms_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Realms)
@@ -66,10 +64,10 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         controller, ExternalContractIds.S_Realms)
 
     let (settle_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.S01_Settling)
+        controller, ModuleIds.S01_Settling)
 
     # TRANSFER REALM
-    realms_IERC721.transferFrom(realms_address, caller, settle_state_address, token_id)
+    realms_IERC721.transferFrom(realms_address, caller, contract_address, token_id)
 
     # MINT S_REALM
     s_realms_IERC721.mint(s_realms_address, caller, token_id)
@@ -90,6 +88,7 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     alloc_locals
     let (caller) = get_caller_address()
     let (controller) = MODULE_controller_address()
+    let (contract_address) = get_contract_address()
 
     # FETCH ADDRESSES
     let (realms_address) = IModuleController.get_external_contract_address(
@@ -101,23 +100,21 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     let (resource_logic_address) = IModuleController.get_module_address(
         controller, ModuleIds.L02_Resources)
 
-    # TRANSFER REALM BACK TO OWNER
-    realms_IERC721.transferFrom(realms_address, settle_state_address, caller, token_id)
-
-    # BURN S_REALM
-    s_realms_IERC721.burn(s_realms_address, token_id)
-
     # CHECK NO PENDING RESOURCES OR LORDS
     let (can_claim) = IL02_Resources.check_if_claimable(resource_logic_address, token_id)
 
     if can_claim == TRUE:
-        IL02_Resources.claim_resources(resource_logic_address, token_id)
+        IL02_Resources.delegate_claim_resources(resource_logic_address, token_id)
         set_world_state(token_id, caller, controller, settle_state_address, realms_address)
-        UnSettled.emit(caller, token_id)
-        return (TRUE)
     else:
         set_world_state(token_id, caller, controller, settle_state_address, realms_address)
     end
+
+    # TRANSFER REALM BACK TO OWNER
+    realms_IERC721.transferFrom(realms_address, contract_address, caller, token_id)
+
+    # BURN S_REALM
+    s_realms_IERC721.burn(s_realms_address, token_id)
 
     # EMIT
     UnSettled.emit(caller, token_id)

@@ -120,7 +120,9 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let days = total_days + total_vault_days
     assert_not_zero(days)
 
+    # set vault time
     IS01_Settling.set_time_staked(settling_state_address, token_id, remainder)
+    IS01_Settling.set_time_vault_staked(settling_state_address, token_id, vault_remainder)
 
     # get wonder tax percentage
     let (wonder_tax) = IL04_Calculator.calculate_wonder_tax(contract_address=calculator_address)

@@ -57,6 +57,8 @@ namespace IS01_Settling:
     end
     func get_total_realms_settled() -> (amount : felt):
     end
+    func return_approved():
+    end
 end
 
 @contract_interface
