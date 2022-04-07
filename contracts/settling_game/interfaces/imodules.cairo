@@ -37,9 +37,16 @@ namespace IModuleController:
     end
 
     func set_initial_module_addresses(
-            module_01_addr : felt, module_02_addr : felt, module_03_addr : felt,
-            module_04_addr : felt, module_05_addr : felt, module_06_addr : felt,
-            module_07_addr : felt, module_08_addr : felt, module_09_addr : felt):
+        module_01_addr : felt,
+        module_02_addr : felt,
+        module_03_addr : felt,
+        module_04_addr : felt,
+        module_05_addr : felt,
+        module_06_addr : felt,
+        module_07_addr : felt,
+        module_08_addr : felt,
+        module_09_addr : felt,
+    ):
     end
 end
 
@@ -136,8 +143,12 @@ namespace IS05_Wonders:
     end
 
     func batch_set_tax_pool(
-            epoch : felt, resource_ids_len : felt, resource_ids : Uint256*, amounts_len : felt,
-            amounts : felt*):
+        epoch : felt,
+        resource_ids_len : felt,
+        resource_ids : Uint256*,
+        amounts_len : felt,
+        amounts : felt*,
+    ):
     end
 
     func get_total_wonders_staked(epoch : felt) -> (amount : felt):

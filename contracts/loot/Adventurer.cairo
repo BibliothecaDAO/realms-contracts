@@ -23,7 +23,8 @@ end
 
 @external
 func equipItem{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : felt, item_token_id : felt):
+    token_id : felt, item_token_id : felt
+):
     # # Check user owns the item
     # # Check item is correct for the slot
     # # TODO: Set Id within slot
@@ -33,7 +34,8 @@ end
 
 @external
 func getPower{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : felt, item_token_id : felt):
+    token_id : felt, item_token_id : felt
+):
     # SUM all item powers
     # Fetch item stats
 

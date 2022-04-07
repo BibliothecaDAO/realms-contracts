@@ -6,7 +6,10 @@ from starkware.starknet.common.syscalls import get_caller_address
 from contracts.settling_game.interfaces.imodules import IModuleController
 
 from contracts.settling_game.utils.library import (
-    MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
+    MODULE_controller_address,
+    MODULE_only_approved,
+    MODULE_initializer,
+)
 
 # ____MODULE_XXX___BUILDING_STATE
 #
@@ -33,7 +36,8 @@ from contracts.settling_game.utils.library import (
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        address_of_controller : felt):
+    address_of_controller : felt
+):
     # Store the address of the only fixed contract in the system.
     MODULE_initializer(address_of_controller)
     return ()
