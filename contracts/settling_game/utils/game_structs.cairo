@@ -145,6 +145,7 @@ namespace ModuleIds:
     const L05_Wonders = 8
     const S05_Wonders = 9
     const L07_Crypts = 10
+    const S07_Crypts = 11
 end
 
 namespace ExternalContractIds:
@@ -154,4 +155,18 @@ namespace ExternalContractIds:
     const Resources = 4
     const Treasury = 5
     const Storage = 6
+    const Crypts = 7
+    const S_Crypts = 8
+end
+
+struct CryptData:
+    member layout : felt  # map - locations of walls/floors
+    member doors : felt # map - locations of doors
+    member points : felt # map - locations of points of interest
+    member name : felt  # string - name of the dungeon
+    member environment : felt  # uint256 - environment of the dungeon (0-6)
+    member legendary : felt  # uint256 - flag if dungeon is legendary (0/1)
+    member size : felt  # uint256 - size (e.g. 6x6) of dungeon. (6-25)
+    member numDoors : felt  # uint256 - number of doors (0-12)
+    member numPoints : felt  # uint256 - number of points (0-12)
 end

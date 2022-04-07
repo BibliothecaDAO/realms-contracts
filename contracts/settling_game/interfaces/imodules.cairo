@@ -155,3 +155,18 @@ namespace IS05_Wonders:
     func get_tax_pool(epoch : felt, resource_id : felt) -> (supply : felt):
     end
 end
+
+@contract_interface
+namespace IS07_Crypts:
+    func set_time_staked(token_id : Uint256, time_left : felt):
+    end
+    func set_total_crypts_unlocked(amount : felt):
+    end
+    func get_time_staked(token_id : Uint256) -> (time : felt):
+    end
+    func get_total_crypts_unlocked() -> (amount : felt):
+    end
+    func return_approved():
+    end
+end
+

@@ -23,7 +23,7 @@ from openzeppelin.introspection.ERC165 import ERC165_supports_interface
 
 from openzeppelin.access.ownable import Ownable_initializer, Ownable_only_owner
 
-from contracts.settling_game.utils.game_structs import RealmData
+from contracts.settling_game.utils.game_structs import CryptData, RealmData
 #
 # Constructor
 #
@@ -154,47 +154,48 @@ end
 #
 
 @storage_var
-func realm_name(token_id : Uint256) -> (name : felt):
+func crypt_name(token_id : Uint256) -> (name : felt):
 end
 
 @storage_var
-func realm_data(token_id : Uint256) -> (data : felt):
+func crypt_data(token_id : Uint256) -> (data : felt):
 end
 
 @storage_var
-func is_settled(token_id : Uint256) -> (data : felt):
+func is_unlocked(token_id : Uint256) -> (data : felt):
 end
 
 @external
-func set_realm_data{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-        tokenId : Uint256, _realm_data : felt):
+func set_crypt_data{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+        tokenId : Uint256, _crypt_data : felt):
         ## ONLY OWNER TODO
-    realm_data.write(tokenId, _realm_data)
+    crypt_data.write(tokenId, _crypt_data)
     return ()
 end
 
 @view
-func get_is_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256) -> (is_settled : felt):
-    let (data) = is_settled.read(token_id)
+func get_is_unlocked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        token_id : Uint256) -> (is_unlocked : felt):
+    let (data) = is_unlocked.read(token_id)
     return (data)
 end
 
 @external
-func get_realm_info{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256) -> (realm_data : felt):
-    let (data) = realm_data.read(token_id)
+func get_crypts_info{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        token_id : Uint256) -> (crypts_data : felt):
+    let (data) = crypt_data.read(token_id)
     return (data)
 end
 
 @external
-func fetch_realm_data{
+func fetch_crypt_data{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*}(realm_id : Uint256) -> (realm_stats : RealmData):
+        bitwise_ptr : BitwiseBuiltin*}(crypt_id : Uint256) -> (realm_stats : RealmData):
     alloc_locals
 
-    let (data) = realm_data.read(realm_id)
+    let (data) = crypt_data.read(crypt_id)
 
+    ## TODO: Update with bitmap for Crypts data
     let (regions) = unpack_data(data, 0, 255)
     let (cities) = unpack_data(data, 8, 255)
     let (harbours) = unpack_data(data, 16, 255)

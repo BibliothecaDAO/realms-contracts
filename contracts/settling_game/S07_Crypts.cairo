@@ -8,7 +8,7 @@ from starkware.starknet.common.syscalls import get_caller_address, get_block_tim
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.interfaces.imodules import IModuleController
-from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
+from contracts.settling_game.interfaces.crypts_IERC721 import crypts_IERC721
 
 from contracts.settling_game.utils.library import (
     MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
@@ -40,7 +40,7 @@ func time_vault_staked(token_id : Uint256) -> (time : felt):
 end
 
 @storage_var
-func total_realms_settled() -> (amount : felt):
+func total_crypts_unlocked() -> (amount : felt):
 end
 
 ###############
@@ -73,26 +73,12 @@ func set_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     return ()
 end
 
-# VAULT_TIME_LEFT -> WHEN PLAYER CLAIMS, THIS IS THE REMAINDER TO BE PASSED BACK INTO STORAGE
-# THIS ALLOWS FULL 7 DAYS TO BE CLAIMED ONLY AND ALLOWS LESS THAN FULL DAYS TO CONTINUE ACCRUREING
 @external
-func set_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256, time_left : felt):
-    MODULE_only_approved()
-
-    let (block_timestamp) = get_block_timestamp()
-
-    # SETS CURRENT TIME
-    time_vault_staked.write(token_id, block_timestamp - time_left)
-    return ()
-end
-
-@external
-func set_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+func set_total_crypts_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         amount : felt):
     MODULE_only_approved()
 
-    total_realms_settled.write(amount)
+    total_crypts_unlocked.write(amount)
     return ()
 end
 
