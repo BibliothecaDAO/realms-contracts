@@ -57,6 +57,8 @@ namespace IS01_Settling:
     end
     func get_total_realms_settled() -> (amount : felt):
     end
+    func return_approved():
+    end
 end
 
 @contract_interface
@@ -67,6 +69,14 @@ namespace IS02_Resources:
     end
 
     func set_resource_level(token_id : Uint256, resource_id : felt, level : felt) -> ():
+    end
+end
+
+@contract_interface
+namespace IL02_Resources:
+    func check_if_claimable(token_id : Uint256) -> (can_claim : felt):
+    end
+    func claim_resources(token_id : Uint256):
     end
 end
 

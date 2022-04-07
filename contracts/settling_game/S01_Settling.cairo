@@ -10,6 +10,8 @@ from starkware.cairo.common.uint256 import Uint256, uint256_eq
 from contracts.settling_game.interfaces.imodules import IModuleController
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 
+from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
+
 from contracts.settling_game.utils.library import (
     MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
 
@@ -92,21 +94,23 @@ func set_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     return ()
 end
 
-# TODO: CHECK IF NEEDED
-# @external
-# func set_approval{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-#         success : felt):
-#     MODULE_only_approved()
-#     let (controller) = MODULE_controller_address()
+# TODO: AUDIT NEEDED
+@external
+func return_approved{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    MODULE_only_approved()
+    let (controller) = MODULE_controller_address()
 
-# let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
-#     let (settle_logic_address) = IModuleController.get_module_address(
-#         contract_address=controller, module_id=1)
+    # FETCH ADDRESSES
+    let (realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Realms)
+    let (settle_logic_address) = IModuleController.get_module_address(
+        controller, ModuleIds.S01_Settling)
 
-# realms_IERC721.setApprovalForAll(realms_address, settle_logic_address, 1)
+    # SET APPROVAL TO ALLOW TRANSFER BACK TO OWNER
+    realms_IERC721.setApprovalForAll(realms_address, settle_logic_address, TRUE)
 
-# return (TRUE)
-# end
+    return ()
+end
 
 ###########
 # GETTERS #
