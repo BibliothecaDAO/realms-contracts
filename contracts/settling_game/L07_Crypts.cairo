@@ -5,22 +5,19 @@ from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem, assert_n
 from starkware.cairo.common.math_cmp import is_nn_le
 from starkware.cairo.common.hash_state import hash_init, hash_update, HashState
 from starkware.cairo.common.alloc import alloc
-from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
+from starkware.starknet.common.syscalls import (
+    get_caller_address, get_block_timestamp, get_contract_address)
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
-from contracts.settling_game.utils.general import scale
-from contracts.settling_game.utils.game_structs import ModuleIds
+from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds, RealmData
 from contracts.settling_game.utils.constants import TRUE, FALSE
+from contracts.settling_game.utils.library import (
+    MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
 
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
 from contracts.settling_game.interfaces.imodules import (
-    IModuleController, IS01_Settling, IL05_Wonders)
-
-from contracts.settling_game.utils.game_structs import RealmData
-
-from contracts.settling_game.utils.library import (
-    MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
+    IModuleController, IS01_Settling, IL05_Wonders, IL02_Resources)
 
 # TODO:
 # Refactor this file to take into account the Crypts contracts. This will mostly be just chaning contract address
@@ -68,12 +65,15 @@ func unlock_crypt{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     alloc_locals
     let (caller) = get_caller_address()
     let (controller) = MODULE_controller_address()
+    let (contract_address) = get_contract_address()
 
-    let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
-    let (s_realms_address) = IModuleController.get_s_realms_address(contract_address=controller)
+    let (realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Realms)
+    let (s_realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.S_Realms)
 
     let (settle_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.S01_Settling)
+        controller, ModuleIds.S01_Settling)
 
     # TRANSFER REALM
     realms_IERC721.transferFrom(realms_address, caller, settle_state_address, token_id)
@@ -109,10 +109,15 @@ func lock_crypt{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
     let (controller) = MODULE_controller_address()
     let (block_timestamp) = get_block_timestamp()
 
-    let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
-    let (s_realms_address) = IModuleController.get_s_realms_address(contract_address=controller)
+   # FETCH ADDRESSES
+    let (realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Realms)
+    let (s_realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.S_Realms)
     let (settle_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.S01_Settling)
+        controller, ModuleIds.S01_Settling)
+    let (resource_logic_address) = IModuleController.get_module_address(
+        controller, ModuleIds.L02_Resources)
 
     # TRANSFER REALM BACK TO OWNER
     realms_IERC721.transferFrom(realms_address, settle_state_address, caller, token_id)
