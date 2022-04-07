@@ -13,7 +13,7 @@ from contracts.settling_game.interfaces.imodules import IModuleController, IS06_
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library_combat import (
-    compute_squad_stats, pack_squad, unpack_squad, sum_values_by_key)
+    build_squad_from_troops, compute_squad_stats, pack_squad, unpack_squad, sum_values_by_key)
 from contracts.settling_game.utils.game_structs import (
     ModuleIds, RealmData, RealmCombatData, Troop, Squad, SquadStats, PackedSquad, TroopCost)
 from contracts.settling_game.utils.general import unpack_data
@@ -144,7 +144,7 @@ end
 func build_squad_from_troops_in_realm{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
         bitwise_ptr : BitwiseBuiltin*}(
-        realm_id : Uint256, slot : felt, troop_ids_len : felt, troop_ids : felt*):
+        troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt):
     alloc_locals
 
     # TODO: auth
@@ -177,9 +177,11 @@ func build_squad_from_troops_in_realm{
     # pay for the squad
     IERC1155.burn_batch(resource_address, caller, d_len, token_ids, d_len, token_values)
 
-    # assemble the squad
-    # TODO:
-    IS06_Combat.assemble_squad_from_troops_in_realm(combat_state_address)
+    # assemble the squad, store it in a Realm
+    # TODO: better name
+    # IS06_Combat.assemble_squad_from_troops_in_realm(combat_state_address, troop_ids_len, troop_ids, realm_id, slot)
+    let (squad) = build_squad_from_troops(troop_ids_len, troop_ids)
+    IS06_Combat.update_squad_in_realm(combat_state_address, squad, realm_id, slot)
 
     # TODO: emit an event?
 
@@ -236,6 +238,8 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
         defending_squad=new_defender,
         last_attacked_at=now)
     IS06_Combat.set_realm_combat_data(controller, defending_realm_id, new_defending_realm_data)
+
+    # TODO: call pillage_resources here
 
     Combat_outcome.emit(attacking_realm_id, defending_realm_id, combat_outcome)
 

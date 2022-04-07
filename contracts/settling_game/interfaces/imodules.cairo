@@ -178,6 +178,6 @@ namespace IS06_Combat:
     func get_troop_cost(troop_id : felt) -> (cost : TroopCost):
     end
 
-    func assemble_squad_from_troops_in_realm():
+    func assemble_squad_from_troops_in_realm(troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt):
     end
 end

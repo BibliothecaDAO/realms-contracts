@@ -391,70 +391,70 @@ async def test_hit_troop(l06_combat_tests):
 
 
 @pytest.mark.asyncio
-async def test_squad_to_array(s06_combat_tests):
+async def test_squad_to_array(library_combat_tests):
     s = build_default_squad()
-    tx = await s06_combat_tests.test_squad_to_array(s).invoke()
+    tx = await library_combat_tests.test_squad_to_array(s).invoke()
     flattened = functools.reduce(operator.concat, [list(t) for t in s])
     assert tx.result.a == flattened
 
 
 @pytest.mark.asyncio
-async def test_troop_to_array(s06_combat_tests):
+async def test_troop_to_array(library_combat_tests):
     for t in TROOPS:
-        tx = await s06_combat_tests.test_troop_to_array(t).invoke()
+        tx = await library_combat_tests.test_troop_to_array(t).invoke()
         assert tx.result.a == list(t)
 
 
 @pytest.mark.asyncio
-async def test_array_to_squad(s06_combat_tests):
+async def test_array_to_squad(library_combat_tests):
     s = build_default_squad()
     flattened = functools.reduce(operator.concat, [list(t) for t in s])
-    tx = await s06_combat_tests.test_array_to_squad(flattened).invoke()
+    tx = await library_combat_tests.test_array_to_squad(flattened).invoke()
     assert tx.result.s == s
 
 
 @pytest.mark.asyncio
-async def test_array_to_troop(s06_combat_tests):
+async def test_array_to_troop(library_combat_tests):
     a = list(SNIPER)
-    tx = await s06_combat_tests.test_array_to_troop(a).invoke()
+    tx = await library_combat_tests.test_array_to_troop(a).invoke()
     assert tx.result.t == SNIPER
 
 
 @pytest.mark.asyncio
-async def test_add_troop_to_squad(s06_combat):
+async def test_add_troop_to_squad(library_combat_tests):
     partial_squad = build_partial_squad(3)
 
     # add a tier 1
-    tx = await s06_combat.add_troop_to_squad(SCORPIO, partial_squad).invoke()
+    tx = await library_combat_tests.test_add_troop_to_squad(SCORPIO, partial_squad).invoke()
     assert tx.result.updated.t1_4 == SCORPIO
 
     # add a tier 2
-    tx = await s06_combat.add_troop_to_squad(KNIGHT, partial_squad).invoke()
+    tx = await library_combat_tests.test_add_troop_to_squad(KNIGHT, partial_squad).invoke()
     assert tx.result.updated.t2_1 == KNIGHT
 
     # add a tier 3
-    tx = await s06_combat.add_troop_to_squad(ARCANIST, partial_squad).invoke()
+    tx = await library_combat_tests.test_add_troop_to_squad(ARCANIST, partial_squad).invoke()
     assert tx.result.updated.t3_1 == ARCANIST
 
     # adding to a full squad should fail
     with pytest.raises(StarkException):
         squad = build_default_squad()
-        await s06_combat.add_troop_to_squad(GUARD, squad).invoke()
+        await library_combat_tests.test_add_troop_to_squad(GUARD, squad).invoke()
 
 
 @pytest.mark.asyncio
-async def test_remove_troop_from_squad(s06_combat):
+async def test_remove_troop_from_squad(library_combat_tests):
     squad = build_default_squad()
 
     modified_squad = squad
     for troop_idx in range(len(squad)):
-        tx = await s06_combat.remove_troop_from_squad(troop_idx, modified_squad).invoke()
+        tx = await library_combat_tests.test_remove_troop_from_squad(troop_idx, modified_squad).invoke()
         modified_squad = tx.result.updated
         assert modified_squad[troop_idx] == EMPTY_TROOP
 
 
 @pytest.mark.asyncio
-async def test_find_first_free_troop_slot_in_squad(s06_combat_tests):
+async def test_find_first_free_troop_slot_in_squad(library_combat_tests):
     troop_size = 7  # Cairo's Troop.SIZE, also the number of element in Troop
     for i in range(25):
         partial_squad = build_partial_squad(i)
@@ -464,7 +464,7 @@ async def test_find_first_free_troop_slot_in_squad(s06_combat_tests):
         if i == 24:
             tier = 3
 
-        tx = await s06_combat_tests.test_find_first_free_troop_slot_in_squad(
+        tx = await library_combat_tests.test_find_first_free_troop_slot_in_squad(
             partial_squad, tier
         ).invoke()
         assert tx.result.free_slot_index == i * troop_size
@@ -472,7 +472,7 @@ async def test_find_first_free_troop_slot_in_squad(s06_combat_tests):
     full_squad = build_default_squad()
     for tier in [1, 2, 3]:
         with pytest.raises(StarkException):
-            await s06_combat_tests.test_find_first_free_troop_slot_in_squad(
+            await library_combat_tests.test_find_first_free_troop_slot_in_squad(
                 full_squad, tier
             ).invoke()
 
@@ -512,10 +512,10 @@ async def test_update_squad_in_realm(s06_combat):
 
 
 @pytest.mark.asyncio
-async def test_get_set_troop_cost(s06_combat_tests):
+async def test_get_set_troop_cost(s06_combat):
     for troop_id, troop_cost in TROOP_COSTS.items():
-        await s06_combat_tests.set_troop_cost(troop_id, troop_cost).invoke()
-        tx = await s06_combat_tests.get_troop_cost(troop_id).invoke()
+        await s06_combat.set_troop_cost(troop_id, troop_cost).invoke()
+        tx = await s06_combat.get_troop_cost(troop_id).invoke()
         assert tx.result.cost == troop_cost
 
 
