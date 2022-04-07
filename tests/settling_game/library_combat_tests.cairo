@@ -12,7 +12,8 @@ from contracts.settling_game.library_combat import (
     troop_to_array,
     array_to_squad,
     array_to_troop,
-    find_first_free_troop_slot_in_squad
+    find_first_free_troop_slot_in_squad,
+    build_squad_from_troops,
 )
 
 @view
@@ -79,4 +80,12 @@ end
 func test_find_first_free_troop_slot_in_squad(s : Squad, tier : felt) -> (free_slot_index : felt):
     let (idx) = find_first_free_troop_slot_in_squad(s, tier)
     return (idx)
+end
+
+@view
+func test_build_squad_from_troops{range_check_ptr}(troop_ids_len : felt, troop_ids : felt*) -> (
+    squad : Squad
+):
+    let (s : Squad) = build_squad_from_troops(troop_ids_len, troop_ids)
+    return (s)
 end

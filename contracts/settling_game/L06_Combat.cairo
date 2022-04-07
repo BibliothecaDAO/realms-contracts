@@ -178,8 +178,6 @@ func build_squad_from_troops_in_realm{
     IERC1155.burn_batch(resource_address, caller, d_len, token_ids, d_len, token_values)
 
     # assemble the squad, store it in a Realm
-    # TODO: better name
-    # IS06_Combat.assemble_squad_from_troops_in_realm(combat_state_address, troop_ids_len, troop_ids, realm_id, slot)
     let (squad) = build_squad_from_troops(troop_ids_len, troop_ids)
     IS06_Combat.update_squad_in_realm(combat_state_address, squad, realm_id, slot)
 

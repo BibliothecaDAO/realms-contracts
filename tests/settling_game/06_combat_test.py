@@ -448,7 +448,9 @@ async def test_remove_troop_from_squad(library_combat_tests):
 
     modified_squad = squad
     for troop_idx in range(len(squad)):
-        tx = await library_combat_tests.test_remove_troop_from_squad(troop_idx, modified_squad).invoke()
+        tx = await library_combat_tests.test_remove_troop_from_squad(
+            troop_idx, modified_squad
+        ).invoke()
         modified_squad = tx.result.updated
         assert modified_squad[troop_idx] == EMPTY_TROOP
 
@@ -517,6 +519,19 @@ async def test_get_set_troop_cost(s06_combat):
         await s06_combat.set_troop_cost(troop_id, troop_cost).invoke()
         tx = await s06_combat.get_troop_cost(troop_id).invoke()
         assert tx.result.cost == troop_cost
+
+
+@pytest.mark.asyncio
+async def test_build_squad_from_troops(library_combat_tests):
+    squad = build_default_squad()
+    troop_ids = [TroopId.Watchman] * 16 + [TroopId.Guard] * 8 + [TroopId.GuardCaptain]
+    tx = await library_combat_tests.test_build_squad_from_troops(troop_ids).invoke()
+    assert tx.result.squad == squad
+
+    squad = build_partial_squad(4)
+    troop_ids = [TroopId.Watchman] * 4
+    tx = await library_combat_tests.test_build_squad_from_troops(troop_ids).invoke()
+    assert tx.result.squad == squad
 
 
 # @pytest.mark.asyncio

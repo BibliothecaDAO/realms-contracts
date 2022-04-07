@@ -604,7 +604,7 @@ func build_squad_from_troops{range_check_ptr}(troop_ids_len : felt, troop_ids : 
     squad : Squad
 ):
     alloc_locals
-    let (empty : Squad) = alloc()
+    let (empty : Squad) = build_empty_squad()
     let (full : Squad) = build_squad_from_troops_loop(empty, troop_ids_len, troop_ids)
     return (full)
 end
@@ -612,6 +612,8 @@ end
 func build_squad_from_troops_loop{range_check_ptr}(
     current : Squad, troop_ids_len : felt, troop_ids : felt*
 ) -> (squad : Squad):
+    alloc_locals
+
     if troop_ids_len == 0:
         return (current)
     end
@@ -620,4 +622,35 @@ func build_squad_from_troops_loop{range_check_ptr}(
     let (updated : Squad) = add_troop_to_squad(troop, current)
 
     return build_squad_from_troops_loop(updated, troop_ids_len - 1, troop_ids + 1)
+end
+
+func build_empty_squad() -> (s : Squad):
+    return (Squad(
+        t1_1=Troop(0, 0, 0, 0, 0, 0, 0),
+        t1_2=Troop(0, 0, 0, 0, 0, 0, 0),
+        t1_3=Troop(0, 0, 0, 0, 0, 0, 0),
+        t1_4=Troop(0, 0, 0, 0, 0, 0, 0),
+        t1_5=Troop(0, 0, 0, 0, 0, 0, 0),
+        t1_6=Troop(0, 0, 0, 0, 0, 0, 0),
+        t1_7=Troop(0, 0, 0, 0, 0, 0, 0),
+        t1_8=Troop(0, 0, 0, 0, 0, 0, 0),
+        t1_9=Troop(0, 0, 0, 0, 0, 0, 0),
+        t1_10=Troop(0, 0, 0, 0, 0, 0, 0),
+        t1_11=Troop(0, 0, 0, 0, 0, 0, 0),
+        t1_12=Troop(0, 0, 0, 0, 0, 0, 0),
+        t1_13=Troop(0, 0, 0, 0, 0, 0, 0),
+        t1_14=Troop(0, 0, 0, 0, 0, 0, 0),
+        t1_15=Troop(0, 0, 0, 0, 0, 0, 0),
+        t1_16=Troop(0, 0, 0, 0, 0, 0, 0),
+        t2_1=Troop(0, 0, 0, 0, 0, 0, 0),
+        t2_2=Troop(0, 0, 0, 0, 0, 0, 0),
+        t2_3=Troop(0, 0, 0, 0, 0, 0, 0),
+        t2_4=Troop(0, 0, 0, 0, 0, 0, 0),
+        t2_5=Troop(0, 0, 0, 0, 0, 0, 0),
+        t2_6=Troop(0, 0, 0, 0, 0, 0, 0),
+        t2_7=Troop(0, 0, 0, 0, 0, 0, 0),
+        t2_8=Troop(0, 0, 0, 0, 0, 0, 0),
+        t3_1=Troop(0, 0, 0, 0, 0, 0, 0))
+    )
+
 end
