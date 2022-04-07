@@ -32,6 +32,7 @@ sixth_token_id = (9999, 9999)
 initial_user_funds = 1000 * (10 ** 18)
 
 initial_supply = 1000000 * (10 ** 18)
+DEFAULT_GAS_PRICE = 100
 
 
 def compile(path) -> ContractDefinition:
@@ -58,7 +59,7 @@ def get_block_timestamp(starknet_state):
 
 def set_block_timestamp(starknet_state, timestamp):
     starknet_state.state.block_info = BlockInfo(
-        starknet_state.state.block_info.block_number, timestamp
+        starknet_state.state.block_info.block_number, timestamp, DEFAULT_GAS_PRICE
     )
 
 
