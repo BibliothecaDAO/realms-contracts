@@ -64,9 +64,14 @@ end
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        arbiter_address : felt, _lords_address : felt, _resources_address : felt,
-        _realms_address : felt, _treasury_address : felt, _s_realms_address : felt,
-        _storage_address : felt):
+    arbiter_address : felt,
+    _lords_address : felt,
+    _resources_address : felt,
+    _realms_address : felt,
+    _treasury_address : felt,
+    _s_realms_address : felt,
+    _storage_address : felt,
+):
     arbiter.write(arbiter_address)
 
     # set genesis
@@ -117,8 +122,8 @@ end
 # Called by the Arbiter to set new address mappings.
 @external
 func set_address_for_external_contract{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        external_contract_id : felt, contract_address : felt):
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+}(external_contract_id : felt, contract_address : felt):
     only_arbiter()
     external_contract_table.write(external_contract_id, contract_address)
 
@@ -128,7 +133,8 @@ end
 # Called by the current Arbiter to replace itself.
 @external
 func appoint_new_arbiter{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        new_arbiter : felt):
+    new_arbiter : felt
+):
     only_arbiter()
     arbiter.write(new_arbiter)
     return ()
@@ -137,7 +143,8 @@ end
 # Called by the Arbiter to set new address mappings.
 @external
 func set_address_for_module_id{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        module_id : felt, module_address : felt):
+    module_id : felt, module_address : felt
+):
     only_arbiter()
     module_id_of_address.write(module_address, module_id)
     address_of_module_id.write(module_id, module_address)
@@ -148,10 +155,18 @@ end
 # Called by the Arbiter to batch set new address mappings on deployment.
 @external
 func set_initial_module_addresses{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        module_01_addr : felt, module_02_addr : felt, module_03_addr : felt, module_04_addr : felt,
-        module_05_addr : felt, module_06_addr : felt, module_07_addr : felt, module_08_addr : felt,
-        module_09_addr : felt):
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+}(
+    module_01_addr : felt,
+    module_02_addr : felt,
+    module_03_addr : felt,
+    module_04_addr : felt,
+    module_05_addr : felt,
+    module_06_addr : felt,
+    module_07_addr : felt,
+    module_08_addr : felt,
+    module_09_addr : felt,
+):
     only_arbiter()
 
     # # Settling Logic
@@ -200,7 +215,8 @@ end
 # Called to authorise write access of one module to another.
 @external
 func set_write_access{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        module_id_doing_writing : felt, module_id_being_written_to : felt):
+    module_id_doing_writing : felt, module_id_being_written_to : felt
+):
     only_arbiter()
     can_write_to.write(module_id_doing_writing, module_id_being_written_to, TRUE)
     return ()
@@ -212,29 +228,32 @@ end
 
 @view
 func get_module_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        module_id : felt) -> (address : felt):
+    module_id : felt
+) -> (address : felt):
     let (address) = address_of_module_id.read(module_id)
     return (address)
 end
 
 @view
 func get_external_contract_address{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        external_contract_id : felt) -> (address : felt):
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+}(external_contract_id : felt) -> (address : felt):
     let (address) = external_contract_table.read(external_contract_id)
     return (address)
 end
 
 @view
 func get_genesis{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-        genesis_time : felt):
+    genesis_time : felt
+):
     let (genesis_time) = genesis.read()
     return (genesis_time=genesis_time)
 end
 
 @view
 func get_arbiter{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-        arbiter_address : felt):
+    arbiter_address : felt
+):
     let (arbiter_address) = arbiter.read()
     return (arbiter_address=arbiter_address)
 end
@@ -245,7 +264,8 @@ end
 
 @view
 func has_write_access{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        address_attempting_to_write : felt) -> (success : felt):
+    address_attempting_to_write : felt
+) -> (success : felt):
     alloc_locals
 
     # Approves the write-permissions between two modules, ensuring

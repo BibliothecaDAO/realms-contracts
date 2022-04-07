@@ -6,18 +6,28 @@ from starkware.cairo.common.math_cmp import is_nn_le
 from starkware.cairo.common.hash_state import hash_init, hash_update, HashState
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import (
-    get_caller_address, get_block_timestamp, get_contract_address)
+    get_caller_address,
+    get_block_timestamp,
+    get_contract_address,
+)
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds, RealmData
 from contracts.settling_game.utils.constants import TRUE, FALSE
 from contracts.settling_game.utils.library import (
-    MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
+    MODULE_controller_address,
+    MODULE_only_approved,
+    MODULE_initializer,
+)
 
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
 from contracts.settling_game.interfaces.imodules import (
-    IModuleController, IS01_Settling, IL05_Wonders, IL02_Resources)
+    IModuleController,
+    IS01_Settling,
+    IL05_Wonders,
+    IL02_Resources,
+)
 
 # ____MODULE_L01___SETTLING_LOGIC
 
@@ -39,7 +49,8 @@ end
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        address_of_controller : felt):
+    address_of_controller : felt
+):
     # Store the address of the only fixed contract in the system.
     MODULE_initializer(address_of_controller)
     return ()
@@ -52,19 +63,23 @@ end
 # SETTLES REALM
 @external
 func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256) -> (success : felt):
+    token_id : Uint256
+) -> (success : felt):
     alloc_locals
     let (caller) = get_caller_address()
     let (controller) = MODULE_controller_address()
     let (contract_address) = get_contract_address()
 
     let (realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Realms)
+        controller, ExternalContractIds.Realms
+    )
     let (s_realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.S_Realms)
+        controller, ExternalContractIds.S_Realms
+    )
 
     let (settle_state_address) = IModuleController.get_module_address(
-        controller, ModuleIds.S01_Settling)
+        controller, ModuleIds.S01_Settling
+    )
 
     # TRANSFER REALM
     realms_IERC721.transferFrom(realms_address, caller, contract_address, token_id)
@@ -84,7 +99,8 @@ end
 # UNSETTLES REALM
 @external
 func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256) -> (success : felt):
+    token_id : Uint256
+) -> (success : felt):
     alloc_locals
     let (caller) = get_caller_address()
     let (controller) = MODULE_controller_address()
@@ -92,13 +108,17 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
 
     # FETCH ADDRESSES
     let (realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Realms)
+        controller, ExternalContractIds.Realms
+    )
     let (s_realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.S_Realms)
+        controller, ExternalContractIds.S_Realms
+    )
     let (settle_state_address) = IModuleController.get_module_address(
-        controller, ModuleIds.S01_Settling)
+        controller, ModuleIds.S01_Settling
+    )
     let (resource_logic_address) = IModuleController.get_module_address(
-        controller, ModuleIds.L02_Resources)
+        controller, ModuleIds.L02_Resources
+    )
 
     # CHECK NO PENDING RESOURCES OR LORDS
     let (can_claim) = IL02_Resources.check_if_claimable(resource_logic_address, token_id)
@@ -127,8 +147,12 @@ end
 ############
 
 func set_world_state{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256, caller : felt, controller : felt, settle_state_address : felt,
-        realms_address : felt):
+    token_id : Uint256,
+    caller : felt,
+    controller : felt,
+    settle_state_address : felt,
+    realms_address : felt,
+):
     # SET REALM SETTLED/UNSETTLED STATE - PARSE 0 TO SET CURRENT TIME
     IS01_Settling.set_time_staked(settle_state_address, token_id, 0)
     IS01_Settling.set_time_vault_staked(settle_state_address, token_id, 0)
@@ -143,7 +167,8 @@ func set_world_state{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     # UPDATE WONDERS
     if realms_data.wonder != FALSE:
         let (wonders_logic_address) = IModuleController.get_module_address(
-            controller, ModuleIds.L05_Wonders)
+            controller, ModuleIds.L05_Wonders
+        )
         IL05_Wonders.update_wonder_settlement(wonders_logic_address, token_id)
         return ()
     end

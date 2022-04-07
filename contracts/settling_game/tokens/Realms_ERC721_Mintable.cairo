@@ -14,10 +14,23 @@ from starkware.cairo.common.pow import pow
 from contracts.settling_game.utils.general import unpack_data
 
 from openzeppelin.token.erc721.library import (
-    ERC721_name, ERC721_symbol, ERC721_balanceOf, ERC721_ownerOf, ERC721_getApproved,
-    ERC721_isApprovedForAll, ERC721_tokenURI, ERC721_initializer, ERC721_approve,
-    ERC721_setApprovalForAll, ERC721_transferFrom, ERC721_safeTransferFrom, ERC721_mint,
-    ERC721_burn, ERC721_only_token_owner, ERC721_setTokenURI)
+    ERC721_name,
+    ERC721_symbol,
+    ERC721_balanceOf,
+    ERC721_ownerOf,
+    ERC721_getApproved,
+    ERC721_isApprovedForAll,
+    ERC721_tokenURI,
+    ERC721_initializer,
+    ERC721_approve,
+    ERC721_setApprovalForAll,
+    ERC721_transferFrom,
+    ERC721_safeTransferFrom,
+    ERC721_mint,
+    ERC721_burn,
+    ERC721_only_token_owner,
+    ERC721_setTokenURI,
+)
 
 from openzeppelin.introspection.ERC165 import ERC165_supports_interface
 
@@ -30,7 +43,8 @@ from contracts.settling_game.utils.game_structs import RealmData
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        name : felt, symbol : felt, owner : felt):
+    name : felt, symbol : felt, owner : felt
+):
     ERC721_initializer(name, symbol)
     Ownable_initializer(owner)
     return ()
@@ -42,7 +56,8 @@ end
 
 @view
 func supportsInterface{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        interfaceId : felt) -> (success : felt):
+    interfaceId : felt
+) -> (success : felt):
     let (success) = ERC165_supports_interface(interfaceId)
     return (success)
 end
@@ -61,35 +76,40 @@ end
 
 @view
 func balanceOf{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(owner : felt) -> (
-        balance : Uint256):
+    balance : Uint256
+):
     let (balance : Uint256) = ERC721_balanceOf(owner)
     return (balance)
 end
 
 @view
 func ownerOf{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        tokenId : Uint256) -> (owner : felt):
+    tokenId : Uint256
+) -> (owner : felt):
     let (owner : felt) = ERC721_ownerOf(tokenId)
     return (owner)
 end
 
 @view
 func getApproved{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        tokenId : Uint256) -> (approved : felt):
+    tokenId : Uint256
+) -> (approved : felt):
     let (approved : felt) = ERC721_getApproved(tokenId)
     return (approved)
 end
 
 @view
 func isApprovedForAll{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        owner : felt, operator : felt) -> (isApproved : felt):
+    owner : felt, operator : felt
+) -> (isApproved : felt):
     let (isApproved : felt) = ERC721_isApprovedForAll(owner, operator)
     return (isApproved)
 end
 
 @view
 func tokenURI{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        tokenId : Uint256) -> (tokenURI : felt):
+    tokenId : Uint256
+) -> (tokenURI : felt):
     let (tokenURI : felt) = ERC721_tokenURI(tokenId)
     return (tokenURI)
 end
@@ -100,35 +120,40 @@ end
 
 @external
 func approve{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-        to : felt, tokenId : Uint256):
+    to : felt, tokenId : Uint256
+):
     ERC721_approve(to, tokenId)
     return ()
 end
 
 @external
 func setApprovalForAll{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        operator : felt, approved : felt):
+    operator : felt, approved : felt
+):
     ERC721_setApprovalForAll(operator, approved)
     return ()
 end
 
 @external
 func transferFrom{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-        from_ : felt, to : felt, tokenId : Uint256):
+    from_ : felt, to : felt, tokenId : Uint256
+):
     ERC721_transferFrom(from_, to, tokenId)
     return ()
 end
 
 @external
 func safeTransferFrom{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-        from_ : felt, to : felt, tokenId : Uint256, data_len : felt, data : felt*):
+    from_ : felt, to : felt, tokenId : Uint256, data_len : felt, data : felt*
+):
     ERC721_safeTransferFrom(from_, to, tokenId, data_len, data)
     return ()
 end
 
 @external
 func setTokenURI{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-        tokenId : Uint256, tokenURI : felt):
+    tokenId : Uint256, tokenURI : felt
+):
     Ownable_only_owner()
     ERC721_setTokenURI(tokenId, tokenURI)
     return ()
@@ -136,7 +161,8 @@ end
 
 @external
 func mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-        to : felt, tokenId : Uint256):
+    to : felt, tokenId : Uint256
+):
     Ownable_only_owner()
     ERC721_mint(to, tokenId)
     return ()
@@ -167,30 +193,33 @@ end
 
 @external
 func set_realm_data{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-        tokenId : Uint256, _realm_data : felt):
-        ## ONLY OWNER TODO
+    tokenId : Uint256, _realm_data : felt
+):
+    # # ONLY OWNER TODO
     realm_data.write(tokenId, _realm_data)
     return ()
 end
 
 @view
 func get_is_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256) -> (is_settled : felt):
+    token_id : Uint256
+) -> (is_settled : felt):
     let (data) = is_settled.read(token_id)
     return (data)
 end
 
 @external
 func get_realm_info{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256) -> (realm_data : felt):
+    token_id : Uint256
+) -> (realm_data : felt):
     let (data) = realm_data.read(token_id)
     return (data)
 end
 
 @external
 func fetch_realm_data{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*}(realm_id : Uint256) -> (realm_stats : RealmData):
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(realm_id : Uint256) -> (realm_stats : RealmData):
     alloc_locals
 
     let (data) = realm_data.read(realm_id)
@@ -224,6 +253,7 @@ func fetch_realm_data{
         resource_6=resource_6,
         resource_7=resource_7,
         wonder=wonder,
-        order=order)
+        order=order,
+    )
     return (realm_stats=realm_stats)
 end

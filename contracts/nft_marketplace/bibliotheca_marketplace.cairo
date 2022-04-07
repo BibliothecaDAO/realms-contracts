@@ -7,7 +7,10 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.messages import send_message_to_l1
 from starkware.starknet.common.syscalls import (
-    get_caller_address, get_contract_address, get_block_timestamp)
+    get_caller_address,
+    get_contract_address,
+    get_block_timestamp,
+)
 from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem
 from starkware.cairo.common.uint256 import Uint256, uint256_le
 
@@ -17,7 +20,11 @@ from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
 from openzeppelin.access.ownable import Ownable_initializer, Ownable_only_owner
 
 from openzeppelin.security.pausable import (
-    Pausable_paused, Pausable_pause, Pausable_unpause, Pausable_when_not_paused)
+    Pausable_paused,
+    Pausable_pause,
+    Pausable_unpause,
+    Pausable_when_not_paused,
+)
 
 ############
 # MAPPINGS #
@@ -82,7 +89,8 @@ end
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        address_of_currency_token : felt, _treasury_address : felt, owner : felt):
+    address_of_currency_token : felt, _treasury_address : felt, owner : felt
+):
     currency_token_address.write(address_of_currency_token)
     trade_counter.write(1)
     protocol_fee_bips.write(500)
@@ -97,7 +105,8 @@ end
 
 @external
 func open_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        _token_contract : felt, _token_id : Uint256, _price : felt, _expiration : felt):
+    _token_contract : felt, _token_id : Uint256, _price : felt, _expiration : felt
+):
     alloc_locals
     Pausable_when_not_paused()
     let (caller) = get_caller_address()
@@ -112,7 +121,8 @@ func open_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
     write_trade(
         trade_count,
         Trade(
-        _token_contract, _token_id, _expiration, _price, caller, TradeStatus.Open, trade_count))
+        _token_contract, _token_id, _expiration, _price, caller, TradeStatus.Open, trade_count),
+    )
 
     # increment
     trade_counter.write(trade_count + 1)
@@ -121,7 +131,8 @@ end
 
 @external
 func execute_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        _trade : felt):
+    _trade : felt
+):
     alloc_locals
     Pausable_when_not_paused()
     let (currency) = currency_token_address.read()
@@ -157,14 +168,16 @@ func execute_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
         trade.price,
         trade.poster,
         TradeStatus.Executed,
-        _trade))
+        _trade),
+    )
 
     return ()
 end
 
 @external
 func update_price{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        _trade : felt, _price : felt):
+    _trade : felt, _price : felt
+):
     alloc_locals
     Pausable_when_not_paused()
     let (trade) = _trades.read(_trade)
@@ -176,7 +189,8 @@ func update_price{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
 
     write_trade(
         _trade,
-        Trade(trade.token_contract, trade.token_id, trade.expiration, _price, trade.poster, trade.status, _trade))
+        Trade(trade.token_contract, trade.token_id, trade.expiration, _price, trade.poster, trade.status, _trade),
+    )
     return ()
 end
 
@@ -200,7 +214,8 @@ func cancel_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
         trade.price,
         trade.poster,
         TradeStatus.Cancelled,
-        _trade))
+        _trade),
+    )
 
     return ()
 end
@@ -210,14 +225,16 @@ end
 ###########
 
 func write_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        _trade : felt, trade : Trade):
+    _trade : felt, trade : Trade
+):
     _trades.write(_trade, trade)
     TradeAction.emit(trade)
     return ()
 end
 
 func assert_time_in_range{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        _trade : felt):
+    _trade : felt
+):
     let (block_timestamp) = get_block_timestamp()
     let (trade) = _trades.read(_trade)
     # check trade within
@@ -227,7 +244,8 @@ func assert_time_in_range{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
 end
 
 func assert_poster{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        _trade : felt):
+    _trade : felt
+):
     let (caller) = get_caller_address()
     let (trade) = _trades.read(_trade)
     assert caller = trade.poster
@@ -241,20 +259,23 @@ end
 
 @view
 func get_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(idx : felt) -> (
-        trade : Trade):
+    trade : Trade
+):
     return _trades.read(idx)
 end
 
 @view
 func get_trade_counter{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-        trade_counter : felt):
+    trade_counter : felt
+):
     return trade_counter.read()
 end
 
 # Returns a trades status
 @view
 func get_trade_status{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        idx : felt) -> (status : felt):
+    idx : felt
+) -> (status : felt):
     let (trade) = _trades.read(idx)
     return (trade.status)
 end
@@ -262,7 +283,8 @@ end
 # Returns a trades token
 @view
 func get_trade_token_id{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        idx : felt) -> (token_id : Uint256):
+    idx : felt
+) -> (token_id : Uint256):
     let (trade) = _trades.read(idx)
     return (trade.token_id)
 end
@@ -280,7 +302,8 @@ end
 # Set basis points
 @external
 func set_basis_points{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        basis_points : felt) -> (success : felt):
+    basis_points : felt
+) -> (success : felt):
     Ownable_only_owner()
     protocol_fee_bips.write(basis_points)
     return (1)
@@ -288,7 +311,8 @@ end
 
 @external
 func set_treasury_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        address : felt) -> (success : felt):
+    address : felt
+) -> (success : felt):
     Ownable_only_owner()
     treasury_address.write(address)
     return (1)
@@ -296,7 +320,8 @@ end
 
 @external
 func set_currency_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        address : felt) -> (success : felt):
+    address : felt
+) -> (success : felt):
     Ownable_only_owner()
     currency_token_address.write(address)
     return (1)
