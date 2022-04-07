@@ -28,7 +28,7 @@ from contracts.settling_game.interfaces.imodules import (
 
 ##########
 # EVENTS #
-##########
+# ########
 
 @event
 func ResourceUpgraded(token_id : Uint256, building_id : felt, level : felt):
@@ -79,6 +79,10 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (settling_state_address) = IModuleController.get_module_address(
         controller, ModuleIds.S01_Settling)
 
+    # settling state contract
+    let (settling_logic_address) = IModuleController.get_module_address(
+        controller, ModuleIds.L01_Settling)
+
     # calculator logic contract
     let (calculator_address) = IModuleController.get_module_address(
         controller, ModuleIds.L04_Calculator)
@@ -93,7 +97,13 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # check owner of sRealm
     let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
-    assert caller = owner
+
+    # Allow settling state to Call function
+    if caller != settling_logic_address:
+        with_attr error_message("SETTLING_STATE: Not your realm ser"):
+            assert caller = owner
+        end
+    end
 
     let (local resource_ids : Uint256*) = alloc()
     let (local user_mint : Uint256*) = alloc()
@@ -205,7 +215,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     # TODO: CAN WE IMPROVE THE GAS OF THIS??
 
     # approve lords
-    # IERC20.approve(lords_address, treasury_address, lords_available)
+    IERC20.approve(lords_address, treasury_address, lords_available)
 
     # mint lords
     IERC20.transferFrom(lords_address, treasury_address, owner, lords_available)

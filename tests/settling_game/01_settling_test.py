@@ -44,9 +44,13 @@ async def test_mint_realm(game_factory):
         account=admin_account, to=resources.contract_address, selector_name='mintBatch', calldata=[admin_account.contract_address, 5, *uint(1), *uint(2), *uint(3), *uint(4), *uint(5), 5, *uint(100), *uint(100), *uint(100), *uint(100), *uint(100)]
     )
 
-    # # APPROVE RESOURCE CONTRACT FOR LORDS TRANSFERS - SET AT FULL SUPPLY TODO: NEEDS MORE SECURE SYSTEM
+    # APPROVE RESOURCE CONTRACT FOR LORDS TRANSFERS - SET AT FULL SUPPLY TODO: NEEDS MORE SECURE SYSTEM
     await signers[1].send_transaction(
         account=treasury_account, to=lords.contract_address, selector_name='approve', calldata=[resources_logic.contract_address, *uint(initial_supply)]
+    )
+
+    await signers[1].send_transaction(
+        account=treasury_account, to=lords.contract_address, selector_name='approve', calldata=[settling_logic.contract_address, *uint(initial_supply)]
     )
 
     # RESOURCES
@@ -147,7 +151,12 @@ async def test_mint_realm(game_factory):
     await show_resource_balance(admin_account, resources)
 
     # increment another time so more resource accure
-    set_block_timestamp(starknet.state, round(time.time()) + stake_time)
+    set_block_timestamp(starknet.state, round(
+        time.time()) + stake_time * 2)
+
+    await claim_resources(admin_account, resources_logic, first_token_id)
+
+    await show_resource_balance(admin_account, resources)
 
     #############
     # BUILDINGS #
@@ -169,6 +178,9 @@ async def test_mint_realm(game_factory):
 
     print(
         f'Realm {first_token_id} buildings: {values.result.realm_buildings}')
+
+    set_block_timestamp(starknet.state, round(
+        time.time()) + stake_time * 3)
 
     ##################
     # UNSETTLE REALM #
