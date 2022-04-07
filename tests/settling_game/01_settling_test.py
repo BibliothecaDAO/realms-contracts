@@ -178,7 +178,7 @@ async def test_mint_realm(game_factory):
         account=admin_account, to=settling_logic.contract_address, selector_name='unsettle', calldata=[*first_token_id]
     )
     await show_resource_balance(admin_account, resources)
-    await checks_realms_balance(admin_account, realms, 2)
+    await checks_realms_balance(admin_account, realms, 1)
 
 #########
 # CALLS #
@@ -189,8 +189,9 @@ async def show_resource_balance(admin_account, resources):
     """prints resource balance"""
     for index in range(22):
         player_resource_value = await resources.balanceOf(admin_account.contract_address, uint(index + 1)).invoke()
-        print(
-            f'\033[1;33;40m🔥 | Resource {index + 1} balance is: {player_resource_value.result.balance[0]}')
+        if player_resource_value.result.balance[0] > 0:
+            print(
+                f'\033[1;33;40m🔥 | Resource {index + 1} balance is: {player_resource_value.result.balance[0]}')
 
 
 async def show_lords_balance(admin_account, lords):

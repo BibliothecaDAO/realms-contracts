@@ -104,7 +104,7 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     let (can_claim) = IL02_Resources.check_if_claimable(resource_logic_address, token_id)
 
     if can_claim == TRUE:
-        IL02_Resources.delegate_claim_resources(resource_logic_address, token_id)
+        IL02_Resources.claim_resources(resource_logic_address, token_id)
         set_world_state(token_id, caller, controller, settle_state_address, realms_address)
     else:
         set_world_state(token_id, caller, controller, settle_state_address, realms_address)

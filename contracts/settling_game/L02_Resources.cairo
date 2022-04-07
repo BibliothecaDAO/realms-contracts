@@ -73,15 +73,15 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # state contract
     let (resources_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.S02_Resources)
+        controller, ModuleIds.S02_Resources)
 
     # settling state contract
     let (settling_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.S01_Settling)
+        controller, ModuleIds.S01_Settling)
 
     # calculator logic contract
     let (calculator_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.L04_Calculator)
+        controller, ModuleIds.L04_Calculator)
 
     # treasury address
     let (treasury_address) = IModuleController.get_external_contract_address(
@@ -89,93 +89,114 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # wonder tax pool address
     let (wonders_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.S05_Wonders)
+        controller, ModuleIds.S05_Wonders)
 
     # check owner of sRealm
-    let (owner) = realms_IERC721.ownerOf(contract_address=s_realms_address, token_id=token_id)
+    let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
     assert caller = owner
 
     let (local resource_ids : Uint256*) = alloc()
     let (local user_mint : Uint256*) = alloc()
     let (local wonder_tax_arr : Uint256*) = alloc()
 
-    let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
-        contract_address=realms_address, token_id=token_id)
+    let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
 
-    let (r_1) = calculate_resource_output(token_id, realms_data.resource_1)
-    let (r_2) = calculate_resource_output(token_id, realms_data.resource_2)
-    let (r_3) = calculate_resource_output(token_id, realms_data.resource_3)
-    let (r_4) = calculate_resource_output(token_id, realms_data.resource_5)
-    let (r_5) = calculate_resource_output(token_id, realms_data.resource_5)
-    let (r_6) = calculate_resource_output(token_id, realms_data.resource_6)
-    let (r_7) = calculate_resource_output(token_id, realms_data.resource_7)
-
-    # calculate days
+    # CALC DAYS
     let (total_days, remainder) = get_available_resources(token_id)
 
-    # calculate vault days
+    # CALC VAULT DAYS
     let (total_vault_days, vault_remainder) = get_available_vault_resources(token_id)
 
-    # check vault days + days greater than zero
+    # CHECK DAYS + VAULT > 1
     let days = total_days + total_vault_days
-    assert_not_zero(days)
 
-    # set vault time
+    with_attr error_message("RESOURCES: Nothing Claimable."):
+        assert_not_zero(days)
+    end
+
+    # SET VAULT TIME = REMAINDER - CURRENT_TIME
     IS01_Settling.set_time_staked(settling_state_address, token_id, remainder)
     IS01_Settling.set_time_vault_staked(settling_state_address, token_id, vault_remainder)
 
-    # get wonder tax percentage
-    let (wonder_tax) = IL04_Calculator.calculate_wonder_tax(contract_address=calculator_address)
-    let (wonder_tax_rel_perc, _) = unsigned_div_rem(wonder_tax, 100)
+    # GET WONDER TAX
+    let (wonder_tax) = IL04_Calculator.calculate_wonder_tax(calculator_address)
 
-    # set minting percentages
-    let treasury_mint_perc = wonder_tax_rel_perc
-    let user_mint_rel_perc = 100 - wonder_tax_rel_perc
+    # SET MINT
+    let treasury_mint_perc = wonder_tax
+    let user_mint_rel_perc = 100 - wonder_tax
 
-    let (user_resource_factor, _) = unsigned_div_rem(
-        days * user_mint_rel_perc, BASE_RESOURCES_PER_DAY)
-    let (wonder_tax_resource_factor, _) = unsigned_div_rem(
-        days * treasury_mint_perc, BASE_RESOURCES_PER_DAY)
+    let (r_1_output) = calculate_resource_output(token_id, realms_data.resource_1)
+    let (r_2_output) = calculate_resource_output(token_id, realms_data.resource_2)
+    let (r_3_output) = calculate_resource_output(token_id, realms_data.resource_3)
+    let (r_4_output) = calculate_resource_output(token_id, realms_data.resource_5)
+    let (r_5_output) = calculate_resource_output(token_id, realms_data.resource_5)
+    let (r_6_output) = calculate_resource_output(token_id, realms_data.resource_6)
+    let (r_7_output) = calculate_resource_output(token_id, realms_data.resource_7)
 
-    # current
+    let (r_1_user) = calculate_total_claimable(
+        token_id, realms_data.resource_1, days, user_mint_rel_perc, r_1_output)
+    let (r_1_wonder) = calculate_total_claimable(
+        token_id, realms_data.resource_1, days, treasury_mint_perc, r_1_output)
+
     assert resource_ids[0] = Uint256(realms_data.resource_1, 0)
-    assert user_mint[0] = Uint256(r_1 * user_resource_factor, 0)
-    assert wonder_tax_arr[0] = Uint256(r_1 * wonder_tax_resource_factor, 0)
+    assert user_mint[0] = r_1_user
+    assert wonder_tax_arr[0] = r_1_wonder
 
+    let (r_2_user) = calculate_total_claimable(
+        token_id, realms_data.resource_1, days, user_mint_rel_perc, r_2_output)
+    let (r_2_wonder) = calculate_total_claimable(
+        token_id, realms_data.resource_1, days, treasury_mint_perc, r_2_output)
     if realms_data.resource_2 != 0:
         assert resource_ids[1] = Uint256(realms_data.resource_2, 0)
-        assert user_mint[1] = Uint256(r_2 * user_resource_factor, 0)
-        assert wonder_tax_arr[1] = Uint256(r_2 * wonder_tax_resource_factor, 0)
+        assert user_mint[1] = r_2_user
+        assert wonder_tax_arr[1] = r_2_wonder
     end
-
+    let (r_3_user) = calculate_total_claimable(
+        token_id, realms_data.resource_1, days, user_mint_rel_perc, r_3_output)
+    let (r_3_wonder) = calculate_total_claimable(
+        token_id, realms_data.resource_1, days, treasury_mint_perc, r_3_output)
     if realms_data.resource_3 != 0:
         assert resource_ids[2] = Uint256(realms_data.resource_3, 0)
-        assert user_mint[2] = Uint256(r_3 * user_resource_factor, 0)
-        assert wonder_tax_arr[2] = Uint256(r_3 * wonder_tax_resource_factor, 0)
+        assert user_mint[2] = r_3_user
+        assert wonder_tax_arr[2] = r_3_wonder
     end
-
+    let (r_4_user) = calculate_total_claimable(
+        token_id, realms_data.resource_1, days, user_mint_rel_perc, r_4_output)
+    let (r_4_wonder) = calculate_total_claimable(
+        token_id, realms_data.resource_1, days, treasury_mint_perc, r_4_output)
     if realms_data.resource_4 != 0:
         assert resource_ids[3] = Uint256(realms_data.resource_4, 0)
-        assert user_mint[3] = Uint256(r_4 * user_resource_factor, 0)
-        assert wonder_tax_arr[3] = Uint256(r_4 * wonder_tax_resource_factor, 0)
+        assert user_mint[3] = r_4_user
+        assert wonder_tax_arr[3] = r_4_wonder
     end
-
+    let (r_5_user) = calculate_total_claimable(
+        token_id, realms_data.resource_1, days, user_mint_rel_perc, r_5_output)
+    let (r_5_wonder) = calculate_total_claimable(
+        token_id, realms_data.resource_1, days, treasury_mint_perc, r_5_output)
     if realms_data.resource_5 != 0:
         assert resource_ids[4] = Uint256(realms_data.resource_5, 0)
-        assert user_mint[4] = Uint256(r_5 * user_resource_factor, 0)
-        assert wonder_tax_arr[4] = Uint256(r_5 * wonder_tax_resource_factor, 0)
+        assert user_mint[4] = r_5_user
+        assert wonder_tax_arr[4] = r_5_wonder
     end
 
+    let (r_6_user) = calculate_total_claimable(
+        token_id, realms_data.resource_1, days, user_mint_rel_perc, r_6_output)
+    let (r_6_wonder) = calculate_total_claimable(
+        token_id, realms_data.resource_1, days, treasury_mint_perc, r_6_output)
     if realms_data.resource_6 != 0:
-        assert resource_ids[5] = Uint256(realms_data.resource_7, 0)
-        assert user_mint[5] = Uint256(r_6 * user_resource_factor, 0)
-        assert wonder_tax_arr[5] = Uint256(r_6 * wonder_tax_resource_factor, 0)
+        assert resource_ids[5] = Uint256(realms_data.resource_6, 0)
+        assert user_mint[5] = r_6_user
+        assert wonder_tax_arr[5] = r_6_wonder
     end
 
+    let (r_7_user) = calculate_total_claimable(
+        token_id, realms_data.resource_1, days, user_mint_rel_perc, r_7_output)
+    let (r_7_wonder) = calculate_total_claimable(
+        token_id, realms_data.resource_1, days, treasury_mint_perc, r_7_output)
     if realms_data.resource_7 != 0:
         assert resource_ids[6] = Uint256(realms_data.resource_7, 0)
-        assert user_mint[6] = Uint256(r_7 * user_resource_factor, 0)
-        assert wonder_tax_arr[6] = Uint256(r_7 * wonder_tax_resource_factor, 0)
+        assert user_mint[6] = r_7_user
+        assert wonder_tax_arr[6] = r_7_wonder
     end
 
     # LORDS MINT
@@ -187,14 +208,14 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     # IERC20.approve(lords_address, treasury_address, lords_available)
 
     # mint lords
-    IERC20.transferFrom(lords_address, treasury_address, caller, lords_available)
+    IERC20.transferFrom(lords_address, treasury_address, owner, lords_available)
 
     # TODO: ONLY ALLOW THIS MODULE TO MINT FROM RESOURCE CONTRACT
 
     # mint users
     IERC1155.mintBatch(
         resources_address,
-        caller,
+        owner,
         realms_data.resource_number,
         resource_ids,
         realms_data.resource_number,
@@ -422,4 +443,15 @@ func calculate_resource_output{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
         return (BASE_RESOURCES_PER_DAY)
     end
     return (level * BASE_RESOURCES_PER_DAY)
+end
+
+func calculate_total_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        token_id : Uint256, resource_id : felt, days : felt, tax : felt, output : felt) -> (
+        value : Uint256):
+    alloc_locals
+
+    # days * current tax * output
+    # we multiply by tax before dividing by 100
+    let (total_work_generated, _) = unsigned_div_rem(days * tax * output, 100)
+    return (Uint256(total_work_generated, 0))
 end
