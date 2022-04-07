@@ -31,6 +31,8 @@ sixth_token_id = (9999, 9999)
 
 initial_user_funds = 1000 * (10 ** 18)
 
+initial_supply = 1000000 * (10 ** 18)
+
 
 def compile(path) -> ContractDefinition:
     here = os.path.abspath(os.path.dirname(__file__))
@@ -382,11 +384,9 @@ async def ctx_factory_desiege(copyable_deployment_desiege):
 
     return make
 
-initial_supply = 1000000 * (10 ** 18)
-
 
 @pytest.fixture(scope='session')
-async def game_factory(account_factory):
+async def token_factory(account_factory):
     (starknet, accounts, signers) = account_factory
     admin_key = signers[0]
     admin_account = accounts[0]
@@ -394,7 +394,6 @@ async def game_factory(account_factory):
 
     set_block_timestamp(starknet.state, round(time.time()))
     print('Lords...')
-    # ERC Contracts
     lords = await starknet.deploy(
         source="contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo",
         constructor_calldata=[
@@ -430,16 +429,20 @@ async def game_factory(account_factory):
             admin_account.contract_address
         ])
 
+    return starknet, admin_key, admin_account, treasury_account, accounts, signers, lords, realms, s_realms, resources
+
+
+@pytest.fixture(scope='session')
+async def game_factory(token_factory):
+    (starknet, admin_key, admin_account, treasury_account, accounts,
+     signers, lords, realms, s_realms, resources) = token_factory
+
     storage = await starknet.deploy(
         source="contracts/settling_game/database/Storage.cairo",
         constructor_calldata=[
             admin_account.contract_address
         ])
-    # The Controller is the only unchangeable contract.
-    # First deploy Arbiter.
-    # Then send the Arbiter address during Controller deployment.
-    # Then save the controller address in the Arbiter.
-    # Then deploy Controller address during module deployments.
+
     print('Game...')
     arbiter = await starknet.deploy(
         source="contracts/settling_game/Arbiter.cairo",
@@ -488,6 +491,7 @@ async def game_factory(account_factory):
         calldata=[
             settling_logic.contract_address, settling_state.contract_address, resources_logic.contract_address, resources_state.contract_address, buildings_logic.contract_address, buildings_state.contract_address, calculator_logic.contract_address, wonders_logic.contract_address, wonders_state.contract_address])
 
+    # set module access witin S_Realm contract
     await admin_key.send_transaction(
         account=admin_account,
         to=s_realms.contract_address,
@@ -495,6 +499,7 @@ async def game_factory(account_factory):
         calldata=[
             settling_logic.contract_address])
 
+    # set module access witin resources contract
     await admin_key.send_transaction(
         account=admin_account,
         to=resources.contract_address,

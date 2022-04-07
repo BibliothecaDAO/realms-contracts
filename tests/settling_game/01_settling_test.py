@@ -29,6 +29,7 @@ LORDS_RATE = 25
 RESOURCES = 100
 stake_time = DAYS * STAKED_DAYS
 building_id = 1
+resource_id = 2
 
 
 @pytest.mark.asyncio
@@ -56,7 +57,7 @@ async def test_mint_realm(game_factory):
     # RESOURCES
     # SET VALUES (ids,cost) AT 1,2,3,4,5,10,10,10,10,10
     await signer.send_transaction(
-        account=admin_account, to=storage.contract_address, selector_name='set_resource_upgrade_value', calldata=[5, 47408855671140352459265]
+        account=admin_account, to=storage.contract_address, selector_name='set_resource_upgrade_value', calldata=[resource_id, 47408855671140352459265]
     )
 
     # BUILDING 1 IDS 1,2,3,4,5
@@ -145,7 +146,7 @@ async def test_mint_realm(game_factory):
         f'\n \033[1;33;40m🔥 Upgrading Resource.... 🔥\n')
 
     await signer.send_transaction(
-        account=admin_account, to=resources_logic.contract_address, selector_name='upgrade_resource', calldata=[*first_token_id, 5]
+        account=admin_account, to=resources_logic.contract_address, selector_name='upgrade_resource', calldata=[*first_token_id, resource_id]
     )
 
     await show_resource_balance(admin_account, resources)
@@ -197,56 +198,56 @@ async def test_mint_realm(game_factory):
 #########
 
 
-async def show_resource_balance(admin_account, resources):
+async def show_resource_balance(account, resources):
     """prints resource balance"""
     for index in range(22):
-        player_resource_value = await resources.balanceOf(admin_account.contract_address, uint(index + 1)).invoke()
+        player_resource_value = await resources.balanceOf(account.contract_address, uint(index + 1)).invoke()
         if player_resource_value.result.balance[0] > 0:
             print(
                 f'\033[1;33;40m🔥 | Resource {index + 1} balance is: {player_resource_value.result.balance[0]}')
 
 
-async def show_lords_balance(admin_account, lords):
+async def show_lords_balance(account, lords):
     """claims lords"""
-    player_lords_value = await lords.balanceOf(admin_account.contract_address).invoke()
+    player_lords_value = await lords.balanceOf(account.contract_address).invoke()
     print(
         f'\n \033[1;33;40m👛 | $LORDS {player_lords_value.result.balance[0]}\n')
     assert player_lords_value.result.balance[0] == STAKED_DAYS * LORDS_RATE
 
 
-async def claim_resources(admin_account, resources_logic, token):
+async def claim_resources(account, resources_logic, token):
     """claims resources"""
     await signer.send_transaction(
-        account=admin_account, to=resources_logic.contract_address, selector_name='claim_resources', calldata=[*token]
+        account=account, to=resources_logic.contract_address, selector_name='claim_resources', calldata=[*token]
     )
 
 
-async def checks_realms_balance(admin_account, realms, assert_value):
+async def checks_realms_balance(account, realms, assert_value):
     """check realms balance"""
-    balance_of = await realms.balanceOf(admin_account.contract_address).invoke()
+    balance_of = await realms.balanceOf(account.contract_address).invoke()
     assert balance_of.result.balance[0] == assert_value
     print(
         f'🏰 | Realms Balance: {balance_of.result.balance[0]}\n')
 
 
-async def set_realm_meta(admin_account, realms, token):
+async def set_realm_meta(account, realms, token):
     """set realm metadata"""
     await signer.send_transaction(
-        admin_account, realms.contract_address, 'set_realm_data', [
+        account, realms.contract_address, 'set_realm_data', [
             *token, map_realm(json_realms[str(from_uint(token))])]
     )
 
 
-async def mint_realm(admin_account, realms, token):
+async def mint_realm(account, realms, token):
     """mint realm"""
     await signer.send_transaction(
-        admin_account, realms.contract_address, 'mint', [
-            admin_account.contract_address, *token]
+        account, realms.contract_address, 'mint', [
+            account.contract_address, *token]
     )
 
 
-async def settle_realm(admin_account, settling_logic, token):
+async def settle_realm(account, settling_logic, token):
     """settle realm"""
     await signer.send_transaction(
-        account=admin_account, to=settling_logic.contract_address, selector_name='settle', calldata=[*token]
+        account=account, to=settling_logic.contract_address, selector_name='settle', calldata=[*token]
     )

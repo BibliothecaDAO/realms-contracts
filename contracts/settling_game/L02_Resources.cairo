@@ -55,50 +55,50 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (caller) = get_caller_address()
     let (controller) = MODULE_controller_address()
 
-    # lords contract
+    # LORDS CONTRACT
     let (lords_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Lords)
 
-    # realms contract
+    # REALMS CONTRACT
     let (realms_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Realms)
 
-    # sRealms contract
+    # S_REALMS CONTRACT
     let (s_realms_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.S_Realms)
 
-    # resource contract
+    # RESOURCES 1155 CONTRACT
     let (resources_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Resources)
 
-    # state contract
+    # RESOURCE STATE
     let (resources_state_address) = IModuleController.get_module_address(
         controller, ModuleIds.S02_Resources)
 
-    # settling state contract
+    # SETTLING STATE
     let (settling_state_address) = IModuleController.get_module_address(
         controller, ModuleIds.S01_Settling)
 
-    # settling state contract
+    # SETTLING LOGIC
     let (settling_logic_address) = IModuleController.get_module_address(
         controller, ModuleIds.L01_Settling)
 
-    # calculator logic contract
+    # CALCULATOR
     let (calculator_address) = IModuleController.get_module_address(
         controller, ModuleIds.L04_Calculator)
 
-    # treasury address
+    # TREASURY
     let (treasury_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Treasury)
 
-    # wonder tax pool address
+    # WONDER STATE
     let (wonders_state_address) = IModuleController.get_module_address(
         controller, ModuleIds.S05_Wonders)
 
-    # check owner of sRealm
+    # FETCH OWNER
     let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
 
-    # Allow settling state to Call function
+    # ALLOW RESOURCE LOGIC ADDRESS TO CLAIM, BUT STILL RESTRICT
     if caller != settling_logic_address:
         with_attr error_message("SETTLING_STATE: Not your realm ser"):
             assert caller = owner
@@ -109,6 +109,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (local user_mint : Uint256*) = alloc()
     let (local wonder_tax_arr : Uint256*) = alloc()
 
+    # FETCH REALM DATA
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
 
     # CALC DAYS
@@ -135,6 +136,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let treasury_mint_perc = wonder_tax
     let user_mint_rel_perc = 100 - wonder_tax
 
+    # GET OUTPUT FOR EACH RESOURCE
     let (r_1_output) = calculate_resource_output(token_id, realms_data.resource_1)
     let (r_2_output) = calculate_resource_output(token_id, realms_data.resource_2)
     let (r_3_output) = calculate_resource_output(token_id, realms_data.resource_3)
@@ -143,6 +145,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (r_6_output) = calculate_resource_output(token_id, realms_data.resource_6)
     let (r_7_output) = calculate_resource_output(token_id, realms_data.resource_7)
 
+    # ADD VALUES TO TEMP ARRAY FOR EACH AVAILABLE RESOURCE
     let (r_1_user) = calculate_total_claimable(
         token_id, realms_data.resource_1, days, user_mint_rel_perc, r_1_output)
     let (r_1_wonder) = calculate_total_claimable(
@@ -212,17 +215,12 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     # LORDS MINT
     let lords_available = Uint256(total_days * BASE_LORDS_PER_DAY, 0)
 
-    # TODO: CAN WE IMPROVE THE GAS OF THIS??
-
-    # approve lords
-    IERC20.approve(lords_address, treasury_address, lords_available)
-
-    # mint lords
+    # MINT LORDS
     IERC20.transferFrom(lords_address, treasury_address, owner, lords_available)
 
-    # TODO: ONLY ALLOW THIS MODULE TO MINT FROM RESOURCE CONTRACT
+    # TODO: AUDIT CHECK SECURE PATH TO MINT
 
-    # mint users
+    # MINT USERS RESOURCES
     IERC1155.mintBatch(
         resources_address,
         owner,
@@ -231,9 +229,10 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         realms_data.resource_number,
         user_mint)
 
-    # update wonder tax pool
+    # GET EPOCH
     let (current_epoch) = IL04_Calculator.calculate_epoch(calculator_address)
 
+    # SET WONDER TAX IN POOL
     IS05_Wonders.batch_set_tax_pool(
         wonders_state_address,
         current_epoch,
@@ -249,6 +248,7 @@ end
 # GETTERS #
 ###########
 
+# FETCHES AVAILABLE RESOURCES PER DAY
 @view
 func get_available_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_id : Uint256) -> (days_accrued : felt, remainder : felt):
@@ -266,6 +266,7 @@ func get_available_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, r
     return (days_accrued, seconds_left_over)
 end
 
+# FETCHES AVAILABLE RESOURCES PER VAULT
 @view
 func get_available_vault_resources{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(token_id : Uint256) -> (
@@ -280,7 +281,7 @@ func get_available_vault_resources{
 
     let (last_update) = IS01_Settling.get_time_vault_staked(settling_state_address, token_id)
 
-    # calc days remaining
+    # CALC REMAINING DAYS
     let (days_accrued, seconds_left_over) = unsigned_div_rem(block_timestamp - last_update, DAY)
 
     # returns true if days <= vault_length -1 (we minus 1 so the user can claim when they have 7 days)
@@ -452,7 +453,7 @@ func calculate_resource_output{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     if level == 0:
         return (BASE_RESOURCES_PER_DAY)
     end
-    return (level * BASE_RESOURCES_PER_DAY)
+    return ((level + 1) * BASE_RESOURCES_PER_DAY)
 end
 
 func calculate_total_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
