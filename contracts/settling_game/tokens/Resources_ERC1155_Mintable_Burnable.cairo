@@ -96,7 +96,7 @@ func mintBatch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
         to : felt, ids_len : felt, ids : Uint256*, amounts_len : felt, amounts : Uint256*):
     # TODO: Restrict
     # Ownable_only_owner()
-    check_can_action()
+    # check_can_action()
     ERC1155_mint_batch(to, ids_len, ids, amounts_len, amounts)
     return ()
 end
