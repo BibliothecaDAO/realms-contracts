@@ -1,4 +1,5 @@
-import { Provider, ec, Account } from 'starknet'
+import { Provider, ec, Account, Contract, hash } from 'starknet'
+import { transformCallsToMulticallArrays } from 'starknet/dist/utils/transaction.js'
 import fs from 'fs'
 import { BigNumberish, toBN } from 'starknet/dist/utils/number'
 import { config as dotenvConfig } from "dotenv";
@@ -6,7 +7,7 @@ import { resolve } from "path";
 
 dotenvConfig({ path: resolve(__dirname, "../../.env") });
 
-export const DEPLOYMENT_PATH_BASE = "./minigame-deployments/starknet";
+export const DEPLOYMENT_PATH_BASE = "./deployments/starknet";
 
 const network: any = process.env.NETWORK || "georli-alpha"
 export const provider = new Provider({ network })
@@ -44,7 +45,7 @@ type AccountShape = {
 export function getOwnerAccount(): AccountShape {
   const path_base = getPathBase()
 
-  try {  
+  try {
     const file = fs.readFileSync(`${path_base}/OwnerAccount.json`)
 
     const parsed = JSON.parse(file.toString())
@@ -128,8 +129,8 @@ export async function deployContract(contractName: string, contractAlias: string
     writeDeployment(contractAlias, result)
     writeNileDeploymentFile(contractName, contractAlias, result)
     console.log(res);
-  } catch(e){
-    console.error("Error Deploying Contract: ", e )
+  } catch (e) {
+    console.error("Error Deploying Contract: ", e)
   }
 
   return result
@@ -137,27 +138,85 @@ export async function deployContract(contractName: string, contractAlias: string
 
 export function getSigner() {
   const path_base = getPathBase()
-  try {  
+  try {
     const file = fs.readFileSync(`${path_base}/OwnerAccount.json`)
 
     const parsed = JSON.parse(file.toString())
 
     const privKey = process.env.OWNER_PRIVATE_KEY;
 
-    if(privKey == undefined || privKey == ""){
+    if (privKey == undefined || privKey == "") {
       throw new Error("Attempted to call getSigner() with OWNER_PRIVATE_KEY being undefined. Set env value in .env or execution environment.")
     }
 
-    const kp = ec.getKeyPair(toBN(privKey, "hex"))
-    const s = new Account(provider, parsed.address, kp )
+    const kp = ec.genKeyPair(privKey)
+    const s = new Account(provider, parsed.address, kp)
+    console.log(s)
     return s;
 
-  } catch( e ) {
+  } catch (e) {
     console.error("Signing error: ", e)
+  }
+}
+
+export async function sendtx(data: any) {
+  try {
+    const res = await getSigner().execute(data)
+
+    console.log(res)
+
+    console.log(`Waiting for Tx to be Accepted on Starknet - Transfer...`);
+    await provider.waitForTransaction(res.transaction_hash);
+
+  } catch (e) {
+    console.log(e)
   }
 }
 
 export function getVersionSuffix() {
   const now = new Date()
   return `${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}`
+}
+
+export async function getAccountContract(calls: any) {
+  const path_base = getPathBase()
+  const privKey = process.env.OWNER_PRIVATE_KEY;
+  const address: any = fs.readFileSync(`${path_base}/OwnerAccount.json`)
+  const abi: any = fs.readFileSync(`./artifacts/abis/Account.json`)
+
+  const parsed_address = JSON.parse(address.toString())
+  const parsed_abi = JSON.parse(abi.toString())
+
+  try {
+    const starkKeyPair = ec.genKeyPair(privKey);
+
+    console.log(starkKeyPair.getPrivate("number").toString())
+    // const account = new Account(provider, parsed_address.address, starkKeyPair)
+    // const accountContract = new Contract(
+    //   parsed_abi,
+    //   parsed_address.address
+    // );
+
+    // const nonce = (await accountContract.call("get_nonce")).toString();
+    // const msgHash = hash.hashMulticall(parsed_address.address, calls, nonce, "0");
+    // const signature = ec.sign(starkKeyPair, msgHash);
+
+    // const { callArray, calldata } = transformCallsToMulticallArrays(calls);
+
+    // const { transaction_hash: transferTxHash } = await accountContract.__execute__(
+    //   callArray,
+    //   calldata,
+    //   nonce,
+    //   signature
+    // );
+
+    console.log(`Waiting for Tx to be Accepted on Starknet - Transfer...`);
+
+    // await provider.waitForTransaction(transferTxHash);
+
+    return 1;
+
+  } catch (e) {
+    console.error("Signing error: ", e)
+  }
 }

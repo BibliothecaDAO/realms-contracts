@@ -4,80 +4,149 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.dict import dict_write, dict_read
 from starkware.cairo.common.default_dict import default_dict_new, default_dict_finalize
-from starkware.starknet.common.syscalls import get_caller_address
+from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
-from contracts.token.IERC20 import IERC20
 from contracts.settling_game.interfaces.imodules import IModuleController
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 
-# #### Module 1B ###
-#                 #
-# Settling State  #
-#                 #
-###################
+from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
 
-@storage_var
-func controller_address() -> (address : felt):
-end
+from contracts.settling_game.utils.library import (
+    MODULE_controller_address,
+    MODULE_only_approved,
+    MODULE_initializer,
+)
 
+from contracts.settling_game.utils.constants import TRUE, FALSE
+
+# ___MODULE_S01___SETTLING_STATE
+
+##########
+# EVENTS #
+##########
+
+# STAKE TIME - THIS IS USED AS THE MAIN IDENTIFIER FOR STAKING TIME.
+# IT IS UPDATED ON RESOURCE CLAIM, STAKE, UNSTAKE
 @storage_var
 func time_staked(token_id : Uint256) -> (time : felt):
 end
 
+# VESTING TIME - 7 DAYS
+# THIS IS THE STORAGE VAR FOR THE VAULT
+# THE VAULT STORES THE VESTED RESOURCES, IT CAN ONLY BE ACCESS WHEN A FULL EPOCH WORTH IS AVAILABLE
+# THIS IS CURRENTLY SET AT 7 DAYS
+@storage_var
+func time_vault_staked(token_id : Uint256) -> (time : felt):
+end
+
+@storage_var
+func total_realms_settled() -> (amount : felt):
+end
+
+###############
+# CONSTRUCTOR #
+###############
+
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        address_of_controller : felt):
+    address_of_controller : felt
+):
     # Store the address of the only fixed contract in the system.
-    controller_address.write(address_of_controller)
+    MODULE_initializer(address_of_controller)
     return ()
 end
 
-# Setters
+###########
+# SETTERS #
+###########
+# ## VARS ###
+# TIME_LEFT -> WHEN PLAYER CLAIMS, THIS IS THE REMAINDER TO BE PASSED BACK INTO STORAGE
+# THIS ALLOWS FULL DAYS TO BE CLAIMED ONLY AND ALLOWS LESS THAN FULL DAYS TO CONTINUE ACCRUREING
 @external
 func set_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256, timestamp : felt):
-    only_approved()
+    token_id : Uint256, time_left : felt
+):
+    MODULE_only_approved()
 
-    time_staked.write(token_id, timestamp)
+    let (block_timestamp) = get_block_timestamp()
+
+    # SETS CURRENT TIME
+    time_staked.write(token_id, block_timestamp - time_left)
+    return ()
+end
+
+# VAULT_TIME_LEFT -> WHEN PLAYER CLAIMS, THIS IS THE REMAINDER TO BE PASSED BACK INTO STORAGE
+# THIS ALLOWS FULL 7 DAYS TO BE CLAIMED ONLY AND ALLOWS LESS THAN FULL DAYS TO CONTINUE ACCRUREING
+@external
+func set_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256, time_left : felt
+):
+    MODULE_only_approved()
+
+    let (block_timestamp) = get_block_timestamp()
+
+    # SETS CURRENT TIME
+    time_vault_staked.write(token_id, block_timestamp - time_left)
     return ()
 end
 
 @external
-func set_approval{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    let (controller) = controller_address.read()
+func set_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    amount : felt
+):
+    MODULE_only_approved()
 
-    # realms address
-    let (realms_address) = IModuleController.get_realms_address(contract_address=controller)
+    total_realms_settled.write(amount)
+    return ()
+end
 
-    # settle address
+# TODO: AUDIT NEEDED
+@external
+func return_approved{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    MODULE_only_approved()
+    let (controller) = MODULE_controller_address()
+
+    # FETCH ADDRESSES
+    let (realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Realms
+    )
     let (settle_logic_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=1)
+        controller, ModuleIds.S01_Settling
+    )
 
-    # Allow logic to access the erc721 stored
-    realms_IERC721.setApprovalForAll(realms_address, settle_logic_address, 1)
+    # SET APPROVAL TO ALLOW TRANSFER BACK TO OWNER
+    realms_IERC721.setApprovalForAll(realms_address, settle_logic_address, TRUE)
 
     return ()
 end
 
-# Getters
-@external
+###########
+# GETTERS #
+###########
+
+@view
 func get_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256) -> (time : felt):
+    token_id : Uint256
+) -> (time : felt):
     let (time) = time_staked.read(token_id)
 
     return (time=time)
 end
 
-# Checks write-permission of the calling contract.
-func only_approved{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    # Get the address of the module trying to write to this contract.
-    let (caller) = get_caller_address()
-    let (controller) = controller_address.read()
-    # Pass this address on to the ModuleController.
-    # "Does this address have write-authority here?"
-    # Will revert the transaction if not.
-    IModuleController.has_write_access(
-        contract_address=controller, address_attempting_to_write=caller)
-    return ()
+@view
+func get_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
+) -> (time : felt):
+    let (time) = time_vault_staked.read(token_id)
+
+    return (time=time)
+end
+
+@view
+func get_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    ) -> (realms_settled : felt):
+    let (amount) = total_realms_settled.read()
+
+    return (realms_settled=amount)
 end

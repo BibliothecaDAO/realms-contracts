@@ -8,7 +8,7 @@ To run all tests:
 
 To run a specific test:
 
-`$ pytest tests/settling_game/00_realms_contract_test.py`
+`$ pytest -s tests/settling_game/01_settling_test.py`
 
 ### pytest Flags
 

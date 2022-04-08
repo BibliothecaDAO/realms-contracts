@@ -3,6 +3,8 @@ import json
 
 building_costs = [6, 6, 6, 6, 6, 6, 6, 6, 6]
 
+resource_ids = [1, 4, 6]
+resource_values = [10, 10, 10, 10, 10]
 
 buildings = [
     {
@@ -50,7 +52,7 @@ def createOutput(value, chunksize):
     return value
 
 
-def mapRealm(value):
+def map_realm(value):
     traits = []
     resourceIds = []
     wonder = []
@@ -101,21 +103,20 @@ def mapRealm(value):
 
     # concat all together
     meta = traits + resourceLength + resourceIds + wonder + order
-    print(meta)
-    print(decimalToBinary(meta, 8))
     return decimalToBinary(meta, 8)
 
 
 if __name__ == '__main__':
 
-    f = open("data/realms_bit.json", "a")
-    output = []
-    for index in range(8000):
-        output.append({str(index + 1): mapRealm(realms[str(index + 1)])})
+    # f = open("data/realms_bit.json", "a")
+    # output = []
+    # for index in range(8000):
+    #     output.append({str(index + 1): map_realm(realms[str(index + 1)])})
 
-    f.write(str(output))
+    # f.write(str(output))
 
-    # with open('scripts/json_data.json', 'w') as outfile:
-    #     outfile.write(str(createOutput(buildings, 6)))
+    # # with open('scripts/json_data.json', 'w') as outfile:
+    # #     outfile.write(str(createOutput(buildings, 6)))
 
-    # print(createOutput(buildings, 6))
+    print(decimalToBinary(resource_ids, 8))
+    print(decimalToBinary(resource_values, 12))

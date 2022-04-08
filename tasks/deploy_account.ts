@@ -18,13 +18,13 @@ export default async function deployAccount() {
   const starkKey = ec.getStarkKey(keyPair)
 
   const network = process.env.NETWORK || "georli-alpha"
-  
+
   const provider = new Provider({ network: network as any })
 
   const contract = (await fs.promises.readFile("./artifacts/Account.json")).toString()
 
-  const result = await provider.deployContract({ 
-    contract, 
+  const result = await provider.deployContract({
+    contract,
     constructorCalldata: [
       starkKey
     ]
@@ -39,13 +39,13 @@ export default async function deployAccount() {
   console.log(`TX: ${result.transaction_hash}`)
   console.log(`Public Key ${starkKey}`)
   console.log(`Private Key ${keyPair.getPrivate("hex")}`)
-  console.log("waiting for transaaction...")
+  console.log("waiting for transaction...")
   try {
     await provider.waitForTransaction(result.transaction_hash)
     const res = await provider.getTransactionStatus(result.transaction_hash)
     console.log(res);
-  } catch(e){
-    console.error("Error deploying account: ", e )
+  } catch (e) {
+    console.error("Error deploying account: ", e)
   }
 
 }

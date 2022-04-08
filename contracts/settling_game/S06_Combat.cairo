@@ -114,7 +114,8 @@ end
 
 @event
 func Combat_step(
-        attacking_squad : Squad, defending_squad : Squad, attack_type : felt, hit_points : felt):
+    attacking_squad : Squad, defending_squad : Squad, attack_type : felt, hit_points : felt
+):
 end
 
 # TODO: stats shouldn't be hardcoded here, take them from a felt that's easy to update
@@ -129,82 +130,98 @@ func get_troop{range_check_ptr, bitwise_ptr : BitwiseBuiltin*}(troop_id : felt) 
 
     if troop_id == TroopId.Watchman:
         return (
-            Troop(type=TroopType.Melee, tier=1, agility=1, attack=1, defense=3, vitality=4, wisdom=1))
+            Troop(type=TroopType.Melee, tier=1, agility=1, attack=1, defense=3, vitality=4, wisdom=1),
+        )
     end
 
     if troop_id == TroopId.Guard:
         return (
-            Troop(type=TroopType.Melee, tier=2, agility=2, attack=2, defense=6, vitality=8, wisdom=2))
+            Troop(type=TroopType.Melee, tier=2, agility=2, attack=2, defense=6, vitality=8, wisdom=2),
+        )
     end
 
     if troop_id == TroopId.GuardCaptain:
         return (
-            Troop(type=TroopType.Melee, tier=3, agility=4, attack=4, defense=12, vitality=16, wisdom=4))
+            Troop(type=TroopType.Melee, tier=3, agility=4, attack=4, defense=12, vitality=16, wisdom=4),
+        )
     end
 
     if troop_id == TroopId.Squire:
         return (
-            Troop(type=TroopType.Melee, tier=1, agility=1, attack=4, defense=1, vitality=1, wisdom=3))
+            Troop(type=TroopType.Melee, tier=1, agility=1, attack=4, defense=1, vitality=1, wisdom=3),
+        )
     end
 
     if troop_id == TroopId.Knight:
         return (
-            Troop(type=TroopType.Melee, tier=2, agility=2, attack=8, defense=2, vitality=2, wisdom=6))
+            Troop(type=TroopType.Melee, tier=2, agility=2, attack=8, defense=2, vitality=2, wisdom=6),
+        )
     end
 
     if troop_id == TroopId.KnightCommander:
         return (
-            Troop(type=TroopType.Melee, tier=3, agility=4, attack=16, defense=4, vitality=4, wisdom=12))
+            Troop(type=TroopType.Melee, tier=3, agility=4, attack=16, defense=4, vitality=4, wisdom=12),
+        )
     end
 
     if troop_id == TroopId.Scout:
         return (
-            Troop(type=TroopType.Ranged, tier=1, agility=4, attack=3, defense=1, vitality=1, wisdom=1))
+            Troop(type=TroopType.Ranged, tier=1, agility=4, attack=3, defense=1, vitality=1, wisdom=1),
+        )
     end
 
     if troop_id == TroopId.Archer:
         return (
-            Troop(type=TroopType.Ranged, tier=2, agility=8, attack=6, defense=2, vitality=2, wisdom=2))
+            Troop(type=TroopType.Ranged, tier=2, agility=8, attack=6, defense=2, vitality=2, wisdom=2),
+        )
     end
 
     if troop_id == TroopId.Sniper:
         return (
-            Troop(type=TroopType.Ranged, tier=3, agility=16, attack=12, defense=4, vitality=4, wisdom=4))
+            Troop(type=TroopType.Ranged, tier=3, agility=16, attack=12, defense=4, vitality=4, wisdom=4),
+        )
     end
 
     if troop_id == TroopId.Scorpio:
         return (
-            Troop(type=TroopType.Siege, tier=1, agility=1, attack=4, defense=1, vitality=3, wisdom=1))
+            Troop(type=TroopType.Siege, tier=1, agility=1, attack=4, defense=1, vitality=3, wisdom=1),
+        )
     end
 
     if troop_id == TroopId.Ballista:
         return (
-            Troop(type=TroopType.Siege, tier=2, agility=2, attack=8, defense=2, vitality=6, wisdom=2))
+            Troop(type=TroopType.Siege, tier=2, agility=2, attack=8, defense=2, vitality=6, wisdom=2),
+        )
     end
 
     if troop_id == TroopId.Catapult:
         return (
-            Troop(type=TroopType.Siege, tier=3, agility=4, attack=16, defense=4, vitality=12, wisdom=4))
+            Troop(type=TroopType.Siege, tier=3, agility=4, attack=16, defense=4, vitality=12, wisdom=4),
+        )
     end
 
     if troop_id == TroopId.Apprentice:
         return (
-            Troop(type=TroopType.Ranged, tier=1, agility=2, attack=2, defense=1, vitality=1, wisdom=4))
+            Troop(type=TroopType.Ranged, tier=1, agility=2, attack=2, defense=1, vitality=1, wisdom=4),
+        )
     end
 
     if troop_id == TroopId.Mage:
         return (
-            Troop(type=TroopType.Ranged, tier=2, agility=4, attack=4, defense=2, vitality=2, wisdom=8))
+            Troop(type=TroopType.Ranged, tier=2, agility=4, attack=4, defense=2, vitality=2, wisdom=8),
+        )
     end
 
     if troop_id == TroopId.Arcanist:
         return (
-            Troop(type=TroopType.Ranged, tier=3, agility=8, attack=8, defense=4, vitality=4, wisdom=16))
+            Troop(type=TroopType.Ranged, tier=3, agility=8, attack=8, defense=4, vitality=4, wisdom=16),
+        )
     end
 
     if troop_id == TroopId.GrandMarshal:
         return (
-            Troop(type=TroopType.Melee, tier=3, agility=16, attack=16, defense=16, vitality=16, wisdom=16))
+            Troop(type=TroopType.Melee, tier=3, agility=16, attack=16, defense=16, vitality=16, wisdom=16),
+        )
     end
 
     # shouldn't ever happen thanks to the asserts at the beginning
@@ -251,7 +268,8 @@ func unpack_troop{range_check_ptr}(packed : felt) -> (t : Troop):
     let (wisdom, vitality) = unsigned_div_rem(r4, SHIFT)
 
     return (
-        Troop(type=type, tier=tier, agility=agility, attack=attack, defense=defense, vitality=vitality, wisdom=wisdom))
+        Troop(type=type, tier=tier, agility=agility, attack=attack, defense=defense, vitality=vitality, wisdom=wisdom),
+    )
 end
 
 func compute_squad_stats(s : Squad) -> (stats : SquadStats):
@@ -291,7 +309,8 @@ func compute_squad_stats(s : Squad) -> (stats : SquadStats):
         s.t3_1.wisdom
 
     return (
-        SquadStats(agility=agility, attack=attack, defense=defense, vitality=vitality, wisdom=wisdom))
+        SquadStats(agility=agility, attack=attack, defense=defense, vitality=vitality, wisdom=wisdom),
+    )
 end
 
 func pack_squad{range_check_ptr}(s : Squad) -> (p : PackedSquad):
@@ -396,7 +415,8 @@ func unpack_squad{range_check_ptr}(p : PackedSquad) -> (s : Squad):
         Squad(t1_1=t1_1, t1_2=t1_2, t1_3=t1_3, t1_4=t1_4, t1_5=t1_5, t1_6=t1_6,
         t1_7=t1_7, t1_8=t1_8, t1_9=t1_9, t1_10=t1_10, t1_11=t1_11, t1_12=t1_12,
         t1_13=t1_13, t1_14=t1_14, t1_15=t1_15, t1_16=t1_16, t2_1=t2_1, t2_2=t2_2,
-        t2_3=t2_3, t2_4=t2_4, t2_5=t2_5, t2_6=t2_6, t2_7=t2_7, t2_8=t2_8, t3_1=t3_1))
+        t2_3=t2_3, t2_4=t2_4, t2_5=t2_5, t2_6=t2_6, t2_7=t2_7, t2_8=t2_8, t3_1=t3_1),
+    )
 end
 
 func squad_to_array(s : Squad) -> (a_len : felt, a : felt*):
@@ -509,12 +529,14 @@ func array_to_squad(a_len : felt, a : felt*) -> (s : Squad):
         Squad(t1_1=t1_1, t1_2=t1_2, t1_3=t1_3, t1_4=t1_4, t1_5=t1_5, t1_6=t1_6,
         t1_7=t1_7, t1_8=t1_8, t1_9=t1_9, t1_10=t1_10, t1_11=t1_11, t1_12=t1_12,
         t1_13=t1_13, t1_14=t1_14, t1_15=t1_15, t1_16=t1_16, t2_1=t2_1, t2_2=t2_2,
-        t2_3=t2_3, t2_4=t2_4, t2_5=t2_5, t2_6=t2_6, t2_7=t2_7, t2_8=t2_8, t3_1=t3_1))
+        t2_3=t2_3, t2_4=t2_4, t2_5=t2_5, t2_6=t2_6, t2_7=t2_7, t2_8=t2_8, t3_1=t3_1),
+    )
 end
 
 func array_to_troop(a_len : felt, a : felt*) -> (t : Troop):
     return (
-        Troop(type=[a], tier=[a + 1], agility=[a + 2], attack=[a + 3], defense=[a + 4], vitality=[a + 5], wisdom=[a + 6]))
+        Troop(type=[a], tier=[a + 1], agility=[a + 2], attack=[a + 3], defense=[a + 4], vitality=[a + 5], wisdom=[a + 6]),
+    )
 end
 
 @view
@@ -531,7 +553,8 @@ func add_troop_to_squad(t : Troop, s : Squad) -> (updated : Squad):
     memcpy(
         a + free_slot + Troop.SIZE,
         sarr + free_slot + Troop.SIZE,
-        Squad.SIZE - free_slot - Troop.SIZE)
+        Squad.SIZE - free_slot - Troop.SIZE,
+    )
     let (updated) = array_to_squad(sarr_len, a)
 
     return (updated)

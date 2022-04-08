@@ -8,7 +8,8 @@ from starkware.cairo.common.pow import pow
 
 # Computes the unique hash of a list of felts.
 func list_to_hash{pedersen_ptr : HashBuiltin*, range_check_ptr}(list : felt*, list_len : felt) -> (
-        hash : felt):
+    hash : felt
+):
     let (list_hash : HashState*) = hash_init()
     let (list_hash : HashState*) = hash_update{hash_ptr=pedersen_ptr}(list_hash, list, list_len)
     return (list_hash.current_hash)
@@ -16,10 +17,10 @@ end
 
 # Generic mapping from one range to another.
 func scale{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*}(
-        val_in : felt, in_low : felt, in_high : felt, out_low : felt, out_high : felt) -> (
-        val_out : felt):
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(val_in : felt, in_low : felt, in_high : felt, out_low : felt, out_high : felt) -> (
+    val_out : felt
+):
     # val_out = ((val_in - in_low) / (in_high - in_low))
     #           * (out_high - out_low) + out_low
     let a = (val_in - in_low) * (out_high - out_low)
@@ -32,8 +33,8 @@ end
 # upack data
 # parse data, index, mask_size
 func unpack_data{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*,
-        range_check_ptr}(data : felt, index : felt, mask_size : felt) -> (score : felt):
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*, range_check_ptr
+}(data : felt, index : felt, mask_size : felt) -> (score : felt):
     alloc_locals
 
     local syscall_ptr : felt* = syscall_ptr

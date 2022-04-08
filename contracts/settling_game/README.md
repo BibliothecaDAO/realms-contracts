@@ -1,7 +1,7 @@
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/uQnjZhZPfu)
 [![Twitter](https://badgen.net/badge/icon/twitter?icon=twitter&label)](https://twitter.com/LootRealms)
 
-![This is an image](/realmsxbibliotheca.jpg)
+![This is an image](/static/realmsxbibliotheca.jpg)
 
 # 🏰 Realms Settling Game
 
@@ -30,44 +30,28 @@ A modular game engine architecture for the StarkNet L2 roll-up - Forked & heavil
 ## Understanding the code
 <details><summary> 🤔 What is the game?</summary>
 
-<p>
+<hr>
 
-First read the [Master Scroll](https://docs.bibliothecadao.xyz/lootverse-master-scroll/
+### Picture a million players all asynchronously working the blockchain; harvesting resources, building alliances, & slaying foes.
+
+*Step one* -> Read the [Master Scroll](https://docs.bibliothecadao.xyz/lootverse-master-scroll/
 ). This is our deep dive into everything about the game. The Master Scroll is the source of truth before this readme.
 
+tldr; <br>
 Settling is an on-chain game of economics and Chivarly built on-top of ZK-STARKS. Earn resources by staking your Realms, raid rivals, steal loot & form on-chain alliances to crush your enemies.
 
 Settling is entirely on-chain; the UI is purely just a client for a distributed backend. Feel free to create your own superior client if you wish.
 
-Picture a million players all asynchronously working the blockchain; harvesting resources, building alliances, & slaying foes. This is Settling.
-
-Settling is all open-source and we encourage people to build modules and contribute.
-
-Requirements: To play be a Lord you require a Realm from the Lootverse. The game will support more Loot derivatives in the future to enrich the gameplay.
-
-</p>
-</details>
-<details><summary>🏗️ System architecture</summary>
-
-
-The game mechanics are separated from the game state variables.
-
-A controller system manages a mapping of modules to deployed addresses and a governance module may update the controller.
+The game is all open-source and we encourage people to build modules and contribute.
 
 </details>
 
 <details><summary>📦 Contract hierarchy</summary>
-<p>
 
-It is also worth pointing out that StarkNet has account abstraction
-(see background notes [here](https://perama-v.github.io/cairo/examples/test_accounts/)).
-This means that transactions are actioned by sending a payload to a personal
-Account contract that holds your public key. The contract checks the payload
-and forwards it on to the destination.
-
-- Player Account
-  - A Lord in the Realmverse. These are holders of Realms.
-- Governance Account
+### Player Account
+  - A player with a wallet
+  
+### Governance Account
   - An admin who controls the Arbiter.
   - The admin may be an L2 DAO to administer governance decisions
     voted through on L2, where voting will be cheap.
@@ -75,22 +59,21 @@ and forwards it on to the destination.
     and important game variable. For example, to change the location
     that a player is currently in. All other modules that read and use location
     would be affected by this.
-- Arbiter (most power in the system).
+### Arbiter (most power in the system).
   - Can update/add module mappings in ModuleController.
-- ModuleController (mapping of deployments to module_ids).
+### ModuleController (mapping of deployments to module_ids).
   - The game 'swichboard' that connects all modules.
   - Is the reference point for all modules. Modules call this
     contract as the source of truth for the address of other modules.
   - The controller stores where modules can be found, and which modules
     have write access to other modules.
-- Modules (open ended set)
+### Modules (open ended set)
   - Game mechanics (where a player would interact to play).
   - Storage modules (game variables).
   - L1 connectors (for integrating L1 state/ownership to L2)
   - Other arbitrary contracts
   - Module logic contained in L (e.g L_Settling.cairo) and state in S (S_Settling.cairo)
 
-</p>
 </details>
 
 <hr>
@@ -99,14 +82,13 @@ and forwards it on to the destination.
 
 <details><summary>Initial Setup</summary>
 
-<p>
 
 Clone this repo and use our docker shell to interact with starknet:
 
-```
+``` bash
 git clone git@github.com:BibliothecaForAdventurers/realms-contracts.git
 cd realms-contracts
-bin/shell starknet --version
+scripts/shell starknet --version
 ```
 
 The CLI allows you to deploy to StarkNet and read/write to contracts
@@ -117,7 +99,7 @@ to the Goerli Ethereum testnet. Learn more in the Cairo language and StarkNet
 docs [here](https://www.cairo-lang.org/docs/), which also has instructions for manual
 installation if you are not using docker.
 
-</p>
+
 </details>
 <details><summary>Development Workflow</summary>
 
@@ -143,24 +125,25 @@ It will also produce an ABI, which is a mapping of the contract functions
 
 Compile all contracts:
 
-```
-nile compile
+```bash
+bash scripts/compile
 ```
 
 Compile an individual contract:
 
-```
+```bash
+export CAIRO_PATH=/workspaces/realms-contracts/openzeppelin/src
 nile compile contracts/02A_Settling.cairo
 ```
 
 ### Test
 
-Run all github actions tests: `bin/test`
+Run all github actions tests: `scripts/test`
 
 Run individual tests
 
 ```
-bin/shell pytest -s testing/l2/01_Realms_contract_test.py
+scripts/shell pytest -s testing/l2/01_Realms_contract_test.py
 ```
 
 ### Deploy
@@ -176,7 +159,7 @@ and handles passing addresses between the modules to create a
 permissions system.
 
 ```
-bin/deploy
+scripts/deploy
 ```
 </details>
 
@@ -330,9 +313,11 @@ StarkNet is very new. Best practices are being discovered. We have amalgamated t
 </details>
 <details><summary>Discords to Join</summary>
 
+- [Bibliotheca DAO](https://discord.gg/uQnjZhZPfu)
 - [StarkNet](https://discord.gg/XzvgKTTptb)
 - [MatchBox DAO](https://discord.gg/uj7wMxsmYw)
 </details>
+<hr>
 
 ## Realms Repositories
 

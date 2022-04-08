@@ -6,7 +6,13 @@ from starkware.cairo.common.math_cmp import is_le, is_nn, is_nn_le
 from starkware.starknet.common.syscalls import get_block_timestamp
 
 from contracts.settling_game.S06_Combat import (
-    Troop, Squad, SquadStats, Combat_outcome, Combat_step, compute_squad_stats)
+    Troop,
+    Squad,
+    SquadStats,
+    Combat_outcome,
+    Combat_step,
+    compute_squad_stats,
+)
 
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 
@@ -25,7 +31,8 @@ const COMBAT_OUTCOME_DEFENDER_WINS = 2
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        xoroshiro_addr_ : felt):
+    xoroshiro_addr_ : felt
+):
     xoroshiro_addr.write(xoroshiro_addr_)
     return ()
 end
@@ -59,8 +66,8 @@ end
 
 @view
 func combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
-        attacker : Squad, defender : Squad, attack_type : felt) -> (
-        attacker : Squad, defender : Squad, outcome : felt):
+    attacker : Squad, defender : Squad, attack_type : felt
+) -> (attacker : Squad, defender : Squad, outcome : felt):
     let (attacker_end, defender_end, outcome) = do_combat_turn(attacker, defender, attack_type)
     # TODO: pass in the Realm IDs to this func so they can be emitted
     # Combat_outcome.emit(TODO_attacking_realm_id, TODO_defending_realm_id, outcome)
@@ -68,8 +75,8 @@ func combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
 end
 
 func do_combat_turn{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
-        attacker : Squad, defender : Squad, attack_type : felt) -> (
-        attacker : Squad, defender : Squad, outcome : felt):
+    attacker : Squad, defender : Squad, attack_type : felt
+) -> (attacker : Squad, defender : Squad, outcome : felt):
     alloc_locals
 
     let (step_defender) = attack(attacker, defender, attack_type)
@@ -90,7 +97,8 @@ func do_combat_turn{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBui
 end
 
 func attack{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
-        a : Squad, d : Squad, attack_type : felt) -> (d_after_attack : Squad):
+    a : Squad, d : Squad, attack_type : felt
+) -> (d_after_attack : Squad):
     alloc_locals
 
     let (a_stats) = compute_squad_stats(a)
@@ -146,7 +154,8 @@ func compute_min_roll_to_hit{range_check_ptr}(a : felt, d : felt) -> (min_roll :
 end
 
 func roll_attack_dice{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
-        dice_count : felt, hit_threshold : felt, successful_hits_acc) -> (successful_hits : felt):
+    dice_count : felt, hit_threshold : felt, successful_hits_acc
+) -> (successful_hits : felt):
     # 12 sided dice, 1...12
     # only values >= hit threshold constitute a successful attack
     alloc_locals
@@ -218,13 +227,15 @@ func hit_squad{range_check_ptr}(s : Squad, hits : felt) -> (squad : Squad):
         t2_6=t2_6,
         t2_7=t2_7,
         t2_8=t2_8,
-        t3_1=t3_1)
+        t3_1=t3_1,
+    )
 
     return (s)
 end
 
 func hit_troop{range_check_ptr}(t : Troop, hits : felt) -> (
-        hit_troop : Troop, remaining_hits : felt):
+    hit_troop : Troop, remaining_hits : felt
+):
     if hits == 0:
         return (t, 0)
     end
@@ -239,7 +250,8 @@ func hit_troop{range_check_ptr}(t : Troop, hits : felt) -> (
             attack=t.attack,
             defense=t.defense,
             vitality=0,
-            wisdom=t.wisdom)
+            wisdom=t.wisdom,
+        )
         let rem = hits - t.vitality
         return (ht, rem)
     else:
@@ -251,7 +263,8 @@ func hit_troop{range_check_ptr}(t : Troop, hits : felt) -> (
             attack=t.attack,
             defense=t.defense,
             vitality=t.vitality - hits,
-            wisdom=t.wisdom)
+            wisdom=t.wisdom,
+        )
         return (ht, 0)
     end
 end
