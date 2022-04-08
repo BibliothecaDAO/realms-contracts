@@ -8,4 +8,7 @@ from starkware.cairo.common.uint256 import (
 namespace IBridgeable_ERC721:
     func bridge_mint(to: felt, token_id: Uint256):
     end
+
+    func bridge_get_token_owner(token_id: Uint256) -> (owner: felt):
+    end 
 end
