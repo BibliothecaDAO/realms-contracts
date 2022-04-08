@@ -1,6 +1,8 @@
-# TODO: Add Contract Title
-#   TODO: Add Contract Description
-# 
+# Shared utility functions
+#   Functions used throughout the settling game. This is not a contract.
+#   Instead, items from this file should be imported into any module
+#   that is a contract and used there.
+#
 # MIT License
 
 # SPDX-License-Identifier: MIT

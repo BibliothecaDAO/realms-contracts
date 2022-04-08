@@ -1,7 +1,7 @@
-# TODO: Add contract title
-#   TODO: Add contract description
+# Interface for the Xoroshiro PRNG
+#   Xoroshiro pseudo random number generator interface
 #
-# TODO: Add license
+# MIT License
 
 %lang starknet
 
