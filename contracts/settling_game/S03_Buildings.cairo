@@ -1,3 +1,7 @@
+# ____MODULE_S03___BUILDING_STATE
+#   TODO: Add Module Description
+# 
+# MIT License
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
@@ -13,8 +17,6 @@ from contracts.settling_game.utils.library import (
     MODULE_initializer,
     MODULE_only_arbiter,
 )
-
-# ____MODULE_S03___BUILDING_STATE
 
 ###########
 # STORAGE #

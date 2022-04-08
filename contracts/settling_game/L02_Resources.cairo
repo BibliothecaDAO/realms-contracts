@@ -1,3 +1,7 @@
+# ____MODULE_L02___RESOURCES_LOGIC
+#   Logic to create and issue resources for a given Realm
+# 
+# MIT License
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
@@ -42,8 +46,6 @@ from contracts.settling_game.interfaces.imodules import (
     IL04_Calculator,
     IS05_Wonders,
 )
-
-# ____MODULE_L02___RESOURCES_LOGIC
 
 ##########
 # EVENTS #

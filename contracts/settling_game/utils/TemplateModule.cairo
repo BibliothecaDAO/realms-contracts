@@ -1,3 +1,9 @@
+# Module Template
+#   Use this template when you want to make a new module.
+#   See directions below (____MODULE_XXX___BUILDING_STATE)
+#
+# MIT License
+
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin

@@ -1,3 +1,10 @@
+# ____MODULE_CONTROLLER___SETTLING_LOGIC
+#   A long-lived open-ended lookup table that routes logic between modules.
+#   Each module must be registered here and Logic vs State write permissions are mapped here.
+#
+# MIT LICENSE
+
+
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
@@ -7,10 +14,7 @@ from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContra
 from starkware.starknet.common.syscalls import get_block_timestamp
 from contracts.settling_game.utils.constants import TRUE, FALSE
 
-# ____MODULE_CONTROLLER___SETTLING_LOGIC
-#
-# A long-lived open-ended lookup table.
-#
+
 # Is in control of the addresses game modules use.
 # Is controlled by the Arbiter, who can update addresses. This will be a Multisig.
 # Maintains a generic mapping that is open ended and which

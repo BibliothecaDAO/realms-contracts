@@ -1,3 +1,11 @@
+# ____MODULE_L04___CONTRACT_LOGIC
+#   This modules focus is to calculate the values of the internal
+#   multipliers so other modules can use them. The aim is to have this
+#   as the core calculator controller that contains no state.
+#   It is pure math.
+# 
+# MIT License
+
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
@@ -28,13 +36,6 @@ from contracts.settling_game.utils.library import (
     MODULE_only_approved,
     MODULE_initializer,
 )
-
-# ____MODULE_L04___CONTRACT_LOGIC
-
-# This modules focus is to calculate the values of the internal
-# multipliers so other modules can use them. The aim is to have this
-# as the core calculator controller that contains no state.
-# It is pure math.
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(

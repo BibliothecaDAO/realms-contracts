@@ -1,3 +1,8 @@
+# Interface for Realms ERC721 Implementation
+#   Realms token that can be staked/unstaked 
+#
+# MIT License
+
 %lang starknet
 
 from starkware.cairo.common.uint256 import Uint256

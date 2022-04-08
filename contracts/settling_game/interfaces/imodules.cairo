@@ -1,10 +1,13 @@
+# Module Interfaces 
+#   These are interfaces that can be imported by other contracts for convenience.
+#   All of the functions in an interface must be @view or @external.
+# 
+# MIT License
+
 %lang starknet
 
 from starkware.cairo.common.uint256 import Uint256
 from contracts.settling_game.utils.game_structs import RealmBuildings
-
-# These are interfaces that can be imported by other contracts for convenience.
-# All of the functions in an interface must be @view or @external.
 
 # Interface for the ModuleController.
 @contract_interface

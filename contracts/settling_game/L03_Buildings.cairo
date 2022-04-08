@@ -1,3 +1,8 @@
+# ____MODULE_L03___BUILDING_LOGIC
+#   TODO: Add Module Description
+# 
+# MIT License
+
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
@@ -55,8 +60,6 @@ from contracts.settling_game.utils.library import (
     MODULE_only_approved,
     MODULE_initializer,
 )
-
-# ____MODULE_L03___BUILDING_LOGIC
 
 ##########
 # EVENTS #

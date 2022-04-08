@@ -1,3 +1,8 @@
+# ____MODULE_L02___RESOURCES_STATE
+#   State to create and issue resources for a given Realm
+# 
+# MIT License
+
 %lang starknet
 
 from starkware.cairo.common.bitwise import bitwise_and

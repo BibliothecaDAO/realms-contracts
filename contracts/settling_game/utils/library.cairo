@@ -1,3 +1,8 @@
+# TODO: Add Contract Title
+#   TODO: Add Contract Description
+# 
+# MIT License
+
 # SPDX-License-Identifier: MIT
 # Realms Contracts v0.0.1 (library.cairo)
 
