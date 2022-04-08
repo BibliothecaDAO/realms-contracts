@@ -1,21 +1,27 @@
 %lang starknet
 %builtins pedersen range_check
 
+# Starkware
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_nn, assert_lt_felt, assert_not_zero, unsigned_div_rem
 from starkware.cairo.common.uint256 import (
     Uint256, uint256_add, uint256_sub, uint256_le, uint256_lt, uint256_check
 )
-# from starkware.cairo.common.eth_utils import assert_valid_eth_address
-
 from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
 from starkware.starknet.common.messages import send_message_to_l1
 
-from contracts.token.IERC721 import IERC721
-from contracts.l2.bridge.IBridgeable_ERC721 import IBridgeable_ERC721
+# OZ
+from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
+from openzeppelin.access.ownable import Ownable_initializer, Ownable_only_owner
+from openzeppelin.utils.constants import IERC721_RECEIVER_ID
+from openzeppelin.introspection.ERC165 import (
+    ERC165_supports_interface,
+    ERC165_register_interface
+)
 
-from contracts.Ownable_base import Ownable_initializer, Ownable_only_owner
+# Ours
+from contracts.l2.bridge.IBridgeable_ERC721 import IBridgeable_ERC721
 
 @storage_var
 func l1_lockbox_contract_address() -> (res: felt):
@@ -40,9 +46,35 @@ func constructor{
     ):
     Ownable_initializer(owner)
 
+    ERC165_register_interface(IERC721_RECEIVER_ID)
+
     l2_realms_contract_address.write(l2_realms_address)
 
     return ()
+end
+
+##########################
+## Complience
+##########################
+@view
+func supportsInterface{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }(interfaceId: felt) -> (success: felt):
+    let (success) = ERC165_supports_interface(interfaceId)
+    return (success)
+end
+
+@view
+func onERC721Received(
+        operator: felt,
+        from_: felt,
+        tokenId: Uint256,
+        data_len: felt,
+        data: felt*
+    ) -> (selector: felt): 
+    return (IERC721_RECEIVER_ID)
 end
 
 ##########################
@@ -94,11 +126,29 @@ func bridge_mint_loop{
     # Not tested and not sure but this call probably should be here - no big overhead 
     let (realms_address) = l2_realms_contract_address.read()
     
-    IBridgeable_ERC721.bridge_mint(
-        contract_address=realms_address, 
-        to=to, 
+    let (owner) = IBridgeable_ERC721.bridge_get_token_owner(
+        contract_address=realms_address,
         token_id=token_id
     )
+
+    let (contract_address) = get_contract_address()
+
+    if owner == contract_address:
+        # Case: transfer from L1->L2
+        IERC721.transferFrom(
+            contract_address=realms_address,
+            from_=contract_address,
+            to=to,
+            tokenId=token_id
+        )
+    else:
+        # Case: first mint
+        IBridgeable_ERC721.bridge_mint(
+            contract_address=realms_address, 
+            to=to, 
+            token_id=token_id
+        )
+    end
 
     bridge_mint_loop(to, token_ids_len - 2, token_ids + 2)
 
@@ -181,7 +231,7 @@ func withdraw_loop{
     let (contract_address) = get_contract_address()
     IERC721.transferFrom(
         contract_address=realms_address,
-        _from=caller,
+        from_=caller,
         to=contract_address,
         tokenId=token_id
     )
