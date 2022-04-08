@@ -1,7 +1,7 @@
-# Module Interfaces 
+# Module Interfaces
 #   These are interfaces that can be imported by other contracts for convenience.
 #   All of the functions in an interface must be @view or @external.
-# 
+#
 # MIT License
 
 %lang starknet

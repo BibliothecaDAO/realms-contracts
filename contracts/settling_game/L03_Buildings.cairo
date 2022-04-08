@@ -1,6 +1,6 @@
 # ____MODULE_L03___BUILDING_LOGIC
 #   TODO: Add Module Description
-# 
+#
 # MIT License
 
 %lang starknet

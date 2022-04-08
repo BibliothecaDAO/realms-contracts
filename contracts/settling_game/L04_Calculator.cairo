@@ -3,7 +3,7 @@
 #   multipliers so other modules can use them. The aim is to have this
 #   as the core calculator controller that contains no state.
 #   It is pure math.
-# 
+#
 # MIT License
 
 %lang starknet

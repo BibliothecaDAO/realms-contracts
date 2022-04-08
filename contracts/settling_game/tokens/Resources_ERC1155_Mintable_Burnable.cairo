@@ -1,6 +1,6 @@
 # Resources ERC1155 Token
 #   Token created for each resource that can be minted, traded, and burned.
-# 
+#
 # MIT License
 
 %lang starknet

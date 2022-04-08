@@ -22,8 +22,6 @@ from openzeppelin.access.ownable import (
 )
 from openzeppelin.utils.constants import TRUE, FALSE
 
-
-
 @storage_var
 func controller_address() -> (address : felt):
 end

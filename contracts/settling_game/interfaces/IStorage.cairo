@@ -1,6 +1,6 @@
 # TODO: Add Contract Title
 #   TODO: Add Contract Description
-# 
+#
 # MIT License
 
 %lang starknet

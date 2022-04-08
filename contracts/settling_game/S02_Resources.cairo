@@ -1,6 +1,6 @@
 # ____MODULE_L02___RESOURCES_STATE
 #   State to create and issue resources for a given Realm
-# 
+#
 # MIT License
 
 %lang starknet

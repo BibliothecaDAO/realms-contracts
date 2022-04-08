@@ -1,6 +1,6 @@
 # Interface for ERC1155 Token
-#   A standard interface for contracts that manage multiple token types. 
-# 
+#   A standard interface for contracts that manage multiple token types.
+#
 # MIT License
 
 %lang starknet

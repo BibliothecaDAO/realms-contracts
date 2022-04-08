@@ -1,6 +1,6 @@
 # ____MODULE_S03___BUILDING_STATE
 #   TODO: Add Module Description
-# 
+#
 # MIT License
 %lang starknet
 

@@ -1,6 +1,6 @@
 # ____MODULE_L05___WONDERS_LOGIC
 #   TODO: Write Module Description
-# 
+#
 # MIT License
 
 %lang starknet

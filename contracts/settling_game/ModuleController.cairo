@@ -4,7 +4,6 @@
 #
 # MIT LICENSE
 
-
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
@@ -13,7 +12,6 @@ from starkware.starknet.common.syscalls import get_caller_address
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
 from starkware.starknet.common.syscalls import get_block_timestamp
 from contracts.settling_game.utils.constants import TRUE, FALSE
-
 
 # Is in control of the addresses game modules use.
 # Is controlled by the Arbiter, who can update addresses. This will be a Multisig.

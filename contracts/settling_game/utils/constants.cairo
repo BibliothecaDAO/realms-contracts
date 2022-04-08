@@ -1,7 +1,7 @@
 # Constants utility contract
 #   A set of constants that are used throughout the project
 #   and/or not provided by cairo (e.g. TRUE / FALSE)
-# 
+#
 # MIT License
 
 %lang starknet
