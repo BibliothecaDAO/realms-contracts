@@ -29,14 +29,14 @@ from openzeppelin.token.erc721.library import (
 
 from openzeppelin.introspection.ERC165 import ERC165_supports_interface
 
-from contracts.Pausable_base import (
+from openzeppelin.security.pausable import (
     Pausable_paused,
     Pausable_pause,
     Pausable_unpause,
     Pausable_when_not_paused
 )
 
-from contracts.Ownable_base import (
+from openzeppelin.access.ownable import (
     Ownable_initializer,
     Ownable_only_owner
 )
