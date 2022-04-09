@@ -20,26 +20,17 @@ contract RealmsBridgeLockbox is
     IStarknetCore starknetCore;
 
     /* Starknet */
-
-    // uint256 constant MESSAGE_WITHDRAW = 0;
-
     // The selector of the "depositFromL1" @l1_handler at StarkNet contract
     uint256 constant private DEPOSIT_SELECTOR =
         512408049450392852989582095984328044240489742106100269794433337059943365139;
 
-    // Loot ID to Ticket ID
-    // mapping(uint256 => uint256) public realmsToTickets;
-    mapping(uint256 => address) public tokensToOwners;
-
     function initialize(
         address _l1RealmsAddress,
-        uint256 _l2BridgeAddress,
         address _starknetCoreAddress
     ) public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
         l1RealmsContract = IERC721(_l1RealmsAddress);
-        l2BridgeAddress = _l2BridgeAddress;
         starknetCore = IStarknetCore(_starknetCoreAddress);
     }
 
