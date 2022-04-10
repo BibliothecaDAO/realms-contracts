@@ -20,9 +20,10 @@ from contracts.settling_game.utils.library import (
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
+from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
 from contracts.settling_game.interfaces.IStorage import IStorage
 from contracts.settling_game.interfaces.imodules import (
-    IModuleController, IS02_Resources, IS01_Settling, IL04_Calculator, IS05_Wonders)
+    IModuleController, IS02_Resources, IS01_Settling, IL04_Calculator, IL05_Wonders, IS05_Wonders)
 
 # ____MODULE_L02___RESOURCES_LOGIC
 
@@ -230,7 +231,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         user_mint)
 
     # GET EPOCH
-    let (current_epoch) = IL04_Calculator.calculate_epoch(calculator_address)
+    let (current_epoch, _) = IL04_Calculator.calculate_epoch(calculator_address)
 
     # SET WONDER TAX IN POOL
     IS05_Wonders.batch_set_tax_pool(
@@ -358,6 +359,82 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
         resource_ids,
         realms_data.resource_number,
         user_mint)
+
+    return ()
+end
+
+@external
+func claim_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        token_id : Uint256):
+    alloc_locals
+    let (caller) = get_caller_address()
+    let (controller) = MODULE_controller_address()
+
+    let (resources_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Resources)
+    let (s_realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.S_Realms)
+    let (wonders_logic_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=ModuleIds.L05_Wonders)
+    let (wonders_state_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=ModuleIds.S05_Wonders)
+    let (calculator_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=ModuleIds.L04_Calculator)
+
+    # FETCH OWNER
+    let (owner) = s_realms_IERC721.ownerOf(s_realms_address, token_id)
+
+    # GET EPOCH OF STAKING
+    let (staked_epoch) = IS05_Wonders.get_wonder_id_staked(wonders_state_address, token_id)
+
+    # # Check that wonder is staked
+    assert_not_zero(staked_epoch)
+
+    # GET CURRENT EPOCH
+    let (current_epoch, _) = IL04_Calculator.calculate_epoch(calculator_address)
+
+    let ( resource_claim_amounts_len, resource_claim_amounts ) = IL05_Wonders.fetch_available_tax_claim(wonders_logic_address, token_id)
+
+    # # Check that there are resources to claim
+    assert_not_zero(resource_claim_amounts_len)
+    
+    # SET STAKING EPOCH TO PREVIOUS
+    IS05_Wonders.set_wonder_id_staked(wonders_state_address, token_id, current_epoch - 1)
+
+    # POPULATE IDs
+    let ( resource_claim_ids : Uint256* ) = alloc()
+
+    assert resource_claim_ids[0] = Uint256(1, 0)
+    assert resource_claim_ids[1] = Uint256(2, 0)
+    assert resource_claim_ids[2] = Uint256(3, 0)
+    assert resource_claim_ids[3] = Uint256(4, 0)
+    assert resource_claim_ids[4] = Uint256(5, 0)
+    assert resource_claim_ids[5] = Uint256(6, 0)
+    assert resource_claim_ids[6] = Uint256(7, 0)
+    assert resource_claim_ids[7] = Uint256(8, 0)
+    assert resource_claim_ids[8] = Uint256(9, 0)
+    assert resource_claim_ids[9] = Uint256(10, 0)
+    assert resource_claim_ids[10] = Uint256(11, 0)
+    assert resource_claim_ids[11] = Uint256(12, 0)
+    assert resource_claim_ids[12] = Uint256(13, 0)
+    assert resource_claim_ids[13] = Uint256(14, 0)
+    assert resource_claim_ids[14] = Uint256(15, 0)
+    assert resource_claim_ids[15] = Uint256(16, 0)
+    assert resource_claim_ids[16] = Uint256(17, 0)
+    assert resource_claim_ids[17] = Uint256(18, 0)
+    assert resource_claim_ids[18] = Uint256(19, 0)
+    assert resource_claim_ids[19] = Uint256(20, 0)
+    assert resource_claim_ids[20] = Uint256(21, 0)
+    assert resource_claim_ids[21] = Uint256(22, 0)
+
+    # MINT
+    IERC1155.mintBatch(
+        resources_address,
+        owner,
+        22,
+        resource_claim_ids,
+        22,
+        resource_claim_amounts)
 
     return ()
 end

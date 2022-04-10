@@ -33,7 +33,7 @@ func wonder_epoch_upkeep(epoch : felt, token_id : Uint256) -> (upkept : felt):
 end
 
 @storage_var
-func tax_pool(epoch : felt, resource_id : Uint256) -> (supply : felt):
+func tax_pool(epoch : felt, resource_id : Uint256) -> (supply : Uint256):
 end
 
 ###############
@@ -88,7 +88,7 @@ func set_wonder_epoch_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, r
 end
 
 func set_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        epoch : felt, resource_id : Uint256, amount : felt):
+        epoch : felt, resource_id : Uint256, amount : Uint256):
     tax_pool.write(epoch, resource_id, amount)
     return ()
 end
@@ -96,20 +96,25 @@ end
 @external
 func batch_set_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         epoch : felt, resource_ids_len : felt, resource_ids : Uint256*, amounts_len : felt,
-        amounts : felt*):
+        amounts : Uint256*):
     alloc_locals
     MODULE_only_approved()
     # Update tax pool
     if resource_ids_len == 0:
         return ()
     end
-    let (tax_pool) = get_tax_pool(epoch, [resource_ids])
 
-    set_tax_pool(0, [resource_ids], 0)
+    let cur_amount : Uint256 = [amounts]
+    let cur_id : Uint256 = [resource_ids]
+
+    let (tax_pool) = get_tax_pool(epoch, cur_id)
+    let (new_tax_pool, _) = uint256_add(tax_pool, cur_amount)
+
+    set_tax_pool(epoch, cur_id, new_tax_pool)
 
     # Recurse
     return batch_set_tax_pool(
-        epoch, resource_ids_len - 1, resource_ids + 1, amounts_len - 1, amounts + 1)
+        epoch, resource_ids_len - 1, resource_ids + Uint256.SIZE, amounts_len - 1, amounts + Uint256.SIZE)
 end
 
 ###########
@@ -134,10 +139,10 @@ end
 
 @view
 func get_wonder_id_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256) -> (wonder_id : felt):
-    let (wonder_id) = wonder_id_staked.read(token_id)
+        token_id : Uint256) -> (epoch : felt):
+    let (epoch) = wonder_id_staked.read(token_id)
 
-    return (wonder_id=wonder_id)
+    return (epoch=epoch)
 end
 
 @view
@@ -150,7 +155,7 @@ end
 
 @view
 func get_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        epoch : felt, resource_id : Uint256) -> (supply : felt):
+        epoch : felt, resource_id : Uint256) -> (supply : Uint256):
     let (supply) = tax_pool.read(epoch, resource_id)
 
     return (supply)

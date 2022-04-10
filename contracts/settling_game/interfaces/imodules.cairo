@@ -106,7 +106,7 @@ end
 
 @contract_interface
 namespace IL04_Calculator:
-    func calculate_epoch() -> (epoch : felt):
+    func calculate_epoch() -> (epoch : felt, seconds_left_over : felt):
     end
     func calculate_wonder_tax() -> (tax_percentage : felt):
     end
@@ -114,6 +114,10 @@ end
 
 @contract_interface
 namespace IL05_Wonders:
+    func fetch_available_tax_claim(token_id : Uint256) -> (
+        resource_claim_amounts_len : felt, resource_claim_amounts : Uint256*):
+    end
+
     func update_wonder_settlement(token_id : Uint256):
     end
 end
@@ -132,12 +136,12 @@ namespace IS05_Wonders:
     func set_wonder_epoch_upkeep(epoch : felt, token_id : Uint256, upkept : felt):
     end
 
-    func set_tax_pool(epoch : felt, resource_id : felt, supply : felt):
+    func set_tax_pool(epoch : felt, resource_id : Uint256, supply : Uint256):
     end
 
     func batch_set_tax_pool(
             epoch : felt, resource_ids_len : felt, resource_ids : Uint256*, amounts_len : felt,
-            amounts : felt*):
+            amounts : Uint256*):
     end
 
     func get_total_wonders_staked(epoch : felt) -> (amount : felt):
@@ -152,6 +156,6 @@ namespace IS05_Wonders:
     func get_wonder_epoch_upkeep(epoch : felt, token_id : Uint256) -> (upkept : felt):
     end
 
-    func get_tax_pool(epoch : felt, resource_id : felt) -> (supply : felt):
+    func get_tax_pool(epoch : felt, resource_id : Uint256) -> (supply : Uint256):
     end
 end

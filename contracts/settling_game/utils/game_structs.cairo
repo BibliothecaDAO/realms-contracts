@@ -154,3 +154,28 @@ namespace ExternalContractIds:
     const Treasury = 5
     const Storage = 6
 end
+
+namespace ResourceIds:
+    const Wood = 1 
+    const Stone = 2  
+    const Coal = 3  
+    const Copper = 4  
+    const Obsidian = 5  
+    const Silver = 6  
+    const Ironwood = 7  
+    const ColdIron = 8  
+    const Gold = 9  
+    const Hartwood = 10  
+    const Diamonds = 11  
+    const Sapphire = 12  
+    const Ruby = 13  
+    const DeepCrystal = 14  
+    const Ignium = 15  
+    const Ethereal_Silica = 16  
+    const True_Ice = 17  
+    const TwilightQuartz = 18  
+    const AlchemicalSilver = 19  
+    const Adamantine = 20  
+    const Mithral = 21 
+    const Dragonhide = 22
+end

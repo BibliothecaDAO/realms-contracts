@@ -36,15 +36,15 @@ end
 
 @view
 func calculate_epoch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-        epoch : felt):
+        epoch : felt, seconds_left_over : felt):
     let (controller) = MODULE_controller_address()
 
-    let (genesis_time_stamp) = IModuleController.get_genesis(contract_address=controller)
+    # let (genesis_time_stamp) = IModuleController.get_genesis(contract_address=controller)
 
     let (block_timestamp) = get_block_timestamp()
 
-    let (epoch, _) = unsigned_div_rem(block_timestamp - genesis_time_stamp, VAULT_LENGTH_SECONDS)
-    return (epoch=epoch)
+    let (epoch, seconds_left_over) = unsigned_div_rem(block_timestamp - GENESIS_TIMESTAMP, VAULT_LENGTH_SECONDS)
+    return (epoch, seconds_left_over)
 end
 
 @view
