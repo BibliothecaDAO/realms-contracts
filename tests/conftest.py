@@ -507,4 +507,4 @@ async def game_factory(token_factory):
         calldata=[
             resources_logic.contract_address])
 
-    return admin_account, treasury_account, starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state, s_realms, buildings_logic, buildings_state, calculator_logic, storage
+    return admin_account, treasury_account, starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state, s_realms, buildings_logic, buildings_state, calculator_logic, wonders_logic, wonders_state, storage
