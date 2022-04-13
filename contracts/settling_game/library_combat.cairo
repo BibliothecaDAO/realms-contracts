@@ -625,7 +625,8 @@ func build_squad_from_troops_loop{range_check_ptr}(
 end
 
 func build_empty_squad() -> (s : Squad):
-    return (Squad(
+    return (
+        Squad(
         t1_1=Troop(0, 0, 0, 0, 0, 0, 0),
         t1_2=Troop(0, 0, 0, 0, 0, 0, 0),
         t1_3=Troop(0, 0, 0, 0, 0, 0, 0),
@@ -650,7 +651,6 @@ func build_empty_squad() -> (s : Squad):
         t2_6=Troop(0, 0, 0, 0, 0, 0, 0),
         t2_7=Troop(0, 0, 0, 0, 0, 0, 0),
         t2_8=Troop(0, 0, 0, 0, 0, 0, 0),
-        t3_1=Troop(0, 0, 0, 0, 0, 0, 0))
+        t3_1=Troop(0, 0, 0, 0, 0, 0, 0)),
     )
-
 end

@@ -13,9 +13,22 @@ from contracts.settling_game.interfaces.imodules import IModuleController, IS06_
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library_combat import (
-    build_squad_from_troops, compute_squad_stats, pack_squad, unpack_squad, sum_values_by_key)
+    build_squad_from_troops,
+    compute_squad_stats,
+    pack_squad,
+    unpack_squad,
+    sum_values_by_key,
+)
 from contracts.settling_game.utils.game_structs import (
-    ModuleIds, RealmData, RealmCombatData, Troop, Squad, SquadStats, PackedSquad, TroopCost)
+    ModuleIds,
+    RealmData,
+    RealmCombatData,
+    Troop,
+    Squad,
+    SquadStats,
+    PackedSquad,
+    TroopCost,
+)
 from contracts.settling_game.utils.general import unpack_data
 from contracts.utils.constants import TRUE, FALSE
 
@@ -46,7 +59,8 @@ end
 
 @event
 func Combat_step(
-        attacking_squad : Squad, defending_squad : Squad, attack_type : felt, hit_points : felt):
+    attacking_squad : Squad, defending_squad : Squad, attack_type : felt, hit_points : felt
+):
 end
 
 #
@@ -108,9 +122,11 @@ func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
 
     let (controller) = controller_address.read()
     let (combat_state_address) = IModuleController.get_module_address(
-        controller, ModuleIds.S06_Combat)
+        controller, ModuleIds.S06_Combat
+    )
     let (realm_combat_data : RealmCombatData) = IS06_Combat.get_realm_combat_data(
-        combat_state_address, defending_realm_id)
+        combat_state_address, defending_realm_id
+    )
 
     let (now) = get_block_timestamp()
     let diff = now - realm_combat_data.last_attacked_at
@@ -142,9 +158,8 @@ end
 
 @external
 func build_squad_from_troops_in_realm{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*}(
-        troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt):
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt):
     alloc_locals
 
     # TODO: auth
@@ -152,7 +167,8 @@ func build_squad_from_troops_in_realm{
     let (caller) = get_caller_address()
     let (controller) = controller_address.read()
     let (combat_state_address) = IModuleController.get_module_address(
-        controller, ModuleIds.S06_Combat)
+        controller, ModuleIds.S06_Combat
+    )
 
     # get the TroopCost for every Troop to build
     let (troop_costs : TroopCost*) = alloc()
@@ -164,12 +180,14 @@ func build_squad_from_troops_in_realm{
     let (resource_ids : felt*) = alloc()
     let (resource_values : felt*) = alloc()
     let (resource_len : felt) = load_resource_ids_and_values_from_costs(
-        resource_ids, resource_values, troop_ids_len, troop_costs, 0)
+        resource_ids, resource_values, troop_ids_len, troop_costs, 0
+    )
 
     # unify the resources and convert them to a list of Uint256, so that they can
     # be used in a IERC1155 function call
     let (d_len : felt, d : DictAccess*) = sum_values_by_key(
-        resource_len, resource_ids, resource_values)
+        resource_len, resource_ids, resource_values
+    )
     let (token_ids : Uint256*) = alloc()
     let (token_values : Uint256*) = alloc()
     convert_cost_resources_to_unique_tokens(d_len, d, token_ids, token_values)
@@ -208,11 +226,14 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
 
     let (controller) = controller_address.read()
     let (combat_state_address) = IModuleController.get_module_address(
-        controller, module_id=ModuleIds.S06_Combat)
+        controller, module_id=ModuleIds.S06_Combat
+    )
     let (attacking_realm_data : RealmCombatData) = IS06_Combat.get_realm_combat_data(
-        controller, attacking_realm_id)
+        controller, attacking_realm_id
+    )
     let (defending_realm_data : RealmCombatData) = IS06_Combat.get_realm_combat_data(
-        controller, defending_realm_id)
+        controller, defending_realm_id
+    )
 
     let (attacker : Squad) = unpack_squad(attacking_realm_data.attacking_squad)
     let (defender : Squad) = unpack_squad(defending_realm_data.defending_squad)
@@ -227,14 +248,16 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     let new_attacking_realm_data = RealmCombatData(
         attacking_squad=new_attacker,
         defending_squad=attacking_realm_data.defending_squad,
-        last_attacked_at=attacking_realm_data.last_attacked_at)
+        last_attacked_at=attacking_realm_data.last_attacked_at,
+    )
     IS06_Combat.set_realm_combat_data(controller, attacking_realm_id, new_attacking_realm_data)
 
     let (now) = get_block_timestamp()
     let new_defending_realm_data = RealmCombatData(
         attacking_squad=defending_realm_data.attacking_squad,
         defending_squad=new_defender,
-        last_attacked_at=now)
+        last_attacked_at=now,
+    )
     IS06_Combat.set_realm_combat_data(controller, defending_realm_id, new_defending_realm_data)
 
     # TODO: call pillage_resources here
@@ -440,8 +463,12 @@ func hit_troop{range_check_ptr}(t : Troop, hits : felt) -> (
 end
 
 func load_troop_costs{syscall_ptr : felt*, range_check_ptr}(
-        state_module_address : felt, troop_ids_len : felt, troop_ids : felt*, costs_len : felt,
-        costs : TroopCost*):
+    state_module_address : felt,
+    troop_ids_len : felt,
+    troop_ids : felt*,
+    costs_len : felt,
+    costs : TroopCost*,
+):
     alloc_locals
 
     if troop_ids_len == 0:
@@ -454,7 +481,8 @@ func load_troop_costs{syscall_ptr : felt*, range_check_ptr}(
     assert [costs + costs_len] = cost
 
     return load_troop_costs(
-        state_module_address, troop_ids_len - 1, troop_ids + 1, costs_len + 1, costs)
+        state_module_address, troop_ids_len - 1, troop_ids + 1, costs_len + 1, costs
+    )
 end
 
 # temporary, only for testing
@@ -478,8 +506,12 @@ end
 # and it returns the total number of resources as `sum([c.resource_count for c in costs])`
 # which is also the length of the ids and values arrays
 func load_resource_ids_and_values_from_costs{range_check_ptr, bitwise_ptr : BitwiseBuiltin*}(
-        ids : felt*, values : felt*, costs_len : felt, costs : TroopCost*,
-        cummulative_resource_count : felt) -> (total_resource_count : felt):
+    ids : felt*,
+    values : felt*,
+    costs_len : felt,
+    costs : TroopCost*,
+    cummulative_resource_count : felt,
+) -> (total_resource_count : felt):
     alloc_locals
 
     if costs_len == 0:
@@ -494,12 +526,14 @@ func load_resource_ids_and_values_from_costs{range_check_ptr, bitwise_ptr : Bitw
         values + current_cost.resource_count,
         costs_len - 1,
         costs + TroopCost.SIZE,
-        cummulative_resource_count + current_cost.resource_count)
+        cummulative_resource_count + current_cost.resource_count,
+    )
 end
 
 # TODO: better naming
 func load_single_cost_ids_and_values{range_check_ptr, bitwise_ptr : BitwiseBuiltin*}(
-        cost : TroopCost, idx : felt, ids : felt*, values : felt*):
+    cost : TroopCost, idx : felt, ids : felt*, values : felt*
+):
     alloc_locals
 
     if idx == cost.resource_count:
@@ -517,7 +551,8 @@ end
 
 # TODO: better naming
 func convert_cost_resources_to_unique_tokens{range_check_ptr}(
-        len : felt, d : DictAccess*, token_ids : Uint256*, token_values : Uint256*):
+    len : felt, d : DictAccess*, token_ids : Uint256*, token_values : Uint256*
+):
     alloc_locals
 
     if len == 0:
@@ -530,5 +565,6 @@ func convert_cost_resources_to_unique_tokens{range_check_ptr}(
     assert [token_values] = Uint256(low=current_entry.new_value, high=0)
 
     return convert_cost_resources_to_unique_tokens(
-        len - 1, d + DictAccess.SIZE, token_ids + Uint256.SIZE, token_values + Uint256.SIZE)
+        len - 1, d + DictAccess.SIZE, token_ids + Uint256.SIZE, token_values + Uint256.SIZE
+    )
 end
