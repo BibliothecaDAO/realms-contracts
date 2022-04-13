@@ -627,10 +627,3 @@ async def test_build_squad_from_troops(library_combat_tests):
     troop_ids = [TroopId.Watchman] * 4
     tx = await library_combat_tests.test_build_squad_from_troops(troop_ids).invoke()
     assert tx.result.squad == squad
-
-
-# @pytest.mark.asyncio
-# async def test_foo(l06_combat):
-#     calldata = [TROOP_COSTS[TroopId.Watchman], TROOP_COSTS[TroopId.Watchman], TROOP_COSTS[TroopId.GuardCaptain]]
-#     tx = await l06_combat.foo(calldata).invoke()
-#     print(tx)

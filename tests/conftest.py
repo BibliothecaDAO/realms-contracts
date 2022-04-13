@@ -266,7 +266,7 @@ async def account_factory(request):
 async def l06_combat(starknet, xoroshiro) -> StarknetContract:
     contract = compile("contracts/settling_game/L06_Combat.cairo")
     return await starknet.deploy(
-        contract_def=contract, constructor_calldata=[xoroshiro.contract_address]
+        contract_def=contract, constructor_calldata=[11, xoroshiro.contract_address]
     )
 
 
@@ -278,7 +278,7 @@ async def l06_combat_tests(starknet, xoroshiro) -> StarknetContract:
     # L06_Combat because it imports from it; hence when calling deploy, we need
     # to pass proper constructor_calldata
     return await starknet.deploy(
-        contract_def=contract, constructor_calldata=[xoroshiro.contract_address]
+        contract_def=contract, constructor_calldata=[11, xoroshiro.contract_address]
     )
 
 

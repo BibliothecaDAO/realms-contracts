@@ -295,6 +295,7 @@ end
 func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256, claimer : felt
 ):
+    # TODO: auth checks
     alloc_locals
     let (caller) = get_caller_address()
     let (controller) = MODULE_controller_address()
