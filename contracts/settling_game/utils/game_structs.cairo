@@ -144,6 +144,8 @@ namespace ModuleIds:
     const L04_Calculator = 7
     const L05_Wonders = 8
     const S05_Wonders = 9
+    const L06_Combat = 11
+    const S06_Combat = 12
 end
 
 namespace ExternalContractIds:
@@ -153,4 +155,143 @@ namespace ExternalContractIds:
     const Resources = 4
     const Treasury = 5
     const Storage = 6
+end
+
+namespace ResourceIds:
+    const Wood = 1
+    const Stone = 2
+    const Coal = 3
+    const Cooper = 4
+    const Obsidian = 5
+    const Silver = 6
+    const Ironwood = 7
+    const ColdIron = 8
+    const Gold = 9
+    const Hartwood = 10
+    const Diamonds = 11
+    const Sapphire = 12
+    const Ruby = 13
+    const DeepCrystal = 14
+    const Ignium = 15
+    const EtherealSilica = 16
+    const TrueIce = 17
+    const TwilightQuartz = 18
+    const AlchemicalSilver = 19
+    const Adamantine = 20
+    const Mithral = 21
+    const Dragonhide = 22
+    # IMPORTANT: if you're adding to this enum
+    # make sure the SIZE is one greater than the
+    # maximal value; certain algorithms depend on that
+    const SIZE = 23
+end
+
+namespace TroopId:
+    const Watchman = 1
+    const Guard = 2
+    const GuardCaptain = 3
+    const Squire = 4
+    const Knight = 5
+    const KnightCommander = 6
+    const Scout = 7
+    const Archer = 8
+    const Sniper = 9
+    const Scorpio = 10
+    const Ballista = 11
+    const Catapult = 12
+    const Apprentice = 13
+    const Mage = 14
+    const Arcanist = 15
+    const GrandMarshal = 16
+end
+
+namespace TroopType:
+    const Melee = 1
+    const Ranged = 2
+    const Siege = 3
+end
+
+struct Troop:
+    member type : felt  # TroopType
+    member tier : felt
+    member agility : felt
+    member attack : felt
+    member defense : felt
+    member vitality : felt
+    member wisdom : felt
+end
+
+# TODO: add a t4 Troop that's a Character from our Character module;
+#       it should be optional
+struct Squad:
+    # tier 1 troops
+    member t1_1 : Troop
+    member t1_2 : Troop
+    member t1_3 : Troop
+    member t1_4 : Troop
+    member t1_5 : Troop
+    member t1_6 : Troop
+    member t1_7 : Troop
+    member t1_8 : Troop
+    member t1_9 : Troop
+    member t1_10 : Troop
+    member t1_11 : Troop
+    member t1_12 : Troop
+    member t1_13 : Troop
+    member t1_14 : Troop
+    member t1_15 : Troop
+    member t1_16 : Troop
+
+    # tier 2 troops
+    member t2_1 : Troop
+    member t2_2 : Troop
+    member t2_3 : Troop
+    member t2_4 : Troop
+    member t2_5 : Troop
+    member t2_6 : Troop
+    member t2_7 : Troop
+    member t2_8 : Troop
+
+    # tier 3 troop
+    member t3_1 : Troop
+end
+
+struct PackedSquad:
+    # one packed troop fits into 7 bytes
+    # one felt is ~31 bytes -> can hold 4 troops
+    # a squad has 25 troops -> fits into 7 felts when packed
+    member p1 : felt  # packed Troops t1_1 ... t1_4
+    member p2 : felt  # packed Troops t1_5 ... t1_8
+    member p3 : felt  # packed Troops t1_9 ... t1_12
+    member p4 : felt  # packed Troops t1_13 ... t1_16
+    member p5 : felt  # packed Troops t2_1 ... t2_4
+    member p6 : felt  # packed Troops t2_5 ... t2_8
+    member p7 : felt  # packed Troop t3_1
+end
+
+struct SquadStats:
+    member agility : felt
+    member attack : felt
+    member defense : felt
+    member vitality : felt
+    member wisdom : felt
+end
+
+# this struct holds everything related to a Realm & combat
+# a Realm can have two squads, one used for attacking
+# and another used for defending; this struct holds them
+struct RealmCombatData:
+    member attacking_squad : PackedSquad
+    member defending_squad : PackedSquad
+    member last_attacked_at : felt
+end
+
+# struct holding how much resources does it cost to build a Troop
+struct TroopCost:
+    # in total, how many unique resources does a troop cost
+    member resource_count : felt
+    # packed IDs of the necessary resources
+    member token_ids : felt
+    # packed amounts of each resource
+    member resource_amounts : felt
 end
