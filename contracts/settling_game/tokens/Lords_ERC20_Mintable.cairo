@@ -1,3 +1,6 @@
+# $LORDS ERC20 Token
+#   The ERC20 asset underpinning the Realmverse and beyond
+#
 # SPDX-License-Identifier: MIT
 # OpenZeppelin Cairo Contracts v0.1.0 (token/erc20/ERC20_Mintable.cairo)
 

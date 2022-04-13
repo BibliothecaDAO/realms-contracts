@@ -1,3 +1,8 @@
+# General Purpose Utilities
+#   Utility functions that are used across the project (e.g. compute the unique hash of a list of felts)
+#
+# MIT License
+
 %lang starknet
 
 from starkware.cairo.common.bitwise import bitwise_and

@@ -1,3 +1,9 @@
+# Interface for Staked Realms ERC721 token
+#   Token that is sent to wallet when a user stakes a Realm
+#   and burned when the user unstakes a Realm
+#
+# MIT License
+
 %lang starknet
 
 from starkware.cairo.common.uint256 import Uint256

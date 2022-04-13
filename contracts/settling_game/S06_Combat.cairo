@@ -1,3 +1,8 @@
+# ____MODULE_S06___COMBAT_STATE
+#   State for combat between characters, troops, etc.
+#
+# MIT License
+
 %lang starknet
 
 from starkware.cairo.common.alloc import alloc

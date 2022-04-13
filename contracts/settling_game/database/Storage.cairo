@@ -1,3 +1,8 @@
+# TODO: Add Contract Title
+#   TODO: Add Contract Description
+#
+# MIT License
+
 %lang starknet
 
 from starkware.cairo.common.bitwise import bitwise_and

@@ -1,6 +1,10 @@
-%lang starknet
+# Game Structs
+#   A struct that holds the Realm statistics.
+#   Each module will need to add a struct with their metadata.
+#
+# MIT License
 
-# A struct that holds the Realm statistics.
+%lang starknet
 
 namespace TraitsIds:
     const Region = 1

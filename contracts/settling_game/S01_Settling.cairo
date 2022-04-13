@@ -1,3 +1,8 @@
+# ___MODULE_S01___SETTLING_STATE
+#   Core Settling Game state contract including setting up the world
+#   and time staked for each realm/user pair.
+#
+# MIT License
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin

@@ -1,3 +1,7 @@
+# Staked Realms ERC721 token
+#   Token that is sent to wallet when a user stakes a Realm
+#   and burned when the user unstakes a Realm
+#
 # SPDX-License-Identifier: MIT
 # OpenZeppelin Cairo Contracts v0.1.0 (token/erc721/ERC721_Mintable_Burnable.cairo)
 

@@ -1,3 +1,8 @@
+# ____MODULE_L06___COMBAT_LOGIC
+#   Logic for combat between characters, troops, etc.
+#
+# MIT License
+
 %lang starknet
 
 from starkware.cairo.common.alloc import alloc
