@@ -152,14 +152,14 @@ export function getSigner() {
     const privKey = process.env.STARKNET_PRIVATE_KEY;
 
     if (accountAddress == undefined || accountAddress == "") {
-      throw new Error("Attempted to call getSigner() with OWNER_PRIVATE_KEY being undefined. Set env value in .env or execution environment.")
+      throw new Error("Attempted to call getSigner() with STARKNET_ACCOUNT_ADDRESS being undefined. Set env value in .env or execution environment.")
     }
 
     if (privKey == undefined || privKey == "") {
       throw new Error("Attempted to call getSigner() with STARKNET_PRIVATE_KEY being undefined. Set env value in .env or execution environment.")
     }
 
-    const kp = ec.genKeyPair(privKey)
+    const kp = ec.getKeyPair(privKey.indexOf("0x") !== 0 ? `0x${privKey}` : privKey)
     const s = new Account(provider, accountAddress, kp)
     console.log(s)
     return s;
