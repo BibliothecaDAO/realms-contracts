@@ -96,10 +96,6 @@ func depositFromL1{
     let (address) = l1_lockbox_contract_address.read()
     assert from_address = address
 
-    # Checking if token_ids_len was correctly formatted because it should contain [low, high, low, high] values
-    # let (q, ids_len_rem) = unsigned_div_rem(token_ids_len, 2)
-    # assert ids_len_rem = 0
-
     bridge_mint_loop(to, token_ids_len, token_ids)
 
     return ()
@@ -125,30 +121,15 @@ func bridge_mint_loop{
     
     # Not tested and not sure but this call probably should be here - no big overhead 
     let (realms_address) = l2_realms_contract_address.read()
-    
-    let (owner) = IBridgeable_ERC721.bridge_get_token_owner(
-        contract_address=realms_address,
-        token_id=token_id
-    )
 
     let (contract_address) = get_contract_address()
 
-    if owner == contract_address:
-        # Case: transfer from L1->L2
-        IERC721.transferFrom(
-            contract_address=realms_address,
-            from_=contract_address,
-            to=to,
-            tokenId=token_id
-        )
-    else:
-        # Case: first mint
-        IBridgeable_ERC721.bridge_mint(
-            contract_address=realms_address, 
-            to=to, 
-            token_id=token_id
-        )
-    end
+    IERC721.transferFrom(
+        contract_address=realms_address,
+        from_=contract_address,
+        to=to,
+        tokenId=token_id
+    )
 
     bridge_mint_loop(to, token_ids_len - 2, token_ids + 2)
 
@@ -201,7 +182,7 @@ func withdraw_loop{
         pedersen_ptr: HashBuiltin*,
         range_check_ptr
     } (
-        to: felt, 
+        to: felt,
         token_ids_len: felt, 
         token_ids: Uint256*,
         message_payload_len: felt,
@@ -240,7 +221,7 @@ func withdraw_loop{
     assert [message_payload] = token_id.low
     assert [message_payload + 1] = token_id.high
  
-    withdraw_loop(to, token_ids_len - 1, token_ids + 1, message_payload_len + 2, message_payload + 2)
+    withdraw_loop(to, token_ids_len - 1, token_ids + 2, message_payload_len + 2, message_payload + 2)
 
     return ()
 end
