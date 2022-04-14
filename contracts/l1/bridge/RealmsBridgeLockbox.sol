@@ -87,7 +87,7 @@ contract RealmsBridgeLockbox is
         // Construct the withdrawal message's payload.
         uint256[] memory payload = new uint256[](1 + (_realmIds.length * 2));
 
-        payload[0] = uint256(uint160(address(msg.sender))); // TODO: needs to be tested 
+        payload[0] = uint256(uint160(address(_to))); // TODO: needs to be tested 
         
         for (uint256 i = 0; i < _realmIds.length; i++) {
           (uint256 low, uint256 high) = splitUint256(_realmIds[i]);
