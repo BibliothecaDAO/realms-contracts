@@ -108,6 +108,8 @@ When opening VS Code, it should ask you to re-open the project in a container, i
 the .devcontainer folder. If not, you can open the Command Palette (`cmd + shift + p`),
 and run “Remote-Containers: Rebuild and Reopen in Container”.
 
+If you need to authenticate in your container, we recommend using [GitHub command line](https://github.com/cli/cli/blob/trunk/docs/install_linux.md). Install the cli and use the command `gh auth login` to generate an ssh keypair and login in your container. This will _not_ be shared outside of your local computer.
+
 ## Outline
 
 Flow:
