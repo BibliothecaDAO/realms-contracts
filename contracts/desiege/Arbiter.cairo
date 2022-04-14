@@ -32,7 +32,8 @@ end
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        address_of_owner : felt):
+    address_of_owner : felt
+):
     # Whoever deploys the arbiter sets the only owner.
     owner_of_arbiter.write(address_of_owner)
     return ()
@@ -41,7 +42,8 @@ end
 # Called to save the address of the ModuleController.
 @external
 func set_address_of_controller{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        contract_address : felt):
+    contract_address : felt
+):
     let (locked) = lock.read()
     # Locked starts as zero
     assert_not_zero(1 - locked)
@@ -55,20 +57,23 @@ end
 # Called to replace the contract that controls the Arbiter.
 @external
 func replace_self{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        new_arbiter_address : felt):
+    new_arbiter_address : felt
+):
     only_owner()
     let (controller) = controller_address.read()
     # The ModuleController has a fixed address. The Arbiter
     # may be upgraded by calling the ModuleController and declaring
     # the new Arbiter.
     IModuleController.appoint_new_arbiter(
-        contract_address=controller, new_arbiter=new_arbiter_address)
+        contract_address=controller, new_arbiter=new_arbiter_address
+    )
     return ()
 end
 
 @external
 func appoint_new_owner{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        new_owner_address : felt):
+    new_owner_address : felt
+):
     only_owner()
     owner_of_arbiter.write(new_owner_address)
     return ()
@@ -77,33 +82,36 @@ end
 # Called to approve a deployed module as identified by an ID.
 @external
 func appoint_contract_as_module{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        module_address : felt, module_id : felt):
+    module_address : felt, module_id : felt
+):
     only_owner()
     let (controller) = controller_address.read()
     # Call the ModuleController and enable the new address.
     IModuleController.set_address_for_module_id(
-        contract_address=controller, module_id=module_id, module_address=module_address)
+        contract_address=controller, module_id=module_id, module_address=module_address
+    )
     return ()
 end
 
 # Called to authorise write access of one module to another.
 @external
 func approve_module_to_module_write_access{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        module_id_doing_writing : felt, module_id_being_written_to : felt):
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+}(module_id_doing_writing : felt, module_id_being_written_to : felt):
     only_owner()
     let (controller) = controller_address.read()
     IModuleController.set_write_access(
         contract_address=controller,
         module_id_doing_writing=module_id_doing_writing,
-        module_id_being_written_to=module_id_being_written_to)
+        module_id_being_written_to=module_id_being_written_to,
+    )
     return ()
 end
 
 @external
 func batch_set_controller_addresses{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        module_01_addr : felt, module_02_addr : felt):
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+}(module_01_addr : felt, module_02_addr : felt):
     only_owner()
     let (controller) = controller_address.read()
     IModuleController.set_initial_module_addresses(controller, module_01_addr, module_02_addr)

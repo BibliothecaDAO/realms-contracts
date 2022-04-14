@@ -6,7 +6,12 @@ from starkware.cairo.common.math import assert_le, split_felt, unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.common.uint256 import (
-    Uint256, uint256_add, uint256_mul, uint256_xor, uint256_shr)
+    Uint256,
+    uint256_add,
+    uint256_mul,
+    uint256_xor,
+    uint256_shr,
+)
 
 struct State:
     member s0 : felt
@@ -19,8 +24,8 @@ end
 
 @constructor
 func constructor{
-        syscall_ptr : felt*, bitwise_ptr : BitwiseBuiltin*, pedersen_ptr : HashBuiltin*,
-        range_check_ptr}(seed : felt):
+    syscall_ptr : felt*, bitwise_ptr : BitwiseBuiltin*, pedersen_ptr : HashBuiltin*, range_check_ptr
+}(seed : felt):
     alloc_locals
     let (s0) = splitmix64(seed)
     let (s1) = splitmix64(s0)
@@ -32,8 +37,8 @@ end
 
 @external
 func next{
-        syscall_ptr : felt*, bitwise_ptr : BitwiseBuiltin*, pedersen_ptr : HashBuiltin*,
-        range_check_ptr}() -> (rnd : felt):
+    syscall_ptr : felt*, bitwise_ptr : BitwiseBuiltin*, pedersen_ptr : HashBuiltin*, range_check_ptr
+}() -> (rnd : felt):
     alloc_locals
 
     let (s) = state.read()

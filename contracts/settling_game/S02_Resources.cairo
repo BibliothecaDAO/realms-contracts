@@ -1,3 +1,8 @@
+# ____MODULE_L02___RESOURCES_STATE
+#   State to create and issue resources for a given Realm
+#
+# MIT License
+
 %lang starknet
 
 from starkware.cairo.common.bitwise import bitwise_and
@@ -8,7 +13,11 @@ from starkware.cairo.common.uint256 import Uint256
 
 from contracts.settling_game.interfaces.imodules import IModuleController
 from contracts.settling_game.utils.library import (
-    MODULE_controller_address, MODULE_only_approved, MODULE_initializer, MODULE_only_arbiter)
+    MODULE_controller_address,
+    MODULE_only_approved,
+    MODULE_initializer,
+    MODULE_only_arbiter,
+)
 
 # ___MODULE_S02___RESOURCE_STATE
 
@@ -19,7 +28,8 @@ end
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        address_of_controller : felt):
+    address_of_controller : felt
+):
     MODULE_initializer(address_of_controller)
     return ()
 end
@@ -30,8 +40,8 @@ end
 
 @external
 func set_resource_level{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*}(token_id : Uint256, resource_id : felt, level : felt) -> ():
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(token_id : Uint256, resource_id : felt, level : felt) -> ():
     MODULE_only_approved()
     resource_levels.write(token_id, resource_id, level)
 
@@ -44,7 +54,8 @@ end
 
 @view
 func get_resource_level{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256, resource : felt) -> (level : felt):
+    token_id : Uint256, resource : felt
+) -> (level : felt):
     let (level) = resource_levels.read(token_id, resource)
 
     return (level=level)

@@ -1,3 +1,8 @@
+# Interface for Realms ERC721 Implementation
+#   Realms token that can be staked/unstaked
+#
+# MIT License
+
 %lang starknet
 
 from starkware.cairo.common.uint256 import Uint256
@@ -24,7 +29,8 @@ namespace realms_IERC721:
     end
 
     func safeTransferFrom(
-            _from : felt, to : felt, token_id : Uint256, data_len : felt, data : felt*):
+        _from : felt, to : felt, token_id : Uint256, data_len : felt, data : felt*
+    ):
     end
 
     func transferFrom(_from : felt, to : felt, token_id : Uint256):

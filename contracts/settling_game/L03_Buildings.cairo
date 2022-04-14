@@ -1,3 +1,8 @@
+# ____MODULE_L03___BUILDING_LOGIC
+#   TODO: Add Module Description
+#
+# MIT License
+
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
@@ -10,13 +15,39 @@ from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.game_structs import (
-    RealmBuildings, RealmData, RealmBuildingCostIds, RealmBuildingCostValues, RealmBuildingsIds,
-    ModuleIds, ExternalContractIds)
+    RealmBuildings,
+    RealmData,
+    RealmBuildingCostIds,
+    RealmBuildingCostValues,
+    RealmBuildingsIds,
+    ModuleIds,
+    ExternalContractIds,
+)
 
 from contracts.settling_game.utils.constants import (
-    SHIFT_6_1, SHIFT_6_2, SHIFT_6_3, SHIFT_6_4, SHIFT_6_5, SHIFT_6_6, SHIFT_6_7, SHIFT_6_8,
-    SHIFT_6_9, SHIFT_6_10, SHIFT_6_11, SHIFT_6_12, SHIFT_6_13, SHIFT_6_14, SHIFT_6_15, SHIFT_6_16,
-    SHIFT_6_17, SHIFT_6_18, SHIFT_6_19, SHIFT_6_20, TRUE, FALSE)
+    SHIFT_6_1,
+    SHIFT_6_2,
+    SHIFT_6_3,
+    SHIFT_6_4,
+    SHIFT_6_5,
+    SHIFT_6_6,
+    SHIFT_6_7,
+    SHIFT_6_8,
+    SHIFT_6_9,
+    SHIFT_6_10,
+    SHIFT_6_11,
+    SHIFT_6_12,
+    SHIFT_6_13,
+    SHIFT_6_14,
+    SHIFT_6_15,
+    SHIFT_6_16,
+    SHIFT_6_17,
+    SHIFT_6_18,
+    SHIFT_6_19,
+    SHIFT_6_20,
+    TRUE,
+    FALSE,
+)
 
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
@@ -25,9 +56,10 @@ from contracts.settling_game.interfaces.imodules import IModuleController, IS03_
 from contracts.settling_game.interfaces.IStorage import IStorage
 
 from contracts.settling_game.utils.library import (
-    MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
-
-# ____MODULE_L03___BUILDING_LOGIC
+    MODULE_controller_address,
+    MODULE_only_approved,
+    MODULE_initializer,
+)
 
 ##########
 # EVENTS #
@@ -43,7 +75,8 @@ end
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        address_of_controller : felt):
+    address_of_controller : felt
+):
     # Store the address of the only fixed contract in the system.
     MODULE_initializer(address_of_controller)
     return ()
@@ -55,8 +88,8 @@ end
 
 @external
 func build{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*}(token_id : Uint256, building_id : felt) -> (success : felt):
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(token_id : Uint256, building_id : felt) -> (success : felt):
     alloc_locals
 
     let (caller) = get_caller_address()
@@ -64,7 +97,8 @@ func build{
 
     # S_REALMS_ADDRESS
     let (s_realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.S_Realms)
+        controller, ExternalContractIds.S_Realms
+    )
 
     # OWNER CHECK
     let (owner) = realms_IERC721.ownerOf(contract_address=s_realms_address, token_id=token_id)
@@ -72,19 +106,23 @@ func build{
 
     # REALMS ADDRESS
     let (realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Realms)
+        controller, ExternalContractIds.Realms
+    )
 
     # RESOURCE ADDRESS
     let (resource_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Resources)
+        controller, ExternalContractIds.Resources
+    )
 
     # REALMS DATA
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
-        contract_address=realms_address, token_id=token_id)
+        contract_address=realms_address, token_id=token_id
+    )
 
     # BUILDINGS STATE
     let (buildings_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.S03_Buildings)
+        contract_address=controller, module_id=ModuleIds.S03_Buildings
+    )
 
     # GET CURRENT BUILDINGS
     let (current_building) = IS03_Buildings.get_realm_buildings(buildings_state_address, token_id)
@@ -118,21 +156,26 @@ end
 
 @external
 func build_buildings{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*}(
-        buildings_state_address : felt, token_id : Uint256, current_realm_buildings : felt,
-        building_id : felt):
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(
+    buildings_state_address : felt,
+    token_id : Uint256,
+    current_realm_buildings : felt,
+    building_id : felt,
+):
     alloc_locals
     let (caller) = get_caller_address()
     let (controller) = MODULE_controller_address()
 
     # REALMS ADDRESS
     let (realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Realms)
+        controller, ExternalContractIds.Realms
+    )
 
     # REALMS DATA
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
-        contract_address=realms_address, token_id=token_id)
+        contract_address=realms_address, token_id=token_id
+    )
 
     # GET CURRENT BUILDINGS
     let (current_buildings : RealmBuildings) = fetch_buildings_by_type(token_id)
@@ -366,10 +409,17 @@ func build_buildings{
 end
 
 func check_correct_resources{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*}(
-        token_ids_len : felt, token_ids : felt*, token_values_len : felt, token_values : felt*,
-        ids_len : felt, ids : felt*, values_len : felt, values : felt*):
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(
+    token_ids_len : felt,
+    token_ids : felt*,
+    token_values_len : felt,
+    token_values : felt*,
+    ids_len : felt,
+    ids : felt*,
+    values_len : felt,
+    values : felt*,
+):
     if token_ids_len == 0:
         return ()
     end
@@ -388,21 +438,22 @@ func check_correct_resources{
         ids_len=ids_len - 1,
         ids=ids + 1,
         values_len=values_len - 1,
-        values=values + 1)
+        values=values + 1,
+    )
 end
 
 @external
 func fetch_building_cost_ids{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*}(building_id : felt) -> (
-        realm_building_ids_len : felt, realm_building_ids : Uint256*):
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(building_id : felt) -> (realm_building_ids_len : felt, realm_building_ids : Uint256*):
     alloc_locals
 
     let (controller) = MODULE_controller_address()
 
     # state contract
     let (storage_db_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Storage)
+        controller, ExternalContractIds.Storage
+    )
 
     let (data) = IStorage.get_building_cost_ids(storage_db_address, building_id)
 
@@ -495,16 +546,16 @@ end
 
 @external
 func fetch_building_cost_values{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*}(building_id : felt) -> (
-        realm_building_costs_len : felt, realm_building_costs : Uint256*):
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(building_id : felt) -> (realm_building_costs_len : felt, realm_building_costs : Uint256*):
     alloc_locals
 
     let (controller) = MODULE_controller_address()
 
     # state contract
     let (storage_db_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Storage)
+        controller, ExternalContractIds.Storage
+    )
 
     let (data) = IStorage.get_building_cost_values(storage_db_address, building_id)
 
@@ -597,15 +648,16 @@ end
 
 @external
 func fetch_buildings_by_type{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*}(token_id : Uint256) -> (realm_buildings : RealmBuildings):
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(token_id : Uint256) -> (realm_buildings : RealmBuildings):
     alloc_locals
 
     let (controller) = MODULE_controller_address()
 
     # state contract
     let (buildings_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.S03_Buildings)
+        contract_address=controller, module_id=ModuleIds.S03_Buildings
+    )
 
     let (data) = IS03_Buildings.get_realm_buildings(buildings_state_address, token_id)
 
@@ -652,5 +704,6 @@ func fetch_buildings_by_type{
         Fishmonger=Fishmonger,
         Farms=Farms,
         Hamlet=Hamlet
-        ))
+        ),
+    )
 end

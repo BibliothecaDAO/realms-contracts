@@ -1,3 +1,9 @@
+# Constants utility contract
+#   A set of constants that are used throughout the project
+#   and/or not provided by cairo (e.g. TRUE / FALSE)
+#
+# MIT License
+
 %lang starknet
 
 const SHIFT_8_1 = 2 ** 0
@@ -53,3 +59,5 @@ const BASE_RESOURCES_PER_DAY = 100
 const BASE_LORDS_PER_DAY = 25
 
 const GENESIS_TIMESTAMP = 1645743897
+
+const PILLAGE_AMOUNT = 25

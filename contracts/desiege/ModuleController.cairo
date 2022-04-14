@@ -70,7 +70,8 @@ end
 # #### Constructor #####
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        arbiter_address : felt):
+    arbiter_address : felt
+):
     arbiter.write(arbiter_address)
 
     # TODO: add 'set_write_access' here for all the module
@@ -85,7 +86,8 @@ end
 # Called by the current Arbiter to replace itself.
 @external
 func appoint_new_arbiter{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        new_arbiter : felt):
+    new_arbiter : felt
+):
     only_arbiter()
     arbiter.write(new_arbiter)
     return ()
@@ -94,7 +96,8 @@ end
 # Called by the Arbiter to set new address mappings.
 @external
 func set_address_for_module_id{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        module_id : felt, module_address : felt):
+    module_id : felt, module_address : felt
+):
     only_arbiter()
     module_id_of_address.write(module_address, module_id)
     address_of_module_id.write(module_id, module_address)
@@ -105,8 +108,8 @@ end
 # Called by the Arbiter to batch set new address mappings on deployment.
 @external
 func set_initial_module_addresses{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        module_01_addr : felt, module_02_addr : felt):
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+}(module_01_addr : felt, module_02_addr : felt):
     only_arbiter()
 
     address_of_module_id.write(1, module_01_addr)
@@ -121,7 +124,8 @@ end
 # Called to authorise write access of one module to another.
 @external
 func set_write_access{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        module_id_doing_writing : felt, module_id_being_written_to : felt):
+    module_id_doing_writing : felt, module_id_being_written_to : felt
+):
     only_arbiter()
     can_write_to.write(module_id_doing_writing, module_id_being_written_to, 1)
     return ()
@@ -130,7 +134,8 @@ end
 # #### View functions #####
 @view
 func get_module_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        module_id : felt) -> (address : felt):
+    module_id : felt
+) -> (address : felt):
     let (address) = address_of_module_id.read(module_id)
     return (address)
 end
@@ -138,7 +143,8 @@ end
 # Called by a module before it updates internal state.
 @view
 func has_write_access{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        address_attempting_to_write : felt):
+    address_attempting_to_write : felt
+):
     alloc_locals
     # Approves the write-permissions between two modules, ensuring
     # first that the modules are both active (not replaced), and
