@@ -2,7 +2,7 @@
 import { deployContract, getOwnerAccountInt, setupDeploymentDir } from '../../helpers'
 
 async function main() {
-  const contractName = 'Arbiter'
+  const contractName = 'Storage'
 
   setupDeploymentDir()
 

@@ -19,4 +19,4 @@ async function main() {
     await deployContract(contractName, contractName, [name, symbol, 18, initial_supply.low.toString(), initial_supply.high.toString(), ownerAccount, ownerAccount])
 }
 
-main().then(e => console.error(e))
+export default main().then(e => console.error(e))

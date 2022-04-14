@@ -2,7 +2,8 @@
 import { deployContract, getOwnerAccountInt, setupDeploymentDir, getDeployedAddressInt } from '../../helpers'
 
 async function main() {
-    const logicContractName = 'L04_Calculator'
+    const logicContractName = 'L05_Wonder'
+    const stateContractName = 'S05_Wonder'
 
     setupDeploymentDir()
 
@@ -12,6 +13,7 @@ async function main() {
 
     // Magically deploy + write all files and stuff 
     await deployContract(logicContractName, logicContractName, [moduleControllerAddress])
+    await deployContract(stateContractName, stateContractName, [moduleControllerAddress])
 }
 
 export default main()

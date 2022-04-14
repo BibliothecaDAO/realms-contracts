@@ -1,5 +1,5 @@
 
-import { deployContract, getDeployedAddressInt, getOwnerAccountInt } from '../helpers'
+import { deployContract, getDeployedAddressInt, getOwnerAccountInt } from '../../helpers'
 import { toFelt } from 'starknet/dist/utils/number'
 
 async function main() {
@@ -13,4 +13,4 @@ async function main() {
     await deployContract(contractName, contractName, [uri, ownerAccount])
 }
 
-main().then(e => console.error(e))
+export default main().then(e => console.error(e))

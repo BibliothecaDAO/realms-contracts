@@ -178,7 +178,7 @@ export function getVersionSuffix() {
   return `${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}`
 }
 
-export async function getAccountContract(calls: any) {
+export async function getAccountContract() {
   const path_base = getPathBase()
   const privKey = process.env.OWNER_PRIVATE_KEY;
   const address: any = fs.readFileSync(`${path_base}/OwnerAccount.json`)
@@ -186,33 +186,51 @@ export async function getAccountContract(calls: any) {
 
   const parsed_address = JSON.parse(address.toString())
   const parsed_abi = JSON.parse(abi.toString())
-
+  const ownerAccount = getOwnerAccountInt()
+  const moduleControllerAddress = getDeployedAddressInt("ModuleController");
+  const proxySettlingLogicAddress = getDeployedAddressInt("PROXY_L01_Settling");
   try {
     const starkKeyPair = ec.genKeyPair(privKey);
 
     console.log(starkKeyPair.getPrivate("number").toString())
     // const account = new Account(provider, parsed_address.address, starkKeyPair)
-    // const accountContract = new Contract(
-    //   parsed_abi,
-    //   parsed_address.address
-    // );
+    const accountContract = new Contract(
+      parsed_abi,
+      parsed_address.address,
+      provider
+    );
 
-    // const nonce = (await accountContract.call("get_nonce")).toString();
-    // const msgHash = hash.hashMulticall(parsed_address.address, calls, nonce, "0");
-    // const signature = ec.sign(starkKeyPair, msgHash);
+    const nonce = (await accountContract.call("get_nonce")).toString();
+    
+    const calls = [
+      {
+          contractAddress: proxySettlingLogicAddress,
+          entrypoint: "initializer",
+          calldata: [ownerAccount, moduleControllerAddress]
+      },
+    ];
 
-    // const { callArray, calldata } = transformCallsToMulticallArrays(calls);
+    const msgHash = hash.hashMulticall(parsed_address.address, calls, nonce, "0");
 
-    // const { transaction_hash: transferTxHash } = await accountContract.__execute__(
-    //   callArray,
-    //   calldata,
-    //   nonce,
-    //   signature
-    // );
+    const { callArray, calldata } = transformCallsToMulticallArrays(calls);
 
+    console.log(callArray)
+    console.log(calldata)
+    const signature = ec.sign(starkKeyPair, msgHash);
+
+    console.log(accountContract)
+
+    const { transaction_hash: transferTxHash } = await accountContract.__execute__(
+      callArray,
+      calldata,
+      nonce,
+      signature
+    );
+
+    console.log(nonce)
     console.log(`Waiting for Tx to be Accepted on Starknet - Transfer...`);
 
-    // await provider.waitForTransaction(transferTxHash);
+    await provider.waitForTransaction(transferTxHash);
 
     return 1;
 
