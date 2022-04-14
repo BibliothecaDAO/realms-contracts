@@ -1,10 +1,18 @@
+# Module Interfaces
+#   These are interfaces that can be imported by other contracts for convenience.
+#   All of the functions in an interface must be @view or @external.
+#
+# MIT License
+
 %lang starknet
 
 from starkware.cairo.common.uint256 import Uint256
-from contracts.settling_game.utils.game_structs import RealmBuildings
-
-# These are interfaces that can be imported by other contracts for convenience.
-# All of the functions in an interface must be @view or @external.
+from contracts.settling_game.utils.game_structs import (
+    RealmBuildings,
+    RealmCombatData,
+    TroopCost,
+    Squad,
+)
 
 # Interface for the ModuleController.
 @contract_interface
@@ -74,7 +82,6 @@ namespace IS02_Resources:
     end
     func get_resource_upgrade_value(resource : felt) -> (level : felt):
     end
-
     func set_resource_level(token_id : Uint256, resource_id : felt, level : felt) -> ():
     end
 end
@@ -84,6 +91,8 @@ namespace IL02_Resources:
     func check_if_claimable(token_id : Uint256) -> (can_claim : felt):
     end
     func claim_resources(token_id : Uint256):
+    end
+    func pillage_resources(token_id : Uint256, claimer : felt):
     end
 end
 
@@ -164,5 +173,20 @@ namespace IS05_Wonders:
     end
 
     func get_tax_pool(epoch : felt, resource_id : felt) -> (supply : felt):
+    end
+end
+
+@contract_interface
+namespace IS06_Combat:
+    func get_realm_combat_data(realm_id : Uint256) -> (combat_data : RealmCombatData):
+    end
+
+    func set_realm_combat_data(realm_id : Uint256, combat_data : RealmCombatData):
+    end
+
+    func get_troop_cost(troop_id : felt) -> (cost : TroopCost):
+    end
+
+    func update_squad_in_realm(s : Squad, realm_id : Uint256, slot : felt):
     end
 end

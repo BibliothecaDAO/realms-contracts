@@ -1,3 +1,8 @@
+# Resources ERC1155 Token
+#   Token created for each resource that can be minted, traded, and burned.
+#
+# MIT License
+
 %lang starknet
 from starkware.cairo.common.math import assert_not_zero
 from starkware.cairo.common.cairo_builtins import HashBuiltin

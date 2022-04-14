@@ -1,3 +1,8 @@
+# General Purpose Utilities
+#   Utility functions that are used across the project (e.g. compute the unique hash of a list of felts)
+#
+# MIT License
+
 %lang starknet
 
 from starkware.cairo.common.bitwise import bitwise_and
@@ -37,9 +42,6 @@ func unpack_data{
 }(data : felt, index : felt, mask_size : felt) -> (score : felt):
     alloc_locals
 
-    local syscall_ptr : felt* = syscall_ptr
-    local pedersen_ptr : HashBuiltin* = pedersen_ptr
-    local bitwise_ptr : BitwiseBuiltin* = bitwise_ptr
     # 1. Create a 8-bit mask at and to the left of the index
     # E.g., 000111100 = 2**2 + 2**3 + 2**4 + 2**5
     # E.g.,  2**(i) + 2**(i+1) + 2**(i+2) + 2**(i+3) = (2**i)(15)

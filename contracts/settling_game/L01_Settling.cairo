@@ -1,3 +1,9 @@
+# ____MODULE_L01___SETTLING_LOGIC
+#   Core Settling Game logic including setting up the world
+#   and staking/unstaking a realm.
+#
+# MIT License
+
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
@@ -28,8 +34,6 @@ from contracts.settling_game.interfaces.imodules import (
     IL05_Wonders,
     IL02_Resources,
 )
-
-# ____MODULE_L01___SETTLING_LOGIC
 
 ##########
 # EVENTS #
