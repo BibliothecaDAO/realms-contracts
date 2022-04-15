@@ -30,9 +30,9 @@ async function main() {
     //         calldata: [ownerAccount, moduleControllerAddress]
     //     }
     // )
-    console.log(await getAccountContract())
+    // console.log(await getAccountContract())
 
-    // await deployContract(stateContractName, stateContractName, [moduleControllerAddress])
+    await deployContract(stateContractName, stateContractName, [moduleControllerAddress])
 }
 
 export default main()

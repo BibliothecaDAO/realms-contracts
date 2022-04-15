@@ -11,15 +11,3 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
    libgmp3-dev \
    software-properties-common && \
    rm -rf /var/lib/apt/lists/*
-
-# Add Node
-FROM node:16.14.2
-ENV NODE_ENV=production
-
-WORKDIR /
-
-COPY ["package.json", "yarn.json*", "./"]
-
-RUN yarn install --production
-
-COPY . .

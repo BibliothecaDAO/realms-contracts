@@ -59,16 +59,24 @@ end
 # CONSTRUCTOR #
 ###############
 
-@external
-func initializer{
-        syscall_ptr : felt*, 
-        pedersen_ptr : HashBuiltin*,
-        range_check_ptr
-    }(proxy_admin: felt, address_of_controller : felt):
-    Proxy_initializer(proxy_admin)
+@constructor
+func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    address_of_controller : felt
+):
     MODULE_initializer(address_of_controller)
     return ()
 end
+
+# @external
+# func initializer{
+#         syscall_ptr : felt*, 
+#         pedersen_ptr : HashBuiltin*,
+#         range_check_ptr
+#     }(proxy_admin: felt, address_of_controller : felt):
+#     Proxy_initializer(proxy_admin)
+#     MODULE_initializer(address_of_controller)
+#     return ()
+# end
 
 @external
 func upgrade{

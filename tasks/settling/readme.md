@@ -27,6 +27,7 @@ Run `npx ts-node ./tasks/deploy_account.ts` and view the resulting file. The pri
 4. `npx ts-node ./tasks/settling/modules/02_deploy_resources.ts`
 5. `npx ts-node ./tasks/settling/modules/03_deploy_buildings.ts`
 6. `npx ts-node ./tasks/settling/modules/04_deploy_calculator.ts`
+6. `npx ts-node ./tasks/settling/modules/05_deploy_wonder_tax.ts`
 7. `npx ts-node ./tasks/settling/modules/set_initial_module_addresses.ts` // do last
 
 # Updating Module
@@ -36,6 +37,7 @@ Run `npx ts-node ./tasks/deploy_account.ts` and view the resulting file. The pri
 # Helpers
 
 1. `npx ts-node ./tasks/settling/modules/update_s_realms_module_address.ts`
+1. `npx ts-node ./tasks/settling/modules/set_initial_module_addresses.ts`
 
 # Data Setters
 

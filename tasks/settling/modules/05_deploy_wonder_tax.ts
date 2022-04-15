@@ -2,8 +2,8 @@
 import { deployContract, getOwnerAccountInt, setupDeploymentDir, getDeployedAddressInt } from '../../helpers'
 
 async function main() {
-    const logicContractName = 'L05_Wonder'
-    const stateContractName = 'S05_Wonder'
+    const logicContractName = 'L05_Wonders'
+    const stateContractName = 'S05_Wonders'
 
     setupDeploymentDir()
 

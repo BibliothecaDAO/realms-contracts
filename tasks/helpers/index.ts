@@ -139,10 +139,11 @@ export async function deployContract(contractName: string, contractAlias: string
 export function getSigner() {
   const path_base = getPathBase()
   try {
-    const file = fs.readFileSync(`${path_base}/OwnerAccount.json`)
+    // const file = fs.readFileSync(`${path_base}/OwnerAccount.json`)
 
-    const parsed = JSON.parse(file.toString())
+    // const parsed = JSON.parse(file.toString())
 
+    const accountAddress = process.env.STARKNET_ACCOUNT_ADDRESS;
     const privKey = process.env.OWNER_PRIVATE_KEY;
 
     if (privKey == undefined || privKey == "") {
@@ -150,7 +151,7 @@ export function getSigner() {
     }
 
     const kp = ec.genKeyPair(privKey)
-    const s = new Account(provider, parsed.address, kp)
+    const s = new Account(provider, accountAddress, kp)
     console.log(s)
     return s;
 
@@ -192,12 +193,9 @@ export async function getAccountContract() {
   try {
     const starkKeyPair = ec.genKeyPair(privKey);
 
-    console.log(starkKeyPair.getPrivate("number").toString())
-    // const account = new Account(provider, parsed_address.address, starkKeyPair)
     const accountContract = new Contract(
       parsed_abi,
-      parsed_address.address,
-      provider
+      parsed_address.address
     );
 
     const nonce = (await accountContract.call("get_nonce")).toString();
@@ -214,25 +212,18 @@ export async function getAccountContract() {
 
     const { callArray, calldata } = transformCallsToMulticallArrays(calls);
 
-    console.log(callArray)
-    console.log(calldata)
     const signature = ec.sign(starkKeyPair, msgHash);
 
-    console.log(accountContract)
-
+    console.log(callArray)
     const { transaction_hash: transferTxHash } = await accountContract.__execute__(
       callArray,
       calldata,
-      nonce,
-      signature
+      nonce
     );
 
-    console.log(nonce)
     console.log(`Waiting for Tx to be Accepted on Starknet - Transfer...`);
 
-    await provider.waitForTransaction(transferTxHash);
-
-    return 1;
+    return await provider.waitForTransaction(transferTxHash);
 
   } catch (e) {
     console.error("Signing error: ", e)
