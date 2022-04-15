@@ -1,18 +1,16 @@
 from ast import arguments
 from email.headerregistry import Address
-from utils import Signer, uint, str_to_felt
 from nile import deployments
 
 # TODO: ADD TO ENV ON LOAD
 NETWORK = "goerli"
 
 def run(nre):
-    admin, abi = next(deployments.load("admin", NETWORK))
+    admin = '0x01560853165c85c290dbe94980a1faa222b6469af53775a15f2fdc1542518af5'
 
     arbiter, abi = next(deployments.load("arbiter", NETWORK))
     controller, abi = next(deployments.load("moduleController", NETWORK))
 
-    admin, abi = next(deployments.load("admin", NETWORK))
     lords, abi = next(deployments.load("lords", NETWORK))
     realms, abi = next(deployments.load("realms", NETWORK))
     resources, abi = next(deployments.load("resources", NETWORK))
@@ -29,15 +27,17 @@ def run(nre):
     S05_Wonders, abi = next(deployments.load("S05_Wonders", NETWORK))
 
     # set module access within realms access
-    nre.invoke(
-        realms,
-        'set_realm_data',
-        params=["1", "0", '40564819207303341694527483217926'],
-    )
+    # nre.invoke(
+    #     realms,
+    #     'set_realm_data',
+    #     params=["1", "0", '40564819207303341694527483217926'],
+    # )
 
     # set module access within resources contract
-    nre.invoke(
+    mint = nre.invoke(
         realms,
         'mint',
-        params=[admin, "1", "0"],
+        params=[admin, "0", "0"],
     )
+
+    print(mint)

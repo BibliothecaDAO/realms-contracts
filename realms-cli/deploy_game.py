@@ -1,13 +1,12 @@
 from ast import arguments
 from email.headerregistry import Address
-from utils import Signer, uint, str_to_felt
 from nile import deployments
 
 # TODO: ADD TO ENV ON LOAD
 NETWORK = "goerli"
 
 def run(nre):
-    admin, abi = next(deployments.load("admin", NETWORK))
+    admin = '0x01560853165c85c290dbe94980a1faa222b6469af53775a15f2fdc1542518af5'
     lords, abi = next(deployments.load("lords", NETWORK))
     realms, abi = next(deployments.load("realms", NETWORK))
     resources, abi = next(deployments.load("resources", NETWORK))
