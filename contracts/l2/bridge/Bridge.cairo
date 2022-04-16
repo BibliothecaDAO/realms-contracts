@@ -20,9 +20,6 @@ from openzeppelin.introspection.ERC165 import (
     ERC165_register_interface
 )
 
-# Ours
-from contracts.l2.bridge.IBridgeable_ERC721 import IBridgeable_ERC721
-
 @storage_var
 func l1_lockbox_contract_address() -> (res: felt):
 end
