@@ -1,0 +1,50 @@
+[
+    {
+        "inputs": [
+            {
+                "name": "grid_dimension",
+                "type": "felt"
+            },
+            {
+                "name": "position",
+                "type": "felt"
+            }
+        ],
+        "name": "test_unpack_position",
+        "outputs": [
+            {
+                "name": "row",
+                "type": "felt"
+            },
+            {
+                "name": "col",
+                "type": "felt"
+            }
+        ],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "grid_dimension",
+                "type": "felt"
+            },
+            {
+                "name": "row",
+                "type": "felt"
+            },
+            {
+                "name": "col",
+                "type": "felt"
+            }
+        ],
+        "name": "test_pack_position",
+        "outputs": [
+            {
+                "name": "position",
+                "type": "felt"
+            }
+        ],
+        "type": "function"
+    }
+]

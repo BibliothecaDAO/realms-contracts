@@ -6,7 +6,7 @@ from nile import deployments
 NETWORK = "goerli"
 
 def run(nre):
-    admin = '0x01560853165c85c290dbe94980a1faa222b6469af53775a15f2fdc1542518af5'
+    admin = '0x00b8675fba812edd0f69fcb917616162cbe785490aeabfb693fb3a0f489a21a5'
     lords, abi = next(deployments.load("lords", NETWORK))
     realms, abi = next(deployments.load("realms", NETWORK))
     resources, abi = next(deployments.load("resources", NETWORK))

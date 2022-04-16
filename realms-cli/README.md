@@ -1,7 +1,18 @@
 ## NILE DEPLOY
 
+``
+export STARKNET_NETWORK=goerli
+``
+
+
 1. Create account or set an account
-INSERT INSTRUCTIONS
+
+``bash
+export STARKNET_PRIVATE_KEY=
+nile setup STARKNET_PRIVATE_KEY --network goerli
+``
+
+
 
 ### GAME DEPLOYS
 
