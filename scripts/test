@@ -1,4 +1,10 @@
 #!/bin/bash
 set -eu
 
-pytest -n auto -W ignore::DeprecationWarning ./tests
+if [ $# -eq 0 ]
+  then
+    pytest -n auto -W ignore::DeprecationWarning ./tests    
+else
+  pytest -n auto -W ignore::DeprecationWarning $@
+fi
+

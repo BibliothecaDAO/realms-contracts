@@ -50,7 +50,7 @@ The development container loads settings and the repository information on your 
 
 Instead, you can use the [Github CLI](https://cli.github.com/) to auth from your dev container:
 
-1. Download the [Github CLI](https://cli.github.com/).
+1. Download the [Github CLI](https://github.com/cli/cli/blob/trunk/docs/install_linux.md#debian-ubuntu-linux-raspberry-pi-os-apt).
 2. Visit the [Github Tokens page](https://github.com/settings/tokens) and click `Generate New Token` to create a new token that will be used in your dev container. Make sure to save it somewhere as the token is only visible upon creation.
 3. With the container loaded, open the dev container terminal in vscode.
 4. Run `gh auth login` and follow the steps, pasting in your new access token when asked.
