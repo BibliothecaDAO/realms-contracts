@@ -5,7 +5,7 @@ import { BigNumberish, toBN } from 'starknet/dist/utils/number'
 import { Uint256, bnToUint256 } from 'starknet/dist/utils/uint256'
 
 async function main() {
-    const contractName = 'ERC20_Mintable'
+    const contractName = 'Lords_ERC20_Mintable'
 
     // Collect params
     const ownerAccount = getOwnerAccountInt()
@@ -19,4 +19,4 @@ async function main() {
     await deployContract(contractName, contractName, [name, symbol, 18, initial_supply.low.toString(), initial_supply.high.toString(), ownerAccount, ownerAccount])
 }
 
-main().then(e => console.error(e))
+export default main().then(e => console.error(e))

@@ -1,0 +1,38 @@
+[
+    {
+        "inputs": [],
+        "name": "constructor",
+        "outputs": [],
+        "type": "constructor"
+    },
+    {
+        "inputs": [
+            {
+                "name": "token_id",
+                "type": "felt"
+            },
+            {
+                "name": "item_token_id",
+                "type": "felt"
+            }
+        ],
+        "name": "equipItem",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "token_id",
+                "type": "felt"
+            },
+            {
+                "name": "item_token_id",
+                "type": "felt"
+            }
+        ],
+        "name": "getPower",
+        "outputs": [],
+        "type": "function"
+    }
+]

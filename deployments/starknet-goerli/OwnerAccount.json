@@ -1,6 +1,1 @@
-{
-    "code": "TRANSACTION_RECEIVED",
-    "transaction_hash": "0xd06dfe370542443484962a6e386e9b242a6feaa082bfe70e8bf7ad1167547c",
-    "address": "0x65cc357ef86937b0b367c44c6b0a3f68caee59445d38c00945cc818fbb906ca",
-    "public_key": "0x02d3c2e3d4e6e7af2a369c7a4c46c10814f7af7b7d91ad917f5ece6583dec668"
-}
+{"code":"TRANSACTION_RECEIVED","transaction_hash":"0x24c93152e68f8a27942f0ba7dbaf4904ac53455622b373a8a5c7ef05c91af5d","address":"0x67f0e05ad353ad6079e3d8963929e3cb5a09de74931d1265d01ee797d7a535d","public_key":"0x074d74bc2076d5e7cade7d8453566efd9242c3d6170ff7d9f69845a9442f2656"}

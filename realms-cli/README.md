@@ -1,18 +1,28 @@
-# Install
+## NILE DEPLOY
 
-1. `$ cd realms-cli && pip install -e . && cd ..`
-2. You can now run the commands with `$ realms ...`
+``
+export STARKNET_NETWORK=goerli
+``
 
-If you are getting weird errors, just call the script directly:
 
-`$ python realms-cli cli.py mint_realms`
+1. Create account or set an account
 
-## Account steps
+``bash
+export STARKNET_PRIVATE_KEY=
+nile setup STARKNET_PRIVATE_KEY --network goerli
+``
 
-https://www.cairo-lang.org/docs/hello_starknet/account_setup.html
 
-`$ starknet deploy_account --account_dir realms-cli/hot`
 
-Check ./deployed_wallets for wallet info.
+### GAME DEPLOYS
 
-Add testnet ETH: https://faucet.goerli.starknet.io/
+You need to deploy all of this 
+
+1. nile run realms-cli/mint_tokens.py --network goerli
+2. nile run realms-cli/deploy_game.py --network goerli
+3. nile run realms-cli/init_game.py --network goerli
+
+
+### SET METADATA
+1. nile run realms-cli/mint_realm.py --network goerli
+

@@ -38,7 +38,7 @@ export default async function deployAccount() {
   console.log(`Deployed at ${result.address}`)
   console.log(`TX: ${result.transaction_hash}`)
   console.log(`Public Key ${starkKey}`)
-  console.log(`Private Key ${keyPair.getPrivate("hex")}`)
+  console.log(`Private Key ${keyPair.getPrivate()}`)
   console.log("waiting for transaction...")
   try {
     await provider.waitForTransaction(result.transaction_hash)

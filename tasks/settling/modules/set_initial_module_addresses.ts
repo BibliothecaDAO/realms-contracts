@@ -13,14 +13,16 @@ async function main() {
     const L03_Buildings = getDeployedAddressInt("L03_Buildings"); // module id 5
     const S03_Buildings = getDeployedAddressInt("S03_Buildings"); // module id 6
     const L04_Calculator = getDeployedAddressInt("L04_Calculator"); // module id 7
-
+    const L05_Wonders = getDeployedAddressInt("L05_Wonders"); // module id 7
+    const S05_Wonders = getDeployedAddressInt("S05_Wonders"); // module id 7
     // Magically deploy + write all files and stuff 
     console.log(L01_Settling, S01_Settling, L02_Resources, S02_Resources, L03_Buildings, S03_Buildings, L04_Calculator)
+    
     const res = await getSigner().execute(
         {
             contractAddress: arbiter,
             entrypoint: "batch_set_controller_addresses",
-            calldata: [L01_Settling, S01_Settling, L02_Resources, S02_Resources, L03_Buildings, S03_Buildings, L04_Calculator]
+            calldata: [L01_Settling, S01_Settling, L02_Resources, S02_Resources, L03_Buildings, S03_Buildings, L04_Calculator, L05_Wonders,S05_Wonders]
         }
     )
 

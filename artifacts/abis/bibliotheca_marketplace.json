@@ -1,0 +1,286 @@
+[
+    {
+        "members": [
+            {
+                "name": "token_contract",
+                "offset": 0,
+                "type": "felt"
+            },
+            {
+                "name": "token_id",
+                "offset": 1,
+                "type": "Uint256"
+            },
+            {
+                "name": "expiration",
+                "offset": 3,
+                "type": "felt"
+            },
+            {
+                "name": "price",
+                "offset": 4,
+                "type": "felt"
+            },
+            {
+                "name": "poster",
+                "offset": 5,
+                "type": "felt"
+            },
+            {
+                "name": "status",
+                "offset": 6,
+                "type": "felt"
+            },
+            {
+                "name": "trade_id",
+                "offset": 7,
+                "type": "felt"
+            }
+        ],
+        "name": "Trade",
+        "size": 8,
+        "type": "struct"
+    },
+    {
+        "members": [
+            {
+                "name": "low",
+                "offset": 0,
+                "type": "felt"
+            },
+            {
+                "name": "high",
+                "offset": 1,
+                "type": "felt"
+            }
+        ],
+        "name": "Uint256",
+        "size": 2,
+        "type": "struct"
+    },
+    {
+        "data": [
+            {
+                "name": "trade",
+                "type": "Trade"
+            }
+        ],
+        "keys": [],
+        "name": "TradeAction",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "name": "address_of_currency_token",
+                "type": "felt"
+            },
+            {
+                "name": "_treasury_address",
+                "type": "felt"
+            },
+            {
+                "name": "owner",
+                "type": "felt"
+            }
+        ],
+        "name": "constructor",
+        "outputs": [],
+        "type": "constructor"
+    },
+    {
+        "inputs": [
+            {
+                "name": "_token_contract",
+                "type": "felt"
+            },
+            {
+                "name": "_token_id",
+                "type": "Uint256"
+            },
+            {
+                "name": "_price",
+                "type": "felt"
+            },
+            {
+                "name": "_expiration",
+                "type": "felt"
+            }
+        ],
+        "name": "open_trade",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "_trade",
+                "type": "felt"
+            }
+        ],
+        "name": "execute_trade",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "_trade",
+                "type": "felt"
+            },
+            {
+                "name": "_price",
+                "type": "felt"
+            }
+        ],
+        "name": "update_price",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "_trade",
+                "type": "felt"
+            }
+        ],
+        "name": "cancel_trade",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "idx",
+                "type": "felt"
+            }
+        ],
+        "name": "get_trade",
+        "outputs": [
+            {
+                "name": "trade",
+                "type": "Trade"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_trade_counter",
+        "outputs": [
+            {
+                "name": "trade_counter",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "idx",
+                "type": "felt"
+            }
+        ],
+        "name": "get_trade_status",
+        "outputs": [
+            {
+                "name": "status",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "idx",
+                "type": "felt"
+            }
+        ],
+        "name": "get_trade_token_id",
+        "outputs": [
+            {
+                "name": "token_id",
+                "type": "Uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "paused",
+        "outputs": [
+            {
+                "name": "paused",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "basis_points",
+                "type": "felt"
+            }
+        ],
+        "name": "set_basis_points",
+        "outputs": [
+            {
+                "name": "success",
+                "type": "felt"
+            }
+        ],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "address",
+                "type": "felt"
+            }
+        ],
+        "name": "set_treasury_address",
+        "outputs": [
+            {
+                "name": "success",
+                "type": "felt"
+            }
+        ],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "address",
+                "type": "felt"
+            }
+        ],
+        "name": "set_currency_address",
+        "outputs": [
+            {
+                "name": "success",
+                "type": "felt"
+            }
+        ],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "pause",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "unpause",
+        "outputs": [],
+        "type": "function"
+    }
+]

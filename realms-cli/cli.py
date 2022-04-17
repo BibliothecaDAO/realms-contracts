@@ -8,9 +8,8 @@ from starkware.starknet.services.api.feeder_gateway.feeder_gateway_client import
 from starkware.cairo.lang.vm.crypto import get_crypto_lib_context_manager
 from starkware.starknet.wallets.starknet_context import StarknetContext
 from starkware.starknet.cli.starknet_cli import load_account
-from openzeppelin.tests.utils import Signer
-import sys
-sys.path.append("/workspaces/realms-contracts")
+from utils import Signer
+
 
 
 # ENV VARIABLES
@@ -50,34 +49,34 @@ def get_context():
     )
 
 
-async def mint_realm(args):
+async def mint_realm():
     signer = Signer(
         0x065abfa492a31efe92b3784206de3fa14627322952fb96840e67b82838a5253f)
     # this will fetch the __default__ wallet
     context = get_context()
     account = await OpenZeppelinAccount.create(
         starknet_context=context,
-        account_name="test_account_1")
+        account_name="admin")
     print(account)
     return 0
 
 
-async def main():
-    subparsers = {
-        "mint_realm": mint_realm,
-    }
+# async def main():
+#     subparsers = {
+#         "mint_realm": mint_realm,
+#     }
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--flavor",
-        type=str,
-        choices=["Debug", "Release", "RelWithDebInfo"],
-        help="Build flavor.",
-    )
-    parser.add_argument("command", choices=subparsers.keys())
-    args, _ = parser.parse_known_args()
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument(
+#         "--flavor",
+#         type=str,
+#         choices=["Debug", "Release", "RelWithDebInfo"],
+#         help="Build flavor.",
+#     )
+#     parser.add_argument("command", choices=subparsers.keys())
+#     args, _ = parser.parse_known_args()
 
-    return await subparsers[args.command](args)
+#     return await subparsers[args.command](args)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(mint_realm())

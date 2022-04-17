@@ -35,6 +35,14 @@ from contracts.settling_game.interfaces.imodules import (
     IL02_Resources,
 )
 
+from openzeppelin.upgrades.library import (
+    Proxy_initializer,
+    Proxy_only_admin,
+    Proxy_set_implementation,
+    Proxy_get_implementation,
+    Proxy_set_admin,
+    Proxy_get_admin
+)
 ##########
 # EVENTS #
 ##########
@@ -55,10 +63,60 @@ end
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     address_of_controller : felt
 ):
-    # Store the address of the only fixed contract in the system.
     MODULE_initializer(address_of_controller)
     return ()
 end
+
+# @external
+# func initializer{
+#         syscall_ptr : felt*, 
+#         pedersen_ptr : HashBuiltin*,
+#         range_check_ptr
+#     }(proxy_admin: felt, address_of_controller : felt):
+#     Proxy_initializer(proxy_admin)
+#     MODULE_initializer(address_of_controller)
+#     return ()
+# end
+
+@external
+func upgrade{
+        syscall_ptr: felt*, 
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }(new_implementation: felt):
+    Proxy_only_admin()
+    Proxy_set_implementation(new_implementation)
+    return ()
+end
+
+@view
+func get_implementation{
+        syscall_ptr : felt*, 
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }() -> (address: felt):
+    let (address) = Proxy_get_implementation()
+    return (address)
+end
+
+@view
+func get_admin{
+        syscall_ptr : felt*, 
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }() -> (admin: felt):
+    let (admin) = Proxy_get_admin()
+    return (admin)
+end
+
+# @constructor
+# func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+#     address_of_controller : felt
+# ):
+#     # Store the address of the only fixed contract in the system.
+    
+#     return ()
+# end
 
 ############
 # EXTERNAL #

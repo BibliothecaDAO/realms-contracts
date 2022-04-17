@@ -10,7 +10,7 @@ dotenvConfig({ path: resolve(__dirname, "../../.env") });
 export const DEPLOYMENT_PATH_BASE = "./deployments/starknet";
 
 const network: any = process.env.NETWORK || "georli-alpha"
-export const provider = new Provider({ network })
+export const provider = new Provider(network === "local" ? { baseUrl: "http://127.0.0.1:5000/" } : { network })
 
 export function getPathBase() {
   if (process.env.NETWORK && process.env.NETWORK !== "goerli") {
@@ -58,8 +58,8 @@ export function getOwnerAccount(): AccountShape {
 
 export function getOwnerAccountInt(): string {
 
-  if (process.env.OWNER_ACCOUNT) {
-    return BigInt(process.env.OWNER_ACCOUNT).toString()
+  if (process.env.STARKNET_ACCOUNT_ADDRESS) {
+    return BigInt(process.env.STARKNET_ACCOUNT_ADDRESS).toString()
   }
 
   return BigInt(getOwnerAccount().address).toString()
@@ -136,21 +136,31 @@ export async function deployContract(contractName: string, contractAlias: string
   return result
 }
 
+export function getNetwork() {
+  if (process.env.NETWORK) { return process.env.NETWORK } // TODO: improve for mainnet
+
+  return "goerli"
+}
+
 export function getSigner() {
-  const path_base = getPathBase()
   try {
-    const file = fs.readFileSync(`${path_base}/OwnerAccount.json`)
+    // const file = fs.readFileSync(`${path_base}/OwnerAccount.json`)
 
-    const parsed = JSON.parse(file.toString())
+    // const parsed = JSON.parse(file.toString())
 
-    const privKey = process.env.OWNER_PRIVATE_KEY;
+    const accountAddress = process.env.STARKNET_ACCOUNT_ADDRESS;
+    const privKey = process.env.STARKNET_PRIVATE_KEY;
 
-    if (privKey == undefined || privKey == "") {
-      throw new Error("Attempted to call getSigner() with OWNER_PRIVATE_KEY being undefined. Set env value in .env or execution environment.")
+    if (accountAddress == undefined || accountAddress == "") {
+      throw new Error("Attempted to call getSigner() with STARKNET_ACCOUNT_ADDRESS being undefined. Set env value in .env or execution environment.")
     }
 
-    const kp = ec.genKeyPair(privKey)
-    const s = new Account(provider, parsed.address, kp)
+    if (privKey == undefined || privKey == "") {
+      throw new Error("Attempted to call getSigner() with STARKNET_PRIVATE_KEY being undefined. Set env value in .env or execution environment.")
+    }
+
+    const kp = ec.getKeyPair(privKey.indexOf("0x") !== 0 ? `0x${privKey}` : privKey)
+    const s = new Account(provider, accountAddress, kp)
     console.log(s)
     return s;
 
@@ -161,7 +171,9 @@ export function getSigner() {
 
 export async function sendtx(data: any) {
   try {
-    const res = await getSigner().execute(data)
+    const res = await getSigner().execute(data, undefined, {
+            maxFee: '250000000000000000000' // Extra buffer
+        })
 
     console.log(res)
 
@@ -176,47 +188,4 @@ export async function sendtx(data: any) {
 export function getVersionSuffix() {
   const now = new Date()
   return `${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}`
-}
-
-export async function getAccountContract(calls: any) {
-  const path_base = getPathBase()
-  const privKey = process.env.OWNER_PRIVATE_KEY;
-  const address: any = fs.readFileSync(`${path_base}/OwnerAccount.json`)
-  const abi: any = fs.readFileSync(`./artifacts/abis/Account.json`)
-
-  const parsed_address = JSON.parse(address.toString())
-  const parsed_abi = JSON.parse(abi.toString())
-
-  try {
-    const starkKeyPair = ec.genKeyPair(privKey);
-
-    console.log(starkKeyPair.getPrivate("number").toString())
-    // const account = new Account(provider, parsed_address.address, starkKeyPair)
-    // const accountContract = new Contract(
-    //   parsed_abi,
-    //   parsed_address.address
-    // );
-
-    // const nonce = (await accountContract.call("get_nonce")).toString();
-    // const msgHash = hash.hashMulticall(parsed_address.address, calls, nonce, "0");
-    // const signature = ec.sign(starkKeyPair, msgHash);
-
-    // const { callArray, calldata } = transformCallsToMulticallArrays(calls);
-
-    // const { transaction_hash: transferTxHash } = await accountContract.__execute__(
-    //   callArray,
-    //   calldata,
-    //   nonce,
-    //   signature
-    // );
-
-    console.log(`Waiting for Tx to be Accepted on Starknet - Transfer...`);
-
-    // await provider.waitForTransaction(transferTxHash);
-
-    return 1;
-
-  } catch (e) {
-    console.error("Signing error: ", e)
-  }
 }
