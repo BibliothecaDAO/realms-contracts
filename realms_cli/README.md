@@ -1,18 +1,7 @@
 ## NILE DEPLOY
 
-``
-export STARKNET_NETWORK=goerli
-``
-
-
 1. Create account or set an account
-
-``bash
-export STARKNET_PRIVATE_KEY=
-nile setup STARKNET_PRIVATE_KEY --network goerli
-``
-
-
+INSERT INSTRUCTIONS
 
 ### GAME DEPLOYS
 
@@ -25,4 +14,3 @@ You need to deploy all of this
 
 ### SET METADATA
 1. nile run realms-cli/mint_realm.py --network goerli
-

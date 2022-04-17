@@ -1,12 +1,13 @@
+import os
 from ast import arguments
 from email.headerregistry import Address
 from nile import deployments
 
 # TODO: ADD TO ENV ON LOAD
 NETWORK = "goerli"
+admin = os.environ["ADMIN_ADDRESS"]
 
 def run(nre):
-    admin = '0x00b8675fba812edd0f69fcb917616162cbe785490aeabfb693fb3a0f489a21a5'
     lords, abi = next(deployments.load("lords", NETWORK))
     realms, abi = next(deployments.load("realms", NETWORK))
     resources, abi = next(deployments.load("resources", NETWORK))
@@ -35,7 +36,6 @@ def run(nre):
             storage,
         ],
     )
-    print(controller)
 
     # Set address of controller
     nre.invoke(

@@ -1,13 +1,14 @@
 from ast import arguments
 from email.headerregistry import Address
 from nile import deployments
+from functools import partial
 
 # TODO: ADD TO ENV ON LOAD
 NETWORK = "goerli"
+import os
+admin = os.environ["ADMIN_ADDRESS"]
 
 def run(nre):
-    admin = '0x01560853165c85c290dbe94980a1faa222b6469af53775a15f2fdc1542518af5'
-
     arbiter, abi = next(deployments.load("arbiter", NETWORK))
     controller, abi = next(deployments.load("moduleController", NETWORK))
 
@@ -35,7 +36,20 @@ def run(nre):
     #     params=[admin, controller],
     # )
 
-    nre.invoke(
+    # args = list(map(partial(int, base=16),[
+    #     L01_Settling,
+    #     S01_Settling,
+    #     L02_Resources,
+    #     S02_Resources,
+    #     L03_Buildings,
+    #     S03_Buildings,
+    #     L04_Calculator,
+    #     L05_Wonders,
+    #     S05_Wonders,
+    # ]))
+    # print(args)
+
+    response = nre.invoke(
         arbiter,
         'batch_set_controller_addresses',
         params=[
@@ -50,17 +64,20 @@ def run(nre):
             S05_Wonders,
         ],
     )
+    print(response)
 
     # set module access within realms access
-    nre.invoke(
+    response = nre.invoke(
         s_realms,
         'Set_module_access',
         params=[L01_Settling],
     )
+    print(response)
 
     # set module access within resources contract
-    nre.invoke(
+    response = nre.invoke(
         resources,
         'Set_module_access',
         params=[L02_Resources],
     )
+    print(response)
