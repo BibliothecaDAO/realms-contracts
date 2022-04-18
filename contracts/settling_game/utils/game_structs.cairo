@@ -290,12 +290,12 @@ struct RealmCombatData:
     member last_attacked_at : felt
 end
 
-# struct holding how much resources does it cost to build a Troop
-struct TroopCost:
-    # in total, how many unique resources does a troop cost
+# struct holding how much resources does it cost to build/buy a thing
+struct Cost:
+    # the count of unique ResourceIds necessary
     member resource_count : felt
     # packed IDs of the necessary resources
-    member token_ids : felt
+    member packed_ids : felt
     # packed amounts of each resource
-    member resource_amounts : felt
+    member packed_amounts : felt
 end

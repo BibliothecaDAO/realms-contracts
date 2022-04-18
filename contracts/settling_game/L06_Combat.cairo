@@ -27,7 +27,6 @@ from contracts.settling_game.library_combat import (
     compute_squad_stats,
     pack_squad,
     unpack_squad,
-    sum_values_by_key,
 )
 from contracts.settling_game.utils.game_structs import (
     ModuleIds,
@@ -37,10 +36,15 @@ from contracts.settling_game.utils.game_structs import (
     Squad,
     SquadStats,
     PackedSquad,
-    TroopCost,
+    Cost,
     ExternalContractIds,
 )
-from contracts.settling_game.utils.general import unpack_data
+from contracts.settling_game.utils.general import (
+    unpack_data,
+    convert_cost_dict_to_tokens_and_values,
+    load_resource_ids_and_values_from_costs,
+    sum_values_by_key,
+)
 from contracts.settling_game.utils.library import (
     MODULE_controller_address,
     MODULE_only_approved,
@@ -163,8 +167,8 @@ func build_squad_from_troops_in_realm{
         controller, ModuleIds.S06_Combat
     )
 
-    # get the TroopCost for every Troop to build
-    let (troop_costs : TroopCost*) = alloc()
+    # get the Cost for every Troop to build
+    let (troop_costs : Cost*) = alloc()
     load_troop_costs(combat_state_address, troop_ids_len, troop_ids, 0, troop_costs)
 
     # destructure the troop_costs array to two arrays, one
@@ -183,7 +187,7 @@ func build_squad_from_troops_in_realm{
     )
     let (token_ids : Uint256*) = alloc()
     let (token_values : Uint256*) = alloc()
-    convert_cost_resources_to_unique_tokens(d_len, d, token_ids, token_values)
+    convert_cost_dict_to_tokens_and_values(d_len, d, token_ids, token_values)
 
     # pay for the squad
     let (resource_address) = IModuleController.get_external_contract_address(
@@ -474,8 +478,8 @@ func load_troop_costs{syscall_ptr : felt*, range_check_ptr}(
     state_module_address : felt,
     troop_ids_len : felt,
     troop_ids : felt*,
-    costs_len : felt,
-    costs : TroopCost*,
+    costs_idx : felt,
+    costs : Cost*,
 ):
     alloc_locals
 
@@ -485,79 +489,10 @@ func load_troop_costs{syscall_ptr : felt*, range_check_ptr}(
 
     # TODO: make the function accept and return an array so we don't have to do
     #       cross-contract calls in a loop
-    let (cost : TroopCost) = IS06_Combat.get_troop_cost(state_module_address, [troop_ids])
-    assert [costs + costs_len] = cost
+    let (cost : Cost) = IS06_Combat.get_troop_cost(state_module_address, [troop_ids])
+    assert [costs + costs_idx] = cost
 
     return load_troop_costs(
-        state_module_address, troop_ids_len - 1, troop_ids + 1, costs_len + 1, costs
-    )
-end
-
-# this func has a side-effect of populating the ids and values arrays
-# and it returns the total number of resources as `sum([c.resource_count for c in costs])`
-# which is also the length of the ids and values arrays
-func load_resource_ids_and_values_from_costs{
-    syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*
-}(
-    ids : felt*,
-    values : felt*,
-    costs_len : felt,
-    costs : TroopCost*,
-    cummulative_resource_count : felt,
-) -> (total_resource_count : felt):
-    alloc_locals
-
-    if costs_len == 0:
-        return (cummulative_resource_count)
-    end
-
-    let current_cost : TroopCost = [costs]
-    load_single_cost_ids_and_values(current_cost, 0, ids, values)
-
-    return load_resource_ids_and_values_from_costs(
-        ids + current_cost.resource_count,
-        values + current_cost.resource_count,
-        costs_len - 1,
-        costs + TroopCost.SIZE,
-        cummulative_resource_count + current_cost.resource_count,
-    )
-end
-
-# TODO: better naming
-func load_single_cost_ids_and_values{
-    syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*
-}(cost : TroopCost, idx : felt, ids : felt*, values : felt*):
-    alloc_locals
-
-    if idx == cost.resource_count:
-        return ()
-    end
-
-    # TODO: naming of variables (even in the cost struct) could be better, suggestions?
-    let (token_id) = unpack_data(cost.token_ids, 8 * idx, 255)
-    let (value) = unpack_data(cost.resource_amounts, 8 * idx, 255)
-    assert [ids + idx] = token_id
-    assert [values + idx] = value
-
-    return load_single_cost_ids_and_values(cost, idx + 1, ids, values)
-end
-
-# TODO: better naming
-func convert_cost_resources_to_unique_tokens{range_check_ptr}(
-    len : felt, d : DictAccess*, token_ids : Uint256*, token_values : Uint256*
-):
-    alloc_locals
-
-    if len == 0:
-        return ()
-    end
-
-    let current_entry : DictAccess = [d]
-    # assuming we will never have token IDs and values with numbers >= 2**128
-    assert [token_ids] = Uint256(low=current_entry.key, high=0)
-    assert [token_values] = Uint256(low=current_entry.new_value, high=0)
-
-    return convert_cost_resources_to_unique_tokens(
-        len - 1, d + DictAccess.SIZE, token_ids + Uint256.SIZE, token_values + Uint256.SIZE
+        state_module_address, troop_ids_len - 1, troop_ids + 1, costs_idx + 1, costs
     )
 end
