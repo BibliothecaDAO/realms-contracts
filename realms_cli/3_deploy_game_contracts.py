@@ -4,44 +4,44 @@ from realms_cli.config import Config, strhex_as_strfelt
 
 def run(nre):
 
-    # config = Config(nre.network)
+    config = Config(nre.network)
 
-    # logged_deploy(
-    #     nre,
-    #     "Storage",
-    #     alias="storage",
-    #     arguments=[
-    #         strhex_as_strfelt(config.ADMIN_ADDRESS),
-    #     ],
-    # )
+    logged_deploy(
+        nre,
+        "Storage",
+        alias="storage",
+        arguments=[
+            strhex_as_strfelt(config.ADMIN_ADDRESS),
+        ],
+    )
 
-    # logged_deploy(
-    #     nre,
-    #     "Arbiter",
-    #     alias="arbiter",
-    #     arguments=[
-    #         strhex_as_strfelt(config.ADMIN_ADDRESS),
-    #     ],
-    # )
+    logged_deploy(
+        nre,
+        "Arbiter",
+        alias="arbiter",
+        arguments=[
+            strhex_as_strfelt(config.ADMIN_ADDRESS),
+        ],
+    )
 
-    # # we just deployed storage and arbiter and need it for the following
-    # # send commands, Config has not loaded it yet so we have to force load it
-    # config = Config(nre.network)
+    # we just deployed storage and arbiter and need it for the following
+    # send commands, Config has not loaded it yet so we have to force load it
+    config = Config(nre.network)
 
-    # logged_deploy(
-    #     nre,
-    #     "ModuleController",
-    #     alias="moduleController",
-    #         arguments=[
-    #             strhex_as_strfelt(config.ARBITER_ADDRESS),
-    #             strhex_as_strfelt(config.LORDS_ADDRESS),
-    #             strhex_as_strfelt(config.RESOURCES_ADDRESS),
-    #             strhex_as_strfelt(config.REALMS_ADDRESS),
-    #             strhex_as_strfelt(config.ADMIN_ADDRESS),
-    #             strhex_as_strfelt(config.S_REALMS_ADDRESS),
-    #             strhex_as_strfelt(config.STORAGE_ADDRESS),
-    #         ],
-    # )
+    logged_deploy(
+        nre,
+        "ModuleController",
+        alias="moduleController",
+            arguments=[
+                strhex_as_strfelt(config.ARBITER_ADDRESS),
+                strhex_as_strfelt(config.LORDS_ADDRESS),
+                strhex_as_strfelt(config.RESOURCES_ADDRESS),
+                strhex_as_strfelt(config.REALMS_ADDRESS),
+                strhex_as_strfelt(config.ADMIN_ADDRESS),
+                strhex_as_strfelt(config.S_REALMS_ADDRESS),
+                strhex_as_strfelt(config.STORAGE_ADDRESS),
+            ],
+    )
 
     config = Config(nre.network)
 
