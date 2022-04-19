@@ -30,6 +30,7 @@ func resource_upgrade_value(resource_id : felt) -> (ids : felt):
 end
 
 # BUILDINGS #
+# TODO: can this be removed? have moved it to S03_Buildings
 
 @storage_var
 func building_cost_ids(building_id : felt) -> (cost_ids : felt):

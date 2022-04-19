@@ -66,32 +66,6 @@ struct RealmBuildings:
     member Hamlet : felt
 end
 
-struct RealmBuildingCostIds:
-    member resource_1 : felt
-    member resource_2 : felt
-    member resource_3 : felt
-    member resource_4 : felt
-    member resource_5 : felt
-    member resource_6 : felt
-    member resource_7 : felt
-    member resource_8 : felt
-    member resource_9 : felt
-    member resource_10 : felt
-end
-
-struct RealmBuildingCostValues:
-    member resource_1_values : felt
-    member resource_2_values : felt
-    member resource_3_values : felt
-    member resource_4_values : felt
-    member resource_5_values : felt
-    member resource_6_values : felt
-    member resource_7_values : felt
-    member resource_8_values : felt
-    member resource_9_values : felt
-    member resource_10_values : felt
-end
-
 namespace RealmBuildingsIds:
     const Fairgrounds = 1
     const RoyalReserve = 2
