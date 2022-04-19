@@ -44,6 +44,10 @@ Then run `$ source realms_cli/.env.nile`
 
 `$ nile run --network localhost realms_cli/3_deploy_game_contracts.py`
 
+### 4. Init the game
+
+`$ nile run --network localhost realms_cli/4_init_game.py`
+
 ### Tips
 
 If you want to check a tx hash, run either
@@ -61,3 +65,9 @@ Or `$ starknet get_transaction_receipt --hash TXHASH` (only for non-localhost)
 ### Settling
 
 `$ nile settle_realm --network localhost 1`
+
+## Adding a plugin
+
+Add your logic to `realms_cli/realms_cli/main.py`
+Add you cli entro to `realms_cli/pyproject.toml`
+Reinstall the plugin cli `pip install realms_cli/`
