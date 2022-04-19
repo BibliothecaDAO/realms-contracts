@@ -1,43 +1,44 @@
 # First, import click dependency
 import click
 from realms_cli.caller_invoker import wrapped_send
-from realms_cli.config import Config as config
+from realms_cli.config import Config
 
-# Decorate the method that will be the command name with `click.command` 
 @click.command()
-@click.argument("realm_token", nargs=1)
-def mint_realm(realm_token):
-    # Help message to show with the command
+@click.argument("realm_token_id", nargs=1)
+@click.option("--network", default="127.0.0.1")
+def mint_realm(realm_token_id, network):
     """
     Mint realm
     """
-    # Done! Now implement your custom functionality in the command
+    config = Config(nile_network=network)
+
     wrapped_send(
+        network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
         contract_alias="realms",
         function="mint",
-        args=[
+        arguments=[
             int(config.ADMIN_ADDRESS, 16),
-            realm_token,
+            realm_token_id,
             0,
         ],
     )
 
-# Decorate the method that will be the command name with `click.command` 
 @click.command()
 @click.argument("realm_toked_id", nargs=1)
-def settle_realm(realm_toked_id):
-    # Help message to show with the command
+@click.option("--network", default="127.0.0.1")
+def settle_realm(realm_toked_id, network):
     """
-    Mint realm
+    Settle realm
     """
-    # Done! Now implement your custom functionality in the command
+    config = Config(nile_network=network)
+
     wrapped_send(
+        network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
         contract_alias="L01_Settling",
         function="settle",
-        args=[
-            int(config.ADMIN_ADDRESS, 16),
+        arguments=[
             realm_toked_id,
             0,
         ],
