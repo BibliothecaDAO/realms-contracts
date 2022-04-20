@@ -5,6 +5,8 @@
 
 %lang starknet
 
+# TODO: delete the whole storage module
+
 @contract_interface
 namespace IStorage:
     func get_resource_upgrade_value(resource : felt) -> (level : felt):

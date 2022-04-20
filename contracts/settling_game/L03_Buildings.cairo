@@ -136,12 +136,6 @@ func build{
     build_buildings(buildings_state_address, token_id, current_building, building_id)
 
     # GET BUILDING COSTS
-
-    # TODO:
-    # the original fetch_building_cost_values used "different" values
-    # in the unpack_data (0..108 by 12 for index, 4095 as mask size)
-    # adapt the algo to accept this, maybe have it in the Cost struct?
-
     let (building_cost : Cost) = IS03_Buildings.get_building_cost(
         buildings_state_address, building_id
     )

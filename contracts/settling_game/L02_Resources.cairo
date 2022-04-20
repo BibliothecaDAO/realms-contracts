@@ -14,11 +14,17 @@ from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.game_structs import (
     RealmData,
-    ResourceUpgradeValues,
     ModuleIds,
     ExternalContractIds,
 )
-from contracts.settling_game.utils.general import scale, unpack_data
+from contracts.settling_game.utils.general import (
+    scale,
+    unpack_data,
+    convert_cost_dict_to_tokens_and_values,
+    load_resource_ids_and_values_from_costs,
+    sum_values_by_key,
+)
+
 from contracts.settling_game.utils.constants import (
     TRUE,
     FALSE,
@@ -38,7 +44,6 @@ from contracts.settling_game.utils.library import (
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
-from contracts.settling_game.interfaces.IStorage import IStorage
 from contracts.settling_game.interfaces.imodules import (
     IModuleController,
     IS02_Resources,
@@ -561,28 +566,23 @@ func upgrade_resource{
     let (level) = IS02_Resources.get_resource_level(resources_state_address, token_id, resource_id)
 
     # GET UPGRADE VALUE
-    let (resource_upgrade_value : ResourceUpgradeValues) = fetch_resource_upgrade_values(
-        resource_id
+    let (upgrade_cost : Cost) = IS02_Resources.get_resource_upgrade_cost(resources_state_address, resource_id)
+    let (costs : Cost*) = alloc()
+    assert [costs] = upgrade_cost
+    let (resource_ids : felt*) = alloc()
+    let (resource_values : felt*) = alloc()
+    let (resource_len : felt) = load_resource_ids_and_values_from_costs(
+        resource_ids, resource_values, 1, costs, 0
     )
-
-    # CREATE TEMP ARRARY
-    let (resource_ids : Uint256*) = alloc()
-    let (resource_values : Uint256*) = alloc()
-
-    assert resource_ids[0] = Uint256(resource_upgrade_value.resource_1, 0)
-    assert resource_ids[1] = Uint256(resource_upgrade_value.resource_2, 0)
-    assert resource_ids[2] = Uint256(resource_upgrade_value.resource_3, 0)
-    assert resource_ids[3] = Uint256(resource_upgrade_value.resource_4, 0)
-    assert resource_ids[4] = Uint256(resource_upgrade_value.resource_5, 0)
-
-    assert resource_values[0] = Uint256(resource_upgrade_value.resource_1_values, 0)
-    assert resource_values[1] = Uint256(resource_upgrade_value.resource_2_values, 0)
-    assert resource_values[2] = Uint256(resource_upgrade_value.resource_3_values, 0)
-    assert resource_values[3] = Uint256(resource_upgrade_value.resource_4_values, 0)
-    assert resource_values[4] = Uint256(resource_upgrade_value.resource_5_values, 0)
+    let (d_len : felt, d : DictAccess*) = sum_values_by_key(
+        resource_len, resource_ids, resource_values
+    )
+    let (token_ids : Uint256*) = alloc()
+    let (token_values : Uint256*) = alloc()
+    convert_cost_dict_to_tokens_and_values(d_len, d, token_ids, token_values)
 
     # BURN RESOURCES
-    IERC1155.burnBatch(resource_address, caller, 5, resource_ids, 5, resource_values)
+    IERC1155.burnBatch(resource_address, caller, d_len, token_ids, d_len, token_values)
 
     # INCREASE LEVEL
     IS02_Resources.set_resource_level(resources_state_address, token_id, resource_id, level + 1)
@@ -590,66 +590,6 @@ func upgrade_resource{
     # EMIT
     ResourceUpgraded.emit(token_id, resource_id, level + 1)
     return ()
-end
-
-func fetch_resource_upgrade_values{
-    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-}(resource_id : felt) -> (resource_values : ResourceUpgradeValues):
-    alloc_locals
-
-    let (controller) = MODULE_controller_address()
-
-    # STATE
-    let (storage_db_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Storage
-    )
-
-    let (data) = IStorage.get_resource_upgrade_value(storage_db_address, resource_id)
-
-    let (resource_1) = unpack_data(data, 0, 255)
-    let (resource_2) = unpack_data(data, 8, 255)
-    let (resource_3) = unpack_data(data, 16, 255)
-    let (resource_4) = unpack_data(data, 24, 255)
-    let (resource_5) = unpack_data(data, 32, 255)
-    let (resource_1_values) = unpack_data(data, 40, 255)
-    let (resource_2_values) = unpack_data(data, 48, 255)
-    let (resource_3_values) = unpack_data(data, 56, 255)
-    let (resource_4_values) = unpack_data(data, 64, 255)
-    let (resource_5_values) = unpack_data(data, 72, 255)
-
-    # TODO: ADD IN DYNAMIC COST ACCORDING TO RESOURCE LEVEL
-    return (
-        resource_values=ResourceUpgradeValues(
-        resource_1,
-        resource_2,
-        resource_3,
-        resource_4,
-        resource_5,
-        resource_1_values,
-        resource_2_values,
-        resource_3_values,
-        resource_4_values,
-        resource_5_values),
-    )
-end
-
-func calculate_resource_level_cost{
-    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-}(token_id : Uint256, resource_id : felt, resource_value : felt) -> (value : felt):
-    let (controller) = MODULE_controller_address()
-
-    # STATE
-    let (resources_state_address) = IModuleController.get_module_address(
-        controller, ModuleIds.S02_Resources
-    )
-
-    # GET RESOURCE LEVEL
-    let (level) = IS02_Resources.get_resource_level(resources_state_address, token_id, resource_id)
-
-    # CALC
-    let value = level * resource_value
-
-    return (value)
 end
 
 func calculate_resource_output{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(

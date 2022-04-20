@@ -12,6 +12,7 @@ from starkware.cairo.common.hash_state import hash_init, hash_update, HashState
 from starkware.cairo.common.uint256 import Uint256
 
 from contracts.settling_game.interfaces.imodules import IModuleController
+from contracts.settling_game.utils.game_structs import Cost
 from contracts.settling_game.utils.library import (
     MODULE_controller_address,
     MODULE_only_approved,
@@ -24,6 +25,10 @@ from contracts.settling_game.utils.library import (
 # STORE RESOURCE LEVEL
 @storage_var
 func resource_levels(token_id : Uint256, resource_id : felt) -> (level : felt):
+end
+
+@storage_var
+func resource_upgrade_cost(resource_id : felt) -> (cost : Cost):
 end
 
 @constructor
@@ -48,6 +53,15 @@ func set_resource_level{
     return ()
 end
 
+@external
+func set_resource_upgrade_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+    resource_id : felt, cost : Cost
+):
+    # TODO: auth + range checks on the cost struct
+    resource_upgrade_cost.write(resource_id, cost)
+    return ()
+end
+
 ###########
 # GETTERS #
 ###########
@@ -59,4 +73,12 @@ func get_resource_level{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     let (level) = resource_levels.read(token_id, resource)
 
     return (level=level)
+end
+
+@view
+func get_resource_upgrade_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+    resource_id : felt
+) -> (cost : Cost):
+    let (cost) = resource_upgrade_cost.read(resource_id)
+    return (cost)
 end
