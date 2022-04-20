@@ -97,4 +97,13 @@ def claim_resources(realm_token_id, network):
     """
     config = Config(nile_network=network)
 
-
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="L02_Resources",
+        function="claim_resources",
+        arguments=[
+            realm_token_id,   # uint 1
+            0,                # uint 2
+        ],
+    )
