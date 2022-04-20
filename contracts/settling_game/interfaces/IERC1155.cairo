@@ -8,12 +8,12 @@ from starkware.cairo.common.uint256 import Uint256
 
 @contract_interface
 namespace IERC1155:
-    func balanceOf(owner : felt, token_id : felt) -> (balance : felt):
+    func balanceOf(owner : felt, token_id : Uint256) -> (balance : Uint256):
     end
 
     func balanceOfBatch(
-        owners_len : felt, owners : felt*, tokens_id_len : felt, tokens_id : felt*
-    ) -> (balance_len : felt, balance : felt*):
+        owners_len : felt, owners : felt*, tokens_id_len : felt, tokens_id : Uint256*
+    ) -> (balance_len : felt, balance : Uint256*):
     end
 
     func isApprovedForAll(account : felt, operator : felt) -> (res : felt):

@@ -1,9 +1,8 @@
 import pytest
 from fractions import Fraction
 import tests.conftest as conftest
-from tests.utils import uint, assert_revert
+from openzeppelin.tests.utils import Signer, uint, assert_revert
 from math import floor
-
 
 def expanded_uint_list(arr):
     """
@@ -28,6 +27,16 @@ async def exchange_factory(ctx_factory):
             *uint(ctx.exchange_fee),
             *uint(ctx.royalty_fee),
             ctx.user1.contract_address,  # Royalty receiver
+        ]
+    )
+
+    await ctx.signers['admin'].send_transaction(
+        account=ctx.admin, to=ctx.resources.contract_address, selector_name='mintBatch', calldata=[
+            ctx.admin.contract_address,
+            5,
+            *uint(1), *uint(2), *uint(3), *uint(4), *uint(5),
+            5,
+            *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000),
         ]
     )
 
@@ -79,7 +88,7 @@ async def initial_liq(admin_signer, admin_account, ctx, currency_amounts, token_
             len(currency_amounts),
             *expanded_uint_list(currency_amounts),
             len(token_ids),
-            *token_ids,
+            *expanded_uint_list(token_ids),
             len(token_spents),
             *expanded_uint_list(token_spents),
         ]
@@ -110,7 +119,7 @@ async def add_liq(admin_signer, admin_account, ctx, max_currencies, token_ids, t
             len(max_currencies),
             *expanded_uint_list(max_currencies),
             len(token_ids),
-            *token_ids,
+            *expanded_uint_list(token_ids),
             len(token_spents),
             *expanded_uint_list(token_spents),
             current_time + 1000,
@@ -122,7 +131,7 @@ async def get_token_bals(account, lords, resources, token_id):
     """ Get the current balances. """
     res = await lords.balanceOf(account.contract_address).invoke()
     before_lords_bal = res.result.balance
-    res = await resources.balanceOf(account.contract_address, token_id).invoke()
+    res = await resources.balanceOf(account.contract_address, uint(token_id)).invoke()
     before_resources_bal = res.result.balance
     return before_lords_bal, before_resources_bal
 
@@ -149,16 +158,16 @@ async def test_liquidity(exchange_factory):
     # After states
     after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources, token_id)
     assert uint(before_lords_bal[0] - currency_amount) == after_lords_bal
-    assert before_resources_bal - token_spent == after_resources_bal
+    assert uint(before_resources_bal[0] - token_spent) == after_resources_bal
 
     # Contract balances
     exchange_lords_bal, exchange_resources_bal = await get_token_bals(exchange, lords, resources, token_id)
     assert exchange_lords_bal == uint(currency_amount)
-    assert exchange_resources_bal == token_spent
+    assert exchange_resources_bal == uint(token_spent)
 
     # Check LP tokens
-    res = await exchange.balanceOf(admin_account.contract_address, token_id).invoke()
-    assert res.result.balance == currency_amount
+    res = await exchange.balanceOf(admin_account.contract_address, uint(token_id)).invoke()
+    assert res.result.balance == uint(currency_amount)
 
     # Add more liquidity using the same spread
     await add_liq(admin_signer, admin_account, ctx, [currency_amount], [token_id], [token_spent])
@@ -166,16 +175,16 @@ async def test_liquidity(exchange_factory):
     # After states
     after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources, token_id)
     assert uint(before_lords_bal[0] - (currency_amount * 2)) == after_lords_bal
-    assert before_resources_bal - (token_spent * 2) == after_resources_bal
+    assert uint(before_resources_bal[0] - (token_spent * 2)) == after_resources_bal
 
     # Contract balances
     exchange_lords_bal, exchange_resources_bal = await get_token_bals(exchange, lords, resources, token_id)
     assert exchange_lords_bal == uint(currency_amount * 2)
-    assert exchange_resources_bal == token_spent * 2
+    assert exchange_resources_bal == uint(token_spent * 2)
 
     # Check LP tokens
-    res = await exchange.balanceOf(admin_account.contract_address, token_id).invoke()
-    assert res.result.balance == currency_amount * 2
+    res = await exchange.balanceOf(admin_account.contract_address, uint(token_id)).invoke()
+    assert res.result.balance == uint(currency_amount * 2)
 
     # Remove liquidity
     await admin_signer.send_transaction(
@@ -193,7 +202,7 @@ async def test_liquidity(exchange_factory):
             1,
             *uint(currency_amount),
             1,
-            token_id,
+            *uint(token_id),
             1,
             *uint(token_spent),
             1,
@@ -208,7 +217,7 @@ async def test_liquidity(exchange_factory):
         'remove_liquidity',
         [
             *uint(currency_amount + 100),
-            token_id,
+            *uint(token_id),
             *uint(token_spent),
             *uint(currency_amount),
             current_time + 1000,
@@ -220,7 +229,7 @@ async def test_liquidity(exchange_factory):
         'remove_liquidity',
         [
             *uint(currency_amount),
-            token_id,
+            *uint(token_id),
             *uint(token_spent + 100),
             *uint(currency_amount),
             current_time + 1000,
@@ -230,16 +239,16 @@ async def test_liquidity(exchange_factory):
     # After states
     after_lords_bal, after_resources_bal = await get_token_bals(admin_account, lords, resources, token_id)
     assert uint(before_lords_bal[0] - currency_amount) == after_lords_bal
-    assert before_resources_bal - token_spent == after_resources_bal
+    assert uint(before_resources_bal[0] - token_spent) == after_resources_bal
 
     # Contract balances
     exchange_lords_bal, exchange_resources_bal = await get_token_bals(exchange, lords, resources, token_id)
     assert exchange_lords_bal == uint(currency_amount)
-    assert exchange_resources_bal == token_spent
+    assert exchange_resources_bal == uint(token_spent)
 
     # Check LP tokens
-    res = await exchange.balanceOf(admin_account.contract_address, token_id).invoke()
-    assert res.result.balance == currency_amount
+    res = await exchange.balanceOf(admin_account.contract_address, uint(token_id)).invoke()
+    assert res.result.balance == uint(currency_amount)
 
 
 def calc_d_x(old_x, old_y, d_y):
@@ -264,11 +273,11 @@ async def buy_and_check(admin_account, admin_signer, ctx, resource_ids, token_to
     for i in range(0, len(resource_ids)):
         before_lords_bal, before_resources_bal = await get_token_bals(admin_account, lords, resources, resource_ids[i])
 
-        before_currency_reserve = (await exchange.get_currency_reserves(resource_ids[i]).invoke()).result.currency_reserves[0]
-        token_reserve = (await resources.balanceOf(exchange.contract_address, resource_ids[i]).invoke()).result.balance
+        before_currency_reserve = (await exchange.get_currency_reserves(uint(resource_ids[i])).invoke()).result.currency_reserves
+        token_reserve = (await resources.balanceOf(exchange.contract_address, uint(resource_ids[i])).invoke()).result.balance
 
         # Check price math
-        res = await exchange.get_buy_price(uint(token_to_buys[i]), uint(before_currency_reserve), uint(token_reserve)).invoke()
+        res = await exchange.get_buy_price(uint(token_to_buys[i]), before_currency_reserve, token_reserve).invoke()
         assert res.result.price == uint(expected_prices[i])
 
         befores.append({
@@ -288,7 +297,7 @@ async def buy_and_check(admin_account, admin_signer, ctx, resource_ids, token_to
         [
             *uint(max_currency),
             len(resource_ids),
-            *resource_ids,
+            *expanded_uint_list(resource_ids),
             len(token_to_buys),
             *expanded_uint_list(token_to_buys),
             current_time + 1000,
@@ -297,13 +306,11 @@ async def buy_and_check(admin_account, admin_signer, ctx, resource_ids, token_to
 
     # Check values
     for i in range(0, len(resource_ids)):
-        res = await resources.balanceOf(admin_account.contract_address, resource_ids[i]).invoke()
+        res = await resources.balanceOf(admin_account.contract_address, uint(resource_ids[i])).invoke()
         after_resources_bal = res.result.balance
-        assert befores[i]['before_resources_bal'] + \
-            token_to_buys[i] == after_resources_bal
-        after_currency_reserve = (await exchange.get_currency_reserves(resource_ids[i]).invoke()).result.currency_reserves[0]
-        assert befores[i]['before_currency_reserve'] + \
-            expected_prices[i] == after_currency_reserve
+        assert uint(befores[i]['before_resources_bal'][0] + token_to_buys[i]) == after_resources_bal
+        after_currency_reserve = (await exchange.get_currency_reserves(uint(resource_ids[i])).invoke()).result.currency_reserves
+        assert uint(befores[i]['before_currency_reserve'][0] + expected_prices[i]) == after_currency_reserve
 
     # Check lords in bulk
     res = await lords.balanceOf(admin_account.contract_address).invoke()
@@ -312,7 +319,6 @@ async def buy_and_check(admin_account, admin_signer, ctx, resource_ids, token_to
     royalties = sum([floor(p * ctx.royalty_fee / 1000)
                     for p in expected_prices])
     prices_inc_royalty = sum(expected_prices) + royalties
-    print(expected_prices, prices_inc_royalty)
     assert uint(before_lords_bal[0] - prices_inc_royalty) == after_lords_bal
     # Check royalties paid out
     res = await lords.balanceOf(ctx.user1.contract_address).invoke()
@@ -333,11 +339,11 @@ async def sell_and_check(admin_account, admin_signer, ctx, resource_ids, token_t
     for i in range(0, len(resource_ids)):
         before_lords_bal, before_resources_bal = await get_token_bals(admin_account, lords, resources, resource_ids[i])
 
-        before_currency_reserve = (await exchange.get_currency_reserves(resource_ids[i]).invoke()).result.currency_reserves[0]
-        token_reserve = (await resources.balanceOf(exchange.contract_address, resource_ids[i]).invoke()).result.balance
+        before_currency_reserve = (await exchange.get_currency_reserves(uint(resource_ids[i])).invoke()).result.currency_reserves
+        token_reserve = (await resources.balanceOf(exchange.contract_address, uint(resource_ids[i])).invoke()).result.balance
 
         # Check price math
-        res = await exchange.get_sell_price(uint(token_to_sells[i]), uint(before_currency_reserve), uint(token_reserve)).invoke()
+        res = await exchange.get_sell_price(uint(token_to_sells[i]), before_currency_reserve, token_reserve).invoke()
         assert res.result.price == uint(expected_prices[i])
 
         befores.append({
@@ -356,7 +362,7 @@ async def sell_and_check(admin_account, admin_signer, ctx, resource_ids, token_t
         [
             *uint(min_currency),
             len(resource_ids),
-            *resource_ids,
+            *expanded_uint_list(resource_ids),
             len(token_to_sells),
             *expanded_uint_list(token_to_sells),
             current_time + 1000,
@@ -365,13 +371,11 @@ async def sell_and_check(admin_account, admin_signer, ctx, resource_ids, token_t
 
     # Check values
     for i in range(0, len(resource_ids)):
-        res = await resources.balanceOf(admin_account.contract_address, resource_ids[i]).invoke()
+        res = await resources.balanceOf(admin_account.contract_address, uint(resource_ids[i])).invoke()
         after_resources_bal = res.result.balance
-        assert befores[i]['before_resources_bal'] - \
-            token_to_sells[i] == after_resources_bal
-        after_currency_reserve = (await exchange.get_currency_reserves(resource_ids[i]).invoke()).result.currency_reserves[0]
-        assert befores[i]['before_currency_reserve'] - \
-            expected_prices[i] == after_currency_reserve
+        assert uint(befores[i]['before_resources_bal'][0] - token_to_sells[i]) == after_resources_bal
+        after_currency_reserve = (await exchange.get_currency_reserves(uint(resource_ids[i])).invoke()).result.currency_reserves
+        assert uint(befores[i]['before_currency_reserve'][0] - expected_prices[i]) == after_currency_reserve
     # Check lords in bulk
     res = await lords.balanceOf(admin_account.contract_address).invoke()
     after_lords_bal = res.result.balance
@@ -411,10 +415,10 @@ async def test_buy_price(exchange_factory):
     exchange = ctx.exchange
     lords = ctx.lords
     resources = ctx.resources
-    before_currency_reserve = (await exchange.get_currency_reserves(token_id).invoke()).result.currency_reserves[0]
-    token_reserve = (await resources.balanceOf(exchange.contract_address, token_id).invoke()).result.balance
+    before_currency_reserve = (await exchange.get_currency_reserves(uint(token_id)).invoke()).result.currency_reserves
+    token_reserve = (await resources.balanceOf(exchange.contract_address, uint(token_id)).invoke()).result.balance
     # Check price math
-    res = await exchange.get_buy_price(uint(buy_amount), uint(before_currency_reserve), uint(token_reserve)).invoke()
+    res = await exchange.get_buy_price(uint(buy_amount), before_currency_reserve, token_reserve).invoke()
     # Make sale
     current_time = conftest.get_block_timestamp(ctx.starknet.state)
     max_currency = res.result.price[0] - 10  # Not enough!
@@ -425,7 +429,7 @@ async def test_buy_price(exchange_factory):
         'buy_tokens',
         [
             *uint(max_currency),
-            token_id,
+            *uint(token_id),
             *uint(buy_amount),
             current_time + 1000,
         ]
@@ -457,10 +461,10 @@ async def test_sell_price(exchange_factory):
     sell_amount = 100
     exchange = ctx.exchange
     resources = ctx.resources
-    before_currency_reserve = (await exchange.get_currency_reserves(token_id).invoke()).result.currency_reserves[0]
-    token_reserve = (await resources.balanceOf(exchange.contract_address, token_id).invoke()).result.balance
+    before_currency_reserve = (await exchange.get_currency_reserves(uint(token_id)).invoke()).result.currency_reserves
+    token_reserve = (await resources.balanceOf(exchange.contract_address, uint(token_id)).invoke()).result.balance
     # Check price math
-    res = await exchange.get_sell_price(uint(sell_amount), uint(before_currency_reserve), uint(token_reserve)).invoke()
+    res = await exchange.get_sell_price(uint(sell_amount), before_currency_reserve, token_reserve).invoke()
     # Make sale
     current_time = conftest.get_block_timestamp(ctx.starknet.state)
     min_currency = res.result.price[0] + 2  # Increase min amount (will fail)
@@ -470,7 +474,7 @@ async def test_sell_price(exchange_factory):
         'sell_tokens',
         [
             *uint(min_currency),
-            token_id,
+            *uint(token_id),
             *uint(sell_amount),
             current_time + 1000,
         ]
@@ -512,7 +516,7 @@ async def test_deadlines_respected(exchange_factory):
             1,
             *uint(currency_amount),
             1,
-            token_id,
+            *uint(token_id),
             1,
             *uint(token_amount),
             earlier_time,
@@ -525,7 +529,7 @@ async def test_deadlines_respected(exchange_factory):
         'remove_liquidity',
         [
             *uint(currency_amount),
-            token_id,
+            *uint(token_id),
             *uint(token_amount),
             *uint(currency_amount),
             earlier_time,
@@ -538,7 +542,7 @@ async def test_deadlines_respected(exchange_factory):
         'buy_tokens',
         [
             *uint(currency_amount),
-            token_id,
+            *uint(token_id),
             *uint(token_amount),
             earlier_time,
         ]
@@ -550,7 +554,7 @@ async def test_deadlines_respected(exchange_factory):
         'sell_tokens',
         [
             *uint(currency_amount),
-            token_id,
+            *uint(token_id),
             *uint(token_amount),
             earlier_time,
         ]
