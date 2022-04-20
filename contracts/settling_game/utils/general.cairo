@@ -16,6 +16,7 @@ from starkware.cairo.common.pow import pow
 from starkware.cairo.common.uint256 import Uint256
 
 from contracts.settling_game.utils.game_structs import Cost
+from contracts.settling_game.utils.pow2 import pow2
 
 const MAX_UINT_PART = 2 ** 128 - 1
 
@@ -109,8 +110,9 @@ func load_single_cost_ids_and_values{
         return ()
     end
 
-    let (token_id) = unpack_data(cost.packed_ids, 8 * idx, 255)
-    let (value) = unpack_data(cost.packed_amounts, 8 * idx, 255)
+    let (bits_squared) = pow2(cost.bits)
+    let (token_id) = unpack_data(cost.packed_ids, cost.bits * idx, bits_squared-1)
+    let (value) = unpack_data(cost.packed_amounts, cost.bits * idx, bits_squared-1)
     assert [ids + idx] = token_id
     assert [values + idx] = value
 

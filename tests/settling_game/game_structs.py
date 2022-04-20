@@ -27,4 +27,4 @@ class ResourceIds(IntEnum):
     Dragonhide = 22
 
 
-Cost = namedtuple('Cost', 'resource_count packed_ids packed_amounts')
+Cost = namedtuple('Cost', 'resource_count bits packed_ids packed_amounts')

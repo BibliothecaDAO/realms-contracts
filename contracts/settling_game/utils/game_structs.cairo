@@ -268,6 +268,8 @@ end
 struct Cost:
     # the count of unique ResourceIds necessary
     member resource_count : felt
+    # how many bits are the packed members packed into
+    member bits : felt
     # packed IDs of the necessary resources
     member packed_ids : felt
     # packed amounts of each resource

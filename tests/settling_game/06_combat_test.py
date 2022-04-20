@@ -8,8 +8,8 @@ import struct
 import pytest
 from starkware.starkware_utils.error_handling import StarkException
 
-from game_structs import Cost, ResourceIds
-from shared import pack_values
+from .game_structs import Cost, ResourceIds
+from tests.shared import pack_values
 
 
 class TroopId(IntEnum):
@@ -79,11 +79,13 @@ TROOPS = [
 TROOP_COSTS = {
     TroopId.Watchman: Cost(
         3,
+        8,
         pack_values([ResourceIds.Wood, ResourceIds.Copper, ResourceIds.Silver]),
         pack_values([100, 90, 80]),
     ),
     TroopId.Guard: Cost(
         5,
+        8,
         pack_values(
             [
                 ResourceIds.Wood,
@@ -97,6 +99,7 @@ TROOP_COSTS = {
     ),
     TroopId.GuardCaptain: Cost(
         4,
+        8,
         pack_values(
             [ResourceIds.Wood, ResourceIds.Gold, ResourceIds.Hartwood, ResourceIds.Adamantine]
         ),
@@ -104,11 +107,13 @@ TROOP_COSTS = {
     ),
     TroopId.Squire: Cost(
         3,
+        8,
         pack_values([ResourceIds.Wood, ResourceIds.Copper, ResourceIds.Silver]),
         pack_values([100, 90, 80]),
     ),
     TroopId.Knight: Cost(
         5,
+        8,
         pack_values(
             [
                 ResourceIds.Wood,
@@ -122,6 +127,7 @@ TROOP_COSTS = {
     ),
     TroopId.KnightCommander: Cost(
         9,
+        8,
         pack_values(
             [
                 ResourceIds.Wood,
@@ -139,11 +145,13 @@ TROOP_COSTS = {
     ),
     TroopId.Scout: Cost(
         3,
+        8,
         pack_values([ResourceIds.Wood, ResourceIds.Copper, ResourceIds.Silver]),
         pack_values([100, 90, 80]),
     ),
     TroopId.Archer: Cost(
         6,
+        8,
         pack_values(
             [
                 ResourceIds.Wood,
@@ -158,6 +166,7 @@ TROOP_COSTS = {
     ),
     TroopId.Sniper: Cost(
         6,
+        8,
         pack_values(
             [
                 ResourceIds.Wood,
@@ -172,6 +181,7 @@ TROOP_COSTS = {
     ),
     TroopId.Ballista: Cost(
         7,
+        8,
         pack_values(
             [
                 ResourceIds.Wood,
@@ -186,6 +196,7 @@ TROOP_COSTS = {
         pack_values([50, 50, 50, 30, 50, 10, 1]),
     ),
     TroopId.Catapult: Cost(
+        8,
         8,
         pack_values(
             [
@@ -204,11 +215,13 @@ TROOP_COSTS = {
     ),
     TroopId.Apprentice: Cost(
         3,
+        8,
         pack_values([ResourceIds.Wood, ResourceIds.Silver, ResourceIds.TrueIce]),
         pack_values([20, 40, 10]),
     ),
     TroopId.Mage: Cost(
         5,
+        8,
         pack_values(
             [
                 ResourceIds.Wood,
@@ -222,6 +235,7 @@ TROOP_COSTS = {
     ),
     TroopId.Arcanist: Cost(
         7,
+        8,
         pack_values(
             [
                 ResourceIds.Wood,
@@ -237,6 +251,7 @@ TROOP_COSTS = {
     ),
     TroopId.GrandMarshal: Cost(
         9,
+        8,
         pack_values(
             [
                 ResourceIds.Wood,
