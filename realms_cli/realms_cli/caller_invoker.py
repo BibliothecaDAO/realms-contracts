@@ -1,7 +1,33 @@
 import re
 import time
 import subprocess
-import json
+
+def call(network, contract_alias, function, arguments):
+    """Nile call function."""
+    command = [
+        "nile",
+        "call",
+        "--network",
+        network,
+        contract_alias,
+        function,
+        *map(str, arguments),
+    ]
+    return subprocess.check_output(command).strip().decode("utf-8")
+
+def wrapped_call(network, contract_alias, function, arguments):
+    """Send command with some extra functionality such as tx status check and built-in timeout.
+    (only supported for non-localhost networks)
+
+    tx statuses:
+    RECEIVED -> PENDING -> ACCEPTED_ON_L2
+    """
+    print("------- CALL ----------------------------------------------------")
+    print(f"calling {function} from {contract_alias} with {arguments}")
+    out = call(network, contract_alias, function, arguments)
+    print("------- CALL ----------------------------------------------------")
+    # return out such that it can me prettified at a higher level
+    return out
 
 def send(network, signer_alias, contract_alias, function, arguments):
     """Nile send function."""
@@ -17,13 +43,6 @@ def send(network, signer_alias, contract_alias, function, arguments):
     ]
     return subprocess.check_output(command).strip().decode("utf-8")
 
-def wait(t : int):
-    """Wait for t seconds"""
-    for _ in range(t):
-        time.sleep(1)
-        print(".", end="")
-    print()
-
 def wrapped_send(network, signer_alias, contract_alias, function, arguments):
     """Send command with some extra functionality such as tx status check and built-in timeout.
     (only supported for non-localhost networks)
@@ -35,10 +54,10 @@ def wrapped_send(network, signer_alias, contract_alias, function, arguments):
     out = send(network, signer_alias, contract_alias, function, arguments)
     print(out)
     _, tx_hash = parse_send(out)
-    get_tx_receipt(network, tx_hash,)
+    get_tx_status(network, tx_hash,)
     print("------- SEND ----------------------------------------------------")
 
-def get_tx_receipt(network, tx_hash : str) -> dict:
+def get_tx_status(network, tx_hash : str) -> dict:
     """Returns transaction receipt in dict."""
     command = [
         "nile",

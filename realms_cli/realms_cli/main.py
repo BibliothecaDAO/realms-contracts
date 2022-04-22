@@ -1,8 +1,9 @@
 # First, import click dependency
 import json
 import click
-from realms_cli.caller_invoker import wrapped_send
+from realms_cli.caller_invoker import wrapped_call, wrapped_send
 from realms_cli.config import Config
+from realms_cli.utils import print_over_colums
 
 from realms_cli.binary_converter import map_realm
 
@@ -78,14 +79,45 @@ def set_realm_data(realm_token_id, network):
 
 
 @click.command()
-@click.argument("realm_token_id", nargs=1)
+@click.argument("account", nargs=1)
 @click.option("--network", default="127.0.0.1")
-def check_resources(realm_token_id, network):
+def check_resources(account, network):
     """
     Check claimable resources
     """
     config = Config(nile_network=network)
 
+    # if isinstance(account, str):
+    #     if "0x" in account:
+    #         account = int(account, 16)
+    #     else:
+    #         account = int(account)
+
+    n_resources = len(config.RESOURCES)
+
+    uints = []
+    for i in range(n_resources):
+        uints.append(str(i+1))
+        uints.append("0")
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="resources",
+        function="balanceOfBatch",
+        arguments=[
+            n_resources,
+            *[account for _ in range(n_resources)],
+            n_resources,
+            *uints,
+        ],
+    )
+
+    out = out.split(" ")
+    pretty_out = []
+    for i, resource in enumerate(config.RESOURCES):
+        pretty_out.append(f"{resource} : {out[i*2+1]}")
+
+    print_over_colums(pretty_out)
 
 
 @click.command()

@@ -54,3 +54,28 @@ class Config:
         self.L04_CALCULATOR_ADDRESS, _ = safe_load_deployment("L04_Calculator", self.nile_network)
         self.L05_WONDERS_ADDRESS, _ = safe_load_deployment("L05_Wonders", self.nile_network)
         self.S05_WONDERS_ADDRESS, _ = safe_load_deployment("S05_Wonders", self.nile_network)
+
+        self.RESOURCES = [
+            "Wood",
+            "Stone",
+            "Coal",
+            "Cooper",
+            "Obsidian",
+            "Silver",
+            "Ironwood",
+            "ColdIron",
+            "Gold",
+            "Hartwood",
+            "Diamonds",
+            "Sapphire",
+            "Ruby",
+            "DeepCrystal",
+            "Ignium",
+            "EtherealSilica",
+            "TrueIce",
+            "TwilightQuartz",
+            "AlchemicalSilver",
+            "Adamantine",
+            "Mithral",
+            "Dragonhide",
+        ]
