@@ -29,7 +29,7 @@ Then run `$ source realms_cli/.env.nile`
 
 ⚠️ Never commit this file!
 
-## Deployment of the game
+## Deployment of the game (ADMIN ONLY)
 
 The following scripts deploy all contracts necessairy to test and play realms on localhost/goerli.
 
@@ -57,7 +57,7 @@ If you want to check a tx hash, run either
 
 Or `$ starknet get_transaction_receipt --hash TXHASH` (only for non-localhost)
 
-## First make an Account
+# New Players
 
 `$ nile deploy account --alias player`
 
