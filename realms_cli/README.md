@@ -10,16 +10,16 @@ cairo-lang==0.8.1
 cairo-nile==0.6.0
 ```
 
-You can install the newest version of cairo-nile by pulling the [nile repo](https://github.com/OpenZeppelin/nile.git) locally and run: `$ sudo python <path>/nile/setup.py install`
-Note: you have make sure *all* previous cairo-nile packages are removed. Run `$ pip uninstall cairo-nile` and check with `$ pip freeze` if it's removed.
-
-To install realms_cli, in the realms-contracts dir run: `$ pip install realms_cli/`
+1. Upgrade pip: `/usr/local/bin/python -m pip install --upgrade pip`
+2. Remove *all* previous cairo nile packages: `$ pip uninstall cairo-nile` and check with `$ pip freeze` to make sure it's removed.
+3. Install nile 0.6.1: `pip install cairo-nile`
+4. Install the realms_cli: `$ pip install realms_cli/` (ensure you are in the realms-contracts dir)
 
 You now should have the realms_cli commands available when you run `$ nile`.
 
 ### .env file
 
-You should have a `.env.nile` file with the following entries:
+Create an `.env.nile` in the realms-contracts directory with the following entries:
 ```
 export STARKNET_PRIVATE_KEY=<A PRIVATE KEY>  # admin private key
 expost STARKNET_NETWORK=alpha-goerli  # different from nile_network
