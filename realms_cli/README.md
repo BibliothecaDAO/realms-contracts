@@ -17,12 +17,24 @@ cairo-nile==0.6.0
 
 You now should have the realms_cli commands available when you run `$ nile`.
 
+### Create a Starknet Wallet
+
+If you don't have a wallet yet, you'll need to [deploy one](https://www.cairo-lang.org/docs/hello_starknet/account_setup.html). You can do this via the following set of commands:
+```
+export STARKNET_NETWORK=alpha-goerli;
+export STARKNET_WALLET=starkware.starknet.wallets.open_zeppelin.OpenZeppelinAccount
+starknet deploy_account
+```
+ There are wallets (such as the [ArgentX](https://chrome.google.com/webstore/detail/argent-x/dlcobpjiigpikoobohmabehhmhfoodbb/related) chrome extension) but they do not allow you to export your private key.
+
+You'll need to fetch the private key which is stored in ~/.starknet_accounts/starknet_open_zeppelin_accounts.json
+
 ### .env file
 
-Create an `.env.nile` in the realms-contracts directory with the following entries:
+Create an `.env.nile` in the realms_cli/ directory with the following entries:
 ```
 export STARKNET_PRIVATE_KEY=<A PRIVATE KEY>  # admin private key
-expost STARKNET_NETWORK=alpha-goerli  # different from nile_network
+export STARKNET_NETWORK=alpha-goerli  # different from nile_network
 ```
 
 Then run `$ source realms_cli/.env.nile`
