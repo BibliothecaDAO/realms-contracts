@@ -45,3 +45,5 @@ cairo-nile = "^0.5.0"
 # Here you specify you command name and location <command_name> = <package_method_location>
 "mint_realm" = "realms_cli.main.mint_realm"
 "settle_realm" = "realms_cli.main.settle_realm"
+"set_realm_data" = "realms_cli.main.set_realm_data"
+"claim_resources" = "realms_cli.main.claim_resources"

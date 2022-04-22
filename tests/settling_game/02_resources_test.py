@@ -4,7 +4,7 @@ import json
 from openzeppelin.tests.utils import Signer, uint, str_to_felt, from_uint, felt_to_str
 import time
 
-from scripts.binary_converter import map_realm
+from realms_cli.realms_cli.binary_converter import map_realm
 
 from tests.conftest import set_block_timestamp
 

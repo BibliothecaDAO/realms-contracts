@@ -2,7 +2,7 @@
 import asyncio
 import json
 from openzeppelin.tests.utils import Signer, uint, str_to_felt, felt_to_str
-from scripts.binary_converter import map_realm
+from realms_cli.realms_cli.binary_converter import map_realm
 # load_dotenv()
 from starkware.starknet.wallets.open_zeppelin import OpenZeppelinAccount
 from services.external_api.base_client import RetryConfig

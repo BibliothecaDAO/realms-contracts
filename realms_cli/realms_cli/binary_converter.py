@@ -1,30 +1,5 @@
 import json
 
-
-building_costs = [6, 6, 6, 6, 6, 6, 6, 6, 6]
-
-resource_ids = [1, 4, 6]
-resource_values = [10, 10, 10, 10, 10]
-
-buildings = [
-    {
-        "name": "Fairgrounds",
-        "id": 1,
-        "costs": [2, 12, 31, 21, 7],
-        "ids":[2, 2, 3, 4, 7]
-    }
-]
-
-
-realms = json.load(open('data/realms.json'))
-
-resources = json.load(open('data/resources.json'))
-
-orders = json.load(open('data/orders.json'))
-
-wonders = json.load(open('data/wonders.json'))
-
-
 def decimalToBinary(n, chunksize):
     bit = []
 
@@ -40,7 +15,7 @@ def decimalToBinary(n, chunksize):
             reversed_bit += ("0" * difference) + i
         else:
             reversed_bit += i
-    print(reversed_bit)
+    # print(reversed_bit)
     return int(reversed_bit, 2)
 
 
@@ -52,14 +27,13 @@ def createOutput(value, chunksize):
     return value
 
 
-def map_realm(value):
+def map_realm(value, resources, wonders, orders):
     traits = []
     resourceIds = []
     wonder = []
     order = []
 
     for a in value['attributes']:
-
         # traits
         if a['trait_type'] == "Cities":
             traits.append(a['value'])
@@ -118,5 +92,30 @@ if __name__ == '__main__':
     # # with open('scripts/json_data.json', 'w') as outfile:
     # #     outfile.write(str(createOutput(buildings, 6)))
 
+    building_costs = [6, 6, 6, 6, 6, 6, 6, 6, 6]
+
+    resource_ids = [1, 4, 6]
+    resource_values = [10, 10, 10, 10, 10]
+
+    buildings = [
+        {
+            "name": "Fairgrounds",
+            "id": 1,
+            "costs": [2, 12, 31, 21, 7],
+            "ids":[2, 2, 3, 4, 7]
+        }
+    ]
+
+
+    realms = json.load(open('data/realms.json'))
+
+    resources = json.load(open('data/resources.json'))
+
+    orders = json.load(open('data/orders.json'))
+
+    wonders = json.load(open('data/wonders.json'))
+
     print(decimalToBinary(resource_ids, 8))
     print(decimalToBinary(resource_values, 12))
+
+    print(map_realm(realms["1"], resources, wonders, orders))
