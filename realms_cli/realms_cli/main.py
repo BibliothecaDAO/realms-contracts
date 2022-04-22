@@ -107,3 +107,38 @@ def claim_resources(realm_token_id, network):
             0,                # uint 2
         ],
     )
+
+@click.command()
+@click.option("--network", default="127.0.0.1")
+def check_lords(network):
+    """
+    Check balance
+    """
+    config = Config(nile_network=network)
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="lords",
+        function="balanceOf",
+        arguments=[],
+    )
+
+@click.command()
+@click.option("--network", default="127.0.0.1")
+def check_realms(network):
+    """
+    Check realms balance
+    """
+    config = Config(nile_network=network)
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="realms",
+        function="balanceOf",
+        arguments=[],
+    )
+
+# get happiness level
+# get pillageable amount

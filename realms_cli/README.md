@@ -57,7 +57,9 @@ If you want to check a tx hash, run either
 
 Or `$ starknet get_transaction_receipt --hash TXHASH` (only for non-localhost)
 
-## Interaction with the game
+## First make an Account
+
+`$ nile deploy account --alias player`
 
 ### Minting
 
@@ -72,3 +74,13 @@ Or `$ starknet get_transaction_receipt --hash TXHASH` (only for non-localhost)
 Add your logic to `realms_cli/realms_cli/main.py`
 Add you cli entro to `realms_cli/pyproject.toml`
 Reinstall the plugin cli `pip install realms_cli/`
+
+
+
+## TODO GAME:
+- Add all building costs (should be script that pulls from json, converts to binary then sends)
+- Add all resources costs (should be script that pulls from json, converts to binary then sends)
+
+## TODO Admin:
+- Add module replace 
+- Add new module (deploy module, call arbiter to include)
