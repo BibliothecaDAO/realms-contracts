@@ -1,0 +1,19 @@
+[
+    {
+        "inputs": [
+            {
+                "name": "address_of_controller",
+                "type": "felt"
+            }
+        ],
+        "name": "constructor",
+        "outputs": [],
+        "type": "constructor"
+    },
+    {
+        "inputs": [],
+        "name": "update_value",
+        "outputs": [],
+        "type": "function"
+    }
+]

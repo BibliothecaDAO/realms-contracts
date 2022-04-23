@@ -1,0 +1,3006 @@
+{
+    "abi": [],
+    "entry_points_by_type": {
+        "CONSTRUCTOR": [],
+        "EXTERNAL": [],
+        "L1_HANDLER": []
+    },
+    "program": {
+        "attributes": [],
+        "builtins": [
+            "range_check"
+        ],
+        "data": [
+            "0x400380007ffc7ffd",
+            "0x482680017ffc8000",
+            "0x1",
+            "0x208b7fff7fff7ffe",
+            "0x480a7ffb7fff8000",
+            "0x48297ffc80007ffd",
+            "0x1104800180018000",
+            "0x800000000000010fffffffffffffffffffffffffffffffffffffffffffffffb",
+            "0x208b7fff7fff7ffe",
+            "0x482680017ffb8000",
+            "0x2",
+            "0x480280007ffb8000",
+            "0x482680017ffd8000",
+            "0x800000000000011000000000000000000000000000000000000000000000000",
+            "0x1104800180018000",
+            "0x800000000000010fffffffffffffffffffffffffffffffffffffffffffffff7",
+            "0x480280017ffb8000",
+            "0x48487ffd7fff8000",
+            "0x480280007ffb8000",
+            "0x40317fff7ffe7ffc",
+            "0x48127ffc7fff8000",
+            "0x480280017ffb8000",
+            "0x480280007ffb8000",
+            "0x208b7fff7fff7ffe",
+            "0x480a7ffb7fff8000",
+            "0x480a7ffd7fff8000",
+            "0x480a7ffc7fff8000",
+            "0x1104800180018000",
+            "0x800000000000010ffffffffffffffffffffffffffffffffffffffffffffffef",
+            "0x480a7ffa7fff8000",
+            "0x48127ffc7fff8000",
+            "0x48127ffc7fff8000",
+            "0x48127ffc7fff8000",
+            "0x208b7fff7fff7ffe",
+            "0x484a7ffb7ffc8000",
+            "0x480a7ff97fff8000",
+            "0x480a7ffa7fff8000",
+            "0x48287ffd7ffd8000",
+            "0x208b7fff7fff7ffe"
+        ],
+        "debug_info": {
+            "file_contents": {},
+            "instruction_locations": {
+                "0": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.math",
+                        "starkware.cairo.common.math.assert_nn"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 0,
+                            "offset": 0
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.math.assert_nn.a": 0,
+                            "starkware.cairo.common.math.assert_nn.range_check_ptr": 1
+                        }
+                    },
+                    "hints": [
+                        {
+                            "location": {
+                                "end_col": 7,
+                                "end_line": 44,
+                                "input_file": {
+                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                                },
+                                "start_col": 5,
+                                "start_line": 40
+                            },
+                            "n_prefix_newlines": 1
+                        }
+                    ],
+                    "inst": {
+                        "end_col": 26,
+                        "end_line": 45,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 45
+                    }
+                },
+                "1": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.math",
+                        "starkware.cairo.common.math.assert_nn"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 0,
+                            "offset": 0
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.math.assert_nn.a": 0,
+                            "starkware.cairo.common.math.assert_nn.range_check_ptr": 2
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 46,
+                        "end_line": 46,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                        },
+                        "parent_location": [
+                            {
+                                "end_col": 31,
+                                "end_line": 39,
+                                "input_file": {
+                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                                },
+                                "parent_location": [
+                                    {
+                                        "end_col": 14,
+                                        "end_line": 47,
+                                        "input_file": {
+                                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                                        },
+                                        "start_col": 5,
+                                        "start_line": 47
+                                    },
+                                    "While trying to retrieve the implicit argument 'range_check_ptr' in:"
+                                ],
+                                "start_col": 16,
+                                "start_line": 39
+                            },
+                            "While expanding the reference 'range_check_ptr' in:"
+                        ],
+                        "start_col": 27,
+                        "start_line": 46
+                    }
+                },
+                "3": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.math",
+                        "starkware.cairo.common.math.assert_nn"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 0,
+                            "offset": 1
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.math.assert_nn.a": 0,
+                            "starkware.cairo.common.math.assert_nn.range_check_ptr": 2
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 14,
+                        "end_line": 47,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 47
+                    }
+                },
+                "4": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.math",
+                        "starkware.cairo.common.math.assert_le"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 1,
+                            "offset": 0
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.math.assert_le.a": 3,
+                            "starkware.cairo.common.math.assert_le.b": 4,
+                            "starkware.cairo.common.math.assert_le.range_check_ptr": 5
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 31,
+                        "end_line": 51,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                        },
+                        "parent_location": [
+                            {
+                                "end_col": 31,
+                                "end_line": 39,
+                                "input_file": {
+                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                                },
+                                "parent_location": [
+                                    {
+                                        "end_col": 21,
+                                        "end_line": 52,
+                                        "input_file": {
+                                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                                        },
+                                        "start_col": 5,
+                                        "start_line": 52
+                                    },
+                                    "While trying to retrieve the implicit argument 'range_check_ptr' in:"
+                                ],
+                                "start_col": 16,
+                                "start_line": 39
+                            },
+                            "While expanding the reference 'range_check_ptr' in:"
+                        ],
+                        "start_col": 16,
+                        "start_line": 51
+                    }
+                },
+                "5": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.math",
+                        "starkware.cairo.common.math.assert_le"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 1,
+                            "offset": 1
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.math.assert_le.a": 3,
+                            "starkware.cairo.common.math.assert_le.b": 4,
+                            "starkware.cairo.common.math.assert_le.range_check_ptr": 5
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 20,
+                        "end_line": 52,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                        },
+                        "start_col": 15,
+                        "start_line": 52
+                    }
+                },
+                "6": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.math",
+                        "starkware.cairo.common.math.assert_le"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 1,
+                            "offset": 2
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.math.assert_le.a": 3,
+                            "starkware.cairo.common.math.assert_le.b": 4,
+                            "starkware.cairo.common.math.assert_le.range_check_ptr": 5
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 21,
+                        "end_line": 52,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 52
+                    }
+                },
+                "8": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.math",
+                        "starkware.cairo.common.math.assert_le"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 1,
+                            "offset": 5
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.math.assert_le.a": 3,
+                            "starkware.cairo.common.math.assert_le.b": 4,
+                            "starkware.cairo.common.math.assert_le.range_check_ptr": 6
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 14,
+                        "end_line": 53,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 53
+                    }
+                },
+                "9": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.math",
+                        "starkware.cairo.common.math.unsigned_div_rem"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 2,
+                            "offset": 0
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.math.unsigned_div_rem.div": 8,
+                            "starkware.cairo.common.math.unsigned_div_rem.q": 11,
+                            "starkware.cairo.common.math.unsigned_div_rem.r": 10,
+                            "starkware.cairo.common.math.unsigned_div_rem.range_check_ptr": 12,
+                            "starkware.cairo.common.math.unsigned_div_rem.value": 7
+                        }
+                    },
+                    "hints": [
+                        {
+                            "location": {
+                                "end_col": 7,
+                                "end_line": 271,
+                                "input_file": {
+                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                                },
+                                "start_col": 5,
+                                "start_line": 265
+                            },
+                            "n_prefix_newlines": 1
+                        }
+                    ],
+                    "inst": {
+                        "end_col": 46,
+                        "end_line": 264,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                        },
+                        "parent_location": [
+                            {
+                                "end_col": 31,
+                                "end_line": 51,
+                                "input_file": {
+                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                                },
+                                "parent_location": [
+                                    {
+                                        "end_col": 26,
+                                        "end_line": 272,
+                                        "input_file": {
+                                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                                        },
+                                        "start_col": 5,
+                                        "start_line": 272
+                                    },
+                                    "While trying to retrieve the implicit argument 'range_check_ptr' in:"
+                                ],
+                                "start_col": 16,
+                                "start_line": 51
+                            },
+                            "While expanding the reference 'range_check_ptr' in:"
+                        ],
+                        "start_col": 27,
+                        "start_line": 264
+                    }
+                },
+                "11": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.math",
+                        "starkware.cairo.common.math.unsigned_div_rem"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 2,
+                            "offset": 1
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.math.unsigned_div_rem.div": 8,
+                            "starkware.cairo.common.math.unsigned_div_rem.q": 11,
+                            "starkware.cairo.common.math.unsigned_div_rem.r": 10,
+                            "starkware.cairo.common.math.unsigned_div_rem.range_check_ptr": 12,
+                            "starkware.cairo.common.math.unsigned_div_rem.value": 7
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 30,
+                        "end_line": 262,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                        },
+                        "parent_location": [
+                            {
+                                "end_col": 16,
+                                "end_line": 272,
+                                "input_file": {
+                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                                },
+                                "start_col": 15,
+                                "start_line": 272
+                            },
+                            "While expanding the reference 'r' in:"
+                        ],
+                        "start_col": 13,
+                        "start_line": 262
+                    }
+                },
+                "12": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.math",
+                        "starkware.cairo.common.math.unsigned_div_rem"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 2,
+                            "offset": 2
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.math.unsigned_div_rem.div": 8,
+                            "starkware.cairo.common.math.unsigned_div_rem.q": 11,
+                            "starkware.cairo.common.math.unsigned_div_rem.r": 10,
+                            "starkware.cairo.common.math.unsigned_div_rem.range_check_ptr": 12,
+                            "starkware.cairo.common.math.unsigned_div_rem.value": 7
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 25,
+                        "end_line": 272,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                        },
+                        "start_col": 18,
+                        "start_line": 272
+                    }
+                },
+                "14": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.math",
+                        "starkware.cairo.common.math.unsigned_div_rem"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 2,
+                            "offset": 3
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.math.unsigned_div_rem.div": 8,
+                            "starkware.cairo.common.math.unsigned_div_rem.q": 11,
+                            "starkware.cairo.common.math.unsigned_div_rem.r": 10,
+                            "starkware.cairo.common.math.unsigned_div_rem.range_check_ptr": 12,
+                            "starkware.cairo.common.math.unsigned_div_rem.value": 7
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 26,
+                        "end_line": 272,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 272
+                    }
+                },
+                "16": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.math",
+                        "starkware.cairo.common.math.unsigned_div_rem"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 2,
+                            "offset": 10
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.math.unsigned_div_rem.div": 8,
+                            "starkware.cairo.common.math.unsigned_div_rem.q": 11,
+                            "starkware.cairo.common.math.unsigned_div_rem.r": 10,
+                            "starkware.cairo.common.math.unsigned_div_rem.range_check_ptr": 13,
+                            "starkware.cairo.common.math.unsigned_div_rem.value": 7
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 34,
+                        "end_line": 263,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                        },
+                        "parent_location": [
+                            {
+                                "end_col": 21,
+                                "end_line": 274,
+                                "input_file": {
+                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                                },
+                                "start_col": 20,
+                                "start_line": 274
+                            },
+                            "While expanding the reference 'q' in:"
+                        ],
+                        "start_col": 13,
+                        "start_line": 263
+                    }
+                },
+                "17": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.math",
+                        "starkware.cairo.common.math.unsigned_div_rem"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 2,
+                            "offset": 11
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.math.unsigned_div_rem.__temp0": 14,
+                            "starkware.cairo.common.math.unsigned_div_rem.div": 8,
+                            "starkware.cairo.common.math.unsigned_div_rem.q": 11,
+                            "starkware.cairo.common.math.unsigned_div_rem.r": 10,
+                            "starkware.cairo.common.math.unsigned_div_rem.range_check_ptr": 13,
+                            "starkware.cairo.common.math.unsigned_div_rem.value": 7
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 27,
+                        "end_line": 274,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                        },
+                        "start_col": 20,
+                        "start_line": 274
+                    }
+                },
+                "18": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.math",
+                        "starkware.cairo.common.math.unsigned_div_rem"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 2,
+                            "offset": 12
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.math.unsigned_div_rem.__temp0": 14,
+                            "starkware.cairo.common.math.unsigned_div_rem.__temp1": 15,
+                            "starkware.cairo.common.math.unsigned_div_rem.div": 8,
+                            "starkware.cairo.common.math.unsigned_div_rem.q": 11,
+                            "starkware.cairo.common.math.unsigned_div_rem.r": 10,
+                            "starkware.cairo.common.math.unsigned_div_rem.range_check_ptr": 13,
+                            "starkware.cairo.common.math.unsigned_div_rem.value": 7
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 30,
+                        "end_line": 262,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                        },
+                        "parent_location": [
+                            {
+                                "end_col": 31,
+                                "end_line": 274,
+                                "input_file": {
+                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                                },
+                                "start_col": 30,
+                                "start_line": 274
+                            },
+                            "While expanding the reference 'r' in:"
+                        ],
+                        "start_col": 13,
+                        "start_line": 262
+                    }
+                },
+                "19": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.math",
+                        "starkware.cairo.common.math.unsigned_div_rem"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 2,
+                            "offset": 13
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.math.unsigned_div_rem.__temp0": 14,
+                            "starkware.cairo.common.math.unsigned_div_rem.__temp1": 15,
+                            "starkware.cairo.common.math.unsigned_div_rem.__temp2": 16,
+                            "starkware.cairo.common.math.unsigned_div_rem.div": 8,
+                            "starkware.cairo.common.math.unsigned_div_rem.q": 11,
+                            "starkware.cairo.common.math.unsigned_div_rem.r": 10,
+                            "starkware.cairo.common.math.unsigned_div_rem.range_check_ptr": 13,
+                            "starkware.cairo.common.math.unsigned_div_rem.value": 7
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 31,
+                        "end_line": 274,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 274
+                    }
+                },
+                "20": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.math",
+                        "starkware.cairo.common.math.unsigned_div_rem"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 2,
+                            "offset": 13
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.math.unsigned_div_rem.__temp0": 14,
+                            "starkware.cairo.common.math.unsigned_div_rem.__temp1": 15,
+                            "starkware.cairo.common.math.unsigned_div_rem.__temp2": 16,
+                            "starkware.cairo.common.math.unsigned_div_rem.div": 8,
+                            "starkware.cairo.common.math.unsigned_div_rem.q": 11,
+                            "starkware.cairo.common.math.unsigned_div_rem.r": 10,
+                            "starkware.cairo.common.math.unsigned_div_rem.range_check_ptr": 13,
+                            "starkware.cairo.common.math.unsigned_div_rem.value": 7
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 31,
+                        "end_line": 51,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                        },
+                        "parent_location": [
+                            {
+                                "end_col": 26,
+                                "end_line": 272,
+                                "input_file": {
+                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                                },
+                                "parent_location": [
+                                    {
+                                        "end_col": 38,
+                                        "end_line": 261,
+                                        "input_file": {
+                                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                                        },
+                                        "parent_location": [
+                                            {
+                                                "end_col": 18,
+                                                "end_line": 275,
+                                                "input_file": {
+                                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                                                },
+                                                "start_col": 5,
+                                                "start_line": 275
+                                            },
+                                            "While trying to retrieve the implicit argument 'range_check_ptr' in:"
+                                        ],
+                                        "start_col": 23,
+                                        "start_line": 261
+                                    },
+                                    "While expanding the reference 'range_check_ptr' in:"
+                                ],
+                                "start_col": 5,
+                                "start_line": 272
+                            },
+                            "While trying to update the implicit return value 'range_check_ptr' in:"
+                        ],
+                        "start_col": 16,
+                        "start_line": 51
+                    }
+                },
+                "21": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.math",
+                        "starkware.cairo.common.math.unsigned_div_rem"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 2,
+                            "offset": 14
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.math.unsigned_div_rem.__temp0": 14,
+                            "starkware.cairo.common.math.unsigned_div_rem.__temp1": 15,
+                            "starkware.cairo.common.math.unsigned_div_rem.__temp2": 16,
+                            "starkware.cairo.common.math.unsigned_div_rem.div": 8,
+                            "starkware.cairo.common.math.unsigned_div_rem.q": 11,
+                            "starkware.cairo.common.math.unsigned_div_rem.r": 10,
+                            "starkware.cairo.common.math.unsigned_div_rem.range_check_ptr": 13,
+                            "starkware.cairo.common.math.unsigned_div_rem.value": 7
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 34,
+                        "end_line": 263,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                        },
+                        "parent_location": [
+                            {
+                                "end_col": 14,
+                                "end_line": 275,
+                                "input_file": {
+                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                                },
+                                "start_col": 13,
+                                "start_line": 275
+                            },
+                            "While expanding the reference 'q' in:"
+                        ],
+                        "start_col": 13,
+                        "start_line": 263
+                    }
+                },
+                "22": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.math",
+                        "starkware.cairo.common.math.unsigned_div_rem"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 2,
+                            "offset": 15
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.math.unsigned_div_rem.__temp0": 14,
+                            "starkware.cairo.common.math.unsigned_div_rem.__temp1": 15,
+                            "starkware.cairo.common.math.unsigned_div_rem.__temp2": 16,
+                            "starkware.cairo.common.math.unsigned_div_rem.div": 8,
+                            "starkware.cairo.common.math.unsigned_div_rem.q": 11,
+                            "starkware.cairo.common.math.unsigned_div_rem.r": 10,
+                            "starkware.cairo.common.math.unsigned_div_rem.range_check_ptr": 13,
+                            "starkware.cairo.common.math.unsigned_div_rem.value": 7
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 30,
+                        "end_line": 262,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                        },
+                        "parent_location": [
+                            {
+                                "end_col": 17,
+                                "end_line": 275,
+                                "input_file": {
+                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                                },
+                                "start_col": 16,
+                                "start_line": 275
+                            },
+                            "While expanding the reference 'r' in:"
+                        ],
+                        "start_col": 13,
+                        "start_line": 262
+                    }
+                },
+                "23": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.math",
+                        "starkware.cairo.common.math.unsigned_div_rem"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 2,
+                            "offset": 16
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.math.unsigned_div_rem.__temp0": 14,
+                            "starkware.cairo.common.math.unsigned_div_rem.__temp1": 15,
+                            "starkware.cairo.common.math.unsigned_div_rem.__temp2": 16,
+                            "starkware.cairo.common.math.unsigned_div_rem.div": 8,
+                            "starkware.cairo.common.math.unsigned_div_rem.q": 11,
+                            "starkware.cairo.common.math.unsigned_div_rem.r": 10,
+                            "starkware.cairo.common.math.unsigned_div_rem.range_check_ptr": 13,
+                            "starkware.cairo.common.math.unsigned_div_rem.value": 7
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 18,
+                        "end_line": 275,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 275
+                    }
+                },
+                "24": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.unpack_position"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 3,
+                            "offset": 0
+                        },
+                        "reference_ids": {
+                            "__main__.unpack_position.grid_dimension": 17,
+                            "__main__.unpack_position.position": 18,
+                            "__main__.unpack_position.range_check_ptr": 20,
+                            "__main__.unpack_position.syscall_ptr": 19
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 58,
+                        "end_line": 7,
+                        "input_file": {
+                            "filename": "contracts/game_utils/grid_position.cairo"
+                        },
+                        "parent_location": [
+                            {
+                                "end_col": 38,
+                                "end_line": 261,
+                                "input_file": {
+                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                                },
+                                "parent_location": [
+                                    {
+                                        "end_col": 64,
+                                        "end_line": 12,
+                                        "input_file": {
+                                            "filename": "contracts/game_utils/grid_position.cairo"
+                                        },
+                                        "start_col": 22,
+                                        "start_line": 12
+                                    },
+                                    "While trying to retrieve the implicit argument 'range_check_ptr' in:"
+                                ],
+                                "start_col": 23,
+                                "start_line": 261
+                            },
+                            "While expanding the reference 'range_check_ptr' in:"
+                        ],
+                        "start_col": 43,
+                        "start_line": 7
+                    }
+                },
+                "25": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.unpack_position"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 3,
+                            "offset": 1
+                        },
+                        "reference_ids": {
+                            "__main__.unpack_position.grid_dimension": 17,
+                            "__main__.unpack_position.position": 18,
+                            "__main__.unpack_position.range_check_ptr": 20,
+                            "__main__.unpack_position.syscall_ptr": 19
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 43,
+                        "end_line": 8,
+                        "input_file": {
+                            "filename": "contracts/game_utils/grid_position.cairo"
+                        },
+                        "parent_location": [
+                            {
+                                "end_col": 47,
+                                "end_line": 12,
+                                "input_file": {
+                                    "filename": "contracts/game_utils/grid_position.cairo"
+                                },
+                                "start_col": 39,
+                                "start_line": 12
+                            },
+                            "While expanding the reference 'position' in:"
+                        ],
+                        "start_col": 28,
+                        "start_line": 8
+                    }
+                },
+                "26": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.unpack_position"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 3,
+                            "offset": 2
+                        },
+                        "reference_ids": {
+                            "__main__.unpack_position.grid_dimension": 17,
+                            "__main__.unpack_position.position": 18,
+                            "__main__.unpack_position.range_check_ptr": 20,
+                            "__main__.unpack_position.syscall_ptr": 19
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 26,
+                        "end_line": 8,
+                        "input_file": {
+                            "filename": "contracts/game_utils/grid_position.cairo"
+                        },
+                        "parent_location": [
+                            {
+                                "end_col": 63,
+                                "end_line": 12,
+                                "input_file": {
+                                    "filename": "contracts/game_utils/grid_position.cairo"
+                                },
+                                "start_col": 49,
+                                "start_line": 12
+                            },
+                            "While expanding the reference 'grid_dimension' in:"
+                        ],
+                        "start_col": 5,
+                        "start_line": 8
+                    }
+                },
+                "27": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.unpack_position"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 3,
+                            "offset": 3
+                        },
+                        "reference_ids": {
+                            "__main__.unpack_position.grid_dimension": 17,
+                            "__main__.unpack_position.position": 18,
+                            "__main__.unpack_position.range_check_ptr": 20,
+                            "__main__.unpack_position.syscall_ptr": 19
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 64,
+                        "end_line": 12,
+                        "input_file": {
+                            "filename": "contracts/game_utils/grid_position.cairo"
+                        },
+                        "start_col": 22,
+                        "start_line": 12
+                    }
+                },
+                "29": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.unpack_position"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 3,
+                            "offset": 21
+                        },
+                        "reference_ids": {
+                            "__main__.unpack_position.col": 23,
+                            "__main__.unpack_position.grid_dimension": 17,
+                            "__main__.unpack_position.position": 18,
+                            "__main__.unpack_position.range_check_ptr": 21,
+                            "__main__.unpack_position.row": 22,
+                            "__main__.unpack_position.syscall_ptr": 19
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 41,
+                        "end_line": 7,
+                        "input_file": {
+                            "filename": "contracts/game_utils/grid_position.cairo"
+                        },
+                        "parent_location": [
+                            {
+                                "end_col": 41,
+                                "end_line": 7,
+                                "input_file": {
+                                    "filename": "contracts/game_utils/grid_position.cairo"
+                                },
+                                "parent_location": [
+                                    {
+                                        "end_col": 30,
+                                        "end_line": 14,
+                                        "input_file": {
+                                            "filename": "contracts/game_utils/grid_position.cairo"
+                                        },
+                                        "start_col": 5,
+                                        "start_line": 14
+                                    },
+                                    "While trying to retrieve the implicit argument 'syscall_ptr' in:"
+                                ],
+                                "start_col": 22,
+                                "start_line": 7
+                            },
+                            "While expanding the reference 'syscall_ptr' in:"
+                        ],
+                        "start_col": 22,
+                        "start_line": 7
+                    }
+                },
+                "30": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.unpack_position"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 3,
+                            "offset": 22
+                        },
+                        "reference_ids": {
+                            "__main__.unpack_position.col": 23,
+                            "__main__.unpack_position.grid_dimension": 17,
+                            "__main__.unpack_position.position": 18,
+                            "__main__.unpack_position.range_check_ptr": 21,
+                            "__main__.unpack_position.row": 22,
+                            "__main__.unpack_position.syscall_ptr": 19
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 38,
+                        "end_line": 261,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/math.cairo"
+                        },
+                        "parent_location": [
+                            {
+                                "end_col": 64,
+                                "end_line": 12,
+                                "input_file": {
+                                    "filename": "contracts/game_utils/grid_position.cairo"
+                                },
+                                "parent_location": [
+                                    {
+                                        "end_col": 58,
+                                        "end_line": 7,
+                                        "input_file": {
+                                            "filename": "contracts/game_utils/grid_position.cairo"
+                                        },
+                                        "parent_location": [
+                                            {
+                                                "end_col": 30,
+                                                "end_line": 14,
+                                                "input_file": {
+                                                    "filename": "contracts/game_utils/grid_position.cairo"
+                                                },
+                                                "start_col": 5,
+                                                "start_line": 14
+                                            },
+                                            "While trying to retrieve the implicit argument 'range_check_ptr' in:"
+                                        ],
+                                        "start_col": 43,
+                                        "start_line": 7
+                                    },
+                                    "While expanding the reference 'range_check_ptr' in:"
+                                ],
+                                "start_col": 22,
+                                "start_line": 12
+                            },
+                            "While trying to update the implicit return value 'range_check_ptr' in:"
+                        ],
+                        "start_col": 23,
+                        "start_line": 261
+                    }
+                },
+                "31": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.unpack_position"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 3,
+                            "offset": 23
+                        },
+                        "reference_ids": {
+                            "__main__.unpack_position.col": 23,
+                            "__main__.unpack_position.grid_dimension": 17,
+                            "__main__.unpack_position.position": 18,
+                            "__main__.unpack_position.range_check_ptr": 21,
+                            "__main__.unpack_position.row": 22,
+                            "__main__.unpack_position.syscall_ptr": 19
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 13,
+                        "end_line": 12,
+                        "input_file": {
+                            "filename": "contracts/game_utils/grid_position.cairo"
+                        },
+                        "parent_location": [
+                            {
+                                "end_col": 20,
+                                "end_line": 14,
+                                "input_file": {
+                                    "filename": "contracts/game_utils/grid_position.cairo"
+                                },
+                                "start_col": 17,
+                                "start_line": 14
+                            },
+                            "While expanding the reference 'row' in:"
+                        ],
+                        "start_col": 10,
+                        "start_line": 12
+                    }
+                },
+                "32": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.unpack_position"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 3,
+                            "offset": 24
+                        },
+                        "reference_ids": {
+                            "__main__.unpack_position.col": 23,
+                            "__main__.unpack_position.grid_dimension": 17,
+                            "__main__.unpack_position.position": 18,
+                            "__main__.unpack_position.range_check_ptr": 21,
+                            "__main__.unpack_position.row": 22,
+                            "__main__.unpack_position.syscall_ptr": 19
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 18,
+                        "end_line": 12,
+                        "input_file": {
+                            "filename": "contracts/game_utils/grid_position.cairo"
+                        },
+                        "parent_location": [
+                            {
+                                "end_col": 29,
+                                "end_line": 14,
+                                "input_file": {
+                                    "filename": "contracts/game_utils/grid_position.cairo"
+                                },
+                                "start_col": 26,
+                                "start_line": 14
+                            },
+                            "While expanding the reference 'col' in:"
+                        ],
+                        "start_col": 15,
+                        "start_line": 12
+                    }
+                },
+                "33": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.unpack_position"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 3,
+                            "offset": 25
+                        },
+                        "reference_ids": {
+                            "__main__.unpack_position.col": 23,
+                            "__main__.unpack_position.grid_dimension": 17,
+                            "__main__.unpack_position.position": 18,
+                            "__main__.unpack_position.range_check_ptr": 21,
+                            "__main__.unpack_position.row": 22,
+                            "__main__.unpack_position.syscall_ptr": 19
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 30,
+                        "end_line": 14,
+                        "input_file": {
+                            "filename": "contracts/game_utils/grid_position.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 14
+                    }
+                },
+                "34": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pack_position"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 4,
+                            "offset": 0
+                        },
+                        "reference_ids": {
+                            "__main__.pack_position.col": 26,
+                            "__main__.pack_position.grid_dimension": 24,
+                            "__main__.pack_position.range_check_ptr": 28,
+                            "__main__.pack_position.row": 25,
+                            "__main__.pack_position.syscall_ptr": 27
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 44,
+                        "end_line": 22,
+                        "input_file": {
+                            "filename": "contracts/game_utils/grid_position.cairo"
+                        },
+                        "start_col": 24,
+                        "start_line": 22
+                    }
+                },
+                "35": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pack_position"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 4,
+                            "offset": 1
+                        },
+                        "reference_ids": {
+                            "__main__.pack_position.col": 26,
+                            "__main__.pack_position.grid_dimension": 24,
+                            "__main__.pack_position.multiple": 29,
+                            "__main__.pack_position.range_check_ptr": 28,
+                            "__main__.pack_position.row": 25,
+                            "__main__.pack_position.syscall_ptr": 27
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 39,
+                        "end_line": 18,
+                        "input_file": {
+                            "filename": "contracts/game_utils/grid_position.cairo"
+                        },
+                        "parent_location": [
+                            {
+                                "end_col": 39,
+                                "end_line": 18,
+                                "input_file": {
+                                    "filename": "contracts/game_utils/grid_position.cairo"
+                                },
+                                "parent_location": [
+                                    {
+                                        "end_col": 37,
+                                        "end_line": 23,
+                                        "input_file": {
+                                            "filename": "contracts/game_utils/grid_position.cairo"
+                                        },
+                                        "start_col": 5,
+                                        "start_line": 23
+                                    },
+                                    "While trying to retrieve the implicit argument 'syscall_ptr' in:"
+                                ],
+                                "start_col": 20,
+                                "start_line": 18
+                            },
+                            "While expanding the reference 'syscall_ptr' in:"
+                        ],
+                        "start_col": 20,
+                        "start_line": 18
+                    }
+                },
+                "36": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pack_position"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 4,
+                            "offset": 2
+                        },
+                        "reference_ids": {
+                            "__main__.pack_position.col": 26,
+                            "__main__.pack_position.grid_dimension": 24,
+                            "__main__.pack_position.multiple": 29,
+                            "__main__.pack_position.range_check_ptr": 28,
+                            "__main__.pack_position.row": 25,
+                            "__main__.pack_position.syscall_ptr": 27
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 56,
+                        "end_line": 18,
+                        "input_file": {
+                            "filename": "contracts/game_utils/grid_position.cairo"
+                        },
+                        "parent_location": [
+                            {
+                                "end_col": 56,
+                                "end_line": 18,
+                                "input_file": {
+                                    "filename": "contracts/game_utils/grid_position.cairo"
+                                },
+                                "parent_location": [
+                                    {
+                                        "end_col": 37,
+                                        "end_line": 23,
+                                        "input_file": {
+                                            "filename": "contracts/game_utils/grid_position.cairo"
+                                        },
+                                        "start_col": 5,
+                                        "start_line": 23
+                                    },
+                                    "While trying to retrieve the implicit argument 'range_check_ptr' in:"
+                                ],
+                                "start_col": 41,
+                                "start_line": 18
+                            },
+                            "While expanding the reference 'range_check_ptr' in:"
+                        ],
+                        "start_col": 41,
+                        "start_line": 18
+                    }
+                },
+                "37": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pack_position"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 4,
+                            "offset": 3
+                        },
+                        "reference_ids": {
+                            "__main__.pack_position.col": 26,
+                            "__main__.pack_position.grid_dimension": 24,
+                            "__main__.pack_position.multiple": 29,
+                            "__main__.pack_position.range_check_ptr": 28,
+                            "__main__.pack_position.row": 25,
+                            "__main__.pack_position.syscall_ptr": 27
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 36,
+                        "end_line": 23,
+                        "input_file": {
+                            "filename": "contracts/game_utils/grid_position.cairo"
+                        },
+                        "start_col": 22,
+                        "start_line": 23
+                    }
+                },
+                "38": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pack_position"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 4,
+                            "offset": 4
+                        },
+                        "reference_ids": {
+                            "__main__.pack_position.col": 26,
+                            "__main__.pack_position.grid_dimension": 24,
+                            "__main__.pack_position.multiple": 29,
+                            "__main__.pack_position.range_check_ptr": 28,
+                            "__main__.pack_position.row": 25,
+                            "__main__.pack_position.syscall_ptr": 27
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 37,
+                        "end_line": 23,
+                        "input_file": {
+                            "filename": "contracts/game_utils/grid_position.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 23
+                    }
+                }
+            }
+        },
+        "hints": {
+            "0": [
+                {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.math",
+                        "starkware.cairo.common.math.assert_nn"
+                    ],
+                    "code": "from starkware.cairo.common.math_utils import assert_integer\nassert_integer(ids.a)\nassert 0 <= ids.a % PRIME < range_check_builtin.bound, f'a = {ids.a} is out of range.'",
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 0,
+                            "offset": 0
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.math.assert_nn.a": 0,
+                            "starkware.cairo.common.math.assert_nn.range_check_ptr": 1
+                        }
+                    }
+                }
+            ],
+            "9": [
+                {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.math",
+                        "starkware.cairo.common.math.unsigned_div_rem"
+                    ],
+                    "code": "from starkware.cairo.common.math_utils import assert_integer\nassert_integer(ids.div)\nassert 0 < ids.div <= PRIME // range_check_builtin.bound, \\\n    f'div={hex(ids.div)} is out of the valid range.'\nids.q, ids.r = divmod(ids.value, ids.div)",
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 2,
+                            "offset": 0
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.math.unsigned_div_rem.div": 8,
+                            "starkware.cairo.common.math.unsigned_div_rem.q": 11,
+                            "starkware.cairo.common.math.unsigned_div_rem.r": 10,
+                            "starkware.cairo.common.math.unsigned_div_rem.range_check_ptr": 12,
+                            "starkware.cairo.common.math.unsigned_div_rem.value": 7
+                        }
+                    }
+                }
+            ]
+        },
+        "identifiers": {
+            "__main__.pack_position": {
+                "decorators": [],
+                "pc": 34,
+                "type": "function"
+            },
+            "__main__.pack_position.Args": {
+                "full_name": "__main__.pack_position.Args",
+                "members": {
+                    "col": {
+                        "cairo_type": "felt",
+                        "offset": 2
+                    },
+                    "grid_dimension": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    },
+                    "row": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    }
+                },
+                "size": 3,
+                "type": "struct"
+            },
+            "__main__.pack_position.ImplicitArgs": {
+                "full_name": "__main__.pack_position.ImplicitArgs",
+                "members": {
+                    "range_check_ptr": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    },
+                    "syscall_ptr": {
+                        "cairo_type": "felt*",
+                        "offset": 0
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "__main__.pack_position.Return": {
+                "full_name": "__main__.pack_position.Return",
+                "members": {
+                    "position": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "__main__.pack_position.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.pack_position.col": {
+                "cairo_type": "felt",
+                "full_name": "__main__.pack_position.col",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 4,
+                            "offset": 0
+                        },
+                        "pc": 34,
+                        "value": "[cast(fp + (-3), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "__main__.pack_position.grid_dimension": {
+                "cairo_type": "felt",
+                "full_name": "__main__.pack_position.grid_dimension",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 4,
+                            "offset": 0
+                        },
+                        "pc": 34,
+                        "value": "[cast(fp + (-5), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "__main__.pack_position.multiple": {
+                "cairo_type": "felt",
+                "full_name": "__main__.pack_position.multiple",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 4,
+                            "offset": 1
+                        },
+                        "pc": 35,
+                        "value": "[cast(ap + (-1), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "__main__.pack_position.range_check_ptr": {
+                "cairo_type": "felt",
+                "full_name": "__main__.pack_position.range_check_ptr",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 4,
+                            "offset": 0
+                        },
+                        "pc": 34,
+                        "value": "[cast(fp + (-6), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "__main__.pack_position.row": {
+                "cairo_type": "felt",
+                "full_name": "__main__.pack_position.row",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 4,
+                            "offset": 0
+                        },
+                        "pc": 34,
+                        "value": "[cast(fp + (-4), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "__main__.pack_position.syscall_ptr": {
+                "cairo_type": "felt*",
+                "full_name": "__main__.pack_position.syscall_ptr",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 4,
+                            "offset": 0
+                        },
+                        "pc": 34,
+                        "value": "[cast(fp + (-7), felt**)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "__main__.unpack_position": {
+                "decorators": [],
+                "pc": 24,
+                "type": "function"
+            },
+            "__main__.unpack_position.Args": {
+                "full_name": "__main__.unpack_position.Args",
+                "members": {
+                    "grid_dimension": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    },
+                    "position": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "__main__.unpack_position.ImplicitArgs": {
+                "full_name": "__main__.unpack_position.ImplicitArgs",
+                "members": {
+                    "range_check_ptr": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    },
+                    "syscall_ptr": {
+                        "cairo_type": "felt*",
+                        "offset": 0
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "__main__.unpack_position.Return": {
+                "full_name": "__main__.unpack_position.Return",
+                "members": {
+                    "col": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    },
+                    "row": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "__main__.unpack_position.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.unpack_position.col": {
+                "cairo_type": "felt",
+                "full_name": "__main__.unpack_position.col",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 3,
+                            "offset": 21
+                        },
+                        "pc": 29,
+                        "value": "[cast(ap + (-1), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "__main__.unpack_position.grid_dimension": {
+                "cairo_type": "felt",
+                "full_name": "__main__.unpack_position.grid_dimension",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 3,
+                            "offset": 0
+                        },
+                        "pc": 24,
+                        "value": "[cast(fp + (-4), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "__main__.unpack_position.position": {
+                "cairo_type": "felt",
+                "full_name": "__main__.unpack_position.position",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 3,
+                            "offset": 0
+                        },
+                        "pc": 24,
+                        "value": "[cast(fp + (-3), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "__main__.unpack_position.range_check_ptr": {
+                "cairo_type": "felt",
+                "full_name": "__main__.unpack_position.range_check_ptr",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 3,
+                            "offset": 0
+                        },
+                        "pc": 24,
+                        "value": "[cast(fp + (-5), felt*)]"
+                    },
+                    {
+                        "ap_tracking_data": {
+                            "group": 3,
+                            "offset": 21
+                        },
+                        "pc": 29,
+                        "value": "[cast(ap + (-3), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "__main__.unpack_position.row": {
+                "cairo_type": "felt",
+                "full_name": "__main__.unpack_position.row",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 3,
+                            "offset": 21
+                        },
+                        "pc": 29,
+                        "value": "[cast(ap + (-2), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "__main__.unpack_position.syscall_ptr": {
+                "cairo_type": "felt*",
+                "full_name": "__main__.unpack_position.syscall_ptr",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 3,
+                            "offset": 0
+                        },
+                        "pc": 24,
+                        "value": "[cast(fp + (-6), felt**)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "__main__.unsigned_div_rem": {
+                "destination": "starkware.cairo.common.math.unsigned_div_rem",
+                "type": "alias"
+            },
+            "starkware.cairo.common.cairo_builtins.BitwiseBuiltin": {
+                "full_name": "starkware.cairo.common.cairo_builtins.BitwiseBuiltin",
+                "members": {
+                    "x": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    },
+                    "x_and_y": {
+                        "cairo_type": "felt",
+                        "offset": 2
+                    },
+                    "x_or_y": {
+                        "cairo_type": "felt",
+                        "offset": 4
+                    },
+                    "x_xor_y": {
+                        "cairo_type": "felt",
+                        "offset": 3
+                    },
+                    "y": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    }
+                },
+                "size": 5,
+                "type": "struct"
+            },
+            "starkware.cairo.common.cairo_builtins.EcOpBuiltin": {
+                "full_name": "starkware.cairo.common.cairo_builtins.EcOpBuiltin",
+                "members": {
+                    "m": {
+                        "cairo_type": "felt",
+                        "offset": 4
+                    },
+                    "p": {
+                        "cairo_type": "starkware.cairo.common.ec_point.EcPoint",
+                        "offset": 0
+                    },
+                    "q": {
+                        "cairo_type": "starkware.cairo.common.ec_point.EcPoint",
+                        "offset": 2
+                    },
+                    "r": {
+                        "cairo_type": "starkware.cairo.common.ec_point.EcPoint",
+                        "offset": 5
+                    }
+                },
+                "size": 7,
+                "type": "struct"
+            },
+            "starkware.cairo.common.cairo_builtins.EcPoint": {
+                "destination": "starkware.cairo.common.ec_point.EcPoint",
+                "type": "alias"
+            },
+            "starkware.cairo.common.cairo_builtins.HashBuiltin": {
+                "full_name": "starkware.cairo.common.cairo_builtins.HashBuiltin",
+                "members": {
+                    "result": {
+                        "cairo_type": "felt",
+                        "offset": 2
+                    },
+                    "x": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    },
+                    "y": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    }
+                },
+                "size": 3,
+                "type": "struct"
+            },
+            "starkware.cairo.common.cairo_builtins.SignatureBuiltin": {
+                "full_name": "starkware.cairo.common.cairo_builtins.SignatureBuiltin",
+                "members": {
+                    "message": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    },
+                    "pub_key": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.cairo.common.dict_access.DictAccess": {
+                "full_name": "starkware.cairo.common.dict_access.DictAccess",
+                "members": {
+                    "key": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    },
+                    "new_value": {
+                        "cairo_type": "felt",
+                        "offset": 2
+                    },
+                    "prev_value": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    }
+                },
+                "size": 3,
+                "type": "struct"
+            },
+            "starkware.cairo.common.ec_point.EcPoint": {
+                "full_name": "starkware.cairo.common.ec_point.EcPoint",
+                "members": {
+                    "x": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    },
+                    "y": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.cairo.common.hash.HashBuiltin": {
+                "destination": "starkware.cairo.common.cairo_builtins.HashBuiltin",
+                "type": "alias"
+            },
+            "starkware.cairo.common.math.assert_le": {
+                "decorators": [],
+                "pc": 4,
+                "type": "function"
+            },
+            "starkware.cairo.common.math.assert_le.Args": {
+                "full_name": "starkware.cairo.common.math.assert_le.Args",
+                "members": {
+                    "a": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    },
+                    "b": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.cairo.common.math.assert_le.ImplicitArgs": {
+                "full_name": "starkware.cairo.common.math.assert_le.ImplicitArgs",
+                "members": {
+                    "range_check_ptr": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.cairo.common.math.assert_le.Return": {
+                "full_name": "starkware.cairo.common.math.assert_le.Return",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "starkware.cairo.common.math.assert_le.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "starkware.cairo.common.math.assert_le.a": {
+                "cairo_type": "felt",
+                "full_name": "starkware.cairo.common.math.assert_le.a",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 1,
+                            "offset": 0
+                        },
+                        "pc": 4,
+                        "value": "[cast(fp + (-4), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "starkware.cairo.common.math.assert_le.b": {
+                "cairo_type": "felt",
+                "full_name": "starkware.cairo.common.math.assert_le.b",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 1,
+                            "offset": 0
+                        },
+                        "pc": 4,
+                        "value": "[cast(fp + (-3), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "starkware.cairo.common.math.assert_le.range_check_ptr": {
+                "cairo_type": "felt",
+                "full_name": "starkware.cairo.common.math.assert_le.range_check_ptr",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 1,
+                            "offset": 0
+                        },
+                        "pc": 4,
+                        "value": "[cast(fp + (-5), felt*)]"
+                    },
+                    {
+                        "ap_tracking_data": {
+                            "group": 1,
+                            "offset": 5
+                        },
+                        "pc": 8,
+                        "value": "[cast(ap + (-1), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "starkware.cairo.common.math.assert_nn": {
+                "decorators": [],
+                "pc": 0,
+                "type": "function"
+            },
+            "starkware.cairo.common.math.assert_nn.Args": {
+                "full_name": "starkware.cairo.common.math.assert_nn.Args",
+                "members": {
+                    "a": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.cairo.common.math.assert_nn.ImplicitArgs": {
+                "full_name": "starkware.cairo.common.math.assert_nn.ImplicitArgs",
+                "members": {
+                    "range_check_ptr": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.cairo.common.math.assert_nn.Return": {
+                "full_name": "starkware.cairo.common.math.assert_nn.Return",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "starkware.cairo.common.math.assert_nn.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "starkware.cairo.common.math.assert_nn.a": {
+                "cairo_type": "felt",
+                "full_name": "starkware.cairo.common.math.assert_nn.a",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 0,
+                            "offset": 0
+                        },
+                        "pc": 0,
+                        "value": "[cast(fp + (-3), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "starkware.cairo.common.math.assert_nn.range_check_ptr": {
+                "cairo_type": "felt",
+                "full_name": "starkware.cairo.common.math.assert_nn.range_check_ptr",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 0,
+                            "offset": 0
+                        },
+                        "pc": 0,
+                        "value": "[cast(fp + (-4), felt*)]"
+                    },
+                    {
+                        "ap_tracking_data": {
+                            "group": 0,
+                            "offset": 0
+                        },
+                        "pc": 1,
+                        "value": "cast([fp + (-4)] + 1, felt)"
+                    }
+                ],
+                "type": "reference"
+            },
+            "starkware.cairo.common.math.unsigned_div_rem": {
+                "decorators": [],
+                "pc": 9,
+                "type": "function"
+            },
+            "starkware.cairo.common.math.unsigned_div_rem.Args": {
+                "full_name": "starkware.cairo.common.math.unsigned_div_rem.Args",
+                "members": {
+                    "div": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    },
+                    "value": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.cairo.common.math.unsigned_div_rem.ImplicitArgs": {
+                "full_name": "starkware.cairo.common.math.unsigned_div_rem.ImplicitArgs",
+                "members": {
+                    "range_check_ptr": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.cairo.common.math.unsigned_div_rem.Return": {
+                "full_name": "starkware.cairo.common.math.unsigned_div_rem.Return",
+                "members": {
+                    "q": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    },
+                    "r": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.cairo.common.math.unsigned_div_rem.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "starkware.cairo.common.math.unsigned_div_rem.__temp0": {
+                "cairo_type": "felt",
+                "full_name": "starkware.cairo.common.math.unsigned_div_rem.__temp0",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 2,
+                            "offset": 11
+                        },
+                        "pc": 17,
+                        "value": "[cast(ap + (-1), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "starkware.cairo.common.math.unsigned_div_rem.__temp1": {
+                "cairo_type": "felt",
+                "full_name": "starkware.cairo.common.math.unsigned_div_rem.__temp1",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 2,
+                            "offset": 12
+                        },
+                        "pc": 18,
+                        "value": "[cast(ap + (-1), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "starkware.cairo.common.math.unsigned_div_rem.__temp2": {
+                "cairo_type": "felt",
+                "full_name": "starkware.cairo.common.math.unsigned_div_rem.__temp2",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 2,
+                            "offset": 13
+                        },
+                        "pc": 19,
+                        "value": "[cast(ap + (-1), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "starkware.cairo.common.math.unsigned_div_rem.div": {
+                "cairo_type": "felt",
+                "full_name": "starkware.cairo.common.math.unsigned_div_rem.div",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 2,
+                            "offset": 0
+                        },
+                        "pc": 9,
+                        "value": "[cast(fp + (-3), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "starkware.cairo.common.math.unsigned_div_rem.q": {
+                "cairo_type": "felt",
+                "full_name": "starkware.cairo.common.math.unsigned_div_rem.q",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 2,
+                            "offset": 0
+                        },
+                        "pc": 9,
+                        "value": "[cast([fp + (-5)] + 1, felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "starkware.cairo.common.math.unsigned_div_rem.r": {
+                "cairo_type": "felt",
+                "full_name": "starkware.cairo.common.math.unsigned_div_rem.r",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 2,
+                            "offset": 0
+                        },
+                        "pc": 9,
+                        "value": "[cast([fp + (-5)], felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "starkware.cairo.common.math.unsigned_div_rem.range_check_ptr": {
+                "cairo_type": "felt",
+                "full_name": "starkware.cairo.common.math.unsigned_div_rem.range_check_ptr",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 2,
+                            "offset": 0
+                        },
+                        "pc": 9,
+                        "value": "[cast(fp + (-5), felt*)]"
+                    },
+                    {
+                        "ap_tracking_data": {
+                            "group": 2,
+                            "offset": 0
+                        },
+                        "pc": 9,
+                        "value": "cast([fp + (-5)] + 2, felt)"
+                    },
+                    {
+                        "ap_tracking_data": {
+                            "group": 2,
+                            "offset": 10
+                        },
+                        "pc": 16,
+                        "value": "[cast(ap + (-1), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "starkware.cairo.common.math.unsigned_div_rem.value": {
+                "cairo_type": "felt",
+                "full_name": "starkware.cairo.common.math.unsigned_div_rem.value",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 2,
+                            "offset": 0
+                        },
+                        "pc": 9,
+                        "value": "[cast(fp + (-4), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "starkware.starknet.common.storage.ADDR_BOUND": {
+                "type": "const",
+                "value": -106710729501573572985208420194530329073740042555888586719489
+            },
+            "starkware.starknet.common.storage.MAX_STORAGE_ITEM_SIZE": {
+                "type": "const",
+                "value": 256
+            },
+            "starkware.starknet.common.storage.assert_250_bit": {
+                "destination": "starkware.cairo.common.math.assert_250_bit",
+                "type": "alias"
+            },
+            "starkware.starknet.common.syscalls.CALL_CONTRACT_SELECTOR": {
+                "type": "const",
+                "value": 20853273475220472486191784820
+            },
+            "starkware.starknet.common.syscalls.CallContract": {
+                "full_name": "starkware.starknet.common.syscalls.CallContract",
+                "members": {
+                    "request": {
+                        "cairo_type": "starkware.starknet.common.syscalls.CallContractRequest",
+                        "offset": 0
+                    },
+                    "response": {
+                        "cairo_type": "starkware.starknet.common.syscalls.CallContractResponse",
+                        "offset": 5
+                    }
+                },
+                "size": 7,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.CallContractRequest": {
+                "full_name": "starkware.starknet.common.syscalls.CallContractRequest",
+                "members": {
+                    "calldata": {
+                        "cairo_type": "felt*",
+                        "offset": 4
+                    },
+                    "calldata_size": {
+                        "cairo_type": "felt",
+                        "offset": 3
+                    },
+                    "contract_address": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    },
+                    "function_selector": {
+                        "cairo_type": "felt",
+                        "offset": 2
+                    },
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 5,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.CallContractResponse": {
+                "full_name": "starkware.starknet.common.syscalls.CallContractResponse",
+                "members": {
+                    "retdata": {
+                        "cairo_type": "felt*",
+                        "offset": 1
+                    },
+                    "retdata_size": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.DELEGATE_CALL_SELECTOR": {
+                "type": "const",
+                "value": 21167594061783206823196716140
+            },
+            "starkware.starknet.common.syscalls.DELEGATE_L1_HANDLER_SELECTOR": {
+                "type": "const",
+                "value": 23274015802972845247556842986379118667122
+            },
+            "starkware.starknet.common.syscalls.DictAccess": {
+                "destination": "starkware.cairo.common.dict_access.DictAccess",
+                "type": "alias"
+            },
+            "starkware.starknet.common.syscalls.EMIT_EVENT_SELECTOR": {
+                "type": "const",
+                "value": 1280709301550335749748
+            },
+            "starkware.starknet.common.syscalls.EmitEvent": {
+                "full_name": "starkware.starknet.common.syscalls.EmitEvent",
+                "members": {
+                    "data": {
+                        "cairo_type": "felt*",
+                        "offset": 4
+                    },
+                    "data_len": {
+                        "cairo_type": "felt",
+                        "offset": 3
+                    },
+                    "keys": {
+                        "cairo_type": "felt*",
+                        "offset": 2
+                    },
+                    "keys_len": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    },
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 5,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GET_BLOCK_NUMBER_SELECTOR": {
+                "type": "const",
+                "value": 1448089106835523001438702345020786
+            },
+            "starkware.starknet.common.syscalls.GET_BLOCK_TIMESTAMP_SELECTOR": {
+                "type": "const",
+                "value": 24294903732626645868215235778792757751152
+            },
+            "starkware.starknet.common.syscalls.GET_CALLER_ADDRESS_SELECTOR": {
+                "type": "const",
+                "value": 94901967781393078444254803017658102643
+            },
+            "starkware.starknet.common.syscalls.GET_CONTRACT_ADDRESS_SELECTOR": {
+                "type": "const",
+                "value": 6219495360805491471215297013070624192820083
+            },
+            "starkware.starknet.common.syscalls.GET_SEQUENCER_ADDRESS_SELECTOR": {
+                "type": "const",
+                "value": 1592190833581991703053805829594610833820054387
+            },
+            "starkware.starknet.common.syscalls.GET_TX_INFO_SELECTOR": {
+                "type": "const",
+                "value": 1317029390204112103023
+            },
+            "starkware.starknet.common.syscalls.GET_TX_SIGNATURE_SELECTOR": {
+                "type": "const",
+                "value": 1448089128652340074717162277007973
+            },
+            "starkware.starknet.common.syscalls.GetBlockNumber": {
+                "full_name": "starkware.starknet.common.syscalls.GetBlockNumber",
+                "members": {
+                    "request": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetBlockNumberRequest",
+                        "offset": 0
+                    },
+                    "response": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetBlockNumberResponse",
+                        "offset": 1
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetBlockNumberRequest": {
+                "full_name": "starkware.starknet.common.syscalls.GetBlockNumberRequest",
+                "members": {
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetBlockNumberResponse": {
+                "full_name": "starkware.starknet.common.syscalls.GetBlockNumberResponse",
+                "members": {
+                    "block_number": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetBlockTimestamp": {
+                "full_name": "starkware.starknet.common.syscalls.GetBlockTimestamp",
+                "members": {
+                    "request": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetBlockTimestampRequest",
+                        "offset": 0
+                    },
+                    "response": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetBlockTimestampResponse",
+                        "offset": 1
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetBlockTimestampRequest": {
+                "full_name": "starkware.starknet.common.syscalls.GetBlockTimestampRequest",
+                "members": {
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetBlockTimestampResponse": {
+                "full_name": "starkware.starknet.common.syscalls.GetBlockTimestampResponse",
+                "members": {
+                    "block_timestamp": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetCallerAddress": {
+                "full_name": "starkware.starknet.common.syscalls.GetCallerAddress",
+                "members": {
+                    "request": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetCallerAddressRequest",
+                        "offset": 0
+                    },
+                    "response": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetCallerAddressResponse",
+                        "offset": 1
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetCallerAddressRequest": {
+                "full_name": "starkware.starknet.common.syscalls.GetCallerAddressRequest",
+                "members": {
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetCallerAddressResponse": {
+                "full_name": "starkware.starknet.common.syscalls.GetCallerAddressResponse",
+                "members": {
+                    "caller_address": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetContractAddress": {
+                "full_name": "starkware.starknet.common.syscalls.GetContractAddress",
+                "members": {
+                    "request": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetContractAddressRequest",
+                        "offset": 0
+                    },
+                    "response": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetContractAddressResponse",
+                        "offset": 1
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetContractAddressRequest": {
+                "full_name": "starkware.starknet.common.syscalls.GetContractAddressRequest",
+                "members": {
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetContractAddressResponse": {
+                "full_name": "starkware.starknet.common.syscalls.GetContractAddressResponse",
+                "members": {
+                    "contract_address": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetSequencerAddress": {
+                "full_name": "starkware.starknet.common.syscalls.GetSequencerAddress",
+                "members": {
+                    "request": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetSequencerAddressRequest",
+                        "offset": 0
+                    },
+                    "response": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetSequencerAddressResponse",
+                        "offset": 1
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetSequencerAddressRequest": {
+                "full_name": "starkware.starknet.common.syscalls.GetSequencerAddressRequest",
+                "members": {
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetSequencerAddressResponse": {
+                "full_name": "starkware.starknet.common.syscalls.GetSequencerAddressResponse",
+                "members": {
+                    "sequencer_address": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetTxInfo": {
+                "full_name": "starkware.starknet.common.syscalls.GetTxInfo",
+                "members": {
+                    "request": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetTxInfoRequest",
+                        "offset": 0
+                    },
+                    "response": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetTxInfoResponse",
+                        "offset": 1
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetTxInfoRequest": {
+                "full_name": "starkware.starknet.common.syscalls.GetTxInfoRequest",
+                "members": {
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetTxInfoResponse": {
+                "full_name": "starkware.starknet.common.syscalls.GetTxInfoResponse",
+                "members": {
+                    "tx_info": {
+                        "cairo_type": "starkware.starknet.common.syscalls.TxInfo*",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetTxSignature": {
+                "full_name": "starkware.starknet.common.syscalls.GetTxSignature",
+                "members": {
+                    "request": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetTxSignatureRequest",
+                        "offset": 0
+                    },
+                    "response": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetTxSignatureResponse",
+                        "offset": 1
+                    }
+                },
+                "size": 3,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetTxSignatureRequest": {
+                "full_name": "starkware.starknet.common.syscalls.GetTxSignatureRequest",
+                "members": {
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetTxSignatureResponse": {
+                "full_name": "starkware.starknet.common.syscalls.GetTxSignatureResponse",
+                "members": {
+                    "signature": {
+                        "cairo_type": "felt*",
+                        "offset": 1
+                    },
+                    "signature_len": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.SEND_MESSAGE_TO_L1_SELECTOR": {
+                "type": "const",
+                "value": 433017908768303439907196859243777073
+            },
+            "starkware.starknet.common.syscalls.STORAGE_READ_SELECTOR": {
+                "type": "const",
+                "value": 100890693370601760042082660
+            },
+            "starkware.starknet.common.syscalls.STORAGE_WRITE_SELECTOR": {
+                "type": "const",
+                "value": 25828017502874050592466629733
+            },
+            "starkware.starknet.common.syscalls.SendMessageToL1SysCall": {
+                "full_name": "starkware.starknet.common.syscalls.SendMessageToL1SysCall",
+                "members": {
+                    "payload_ptr": {
+                        "cairo_type": "felt*",
+                        "offset": 3
+                    },
+                    "payload_size": {
+                        "cairo_type": "felt",
+                        "offset": 2
+                    },
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    },
+                    "to_address": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    }
+                },
+                "size": 4,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.StorageRead": {
+                "full_name": "starkware.starknet.common.syscalls.StorageRead",
+                "members": {
+                    "request": {
+                        "cairo_type": "starkware.starknet.common.syscalls.StorageReadRequest",
+                        "offset": 0
+                    },
+                    "response": {
+                        "cairo_type": "starkware.starknet.common.syscalls.StorageReadResponse",
+                        "offset": 2
+                    }
+                },
+                "size": 3,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.StorageReadRequest": {
+                "full_name": "starkware.starknet.common.syscalls.StorageReadRequest",
+                "members": {
+                    "address": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    },
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.StorageReadResponse": {
+                "full_name": "starkware.starknet.common.syscalls.StorageReadResponse",
+                "members": {
+                    "value": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.StorageWrite": {
+                "full_name": "starkware.starknet.common.syscalls.StorageWrite",
+                "members": {
+                    "address": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    },
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    },
+                    "value": {
+                        "cairo_type": "felt",
+                        "offset": 2
+                    }
+                },
+                "size": 3,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.TxInfo": {
+                "full_name": "starkware.starknet.common.syscalls.TxInfo",
+                "members": {
+                    "account_contract_address": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    },
+                    "chain_id": {
+                        "cairo_type": "felt",
+                        "offset": 6
+                    },
+                    "max_fee": {
+                        "cairo_type": "felt",
+                        "offset": 2
+                    },
+                    "signature": {
+                        "cairo_type": "felt*",
+                        "offset": 4
+                    },
+                    "signature_len": {
+                        "cairo_type": "felt",
+                        "offset": 3
+                    },
+                    "transaction_hash": {
+                        "cairo_type": "felt",
+                        "offset": 5
+                    },
+                    "version": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 7,
+                "type": "struct"
+            }
+        },
+        "main_scope": "__main__",
+        "prime": "0x800000000000011000000000000000000000000000000000000000000000001",
+        "reference_manager": {
+            "references": [
+                {
+                    "ap_tracking_data": {
+                        "group": 0,
+                        "offset": 0
+                    },
+                    "pc": 0,
+                    "value": "[cast(fp + (-3), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 0,
+                        "offset": 0
+                    },
+                    "pc": 0,
+                    "value": "[cast(fp + (-4), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 0,
+                        "offset": 0
+                    },
+                    "pc": 1,
+                    "value": "cast([fp + (-4)] + 1, felt)"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 1,
+                        "offset": 0
+                    },
+                    "pc": 4,
+                    "value": "[cast(fp + (-4), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 1,
+                        "offset": 0
+                    },
+                    "pc": 4,
+                    "value": "[cast(fp + (-3), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 1,
+                        "offset": 0
+                    },
+                    "pc": 4,
+                    "value": "[cast(fp + (-5), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 1,
+                        "offset": 5
+                    },
+                    "pc": 8,
+                    "value": "[cast(ap + (-1), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 2,
+                        "offset": 0
+                    },
+                    "pc": 9,
+                    "value": "[cast(fp + (-4), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 2,
+                        "offset": 0
+                    },
+                    "pc": 9,
+                    "value": "[cast(fp + (-3), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 2,
+                        "offset": 0
+                    },
+                    "pc": 9,
+                    "value": "[cast(fp + (-5), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 2,
+                        "offset": 0
+                    },
+                    "pc": 9,
+                    "value": "[cast([fp + (-5)], felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 2,
+                        "offset": 0
+                    },
+                    "pc": 9,
+                    "value": "[cast([fp + (-5)] + 1, felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 2,
+                        "offset": 0
+                    },
+                    "pc": 9,
+                    "value": "cast([fp + (-5)] + 2, felt)"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 2,
+                        "offset": 10
+                    },
+                    "pc": 16,
+                    "value": "[cast(ap + (-1), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 2,
+                        "offset": 11
+                    },
+                    "pc": 17,
+                    "value": "[cast(ap + (-1), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 2,
+                        "offset": 12
+                    },
+                    "pc": 18,
+                    "value": "[cast(ap + (-1), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 2,
+                        "offset": 13
+                    },
+                    "pc": 19,
+                    "value": "[cast(ap + (-1), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 3,
+                        "offset": 0
+                    },
+                    "pc": 24,
+                    "value": "[cast(fp + (-4), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 3,
+                        "offset": 0
+                    },
+                    "pc": 24,
+                    "value": "[cast(fp + (-3), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 3,
+                        "offset": 0
+                    },
+                    "pc": 24,
+                    "value": "[cast(fp + (-6), felt**)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 3,
+                        "offset": 0
+                    },
+                    "pc": 24,
+                    "value": "[cast(fp + (-5), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 3,
+                        "offset": 21
+                    },
+                    "pc": 29,
+                    "value": "[cast(ap + (-3), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 3,
+                        "offset": 21
+                    },
+                    "pc": 29,
+                    "value": "[cast(ap + (-2), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 3,
+                        "offset": 21
+                    },
+                    "pc": 29,
+                    "value": "[cast(ap + (-1), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 4,
+                        "offset": 0
+                    },
+                    "pc": 34,
+                    "value": "[cast(fp + (-5), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 4,
+                        "offset": 0
+                    },
+                    "pc": 34,
+                    "value": "[cast(fp + (-4), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 4,
+                        "offset": 0
+                    },
+                    "pc": 34,
+                    "value": "[cast(fp + (-3), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 4,
+                        "offset": 0
+                    },
+                    "pc": 34,
+                    "value": "[cast(fp + (-7), felt**)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 4,
+                        "offset": 0
+                    },
+                    "pc": 34,
+                    "value": "[cast(fp + (-6), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 4,
+                        "offset": 1
+                    },
+                    "pc": 35,
+                    "value": "[cast(ap + (-1), felt*)]"
+                }
+            ]
+        }
+    }
+}

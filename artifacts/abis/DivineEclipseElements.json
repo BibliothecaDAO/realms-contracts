@@ -1,0 +1,85 @@
+[
+    {
+        "inputs": [
+            {
+                "name": "address_of_controller",
+                "type": "felt"
+            }
+        ],
+        "name": "constructor",
+        "outputs": [],
+        "type": "constructor"
+    },
+    {
+        "inputs": [
+            {
+                "name": "l1_address",
+                "type": "felt"
+            },
+            {
+                "name": "game_idx",
+                "type": "felt"
+            }
+        ],
+        "name": "get_has_minted",
+        "outputs": [
+            {
+                "name": "result",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "l1_address",
+                "type": "felt"
+            },
+            {
+                "name": "game_idx",
+                "type": "felt"
+            },
+            {
+                "name": "minted_bool",
+                "type": "felt"
+            }
+        ],
+        "name": "set_has_minted",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "token_idx",
+                "type": "felt"
+            }
+        ],
+        "name": "get_total_minted",
+        "outputs": [
+            {
+                "name": "total",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "token_idx",
+                "type": "felt"
+            },
+            {
+                "name": "total",
+                "type": "felt"
+            }
+        ],
+        "name": "set_total_minted",
+        "outputs": [],
+        "type": "function"
+    }
+]

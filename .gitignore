@@ -1,11 +1,5 @@
-# StarkNet / Cairo
-artifacts/abis/*.json
-artifacts/*.json
-
-/.vscode
-
-# OSX images
 .DS_Store
+.temp/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -112,6 +106,7 @@ celerybeat.pid
 
 # Environments
 .env
+.env.nile
 .venv
 env/
 venv/
@@ -137,6 +132,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-node_modules/
-
-realms-cli/hot
+# vscode project settings
+.vscode/

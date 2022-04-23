@@ -14,4 +14,4 @@ async function main() {
     await deployContract(logicContractName, logicContractName, [moduleControllerAddress])
 }
 
-main()
+export default main()

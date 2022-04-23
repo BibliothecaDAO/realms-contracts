@@ -1,0 +1,52 @@
+[
+    {
+        "data": [
+            {
+                "name": "implementation",
+                "type": "felt"
+            }
+        ],
+        "keys": [],
+        "name": "Upgraded",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "name": "implementation_address",
+                "type": "felt"
+            }
+        ],
+        "name": "constructor",
+        "outputs": [],
+        "type": "constructor"
+    },
+    {
+        "inputs": [
+            {
+                "name": "selector",
+                "type": "felt"
+            },
+            {
+                "name": "calldata_size",
+                "type": "felt"
+            },
+            {
+                "name": "calldata",
+                "type": "felt*"
+            }
+        ],
+        "name": "__default__",
+        "outputs": [
+            {
+                "name": "retdata_size",
+                "type": "felt"
+            },
+            {
+                "name": "retdata",
+                "type": "felt*"
+            }
+        ],
+        "type": "function"
+    }
+]

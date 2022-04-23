@@ -1,0 +1,24 @@
+[
+    {
+        "inputs": [
+            {
+                "name": "seed",
+                "type": "felt"
+            }
+        ],
+        "name": "constructor",
+        "outputs": [],
+        "type": "constructor"
+    },
+    {
+        "inputs": [],
+        "name": "next",
+        "outputs": [
+            {
+                "name": "rnd",
+                "type": "felt"
+            }
+        ],
+        "type": "function"
+    }
+]
