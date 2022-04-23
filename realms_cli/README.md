@@ -10,6 +10,8 @@ cairo-lang==0.8.1
 cairo-nile==0.6.1
 ```
 
+<details><summary>Python Setup</summary>
+
 1. Upgrade pip: `/usr/local/bin/python -m pip install --upgrade pip`
 2. Remove *all* previous cairo nile packages: `$ pip uninstall cairo-nile` and check with `$ pip freeze` to make sure it's removed.
 3. Install nile 0.6.1: `pip install cairo-nile`
@@ -17,10 +19,9 @@ cairo-nile==0.6.1
 
 You now should have the realms_cli commands available when you run `$ nile`. 
 
-*NOTE: Minting Realms requires admin access currently. Contact the Admin to mint realms for.
+</details>
 
-
-### .env file
+<details><summary>Enviroment Setup</summary>
 
 Create an `.env.nile` in the realms_cli/ directory with the following entries:
 
@@ -29,19 +30,28 @@ export STARKNET_PRIVATE_KEY=<A PRIVATE KEY>  # admin private key
 export STARKNET_NETWORK=alpha-goerli  # different from nile_network
 
 ```
+⚠️ Never commit this file!
+</details>
 
-### Create a Starknet Wallet
+
+
+---
+
+## Actions
+
+
+<details><summary>Create Wallet via CLI</summary>
 1. Create private Key via XYZ
 2. Save in .env.nile as STARKNET_PRIVATE_KEY
 3. `$ source realms_cli/.env.nile`
 4. Run `$ nile setup STARKNET_PRIVATE_KEY --network goerli`
 5. Your address will be saved in the goerli.accounts.json
+</details>
 
+---
 
+<details><summary>Deployment of the full game (ADMIN ONLY)</summary>
 
-⚠️ Never commit this file!
-
-## Deployment of the game (ADMIN ONLY)
 
 The following scripts deploy all contracts necessairy to test and play realms on localhost/goerli.
 
@@ -69,9 +79,11 @@ If you want to check a tx hash, run either
 
 Or `$ starknet get_transaction_receipt --hash TXHASH` (only for non-localhost)
 
----
+</details>
 
-# New Players
+---
+<details><summary>Player Actions</summary>
+
 
 ### Deploy account
 
@@ -91,12 +103,16 @@ Add your logic to `realms_cli/realms_cli/main.py`
 Add you cli entro to `realms_cli/pyproject.toml`
 Reinstall the plugin cli `pip install realms_cli/`
 
+</details>
 
+---
 
-## TODO GAME:
+# TODO
+
+#### Game:
 - Add all building costs (should be script that pulls from json, converts to binary then sends)
 - Add all resources costs (should be script that pulls from json, converts to binary then sends)
 
-## TODO Admin:
+#### Admin:
 - Add module replace 
 - Add new module (deploy module, call arbiter to include)
