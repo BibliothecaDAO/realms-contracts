@@ -3,11 +3,13 @@
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.dict_access import DictAccess
+from starkware.cairo.common.uint256 import Uint256
 
 from contracts.settling_game.utils.game_structs import Cost
 
 from contracts.settling_game.utils.general import (
     unpack_data,
+    transform_costs_to_token_ids_values,
     load_resource_ids_and_values_from_costs,
     sum_values_by_key,
 )
@@ -21,20 +23,18 @@ func test_unpack_data{
 end
 
 @view
-func test_load_resource_ids_and_values_from_costs{
+func test_transform_costs_to_token_ids_values{
     syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*
 }(costs_len : felt, costs : Cost*) -> (
-    ids_len : felt, ids : felt*, values_len : felt, values : felt*
+    ids_len : felt, ids : Uint256*, values_len : felt, values : Uint256*
 ):
     alloc_locals
 
-    let (resource_ids) = alloc()
-    let (resource_values) = alloc()
-    let (resource_len) = load_resource_ids_and_values_from_costs(
-        resource_ids, resource_values, costs_len, costs, 0
-    )
+    let (ids : Uint256*) = alloc()
+    let (values : Uint256*) = alloc()
+    let (len : felt) = transform_costs_to_token_ids_values(costs_len, costs, ids, values)
 
-    return (resource_len, resource_ids, resource_len, resource_values)
+    return (len, ids, len, values)
 end
 
 @view

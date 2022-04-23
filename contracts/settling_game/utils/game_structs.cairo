@@ -126,7 +126,7 @@ namespace ResourceIds:
     const Wood = 1
     const Stone = 2
     const Coal = 3
-    const Cooper = 4
+    const Copper = 4
     const Obsidian = 5
     const Silver = 6
     const Ironwood = 7

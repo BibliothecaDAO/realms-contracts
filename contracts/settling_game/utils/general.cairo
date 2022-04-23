@@ -5,6 +5,7 @@
 
 %lang starknet
 
+from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.bitwise import bitwise_and
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.dict import dict_read, dict_write
@@ -67,7 +68,43 @@ func unpack_data{
     return (score=result)
 end
 
-# the function takes an array of Cost structs (which hold packed values of
+# function takes an array of Cost structs and restructures it into two arrays,
+# one holding the resource IDs of tokens and the other the amounts of these tokens
+# which can be directly passed into a IERC1155.burnBatch call
+# the return value of this function is the length of the token arrays, i.e. the
+# count of unique tokens
+# the token_ids and token_values argument have to be `alloc()`ed in the calling
+# scope:
+#
+# let (token_ids : Uint256*) = alloc()
+# let (token_values : Uint256*) = alloc()
+# let (token_len : felt) = transform_costs_to_token_ids_values(costs_len, costs, toekn_ids, token_values)
+func transform_costs_to_token_ids_values{
+    syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*
+}(costs_len : felt, costs : Cost*, token_ids : Uint256*, token_values : Uint256*) -> (
+    tokens : felt
+):
+    alloc_locals
+    # destructure the costs array to two arrays, one
+    # holding the IDs of resources and the other one values of resources
+    # that are required to build the Troops
+    let (resource_ids : felt*) = alloc()
+    let (resource_values : felt*) = alloc()
+    let (resource_len : felt) = load_resource_ids_and_values_from_costs(
+        resource_ids, resource_values, costs_len, costs, 0
+    )
+
+    # unify the resources and convert them to a list of Uint256, so that they can
+    # be used in a IERC1155 function call
+    let (d_len : felt, d : DictAccess*) = sum_values_by_key(
+        resource_len, resource_ids, resource_values
+    )
+    convert_cost_dict_to_tokens_and_values(d_len, d, token_ids, token_values)
+
+    return (d_len)
+end
+
+# function takes an array of Cost structs (which hold packed values of
 # resource IDs and respective amounts of these resources necessary to build
 # something) and unpacks them into two arrays of `ids` and `values` - i.e.
 # this func has a side-effect of populating the ids and values arrays;
@@ -111,8 +148,8 @@ func load_single_cost_ids_and_values{
     end
 
     let (bits_squared) = pow2(cost.bits)
-    let (token_id) = unpack_data(cost.packed_ids, cost.bits * idx, bits_squared-1)
-    let (value) = unpack_data(cost.packed_amounts, cost.bits * idx, bits_squared-1)
+    let (token_id) = unpack_data(cost.packed_ids, cost.bits * idx, bits_squared - 1)
+    let (value) = unpack_data(cost.packed_amounts, cost.bits * idx, bits_squared - 1)
     assert [ids + idx] = token_id
     assert [values + idx] = value
 

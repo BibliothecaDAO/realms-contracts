@@ -12,17 +12,11 @@ from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
-from contracts.settling_game.utils.game_structs import (
-    RealmData,
-    ModuleIds,
-    ExternalContractIds,
-)
+from contracts.settling_game.utils.game_structs import RealmData, ModuleIds, ExternalContractIds
 from contracts.settling_game.utils.general import (
     scale,
     unpack_data,
-    convert_cost_dict_to_tokens_and_values,
-    load_resource_ids_and_values_from_costs,
-    sum_values_by_key,
+    transform_costs_to_token_ids_values,
 )
 
 from contracts.settling_game.utils.constants import (
@@ -566,20 +560,14 @@ func upgrade_resource{
     let (level) = IS02_Resources.get_resource_level(resources_state_address, token_id, resource_id)
 
     # GET UPGRADE VALUE
-    let (upgrade_cost : Cost) = IS02_Resources.get_resource_upgrade_cost(resources_state_address, resource_id)
+    let (upgrade_cost : Cost) = IS02_Resources.get_resource_upgrade_cost(
+        resources_state_address, resource_id
+    )
     let (costs : Cost*) = alloc()
     assert [costs] = upgrade_cost
-    let (resource_ids : felt*) = alloc()
-    let (resource_values : felt*) = alloc()
-    let (resource_len : felt) = load_resource_ids_and_values_from_costs(
-        resource_ids, resource_values, 1, costs, 0
-    )
-    let (d_len : felt, d : DictAccess*) = sum_values_by_key(
-        resource_len, resource_ids, resource_values
-    )
     let (token_ids : Uint256*) = alloc()
     let (token_values : Uint256*) = alloc()
-    convert_cost_dict_to_tokens_and_values(d_len, d, token_ids, token_values)
+    let (token_len : felt) = transform_costs_to_token_ids_values(1, costs, token_ids, token_values)
 
     # BURN RESOURCES
     IERC1155.burnBatch(resource_address, caller, d_len, token_ids, d_len, token_values)

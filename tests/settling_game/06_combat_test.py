@@ -617,21 +617,23 @@ async def test_build_squad_from_troops(library_combat_tests):
 
 # even though this tests a func in utils, it is
 # kept here because of easy access to TROOP_COST
+# as a side-effect, testing this function also asserts the correctness
+# of load_resource_ids_and_values_from_cost, convert_cost_dict_to_tokens_and_values
+# and sum_values_by_key in general.cairo file, as it calls them all
 @pytest.mark.asyncio
-async def test_load_resource_ids_and_values_from_costs(utils_general_tests):
+async def test_transform_costs_to_token_ids_values(utils_general_tests):
     costs = [TROOP_COSTS[1], TROOP_COSTS[2]]
-    tx = await utils_general_tests.test_load_resource_ids_and_values_from_costs(costs).invoke()
+    tx = await utils_general_tests.test_transform_costs_to_token_ids_values(costs).invoke()
+
     expected_ids = [
         ResourceIds.Wood,
         ResourceIds.Copper,
-        ResourceIds.Silver,
-        ResourceIds.Wood,
         ResourceIds.Silver,
         ResourceIds.Ironwood,
         ResourceIds.ColdIron,
         ResourceIds.Gold,
     ]
-    expected_values = [100, 90, 80, 60, 50, 60, 50, 50]
+    expected_values = [160, 90, 130, 60, 50, 50]
 
-    assert tx.result.ids == expected_ids
-    assert tx.result.values == expected_values
+    assert tx.result.ids == [utils_general_tests.Uint256(low=v, high=0) for v in expected_ids]
+    assert tx.result.values == [utils_general_tests.Uint256(low=v, high=0) for v in expected_values]

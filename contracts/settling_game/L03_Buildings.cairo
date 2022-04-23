@@ -15,12 +15,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
-from contracts.settling_game.utils.general import (
-    unpack_data,
-    convert_cost_dict_to_tokens_and_values,
-    load_resource_ids_and_values_from_costs,
-    sum_values_by_key,
-)
+from contracts.settling_game.utils.general import unpack_data, transform_costs_to_token_ids_values
 from contracts.settling_game.utils.game_structs import (
     RealmBuildings,
     RealmData,
@@ -141,17 +136,9 @@ func build{
     )
     let (costs : Cost*) = alloc()
     assert [costs] = building_cost
-    let (resource_ids : felt*) = alloc()
-    let (resource_values : felt*) = alloc()
-    let (resource_len : felt) = load_resource_ids_and_values_from_costs(
-        resource_ids, resource_values, 1, costs, 0
-    )
-    let (d_len : felt, d : DictAccess*) = sum_values_by_key(
-        resource_len, resource_ids, resource_values
-    )
     let (token_ids : Uint256*) = alloc()
     let (token_values : Uint256*) = alloc()
-    convert_cost_dict_to_tokens_and_values(d_len, d, token_ids, token_values)
+    let (token_len : felt) = transform_costs_to_token_ids_values(1, costs, token_ids, token_values)
 
     # BURN RESOURCES
     IERC1155.burnBatch(resource_address, caller, d_len, token_ids, d_len, token_values)
