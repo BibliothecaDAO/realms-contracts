@@ -29,7 +29,7 @@ class Config:
     def __init__(self, nile_network : str):
         self.nile_network = "127.0.0.1" if nile_network=="localhost" else nile_network
 
-        self.ADMIN_ALIAS = "STARKNET_PRIVATE_KEY"
+        self.USER_ALIAS = "STARKNET_PRIVATE_KEY"
 
         self.INITIAL_LORDS_SUPPLY = 500000000 * (10 ** 18)
 
@@ -59,7 +59,7 @@ class Config:
             "Wood",
             "Stone",
             "Coal",
-            "Cooper",
+            "Copper",
             "Obsidian",
             "Silver",
             "Ironwood",
