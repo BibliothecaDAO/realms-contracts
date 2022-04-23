@@ -1,8 +1,9 @@
 def print_over_colums(array_of_strings, cols=3, width=30):
+    """Takes in an array of strings and prints the content over a
+     number of colums."""
     ans = ""
-    for i, s in enumerate(array_of_strings):
-        factor = i%cols
-        if factor == 0:
+    for i, text in enumerate(array_of_strings):
+        if i%cols == 0:
             ans += "\n"
-        ans += f"| {s.ljust(width)} "
+        ans += f"| {text.ljust(width)} "
     print(ans)

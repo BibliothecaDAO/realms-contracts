@@ -50,7 +50,7 @@ export STARKNET_NETWORK=alpha-goerli  # different from nile_network
 
 ---
 
-<details><summary>Deployment of the full game (ADMIN ONLY)</summary>
+<details><summary>Deployment of the full game (ADMIN ONLY) [localhost/goerli]</summary>
 
 
 The following scripts deploy all contracts necessairy to test and play realms on localhost/goerli.
@@ -79,29 +79,47 @@ If you want to check a tx hash, run either
 
 Or `$ starknet get_transaction_receipt --hash TXHASH` (only for non-localhost)
 
-</details>
-
----
-<details><summary>Player Actions</summary>
-
-
-### Deploy account
-
-`$ nile deploy account`
-
-### Minting
-
-`$ nile mint_realm --network localhost 1`
-
-### Settling
-
-`$ nile settle_realm --network localhost 1`
-
-## Adding a plugin
+### Adding a plugin
 
 Add your logic to `realms_cli/realms_cli/main.py`
 Add you cli entro to `realms_cli/pyproject.toml`
 Reinstall the plugin cli `pip install realms_cli/`
+
+</details>
+
+---
+<details><summary>Player Actions [goerli]</summary>
+
+
+### Deploy account
+
+`$ nile deploy STARKNET_PRIVATE_KEY`
+
+Note: you need to setup and source a `.env` file.
+
+### Settling
+
+`$ nile settle_realm 1`
+
+Note: an admin needs to give you a minter realm first.
+
+### Check lords [wip]
+
+`$ nile check_lords`
+
+### check realms [wip]
+
+`$ nile check_realms`
+
+### Check resources
+
+`$ nile check_resources`
+
+Of another user:
+
+`$ nile check_resources --address 0x000000`
+
+### Claim resources
 
 </details>
 

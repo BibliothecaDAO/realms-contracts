@@ -1,15 +1,19 @@
 # First, import click dependency
 import json
 import click
+
+from nile.core.account import Account
+
 from realms_cli.caller_invoker import wrapped_call, wrapped_send
 from realms_cli.config import Config
 from realms_cli.utils import print_over_colums
 
 from realms_cli.binary_converter import map_realm
 
+
 @click.command()
 @click.argument("realm_token_id", nargs=1)
-@click.option("--network", default="127.0.0.1")
+@click.option("--network", default="goerli")
 def mint_realm(realm_token_id, network):
     """
     Mint realm
@@ -18,7 +22,7 @@ def mint_realm(realm_token_id, network):
 
     wrapped_send(
         network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
+        signer_alias=config.USER_ALIAS,
         contract_alias="realms",
         function="mint",
         arguments=[
@@ -30,7 +34,7 @@ def mint_realm(realm_token_id, network):
 
 @click.command()
 @click.argument("realm_token_id", nargs=1)
-@click.option("--network", default="127.0.0.1")
+@click.option("--network", default="goerli")
 def settle_realm(realm_token_id, network):
     """
     Settle realm
@@ -39,7 +43,7 @@ def settle_realm(realm_token_id, network):
 
     wrapped_send(
         network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
+        signer_alias=config.USER_ALIAS,
         contract_alias="L01_Settling",
         function="settle",
         arguments=[
@@ -50,7 +54,7 @@ def settle_realm(realm_token_id, network):
 
 @click.command()
 @click.argument("realm_token_id", nargs=1)
-@click.option("--network", default="127.0.0.1")
+@click.option("--network", default="goerli")
 def set_realm_data(realm_token_id, network):
     """
     Set realm data
@@ -66,7 +70,7 @@ def set_realm_data(realm_token_id, network):
 
     wrapped_send(
         network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
+        signer_alias=config.USER_ALIAS,
         contract_alias="realms",
         function="set_realm_data",
         arguments=[
@@ -79,19 +83,18 @@ def set_realm_data(realm_token_id, network):
 
 
 @click.command()
-@click.argument("account", nargs=1)
-@click.option("--network", default="127.0.0.1")
-def check_resources(account, network):
+@click.option("--address", default="", help="Account address in hex format 0x...")
+@click.option("--network", default="goerli")
+def check_resources(address, network):
     """
-    Check claimable resources
+    Check claimable resources.
+    If no account is specified, it uses the env account.
     """
     config = Config(nile_network=network)
 
-    # if isinstance(account, str):
-    #     if "0x" in account:
-    #         account = int(account, 16)
-    #     else:
-    #         account = int(account)
+    if address == "":
+        nile_account = Account(config.USER_ALIAS, network)
+        address = nile_account.address
 
     n_resources = len(config.RESOURCES)
 
@@ -106,7 +109,7 @@ def check_resources(account, network):
         function="balanceOfBatch",
         arguments=[
             n_resources,
-            *[account for _ in range(n_resources)],
+            *[address for _ in range(n_resources)],
             n_resources,
             *uints,
         ],
@@ -122,7 +125,7 @@ def check_resources(account, network):
 
 @click.command()
 @click.argument("realm_token_id", nargs=1)
-@click.option("--network", default="127.0.0.1")
+@click.option("--network", default="goerli")
 def claim_resources(realm_token_id, network):
     """
     Claim available resources
@@ -131,7 +134,7 @@ def claim_resources(realm_token_id, network):
 
     wrapped_send(
         network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
+        signer_alias=config.USER_ALIAS,
         contract_alias="L02_Resources",
         function="claim_resources",
         arguments=[
@@ -141,7 +144,7 @@ def claim_resources(realm_token_id, network):
     )
 
 @click.command()
-@click.option("--network", default="127.0.0.1")
+@click.option("--network", default="goerli")
 def check_lords(network):
     """
     Check balance
@@ -150,14 +153,14 @@ def check_lords(network):
 
     wrapped_send(
         network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
+        signer_alias=config.USER_ALIAS,
         contract_alias="lords",
         function="balanceOf",
         arguments=[],
     )
 
 @click.command()
-@click.option("--network", default="127.0.0.1")
+@click.option("--network", default="goerli")
 def check_realms(network):
     """
     Check realms balance
@@ -166,7 +169,7 @@ def check_realms(network):
 
     wrapped_send(
         network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
+        signer_alias=config.USER_ALIAS,
         contract_alias="realms",
         function="balanceOf",
         arguments=[],
