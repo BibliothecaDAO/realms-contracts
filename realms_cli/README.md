@@ -9,20 +9,40 @@ python 3.7.12
 cairo-lang==0.8.1
 cairo-nile==0.6.1
 ```
+<<<<<<< HEAD
 First `$ pip install -r requirements.txt` to update.
 
 To install realms_cli, in the realms-contracts dir run: `$ pip install realms_cli/`
+=======
+
+1. Upgrade pip: `/usr/local/bin/python -m pip install --upgrade pip`
+2. Remove *all* previous cairo nile packages: `$ pip uninstall cairo-nile` and check with `$ pip freeze` to make sure it's removed.
+3. Install nile 0.6.1: `pip install cairo-nile`
+4. Install the realms_cli: `$ pip install realms_cli/` (ensure you are in the realms-contracts dir)
+>>>>>>> 5d731813ed4c3d277014e59bf576afdfe1362237
 
 You now should have the realms_cli commands available when you run `$ nile`. 
 
 *NOTE: Minting Realms requires admin access currently. Contact the Admin to mint realms for.*
 
+### Create a Starknet Wallet
+
+If you don't have a wallet yet, you'll need to [deploy one](https://www.cairo-lang.org/docs/hello_starknet/account_setup.html). You can do this via the following set of commands:
+```
+export STARKNET_NETWORK=alpha-goerli;
+export STARKNET_WALLET=starkware.starknet.wallets.open_zeppelin.OpenZeppelinAccount
+starknet deploy_account
+```
+ There are wallets (such as the [ArgentX](https://chrome.google.com/webstore/detail/argent-x/dlcobpjiigpikoobohmabehhmhfoodbb/related) chrome extension) but they do not allow you to export your private key.
+
+You'll need to fetch the private key which is stored in ~/.starknet_accounts/starknet_open_zeppelin_accounts.json
+
 ### .env file
 
-You should have a `.env.nile` file with the following entries:
+Create an `.env.nile` in the realms_cli/ directory with the following entries:
 ```
 export STARKNET_PRIVATE_KEY=<A PRIVATE KEY>  # admin private key
-expost STARKNET_NETWORK=alpha-goerli  # different from nile_network
+export STARKNET_NETWORK=alpha-goerli  # different from nile_network
 ```
 
 Then run `$ source realms_cli/.env.nile`
