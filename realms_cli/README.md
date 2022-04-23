@@ -7,15 +7,15 @@ This feature has been tested in
 python 3.7.12
 ---
 cairo-lang==0.8.1
-cairo-nile==0.6.0
+cairo-nile==0.6.1
 ```
-
-You can install the newest version of cairo-nile by pulling the [nile repo](https://github.com/OpenZeppelin/nile.git) locally and run: `$ sudo python <path>/nile/setup.py install`
-Note: you have make sure *all* previous cairo-nile packages are removed. Run `$ pip uninstall cairo-nile` and check with `$ pip freeze` if it's removed.
+First `$ pip install -r requirements.txt` to update.
 
 To install realms_cli, in the realms-contracts dir run: `$ pip install realms_cli/`
 
-You now should have the realms_cli commands available when you run `$ nile`.
+You now should have the realms_cli commands available when you run `$ nile`. 
+
+*NOTE: Minting Realms requires admin access currently. Contact the Admin to mint realms for.*
 
 ### .env file
 
@@ -26,6 +26,8 @@ expost STARKNET_NETWORK=alpha-goerli  # different from nile_network
 ```
 
 Then run `$ source realms_cli/.env.nile`
+
+*run this on every time opening enviroment*
 
 ⚠️ Never commit this file!
 
@@ -57,9 +59,13 @@ If you want to check a tx hash, run either
 
 Or `$ starknet get_transaction_receipt --hash TXHASH` (only for non-localhost)
 
+---
+
 # New Players
 
-`$ nile deploy account --alias player`
+### Deploy account
+
+`$ nile deploy account`
 
 ### Minting
 
