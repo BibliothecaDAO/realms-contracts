@@ -17,7 +17,7 @@ from contracts.settling_game.utils.game_structs import (
     Squad,
     PackedSquad,
     RealmCombatData,
-    TroopCost,
+    Cost,
 )
 from contracts.settling_game.library_combat import pack_squad, get_troop_internal
 
@@ -34,7 +34,7 @@ func realm_combat_data(realm_id : Uint256) -> (combat_data : RealmCombatData):
 end
 
 @storage_var
-func troop_cost(troop_id : felt) -> (cost : TroopCost):
+func troop_cost(troop_id : felt) -> (cost : Cost):
 end
 
 #
@@ -61,14 +61,14 @@ end
 @view
 func get_troop_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     troop_id : felt
-) -> (cost : TroopCost):
+) -> (cost : Cost):
     let (cost) = troop_cost.read(troop_id)
     return (cost)
 end
 
 @external
 func set_troop_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
-    troop_id : felt, cost : TroopCost
+    troop_id : felt, cost : Cost
 ):
     # TODO: auth + range checks on the cost struct
     troop_cost.write(troop_id, cost)
