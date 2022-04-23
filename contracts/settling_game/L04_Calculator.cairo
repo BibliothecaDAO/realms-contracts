@@ -125,9 +125,8 @@ func calculateFood{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
         buildings_logic_address, tokenId
     )
 
-    # food = 25 + (# of farms) + (2 * # of granaries) + (6 * # of fairgrounds) + (6 * # of royal reserves) + (6 * # of grand markets) - (# of city structures) - (# of troops)
-
     # TODO @milan add in # of troops
+    # TODO add rest of buildings
     let food = 25 + (RealmBuildings.Farms) + (RealmBuildings.Granary) + (RealmBuildings.Fairgrounds * 5) + (RealmBuildings.RoyalReserve * 5) - (20)
     return (food=food)
 end
