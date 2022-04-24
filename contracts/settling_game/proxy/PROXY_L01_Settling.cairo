@@ -9,7 +9,7 @@ from openzeppelin.upgrades.library import (
     Proxy_implementation_address,
     Proxy_set_implementation,
     Proxy_only_admin,
-    Proxy_set_admin
+    Proxy_set_admin,
 )
 
 #
@@ -17,11 +17,9 @@ from openzeppelin.upgrades.library import (
 #
 
 @constructor
-func constructor{
-        syscall_ptr: felt*,
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(implementation_address: felt):
+func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    implementation_address : felt
+):
     Proxy_set_implementation(implementation_address)
     return ()
 end
@@ -33,25 +31,16 @@ end
 @external
 @raw_input
 @raw_output
-func __default__{
-        syscall_ptr: felt*,
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(
-        selector: felt,
-        calldata_size: felt,
-        calldata: felt*
-    ) -> (
-        retdata_size: felt,
-        retdata: felt*
-    ):
+func __default__{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    selector : felt, calldata_size : felt, calldata : felt*
+) -> (retdata_size : felt, retdata : felt*):
     let (address) = Proxy_implementation_address.read()
 
-    let (retdata_size: felt, retdata: felt*) = delegate_call(
+    let (retdata_size : felt, retdata : felt*) = delegate_call(
         contract_address=address,
         function_selector=selector,
         calldata_size=calldata_size,
-        calldata=calldata
+        calldata=calldata,
     )
 
     return (retdata_size=retdata_size, retdata=retdata)

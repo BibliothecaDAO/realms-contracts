@@ -41,7 +41,7 @@ from openzeppelin.upgrades.library import (
     Proxy_set_implementation,
     Proxy_get_implementation,
     Proxy_set_admin,
-    Proxy_get_admin
+    Proxy_get_admin,
 )
 ##########
 # EVENTS #
@@ -69,7 +69,7 @@ end
 
 # @external
 # func initializer{
-#         syscall_ptr : felt*, 
+#         syscall_ptr : felt*,
 #         pedersen_ptr : HashBuiltin*,
 #         range_check_ptr
 #     }(proxy_admin: felt, address_of_controller : felt):
@@ -79,32 +79,26 @@ end
 # end
 
 @external
-func upgrade{
-        syscall_ptr: felt*, 
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(new_implementation: felt):
+func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    new_implementation : felt
+):
     Proxy_only_admin()
     Proxy_set_implementation(new_implementation)
     return ()
 end
 
 @view
-func get_implementation{
-        syscall_ptr : felt*, 
-        pedersen_ptr : HashBuiltin*,
-        range_check_ptr
-    }() -> (address: felt):
+func get_implementation{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+    address : felt
+):
     let (address) = Proxy_get_implementation()
     return (address)
 end
 
 @view
-func get_admin{
-        syscall_ptr : felt*, 
-        pedersen_ptr : HashBuiltin*,
-        range_check_ptr
-    }() -> (admin: felt):
+func get_admin{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+    admin : felt
+):
     let (admin) = Proxy_get_admin()
     return (admin)
 end
@@ -114,8 +108,8 @@ end
 #     address_of_controller : felt
 # ):
 #     # Store the address of the only fixed contract in the system.
-    
-#     return ()
+
+# return ()
 # end
 
 ############

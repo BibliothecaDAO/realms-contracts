@@ -163,7 +163,7 @@ func initial_liquidity{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     let (currency_address_) = currency_address.read()
 
     # Only valid for first liquidity add to LP
-    let (currency_reserves_: Uint256) = currency_reserves.read([token_ids])
+    let (currency_reserves_ : Uint256) = currency_reserves.read([token_ids])
     with_attr error_message("Only valid for initial liquidity add"):
         assert currency_reserves_ = Uint256(0, 0)
     end
@@ -264,9 +264,9 @@ func add_liquidity_loop{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     let (currency_address_) = currency_address.read()
 
     # Read current reserve levels
-    let (lp_reserves_: Uint256) = lp_reserves.read([token_ids])
-    let (token_reserves: Uint256) = IERC1155.balanceOf(token_address_, contract, [token_ids])
-    let (currency_reserves_: Uint256) = currency_reserves.read([token_ids])
+    let (lp_reserves_ : Uint256) = lp_reserves.read([token_ids])
+    let (token_reserves : Uint256) = IERC1155.balanceOf(token_address_, contract, [token_ids])
+    let (currency_reserves_ : Uint256) = currency_reserves.read([token_ids])
 
     # Ensure this method is only called for subsequent liquidity adds
     let (above_zero) = uint256_lt(Uint256(0, 0), currency_reserves_)
@@ -389,9 +389,9 @@ func remove_liquidity_loop{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     let (currency_address_) = currency_address.read()
 
     # Read current reserve levels
-    let (lp_reserves_: Uint256) = lp_reserves.read([token_ids])
-    let (currency_reserves_: Uint256) = currency_reserves.read([token_ids])
-    let (token_reserves: Uint256) = IERC1155.balanceOf(token_address_, contract, [token_ids])
+    let (lp_reserves_ : Uint256) = lp_reserves.read([token_ids])
+    let (currency_reserves_ : Uint256) = currency_reserves.read([token_ids])
+    let (token_reserves : Uint256) = IERC1155.balanceOf(token_address_, contract, [token_ids])
 
     let (new_supplies) = uint256_sub(lp_reserves_, [lp_amounts])
     # It should not be possible to go below zero as LP reflects supply
@@ -513,8 +513,8 @@ func buy_tokens_loop{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (royalty_fee_address_) = royalty_fee_address.read()
 
     # Read current reserve levels
-    let (currency_reserves_: Uint256) = currency_reserves.read([token_ids])
-    let (token_reserves: Uint256) = IERC1155.balanceOf(token_address_, contract, [token_ids])
+    let (currency_reserves_ : Uint256) = currency_reserves.read([token_ids])
+    let (token_reserves : Uint256) = IERC1155.balanceOf(token_address_, contract, [token_ids])
 
     # Calculate prices
     let (currency_amount_sans_royal) = get_buy_price(
@@ -543,7 +543,10 @@ func buy_tokens_loop{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # Recurse
     let (currency_total) = buy_tokens_loop(
-        token_ids_len - 1, token_ids + Uint256.SIZE, token_amounts_len - 1, token_amounts + Uint256.SIZE
+        token_ids_len - 1,
+        token_ids + Uint256.SIZE,
+        token_amounts_len - 1,
+        token_amounts + Uint256.SIZE,
     )
     let (currency_sold, add_overflow) = uint256_add(currency_total, currency_amount)
     with_attr error_message("Total currency overflow"):
@@ -614,8 +617,8 @@ func sell_tokens_loop{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     let (royalty_fee_address_) = royalty_fee_address.read()
 
     # Read current reserve levels
-    let (currency_reserves_: Uint256) = currency_reserves.read([token_ids])
-    let (token_reserves: Uint256) = IERC1155.balanceOf(token_address_, contract, [token_ids])
+    let (currency_reserves_ : Uint256) = currency_reserves.read([token_ids])
+    let (token_reserves : Uint256) = IERC1155.balanceOf(token_address_, contract, [token_ids])
 
     # Take the token amount
     IERC1155.safeTransferFrom(token_address_, caller, contract, [token_ids], [token_amounts])
@@ -643,7 +646,10 @@ func sell_tokens_loop{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
 
     # Recurse
     let (currency_total) = sell_tokens_loop(
-        token_ids_len - 1, token_ids + Uint256.SIZE, token_amounts_len - 1, token_amounts + Uint256.SIZE
+        token_ids_len - 1,
+        token_ids + Uint256.SIZE,
+        token_amounts_len - 1,
+        token_amounts + Uint256.SIZE,
     )
     let (currency_owed, add_overflow) = uint256_add(currency_total, currency_amount)
     with_attr error_message("Total currency overflow"):
@@ -804,9 +810,7 @@ end
 @external
 func onERC1155Received{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     operator : felt, _from : felt, id : Uint256, value : Uint256
-) -> (
-    selector : felt
-):
+) -> (selector : felt):
     return (ON_ERC1155_RECEIVED_SELECTOR)
 end
 
@@ -855,27 +859,28 @@ func supportsInterface(interface_id : felt) -> (is_supported : felt):
 end
 
 @view
-func uri{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}()
-        -> (uri : felt):
+func uri{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (uri : felt):
     return ERC1155_uri()
 end
 
 @view
 func balanceOf{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        account : felt, id : Uint256) -> (balance : Uint256):
-    return ERC1155_balanceOf(account,id)
+    account : felt, id : Uint256
+) -> (balance : Uint256):
+    return ERC1155_balanceOf(account, id)
 end
 
 @view
 func balanceOfBatch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        accounts_len : felt, accounts : felt*, ids_len : felt, ids : Uint256*)
-        -> (balances_len : felt, balances : Uint256*):
-    return ERC1155_balanceOfBatch(accounts_len,accounts,ids_len,ids)
+    accounts_len : felt, accounts : felt*, ids_len : felt, ids : Uint256*
+) -> (balances_len : felt, balances : Uint256*):
+    return ERC1155_balanceOfBatch(accounts_len, accounts, ids_len, ids)
 end
 
 @view
 func isApprovedForAll{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        account : felt, operator : felt) -> (is_approved : felt):
+    account : felt, operator : felt
+) -> (is_approved : felt):
     return ERC1155_isApprovedForAll(account, operator)
 end
 
