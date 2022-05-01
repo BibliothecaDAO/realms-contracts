@@ -1,15 +1,24 @@
 import { Provider, ec } from "starknet";
 import fs from "fs";
+import { config as dotenvConfig } from "dotenv";
+import { resolve } from "path";
+
 import { getPathBase } from "./helpers";
+dotenvConfig({ path: resolve(__dirname, "../.env") });
 
 const DEPLOYMENT_PATH_BASE = getPathBase();
 
 export default async function deployAccount() {
+
+  const accountName = process.env.ACCOUNT_NAME || `OwnerAccount`;
+
+  console.log("Deploying account", accountName)
+
   if (!fs.existsSync(DEPLOYMENT_PATH_BASE)) {
     await fs.promises.mkdir(DEPLOYMENT_PATH_BASE, { recursive: true })
   }
 
-  if (fs.existsSync(`${DEPLOYMENT_PATH_BASE}/OwnerAccount.json`)) {
+  if (fs.existsSync(`${DEPLOYMENT_PATH_BASE}/${accountName}.json`)) {
     console.log("Deployment already exists")
     return
   }
@@ -30,7 +39,7 @@ export default async function deployAccount() {
     ]
   })
 
-  fs.writeFileSync(`${DEPLOYMENT_PATH_BASE}/OwnerAccount.json`, JSON.stringify({
+  fs.writeFileSync(`${DEPLOYMENT_PATH_BASE}/${accountName}.json`, JSON.stringify({
     ...result,
     public_key: starkKey
   }))

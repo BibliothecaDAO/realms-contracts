@@ -7,7 +7,9 @@ import { resolve } from "path";
 
 dotenvConfig({ path: resolve(__dirname, "../../.env") });
 
-export const DEPLOYMENT_PATH_BASE = "./deployments/starknet";
+// Deployments for different applications can provide a separate base
+// with an environment variable.
+export const DEPLOYMENT_PATH_BASE = process.env.DEPLOY_BASE || "./deployments/starknet";
 
 const network: any = process.env.NETWORK || "georli-alpha"
 export const provider = new Provider(network === "local" ? { baseUrl: "http://127.0.0.1:5000/" } : { network })
@@ -172,7 +174,7 @@ export function getSigner() {
 export async function sendtx(data: any) {
   try {
     const res = await getSigner().execute(data, undefined, {
-            maxFee: '250000000000000000000' // Extra buffer
+            maxFee: 0
         })
 
     console.log(res)
