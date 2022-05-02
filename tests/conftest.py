@@ -460,11 +460,6 @@ async def game_factory(token_factory):
         resources,
     ) = token_factory
 
-    storage = await starknet.deploy(
-        source="contracts/settling_game/database/Storage.cairo",
-        constructor_calldata=[admin_account.contract_address],
-    )
-
     print('Game...')
     arbiter = await starknet.deploy(
         source="contracts/settling_game/Arbiter.cairo",
@@ -478,23 +473,24 @@ async def game_factory(token_factory):
             resources.contract_address,
             realms.contract_address,
             treasury_account.contract_address,
-            s_realms.contract_address,
-            storage.contract_address,
+            s_realms.contract_address
         ],
     )
+    
     await admin_key.send_transaction(
         account=admin_account,
         to=arbiter.contract_address,
         selector_name='set_address_of_controller',
         calldata=[controller.contract_address],
     )
+
     settling_logic = await starknet.deploy(
         source="contracts/settling_game/L01_Settling.cairo",
         constructor_calldata=[],
     )
 
     proxy_settling_logic = await starknet.deploy(
-        source="contracts/settling_game/proxy/PROXY_L01_Settling.cairo",
+        source="contracts/settling_game/proxy/PROXY_Logic.cairo",
         constructor_calldata=[settling_logic.contract_address],
     )
 
@@ -602,6 +598,5 @@ async def game_factory(token_factory):
         s_realms,
         buildings_logic,
         buildings_state,
-        calculator_logic,
-        storage,
+        calculator_logic
     )

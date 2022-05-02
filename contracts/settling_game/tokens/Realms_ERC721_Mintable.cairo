@@ -166,7 +166,7 @@ end
 func mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
     to : felt, tokenId : Uint256
 ):
-    Ownable_only_owner()
+    # Ownable_only_owner() TODO: Restrict on production
     ERC721_mint(to, tokenId)
     return ()
 end
@@ -190,10 +190,6 @@ end
 func realm_data(token_id : Uint256) -> (data : felt):
 end
 
-@storage_var
-func is_settled(token_id : Uint256) -> (data : felt):
-end
-
 @external
 func set_realm_data{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
     tokenId : Uint256, _realm_data : felt
@@ -201,14 +197,6 @@ func set_realm_data{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_chec
     # # ONLY OWNER TODO
     realm_data.write(tokenId, _realm_data)
     return ()
-end
-
-@view
-func get_is_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    token_id : Uint256
-) -> (is_settled : felt):
-    let (data) = is_settled.read(token_id)
-    return (data)
 end
 
 @external

@@ -10,5 +10,5 @@ def felt_to_str(felt: int) -> str:
     return b_felt.decode()
 
 
-def pack_values(values: list[int]) -> int:
+def pack_values(values: list) -> int:
     return int.from_bytes(struct.pack(f"<{len(values)}b", *values), "little")

@@ -8,15 +8,6 @@ def run(nre):
 
     logged_deploy(
         nre,
-        "Storage",
-        alias="storage",
-        arguments=[
-            strhex_as_strfelt(config.ADMIN_ADDRESS),
-        ],
-    )
-
-    logged_deploy(
-        nre,
         "Arbiter",
         alias="arbiter",
         arguments=[
@@ -38,8 +29,7 @@ def run(nre):
                 strhex_as_strfelt(config.RESOURCES_ADDRESS),
                 strhex_as_strfelt(config.REALMS_ADDRESS),
                 strhex_as_strfelt(config.ADMIN_ADDRESS),
-                strhex_as_strfelt(config.S_REALMS_ADDRESS),
-                strhex_as_strfelt(config.STORAGE_ADDRESS),
+                strhex_as_strfelt(config.S_REALMS_ADDRESS)
             ],
     )
 
@@ -71,7 +61,6 @@ def run(nre):
     #     params=[admin, controller],
     # )
 
-
     logged_deploy(
         nre,
         "L01_Settling",
@@ -80,7 +69,6 @@ def run(nre):
             strhex_as_strfelt(config.CONTROLLER_ADDRESS),
         ]
     )
-
 
     logged_deploy(
         nre,

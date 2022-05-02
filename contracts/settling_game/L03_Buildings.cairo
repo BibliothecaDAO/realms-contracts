@@ -19,11 +19,10 @@ from contracts.settling_game.utils.general import unpack_data, transform_costs_t
 from contracts.settling_game.utils.game_structs import (
     RealmBuildings,
     RealmData,
-    RealmBuildingCostIds,
-    RealmBuildingCostValues,
     RealmBuildingsIds,
     ModuleIds,
     ExternalContractIds,
+    Cost
 )
 
 from contracts.settling_game.utils.constants import (
@@ -53,7 +52,6 @@ from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
 from contracts.settling_game.interfaces.imodules import IModuleController, IS03_Buildings
-from contracts.settling_game.interfaces.IStorage import IStorage
 
 from contracts.settling_game.utils.library import (
     MODULE_controller_address,
@@ -141,7 +139,7 @@ func build{
     let (token_len : felt) = transform_costs_to_token_ids_values(1, costs, token_ids, token_values)
 
     # BURN RESOURCES
-    IERC1155.burnBatch(resource_address, caller, d_len, token_ids, d_len, token_values)
+    IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
 
     # EMIT
     BuildingBuilt.emit(token_id, building_id)

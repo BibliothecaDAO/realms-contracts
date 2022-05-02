@@ -71,8 +71,7 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     _resources_address : felt,
     _realms_address : felt,
     _treasury_address : felt,
-    _s_realms_address : felt,
-    _storage_address : felt,
+    _s_realms_address : felt
 ):
     arbiter.write(arbiter_address)
 
@@ -112,7 +111,6 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     external_contract_table.write(ExternalContractIds.S_Realms, _s_realms_address)
     external_contract_table.write(ExternalContractIds.Resources, _resources_address)
     external_contract_table.write(ExternalContractIds.Treasury, _treasury_address)
-    external_contract_table.write(ExternalContractIds.Storage, _storage_address)
 
     return ()
 end

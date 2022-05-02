@@ -12,7 +12,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
-from contracts.settling_game.utils.game_structs import RealmData, ModuleIds, ExternalContractIds
+from contracts.settling_game.utils.game_structs import RealmData, ModuleIds, ExternalContractIds, Cost
 from contracts.settling_game.utils.general import (
     scale,
     unpack_data,
@@ -570,7 +570,7 @@ func upgrade_resource{
     let (token_len : felt) = transform_costs_to_token_ids_values(1, costs, token_ids, token_values)
 
     # BURN RESOURCES
-    IERC1155.burnBatch(resource_address, caller, d_len, token_ids, d_len, token_values)
+    IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
 
     # INCREASE LEVEL
     IS02_Resources.set_resource_level(resources_state_address, token_id, resource_id, level + 1)

@@ -17,6 +17,10 @@
         },
         "hints": {},
         "identifiers": {
+            "__main__.Cost": {
+                "destination": "contracts.settling_game.utils.game_structs.Cost",
+                "type": "alias"
+            },
             "__main__.IL02_Resources": {
                 "type": "namespace"
             },
@@ -372,9 +376,9 @@
                 "type": "const",
                 "value": 1149107753325219705879250662326081727472252721501772240122618592681448223907
             },
-            "__main__.IS02_Resources.GET_RESOURCE_UPGRADE_VALUE_SELECTOR": {
+            "__main__.IS02_Resources.GET_RESOURCE_UPGRADE_COST_SELECTOR": {
                 "type": "const",
-                "value": 1807765071834059597079511818730444251634739647208611401522235472181643983270
+                "value": 916236982850433202338707750245430013172545047392936926571300331696790009240
             },
             "__main__.IS02_Resources.ImplicitArgs": {
                 "full_name": "__main__.IS02_Resources.ImplicitArgs",
@@ -421,13 +425,9 @@
                 "size": 0,
                 "type": "struct"
             },
-            "__main__.IS03_Buildings.GET_BUILDING_COST_IDS_SELECTOR": {
+            "__main__.IS03_Buildings.GET_BUILDING_COST_SELECTOR": {
                 "type": "const",
-                "value": 1615780598957492009014438733764174661257805816342448139534316408293133606146
-            },
-            "__main__.IS03_Buildings.GET_BUILDING_COST_VALUES_SELECTOR": {
-                "type": "const",
-                "value": 1510828114546911817818601985956895533596207452304550531562238158348433077972
+                "value": 384233913515646994454365747905211577267277977626826533709748325189405264002
             },
             "__main__.IS03_Buildings.GET_REALM_BUILDINGS_SELECTOR": {
                 "type": "const",
@@ -627,13 +627,32 @@
                 "destination": "contracts.settling_game.utils.game_structs.Squad",
                 "type": "alias"
             },
-            "__main__.TroopCost": {
-                "destination": "contracts.settling_game.utils.game_structs.TroopCost",
-                "type": "alias"
-            },
             "__main__.Uint256": {
                 "destination": "starkware.cairo.common.uint256.Uint256",
                 "type": "alias"
+            },
+            "contracts.settling_game.utils.game_structs.Cost": {
+                "full_name": "contracts.settling_game.utils.game_structs.Cost",
+                "members": {
+                    "bits": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    },
+                    "packed_amounts": {
+                        "cairo_type": "felt",
+                        "offset": 3
+                    },
+                    "packed_ids": {
+                        "cairo_type": "felt",
+                        "offset": 2
+                    },
+                    "resource_count": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 4,
+                "type": "struct"
             },
             "contracts.settling_game.utils.game_structs.ExternalContractIds": {
                 "type": "namespace"
@@ -786,100 +805,6 @@
                     }
                 },
                 "size": 7,
-                "type": "struct"
-            },
-            "contracts.settling_game.utils.game_structs.RealmBuildingCostIds": {
-                "full_name": "contracts.settling_game.utils.game_structs.RealmBuildingCostIds",
-                "members": {
-                    "resource_1": {
-                        "cairo_type": "felt",
-                        "offset": 0
-                    },
-                    "resource_10": {
-                        "cairo_type": "felt",
-                        "offset": 9
-                    },
-                    "resource_2": {
-                        "cairo_type": "felt",
-                        "offset": 1
-                    },
-                    "resource_3": {
-                        "cairo_type": "felt",
-                        "offset": 2
-                    },
-                    "resource_4": {
-                        "cairo_type": "felt",
-                        "offset": 3
-                    },
-                    "resource_5": {
-                        "cairo_type": "felt",
-                        "offset": 4
-                    },
-                    "resource_6": {
-                        "cairo_type": "felt",
-                        "offset": 5
-                    },
-                    "resource_7": {
-                        "cairo_type": "felt",
-                        "offset": 6
-                    },
-                    "resource_8": {
-                        "cairo_type": "felt",
-                        "offset": 7
-                    },
-                    "resource_9": {
-                        "cairo_type": "felt",
-                        "offset": 8
-                    }
-                },
-                "size": 10,
-                "type": "struct"
-            },
-            "contracts.settling_game.utils.game_structs.RealmBuildingCostValues": {
-                "full_name": "contracts.settling_game.utils.game_structs.RealmBuildingCostValues",
-                "members": {
-                    "resource_10_values": {
-                        "cairo_type": "felt",
-                        "offset": 9
-                    },
-                    "resource_1_values": {
-                        "cairo_type": "felt",
-                        "offset": 0
-                    },
-                    "resource_2_values": {
-                        "cairo_type": "felt",
-                        "offset": 1
-                    },
-                    "resource_3_values": {
-                        "cairo_type": "felt",
-                        "offset": 2
-                    },
-                    "resource_4_values": {
-                        "cairo_type": "felt",
-                        "offset": 3
-                    },
-                    "resource_5_values": {
-                        "cairo_type": "felt",
-                        "offset": 4
-                    },
-                    "resource_6_values": {
-                        "cairo_type": "felt",
-                        "offset": 5
-                    },
-                    "resource_7_values": {
-                        "cairo_type": "felt",
-                        "offset": 6
-                    },
-                    "resource_8_values": {
-                        "cairo_type": "felt",
-                        "offset": 7
-                    },
-                    "resource_9_values": {
-                        "cairo_type": "felt",
-                        "offset": 8
-                    }
-                },
-                "size": 10,
                 "type": "struct"
             },
             "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds": {
@@ -1286,7 +1211,7 @@
                 "type": "const",
                 "value": 8
             },
-            "contracts.settling_game.utils.game_structs.ResourceIds.Cooper": {
+            "contracts.settling_game.utils.game_structs.ResourceIds.Copper": {
                 "type": "const",
                 "value": 4
             },
@@ -1377,53 +1302,6 @@
             "contracts.settling_game.utils.game_structs.ResourceIds.Wood": {
                 "type": "const",
                 "value": 1
-            },
-            "contracts.settling_game.utils.game_structs.ResourceUpgradeValues": {
-                "full_name": "contracts.settling_game.utils.game_structs.ResourceUpgradeValues",
-                "members": {
-                    "resource_1": {
-                        "cairo_type": "felt",
-                        "offset": 0
-                    },
-                    "resource_1_values": {
-                        "cairo_type": "felt",
-                        "offset": 5
-                    },
-                    "resource_2": {
-                        "cairo_type": "felt",
-                        "offset": 1
-                    },
-                    "resource_2_values": {
-                        "cairo_type": "felt",
-                        "offset": 6
-                    },
-                    "resource_3": {
-                        "cairo_type": "felt",
-                        "offset": 2
-                    },
-                    "resource_3_values": {
-                        "cairo_type": "felt",
-                        "offset": 7
-                    },
-                    "resource_4": {
-                        "cairo_type": "felt",
-                        "offset": 3
-                    },
-                    "resource_4_values": {
-                        "cairo_type": "felt",
-                        "offset": 8
-                    },
-                    "resource_5": {
-                        "cairo_type": "felt",
-                        "offset": 4
-                    },
-                    "resource_5_values": {
-                        "cairo_type": "felt",
-                        "offset": 9
-                    }
-                },
-                "size": 10,
-                "type": "struct"
             },
             "contracts.settling_game.utils.game_structs.Squad": {
                 "full_name": "contracts.settling_game.utils.game_structs.Squad",
@@ -1633,25 +1511,6 @@
                     }
                 },
                 "size": 7,
-                "type": "struct"
-            },
-            "contracts.settling_game.utils.game_structs.TroopCost": {
-                "full_name": "contracts.settling_game.utils.game_structs.TroopCost",
-                "members": {
-                    "resource_amounts": {
-                        "cairo_type": "felt",
-                        "offset": 2
-                    },
-                    "resource_count": {
-                        "cairo_type": "felt",
-                        "offset": 0
-                    },
-                    "token_ids": {
-                        "cairo_type": "felt",
-                        "offset": 1
-                    }
-                },
-                "size": 3,
                 "type": "struct"
             },
             "contracts.settling_game.utils.game_structs.TroopId": {

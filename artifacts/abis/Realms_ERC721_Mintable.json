@@ -438,23 +438,6 @@
                 "type": "Uint256"
             }
         ],
-        "name": "get_is_settled",
-        "outputs": [
-            {
-                "name": "is_settled",
-                "type": "felt"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "name": "token_id",
-                "type": "Uint256"
-            }
-        ],
         "name": "get_realm_info",
         "outputs": [
             {
