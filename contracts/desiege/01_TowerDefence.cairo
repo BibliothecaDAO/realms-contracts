@@ -1,5 +1,4 @@
 %lang starknet
-%builtins pedersen range_check
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import (
@@ -11,7 +10,7 @@ from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.math_cmp import is_le_felt, is_le
 from starkware.cairo.common.math import unsigned_div_rem, assert_lt
 
-from contracts.Ownable_base import (
+from openzeppelin.access.ownable import (
     Ownable_initializer,
     Ownable_only_owner,
     Ownable_transfer_ownership,
@@ -19,7 +18,7 @@ from contracts.Ownable_base import (
 )
 
 from contracts.desiege.utils.interfaces import IModuleController, I02_TowerStorage
-from contracts.token.ERC1155.interfaces.IERC1155 import IERC1155
+from contracts.desiege.tokens.ERC1155.IERC1155_Mintable_Ownable import IERC1155
 from contracts.game_utils.game_structs import ShieldGameRole
 
 # ############# Storage ################

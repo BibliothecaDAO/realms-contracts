@@ -10,7 +10,6 @@
 # - Checks movement logic
 
 %lang starknet
-%builtins pedersen range_check
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math_cmp import is_nn_le, is_in_range
