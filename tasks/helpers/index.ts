@@ -1,5 +1,4 @@
-import { Provider, ec, Account, Contract, hash } from 'starknet'
-import { transformCallsToMulticallArrays } from 'starknet/dist/utils/transaction.js'
+import { Provider, ec, Account, encode } from 'starknet'
 import fs from 'fs'
 import { BigNumberish, toBN } from 'starknet/dist/utils/number'
 import { config as dotenvConfig } from "dotenv";
@@ -46,14 +45,15 @@ type AccountShape = {
 
 export function getOwnerAccount(): AccountShape {
   const path_base = getPathBase()
+  const accountName = process.env.ACCOUNT_NAME || `OwnerAccount`;
 
   try {
-    const file = fs.readFileSync(`${path_base}/OwnerAccount.json`)
+    const file = fs.readFileSync(`${path_base}/${accountName}.json`)
 
     const parsed = JSON.parse(file.toString())
     return parsed;
   } catch (error) {
-    console.log(`No OWNER_ACCOUNT env variable nor "${path_base}/OwnerAccount.json" provided.`)
+    console.log(`No STARKNET_ACCOUNT_ADDRESS env variable nor "${path_base}/${accountName}.json" provided.`)
     throw error
   }
 }
@@ -146,11 +146,7 @@ export function getNetwork() {
 
 export function getSigner() {
   try {
-    // const file = fs.readFileSync(`${path_base}/OwnerAccount.json`)
-
-    // const parsed = JSON.parse(file.toString())
-
-    const accountAddress = process.env.STARKNET_ACCOUNT_ADDRESS;
+    const accountAddress = getOwnerAccountInt();
     const privKey = process.env.STARKNET_PRIVATE_KEY;
 
     if (accountAddress == undefined || accountAddress == "") {
@@ -160,8 +156,8 @@ export function getSigner() {
     if (privKey == undefined || privKey == "") {
       throw new Error("Attempted to call getSigner() with STARKNET_PRIVATE_KEY being undefined. Set env value in .env or execution environment.")
     }
-
-    const kp = ec.getKeyPair(privKey.indexOf("0x") !== 0 ? `0x${privKey}` : privKey)
+ 
+    const kp = ec.getKeyPair( encode.addHexPrefix(privKey))
     const s = new Account(provider, accountAddress, kp)
     console.log(s)
     return s;
