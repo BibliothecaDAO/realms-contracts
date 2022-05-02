@@ -170,14 +170,14 @@ func build_squad_from_troops_in_realm{
     let (token_ids : Uint256*) = alloc()
     let (token_values : Uint256*) = alloc()
     let (token_len : felt) = transform_costs_to_token_ids_values(
-        troop_ids_len, troop_costs, toekn_ids, token_values
+        troop_ids_len, troop_costs, token_ids, token_values
     )
 
     # pay for the squad
     let (resource_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Resources
     )
-    IERC1155.burnBatch(resource_address, caller, d_len, token_ids, d_len, token_values)
+    IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
 
     # assemble the squad, store it in a Realm
     let (squad) = build_squad_from_troops(troop_ids_len, troop_ids)

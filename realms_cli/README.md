@@ -41,9 +41,10 @@ export STARKNET_NETWORK=alpha-goerli  # different from nile_network
 
 
 <details><summary>Create Wallet via CLI</summary>
+
 1. Create private Key via XYZ
 2. Save in .env.nile as STARKNET_PRIVATE_KEY
-3. `$ source realms_cli/.env.nile`
+3. Run `$ source realms_cli/.env.nile`
 4. Run `$ nile setup STARKNET_PRIVATE_KEY --network goerli`
 5. Your address will be saved in the goerli.accounts.json
 </details>
@@ -101,7 +102,6 @@ Note: you need to setup and source a `.env` file.
 
 `$ nile settle_realm 1`
 
-Note: an admin needs to give you a minter realm first.
 
 ### Check lords [wip]
 
