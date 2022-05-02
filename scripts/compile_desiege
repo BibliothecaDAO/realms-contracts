@@ -1,0 +1,5 @@
+#!/bin/bash
+set -eu
+
+nile compile contracts/desiege/*.cairo
+nile compile contracts/desiege/tokens/ERC1155/*.cairo
