@@ -43,7 +43,7 @@ export STARKNET_NETWORK=alpha-goerli  # different from nile_network
 NOTE: This is the temporary solution until native ArgentX integration
 
 1. Create private Key via `$ nile create_pk`
-2. Save in .env.nile as STARKNET_PRIVATE_KEY
+2. Save in .env.nile as STARKNET_PRIVATE_KEY in the realms_cli directory 
 3. Run `$ source realms_cli/.env.nile`
 4. Run `$ nile setup STARKNET_PRIVATE_KEY --network goerli`
 5. Your address will be saved in the goerli.accounts.json
