@@ -1,0 +1,98 @@
+[
+    {
+        "inputs": [
+            {
+                "name": "arbiter_address",
+                "type": "felt"
+            }
+        ],
+        "name": "constructor",
+        "outputs": [],
+        "type": "constructor"
+    },
+    {
+        "inputs": [
+            {
+                "name": "new_arbiter",
+                "type": "felt"
+            }
+        ],
+        "name": "appoint_new_arbiter",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "module_id",
+                "type": "felt"
+            },
+            {
+                "name": "module_address",
+                "type": "felt"
+            }
+        ],
+        "name": "set_address_for_module_id",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "module_01_addr",
+                "type": "felt"
+            },
+            {
+                "name": "module_02_addr",
+                "type": "felt"
+            }
+        ],
+        "name": "set_initial_module_addresses",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "module_id_doing_writing",
+                "type": "felt"
+            },
+            {
+                "name": "module_id_being_written_to",
+                "type": "felt"
+            }
+        ],
+        "name": "set_write_access",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "module_id",
+                "type": "felt"
+            }
+        ],
+        "name": "get_module_address",
+        "outputs": [
+            {
+                "name": "address",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "address_attempting_to_write",
+                "type": "felt"
+            }
+        ],
+        "name": "has_write_access",
+        "outputs": [],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]

@@ -2,9 +2,17 @@
 
 Create a contract account, if you haven't already, which can programmatically execute the following scripts.
 
-Run `npx ts-node ./tasks/deploy_account.ts` and view the resulting file. The private key is output in the file and also logged. Save that key and set an environment variable in the `.env` local file.
+Run `npx ts-node ./tasks/deploy_account.ts` and view the resulting file and logs. The private key is logged one time. Save that key and set an environment variable in the `.env` local file.
 
-`OWNER_PRIVATE_KEY=0x123345....`
+Your .env file should look like:
+
+```
+DEPLOY_BASE=./minigame-deployments/starknet
+ACCOUNT_NAME=OwnerAccountDesiege
+STARKNET_ACCOUNT_ADDRESS=deployed_address
+STARKNET_PRIVATE_KEY=<private_key>
+```
+replacing `deployed_address` and `private_key` with the respective vallues after running
 
 # How to start game
 
