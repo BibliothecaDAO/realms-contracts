@@ -5,13 +5,6 @@ def run(nre):
 
     config = Config(nre.network)
 
-    # Settling Init TODO: PROXY CALLS
-    # nre.invoke(
-    #     proxy_settling_logic,
-    #     'initializer',
-    #     params=[admin, controller],
-    # )
-
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
@@ -61,5 +54,27 @@ def run(nre):
         arguments=[
             strhex_as_strfelt(config.L01_SETTLING_ADDRESS),
             "1",
+        ]
+    )
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="lords",
+        function="approve",
+        arguments=[
+            strhex_as_strfelt(config.L01_SETTLING_ADDRESS),
+            str(config.INITIAL_LORDS_SUPPLY), 0
+        ]
+    )
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="lords",
+        function="approve",
+        arguments=[
+            strhex_as_strfelt(config.L02_RESOURCES_ADDRESS),
+            str(config.INITIAL_LORDS_SUPPLY), 0
         ]
     )

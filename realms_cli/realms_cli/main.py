@@ -3,12 +3,25 @@ import json
 import click
 
 from nile.core.account import Account
+from ecdsa import SigningKey, SECP256k1
 
 from realms_cli.caller_invoker import wrapped_call, wrapped_send
 from realms_cli.config import Config
 from realms_cli.utils import print_over_colums
 
 from realms_cli.binary_converter import map_realm
+
+
+@click.command()
+def create_pk():
+    """
+    Create private key
+    """
+    sk = SigningKey.generate(curve=SECP256k1)
+    sk_string = sk.to_string()
+    sk_hex = sk_string.hex()
+    print(int(sk_hex, 16))
+
 
 
 @click.command()
@@ -29,6 +42,25 @@ def mint_realm(realm_token_id, network):
             int(config.ADMIN_ADDRESS, 16),  # felt
             realm_token_id,                 # uint 1
             0,                              # uint 2
+        ],
+    )
+
+@click.command()
+@click.option("--network", default="goerli")
+def approve_realm(network):
+    """
+    Approve realm transfer
+    """
+    config = Config(nile_network=network)
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias=config.REALMS_ADDRESS,
+        function="setApprovalForAll",
+        arguments=[
+            int(config.L01_SETTLING_ADDRESS, 16),  # uint1
+            1,               # true
         ],
     )
 

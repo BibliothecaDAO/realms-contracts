@@ -25,6 +25,11 @@ from contracts.settling_game.library_combat import pack_squad, get_troop_interna
 const ATTACKING_SQUAD_SLOT = 1
 const DEFENDING_SQUAD_SLOT = 2
 
+from contracts.settling_game.utils.library import (
+    MODULE_controller_address,
+    MODULE_only_approved,
+    MODULE_initializer,
+)
 #
 # storage
 #
@@ -35,6 +40,13 @@ end
 
 @storage_var
 func troop_cost(troop_id : felt) -> (cost : Cost):
+end
+
+@constructor
+func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    controller_addr : felt):
+    MODULE_initializer(controller_addr)
+    return ()
 end
 
 #

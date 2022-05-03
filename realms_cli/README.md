@@ -26,14 +26,12 @@ You now should have the realms_cli commands available when you run `$ nile`.
 Create an `.env.nile` in the realms_cli/ directory with the following entries:
 
 ```
-export STARKNET_PRIVATE_KEY=<A PRIVATE KEY>  # admin private key
+export STARKNET_PRIVATE_KEY=<A PRIVATE KEY>  # admin private key - see below to generate
 export STARKNET_NETWORK=alpha-goerli  # different from nile_network
 
 ```
 ⚠️ Never commit this file!
 </details>
-
-
 
 ---
 
@@ -42,7 +40,9 @@ export STARKNET_NETWORK=alpha-goerli  # different from nile_network
 
 <details><summary>Create Wallet via CLI</summary>
 
-1. Create private Key via XYZ
+NOTE: This is the temporary solution until native ArgentX integration
+
+1. Create private Key via `$ nile create_pk`
 2. Save in .env.nile as STARKNET_PRIVATE_KEY
 3. Run `$ source realms_cli/.env.nile`
 4. Run `$ nile setup STARKNET_PRIVATE_KEY --network goerli`
@@ -72,6 +72,14 @@ The following scripts deploy all contracts necessairy to test and play realms on
 
 `$ nile run --network localhost realms_cli/4_init_game.py`
 
+### 5. Set Costs
+
+`$ nile run --network localhost realms_cli/5_set_costs.py`
+
+### 6. Troops (or any other new module that needs adding updating)
+
+`$ nile run --network localhost realms_cli/6_deploy_troops.py`
+
 ### Tips
 
 If you want to check a tx hash, run either
@@ -91,25 +99,45 @@ Reinstall the plugin cli `pip install realms_cli/`
 ---
 <details><summary>Player Actions [goerli]</summary>
 
+---
 
-### Deploy account
+### Mint Realm
 
-`$ nile deploy STARKNET_PRIVATE_KEY`
+`$ nile mint_realm 1`
 
-Note: you need to setup and source a `.env` file.
+If your tx fails, someone has already minted this realm
+
+---
+
+### Set Metadata (use as temporary until production)
+
+`$ nile set_realm_data 1`
+
+---
+
+### Approve your Realms for game usage
+
+`$ nile approve_realm`
+
+---
 
 ### Settling
 
 `$ nile settle_realm 1`
 
+---
 
 ### Check lords [wip]
 
 `$ nile check_lords`
 
+---
+
 ### check realms [wip]
 
 `$ nile check_realms`
+
+---
 
 ### Check resources
 
@@ -119,13 +147,19 @@ Of another user:
 
 `$ nile check_resources --address 0x000000`
 
+---
+
 ### Claim resources
+
+Claims specific realms resources
+
+`$ nile claim_resources 1`
 
 </details>
 
 ---
 
-# TODO
+## TODO
 
 #### Game:
 - Add all building costs (should be script that pulls from json, converts to binary then sends)

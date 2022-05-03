@@ -29,7 +29,9 @@ class Config:
     def __init__(self, nile_network : str):
         self.nile_network = "127.0.0.1" if nile_network=="localhost" else nile_network
 
-        self.ADMIN_ALIAS = "STARKNET_PRIVATE_KEY"
+        self.USER_ALIAS = "STARKNET_PRIVATE_KEY"
+
+        self.ADMIN_ALIAS = "STARKNET_ADMIN_PRIVATE_KEY"
 
         self.INITIAL_LORDS_SUPPLY = 500000000 * (10 ** 18)
 
@@ -43,8 +45,6 @@ class Config:
         self.RESOURCES_ADDRESS, _ = safe_load_deployment("resources", self.nile_network)
         self.S_REALMS_ADDRESS, _ = safe_load_deployment("s_realms", self.nile_network)
 
-        self.STORAGE_ADDRESS, _ = safe_load_deployment("storage", self.nile_network)
-
         self.L01_SETTLING_ADDRESS, _ = safe_load_deployment("L01_Settling", self.nile_network)
         self.S01_SETTLING_ADDRESS, _ = safe_load_deployment("S01_Settling", self.nile_network)
         self.L02_RESOURCES_ADDRESS, _ = safe_load_deployment("L02_Resources", self.nile_network)
@@ -54,6 +54,9 @@ class Config:
         self.L04_CALCULATOR_ADDRESS, _ = safe_load_deployment("L04_Calculator", self.nile_network)
         self.L05_WONDERS_ADDRESS, _ = safe_load_deployment("L05_Wonders", self.nile_network)
         self.S05_WONDERS_ADDRESS, _ = safe_load_deployment("S05_Wonders", self.nile_network)
+        self.L06_COMBAT_ADDRESS, _ = safe_load_deployment("L06_Combat", self.nile_network)
+        self.S06_COMBAT_ADDRESS, _ = safe_load_deployment("S06_Combat", self.nile_network)
+        self.XOROSHIRO_ADDRESS, _ = safe_load_deployment("xoroshiro128_starstar", self.nile_network)
 
         self.RESOURCES = [
             "Wood",

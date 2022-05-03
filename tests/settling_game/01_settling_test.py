@@ -67,11 +67,11 @@ async def test_mint_realm(game_factory):
 
     for resource_id, resource_cost in RESOURCE_UPGRADE_COST.items():
         await signer.send_transaction(
-            account=admin_account, to=resources_state.contract_address, selector_name='set_resource_upgrade_cost', calldata=[resource_id, resource_cost.resource_count, resource_cost.bits, resource_cost.packed_ids, resource_cost.packed_amounts]
+            account=admin_account, to=resources_state.contract_address, selector_name='set_resource_upgrade_cost', calldata=[resource_id.value, resource_cost.resource_count, resource_cost.bits, resource_cost.packed_ids, resource_cost.packed_amounts]
         )
     for troop_id, troop_cost in BUILDING_COSTS.items():
         await signer.send_transaction(
-            account=admin_account, to=buildings_state.contract_address, selector_name='set_building_cost', calldata=[troop_id, troop_cost.resource_count, troop_cost.bits, troop_cost.packed_ids, troop_cost.packed_amounts]
+            account=admin_account, to=buildings_state.contract_address, selector_name='set_building_cost', calldata=[troop_id.value, troop_cost.resource_count, troop_cost.bits, troop_cost.packed_ids, troop_cost.packed_amounts]
         )
 
     # REALM METADATA

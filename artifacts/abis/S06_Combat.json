@@ -284,6 +284,17 @@
     {
         "inputs": [
             {
+                "name": "controller_addr",
+                "type": "felt"
+            }
+        ],
+        "name": "constructor",
+        "outputs": [],
+        "type": "constructor"
+    },
+    {
+        "inputs": [
+            {
                 "name": "realm_id",
                 "type": "Uint256"
             }
