@@ -60,7 +60,7 @@ def approve_realm(network):
         function="setApprovalForAll",
         arguments=[
             int(config.L01_SETTLING_ADDRESS, 16),  # uint1
-            1,               # true
+            "1",               # true
         ],
     )
 
