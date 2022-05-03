@@ -1,0 +1,95 @@
+[
+    {
+        "data": [
+            {
+                "name": "by",
+                "type": "felt"
+            },
+            {
+                "name": "token_id",
+                "type": "felt"
+            },
+            {
+                "name": "amount",
+                "type": "felt"
+            }
+        ],
+        "keys": [],
+        "name": "element_distilled",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "name": "address_of_controller",
+                "type": "felt"
+            },
+            {
+                "name": "address_of_elements_token",
+                "type": "felt"
+            },
+            {
+                "name": "address_of_minting_middleware",
+                "type": "felt"
+            }
+        ],
+        "name": "constructor",
+        "outputs": [],
+        "type": "constructor"
+    },
+    {
+        "inputs": [
+            {
+                "name": "game_idx",
+                "type": "felt"
+            },
+            {
+                "name": "from_l1_address",
+                "type": "felt"
+            },
+            {
+                "name": "to",
+                "type": "felt"
+            },
+            {
+                "name": "token_id",
+                "type": "felt"
+            },
+            {
+                "name": "amount",
+                "type": "felt"
+            }
+        ],
+        "name": "mint_elements",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "next_owner",
+                "type": "felt"
+            }
+        ],
+        "name": "transfer_ownership",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "token_id",
+                "type": "felt"
+            }
+        ],
+        "name": "get_total_minted",
+        "outputs": [
+            {
+                "name": "total",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]

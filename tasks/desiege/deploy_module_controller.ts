@@ -2,7 +2,7 @@
 import { deployContract, getDeployedAddressInt } from '../helpers'
 
 async function main() {
-  const contractName = 'ModuleController'
+  const contractName = 'DesiegeModuleController'
 
   // Collect params
   const arbiter = getDeployedAddressInt("Arbiter");

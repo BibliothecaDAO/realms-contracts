@@ -5225,12 +5225,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 17,
-                        "end_line": 27,
+                        "end_line": 26,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 27
+                        "start_line": 26
                     }
                 },
                 "176": {
@@ -5256,7 +5256,7 @@
                     "hints": [],
                     "inst": {
                         "end_col": 37,
-                        "end_line": 24,
+                        "end_line": 23,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
@@ -5270,12 +5270,12 @@
                                 "parent_location": [
                                     {
                                         "end_col": 80,
-                                        "end_line": 29,
+                                        "end_line": 28,
                                         "input_file": {
                                             "filename": "contracts/desiege/03_GridMovement.cairo"
                                         },
                                         "start_col": 32,
-                                        "start_line": 29
+                                        "start_line": 28
                                     },
                                     "While trying to retrieve the implicit argument 'syscall_ptr' in:"
                                 ],
@@ -5285,7 +5285,7 @@
                             "While expanding the reference 'syscall_ptr' in:"
                         ],
                         "start_col": 18,
-                        "start_line": 24
+                        "start_line": 23
                     }
                 },
                 "177": {
@@ -5311,7 +5311,7 @@
                     "hints": [],
                     "inst": {
                         "end_col": 83,
-                        "end_line": 24,
+                        "end_line": 23,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
@@ -5325,12 +5325,12 @@
                                 "parent_location": [
                                     {
                                         "end_col": 80,
-                                        "end_line": 29,
+                                        "end_line": 28,
                                         "input_file": {
                                             "filename": "contracts/desiege/03_GridMovement.cairo"
                                         },
                                         "start_col": 32,
-                                        "start_line": 29
+                                        "start_line": 28
                                     },
                                     "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                 ],
@@ -5340,7 +5340,7 @@
                             "While expanding the reference 'range_check_ptr' in:"
                         ],
                         "start_col": 68,
-                        "start_line": 24
+                        "start_line": 23
                     }
                 },
                 "178": {
@@ -5366,24 +5366,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 26,
-                        "end_line": 25,
+                        "end_line": 24,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 62,
-                                "end_line": 29,
+                                "end_line": 28,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "start_col": 48,
-                                "start_line": 29
+                                "start_line": 28
                             },
                             "While expanding the reference 'grid_dimension' in:"
                         ],
                         "start_col": 5,
-                        "start_line": 25
+                        "start_line": 24
                     }
                 },
                 "179": {
@@ -5409,24 +5409,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 50,
-                        "end_line": 25,
+                        "end_line": 24,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 79,
-                                "end_line": 29,
+                                "end_line": 28,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "start_col": 64,
-                                "start_line": 29
+                                "start_line": 28
                             },
                             "While expanding the reference 'player_position' in:"
                         ],
                         "start_col": 28,
-                        "start_line": 25
+                        "start_line": 24
                     }
                 },
                 "180": {
@@ -5452,12 +5452,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 80,
-                        "end_line": 29,
+                        "end_line": 28,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 32,
-                        "start_line": 29
+                        "start_line": 28
                     }
                 },
                 "182": {
@@ -5485,24 +5485,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 18,
-                        "end_line": 29,
+                        "end_line": 28,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 18,
-                                "end_line": 29,
+                                "end_line": 28,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 29
+                                "start_line": 28
                             },
                             "While auto generating local variable for 'curr_row'."
                         ],
                         "start_col": 10,
-                        "start_line": 29
+                        "start_line": 28
                     }
                 },
                 "183": {
@@ -5530,24 +5530,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 28,
-                        "end_line": 29,
+                        "end_line": 28,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 28,
-                                "end_line": 29,
+                                "end_line": 28,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "start_col": 20,
-                                "start_line": 29
+                                "start_line": 28
                             },
                             "While auto generating local variable for 'curr_col'."
                         ],
                         "start_col": 20,
-                        "start_line": 29
+                        "start_line": 28
                     }
                 },
                 "184": {
@@ -5582,7 +5582,7 @@
                         "parent_location": [
                             {
                                 "end_col": 80,
-                                "end_line": 29,
+                                "end_line": 28,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -5596,12 +5596,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 84,
-                                                "end_line": 30,
+                                                "end_line": 29,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 36,
-                                                "start_line": 30
+                                                "start_line": 29
                                             },
                                             "While trying to retrieve the implicit argument 'syscall_ptr' in:"
                                         ],
@@ -5611,7 +5611,7 @@
                                     "While expanding the reference 'syscall_ptr' in:"
                                 ],
                                 "start_col": 32,
-                                "start_line": 29
+                                "start_line": 28
                             },
                             "While trying to update the implicit return value 'syscall_ptr' in:"
                         ],
@@ -5651,7 +5651,7 @@
                         "parent_location": [
                             {
                                 "end_col": 80,
-                                "end_line": 29,
+                                "end_line": 28,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -5665,12 +5665,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 84,
-                                                "end_line": 30,
+                                                "end_line": 29,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 36,
-                                                "start_line": 30
+                                                "start_line": 29
                                             },
                                             "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                         ],
@@ -5680,7 +5680,7 @@
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 32,
-                                "start_line": 29
+                                "start_line": 28
                             },
                             "While trying to update the implicit return value 'range_check_ptr' in:"
                         ],
@@ -5713,24 +5713,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 26,
-                        "end_line": 25,
+                        "end_line": 24,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 66,
-                                "end_line": 30,
+                                "end_line": 29,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "start_col": 52,
-                                "start_line": 30
+                                "start_line": 29
                             },
                             "While expanding the reference 'grid_dimension' in:"
                         ],
                         "start_col": 5,
-                        "start_line": 25
+                        "start_line": 24
                     }
                 },
                 "187": {
@@ -5758,24 +5758,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 74,
-                        "end_line": 25,
+                        "end_line": 24,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 83,
-                                "end_line": 30,
+                                "end_line": 29,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "start_col": 68,
-                                "start_line": 30
+                                "start_line": 29
                             },
                             "While expanding the reference 'target_position' in:"
                         ],
                         "start_col": 52,
-                        "start_line": 25
+                        "start_line": 24
                     }
                 },
                 "188": {
@@ -5803,12 +5803,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 84,
-                        "end_line": 30,
+                        "end_line": 29,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 36,
-                        "start_line": 30
+                        "start_line": 29
                     }
                 },
                 "190": {
@@ -5838,24 +5838,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 32,
-                        "end_line": 30,
+                        "end_line": 29,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 32,
-                                "end_line": 30,
+                                "end_line": 29,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "start_col": 22,
-                                "start_line": 30
+                                "start_line": 29
                             },
                             "While auto generating local variable for 'target_col'."
                         ],
                         "start_col": 22,
-                        "start_line": 30
+                        "start_line": 29
                     }
                 },
                 "191": {
@@ -5885,24 +5885,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 20,
-                        "end_line": 30,
+                        "end_line": 29,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 20,
-                                "end_line": 30,
+                                "end_line": 29,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 30
+                                "start_line": 29
                             },
                             "While auto generating local variable for 'target_row'."
                         ],
                         "start_col": 10,
-                        "start_line": 30
+                        "start_line": 29
                     }
                 },
                 "192": {
@@ -5939,7 +5939,7 @@
                         "parent_location": [
                             {
                                 "end_col": 84,
-                                "end_line": 30,
+                                "end_line": 29,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -5953,12 +5953,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 84,
-                                                "end_line": 30,
+                                                "end_line": 29,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 36,
-                                                "start_line": 30
+                                                "start_line": 29
                                             },
                                             "While trying to update the implicit return value 'syscall_ptr' in:"
                                         ],
@@ -5968,7 +5968,7 @@
                                     "While auto generating local variable for 'syscall_ptr'."
                                 ],
                                 "start_col": 36,
-                                "start_line": 30
+                                "start_line": 29
                             },
                             "While trying to update the implicit return value 'syscall_ptr' in:"
                         ],
@@ -6010,7 +6010,7 @@
                         "parent_location": [
                             {
                                 "end_col": 84,
-                                "end_line": 30,
+                                "end_line": 29,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -6024,12 +6024,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 64,
-                                                "end_line": 33,
+                                                "end_line": 32,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 24,
-                                                "start_line": 33
+                                                "start_line": 32
                                             },
                                             "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                         ],
@@ -6039,7 +6039,7 @@
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 36,
-                                "start_line": 30
+                                "start_line": 29
                             },
                             "While trying to update the implicit return value 'range_check_ptr' in:"
                         ],
@@ -6074,36 +6074,36 @@
                     "hints": [],
                     "inst": {
                         "end_col": 20,
-                        "end_line": 30,
+                        "end_line": 29,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 20,
-                                "end_line": 30,
+                                "end_line": 29,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 43,
-                                        "end_line": 33,
+                                        "end_line": 32,
                                         "input_file": {
                                             "filename": "contracts/desiege/03_GridMovement.cairo"
                                         },
                                         "start_col": 33,
-                                        "start_line": 33
+                                        "start_line": 32
                                     },
                                     "While expanding the reference 'target_row' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 30
+                                "start_line": 29
                             },
                             "While auto generating local variable for 'target_row'."
                         ],
                         "start_col": 10,
-                        "start_line": 30
+                        "start_line": 29
                     }
                 },
                 "195": {
@@ -6133,12 +6133,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 63,
-                        "end_line": 33,
+                        "end_line": 32,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 45,
-                        "start_line": 33
+                        "start_line": 32
                     }
                 },
                 "197": {
@@ -6168,12 +6168,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 64,
-                        "end_line": 33,
+                        "end_line": 32,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 24,
-                        "start_line": 33
+                        "start_line": 32
                     }
                 },
                 "199": {
@@ -6204,24 +6204,24 @@
                     "hints": [],
                     "inst": {
                         "end_col": 20,
-                        "end_line": 33,
+                        "end_line": 32,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 20,
-                                "end_line": 33,
+                                "end_line": 32,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 33
+                                "start_line": 32
                             },
                             "While auto generating local variable for 'within_row'."
                         ],
                         "start_col": 10,
-                        "start_line": 33
+                        "start_line": 32
                     }
                 },
                 "200": {
@@ -6259,7 +6259,7 @@
                         "parent_location": [
                             {
                                 "end_col": 64,
-                                "end_line": 33,
+                                "end_line": 32,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -6273,12 +6273,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 64,
-                                                "end_line": 34,
+                                                "end_line": 33,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 24,
-                                                "start_line": 34
+                                                "start_line": 33
                                             },
                                             "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                         ],
@@ -6288,7 +6288,7 @@
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 24,
-                                "start_line": 33
+                                "start_line": 32
                             },
                             "While trying to update the implicit return value 'range_check_ptr' in:"
                         ],
@@ -6324,36 +6324,36 @@
                     "hints": [],
                     "inst": {
                         "end_col": 32,
-                        "end_line": 30,
+                        "end_line": 29,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 32,
-                                "end_line": 30,
+                                "end_line": 29,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 43,
-                                        "end_line": 34,
+                                        "end_line": 33,
                                         "input_file": {
                                             "filename": "contracts/desiege/03_GridMovement.cairo"
                                         },
                                         "start_col": 33,
-                                        "start_line": 34
+                                        "start_line": 33
                                     },
                                     "While expanding the reference 'target_col' in:"
                                 ],
                                 "start_col": 22,
-                                "start_line": 30
+                                "start_line": 29
                             },
                             "While auto generating local variable for 'target_col'."
                         ],
                         "start_col": 22,
-                        "start_line": 30
+                        "start_line": 29
                     }
                 },
                 "202": {
@@ -6384,12 +6384,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 63,
-                        "end_line": 34,
+                        "end_line": 33,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 45,
-                        "start_line": 34
+                        "start_line": 33
                     }
                 },
                 "204": {
@@ -6420,15 +6420,52 @@
                     "hints": [],
                     "inst": {
                         "end_col": 64,
-                        "end_line": 34,
+                        "end_line": 33,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 24,
-                        "start_line": 34
+                        "start_line": 33
                     }
                 },
                 "206": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__",
+                        "__main__.assert_move"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 18,
+                            "offset": 0
+                        },
+                        "reference_ids": {
+                            "__main__.assert_move.curr_col": 93,
+                            "__main__.assert_move.curr_row": 92,
+                            "__main__.assert_move.grid_dimension": 82,
+                            "__main__.assert_move.pedersen_ptr": 86,
+                            "__main__.assert_move.player_position": 83,
+                            "__main__.assert_move.range_check_ptr": 104,
+                            "__main__.assert_move.syscall_ptr": 100,
+                            "__main__.assert_move.target_col": 98,
+                            "__main__.assert_move.target_position": 84,
+                            "__main__.assert_move.target_row": 99,
+                            "__main__.assert_move.within_col": 105,
+                            "__main__.assert_move.within_row": 103
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 26,
+                        "end_line": 34,
+                        "input_file": {
+                            "filename": "contracts/desiege/03_GridMovement.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 34
+                    }
+                },
+                "208": {
                     "accessible_scopes": [
                         "__main__",
                         "__main__",
@@ -6465,43 +6502,6 @@
                         "start_line": 35
                     }
                 },
-                "208": {
-                    "accessible_scopes": [
-                        "__main__",
-                        "__main__",
-                        "__main__.assert_move"
-                    ],
-                    "flow_tracking_data": {
-                        "ap_tracking": {
-                            "group": 18,
-                            "offset": 0
-                        },
-                        "reference_ids": {
-                            "__main__.assert_move.curr_col": 93,
-                            "__main__.assert_move.curr_row": 92,
-                            "__main__.assert_move.grid_dimension": 82,
-                            "__main__.assert_move.pedersen_ptr": 86,
-                            "__main__.assert_move.player_position": 83,
-                            "__main__.assert_move.range_check_ptr": 104,
-                            "__main__.assert_move.syscall_ptr": 100,
-                            "__main__.assert_move.target_col": 98,
-                            "__main__.assert_move.target_position": 84,
-                            "__main__.assert_move.target_row": 99,
-                            "__main__.assert_move.within_col": 105,
-                            "__main__.assert_move.within_row": 103
-                        }
-                    },
-                    "hints": [],
-                    "inst": {
-                        "end_col": 26,
-                        "end_line": 36,
-                        "input_file": {
-                            "filename": "contracts/desiege/03_GridMovement.cairo"
-                        },
-                        "start_col": 5,
-                        "start_line": 36
-                    }
-                },
                 "210": {
                     "accessible_scopes": [
                         "__main__",
@@ -6531,12 +6531,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 30,
-                        "end_line": 43,
+                        "end_line": 42,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 8,
-                        "start_line": 43
+                        "start_line": 42
                     }
                 },
                 "211": {
@@ -6569,12 +6569,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 7,
-                        "end_line": 43,
+                        "end_line": 42,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 43
+                        "start_line": 42
                     }
                 },
                 "213": {
@@ -6614,7 +6614,7 @@
                         "parent_location": [
                             {
                                 "end_col": 64,
-                                "end_line": 34,
+                                "end_line": 33,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -6628,12 +6628,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 81,
-                                                "end_line": 45,
+                                                "end_line": 44,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 30,
-                                                "start_line": 45
+                                                "start_line": 44
                                             },
                                             "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                         ],
@@ -6643,7 +6643,7 @@
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 24,
-                                "start_line": 34
+                                "start_line": 33
                             },
                             "While trying to update the implicit return value 'range_check_ptr' in:"
                         ],
@@ -6681,36 +6681,36 @@
                     "hints": [],
                     "inst": {
                         "end_col": 32,
-                        "end_line": 30,
+                        "end_line": 29,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 32,
-                                "end_line": 30,
+                                "end_line": 29,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 52,
-                                        "end_line": 45,
+                                        "end_line": 44,
                                         "input_file": {
                                             "filename": "contracts/desiege/03_GridMovement.cairo"
                                         },
                                         "start_col": 42,
-                                        "start_line": 45
+                                        "start_line": 44
                                     },
                                     "While expanding the reference 'target_col' in:"
                                 ],
                                 "start_col": 22,
-                                "start_line": 30
+                                "start_line": 29
                             },
                             "While auto generating local variable for 'target_col'."
                         ],
                         "start_col": 22,
-                        "start_line": 30
+                        "start_line": 29
                     }
                 },
                 "215": {
@@ -6743,12 +6743,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 66,
-                        "end_line": 45,
+                        "end_line": 44,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 54,
-                        "start_line": 45
+                        "start_line": 44
                     }
                 },
                 "217": {
@@ -6781,12 +6781,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 80,
-                        "end_line": 45,
+                        "end_line": 44,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 68,
-                        "start_line": 45
+                        "start_line": 44
                     }
                 },
                 "219": {
@@ -6819,12 +6819,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 81,
-                        "end_line": 45,
+                        "end_line": 44,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 30,
-                        "start_line": 45
+                        "start_line": 44
                     }
                 },
                 "221": {
@@ -6858,12 +6858,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 32,
-                        "end_line": 46,
+                        "end_line": 45,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 9,
-                        "start_line": 46
+                        "start_line": 45
                     }
                 },
                 "223": {
@@ -6904,7 +6904,7 @@
                         "parent_location": [
                             {
                                 "end_col": 84,
-                                "end_line": 30,
+                                "end_line": 29,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -6918,36 +6918,36 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 84,
-                                                "end_line": 30,
+                                                "end_line": 29,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "parent_location": [
                                                     {
                                                         "end_col": 37,
-                                                        "end_line": 24,
+                                                        "end_line": 23,
                                                         "input_file": {
                                                             "filename": "contracts/desiege/03_GridMovement.cairo"
                                                         },
                                                         "parent_location": [
                                                             {
                                                                 "end_col": 23,
-                                                                "end_line": 47,
+                                                                "end_line": 46,
                                                                 "input_file": {
                                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                                 },
                                                                 "start_col": 9,
-                                                                "start_line": 47
+                                                                "start_line": 46
                                                             },
                                                             "While trying to retrieve the implicit argument 'syscall_ptr' in:"
                                                         ],
                                                         "start_col": 18,
-                                                        "start_line": 24
+                                                        "start_line": 23
                                                     },
                                                     "While expanding the reference 'syscall_ptr' in:"
                                                 ],
                                                 "start_col": 36,
-                                                "start_line": 30
+                                                "start_line": 29
                                             },
                                             "While trying to update the implicit return value 'syscall_ptr' in:"
                                         ],
@@ -6957,7 +6957,7 @@
                                     "While auto generating local variable for 'syscall_ptr'."
                                 ],
                                 "start_col": 36,
-                                "start_line": 30
+                                "start_line": 29
                             },
                             "While trying to update the implicit return value 'syscall_ptr' in:"
                         ],
@@ -6996,36 +6996,36 @@
                     "hints": [],
                     "inst": {
                         "end_col": 66,
-                        "end_line": 24,
+                        "end_line": 23,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 66,
-                                "end_line": 24,
+                                "end_line": 23,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 23,
-                                        "end_line": 47,
+                                        "end_line": 46,
                                         "input_file": {
                                             "filename": "contracts/desiege/03_GridMovement.cairo"
                                         },
                                         "start_col": 9,
-                                        "start_line": 47
+                                        "start_line": 46
                                     },
                                     "While trying to retrieve the implicit argument 'pedersen_ptr' in:"
                                 ],
                                 "start_col": 39,
-                                "start_line": 24
+                                "start_line": 23
                             },
                             "While expanding the reference 'pedersen_ptr' in:"
                         ],
                         "start_col": 39,
-                        "start_line": 24
+                        "start_line": 23
                     }
                 },
                 "225": {
@@ -7066,36 +7066,36 @@
                         "parent_location": [
                             {
                                 "end_col": 81,
-                                "end_line": 45,
+                                "end_line": 44,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 83,
-                                        "end_line": 24,
+                                        "end_line": 23,
                                         "input_file": {
                                             "filename": "contracts/desiege/03_GridMovement.cairo"
                                         },
                                         "parent_location": [
                                             {
                                                 "end_col": 23,
-                                                "end_line": 47,
+                                                "end_line": 46,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 9,
-                                                "start_line": 47
+                                                "start_line": 46
                                             },
                                             "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                         ],
                                         "start_col": 68,
-                                        "start_line": 24
+                                        "start_line": 23
                                     },
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 30,
-                                "start_line": 45
+                                "start_line": 44
                             },
                             "While trying to update the implicit return value 'range_check_ptr' in:"
                         ],
@@ -7134,12 +7134,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 22,
-                        "end_line": 47,
+                        "end_line": 46,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 21,
-                        "start_line": 47
+                        "start_line": 46
                     }
                 },
                 "228": {
@@ -7173,12 +7173,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 23,
-                        "end_line": 47,
+                        "end_line": 46,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 9,
-                        "start_line": 47
+                        "start_line": 46
                     }
                 },
                 "229": {
@@ -7211,12 +7211,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 34,
-                        "end_line": 49,
+                        "end_line": 48,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 12,
-                        "start_line": 49
+                        "start_line": 48
                     }
                 },
                 "230": {
@@ -7250,12 +7250,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 11,
-                        "end_line": 49,
+                        "end_line": 48,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 9,
-                        "start_line": 49
+                        "start_line": 48
                     }
                 },
                 "232": {
@@ -7296,7 +7296,7 @@
                         "parent_location": [
                             {
                                 "end_col": 64,
-                                "end_line": 34,
+                                "end_line": 33,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -7310,12 +7310,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 85,
-                                                "end_line": 51,
+                                                "end_line": 50,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 34,
-                                                "start_line": 51
+                                                "start_line": 50
                                             },
                                             "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                         ],
@@ -7325,7 +7325,7 @@
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 24,
-                                "start_line": 34
+                                "start_line": 33
                             },
                             "While trying to update the implicit return value 'range_check_ptr' in:"
                         ],
@@ -7364,36 +7364,36 @@
                     "hints": [],
                     "inst": {
                         "end_col": 20,
-                        "end_line": 30,
+                        "end_line": 29,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 20,
-                                "end_line": 30,
+                                "end_line": 29,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 56,
-                                        "end_line": 51,
+                                        "end_line": 50,
                                         "input_file": {
                                             "filename": "contracts/desiege/03_GridMovement.cairo"
                                         },
                                         "start_col": 46,
-                                        "start_line": 51
+                                        "start_line": 50
                                     },
                                     "While expanding the reference 'target_row' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 30
+                                "start_line": 29
                             },
                             "While auto generating local variable for 'target_row'."
                         ],
                         "start_col": 10,
-                        "start_line": 30
+                        "start_line": 29
                     }
                 },
                 "234": {
@@ -7427,12 +7427,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 70,
-                        "end_line": 51,
+                        "end_line": 50,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 58,
-                        "start_line": 51
+                        "start_line": 50
                     }
                 },
                 "236": {
@@ -7466,12 +7466,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 84,
-                        "end_line": 51,
+                        "end_line": 50,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 72,
-                        "start_line": 51
+                        "start_line": 50
                     }
                 },
                 "238": {
@@ -7505,12 +7505,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 85,
-                        "end_line": 51,
+                        "end_line": 50,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 34,
-                        "start_line": 51
+                        "start_line": 50
                     }
                 },
                 "240": {
@@ -7545,12 +7545,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 36,
-                        "end_line": 52,
+                        "end_line": 51,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 13,
-                        "start_line": 52
+                        "start_line": 51
                     }
                 },
                 "242": {
@@ -7592,7 +7592,7 @@
                         "parent_location": [
                             {
                                 "end_col": 84,
-                                "end_line": 30,
+                                "end_line": 29,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -7606,36 +7606,36 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 84,
-                                                "end_line": 30,
+                                                "end_line": 29,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "parent_location": [
                                                     {
                                                         "end_col": 37,
-                                                        "end_line": 24,
+                                                        "end_line": 23,
                                                         "input_file": {
                                                             "filename": "contracts/desiege/03_GridMovement.cairo"
                                                         },
                                                         "parent_location": [
                                                             {
                                                                 "end_col": 27,
-                                                                "end_line": 53,
+                                                                "end_line": 52,
                                                                 "input_file": {
                                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                                 },
                                                                 "start_col": 13,
-                                                                "start_line": 53
+                                                                "start_line": 52
                                                             },
                                                             "While trying to retrieve the implicit argument 'syscall_ptr' in:"
                                                         ],
                                                         "start_col": 18,
-                                                        "start_line": 24
+                                                        "start_line": 23
                                                     },
                                                     "While expanding the reference 'syscall_ptr' in:"
                                                 ],
                                                 "start_col": 36,
-                                                "start_line": 30
+                                                "start_line": 29
                                             },
                                             "While trying to update the implicit return value 'syscall_ptr' in:"
                                         ],
@@ -7645,7 +7645,7 @@
                                     "While auto generating local variable for 'syscall_ptr'."
                                 ],
                                 "start_col": 36,
-                                "start_line": 30
+                                "start_line": 29
                             },
                             "While trying to update the implicit return value 'syscall_ptr' in:"
                         ],
@@ -7685,36 +7685,36 @@
                     "hints": [],
                     "inst": {
                         "end_col": 66,
-                        "end_line": 24,
+                        "end_line": 23,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 66,
-                                "end_line": 24,
+                                "end_line": 23,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 27,
-                                        "end_line": 53,
+                                        "end_line": 52,
                                         "input_file": {
                                             "filename": "contracts/desiege/03_GridMovement.cairo"
                                         },
                                         "start_col": 13,
-                                        "start_line": 53
+                                        "start_line": 52
                                     },
                                     "While trying to retrieve the implicit argument 'pedersen_ptr' in:"
                                 ],
                                 "start_col": 39,
-                                "start_line": 24
+                                "start_line": 23
                             },
                             "While expanding the reference 'pedersen_ptr' in:"
                         ],
                         "start_col": 39,
-                        "start_line": 24
+                        "start_line": 23
                     }
                 },
                 "244": {
@@ -7756,36 +7756,36 @@
                         "parent_location": [
                             {
                                 "end_col": 85,
-                                "end_line": 51,
+                                "end_line": 50,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 83,
-                                        "end_line": 24,
+                                        "end_line": 23,
                                         "input_file": {
                                             "filename": "contracts/desiege/03_GridMovement.cairo"
                                         },
                                         "parent_location": [
                                             {
                                                 "end_col": 27,
-                                                "end_line": 53,
+                                                "end_line": 52,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 13,
-                                                "start_line": 53
+                                                "start_line": 52
                                             },
                                             "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                         ],
                                         "start_col": 68,
-                                        "start_line": 24
+                                        "start_line": 23
                                     },
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 34,
-                                "start_line": 51
+                                "start_line": 50
                             },
                             "While trying to update the implicit return value 'range_check_ptr' in:"
                         ],
@@ -7825,12 +7825,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 26,
-                        "end_line": 53,
+                        "end_line": 52,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 25,
-                        "start_line": 53
+                        "start_line": 52
                     }
                 },
                 "247": {
@@ -7865,12 +7865,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 27,
-                        "end_line": 53,
+                        "end_line": 52,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 13,
-                        "start_line": 53
+                        "start_line": 52
                     }
                 },
                 "248": {
@@ -7904,12 +7904,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 17,
-                        "end_line": 58,
+                        "end_line": 57,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 16,
-                        "start_line": 58
+                        "start_line": 57
                     }
                 },
                 "250": {
@@ -7944,12 +7944,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 17,
-                        "end_line": 58,
+                        "end_line": 57,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 58
+                        "start_line": 57
                     }
                 },
                 "252": {
@@ -7991,7 +7991,7 @@
                         "parent_location": [
                             {
                                 "end_col": 84,
-                                "end_line": 30,
+                                "end_line": 29,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -8005,36 +8005,36 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 84,
-                                                "end_line": 30,
+                                                "end_line": 29,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "parent_location": [
                                                     {
                                                         "end_col": 37,
-                                                        "end_line": 24,
+                                                        "end_line": 23,
                                                         "input_file": {
                                                             "filename": "contracts/desiege/03_GridMovement.cairo"
                                                         },
                                                         "parent_location": [
                                                             {
                                                                 "end_col": 19,
-                                                                "end_line": 59,
+                                                                "end_line": 58,
                                                                 "input_file": {
                                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                                 },
                                                                 "start_col": 5,
-                                                                "start_line": 59
+                                                                "start_line": 58
                                                             },
                                                             "While trying to retrieve the implicit argument 'syscall_ptr' in:"
                                                         ],
                                                         "start_col": 18,
-                                                        "start_line": 24
+                                                        "start_line": 23
                                                     },
                                                     "While expanding the reference 'syscall_ptr' in:"
                                                 ],
                                                 "start_col": 36,
-                                                "start_line": 30
+                                                "start_line": 29
                                             },
                                             "While trying to update the implicit return value 'syscall_ptr' in:"
                                         ],
@@ -8044,7 +8044,7 @@
                                     "While auto generating local variable for 'syscall_ptr'."
                                 ],
                                 "start_col": 36,
-                                "start_line": 30
+                                "start_line": 29
                             },
                             "While trying to update the implicit return value 'syscall_ptr' in:"
                         ],
@@ -8084,36 +8084,36 @@
                     "hints": [],
                     "inst": {
                         "end_col": 66,
-                        "end_line": 24,
+                        "end_line": 23,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 66,
-                                "end_line": 24,
+                                "end_line": 23,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 19,
-                                        "end_line": 59,
+                                        "end_line": 58,
                                         "input_file": {
                                             "filename": "contracts/desiege/03_GridMovement.cairo"
                                         },
                                         "start_col": 5,
-                                        "start_line": 59
+                                        "start_line": 58
                                     },
                                     "While trying to retrieve the implicit argument 'pedersen_ptr' in:"
                                 ],
                                 "start_col": 39,
-                                "start_line": 24
+                                "start_line": 23
                             },
                             "While expanding the reference 'pedersen_ptr' in:"
                         ],
                         "start_col": 39,
-                        "start_line": 24
+                        "start_line": 23
                     }
                 },
                 "254": {
@@ -8155,36 +8155,36 @@
                         "parent_location": [
                             {
                                 "end_col": 64,
-                                "end_line": 34,
+                                "end_line": 33,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 83,
-                                        "end_line": 24,
+                                        "end_line": 23,
                                         "input_file": {
                                             "filename": "contracts/desiege/03_GridMovement.cairo"
                                         },
                                         "parent_location": [
                                             {
                                                 "end_col": 19,
-                                                "end_line": 59,
+                                                "end_line": 58,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 5,
-                                                "start_line": 59
+                                                "start_line": 58
                                             },
                                             "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                         ],
                                         "start_col": 68,
-                                        "start_line": 24
+                                        "start_line": 23
                                     },
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 24,
-                                "start_line": 34
+                                "start_line": 33
                             },
                             "While trying to update the implicit return value 'range_check_ptr' in:"
                         ],
@@ -8224,12 +8224,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 18,
-                        "end_line": 59,
+                        "end_line": 58,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 17,
-                        "start_line": 59
+                        "start_line": 58
                     }
                 },
                 "257": {
@@ -8264,12 +8264,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 19,
-                        "end_line": 59,
+                        "end_line": 58,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 5,
-                        "start_line": 59
+                        "start_line": 58
                     }
                 },
                 "258": {
@@ -8300,12 +8300,12 @@
                                 "parent_location": [
                                     {
                                         "end_col": 17,
-                                        "end_line": 24,
+                                        "end_line": 23,
                                         "input_file": {
                                             "filename": "contracts/desiege/03_GridMovement.cairo"
                                         },
                                         "start_col": 6,
-                                        "start_line": 24
+                                        "start_line": 23
                                     },
                                     "While handling return value of"
                                 ],
@@ -8324,12 +8324,12 @@
                         "parent_location": [
                             {
                                 "end_col": 17,
-                                "end_line": 24,
+                                "end_line": 23,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "start_col": 6,
-                                "start_line": 24
+                                "start_line": 23
                             },
                             "While handling return value of"
                         ],
@@ -8366,12 +8366,12 @@
                         "parent_location": [
                             {
                                 "end_col": 17,
-                                "end_line": 26,
+                                "end_line": 25,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "start_col": 7,
-                                "start_line": 26
+                                "start_line": 25
                             },
                             "While handling return value 'res'"
                         ],
@@ -8408,7 +8408,7 @@
                         "parent_location": [
                             {
                                 "end_col": 17,
-                                "end_line": 26,
+                                "end_line": 25,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -8422,12 +8422,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 17,
-                                                "end_line": 24,
+                                                "end_line": 23,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 6,
-                                                "start_line": 24
+                                                "start_line": 23
                                             },
                                             "While handling return value of"
                                         ],
@@ -8437,7 +8437,7 @@
                                     "While expanding the reference '__return_value_ptr' in:"
                                 ],
                                 "start_col": 7,
-                                "start_line": 26
+                                "start_line": 25
                             },
                             "While handling return value 'res'"
                         ],
@@ -8475,7 +8475,7 @@
                         "parent_location": [
                             {
                                 "end_col": 17,
-                                "end_line": 24,
+                                "end_line": 23,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -8489,12 +8489,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 17,
-                                                "end_line": 24,
+                                                "end_line": 23,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 6,
-                                                "start_line": 24
+                                                "start_line": 23
                                             },
                                             "While handling return value of"
                                         ],
@@ -8504,7 +8504,7 @@
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 6,
-                                "start_line": 24
+                                "start_line": 23
                             },
                             "While handling return value of"
                         ],
@@ -8542,12 +8542,12 @@
                         "parent_location": [
                             {
                                 "end_col": 17,
-                                "end_line": 24,
+                                "end_line": 23,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "start_col": 6,
-                                "start_line": 24
+                                "start_line": 23
                             },
                             "While handling return value of"
                         ],
@@ -8585,7 +8585,7 @@
                         "parent_location": [
                             {
                                 "end_col": 17,
-                                "end_line": 24,
+                                "end_line": 23,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -8599,12 +8599,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 17,
-                                                "end_line": 24,
+                                                "end_line": 23,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 6,
-                                                "start_line": 24
+                                                "start_line": 23
                                             },
                                             "While handling return value of"
                                         ],
@@ -8614,7 +8614,7 @@
                                     "While expanding the reference '__return_value_ptr_start' in:"
                                 ],
                                 "start_col": 6,
-                                "start_line": 24
+                                "start_line": 23
                             },
                             "While handling return value of"
                         ],
@@ -8652,12 +8652,12 @@
                         "parent_location": [
                             {
                                 "end_col": 17,
-                                "end_line": 24,
+                                "end_line": 23,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "start_col": 6,
-                                "start_line": 24
+                                "start_line": 23
                             },
                             "While handling return value of"
                         ],
@@ -8698,7 +8698,7 @@
                         "parent_location": [
                             {
                                 "end_col": 74,
-                                "end_line": 25,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -8712,7 +8712,7 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 17,
-                                                "end_line": 24,
+                                                "end_line": 23,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
@@ -8726,12 +8726,12 @@
                                                         "parent_location": [
                                                             {
                                                                 "end_col": 17,
-                                                                "end_line": 24,
+                                                                "end_line": 23,
                                                                 "input_file": {
                                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                                 },
                                                                 "start_col": 6,
-                                                                "start_line": 24
+                                                                "start_line": 23
                                                             },
                                                             "While handling calldata of"
                                                         ],
@@ -8741,7 +8741,7 @@
                                                     "While expanding the reference '__calldata_actual_size' in:"
                                                 ],
                                                 "start_col": 6,
-                                                "start_line": 24
+                                                "start_line": 23
                                             },
                                             "While handling calldata of"
                                         ],
@@ -8751,7 +8751,7 @@
                                     "While expanding the reference '__calldata_ptr' in:"
                                 ],
                                 "start_col": 52,
-                                "start_line": 25
+                                "start_line": 24
                             },
                             "While handling calldata argument 'target_position'"
                         ],
@@ -8793,12 +8793,12 @@
                         "parent_location": [
                             {
                                 "end_col": 17,
-                                "end_line": 24,
+                                "end_line": 23,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "start_col": 6,
-                                "start_line": 24
+                                "start_line": 23
                             },
                             "While handling calldata of"
                         ],
@@ -8840,7 +8840,7 @@
                         "parent_location": [
                             {
                                 "end_col": 37,
-                                "end_line": 24,
+                                "end_line": 23,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -8854,12 +8854,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 17,
-                                                "end_line": 24,
+                                                "end_line": 23,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 6,
-                                                "start_line": 24
+                                                "start_line": 23
                                             },
                                             "While constructing the external wrapper for:"
                                         ],
@@ -8869,7 +8869,7 @@
                                     "While expanding the reference 'syscall_ptr' in:"
                                 ],
                                 "start_col": 18,
-                                "start_line": 24
+                                "start_line": 23
                             },
                             "While constructing the external wrapper for:"
                         ],
@@ -8911,7 +8911,7 @@
                         "parent_location": [
                             {
                                 "end_col": 66,
-                                "end_line": 24,
+                                "end_line": 23,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -8925,12 +8925,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 17,
-                                                "end_line": 24,
+                                                "end_line": 23,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 6,
-                                                "start_line": 24
+                                                "start_line": 23
                                             },
                                             "While constructing the external wrapper for:"
                                         ],
@@ -8940,7 +8940,7 @@
                                     "While expanding the reference 'pedersen_ptr' in:"
                                 ],
                                 "start_col": 39,
-                                "start_line": 24
+                                "start_line": 23
                             },
                             "While constructing the external wrapper for:"
                         ],
@@ -8982,7 +8982,7 @@
                         "parent_location": [
                             {
                                 "end_col": 83,
-                                "end_line": 24,
+                                "end_line": 23,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -8996,12 +8996,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 17,
-                                                "end_line": 24,
+                                                "end_line": 23,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 6,
-                                                "start_line": 24
+                                                "start_line": 23
                                             },
                                             "While constructing the external wrapper for:"
                                         ],
@@ -9011,7 +9011,7 @@
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 68,
-                                "start_line": 24
+                                "start_line": 23
                             },
                             "While constructing the external wrapper for:"
                         ],
@@ -9053,7 +9053,7 @@
                         "parent_location": [
                             {
                                 "end_col": 26,
-                                "end_line": 25,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -9067,12 +9067,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 17,
-                                                "end_line": 24,
+                                                "end_line": 23,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 6,
-                                                "start_line": 24
+                                                "start_line": 23
                                             },
                                             "While constructing the external wrapper for:"
                                         ],
@@ -9082,7 +9082,7 @@
                                     "While expanding the reference '__calldata_arg_grid_dimension' in:"
                                 ],
                                 "start_col": 5,
-                                "start_line": 25
+                                "start_line": 24
                             },
                             "While handling calldata argument 'grid_dimension'"
                         ],
@@ -9124,7 +9124,7 @@
                         "parent_location": [
                             {
                                 "end_col": 50,
-                                "end_line": 25,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -9138,12 +9138,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 17,
-                                                "end_line": 24,
+                                                "end_line": 23,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 6,
-                                                "start_line": 24
+                                                "start_line": 23
                                             },
                                             "While constructing the external wrapper for:"
                                         ],
@@ -9153,7 +9153,7 @@
                                     "While expanding the reference '__calldata_arg_player_position' in:"
                                 ],
                                 "start_col": 28,
-                                "start_line": 25
+                                "start_line": 24
                             },
                             "While handling calldata argument 'player_position'"
                         ],
@@ -9195,7 +9195,7 @@
                         "parent_location": [
                             {
                                 "end_col": 74,
-                                "end_line": 25,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -9209,12 +9209,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 17,
-                                                "end_line": 24,
+                                                "end_line": 23,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 6,
-                                                "start_line": 24
+                                                "start_line": 23
                                             },
                                             "While constructing the external wrapper for:"
                                         ],
@@ -9224,7 +9224,7 @@
                                     "While expanding the reference '__calldata_arg_target_position' in:"
                                 ],
                                 "start_col": 52,
-                                "start_line": 25
+                                "start_line": 24
                             },
                             "While handling calldata argument 'target_position'"
                         ],
@@ -9259,12 +9259,12 @@
                     "hints": [],
                     "inst": {
                         "end_col": 17,
-                        "end_line": 24,
+                        "end_line": 23,
                         "input_file": {
                             "filename": "contracts/desiege/03_GridMovement.cairo"
                         },
                         "start_col": 6,
-                        "start_line": 24
+                        "start_line": 23
                     }
                 },
                 "278": {
@@ -9302,7 +9302,7 @@
                         "parent_location": [
                             {
                                 "end_col": 17,
-                                "end_line": 24,
+                                "end_line": 23,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -9316,12 +9316,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 17,
-                                                "end_line": 24,
+                                                "end_line": 23,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 6,
-                                                "start_line": 24
+                                                "start_line": 23
                                             },
                                             "While constructing the external wrapper for:"
                                         ],
@@ -9331,7 +9331,7 @@
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 6,
-                                "start_line": 24
+                                "start_line": 23
                             },
                             "While constructing the external wrapper for:"
                         ],
@@ -9374,12 +9374,12 @@
                         "parent_location": [
                             {
                                 "end_col": 17,
-                                "end_line": 24,
+                                "end_line": 23,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "start_col": 6,
-                                "start_line": 24
+                                "start_line": 23
                             },
                             "While constructing the external wrapper for:"
                         ],
@@ -9424,7 +9424,7 @@
                         "parent_location": [
                             {
                                 "end_col": 17,
-                                "end_line": 24,
+                                "end_line": 23,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -9438,12 +9438,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 17,
-                                                "end_line": 24,
+                                                "end_line": 23,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 6,
-                                                "start_line": 24
+                                                "start_line": 23
                                             },
                                             "While constructing the external wrapper for:"
                                         ],
@@ -9453,7 +9453,7 @@
                                     "While expanding the reference 'syscall_ptr' in:"
                                 ],
                                 "start_col": 6,
-                                "start_line": 24
+                                "start_line": 23
                             },
                             "While constructing the external wrapper for:"
                         ],
@@ -9498,7 +9498,7 @@
                         "parent_location": [
                             {
                                 "end_col": 17,
-                                "end_line": 24,
+                                "end_line": 23,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -9512,12 +9512,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 17,
-                                                "end_line": 24,
+                                                "end_line": 23,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 6,
-                                                "start_line": 24
+                                                "start_line": 23
                                             },
                                             "While constructing the external wrapper for:"
                                         ],
@@ -9527,7 +9527,7 @@
                                     "While expanding the reference 'pedersen_ptr' in:"
                                 ],
                                 "start_col": 6,
-                                "start_line": 24
+                                "start_line": 23
                             },
                             "While constructing the external wrapper for:"
                         ],
@@ -9572,7 +9572,7 @@
                         "parent_location": [
                             {
                                 "end_col": 17,
-                                "end_line": 24,
+                                "end_line": 23,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -9586,12 +9586,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 17,
-                                                "end_line": 24,
+                                                "end_line": 23,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 6,
-                                                "start_line": 24
+                                                "start_line": 23
                                             },
                                             "While constructing the external wrapper for:"
                                         ],
@@ -9601,7 +9601,7 @@
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 6,
-                                "start_line": 24
+                                "start_line": 23
                             },
                             "While constructing the external wrapper for:"
                         ],
@@ -9646,7 +9646,7 @@
                         "parent_location": [
                             {
                                 "end_col": 17,
-                                "end_line": 24,
+                                "end_line": 23,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -9660,12 +9660,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 17,
-                                                "end_line": 24,
+                                                "end_line": 23,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 6,
-                                                "start_line": 24
+                                                "start_line": 23
                                             },
                                             "While constructing the external wrapper for:"
                                         ],
@@ -9675,7 +9675,7 @@
                                     "While expanding the reference 'retdata_size' in:"
                                 ],
                                 "start_col": 6,
-                                "start_line": 24
+                                "start_line": 23
                             },
                             "While constructing the external wrapper for:"
                         ],
@@ -9720,7 +9720,7 @@
                         "parent_location": [
                             {
                                 "end_col": 17,
-                                "end_line": 24,
+                                "end_line": 23,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
@@ -9734,12 +9734,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 17,
-                                                "end_line": 24,
+                                                "end_line": 23,
                                                 "input_file": {
                                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                                 },
                                                 "start_col": 6,
-                                                "start_line": 24
+                                                "start_line": 23
                                             },
                                             "While constructing the external wrapper for:"
                                         ],
@@ -9749,7 +9749,7 @@
                                     "While expanding the reference 'retdata' in:"
                                 ],
                                 "start_col": 6,
-                                "start_line": 24
+                                "start_line": 23
                             },
                             "While constructing the external wrapper for:"
                         ],
@@ -9794,12 +9794,12 @@
                         "parent_location": [
                             {
                                 "end_col": 17,
-                                "end_line": 24,
+                                "end_line": 23,
                                 "input_file": {
                                     "filename": "contracts/desiege/03_GridMovement.cairo"
                                 },
                                 "start_col": 6,
-                                "start_line": 24
+                                "start_line": 23
                             },
                             "While constructing the external wrapper for:"
                         ],

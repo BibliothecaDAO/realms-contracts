@@ -9,7 +9,7 @@ async function main() {
   const contractName = "01_TowerDefence";
 
   // Collect params
-  const moduleControllerAddress = getDeployment("ModuleController").address;
+  const moduleControllerAddress = getDeployment("DesiegeModuleController").address;
   const elementsTokenAddress = getDeployment("ERC1155_ElementsToken").address;
 
   // Magically deploy + write all files and stuff
