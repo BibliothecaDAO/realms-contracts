@@ -10,8 +10,8 @@ import {
 const deploy = async () => {
     const contractName = 'DivineEclipseElements'
 
-    const arbiterAddress = getDeployedAddressInt("Arbiter");
-    const moduleControllerAddress = getDeployedAddressInt("ModuleController");
+    const arbiterAddress = getDeployedAddressInt("DesiegeArbiter");
+    const moduleControllerAddress = getDeployedAddressInt("DesiegeModuleController");
 
     await deployContract(
         contractName, 

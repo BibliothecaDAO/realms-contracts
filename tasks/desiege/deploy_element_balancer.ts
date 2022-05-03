@@ -10,8 +10,8 @@ import {
 const deploy = async () => {
     const contractName = '04_Elements'
 
-    const arbiterAddress = getDeployedAddressInt("Arbiter");
-    const moduleControllerAddress = getDeployedAddressInt("ModuleController");
+    const arbiterAddress = getDeployedAddressInt("DesiegeArbiter");
+    const moduleControllerAddress = getDeployedAddressInt("DesiegeModuleController");
     const elementsTokenAddress = getDeployedAddressInt("ERC1155_ElementsToken");  
     const owner = getOwnerAccountInt();
   
