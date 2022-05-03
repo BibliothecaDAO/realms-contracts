@@ -47,6 +47,8 @@ export function getOwnerAccount(): AccountShape {
   const path_base = getPathBase()
   const accountName = process.env.ACCOUNT_NAME || `OwnerAccount`;
 
+  console.log("Using account", accountName)
+
   try {
     const file = fs.readFileSync(`${path_base}/${accountName}.json`)
 
@@ -146,7 +148,7 @@ export function getNetwork() {
 
 export function getSigner() {
   try {
-    const accountAddress = getOwnerAccountInt();
+    const accountAddress = getOwnerAccount().address;
     const privKey = process.env.STARKNET_PRIVATE_KEY;
 
     if (accountAddress == undefined || accountAddress == "") {
