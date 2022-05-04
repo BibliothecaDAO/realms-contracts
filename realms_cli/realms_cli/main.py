@@ -239,7 +239,39 @@ def check_s_realms(address, network):
     )
     print(out)   
 
+@click.command()
+@click.argument("realm_token_id", nargs=1)
+@click.option("--network", default="goerli")
+def check_owner_of_realm(realm_token_id, network):
+    """
+    Check realms balance
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="realms",
+        function="ownerOf",
+        arguments=[realm_token_id, 0],
+    )
+    print(out)   
+
+@click.command()
+@click.argument("realm_token_id", nargs=1)
+@click.option("--network", default="goerli")
+def check_owner_of_s_realm(realm_token_id, network):
+    """
+    Check realms balance
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="s_realms",
+        function="ownerOf",
+        arguments=[realm_token_id, 0],
+    )
+    print(out)   
+
 # get happiness level of realm
-# check settled realms 
-# check realms
 # get pillageable amount
