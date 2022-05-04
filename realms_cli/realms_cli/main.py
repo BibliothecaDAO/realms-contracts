@@ -20,7 +20,7 @@ def create_pk():
     sk = SigningKey.generate(curve=SECP256k1)
     sk_string = sk.to_string()
     sk_hex = sk_string.hex()
-    print(int(sk_hex, 16))
+    print(int('0x' + sk_hex, 16))
 
 @click.command()
 @click.argument("realm_token_id", nargs=1)
