@@ -22,8 +22,6 @@ def create_pk():
     sk_hex = sk_string.hex()
     print(int(sk_hex, 16))
 
-
-
 @click.command()
 @click.argument("realm_token_id", nargs=1)
 @click.option("--network", default="goerli")
