@@ -3,12 +3,21 @@ import asyncio
 import json
 from openzeppelin.tests.utils import Signer, uint, str_to_felt, from_uint, felt_to_str
 import time
+from enum import IntEnum
 
-from scripts.binary_converter import map_realm
+from realms_cli.realms_cli.binary_converter import map_realm
+
+from .game_structs import BUILDING_COSTS, RESOURCE_UPGRADE_COST
 
 from tests.conftest import set_block_timestamp
 
-json_realms = json.load(open('data/realms.json'))
+realms_data = json.load(open('data/realms.json'))
+
+resources = json.load(open('data/resources.json'))
+
+orders = json.load(open('data/orders.json'))
+
+wonders = json.load(open('data/wonders.json'))
 
 # ACCOUNTS
 NUM_SIGNING_ACCOUNTS = 2
@@ -35,7 +44,7 @@ RESOURCE_ID = 2
 @pytest.mark.asyncio
 @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
 async def test_mint_realm(game_factory):
-    admin_account, treasury_account, starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state, s_realms, buildings_logic, buildings_state, calculator_logic, storage = game_factory
+    admin_account, treasury_account, starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state, s_realms, buildings_logic, buildings_state, calculator_logic = game_factory
 
     #################
     # VALUE SETTERS #
@@ -54,21 +63,16 @@ async def test_mint_realm(game_factory):
         account=treasury_account, to=lords.contract_address, selector_name='approve', calldata=[settling_logic.contract_address, *uint(INITIAL_SUPPLY)]
     )
 
-    # RESOURCES
-    # SET VALUES (ids,cost) AT 1,2,3,4,5,10,10,10,10,10
-    await signer.send_transaction(
-        account=admin_account, to=storage.contract_address, selector_name='set_resource_upgrade_value', calldata=[RESOURCE_ID, 47408855671140352459265]
-    )
+    # RESOURCE COSTS
 
-    # BUILDING 1 IDS 1,2,3,4,5
-    await signer.send_transaction(
-        account=admin_account, to=storage.contract_address, selector_name='set_building_cost_ids', calldata=[BUILDING_ID, 21542142465]
-    )
-
-    # BUILDING 1 VALUES 10,10,10,10,10
-    await signer.send_transaction(
-        account=admin_account, to=storage.contract_address, selector_name='set_building_cost_values', calldata=[BUILDING_ID, 2815437129687050]
-    )
+    for resource_id, resource_cost in RESOURCE_UPGRADE_COST.items():
+        await signer.send_transaction(
+            account=admin_account, to=resources_state.contract_address, selector_name='set_resource_upgrade_cost', calldata=[resource_id.value, resource_cost.resource_count, resource_cost.bits, resource_cost.packed_ids, resource_cost.packed_amounts]
+        )
+    for troop_id, troop_cost in BUILDING_COSTS.items():
+        await signer.send_transaction(
+            account=admin_account, to=buildings_state.contract_address, selector_name='set_building_cost', calldata=[troop_id.value, troop_cost.resource_count, troop_cost.bits, troop_cost.packed_ids, troop_cost.packed_amounts]
+        )
 
     # REALM METADATA
 
@@ -85,12 +89,12 @@ async def test_mint_realm(game_factory):
     # print realm details
     realm_info = await realms.get_realm_info(FIRST_TOKEN_ID).invoke()
     print(f'\033[1;33;40m🏰 | Realm metadata: {realm_info.result.realm_data}\n')
-    assert realm_info.result.realm_data == map_realm(
-        json_realms[str(from_uint(FIRST_TOKEN_ID))])
+    # assert realm_info.result.realm_data == map_realm(
+    #     realms_data[str(from_uint(FIRST_TOKEN_ID))], resources, wonders, orders)
 
-    unpacked_realm_info = await realms.fetch_realm_data(FIRST_TOKEN_ID).invoke()
-    print(
-        f'\033[1;33;40m🏰 | Realm unpacked: {unpacked_realm_info.result.realm_stats}\n')
+    # unpacked_realm_info = await realms.fetch_realm_data(FIRST_TOKEN_ID).invoke()
+    # print(
+    #     f'\033[1;33;40m🏰 | Realm unpacked: {unpacked_realm_info.result.realm_stats}\n')
 
     # check balance of Realm on account
     await checks_realms_balance(admin_account, realms, 2)
@@ -234,7 +238,8 @@ async def set_realm_meta(account, realms, token):
     """set realm metadata"""
     await signer.send_transaction(
         account, realms.contract_address, 'set_realm_data', [
-            *token, map_realm(json_realms[str(from_uint(token))])]
+            *token, map_realm(
+        realms_data[str(from_uint(token))], resources, wonders, orders)]
     )
 
 
@@ -251,3 +256,12 @@ async def settle_realm(account, settling_logic, token):
     await signer.send_transaction(
         account=account, to=settling_logic.contract_address, selector_name='settle', calldata=[*token]
     )
+
+# async def test_get_set_troop_cost(account, buildings_state):
+#     for troop_id, troop_cost in BUILDING_COSTS.items():
+#         await signer.send_transaction(
+#             account=account, to=buildings_state.contract_address, selector_name='settle', calldata=[troop_id, troop_cost]
+#         )
+#         # await s06_combat.set_troop_cost(troop_id, troop_cost).invoke()
+#         # tx = await s06_combat.get_troop_cost(troop_id).invoke()
+#         # assert tx.result.cost == troop_cost

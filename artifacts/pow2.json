@@ -1,0 +1,4329 @@
+{
+    "abi": [],
+    "entry_points_by_type": {
+        "CONSTRUCTOR": [],
+        "EXTERNAL": [],
+        "L1_HANDLER": []
+    },
+    "program": {
+        "attributes": [],
+        "builtins": [
+            "range_check"
+        ],
+        "data": [
+            "0x208b7fff7fff7ffe",
+            "0x1104800180018000",
+            "0x800000000000011000000000000000000000000000000000000000000000000",
+            "0x482680017ffd8000",
+            "0x800000000000010fffffffffffffffffffffffffffffffffffffffffffffffe",
+            "0x48307fff7ffe8000",
+            "0x208b7fff7fff7ffe",
+            "0x480680017fff8000",
+            "0xe",
+            "0x1104800180018000",
+            "0x800000000000010fffffffffffffffffffffffffffffffffffffffffffffff9",
+            "0x48287ffd7fff8000",
+            "0x480080007fff8000",
+            "0x208b7fff7fff7ffe",
+            "0x1",
+            "0x2",
+            "0x4",
+            "0x8",
+            "0x10",
+            "0x20",
+            "0x40",
+            "0x80",
+            "0x100",
+            "0x200",
+            "0x400",
+            "0x800",
+            "0x1000",
+            "0x2000",
+            "0x4000",
+            "0x8000",
+            "0x10000",
+            "0x20000",
+            "0x40000",
+            "0x80000",
+            "0x100000",
+            "0x200000",
+            "0x400000",
+            "0x800000",
+            "0x1000000",
+            "0x2000000",
+            "0x4000000",
+            "0x8000000",
+            "0x10000000",
+            "0x20000000",
+            "0x40000000",
+            "0x80000000",
+            "0x100000000",
+            "0x200000000",
+            "0x400000000",
+            "0x800000000",
+            "0x1000000000",
+            "0x2000000000",
+            "0x4000000000",
+            "0x8000000000",
+            "0x10000000000",
+            "0x20000000000",
+            "0x40000000000",
+            "0x80000000000",
+            "0x100000000000",
+            "0x200000000000",
+            "0x400000000000",
+            "0x800000000000",
+            "0x1000000000000",
+            "0x2000000000000",
+            "0x4000000000000",
+            "0x8000000000000",
+            "0x10000000000000",
+            "0x20000000000000",
+            "0x40000000000000",
+            "0x80000000000000",
+            "0x100000000000000",
+            "0x200000000000000",
+            "0x400000000000000",
+            "0x800000000000000",
+            "0x1000000000000000",
+            "0x2000000000000000",
+            "0x4000000000000000",
+            "0x8000000000000000",
+            "0x10000000000000000",
+            "0x20000000000000000",
+            "0x40000000000000000",
+            "0x80000000000000000",
+            "0x100000000000000000",
+            "0x200000000000000000",
+            "0x400000000000000000",
+            "0x800000000000000000",
+            "0x1000000000000000000",
+            "0x2000000000000000000",
+            "0x4000000000000000000",
+            "0x8000000000000000000",
+            "0x10000000000000000000",
+            "0x20000000000000000000",
+            "0x40000000000000000000",
+            "0x80000000000000000000",
+            "0x100000000000000000000",
+            "0x200000000000000000000",
+            "0x400000000000000000000",
+            "0x800000000000000000000",
+            "0x1000000000000000000000",
+            "0x2000000000000000000000",
+            "0x4000000000000000000000",
+            "0x8000000000000000000000",
+            "0x10000000000000000000000",
+            "0x20000000000000000000000",
+            "0x40000000000000000000000",
+            "0x80000000000000000000000",
+            "0x100000000000000000000000",
+            "0x200000000000000000000000",
+            "0x400000000000000000000000",
+            "0x800000000000000000000000",
+            "0x1000000000000000000000000",
+            "0x2000000000000000000000000",
+            "0x4000000000000000000000000",
+            "0x8000000000000000000000000",
+            "0x10000000000000000000000000",
+            "0x20000000000000000000000000",
+            "0x40000000000000000000000000",
+            "0x80000000000000000000000000",
+            "0x100000000000000000000000000",
+            "0x200000000000000000000000000",
+            "0x400000000000000000000000000",
+            "0x800000000000000000000000000",
+            "0x1000000000000000000000000000",
+            "0x2000000000000000000000000000",
+            "0x4000000000000000000000000000",
+            "0x8000000000000000000000000000",
+            "0x10000000000000000000000000000",
+            "0x20000000000000000000000000000",
+            "0x40000000000000000000000000000",
+            "0x80000000000000000000000000000",
+            "0x100000000000000000000000000000",
+            "0x200000000000000000000000000000",
+            "0x400000000000000000000000000000",
+            "0x800000000000000000000000000000",
+            "0x1000000000000000000000000000000",
+            "0x2000000000000000000000000000000",
+            "0x4000000000000000000000000000000",
+            "0x8000000000000000000000000000000",
+            "0x10000000000000000000000000000000",
+            "0x20000000000000000000000000000000",
+            "0x40000000000000000000000000000000",
+            "0x80000000000000000000000000000000",
+            "0x100000000000000000000000000000000"
+        ],
+        "debug_info": {
+            "file_contents": {},
+            "instruction_locations": {
+                "0": {
+                    "accessible_scopes": [
+                        "starkware.cairo.lang.compiler.lib.registers",
+                        "starkware.cairo.lang.compiler.lib.registers.get_fp_and_pc"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 0,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 46,
+                        "end_line": 6,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/lang/compiler/lib/registers.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 6
+                    }
+                },
+                "1": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.registers",
+                        "starkware.cairo.common.registers.get_label_location"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 1,
+                            "offset": 0
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.registers.get_label_location.label_value": 0
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 38,
+                        "end_line": 22,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/registers.cairo"
+                        },
+                        "start_col": 23,
+                        "start_line": 22
+                    }
+                },
+                "3": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.registers",
+                        "starkware.cairo.common.registers.get_label_location"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 1,
+                            "offset": 2
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.registers.get_label_location.label_value": 0,
+                            "starkware.cairo.common.registers.get_label_location.pc_val": 1
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 53,
+                        "end_line": 25,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/registers.cairo"
+                        },
+                        "start_col": 27,
+                        "start_line": 25
+                    }
+                },
+                "5": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.registers",
+                        "starkware.cairo.common.registers.get_label_location"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 1,
+                            "offset": 3
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.registers.get_label_location.__temp0": 2,
+                            "starkware.cairo.common.registers.get_label_location.label_value": 0,
+                            "starkware.cairo.common.registers.get_label_location.pc_val": 1
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 54,
+                        "end_line": 25,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/registers.cairo"
+                        },
+                        "start_col": 17,
+                        "start_line": 25
+                    }
+                },
+                "6": {
+                    "accessible_scopes": [
+                        "starkware.cairo.common.registers",
+                        "starkware.cairo.common.registers.get_label_location"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 1,
+                            "offset": 4
+                        },
+                        "reference_ids": {
+                            "starkware.cairo.common.registers.get_label_location.__temp0": 2,
+                            "starkware.cairo.common.registers.get_label_location.label_value": 0,
+                            "starkware.cairo.common.registers.get_label_location.pc_val": 1
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 55,
+                        "end_line": 25,
+                        "input_file": {
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/registers.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 25
+                    }
+                },
+                "7": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 2,
+                            "offset": 0
+                        },
+                        "reference_ids": {
+                            "__main__.pow2.i": 3
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 49,
+                        "end_line": 8,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 45,
+                        "start_line": 8
+                    }
+                },
+                "9": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 2,
+                            "offset": 1
+                        },
+                        "reference_ids": {
+                            "__main__.pow2.i": 3
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 50,
+                        "end_line": 8,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 26,
+                        "start_line": 8
+                    }
+                },
+                "11": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 2,
+                            "offset": 7
+                        },
+                        "reference_ids": {
+                            "__main__.pow2.data_address": 4,
+                            "__main__.pow2.i": 3
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 30,
+                        "end_line": 9,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 14,
+                        "start_line": 9
+                    }
+                },
+                "12": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 2,
+                            "offset": 8
+                        },
+                        "reference_ids": {
+                            "__main__.pow2.__temp1": 5,
+                            "__main__.pow2.data_address": 4,
+                            "__main__.pow2.i": 3
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 31,
+                        "end_line": 9,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 13,
+                        "start_line": 9
+                    }
+                },
+                "13": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 2,
+                            "offset": 9
+                        },
+                        "reference_ids": {
+                            "__main__.pow2.__temp1": 5,
+                            "__main__.pow2.data_address": 4,
+                            "__main__.pow2.i": 3
+                        }
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 32,
+                        "end_line": 9,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 9
+                    }
+                },
+                "14": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 3,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 9,
+                        "end_line": 12,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 12
+                    }
+                },
+                "15": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 4,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 9,
+                        "end_line": 13,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 13
+                    }
+                },
+                "16": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 5,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 9,
+                        "end_line": 14,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 14
+                    }
+                },
+                "17": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 6,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 9,
+                        "end_line": 15,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 15
+                    }
+                },
+                "18": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 7,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 10,
+                        "end_line": 16,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 16
+                    }
+                },
+                "19": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 8,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 10,
+                        "end_line": 17,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 17
+                    }
+                },
+                "20": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 9,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 10,
+                        "end_line": 18,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 18
+                    }
+                },
+                "21": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 10,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 11,
+                        "end_line": 19,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 19
+                    }
+                },
+                "22": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 11,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 11,
+                        "end_line": 20,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 20
+                    }
+                },
+                "23": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 12,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 11,
+                        "end_line": 21,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 21
+                    }
+                },
+                "24": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 13,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 12,
+                        "end_line": 22,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 22
+                    }
+                },
+                "25": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 14,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 12,
+                        "end_line": 23,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 23
+                    }
+                },
+                "26": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 15,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 12,
+                        "end_line": 24,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 24
+                    }
+                },
+                "27": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 16,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 12,
+                        "end_line": 25,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 25
+                    }
+                },
+                "28": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 17,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 13,
+                        "end_line": 26,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 26
+                    }
+                },
+                "29": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 18,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 13,
+                        "end_line": 27,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 27
+                    }
+                },
+                "30": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 19,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 13,
+                        "end_line": 28,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 28
+                    }
+                },
+                "31": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 20,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 14,
+                        "end_line": 29,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 29
+                    }
+                },
+                "32": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 21,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 14,
+                        "end_line": 30,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 30
+                    }
+                },
+                "33": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 22,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 14,
+                        "end_line": 31,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 31
+                    }
+                },
+                "34": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 23,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 15,
+                        "end_line": 32,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 32
+                    }
+                },
+                "35": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 24,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 15,
+                        "end_line": 33,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 33
+                    }
+                },
+                "36": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 25,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 15,
+                        "end_line": 34,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 34
+                    }
+                },
+                "37": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 26,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 15,
+                        "end_line": 35,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 35
+                    }
+                },
+                "38": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 27,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 16,
+                        "end_line": 36,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 36
+                    }
+                },
+                "39": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 28,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 16,
+                        "end_line": 37,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 37
+                    }
+                },
+                "40": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 29,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 16,
+                        "end_line": 38,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 38
+                    }
+                },
+                "41": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 30,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 17,
+                        "end_line": 39,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 39
+                    }
+                },
+                "42": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 31,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 17,
+                        "end_line": 40,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 40
+                    }
+                },
+                "43": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 32,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 17,
+                        "end_line": 41,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 41
+                    }
+                },
+                "44": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 33,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 18,
+                        "end_line": 42,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 42
+                    }
+                },
+                "45": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 34,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 18,
+                        "end_line": 43,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 43
+                    }
+                },
+                "46": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 35,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 18,
+                        "end_line": 44,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 44
+                    }
+                },
+                "47": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 36,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 18,
+                        "end_line": 45,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 45
+                    }
+                },
+                "48": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 37,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 19,
+                        "end_line": 46,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 46
+                    }
+                },
+                "49": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 38,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 19,
+                        "end_line": 47,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 47
+                    }
+                },
+                "50": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 39,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 19,
+                        "end_line": 48,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 48
+                    }
+                },
+                "51": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 40,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 20,
+                        "end_line": 49,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 49
+                    }
+                },
+                "52": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 41,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 20,
+                        "end_line": 50,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 50
+                    }
+                },
+                "53": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 42,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 20,
+                        "end_line": 51,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 51
+                    }
+                },
+                "54": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 43,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 21,
+                        "end_line": 52,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 52
+                    }
+                },
+                "55": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 44,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 21,
+                        "end_line": 53,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 53
+                    }
+                },
+                "56": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 45,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 21,
+                        "end_line": 54,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 54
+                    }
+                },
+                "57": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 46,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 21,
+                        "end_line": 55,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 55
+                    }
+                },
+                "58": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 47,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 22,
+                        "end_line": 56,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 56
+                    }
+                },
+                "59": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 48,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 22,
+                        "end_line": 57,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 57
+                    }
+                },
+                "60": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 49,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 22,
+                        "end_line": 58,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 58
+                    }
+                },
+                "61": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 50,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 23,
+                        "end_line": 59,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 59
+                    }
+                },
+                "62": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 51,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 23,
+                        "end_line": 60,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 60
+                    }
+                },
+                "63": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 52,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 23,
+                        "end_line": 61,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 61
+                    }
+                },
+                "64": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 53,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 24,
+                        "end_line": 62,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 62
+                    }
+                },
+                "65": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 54,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 24,
+                        "end_line": 63,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 63
+                    }
+                },
+                "66": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 55,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 24,
+                        "end_line": 64,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 64
+                    }
+                },
+                "67": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 56,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 24,
+                        "end_line": 65,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 65
+                    }
+                },
+                "68": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 57,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 25,
+                        "end_line": 66,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 66
+                    }
+                },
+                "69": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 58,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 25,
+                        "end_line": 67,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 67
+                    }
+                },
+                "70": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 59,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 25,
+                        "end_line": 68,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 68
+                    }
+                },
+                "71": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 60,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 26,
+                        "end_line": 69,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 69
+                    }
+                },
+                "72": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 61,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 26,
+                        "end_line": 70,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 70
+                    }
+                },
+                "73": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 62,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 26,
+                        "end_line": 71,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 71
+                    }
+                },
+                "74": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 63,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 27,
+                        "end_line": 72,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 72
+                    }
+                },
+                "75": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 64,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 27,
+                        "end_line": 73,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 73
+                    }
+                },
+                "76": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 65,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 27,
+                        "end_line": 74,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 74
+                    }
+                },
+                "77": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 66,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 27,
+                        "end_line": 75,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 75
+                    }
+                },
+                "78": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 67,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 28,
+                        "end_line": 76,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 76
+                    }
+                },
+                "79": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 68,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 28,
+                        "end_line": 77,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 77
+                    }
+                },
+                "80": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 69,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 28,
+                        "end_line": 78,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 78
+                    }
+                },
+                "81": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 70,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 29,
+                        "end_line": 79,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 79
+                    }
+                },
+                "82": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 71,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 29,
+                        "end_line": 80,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 80
+                    }
+                },
+                "83": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 72,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 29,
+                        "end_line": 81,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 81
+                    }
+                },
+                "84": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 73,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 30,
+                        "end_line": 82,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 82
+                    }
+                },
+                "85": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 74,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 30,
+                        "end_line": 83,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 83
+                    }
+                },
+                "86": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 75,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 30,
+                        "end_line": 84,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 84
+                    }
+                },
+                "87": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 76,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 30,
+                        "end_line": 85,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 85
+                    }
+                },
+                "88": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 77,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 31,
+                        "end_line": 86,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 86
+                    }
+                },
+                "89": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 78,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 31,
+                        "end_line": 87,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 87
+                    }
+                },
+                "90": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 79,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 31,
+                        "end_line": 88,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 88
+                    }
+                },
+                "91": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 80,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 32,
+                        "end_line": 89,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 89
+                    }
+                },
+                "92": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 81,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 32,
+                        "end_line": 90,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 90
+                    }
+                },
+                "93": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 82,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 32,
+                        "end_line": 91,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 91
+                    }
+                },
+                "94": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 83,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 33,
+                        "end_line": 92,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 92
+                    }
+                },
+                "95": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 84,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 33,
+                        "end_line": 93,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 93
+                    }
+                },
+                "96": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 85,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 33,
+                        "end_line": 94,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 94
+                    }
+                },
+                "97": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 86,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 33,
+                        "end_line": 95,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 95
+                    }
+                },
+                "98": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 87,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 34,
+                        "end_line": 96,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 96
+                    }
+                },
+                "99": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 88,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 34,
+                        "end_line": 97,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 97
+                    }
+                },
+                "100": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 89,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 34,
+                        "end_line": 98,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 98
+                    }
+                },
+                "101": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 90,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 35,
+                        "end_line": 99,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 99
+                    }
+                },
+                "102": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 91,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 35,
+                        "end_line": 100,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 100
+                    }
+                },
+                "103": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 92,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 35,
+                        "end_line": 101,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 101
+                    }
+                },
+                "104": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 93,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 36,
+                        "end_line": 102,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 102
+                    }
+                },
+                "105": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 94,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 36,
+                        "end_line": 103,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 103
+                    }
+                },
+                "106": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 95,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 36,
+                        "end_line": 104,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 104
+                    }
+                },
+                "107": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 96,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 36,
+                        "end_line": 105,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 105
+                    }
+                },
+                "108": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 97,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 37,
+                        "end_line": 106,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 106
+                    }
+                },
+                "109": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 98,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 37,
+                        "end_line": 107,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 107
+                    }
+                },
+                "110": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 99,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 37,
+                        "end_line": 108,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 108
+                    }
+                },
+                "111": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 100,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 38,
+                        "end_line": 109,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 109
+                    }
+                },
+                "112": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 101,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 38,
+                        "end_line": 110,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 110
+                    }
+                },
+                "113": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 102,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 38,
+                        "end_line": 111,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 111
+                    }
+                },
+                "114": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 103,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 39,
+                        "end_line": 112,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 112
+                    }
+                },
+                "115": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 104,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 39,
+                        "end_line": 113,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 113
+                    }
+                },
+                "116": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 105,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 39,
+                        "end_line": 114,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 114
+                    }
+                },
+                "117": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 106,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 40,
+                        "end_line": 115,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 115
+                    }
+                },
+                "118": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 107,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 40,
+                        "end_line": 116,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 116
+                    }
+                },
+                "119": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 108,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 40,
+                        "end_line": 117,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 117
+                    }
+                },
+                "120": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 109,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 40,
+                        "end_line": 118,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 118
+                    }
+                },
+                "121": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 110,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 41,
+                        "end_line": 119,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 119
+                    }
+                },
+                "122": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 111,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 41,
+                        "end_line": 120,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 120
+                    }
+                },
+                "123": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 112,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 41,
+                        "end_line": 121,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 121
+                    }
+                },
+                "124": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 113,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 42,
+                        "end_line": 122,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 122
+                    }
+                },
+                "125": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 114,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 42,
+                        "end_line": 123,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 123
+                    }
+                },
+                "126": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 115,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 42,
+                        "end_line": 124,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 124
+                    }
+                },
+                "127": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 116,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 43,
+                        "end_line": 125,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 125
+                    }
+                },
+                "128": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 117,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 43,
+                        "end_line": 126,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 126
+                    }
+                },
+                "129": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 118,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 43,
+                        "end_line": 127,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 127
+                    }
+                },
+                "130": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 119,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 43,
+                        "end_line": 128,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 128
+                    }
+                },
+                "131": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 120,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 44,
+                        "end_line": 129,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 129
+                    }
+                },
+                "132": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 121,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 44,
+                        "end_line": 130,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 130
+                    }
+                },
+                "133": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 122,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 44,
+                        "end_line": 131,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 131
+                    }
+                },
+                "134": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 123,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 45,
+                        "end_line": 132,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 132
+                    }
+                },
+                "135": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 124,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 45,
+                        "end_line": 133,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 133
+                    }
+                },
+                "136": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 125,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 45,
+                        "end_line": 134,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 134
+                    }
+                },
+                "137": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 126,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 46,
+                        "end_line": 135,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 135
+                    }
+                },
+                "138": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 127,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 46,
+                        "end_line": 136,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 136
+                    }
+                },
+                "139": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 128,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 46,
+                        "end_line": 137,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 137
+                    }
+                },
+                "140": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 129,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 46,
+                        "end_line": 138,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 138
+                    }
+                },
+                "141": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 130,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 47,
+                        "end_line": 139,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 139
+                    }
+                },
+                "142": {
+                    "accessible_scopes": [
+                        "__main__",
+                        "__main__.pow2"
+                    ],
+                    "flow_tracking_data": {
+                        "ap_tracking": {
+                            "group": 131,
+                            "offset": 0
+                        },
+                        "reference_ids": {}
+                    },
+                    "hints": [],
+                    "inst": {
+                        "end_col": 47,
+                        "end_line": 140,
+                        "input_file": {
+                            "filename": "contracts/settling_game/utils/pow2.cairo"
+                        },
+                        "start_col": 5,
+                        "start_line": 140
+                    }
+                }
+            }
+        },
+        "hints": {},
+        "identifiers": {
+            "__main__.get_label_location": {
+                "destination": "starkware.cairo.common.registers.get_label_location",
+                "type": "alias"
+            },
+            "__main__.pow2": {
+                "decorators": [],
+                "pc": 7,
+                "type": "function"
+            },
+            "__main__.pow2.Args": {
+                "full_name": "__main__.pow2.Args",
+                "members": {
+                    "i": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "__main__.pow2.ImplicitArgs": {
+                "full_name": "__main__.pow2.ImplicitArgs",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.pow2.Return": {
+                "full_name": "__main__.pow2.Return",
+                "members": {
+                    "res": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "__main__.pow2.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.pow2.__temp1": {
+                "cairo_type": "felt",
+                "full_name": "__main__.pow2.__temp1",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 2,
+                            "offset": 8
+                        },
+                        "pc": 12,
+                        "value": "[cast(ap + (-1), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "__main__.pow2.data": {
+                "pc": 14,
+                "type": "label"
+            },
+            "__main__.pow2.data_address": {
+                "cairo_type": "felt",
+                "full_name": "__main__.pow2.data_address",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 2,
+                            "offset": 7
+                        },
+                        "pc": 11,
+                        "value": "[cast(ap + (-1), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "__main__.pow2.i": {
+                "cairo_type": "felt",
+                "full_name": "__main__.pow2.i",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 2,
+                            "offset": 0
+                        },
+                        "pc": 7,
+                        "value": "[cast(fp + (-3), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "starkware.cairo.common.cairo_builtins.BitwiseBuiltin": {
+                "full_name": "starkware.cairo.common.cairo_builtins.BitwiseBuiltin",
+                "members": {
+                    "x": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    },
+                    "x_and_y": {
+                        "cairo_type": "felt",
+                        "offset": 2
+                    },
+                    "x_or_y": {
+                        "cairo_type": "felt",
+                        "offset": 4
+                    },
+                    "x_xor_y": {
+                        "cairo_type": "felt",
+                        "offset": 3
+                    },
+                    "y": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    }
+                },
+                "size": 5,
+                "type": "struct"
+            },
+            "starkware.cairo.common.cairo_builtins.EcOpBuiltin": {
+                "full_name": "starkware.cairo.common.cairo_builtins.EcOpBuiltin",
+                "members": {
+                    "m": {
+                        "cairo_type": "felt",
+                        "offset": 4
+                    },
+                    "p": {
+                        "cairo_type": "starkware.cairo.common.ec_point.EcPoint",
+                        "offset": 0
+                    },
+                    "q": {
+                        "cairo_type": "starkware.cairo.common.ec_point.EcPoint",
+                        "offset": 2
+                    },
+                    "r": {
+                        "cairo_type": "starkware.cairo.common.ec_point.EcPoint",
+                        "offset": 5
+                    }
+                },
+                "size": 7,
+                "type": "struct"
+            },
+            "starkware.cairo.common.cairo_builtins.EcPoint": {
+                "destination": "starkware.cairo.common.ec_point.EcPoint",
+                "type": "alias"
+            },
+            "starkware.cairo.common.cairo_builtins.HashBuiltin": {
+                "full_name": "starkware.cairo.common.cairo_builtins.HashBuiltin",
+                "members": {
+                    "result": {
+                        "cairo_type": "felt",
+                        "offset": 2
+                    },
+                    "x": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    },
+                    "y": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    }
+                },
+                "size": 3,
+                "type": "struct"
+            },
+            "starkware.cairo.common.cairo_builtins.SignatureBuiltin": {
+                "full_name": "starkware.cairo.common.cairo_builtins.SignatureBuiltin",
+                "members": {
+                    "message": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    },
+                    "pub_key": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.cairo.common.dict_access.DictAccess": {
+                "full_name": "starkware.cairo.common.dict_access.DictAccess",
+                "members": {
+                    "key": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    },
+                    "new_value": {
+                        "cairo_type": "felt",
+                        "offset": 2
+                    },
+                    "prev_value": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    }
+                },
+                "size": 3,
+                "type": "struct"
+            },
+            "starkware.cairo.common.ec_point.EcPoint": {
+                "full_name": "starkware.cairo.common.ec_point.EcPoint",
+                "members": {
+                    "x": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    },
+                    "y": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.cairo.common.hash.HashBuiltin": {
+                "destination": "starkware.cairo.common.cairo_builtins.HashBuiltin",
+                "type": "alias"
+            },
+            "starkware.cairo.common.registers.get_ap": {
+                "destination": "starkware.cairo.lang.compiler.lib.registers.get_ap",
+                "type": "alias"
+            },
+            "starkware.cairo.common.registers.get_fp_and_pc": {
+                "destination": "starkware.cairo.lang.compiler.lib.registers.get_fp_and_pc",
+                "type": "alias"
+            },
+            "starkware.cairo.common.registers.get_label_location": {
+                "decorators": [],
+                "pc": 1,
+                "type": "function"
+            },
+            "starkware.cairo.common.registers.get_label_location.Args": {
+                "full_name": "starkware.cairo.common.registers.get_label_location.Args",
+                "members": {
+                    "label_value": {
+                        "cairo_type": "codeoffset",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.cairo.common.registers.get_label_location.ImplicitArgs": {
+                "full_name": "starkware.cairo.common.registers.get_label_location.ImplicitArgs",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "starkware.cairo.common.registers.get_label_location.Return": {
+                "full_name": "starkware.cairo.common.registers.get_label_location.Return",
+                "members": {
+                    "res": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.cairo.common.registers.get_label_location.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "starkware.cairo.common.registers.get_label_location.__temp0": {
+                "cairo_type": "felt",
+                "full_name": "starkware.cairo.common.registers.get_label_location.__temp0",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 1,
+                            "offset": 3
+                        },
+                        "pc": 5,
+                        "value": "[cast(ap + (-1), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "starkware.cairo.common.registers.get_label_location.label_value": {
+                "cairo_type": "codeoffset",
+                "full_name": "starkware.cairo.common.registers.get_label_location.label_value",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 1,
+                            "offset": 0
+                        },
+                        "pc": 1,
+                        "value": "[cast(fp + (-3), codeoffset*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "starkware.cairo.common.registers.get_label_location.pc_val": {
+                "cairo_type": "felt",
+                "full_name": "starkware.cairo.common.registers.get_label_location.pc_val",
+                "references": [
+                    {
+                        "ap_tracking_data": {
+                            "group": 1,
+                            "offset": 2
+                        },
+                        "pc": 3,
+                        "value": "[cast(ap + (-1), felt*)]"
+                    }
+                ],
+                "type": "reference"
+            },
+            "starkware.cairo.common.registers.get_label_location.ret_pc_label": {
+                "pc": 3,
+                "type": "label"
+            },
+            "starkware.cairo.lang.compiler.lib.registers.get_fp_and_pc": {
+                "decorators": [],
+                "pc": 0,
+                "type": "function"
+            },
+            "starkware.cairo.lang.compiler.lib.registers.get_fp_and_pc.Args": {
+                "full_name": "starkware.cairo.lang.compiler.lib.registers.get_fp_and_pc.Args",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "starkware.cairo.lang.compiler.lib.registers.get_fp_and_pc.ImplicitArgs": {
+                "full_name": "starkware.cairo.lang.compiler.lib.registers.get_fp_and_pc.ImplicitArgs",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "starkware.cairo.lang.compiler.lib.registers.get_fp_and_pc.Return": {
+                "full_name": "starkware.cairo.lang.compiler.lib.registers.get_fp_and_pc.Return",
+                "members": {
+                    "fp_val": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    },
+                    "pc_val": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.cairo.lang.compiler.lib.registers.get_fp_and_pc.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "starkware.starknet.common.storage.ADDR_BOUND": {
+                "type": "const",
+                "value": -106710729501573572985208420194530329073740042555888586719489
+            },
+            "starkware.starknet.common.storage.MAX_STORAGE_ITEM_SIZE": {
+                "type": "const",
+                "value": 256
+            },
+            "starkware.starknet.common.storage.assert_250_bit": {
+                "destination": "starkware.cairo.common.math.assert_250_bit",
+                "type": "alias"
+            },
+            "starkware.starknet.common.syscalls.CALL_CONTRACT_SELECTOR": {
+                "type": "const",
+                "value": 20853273475220472486191784820
+            },
+            "starkware.starknet.common.syscalls.CallContract": {
+                "full_name": "starkware.starknet.common.syscalls.CallContract",
+                "members": {
+                    "request": {
+                        "cairo_type": "starkware.starknet.common.syscalls.CallContractRequest",
+                        "offset": 0
+                    },
+                    "response": {
+                        "cairo_type": "starkware.starknet.common.syscalls.CallContractResponse",
+                        "offset": 5
+                    }
+                },
+                "size": 7,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.CallContractRequest": {
+                "full_name": "starkware.starknet.common.syscalls.CallContractRequest",
+                "members": {
+                    "calldata": {
+                        "cairo_type": "felt*",
+                        "offset": 4
+                    },
+                    "calldata_size": {
+                        "cairo_type": "felt",
+                        "offset": 3
+                    },
+                    "contract_address": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    },
+                    "function_selector": {
+                        "cairo_type": "felt",
+                        "offset": 2
+                    },
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 5,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.CallContractResponse": {
+                "full_name": "starkware.starknet.common.syscalls.CallContractResponse",
+                "members": {
+                    "retdata": {
+                        "cairo_type": "felt*",
+                        "offset": 1
+                    },
+                    "retdata_size": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.DELEGATE_CALL_SELECTOR": {
+                "type": "const",
+                "value": 21167594061783206823196716140
+            },
+            "starkware.starknet.common.syscalls.DELEGATE_L1_HANDLER_SELECTOR": {
+                "type": "const",
+                "value": 23274015802972845247556842986379118667122
+            },
+            "starkware.starknet.common.syscalls.DictAccess": {
+                "destination": "starkware.cairo.common.dict_access.DictAccess",
+                "type": "alias"
+            },
+            "starkware.starknet.common.syscalls.EMIT_EVENT_SELECTOR": {
+                "type": "const",
+                "value": 1280709301550335749748
+            },
+            "starkware.starknet.common.syscalls.EmitEvent": {
+                "full_name": "starkware.starknet.common.syscalls.EmitEvent",
+                "members": {
+                    "data": {
+                        "cairo_type": "felt*",
+                        "offset": 4
+                    },
+                    "data_len": {
+                        "cairo_type": "felt",
+                        "offset": 3
+                    },
+                    "keys": {
+                        "cairo_type": "felt*",
+                        "offset": 2
+                    },
+                    "keys_len": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    },
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 5,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GET_BLOCK_NUMBER_SELECTOR": {
+                "type": "const",
+                "value": 1448089106835523001438702345020786
+            },
+            "starkware.starknet.common.syscalls.GET_BLOCK_TIMESTAMP_SELECTOR": {
+                "type": "const",
+                "value": 24294903732626645868215235778792757751152
+            },
+            "starkware.starknet.common.syscalls.GET_CALLER_ADDRESS_SELECTOR": {
+                "type": "const",
+                "value": 94901967781393078444254803017658102643
+            },
+            "starkware.starknet.common.syscalls.GET_CONTRACT_ADDRESS_SELECTOR": {
+                "type": "const",
+                "value": 6219495360805491471215297013070624192820083
+            },
+            "starkware.starknet.common.syscalls.GET_SEQUENCER_ADDRESS_SELECTOR": {
+                "type": "const",
+                "value": 1592190833581991703053805829594610833820054387
+            },
+            "starkware.starknet.common.syscalls.GET_TX_INFO_SELECTOR": {
+                "type": "const",
+                "value": 1317029390204112103023
+            },
+            "starkware.starknet.common.syscalls.GET_TX_SIGNATURE_SELECTOR": {
+                "type": "const",
+                "value": 1448089128652340074717162277007973
+            },
+            "starkware.starknet.common.syscalls.GetBlockNumber": {
+                "full_name": "starkware.starknet.common.syscalls.GetBlockNumber",
+                "members": {
+                    "request": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetBlockNumberRequest",
+                        "offset": 0
+                    },
+                    "response": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetBlockNumberResponse",
+                        "offset": 1
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetBlockNumberRequest": {
+                "full_name": "starkware.starknet.common.syscalls.GetBlockNumberRequest",
+                "members": {
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetBlockNumberResponse": {
+                "full_name": "starkware.starknet.common.syscalls.GetBlockNumberResponse",
+                "members": {
+                    "block_number": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetBlockTimestamp": {
+                "full_name": "starkware.starknet.common.syscalls.GetBlockTimestamp",
+                "members": {
+                    "request": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetBlockTimestampRequest",
+                        "offset": 0
+                    },
+                    "response": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetBlockTimestampResponse",
+                        "offset": 1
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetBlockTimestampRequest": {
+                "full_name": "starkware.starknet.common.syscalls.GetBlockTimestampRequest",
+                "members": {
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetBlockTimestampResponse": {
+                "full_name": "starkware.starknet.common.syscalls.GetBlockTimestampResponse",
+                "members": {
+                    "block_timestamp": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetCallerAddress": {
+                "full_name": "starkware.starknet.common.syscalls.GetCallerAddress",
+                "members": {
+                    "request": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetCallerAddressRequest",
+                        "offset": 0
+                    },
+                    "response": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetCallerAddressResponse",
+                        "offset": 1
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetCallerAddressRequest": {
+                "full_name": "starkware.starknet.common.syscalls.GetCallerAddressRequest",
+                "members": {
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetCallerAddressResponse": {
+                "full_name": "starkware.starknet.common.syscalls.GetCallerAddressResponse",
+                "members": {
+                    "caller_address": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetContractAddress": {
+                "full_name": "starkware.starknet.common.syscalls.GetContractAddress",
+                "members": {
+                    "request": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetContractAddressRequest",
+                        "offset": 0
+                    },
+                    "response": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetContractAddressResponse",
+                        "offset": 1
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetContractAddressRequest": {
+                "full_name": "starkware.starknet.common.syscalls.GetContractAddressRequest",
+                "members": {
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetContractAddressResponse": {
+                "full_name": "starkware.starknet.common.syscalls.GetContractAddressResponse",
+                "members": {
+                    "contract_address": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetSequencerAddress": {
+                "full_name": "starkware.starknet.common.syscalls.GetSequencerAddress",
+                "members": {
+                    "request": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetSequencerAddressRequest",
+                        "offset": 0
+                    },
+                    "response": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetSequencerAddressResponse",
+                        "offset": 1
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetSequencerAddressRequest": {
+                "full_name": "starkware.starknet.common.syscalls.GetSequencerAddressRequest",
+                "members": {
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetSequencerAddressResponse": {
+                "full_name": "starkware.starknet.common.syscalls.GetSequencerAddressResponse",
+                "members": {
+                    "sequencer_address": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetTxInfo": {
+                "full_name": "starkware.starknet.common.syscalls.GetTxInfo",
+                "members": {
+                    "request": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetTxInfoRequest",
+                        "offset": 0
+                    },
+                    "response": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetTxInfoResponse",
+                        "offset": 1
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetTxInfoRequest": {
+                "full_name": "starkware.starknet.common.syscalls.GetTxInfoRequest",
+                "members": {
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetTxInfoResponse": {
+                "full_name": "starkware.starknet.common.syscalls.GetTxInfoResponse",
+                "members": {
+                    "tx_info": {
+                        "cairo_type": "starkware.starknet.common.syscalls.TxInfo*",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetTxSignature": {
+                "full_name": "starkware.starknet.common.syscalls.GetTxSignature",
+                "members": {
+                    "request": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetTxSignatureRequest",
+                        "offset": 0
+                    },
+                    "response": {
+                        "cairo_type": "starkware.starknet.common.syscalls.GetTxSignatureResponse",
+                        "offset": 1
+                    }
+                },
+                "size": 3,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetTxSignatureRequest": {
+                "full_name": "starkware.starknet.common.syscalls.GetTxSignatureRequest",
+                "members": {
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.GetTxSignatureResponse": {
+                "full_name": "starkware.starknet.common.syscalls.GetTxSignatureResponse",
+                "members": {
+                    "signature": {
+                        "cairo_type": "felt*",
+                        "offset": 1
+                    },
+                    "signature_len": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.SEND_MESSAGE_TO_L1_SELECTOR": {
+                "type": "const",
+                "value": 433017908768303439907196859243777073
+            },
+            "starkware.starknet.common.syscalls.STORAGE_READ_SELECTOR": {
+                "type": "const",
+                "value": 100890693370601760042082660
+            },
+            "starkware.starknet.common.syscalls.STORAGE_WRITE_SELECTOR": {
+                "type": "const",
+                "value": 25828017502874050592466629733
+            },
+            "starkware.starknet.common.syscalls.SendMessageToL1SysCall": {
+                "full_name": "starkware.starknet.common.syscalls.SendMessageToL1SysCall",
+                "members": {
+                    "payload_ptr": {
+                        "cairo_type": "felt*",
+                        "offset": 3
+                    },
+                    "payload_size": {
+                        "cairo_type": "felt",
+                        "offset": 2
+                    },
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    },
+                    "to_address": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    }
+                },
+                "size": 4,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.StorageRead": {
+                "full_name": "starkware.starknet.common.syscalls.StorageRead",
+                "members": {
+                    "request": {
+                        "cairo_type": "starkware.starknet.common.syscalls.StorageReadRequest",
+                        "offset": 0
+                    },
+                    "response": {
+                        "cairo_type": "starkware.starknet.common.syscalls.StorageReadResponse",
+                        "offset": 2
+                    }
+                },
+                "size": 3,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.StorageReadRequest": {
+                "full_name": "starkware.starknet.common.syscalls.StorageReadRequest",
+                "members": {
+                    "address": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    },
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 2,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.StorageReadResponse": {
+                "full_name": "starkware.starknet.common.syscalls.StorageReadResponse",
+                "members": {
+                    "value": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 1,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.StorageWrite": {
+                "full_name": "starkware.starknet.common.syscalls.StorageWrite",
+                "members": {
+                    "address": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    },
+                    "selector": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    },
+                    "value": {
+                        "cairo_type": "felt",
+                        "offset": 2
+                    }
+                },
+                "size": 3,
+                "type": "struct"
+            },
+            "starkware.starknet.common.syscalls.TxInfo": {
+                "full_name": "starkware.starknet.common.syscalls.TxInfo",
+                "members": {
+                    "account_contract_address": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    },
+                    "chain_id": {
+                        "cairo_type": "felt",
+                        "offset": 6
+                    },
+                    "max_fee": {
+                        "cairo_type": "felt",
+                        "offset": 2
+                    },
+                    "signature": {
+                        "cairo_type": "felt*",
+                        "offset": 4
+                    },
+                    "signature_len": {
+                        "cairo_type": "felt",
+                        "offset": 3
+                    },
+                    "transaction_hash": {
+                        "cairo_type": "felt",
+                        "offset": 5
+                    },
+                    "version": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 7,
+                "type": "struct"
+            }
+        },
+        "main_scope": "__main__",
+        "prime": "0x800000000000011000000000000000000000000000000000000000000000001",
+        "reference_manager": {
+            "references": [
+                {
+                    "ap_tracking_data": {
+                        "group": 1,
+                        "offset": 0
+                    },
+                    "pc": 1,
+                    "value": "[cast(fp + (-3), codeoffset*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 1,
+                        "offset": 2
+                    },
+                    "pc": 3,
+                    "value": "[cast(ap + (-1), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 1,
+                        "offset": 3
+                    },
+                    "pc": 5,
+                    "value": "[cast(ap + (-1), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 2,
+                        "offset": 0
+                    },
+                    "pc": 7,
+                    "value": "[cast(fp + (-3), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 2,
+                        "offset": 7
+                    },
+                    "pc": 11,
+                    "value": "[cast(ap + (-1), felt*)]"
+                },
+                {
+                    "ap_tracking_data": {
+                        "group": 2,
+                        "offset": 8
+                    },
+                    "pc": 12,
+                    "value": "[cast(ap + (-1), felt*)]"
+                }
+            ]
+        }
+    }
+}

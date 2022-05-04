@@ -30,19 +30,6 @@ struct RealmData:
     member order : felt  #
 end
 
-struct ResourceUpgradeValues:
-    member resource_1 : felt
-    member resource_2 : felt
-    member resource_3 : felt
-    member resource_4 : felt
-    member resource_5 : felt
-    member resource_1_values : felt
-    member resource_2_values : felt
-    member resource_3_values : felt
-    member resource_4_values : felt
-    member resource_5_values : felt
-end
-
 struct RealmBuildings:
     member Fairgrounds : felt
     member RoyalReserve : felt
@@ -64,32 +51,6 @@ struct RealmBuildings:
     member Fishmonger : felt
     member Farms : felt
     member Hamlet : felt
-end
-
-struct RealmBuildingCostIds:
-    member resource_1 : felt
-    member resource_2 : felt
-    member resource_3 : felt
-    member resource_4 : felt
-    member resource_5 : felt
-    member resource_6 : felt
-    member resource_7 : felt
-    member resource_8 : felt
-    member resource_9 : felt
-    member resource_10 : felt
-end
-
-struct RealmBuildingCostValues:
-    member resource_1_values : felt
-    member resource_2_values : felt
-    member resource_3_values : felt
-    member resource_4_values : felt
-    member resource_5_values : felt
-    member resource_6_values : felt
-    member resource_7_values : felt
-    member resource_8_values : felt
-    member resource_9_values : felt
-    member resource_10_values : felt
 end
 
 namespace RealmBuildingsIds:
@@ -184,7 +145,7 @@ namespace ResourceIds:
     const Wood = 1
     const Stone = 2
     const Coal = 3
-    const Cooper = 4
+    const Copper = 4
     const Obsidian = 5
     const Silver = 6
     const Ironwood = 7
@@ -309,12 +270,14 @@ struct RealmCombatData:
     member last_attacked_at : felt
 end
 
-# struct holding how much resources does it cost to build a Troop
-struct TroopCost:
-    # in total, how many unique resources does a troop cost
+# struct holding how much resources does it cost to build/buy a thing
+struct Cost:
+    # the count of unique ResourceIds necessary
     member resource_count : felt
+    # how many bits are the packed members packed into
+    member bits : felt
     # packed IDs of the necessary resources
-    member token_ids : felt
+    member packed_ids : felt
     # packed amounts of each resource
-    member resource_amounts : felt
+    member packed_amounts : felt
 end

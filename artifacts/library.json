@@ -7679,12 +7679,12 @@
                         "parent_location": [
                             {
                                 "end_col": 21,
-                                "end_line": 29,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 29
+                                "start_line": 24
                             },
                             "While handling contract interface function:"
                         ],
@@ -7719,12 +7719,12 @@
                         "parent_location": [
                             {
                                 "end_col": 21,
-                                "end_line": 29,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 29
+                                "start_line": 24
                             },
                             "While handling contract interface function:"
                         ],
@@ -7760,12 +7760,12 @@
                         "parent_location": [
                             {
                                 "end_col": 21,
-                                "end_line": 29,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 29
+                                "start_line": 24
                             },
                             "While handling contract interface function:"
                         ],
@@ -7802,7 +7802,7 @@
                         "parent_location": [
                             {
                                 "end_col": 21,
-                                "end_line": 29,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
@@ -7823,12 +7823,12 @@
                                                 "parent_location": [
                                                     {
                                                         "end_col": 21,
-                                                        "end_line": 29,
+                                                        "end_line": 24,
                                                         "input_file": {
                                                             "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                         },
                                                         "start_col": 10,
-                                                        "start_line": 29
+                                                        "start_line": 24
                                                     },
                                                     "While handling contract interface function:"
                                                 ],
@@ -7843,7 +7843,7 @@
                                     "While expanding the reference 'syscall_ptr' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 29
+                                "start_line": 24
                             },
                             "While handling contract interface function:"
                         ],
@@ -7880,7 +7880,7 @@
                         "parent_location": [
                             {
                                 "end_col": 21,
-                                "end_line": 29,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
@@ -7894,12 +7894,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 21,
-                                                "end_line": 29,
+                                                "end_line": 24,
                                                 "input_file": {
                                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                 },
                                                 "start_col": 10,
-                                                "start_line": 29
+                                                "start_line": 24
                                             },
                                             "While handling contract interface function:"
                                         ],
@@ -7909,7 +7909,7 @@
                                     "While expanding the reference 'contract_address' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 29
+                                "start_line": 24
                             },
                             "While handling contract interface function:"
                         ],
@@ -7946,12 +7946,12 @@
                         "parent_location": [
                             {
                                 "end_col": 21,
-                                "end_line": 29,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 29
+                                "start_line": 24
                             },
                             "While handling contract interface function:"
                         ],
@@ -7988,12 +7988,12 @@
                         "parent_location": [
                             {
                                 "end_col": 21,
-                                "end_line": 29,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 29
+                                "start_line": 24
                             },
                             "While handling contract interface function:"
                         ],
@@ -8030,7 +8030,7 @@
                         "parent_location": [
                             {
                                 "end_col": 21,
-                                "end_line": 29,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
@@ -8044,12 +8044,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 21,
-                                                "end_line": 29,
+                                                "end_line": 24,
                                                 "input_file": {
                                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                 },
                                                 "start_col": 10,
-                                                "start_line": 29
+                                                "start_line": 24
                                             },
                                             "While handling contract interface function:"
                                         ],
@@ -8059,7 +8059,7 @@
                                     "While expanding the reference 'calldata_ptr_start' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 29
+                                "start_line": 24
                             },
                             "While handling contract interface function:"
                         ],
@@ -8096,12 +8096,12 @@
                         "parent_location": [
                             {
                                 "end_col": 21,
-                                "end_line": 29,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 29
+                                "start_line": 24
                             },
                             "While handling contract interface function:"
                         ],
@@ -8143,7 +8143,7 @@
                         "parent_location": [
                             {
                                 "end_col": 35,
-                                "end_line": 29,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
@@ -8157,7 +8157,7 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 21,
-                                                "end_line": 29,
+                                                "end_line": 24,
                                                 "input_file": {
                                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                 },
@@ -8171,12 +8171,12 @@
                                                         "parent_location": [
                                                             {
                                                                 "end_col": 21,
-                                                                "end_line": 29,
+                                                                "end_line": 24,
                                                                 "input_file": {
                                                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                                 },
                                                                 "start_col": 10,
-                                                                "start_line": 29
+                                                                "start_line": 24
                                                             },
                                                             "While handling return values of"
                                                         ],
@@ -8186,7 +8186,7 @@
                                                     "While expanding the reference '__return_value_actual_size' in:"
                                                 ],
                                                 "start_col": 10,
-                                                "start_line": 29
+                                                "start_line": 24
                                             },
                                             "While handling return values of"
                                         ],
@@ -8196,7 +8196,7 @@
                                     "While expanding the reference '__return_value_ptr' in:"
                                 ],
                                 "start_col": 28,
-                                "start_line": 29
+                                "start_line": 24
                             },
                             "While handling return value 'arbiter'"
                         ],
@@ -8239,12 +8239,12 @@
                         "parent_location": [
                             {
                                 "end_col": 21,
-                                "end_line": 29,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 29
+                                "start_line": 24
                             },
                             "While handling return values of"
                         ],
@@ -8294,7 +8294,7 @@
                                 "parent_location": [
                                     {
                                         "end_col": 21,
-                                        "end_line": 29,
+                                        "end_line": 24,
                                         "input_file": {
                                             "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                         },
@@ -8308,7 +8308,7 @@
                                                 "parent_location": [
                                                     {
                                                         "end_col": 21,
-                                                        "end_line": 29,
+                                                        "end_line": 24,
                                                         "input_file": {
                                                             "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                         },
@@ -8322,12 +8322,12 @@
                                                                 "parent_location": [
                                                                     {
                                                                         "end_col": 21,
-                                                                        "end_line": 29,
+                                                                        "end_line": 24,
                                                                         "input_file": {
                                                                             "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                                         },
                                                                         "start_col": 10,
-                                                                        "start_line": 29
+                                                                        "start_line": 24
                                                                     },
                                                                     "While handling contract interface function:"
                                                                 ],
@@ -8337,7 +8337,7 @@
                                                             "While trying to retrieve the implicit argument 'syscall_ptr' in:"
                                                         ],
                                                         "start_col": 10,
-                                                        "start_line": 29
+                                                        "start_line": 24
                                                     },
                                                     "While handling contract interface function:"
                                                 ],
@@ -8347,7 +8347,7 @@
                                             "While expanding the reference 'syscall_ptr' in:"
                                         ],
                                         "start_col": 10,
-                                        "start_line": 29
+                                        "start_line": 24
                                     },
                                     "While handling contract interface function:"
                                 ],
@@ -8395,7 +8395,7 @@
                         "parent_location": [
                             {
                                 "end_col": 21,
-                                "end_line": 29,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
@@ -8409,7 +8409,7 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 21,
-                                                "end_line": 29,
+                                                "end_line": 24,
                                                 "input_file": {
                                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                 },
@@ -8423,12 +8423,12 @@
                                                         "parent_location": [
                                                             {
                                                                 "end_col": 21,
-                                                                "end_line": 29,
+                                                                "end_line": 24,
                                                                 "input_file": {
                                                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                                 },
                                                                 "start_col": 10,
-                                                                "start_line": 29
+                                                                "start_line": 24
                                                             },
                                                             "While handling contract interface function:"
                                                         ],
@@ -8438,7 +8438,7 @@
                                                     "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                                 ],
                                                 "start_col": 10,
-                                                "start_line": 29
+                                                "start_line": 24
                                             },
                                             "While handling contract interface function:"
                                         ],
@@ -8448,7 +8448,7 @@
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 29
+                                "start_line": 24
                             },
                             "While handling contract interface function:"
                         ],
@@ -8491,7 +8491,7 @@
                         "parent_location": [
                             {
                                 "end_col": 35,
-                                "end_line": 29,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
@@ -8505,12 +8505,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 21,
-                                                "end_line": 29,
+                                                "end_line": 24,
                                                 "input_file": {
                                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                 },
                                                 "start_col": 10,
-                                                "start_line": 29
+                                                "start_line": 24
                                             },
                                             "While handling contract interface function:"
                                         ],
@@ -8520,7 +8520,7 @@
                                     "While expanding the reference '__return_value_arg_arbiter' in:"
                                 ],
                                 "start_col": 28,
-                                "start_line": 29
+                                "start_line": 24
                             },
                             "While handling return value 'arbiter'"
                         ],
@@ -8563,12 +8563,12 @@
                         "parent_location": [
                             {
                                 "end_col": 21,
-                                "end_line": 29,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 29
+                                "start_line": 24
                             },
                             "While handling contract interface function:"
                         ],
@@ -8604,12 +8604,12 @@
                         "parent_location": [
                             {
                                 "end_col": 26,
-                                "end_line": 32,
+                                "end_line": 27,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 32
+                                "start_line": 27
                             },
                             "While handling contract interface function:"
                         ],
@@ -8645,12 +8645,12 @@
                         "parent_location": [
                             {
                                 "end_col": 26,
-                                "end_line": 32,
+                                "end_line": 27,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 32
+                                "start_line": 27
                             },
                             "While handling contract interface function:"
                         ],
@@ -8687,12 +8687,12 @@
                         "parent_location": [
                             {
                                 "end_col": 26,
-                                "end_line": 32,
+                                "end_line": 27,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 32
+                                "start_line": 27
                             },
                             "While handling contract interface function:"
                         ],
@@ -8730,12 +8730,12 @@
                         "parent_location": [
                             {
                                 "end_col": 54,
-                                "end_line": 32,
+                                "end_line": 27,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
                                 "start_col": 27,
-                                "start_line": 32
+                                "start_line": 27
                             },
                             "While handling calldata argument 'address_attempting_to_write'"
                         ],
@@ -8773,7 +8773,7 @@
                         "parent_location": [
                             {
                                 "end_col": 54,
-                                "end_line": 32,
+                                "end_line": 27,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
@@ -8787,12 +8787,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 26,
-                                                "end_line": 32,
+                                                "end_line": 27,
                                                 "input_file": {
                                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                 },
                                                 "start_col": 10,
-                                                "start_line": 32
+                                                "start_line": 27
                                             },
                                             "While handling contract interface function:"
                                         ],
@@ -8802,7 +8802,7 @@
                                     "While expanding the reference '__calldata_ptr' in:"
                                 ],
                                 "start_col": 27,
-                                "start_line": 32
+                                "start_line": 27
                             },
                             "While handling calldata argument 'address_attempting_to_write'"
                         ],
@@ -8841,7 +8841,7 @@
                         "parent_location": [
                             {
                                 "end_col": 26,
-                                "end_line": 32,
+                                "end_line": 27,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
@@ -8862,12 +8862,12 @@
                                                 "parent_location": [
                                                     {
                                                         "end_col": 26,
-                                                        "end_line": 32,
+                                                        "end_line": 27,
                                                         "input_file": {
                                                             "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                         },
                                                         "start_col": 10,
-                                                        "start_line": 32
+                                                        "start_line": 27
                                                     },
                                                     "While handling contract interface function:"
                                                 ],
@@ -8882,7 +8882,7 @@
                                     "While expanding the reference 'syscall_ptr' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 32
+                                "start_line": 27
                             },
                             "While handling contract interface function:"
                         ],
@@ -8921,7 +8921,7 @@
                         "parent_location": [
                             {
                                 "end_col": 26,
-                                "end_line": 32,
+                                "end_line": 27,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
@@ -8935,12 +8935,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 26,
-                                                "end_line": 32,
+                                                "end_line": 27,
                                                 "input_file": {
                                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                 },
                                                 "start_col": 10,
-                                                "start_line": 32
+                                                "start_line": 27
                                             },
                                             "While handling contract interface function:"
                                         ],
@@ -8950,7 +8950,7 @@
                                     "While expanding the reference 'contract_address' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 32
+                                "start_line": 27
                             },
                             "While handling contract interface function:"
                         ],
@@ -8989,12 +8989,12 @@
                         "parent_location": [
                             {
                                 "end_col": 26,
-                                "end_line": 32,
+                                "end_line": 27,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 32
+                                "start_line": 27
                             },
                             "While handling contract interface function:"
                         ],
@@ -9033,12 +9033,12 @@
                         "parent_location": [
                             {
                                 "end_col": 26,
-                                "end_line": 32,
+                                "end_line": 27,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 32
+                                "start_line": 27
                             },
                             "While handling contract interface function:"
                         ],
@@ -9077,7 +9077,7 @@
                         "parent_location": [
                             {
                                 "end_col": 26,
-                                "end_line": 32,
+                                "end_line": 27,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
@@ -9091,12 +9091,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 26,
-                                                "end_line": 32,
+                                                "end_line": 27,
                                                 "input_file": {
                                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                 },
                                                 "start_col": 10,
-                                                "start_line": 32
+                                                "start_line": 27
                                             },
                                             "While handling contract interface function:"
                                         ],
@@ -9106,7 +9106,7 @@
                                     "While expanding the reference 'calldata_ptr_start' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 32
+                                "start_line": 27
                             },
                             "While handling contract interface function:"
                         ],
@@ -9145,12 +9145,12 @@
                         "parent_location": [
                             {
                                 "end_col": 26,
-                                "end_line": 32,
+                                "end_line": 27,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 32
+                                "start_line": 27
                             },
                             "While handling contract interface function:"
                         ],
@@ -9194,7 +9194,7 @@
                         "parent_location": [
                             {
                                 "end_col": 74,
-                                "end_line": 32,
+                                "end_line": 27,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
@@ -9208,7 +9208,7 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 26,
-                                                "end_line": 32,
+                                                "end_line": 27,
                                                 "input_file": {
                                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                 },
@@ -9222,12 +9222,12 @@
                                                         "parent_location": [
                                                             {
                                                                 "end_col": 26,
-                                                                "end_line": 32,
+                                                                "end_line": 27,
                                                                 "input_file": {
                                                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                                 },
                                                                 "start_col": 10,
-                                                                "start_line": 32
+                                                                "start_line": 27
                                                             },
                                                             "While handling return values of"
                                                         ],
@@ -9237,7 +9237,7 @@
                                                     "While expanding the reference '__return_value_actual_size' in:"
                                                 ],
                                                 "start_col": 10,
-                                                "start_line": 32
+                                                "start_line": 27
                                             },
                                             "While handling return values of"
                                         ],
@@ -9247,7 +9247,7 @@
                                     "While expanding the reference '__return_value_ptr' in:"
                                 ],
                                 "start_col": 67,
-                                "start_line": 32
+                                "start_line": 27
                             },
                             "While handling return value 'success'"
                         ],
@@ -9292,12 +9292,12 @@
                         "parent_location": [
                             {
                                 "end_col": 26,
-                                "end_line": 32,
+                                "end_line": 27,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 32
+                                "start_line": 27
                             },
                             "While handling return values of"
                         ],
@@ -9349,7 +9349,7 @@
                                 "parent_location": [
                                     {
                                         "end_col": 26,
-                                        "end_line": 32,
+                                        "end_line": 27,
                                         "input_file": {
                                             "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                         },
@@ -9363,7 +9363,7 @@
                                                 "parent_location": [
                                                     {
                                                         "end_col": 26,
-                                                        "end_line": 32,
+                                                        "end_line": 27,
                                                         "input_file": {
                                                             "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                         },
@@ -9377,12 +9377,12 @@
                                                                 "parent_location": [
                                                                     {
                                                                         "end_col": 26,
-                                                                        "end_line": 32,
+                                                                        "end_line": 27,
                                                                         "input_file": {
                                                                             "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                                         },
                                                                         "start_col": 10,
-                                                                        "start_line": 32
+                                                                        "start_line": 27
                                                                     },
                                                                     "While handling contract interface function:"
                                                                 ],
@@ -9392,7 +9392,7 @@
                                                             "While trying to retrieve the implicit argument 'syscall_ptr' in:"
                                                         ],
                                                         "start_col": 10,
-                                                        "start_line": 32
+                                                        "start_line": 27
                                                     },
                                                     "While handling contract interface function:"
                                                 ],
@@ -9402,7 +9402,7 @@
                                             "While expanding the reference 'syscall_ptr' in:"
                                         ],
                                         "start_col": 10,
-                                        "start_line": 32
+                                        "start_line": 27
                                     },
                                     "While handling contract interface function:"
                                 ],
@@ -9452,7 +9452,7 @@
                         "parent_location": [
                             {
                                 "end_col": 26,
-                                "end_line": 32,
+                                "end_line": 27,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
@@ -9466,7 +9466,7 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 26,
-                                                "end_line": 32,
+                                                "end_line": 27,
                                                 "input_file": {
                                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                 },
@@ -9480,12 +9480,12 @@
                                                         "parent_location": [
                                                             {
                                                                 "end_col": 26,
-                                                                "end_line": 32,
+                                                                "end_line": 27,
                                                                 "input_file": {
                                                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                                 },
                                                                 "start_col": 10,
-                                                                "start_line": 32
+                                                                "start_line": 27
                                                             },
                                                             "While handling contract interface function:"
                                                         ],
@@ -9495,7 +9495,7 @@
                                                     "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                                 ],
                                                 "start_col": 10,
-                                                "start_line": 32
+                                                "start_line": 27
                                             },
                                             "While handling contract interface function:"
                                         ],
@@ -9505,7 +9505,7 @@
                                     "While expanding the reference 'range_check_ptr' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 32
+                                "start_line": 27
                             },
                             "While handling contract interface function:"
                         ],
@@ -9550,7 +9550,7 @@
                         "parent_location": [
                             {
                                 "end_col": 74,
-                                "end_line": 32,
+                                "end_line": 27,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
@@ -9564,12 +9564,12 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 26,
-                                                "end_line": 32,
+                                                "end_line": 27,
                                                 "input_file": {
                                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                 },
                                                 "start_col": 10,
-                                                "start_line": 32
+                                                "start_line": 27
                                             },
                                             "While handling contract interface function:"
                                         ],
@@ -9579,7 +9579,7 @@
                                     "While expanding the reference '__return_value_arg_success' in:"
                                 ],
                                 "start_col": 67,
-                                "start_line": 32
+                                "start_line": 27
                             },
                             "While handling return value 'success'"
                         ],
@@ -9624,12 +9624,12 @@
                         "parent_location": [
                             {
                                 "end_col": 26,
-                                "end_line": 32,
+                                "end_line": 27,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
                                 "start_col": 10,
-                                "start_line": 32
+                                "start_line": 27
                             },
                             "While handling contract interface function:"
                         ],
@@ -11527,7 +11527,7 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 26,
-                                                "end_line": 32,
+                                                "end_line": 27,
                                                 "input_file": {
                                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                 },
@@ -11544,7 +11544,7 @@
                                                     "While trying to retrieve the implicit argument 'syscall_ptr' in:"
                                                 ],
                                                 "start_col": 10,
-                                                "start_line": 32
+                                                "start_line": 27
                                             },
                                             "While handling contract interface function:"
                                         ],
@@ -11604,7 +11604,7 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 26,
-                                                "end_line": 32,
+                                                "end_line": 27,
                                                 "input_file": {
                                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                 },
@@ -11621,7 +11621,7 @@
                                                     "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                                 ],
                                                 "start_col": 10,
-                                                "start_line": 32
+                                                "start_line": 27
                                             },
                                             "While handling contract interface function:"
                                         ],
@@ -11779,7 +11779,7 @@
                         "parent_location": [
                             {
                                 "end_col": 26,
-                                "end_line": 32,
+                                "end_line": 27,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
@@ -11820,7 +11820,7 @@
                                     "While trying to update the implicit return value 'syscall_ptr' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 32
+                                "start_line": 27
                             },
                             "While handling contract interface function:"
                         ],
@@ -11923,7 +11923,7 @@
                         "parent_location": [
                             {
                                 "end_col": 26,
-                                "end_line": 32,
+                                "end_line": 27,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
@@ -11964,7 +11964,7 @@
                                     "While trying to update the implicit return value 'range_check_ptr' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 32
+                                "start_line": 27
                             },
                             "While handling contract interface function:"
                         ],
@@ -12813,7 +12813,7 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 21,
-                                                "end_line": 29,
+                                                "end_line": 24,
                                                 "input_file": {
                                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                 },
@@ -12830,7 +12830,7 @@
                                                     "While trying to retrieve the implicit argument 'syscall_ptr' in:"
                                                 ],
                                                 "start_col": 10,
-                                                "start_line": 29
+                                                "start_line": 24
                                             },
                                             "While handling contract interface function:"
                                         ],
@@ -12890,7 +12890,7 @@
                                         "parent_location": [
                                             {
                                                 "end_col": 21,
-                                                "end_line": 29,
+                                                "end_line": 24,
                                                 "input_file": {
                                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                                 },
@@ -12907,7 +12907,7 @@
                                                     "While trying to retrieve the implicit argument 'range_check_ptr' in:"
                                                 ],
                                                 "start_col": 10,
-                                                "start_line": 29
+                                                "start_line": 24
                                             },
                                             "While handling contract interface function:"
                                         ],
@@ -13117,7 +13117,7 @@
                         "parent_location": [
                             {
                                 "end_col": 21,
-                                "end_line": 29,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
@@ -13158,7 +13158,7 @@
                                     "While trying to update the implicit return value 'syscall_ptr' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 29
+                                "start_line": 24
                             },
                             "While handling contract interface function:"
                         ],
@@ -13263,7 +13263,7 @@
                         "parent_location": [
                             {
                                 "end_col": 21,
-                                "end_line": 29,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
@@ -13304,7 +13304,7 @@
                                     "While trying to update the implicit return value 'range_check_ptr' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 29
+                                "start_line": 24
                             },
                             "While handling contract interface function:"
                         ],
@@ -13404,7 +13404,7 @@
                         "parent_location": [
                             {
                                 "end_col": 21,
-                                "end_line": 29,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
@@ -13445,7 +13445,7 @@
                                     "While trying to update the implicit return value 'syscall_ptr' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 29
+                                "start_line": 24
                             },
                             "While handling contract interface function:"
                         ],
@@ -13550,7 +13550,7 @@
                         "parent_location": [
                             {
                                 "end_col": 21,
-                                "end_line": 29,
+                                "end_line": 24,
                                 "input_file": {
                                     "filename": "/workspaces/realms-contracts/contracts/settling_game/interfaces/imodules.cairo"
                                 },
@@ -13591,7 +13591,7 @@
                                     "While trying to update the implicit return value 'range_check_ptr' in:"
                                 ],
                                 "start_col": 10,
-                                "start_line": 29
+                                "start_line": 24
                             },
                             "While handling contract interface function:"
                         ],
@@ -15749,6 +15749,10 @@
                 "destination": "starkware.cairo.common.uint256.uint256_sub",
                 "type": "alias"
             },
+            "contracts.settling_game.interfaces.imodules.Cost": {
+                "destination": "contracts.settling_game.utils.game_structs.Cost",
+                "type": "alias"
+            },
             "contracts.settling_game.interfaces.imodules.IL02_Resources": {
                 "type": "namespace"
             },
@@ -16616,9 +16620,9 @@
                 "type": "const",
                 "value": 1149107753325219705879250662326081727472252721501772240122618592681448223907
             },
-            "contracts.settling_game.interfaces.imodules.IS02_Resources.GET_RESOURCE_UPGRADE_VALUE_SELECTOR": {
+            "contracts.settling_game.interfaces.imodules.IS02_Resources.GET_RESOURCE_UPGRADE_COST_SELECTOR": {
                 "type": "const",
-                "value": 1807765071834059597079511818730444251634739647208611401522235472181643983270
+                "value": 916236982850433202338707750245430013172545047392936926571300331696790009240
             },
             "contracts.settling_game.interfaces.imodules.IS02_Resources.ImplicitArgs": {
                 "full_name": "contracts.settling_game.interfaces.imodules.IS02_Resources.ImplicitArgs",
@@ -16665,13 +16669,9 @@
                 "size": 0,
                 "type": "struct"
             },
-            "contracts.settling_game.interfaces.imodules.IS03_Buildings.GET_BUILDING_COST_IDS_SELECTOR": {
+            "contracts.settling_game.interfaces.imodules.IS03_Buildings.GET_BUILDING_COST_SELECTOR": {
                 "type": "const",
-                "value": 1615780598957492009014438733764174661257805816342448139534316408293133606146
-            },
-            "contracts.settling_game.interfaces.imodules.IS03_Buildings.GET_BUILDING_COST_VALUES_SELECTOR": {
-                "type": "const",
-                "value": 1510828114546911817818601985956895533596207452304550531562238158348433077972
+                "value": 384233913515646994454365747905211577267277977626826533709748325189405264002
             },
             "contracts.settling_game.interfaces.imodules.IS03_Buildings.GET_REALM_BUILDINGS_SELECTOR": {
                 "type": "const",
@@ -16871,13 +16871,32 @@
                 "destination": "contracts.settling_game.utils.game_structs.Squad",
                 "type": "alias"
             },
-            "contracts.settling_game.interfaces.imodules.TroopCost": {
-                "destination": "contracts.settling_game.utils.game_structs.TroopCost",
-                "type": "alias"
-            },
             "contracts.settling_game.interfaces.imodules.Uint256": {
                 "destination": "starkware.cairo.common.uint256.Uint256",
                 "type": "alias"
+            },
+            "contracts.settling_game.utils.game_structs.Cost": {
+                "full_name": "contracts.settling_game.utils.game_structs.Cost",
+                "members": {
+                    "bits": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    },
+                    "packed_amounts": {
+                        "cairo_type": "felt",
+                        "offset": 3
+                    },
+                    "packed_ids": {
+                        "cairo_type": "felt",
+                        "offset": 2
+                    },
+                    "resource_count": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 4,
+                "type": "struct"
             },
             "contracts.settling_game.utils.game_structs.ExternalContractIds": {
                 "type": "namespace"
@@ -17030,100 +17049,6 @@
                     }
                 },
                 "size": 7,
-                "type": "struct"
-            },
-            "contracts.settling_game.utils.game_structs.RealmBuildingCostIds": {
-                "full_name": "contracts.settling_game.utils.game_structs.RealmBuildingCostIds",
-                "members": {
-                    "resource_1": {
-                        "cairo_type": "felt",
-                        "offset": 0
-                    },
-                    "resource_10": {
-                        "cairo_type": "felt",
-                        "offset": 9
-                    },
-                    "resource_2": {
-                        "cairo_type": "felt",
-                        "offset": 1
-                    },
-                    "resource_3": {
-                        "cairo_type": "felt",
-                        "offset": 2
-                    },
-                    "resource_4": {
-                        "cairo_type": "felt",
-                        "offset": 3
-                    },
-                    "resource_5": {
-                        "cairo_type": "felt",
-                        "offset": 4
-                    },
-                    "resource_6": {
-                        "cairo_type": "felt",
-                        "offset": 5
-                    },
-                    "resource_7": {
-                        "cairo_type": "felt",
-                        "offset": 6
-                    },
-                    "resource_8": {
-                        "cairo_type": "felt",
-                        "offset": 7
-                    },
-                    "resource_9": {
-                        "cairo_type": "felt",
-                        "offset": 8
-                    }
-                },
-                "size": 10,
-                "type": "struct"
-            },
-            "contracts.settling_game.utils.game_structs.RealmBuildingCostValues": {
-                "full_name": "contracts.settling_game.utils.game_structs.RealmBuildingCostValues",
-                "members": {
-                    "resource_10_values": {
-                        "cairo_type": "felt",
-                        "offset": 9
-                    },
-                    "resource_1_values": {
-                        "cairo_type": "felt",
-                        "offset": 0
-                    },
-                    "resource_2_values": {
-                        "cairo_type": "felt",
-                        "offset": 1
-                    },
-                    "resource_3_values": {
-                        "cairo_type": "felt",
-                        "offset": 2
-                    },
-                    "resource_4_values": {
-                        "cairo_type": "felt",
-                        "offset": 3
-                    },
-                    "resource_5_values": {
-                        "cairo_type": "felt",
-                        "offset": 4
-                    },
-                    "resource_6_values": {
-                        "cairo_type": "felt",
-                        "offset": 5
-                    },
-                    "resource_7_values": {
-                        "cairo_type": "felt",
-                        "offset": 6
-                    },
-                    "resource_8_values": {
-                        "cairo_type": "felt",
-                        "offset": 7
-                    },
-                    "resource_9_values": {
-                        "cairo_type": "felt",
-                        "offset": 8
-                    }
-                },
-                "size": 10,
                 "type": "struct"
             },
             "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds": {
@@ -17530,7 +17455,7 @@
                 "type": "const",
                 "value": 8
             },
-            "contracts.settling_game.utils.game_structs.ResourceIds.Cooper": {
+            "contracts.settling_game.utils.game_structs.ResourceIds.Copper": {
                 "type": "const",
                 "value": 4
             },
@@ -17621,53 +17546,6 @@
             "contracts.settling_game.utils.game_structs.ResourceIds.Wood": {
                 "type": "const",
                 "value": 1
-            },
-            "contracts.settling_game.utils.game_structs.ResourceUpgradeValues": {
-                "full_name": "contracts.settling_game.utils.game_structs.ResourceUpgradeValues",
-                "members": {
-                    "resource_1": {
-                        "cairo_type": "felt",
-                        "offset": 0
-                    },
-                    "resource_1_values": {
-                        "cairo_type": "felt",
-                        "offset": 5
-                    },
-                    "resource_2": {
-                        "cairo_type": "felt",
-                        "offset": 1
-                    },
-                    "resource_2_values": {
-                        "cairo_type": "felt",
-                        "offset": 6
-                    },
-                    "resource_3": {
-                        "cairo_type": "felt",
-                        "offset": 2
-                    },
-                    "resource_3_values": {
-                        "cairo_type": "felt",
-                        "offset": 7
-                    },
-                    "resource_4": {
-                        "cairo_type": "felt",
-                        "offset": 3
-                    },
-                    "resource_4_values": {
-                        "cairo_type": "felt",
-                        "offset": 8
-                    },
-                    "resource_5": {
-                        "cairo_type": "felt",
-                        "offset": 4
-                    },
-                    "resource_5_values": {
-                        "cairo_type": "felt",
-                        "offset": 9
-                    }
-                },
-                "size": 10,
-                "type": "struct"
             },
             "contracts.settling_game.utils.game_structs.Squad": {
                 "full_name": "contracts.settling_game.utils.game_structs.Squad",
@@ -17877,25 +17755,6 @@
                     }
                 },
                 "size": 7,
-                "type": "struct"
-            },
-            "contracts.settling_game.utils.game_structs.TroopCost": {
-                "full_name": "contracts.settling_game.utils.game_structs.TroopCost",
-                "members": {
-                    "resource_amounts": {
-                        "cairo_type": "felt",
-                        "offset": 2
-                    },
-                    "resource_count": {
-                        "cairo_type": "felt",
-                        "offset": 0
-                    },
-                    "token_ids": {
-                        "cairo_type": "felt",
-                        "offset": 1
-                    }
-                },
-                "size": 3,
                 "type": "struct"
             },
             "contracts.settling_game.utils.game_structs.TroopId": {

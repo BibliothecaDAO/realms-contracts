@@ -172,69 +172,6 @@
     {
         "inputs": [
             {
-                "name": "buildings_state_address",
-                "type": "felt"
-            },
-            {
-                "name": "token_id",
-                "type": "Uint256"
-            },
-            {
-                "name": "current_realm_buildings",
-                "type": "felt"
-            },
-            {
-                "name": "building_id",
-                "type": "felt"
-            }
-        ],
-        "name": "build_buildings",
-        "outputs": [],
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "name": "building_id",
-                "type": "felt"
-            }
-        ],
-        "name": "fetch_building_cost_ids",
-        "outputs": [
-            {
-                "name": "realm_building_ids_len",
-                "type": "felt"
-            },
-            {
-                "name": "realm_building_ids",
-                "type": "Uint256*"
-            }
-        ],
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "name": "building_id",
-                "type": "felt"
-            }
-        ],
-        "name": "fetch_building_cost_values",
-        "outputs": [
-            {
-                "name": "realm_building_costs_len",
-                "type": "felt"
-            },
-            {
-                "name": "realm_building_costs",
-                "type": "Uint256*"
-            }
-        ],
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
                 "name": "token_id",
                 "type": "Uint256"
             }
@@ -246,6 +183,7 @@
                 "type": "RealmBuildings"
             }
         ],
+        "stateMutability": "view",
         "type": "function"
     }
 ]

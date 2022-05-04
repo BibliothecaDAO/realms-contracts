@@ -8,32 +8,8 @@ import struct
 import pytest
 from starkware.starkware_utils.error_handling import StarkException
 
-# TODO: create a file like game_structs.cairo but for use in python tests
-
-
-class ResourceIds(IntEnum):
-    Wood = 1
-    Stone = 2
-    Coal = 3
-    Copper = 4
-    Obsidian = 5
-    Silver = 6
-    Ironwood = 7
-    ColdIron = 8
-    Gold = 9
-    Hartwood = 10
-    Diamonds = 11
-    Sapphire = 12
-    Ruby = 13
-    DeepCrystal = 14
-    Ignium = 15
-    EtherealSilica = 16
-    TrueIce = 17
-    TwilightQuartz = 18
-    AlchemicalSilver = 19
-    Adamantine = 20
-    Mithral = 21
-    Dragonhide = 22
+from .game_structs import Cost, ResourceIds
+from tests.shared import pack_values
 
 
 class TroopId(IntEnum):
@@ -62,7 +38,6 @@ Squad = namedtuple(
     + 't2_1 t2_2 t2_3 t2_4 t2_5 t2_6 t2_7 t2_8 t3_1',
 )
 PackedSquad = namedtuple('PackedSquad', 'p1 p2 p3 p4 p5 p6 p7')
-TroopCost = namedtuple('TroopCost', 'resource_count token_ids resource_amounts')
 
 EMPTY_TROOP = Troop(0, 0, 0, 0, 0, 0, 0)
 WATCHMAN = Troop(1, 1, 1, 1, 3, 4, 1)
@@ -101,18 +76,16 @@ TROOPS = [
 ]
 
 
-def pack_values(values: list[int]) -> int:
-    return int.from_bytes(struct.pack(f"<{len(values)}b", *values), "little")
-
-
 TROOP_COSTS = {
-    TroopId.Watchman: TroopCost(
+    TroopId.Watchman: Cost(
         3,
+        8,
         pack_values([ResourceIds.Wood, ResourceIds.Copper, ResourceIds.Silver]),
         pack_values([100, 90, 80]),
     ),
-    TroopId.Guard: TroopCost(
+    TroopId.Guard: Cost(
         5,
+        8,
         pack_values(
             [
                 ResourceIds.Wood,
@@ -124,20 +97,23 @@ TROOP_COSTS = {
         ),
         pack_values([60, 50, 60, 50, 50]),
     ),
-    TroopId.GuardCaptain: TroopCost(
+    TroopId.GuardCaptain: Cost(
         4,
+        8,
         pack_values(
             [ResourceIds.Wood, ResourceIds.Gold, ResourceIds.Hartwood, ResourceIds.Adamantine]
         ),
         pack_values([30, 70, 80, 10]),
     ),
-    TroopId.Squire: TroopCost(
+    TroopId.Squire: Cost(
         3,
+        8,
         pack_values([ResourceIds.Wood, ResourceIds.Copper, ResourceIds.Silver]),
         pack_values([100, 90, 80]),
     ),
-    TroopId.Knight: TroopCost(
+    TroopId.Knight: Cost(
         5,
+        8,
         pack_values(
             [
                 ResourceIds.Wood,
@@ -149,8 +125,9 @@ TROOP_COSTS = {
         ),
         pack_values([60, 50, 60, 50, 50]),
     ),
-    TroopId.KnightCommander: TroopCost(
+    TroopId.KnightCommander: Cost(
         9,
+        8,
         pack_values(
             [
                 ResourceIds.Wood,
@@ -166,13 +143,15 @@ TROOP_COSTS = {
         ),
         pack_values([30, 70, 80, 2, 20, 20, 20, 10, 1]),
     ),
-    TroopId.Scout: TroopCost(
+    TroopId.Scout: Cost(
         3,
+        8,
         pack_values([ResourceIds.Wood, ResourceIds.Copper, ResourceIds.Silver]),
         pack_values([100, 90, 80]),
     ),
-    TroopId.Archer: TroopCost(
+    TroopId.Archer: Cost(
         6,
+        8,
         pack_values(
             [
                 ResourceIds.Wood,
@@ -185,8 +164,9 @@ TROOP_COSTS = {
         ),
         pack_values([60, 50, 60, 50, 50, 1]),
     ),
-    TroopId.Sniper: TroopCost(
+    TroopId.Sniper: Cost(
         6,
+        8,
         pack_values(
             [
                 ResourceIds.Wood,
@@ -199,8 +179,9 @@ TROOP_COSTS = {
         ),
         pack_values([30, 70, 80, 20, 20, 10]),
     ),
-    TroopId.Ballista: TroopCost(
+    TroopId.Ballista: Cost(
         7,
+        8,
         pack_values(
             [
                 ResourceIds.Wood,
@@ -214,7 +195,8 @@ TROOP_COSTS = {
         ),
         pack_values([50, 50, 50, 30, 50, 10, 1]),
     ),
-    TroopId.Catapult: TroopCost(
+    TroopId.Catapult: Cost(
+        8,
         8,
         pack_values(
             [
@@ -231,13 +213,15 @@ TROOP_COSTS = {
         ),
         pack_values([110, 110, 110, 90, 90, 110, 10, 110, 10]),
     ),
-    TroopId.Apprentice: TroopCost(
+    TroopId.Apprentice: Cost(
         3,
+        8,
         pack_values([ResourceIds.Wood, ResourceIds.Silver, ResourceIds.TrueIce]),
         pack_values([20, 40, 10]),
     ),
-    TroopId.Mage: TroopCost(
+    TroopId.Mage: Cost(
         5,
+        8,
         pack_values(
             [
                 ResourceIds.Wood,
@@ -249,8 +233,9 @@ TROOP_COSTS = {
         ),
         pack_values([10, 40, 10, 70, 10]),
     ),
-    TroopId.Arcanist: TroopCost(
+    TroopId.Arcanist: Cost(
         7,
+        8,
         pack_values(
             [
                 ResourceIds.Wood,
@@ -264,8 +249,9 @@ TROOP_COSTS = {
         ),
         pack_values([70, 110, 110, 100, 100, 10, 1]),
     ),
-    TroopId.GrandMarshal: TroopCost(
+    TroopId.GrandMarshal: Cost(
         9,
+        8,
         pack_values(
             [
                 ResourceIds.Wood,
@@ -627,3 +613,27 @@ async def test_build_squad_from_troops(library_combat_tests):
     troop_ids = [TroopId.Watchman] * 4
     tx = await library_combat_tests.test_build_squad_from_troops(troop_ids).invoke()
     assert tx.result.squad == squad
+
+
+# even though this tests a func in utils, it is
+# kept here because of easy access to TROOP_COST
+# as a side-effect, testing this function also asserts the correctness
+# of load_resource_ids_and_values_from_cost, convert_cost_dict_to_tokens_and_values
+# and sum_values_by_key in general.cairo file, as it calls them all
+@pytest.mark.asyncio
+async def test_transform_costs_to_token_ids_values(utils_general_tests):
+    costs = [TROOP_COSTS[1], TROOP_COSTS[2]]
+    tx = await utils_general_tests.test_transform_costs_to_token_ids_values(costs).invoke()
+
+    expected_ids = [
+        ResourceIds.Wood,
+        ResourceIds.Copper,
+        ResourceIds.Silver,
+        ResourceIds.Ironwood,
+        ResourceIds.ColdIron,
+        ResourceIds.Gold,
+    ]
+    expected_values = [160, 90, 130, 60, 50, 50]
+
+    assert tx.result.ids == [utils_general_tests.Uint256(low=v, high=0) for v in expected_ids]
+    assert tx.result.values == [utils_general_tests.Uint256(low=v, high=0) for v in expected_values]

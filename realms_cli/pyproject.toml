@@ -1,0 +1,57 @@
+# Poetry pyproject.toml: https://python-poetry.org/docs/pyproject/
+
+[build-system]
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "realms_cli"
+version = "0.1.0"
+description = "Nile plugin for greeting"
+readme = "README.md"
+authors = [
+  "Fran Algaba <f.algaba.work@gmail.com>"
+]
+license = "MIT"
+# Pypi classifiers: https://pypi.org/classifiers/
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[tool.poetry.dependencies]
+python = "^3.7.11"
+click = "^8.0.4"
+
+[tool.poetry.dev-dependencies]
+darglint = "^1.5.8"
+isort = "^5.7.0"
+pyupgrade = "^2.7.4"
+black = "^20.8b1"
+mypy = "^0.790"
+bandit = "^1.7.0"
+safety = "^1.10.3"
+pytest = "^6.2.1"
+pylint = "^2.6.0"
+pydocstyle = "^5.1.1"
+pre-commit = "^2.9.3"
+flake8 = "^3.9.2"
+
+# We need to specify that click commands are Poetry entrypoints of type `nile_plugins`. Do not modify this
+cairo-nile = "^0.5.0"
+[tool.poetry.plugins."nile_plugins"]
+# Here you specify you command name and location <command_name> = <package_method_location>
+"approve_realm" = "realms_cli.main.approve_realm"
+"check_resources" = "realms_cli.main.check_resources"
+"check_lords" = "realms_cli.main.check_lords"
+"check_realms" = "realms_cli.main.check_realms"
+"check_s_realms" = "realms_cli.main.check_s_realms"
+"check_owner_of_realm" = "realms_cli.main.check_owner_of_realm"
+"check_owner_of_s_realm" = "realms_cli.main.check_owner_of_s_realm"
+"claim_resources" = "realms_cli.main.claim_resources"
+"create_pk" = "realms_cli.main.create_pk"
+"mint_realm" = "realms_cli.main.mint_realm"
+"settle_realm" = "realms_cli.main.settle_realm"
+"set_realm_data" = "realms_cli.main.set_realm_data"

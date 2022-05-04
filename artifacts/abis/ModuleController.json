@@ -24,10 +24,6 @@
             {
                 "name": "_s_realms_address",
                 "type": "felt"
-            },
-            {
-                "name": "_storage_address",
-                "type": "felt"
             }
         ],
         "name": "constructor",

@@ -17,6 +17,29 @@
         },
         "hints": {},
         "identifiers": {
+            "__main__.Cost": {
+                "full_name": "__main__.Cost",
+                "members": {
+                    "bits": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    },
+                    "packed_amounts": {
+                        "cairo_type": "felt",
+                        "offset": 3
+                    },
+                    "packed_ids": {
+                        "cairo_type": "felt",
+                        "offset": 2
+                    },
+                    "resource_count": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    }
+                },
+                "size": 4,
+                "type": "struct"
+            },
             "__main__.ExternalContractIds": {
                 "type": "namespace"
             },
@@ -168,100 +191,6 @@
                     }
                 },
                 "size": 7,
-                "type": "struct"
-            },
-            "__main__.RealmBuildingCostIds": {
-                "full_name": "__main__.RealmBuildingCostIds",
-                "members": {
-                    "resource_1": {
-                        "cairo_type": "felt",
-                        "offset": 0
-                    },
-                    "resource_10": {
-                        "cairo_type": "felt",
-                        "offset": 9
-                    },
-                    "resource_2": {
-                        "cairo_type": "felt",
-                        "offset": 1
-                    },
-                    "resource_3": {
-                        "cairo_type": "felt",
-                        "offset": 2
-                    },
-                    "resource_4": {
-                        "cairo_type": "felt",
-                        "offset": 3
-                    },
-                    "resource_5": {
-                        "cairo_type": "felt",
-                        "offset": 4
-                    },
-                    "resource_6": {
-                        "cairo_type": "felt",
-                        "offset": 5
-                    },
-                    "resource_7": {
-                        "cairo_type": "felt",
-                        "offset": 6
-                    },
-                    "resource_8": {
-                        "cairo_type": "felt",
-                        "offset": 7
-                    },
-                    "resource_9": {
-                        "cairo_type": "felt",
-                        "offset": 8
-                    }
-                },
-                "size": 10,
-                "type": "struct"
-            },
-            "__main__.RealmBuildingCostValues": {
-                "full_name": "__main__.RealmBuildingCostValues",
-                "members": {
-                    "resource_10_values": {
-                        "cairo_type": "felt",
-                        "offset": 9
-                    },
-                    "resource_1_values": {
-                        "cairo_type": "felt",
-                        "offset": 0
-                    },
-                    "resource_2_values": {
-                        "cairo_type": "felt",
-                        "offset": 1
-                    },
-                    "resource_3_values": {
-                        "cairo_type": "felt",
-                        "offset": 2
-                    },
-                    "resource_4_values": {
-                        "cairo_type": "felt",
-                        "offset": 3
-                    },
-                    "resource_5_values": {
-                        "cairo_type": "felt",
-                        "offset": 4
-                    },
-                    "resource_6_values": {
-                        "cairo_type": "felt",
-                        "offset": 5
-                    },
-                    "resource_7_values": {
-                        "cairo_type": "felt",
-                        "offset": 6
-                    },
-                    "resource_8_values": {
-                        "cairo_type": "felt",
-                        "offset": 7
-                    },
-                    "resource_9_values": {
-                        "cairo_type": "felt",
-                        "offset": 8
-                    }
-                },
-                "size": 10,
                 "type": "struct"
             },
             "__main__.RealmBuildingLimitTraitsIds": {
@@ -668,7 +597,7 @@
                 "type": "const",
                 "value": 8
             },
-            "__main__.ResourceIds.Cooper": {
+            "__main__.ResourceIds.Copper": {
                 "type": "const",
                 "value": 4
             },
@@ -759,53 +688,6 @@
             "__main__.ResourceIds.Wood": {
                 "type": "const",
                 "value": 1
-            },
-            "__main__.ResourceUpgradeValues": {
-                "full_name": "__main__.ResourceUpgradeValues",
-                "members": {
-                    "resource_1": {
-                        "cairo_type": "felt",
-                        "offset": 0
-                    },
-                    "resource_1_values": {
-                        "cairo_type": "felt",
-                        "offset": 5
-                    },
-                    "resource_2": {
-                        "cairo_type": "felt",
-                        "offset": 1
-                    },
-                    "resource_2_values": {
-                        "cairo_type": "felt",
-                        "offset": 6
-                    },
-                    "resource_3": {
-                        "cairo_type": "felt",
-                        "offset": 2
-                    },
-                    "resource_3_values": {
-                        "cairo_type": "felt",
-                        "offset": 7
-                    },
-                    "resource_4": {
-                        "cairo_type": "felt",
-                        "offset": 3
-                    },
-                    "resource_4_values": {
-                        "cairo_type": "felt",
-                        "offset": 8
-                    },
-                    "resource_5": {
-                        "cairo_type": "felt",
-                        "offset": 4
-                    },
-                    "resource_5_values": {
-                        "cairo_type": "felt",
-                        "offset": 9
-                    }
-                },
-                "size": 10,
-                "type": "struct"
             },
             "__main__.Squad": {
                 "full_name": "__main__.Squad",
@@ -1015,25 +897,6 @@
                     }
                 },
                 "size": 7,
-                "type": "struct"
-            },
-            "__main__.TroopCost": {
-                "full_name": "__main__.TroopCost",
-                "members": {
-                    "resource_amounts": {
-                        "cairo_type": "felt",
-                        "offset": 2
-                    },
-                    "resource_count": {
-                        "cairo_type": "felt",
-                        "offset": 0
-                    },
-                    "token_ids": {
-                        "cairo_type": "felt",
-                        "offset": 1
-                    }
-                },
-                "size": 3,
                 "type": "struct"
             },
             "__main__.TroopId": {

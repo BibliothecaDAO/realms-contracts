@@ -88,18 +88,23 @@
                 "type": "felt"
             },
             {
-                "name": "token_ids",
+                "name": "bits",
                 "offset": 1,
                 "type": "felt"
             },
             {
-                "name": "resource_amounts",
+                "name": "packed_ids",
                 "offset": 2,
+                "type": "felt"
+            },
+            {
+                "name": "packed_amounts",
+                "offset": 3,
                 "type": "felt"
             }
         ],
-        "name": "TroopCost",
-        "size": 3,
+        "name": "Cost",
+        "size": 4,
         "type": "struct"
     },
     {
@@ -279,6 +284,17 @@
     {
         "inputs": [
             {
+                "name": "controller_addr",
+                "type": "felt"
+            }
+        ],
+        "name": "constructor",
+        "outputs": [],
+        "type": "constructor"
+    },
+    {
+        "inputs": [
+            {
                 "name": "realm_id",
                 "type": "Uint256"
             }
@@ -319,7 +335,7 @@
         "outputs": [
             {
                 "name": "cost",
-                "type": "TroopCost"
+                "type": "Cost"
             }
         ],
         "stateMutability": "view",
@@ -333,7 +349,7 @@
             },
             {
                 "name": "cost",
-                "type": "TroopCost"
+                "type": "Cost"
             }
         ],
         "name": "set_troop_cost",

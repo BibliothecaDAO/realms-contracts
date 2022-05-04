@@ -11,6 +11,7 @@ from starkware.cairo.common.uint256 import Uint256
 from contracts.settling_game.utils.constants import TRUE, FALSE
 from contracts.settling_game.interfaces.imodules import IModuleController
 
+from contracts.settling_game.utils.game_structs import Cost
 from contracts.settling_game.utils.library import (
     MODULE_controller_address,
     MODULE_only_approved,
@@ -24,6 +25,10 @@ from contracts.settling_game.utils.library import (
 
 @storage_var
 func realm_buildings(token_id : Uint256) -> (buildings : felt):
+end
+
+@storage_var
+func building_cost(building_id : felt) -> (cost : Cost):
 end
 
 ###############
@@ -53,6 +58,15 @@ func set_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     return ()
 end
 
+@external
+func set_building_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+    building_id : felt, cost : Cost
+):
+    # TODO: auth + range checks on the cost struct
+    building_cost.write(building_id, cost)
+    return ()
+end
+
 ###########
 # GETTERS #
 ###########
@@ -65,4 +79,12 @@ func get_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     let (buildings) = realm_buildings.read(token_id)
 
     return (buildings=buildings)
+end
+
+@view
+func get_building_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+    building_id : felt
+) -> (cost : Cost):
+    let (cost) = building_cost.read(building_id)
+    return (cost)
 end

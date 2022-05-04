@@ -1,5 +1,6 @@
 .DS_Store
 .temp/
+OwnerAccount.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -106,6 +107,7 @@ celerybeat.pid
 
 # Environments
 .env
+.env.nile
 .venv
 env/
 venv/
@@ -133,3 +135,5 @@ dmypy.json
 
 # vscode project settings
 .vscode/
+
+node_modules

@@ -71,41 +71,6 @@
     {
         "inputs": [
             {
-                "name": "new_implementation",
-                "type": "felt"
-            }
-        ],
-        "name": "upgrade",
-        "outputs": [],
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "get_implementation",
-        "outputs": [
-            {
-                "name": "address",
-                "type": "felt"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "get_admin",
-        "outputs": [
-            {
-                "name": "admin",
-                "type": "felt"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
                 "name": "token_id",
                 "type": "Uint256"
             }

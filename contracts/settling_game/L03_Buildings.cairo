@@ -6,6 +6,8 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
+from starkware.cairo.common.bool import TRUE, FALSE
+from starkware.cairo.common.dict_access import DictAccess
 from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem, assert_not_zero
 from starkware.cairo.common.math_cmp import is_nn_le
 from starkware.cairo.common.hash_state import hash_init, hash_update, HashState
@@ -13,15 +15,14 @@ from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
-from contracts.settling_game.utils.general import unpack_data
+from contracts.settling_game.utils.general import unpack_data, transform_costs_to_token_ids_values
 from contracts.settling_game.utils.game_structs import (
     RealmBuildings,
     RealmData,
-    RealmBuildingCostIds,
-    RealmBuildingCostValues,
     RealmBuildingsIds,
     ModuleIds,
     ExternalContractIds,
+    Cost
 )
 
 from contracts.settling_game.utils.constants import (
@@ -45,15 +46,12 @@ from contracts.settling_game.utils.constants import (
     SHIFT_6_18,
     SHIFT_6_19,
     SHIFT_6_20,
-    TRUE,
-    FALSE,
 )
 
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
 from contracts.settling_game.interfaces.imodules import IModuleController, IS03_Buildings
-from contracts.settling_game.interfaces.IStorage import IStorage
 
 from contracts.settling_game.utils.library import (
     MODULE_controller_address,
@@ -131,22 +129,17 @@ func build{
     build_buildings(buildings_state_address, token_id, current_building, building_id)
 
     # GET BUILDING COSTS
-    let (_token_ids_len, ids) = fetch_building_cost_ids(building_id)
-    let (_token_values_len, values) = fetch_building_cost_values(building_id)
-
-    # CHECK CORRECT RESOURCES NEEDED TODO: THIS IS NOT NEEDED??
-    # check_correct_resources(
-    #     token_ids_len,
-    #     token_ids,
-    #     token_values_len,
-    #     token_values,
-    #     _token_ids_len,
-    #     ids,
-    #     _token_values_len,
-    #     values)
+    let (building_cost : Cost) = IS03_Buildings.get_building_cost(
+        buildings_state_address, building_id
+    )
+    let (costs : Cost*) = alloc()
+    assert [costs] = building_cost
+    let (token_ids : Uint256*) = alloc()
+    let (token_values : Uint256*) = alloc()
+    let (token_len : felt) = transform_costs_to_token_ids_values(1, costs, token_ids, token_values)
 
     # BURN RESOURCES
-    IERC1155.burnBatch(resource_address, caller, _token_values_len, ids, _token_values_len, values)
+    IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
 
     # EMIT
     BuildingBuilt.emit(token_id, building_id)
@@ -154,7 +147,6 @@ func build{
     return (TRUE)
 end
 
-@external
 func build_buildings{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
 }(
@@ -164,7 +156,7 @@ func build_buildings{
     building_id : felt,
 ):
     alloc_locals
-    let (caller) = get_caller_address()
+
     let (controller) = MODULE_controller_address()
 
     # REALMS ADDRESS
@@ -408,245 +400,7 @@ func build_buildings{
     return ()
 end
 
-func check_correct_resources{
-    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-}(
-    token_ids_len : felt,
-    token_ids : felt*,
-    token_values_len : felt,
-    token_values : felt*,
-    ids_len : felt,
-    ids : felt*,
-    values_len : felt,
-    values : felt*,
-):
-    if token_ids_len == 0:
-        return ()
-    end
-    if [token_ids] != [ids]:
-        assert_not_zero(0)
-    end
-    if [token_values] != [values]:
-        assert_not_zero(0)
-    end
-
-    return check_correct_resources(
-        token_ids_len=token_ids_len - 1,
-        token_ids=token_ids + 1,
-        token_values_len=token_values_len - 1,
-        token_values=token_values + 1,
-        ids_len=ids_len - 1,
-        ids=ids + 1,
-        values_len=values_len - 1,
-        values=values + 1,
-    )
-end
-
-@external
-func fetch_building_cost_ids{
-    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-}(building_id : felt) -> (realm_building_ids_len : felt, realm_building_ids : Uint256*):
-    alloc_locals
-
-    let (controller) = MODULE_controller_address()
-
-    # state contract
-    let (storage_db_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Storage
-    )
-
-    let (data) = IStorage.get_building_cost_ids(storage_db_address, building_id)
-
-    let (resource_1) = unpack_data(data, 0, 255)
-    let (resource_2) = unpack_data(data, 8, 255)
-    let (resource_3) = unpack_data(data, 16, 255)
-    let (resource_4) = unpack_data(data, 24, 255)
-    let (resource_5) = unpack_data(data, 32, 255)
-    let (resource_6) = unpack_data(data, 40, 255)
-    let (resource_7) = unpack_data(data, 48, 255)
-    let (resource_8) = unpack_data(data, 56, 255)
-    let (resource_9) = unpack_data(data, 64, 255)
-    let (resource_10) = unpack_data(data, 72, 255)
-
-    let (resource_ids : Uint256*) = alloc()
-    let len = 0
-
-    if resource_1 != 0:
-        assert resource_ids[0] = Uint256(resource_1, 0)
-        tempvar len = 1
-    else:
-        tempvar len = len
-    end
-
-    if resource_2 != 0:
-        assert resource_ids[1] = Uint256(resource_2, 0)
-        tempvar len = 2
-    else:
-        tempvar len = len
-    end
-
-    if resource_3 != 0:
-        assert resource_ids[2] = Uint256(resource_3, 0)
-        tempvar len = 3
-    else:
-        tempvar len = len
-    end
-
-    if resource_4 != 0:
-        assert resource_ids[3] = Uint256(resource_4, 0)
-        tempvar len = 4
-    else:
-        tempvar len = len
-    end
-
-    if resource_5 != 0:
-        assert resource_ids[4] = Uint256(resource_5, 0)
-        tempvar len = 5
-    else:
-        tempvar len = len
-    end
-
-    if resource_6 != 0:
-        assert resource_ids[5] = Uint256(resource_6, 0)
-        tempvar len = 6
-    else:
-        tempvar len = len
-    end
-
-    if resource_7 != 0:
-        assert resource_ids[6] = Uint256(resource_7, 0)
-        tempvar len = 7
-    else:
-        tempvar len = len
-    end
-
-    if resource_8 != 0:
-        assert resource_ids[7] = Uint256(resource_8, 0)
-        tempvar len = 8
-    else:
-        tempvar len = len
-    end
-
-    if resource_9 != 0:
-        assert resource_ids[8] = Uint256(resource_9, 0)
-        tempvar len = 9
-    else:
-        tempvar len = len
-    end
-
-    if resource_10 != 0:
-        assert resource_ids[9] = Uint256(resource_10, 0)
-        tempvar len = 10
-    else:
-        tempvar len = len
-    end
-
-    return (realm_building_ids_len=len, realm_building_ids=resource_ids)
-end
-
-@external
-func fetch_building_cost_values{
-    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-}(building_id : felt) -> (realm_building_costs_len : felt, realm_building_costs : Uint256*):
-    alloc_locals
-
-    let (controller) = MODULE_controller_address()
-
-    # state contract
-    let (storage_db_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Storage
-    )
-
-    let (data) = IStorage.get_building_cost_values(storage_db_address, building_id)
-
-    let (resource_1_values) = unpack_data(data, 0, 4095)
-    let (resource_2_values) = unpack_data(data, 12, 4095)
-    let (resource_3_values) = unpack_data(data, 24, 4095)
-    let (resource_4_values) = unpack_data(data, 36, 4095)
-    let (resource_5_values) = unpack_data(data, 48, 4095)
-    let (resource_6_values) = unpack_data(data, 60, 4095)
-    let (resource_7_values) = unpack_data(data, 72, 4095)
-    let (resource_8_values) = unpack_data(data, 84, 4095)
-    let (resource_9_values) = unpack_data(data, 96, 4095)
-    let (resource_10_values) = unpack_data(data, 108, 4095)
-
-    let (resource_values : Uint256*) = alloc()
-    let len = 0
-
-    if resource_1_values != 0:
-        assert resource_values[0] = Uint256(resource_1_values, 0)
-        tempvar len = 1
-    else:
-        tempvar len = len
-    end
-
-    if resource_2_values != 0:
-        assert resource_values[1] = Uint256(resource_2_values, 0)
-        tempvar len = 2
-    else:
-        tempvar len = len
-    end
-
-    if resource_3_values != 0:
-        assert resource_values[2] = Uint256(resource_3_values, 0)
-        tempvar len = 3
-    else:
-        tempvar len = len
-    end
-
-    if resource_4_values != 0:
-        assert resource_values[3] = Uint256(resource_4_values, 0)
-        tempvar len = 4
-    else:
-        tempvar len = len
-    end
-
-    if resource_5_values != 0:
-        assert resource_values[4] = Uint256(resource_5_values, 0)
-        tempvar len = 5
-    else:
-        tempvar len = len
-    end
-
-    if resource_6_values != 0:
-        assert resource_values[5] = Uint256(resource_6_values, 0)
-        tempvar len = 6
-    else:
-        tempvar len = len
-    end
-
-    if resource_7_values != 0:
-        assert resource_values[6] = Uint256(resource_7_values, 0)
-        tempvar len = 7
-    else:
-        tempvar len = len
-    end
-
-    if resource_8_values != 0:
-        assert resource_values[7] = Uint256(resource_8_values, 0)
-        tempvar len = 8
-    else:
-        tempvar len = len
-    end
-
-    if resource_9_values != 0:
-        assert resource_values[8] = Uint256(resource_9_values, 0)
-        tempvar len = 9
-    else:
-        tempvar len = len
-    end
-
-    if resource_10_values != 0:
-        assert resource_values[9] = Uint256(resource_10_values, 0)
-        tempvar len = 10
-    else:
-        tempvar len = len
-    end
-
-    return (realm_building_costs_len=len, realm_building_costs=resource_values)
-end
-
-@external
+@view
 func fetch_buildings_by_type{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
 }(token_id : Uint256) -> (realm_buildings : RealmBuildings):
