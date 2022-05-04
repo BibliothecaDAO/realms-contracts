@@ -37,7 +37,7 @@ def mint_realm(realm_token_id, network):
         contract_alias="realms",
         function="mint",
         arguments=[
-            int(config.ADMIN_ADDRESS, 16),  # felt
+            int(config.USER_ADDRESS, 16),  # felt
             realm_token_id,                 # uint 1
             0,                              # uint 2
         ],
@@ -54,7 +54,7 @@ def approve_realm(network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias=config.REALMS_ADDRESS,
+        contract_alias="realms",
         function="setApprovalForAll",
         arguments=[
             int(config.L01_SETTLING_ADDRESS, 16),  # uint1
