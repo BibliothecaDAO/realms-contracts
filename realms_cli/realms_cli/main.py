@@ -192,20 +192,28 @@ def check_lords(network):
     )
 
 @click.command()
+@click.option("--address", default="", help="Account address in hex format 0x...")
 @click.option("--network", default="goerli")
-def check_realms(network):
+def check_realms(address, network):
     """
     Check realms balance
     """
     config = Config(nile_network=network)
 
-    wrapped_send(
+    if address == "":
+        nile_account = Account(config.USER_ALIAS, network)
+        address = nile_account.address
+
+    out = wrapped_call(
         network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
         contract_alias="realms",
         function="balanceOf",
-        arguments=[],
+        arguments=[address],
     )
 
-# get happiness level
+    print_over_colums(out)    
+
+# get happiness level of realm
+# check settled realms 
+# check realms
 # get pillageable amount
