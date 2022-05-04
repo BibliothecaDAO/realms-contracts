@@ -176,20 +176,26 @@ def claim_resources(realm_token_id, network):
     )
 
 @click.command()
+@click.option("--address", default="", help="Account address in hex format 0x...")
 @click.option("--network", default="goerli")
-def check_lords(network):
+def check_lords(address, network):
     """
-    Check balance
+    Check realms balance
     """
     config = Config(nile_network=network)
 
-    wrapped_send(
+    if address == "":
+        nile_account = Account(config.USER_ALIAS, network)
+        address = nile_account.address
+
+    out = wrapped_call(
         network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
         contract_alias="lords",
         function="balanceOf",
-        arguments=[],
+        arguments=[address],
     )
+
+    print(out)   
 
 @click.command()
 @click.option("--address", default="", help="Account address in hex format 0x...")
@@ -210,8 +216,28 @@ def check_realms(address, network):
         function="balanceOf",
         arguments=[address],
     )
+    print(out)   
 
-    print_over_colums(out)    
+@click.command()
+@click.option("--address", default="", help="Account address in hex format 0x...")
+@click.option("--network", default="goerli")
+def check_s_realms(address, network):
+    """
+    Check realms balance
+    """
+    config = Config(nile_network=network)
+
+    if address == "":
+        nile_account = Account(config.USER_ALIAS, network)
+        address = nile_account.address
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="s_realms",
+        function="balanceOf",
+        arguments=[address],
+    )
+    print(out)   
 
 # get happiness level of realm
 # check settled realms 
