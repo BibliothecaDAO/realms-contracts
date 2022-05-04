@@ -25,6 +25,8 @@ from contracts.settling_game.utils.game_structs import (
     Cost
 )
 
+from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
+
 from contracts.settling_game.utils.constants import (
     SHIFT_6_1,
     SHIFT_6_2,
@@ -107,7 +109,17 @@ func build{
         controller, ExternalContractIds.Realms
     )
 
-    # RESOURCE ADDRESS
+    # REALMS ADDRESS
+    let (lords_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Lords
+    )
+    
+    # TREASURY ADDRESS
+    let (treasury_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Treasury
+    )
+
+    # RESOURCES ADDRESS
     let (resource_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Resources
     )
@@ -129,7 +141,7 @@ func build{
     build_buildings(buildings_state_address, token_id, current_building, building_id)
 
     # GET BUILDING COSTS
-    let (building_cost : Cost) = IS03_Buildings.get_building_cost(
+    let (building_cost : Cost, lords : Uint256) = IS03_Buildings.get_building_cost(
         buildings_state_address, building_id
     )
     let (costs : Cost*) = alloc()
@@ -140,6 +152,9 @@ func build{
 
     # BURN RESOURCES
     IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
+
+    # TRANSFER LORDS
+    IERC20.transfer(lords_address, treasury_address, lords) 
 
     # EMIT
     BuildingBuilt.emit(token_id, building_id)
@@ -273,14 +288,14 @@ func build_buildings{
         buildings[8] = id_9
     end
 
-    if building_id == RealmBuildingsIds.Carpenter:
-        if current_buildings.Carpenter == realms_data.cities:
+    if building_id == RealmBuildingsIds.ArcherTower:
+        if current_buildings.ArcherTower == realms_data.cities:
             assert_not_zero(0)
         end
-        local id_10 = (current_buildings.Carpenter + 1) * SHIFT_6_10
+        local id_10 = (current_buildings.ArcherTower + 1) * SHIFT_6_10
         buildings[9] = id_10
     else:
-        local id_10 = current_buildings.Carpenter * SHIFT_6_10
+        local id_10 = current_buildings.ArcherTower * SHIFT_6_10
         buildings[9] = id_10
     end
 
@@ -295,25 +310,25 @@ func build_buildings{
         buildings[10] = id_11
     end
 
-    if building_id == RealmBuildingsIds.Symposium:
-        if current_buildings.Symposium == realms_data.cities:
+    if building_id == RealmBuildingsIds.MageTower:
+        if current_buildings.MageTower == realms_data.cities:
             assert_not_zero(0)
         end
-        local id_12 = (current_buildings.Symposium + 1) * SHIFT_6_12
+        local id_12 = (current_buildings.MageTower + 1) * SHIFT_6_12
         buildings[11] = id_12
     else:
-        local id_12 = current_buildings.Symposium * SHIFT_6_12
+        local id_12 = current_buildings.MageTower * SHIFT_6_12
         buildings[11] = id_12
     end
 
-    if building_id == RealmBuildingsIds.LogisticsOffice:
-        if current_buildings.LogisticsOffice == realms_data.cities:
+    if building_id == RealmBuildingsIds.TradeOffice: 
+        if current_buildings.TradeOffice == realms_data.cities:
             assert_not_zero(0)
         end
-        local id_13 = (current_buildings.LogisticsOffice + 1) * SHIFT_6_13
+        local id_13 = (current_buildings.TradeOffice + 1) * SHIFT_6_13
         buildings[12] = id_13
     else:
-        local id_13 = current_buildings.LogisticsOffice * SHIFT_6_13
+        local id_13 = current_buildings.TradeOffice * SHIFT_6_13
         buildings[12] = id_13
     end
 
@@ -424,10 +439,10 @@ func fetch_buildings_by_type{
     let (Granary) = unpack_data(data, 36, 63)
     let (Housing) = unpack_data(data, 42, 63)
     let (Amphitheater) = unpack_data(data, 48, 63)
-    let (Carpenter) = unpack_data(data, 54, 63)
+    let (ArcherTower) = unpack_data(data, 54, 63)
     let (School) = unpack_data(data, 60, 63)
-    let (Symposium) = unpack_data(data, 66, 63)
-    let (LogisticsOffice) = unpack_data(data, 72, 63)
+    let (MageTower) = unpack_data(data, 66, 63)
+    let (TradeOffice) = unpack_data(data, 72, 63)
     let (ExplorersGuild) = unpack_data(data, 78, 63)
     let (ParadeGrounds) = unpack_data(data, 84, 63)
     let (ResourceFacility) = unpack_data(data, 90, 63)
@@ -447,10 +462,10 @@ func fetch_buildings_by_type{
         Granary=Granary,
         Housing=Housing,
         Amphitheater=Amphitheater,
-        Carpenter=Carpenter,
+        ArcherTower=ArcherTower,
         School=School,
-        Symposium=Symposium,
-        LogisticsOffice=LogisticsOffice,
+        MageTower=MageTower,
+        TradeOffice=TradeOffice,
         ExplorersGuild=ExplorersGuild,
         ParadeGrounds=ParadeGrounds,
         ResourceFacility=ResourceFacility,

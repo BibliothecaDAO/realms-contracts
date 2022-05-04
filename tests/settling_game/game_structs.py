@@ -3,6 +3,8 @@ from enum import IntEnum
 from tests.shared import pack_values
 
 Cost = namedtuple('Cost', 'resource_count bits packed_ids packed_amounts')
+CostWithLords = namedtuple(
+    'Cost', 'resource_count bits packed_ids packed_amounts lords')
 
 
 class ResourceIds(IntEnum):
@@ -40,10 +42,10 @@ class BuildingId(IntEnum):
     Granary = 7
     Housing = 8
     Amphitheater = 9
-    Carpenter = 10
+    ArcherTower = 10
     School = 11
-    Symposium = 12
-    LogisticsOffice = 13
+    MageTower = 12
+    TradeOffice = 13
     ExplorersGuild = 14
     ParadeGrounds = 15
     ResourceFacility = 16
@@ -54,290 +56,290 @@ class BuildingId(IntEnum):
 
 
 BUILDING_COSTS = {
-    BuildingId.Fairgrounds: Cost(
-        3,
+    BuildingId.Fairgrounds: CostWithLords(
+        6,
         8,
         pack_values(
-            [ResourceIds.Wood, ResourceIds.Copper, ResourceIds.Silver]),
-        pack_values([100, 90, 80]),
+            [ResourceIds.Wood, 
+            ResourceIds.Stone, 
+            ResourceIds.Silver, 
+            ResourceIds.AlchemicalSilver, 
+            ResourceIds.Mithral, 
+            ResourceIds.Dragonhide]),
+        pack_values([40, 50, 40, 90, 8, 1, 1]),
+        50
     ),
-    BuildingId.RoyalReserve: Cost(
-        5,
+    BuildingId.RoyalReserve: CostWithLords(
+        6,
         8,
         pack_values(
             [
                 ResourceIds.Wood,
-                ResourceIds.Silver,
+                ResourceIds.Stone,
                 ResourceIds.Ironwood,
-                ResourceIds.ColdIron,
-                ResourceIds.Gold,
-            ]
-        ),
-        pack_values([60, 50, 60, 50, 50]),
-    ),
-    BuildingId.GrandMarket: Cost(
-        4,
-        8,
-        pack_values(
-            [ResourceIds.Wood, ResourceIds.Gold,
-                ResourceIds.Hartwood, ResourceIds.Adamantine]
-        ),
-        pack_values([30, 70, 80, 10]),
-    ),
-    BuildingId.Castle: Cost(
-        3,
-        8,
-        pack_values(
-            [ResourceIds.Wood, ResourceIds.Copper, ResourceIds.Silver]),
-        pack_values([100, 90, 80]),
-    ),
-    BuildingId.Guild: Cost(
-        5,
-        8,
-        pack_values(
-            [
-                ResourceIds.Wood,
-                ResourceIds.Silver,
-                ResourceIds.Ironwood,
-                ResourceIds.ColdIron,
-                ResourceIds.Gold,
-            ]
-        ),
-        pack_values([60, 50, 60, 50, 50]),
-    ),
-    BuildingId.OfficerAcademy: Cost(
-        9,
-        8,
-        pack_values(
-            [
-                ResourceIds.Wood,
-                ResourceIds.Gold,
-                ResourceIds.Hartwood,
-                ResourceIds.Ruby,
-                ResourceIds.DeepCrystal,
-                ResourceIds.Ignium,
                 ResourceIds.TrueIce,
-                ResourceIds.Adamantine,
-                ResourceIds.Dragonhide,
-            ]
-        ),
-        pack_values([30, 70, 80, 2, 20, 20, 20, 10, 1]),
-    ),
-    BuildingId.Granary: Cost(
-        3,
-        8,
-        pack_values(
-            [ResourceIds.Wood, ResourceIds.Copper, ResourceIds.Silver]),
-        pack_values([100, 90, 80]),
-    ),
-    BuildingId.Housing: Cost(
-        6,
-        8,
-        pack_values(
-            [
-                ResourceIds.Wood,
-                ResourceIds.Silver,
-                ResourceIds.Ironwood,
-                ResourceIds.ColdIron,
-                ResourceIds.Gold,
                 ResourceIds.Mithral,
+                ResourceIds.Dragonhide
             ]
         ),
-        pack_values([60, 50, 60, 50, 50, 1]),
+        pack_values([50, 20, 50, 10, 1, 1]),
+        50
     ),
-    BuildingId.Amphitheater: Cost(
+    BuildingId.GrandMarket: CostWithLords(
         6,
         8,
         pack_values(
-            [
-                ResourceIds.Wood,
-                ResourceIds.Gold,
-                ResourceIds.Hartwood,
-                ResourceIds.DeepCrystal,
-                ResourceIds.EtherealSilica,
-                ResourceIds.Adamantine,
+            [ResourceIds.Wood,
+            ResourceIds.Stone,
+            ResourceIds.Gold,
+            ResourceIds.TwilightQuartz,
+            ResourceIds.Mithral,
+            ResourceIds.Dragonhide
             ]
         ),
-        pack_values([30, 70, 80, 20, 20, 10]),
+        pack_values([35, 40, 20, 10,1,1]),
+        50
     ),
-    BuildingId.Carpenter: Cost(
-        7,
-        8,
-        pack_values(
-            [
-                ResourceIds.Wood,
-                ResourceIds.Obsidian,
-                ResourceIds.Silver,
-                ResourceIds.Ironwood,
-                ResourceIds.Gold,
-                ResourceIds.Ignium,
-                ResourceIds.Dragonhide,
-            ]
-        ),
-        pack_values([50, 50, 50, 30, 50, 10, 1]),
-    ),
-    BuildingId.School: Cost(
-        8,
+    BuildingId.Castle: CostWithLords(
+        6,
         8,
         pack_values(
             [
                 ResourceIds.Wood,
                 ResourceIds.Stone,
                 ResourceIds.Copper,
-                ResourceIds.Gold,
-                ResourceIds.Hartwood,
-                ResourceIds.Sapphire,
-                ResourceIds.DeepCrystal,
-                ResourceIds.TrueIce,
-                ResourceIds.AlchemicalSilver,
+                ResourceIds.Adamantine,
+                ResourceIds.Mithral,
+                ResourceIds.Dragonhide
+            ]),
+        pack_values([30, 50, 100, 4, 1, 1]),
+        50
+    ),
+    BuildingId.Guild: CostWithLords(
+        6,
+        8,
+        pack_values(
+            [
+                ResourceIds.Wood,
+                ResourceIds.Stone,
+                ResourceIds.Coal,
+                ResourceIds.EtherealSilica,
+                ResourceIds.Mithral,
+                ResourceIds.Dragonhide,
             ]
         ),
-        pack_values([110, 110, 110, 90, 90, 110, 10, 110, 10]),
+        pack_values([50, 50, 120, 12, 2, 1]),
+        50
     ),
-    BuildingId.Symposium: Cost(
+    BuildingId.OfficerAcademy: CostWithLords(
+        6,
+        8,
+        pack_values(
+            [
+                ResourceIds.Wood,
+                ResourceIds.Stone,
+                ResourceIds.ColdIron,
+                ResourceIds.Ignium,
+                ResourceIds.Mithral,
+                ResourceIds.Dragonhide
+            ]
+        ),
+        pack_values([40, 20, 45, 12, 1, 1]),
+        50
+    ),
+    BuildingId.Granary: CostWithLords(
+        4,
+        8,
+        pack_values(
+            [   ResourceIds.Wood,
+                ResourceIds.Obsidian,
+                ResourceIds.EtherealSilica,
+                ResourceIds.TrueIce]),
+        pack_values([10, 10, 4, 4]),
+        15
+    ),
+    BuildingId.Housing: CostWithLords(
+        4,
+        8,
+        pack_values(
+            [
+                ResourceIds.Stone,
+                ResourceIds.Coal,
+                ResourceIds.Copper,
+                ResourceIds.Ironwood
+            ]
+        ),
+        pack_values([50, 120, 120, 70]),
+        35
+    ),
+    BuildingId.Amphitheater: CostWithLords(
+        4,
+        8,
+        pack_values(
+            [
+                ResourceIds.Stone,
+                ResourceIds.Diamonds,
+                ResourceIds.Sapphire,
+                ResourceIds.TwilightQuartz
+            ]
+        ),
+        pack_values([5, 5, 1, 2]),
+        10
+    ),
+    BuildingId.ArcherTower: CostWithLords(
+        4,
+        8,
+        pack_values(
+            [
+                ResourceIds.Wood,
+                ResourceIds.Stone,
+                ResourceIds.Obsidian,
+                ResourceIds.Ironwood
+            ]
+        ),
+        pack_values([10, 10, 25, 5]),
+        5
+    ),
+    BuildingId.School: CostWithLords(
+        4,
+        8,
+        pack_values(
+            [
+                ResourceIds.Stone,
+                ResourceIds.Diamonds,
+                ResourceIds.DeepCrystal,
+                ResourceIds.AlchemicalSilver
+            ]
+        ),
+        pack_values([10, 4, 3, 3]),
+        15
+    ),
+    BuildingId.MageTower: CostWithLords(
+        4,
+        8,
+        pack_values(
+            [ResourceIds.Wood, ResourceIds.Stone, ResourceIds.Diamonds, ResourceIds.Ignium]),
+        pack_values([2, 2, 4,1]),
+        5
+    ),
+    BuildingId.TradeOffice: CostWithLords(
+        4,
+        8,
+        pack_values(
+            [
+                ResourceIds.Wood,
+                ResourceIds.Stone,
+                ResourceIds.Gold,
+                ResourceIds.Sapphire,
+            ]
+        ),
+        pack_values([10, 4, 15, 10]),
+        15
+    ),
+    # BuildingId.ExplorersGuild: CostWithLords(
+    #     7,
+    #     8,
+    #     pack_values(
+    #         [
+    #             ResourceIds.Wood,
+    #             ResourceIds.Coal,
+    #             ResourceIds.Copper,
+    #             ResourceIds.Gold,
+    #             ResourceIds.Hartwood,
+    #             ResourceIds.AlchemicalSilver,
+    #             ResourceIds.Dragonhide,
+    #         ]
+    #     ),
+    #     pack_values([70, 110, 110, 100, 100, 10, 1]),
+    #     10
+    # ),
+    BuildingId.ParadeGrounds: CostWithLords(
+        4,
+        8,
+        pack_values(
+            [
+                ResourceIds.Stone,
+                ResourceIds.Sapphire,
+                ResourceIds.Ignium,
+                ResourceIds.Adamantine
+            ]
+        ),
+        pack_values([10, 4, 4, 1]),
+        15
+    ),
+    # BuildingId.ResourceFacility: CostWithLords(
+    #     9,
+    #     8,
+    #     pack_values(
+    #         [
+    #             ResourceIds.Wood,
+    #             ResourceIds.Silver,
+    #             ResourceIds.ColdIron,
+    #             ResourceIds.Gold,
+    #             ResourceIds.Diamonds,
+    #             ResourceIds.Sapphire,
+    #             ResourceIds.Ruby,
+    #             ResourceIds.Mithral,
+    #             ResourceIds.Dragonhide,
+    #         ]
+    #     ),
+    #     pack_values([120, 100, 100, 100, 20, 20, 20, 10, 1]),
+    #     10
+    # ),
+    BuildingId.Dock: CostWithLords(
         3,
         8,
         pack_values(
-            [ResourceIds.Wood, ResourceIds.Silver, ResourceIds.TrueIce]),
-        pack_values([20, 40, 10]),
-    ),
-    BuildingId.LogisticsOffice: Cost(
-        5,
-        8,
-        pack_values(
             [
-                ResourceIds.Wood,
-                ResourceIds.Silver,
-                ResourceIds.Ironwood,
-                ResourceIds.Gold,
-                ResourceIds.TwilightQuartz,
-            ]
-        ),
-        pack_values([10, 40, 10, 70, 10]),
-    ),
-    BuildingId.ExplorersGuild: Cost(
-        7,
-        8,
-        pack_values(
-            [
-                ResourceIds.Wood,
+                ResourceIds.Stone,
                 ResourceIds.Coal,
+                ResourceIds.Ruby
+            ]
+        ),
+        pack_values([2, 15, 4]),
+        5
+    ),
+    BuildingId.Fishmonger: CostWithLords(
+        4,
+        8,
+        pack_values(
+            [
+                ResourceIds.Wood,
+                ResourceIds.Obsidian,
+                ResourceIds.Silver,
+                ResourceIds.ColdIron
+            ]
+        ),
+        pack_values([30, 55, 6, 5]),
+        10
+    ),
+    BuildingId.Farms: CostWithLords(
+        4,
+        8,
+        pack_values(
+            [
+                ResourceIds.Wood,
                 ResourceIds.Copper,
-                ResourceIds.Gold,
-                ResourceIds.Hartwood,
-                ResourceIds.AlchemicalSilver,
-                ResourceIds.Dragonhide,
+                ResourceIds.Silver,
+                ResourceIds.Hartwood
             ]
         ),
-        pack_values([70, 110, 110, 100, 100, 10, 1]),
+        pack_values([20, 5, 30, 10]),
+        10
     ),
-    BuildingId.ParadeGrounds: Cost(
-        9,
+    BuildingId.Hamlet: CostWithLords(
+        4,
         8,
         pack_values(
             [
                 ResourceIds.Wood,
-                ResourceIds.Silver,
                 ResourceIds.ColdIron,
                 ResourceIds.Gold,
-                ResourceIds.Diamonds,
-                ResourceIds.Sapphire,
-                ResourceIds.Ruby,
-                ResourceIds.Mithral,
-                ResourceIds.Dragonhide,
+                ResourceIds.Ruby
             ]
         ),
-        pack_values([120, 100, 100, 100, 20, 20, 20, 10, 1]),
-    ),
-    BuildingId.ResourceFacility: Cost(
-        9,
-        8,
-        pack_values(
-            [
-                ResourceIds.Wood,
-                ResourceIds.Silver,
-                ResourceIds.ColdIron,
-                ResourceIds.Gold,
-                ResourceIds.Diamonds,
-                ResourceIds.Sapphire,
-                ResourceIds.Ruby,
-                ResourceIds.Mithral,
-                ResourceIds.Dragonhide,
-            ]
-        ),
-        pack_values([120, 100, 100, 100, 20, 20, 20, 10, 1]),
-    ),
-    BuildingId.Dock: Cost(
-        9,
-        8,
-        pack_values(
-            [
-                ResourceIds.Wood,
-                ResourceIds.Silver,
-                ResourceIds.ColdIron,
-                ResourceIds.Gold,
-                ResourceIds.Diamonds,
-                ResourceIds.Sapphire,
-                ResourceIds.Ruby,
-                ResourceIds.Mithral,
-                ResourceIds.Dragonhide,
-            ]
-        ),
-        pack_values([120, 100, 100, 100, 20, 20, 20, 10, 1]),
-    ),
-    BuildingId.Fishmonger: Cost(
-        9,
-        8,
-        pack_values(
-            [
-                ResourceIds.Wood,
-                ResourceIds.Silver,
-                ResourceIds.ColdIron,
-                ResourceIds.Gold,
-                ResourceIds.Diamonds,
-                ResourceIds.Sapphire,
-                ResourceIds.Ruby,
-                ResourceIds.Mithral,
-                ResourceIds.Dragonhide,
-            ]
-        ),
-        pack_values([120, 100, 100, 100, 20, 20, 20, 10, 1]),
-    ),
-    BuildingId.Farms: Cost(
-        9,
-        8,
-        pack_values(
-            [
-                ResourceIds.Wood,
-                ResourceIds.Silver,
-                ResourceIds.ColdIron,
-                ResourceIds.Gold,
-                ResourceIds.Diamonds,
-                ResourceIds.Sapphire,
-                ResourceIds.Ruby,
-                ResourceIds.Mithral,
-                ResourceIds.Dragonhide,
-            ]
-        ),
-        pack_values([120, 100, 100, 100, 20, 20, 20, 10, 1]),
-    ),
-    BuildingId.Hamlet: Cost(
-        9,
-        8,
-        pack_values(
-            [
-                ResourceIds.Wood,
-                ResourceIds.Silver,
-                ResourceIds.ColdIron,
-                ResourceIds.Gold,
-                ResourceIds.Diamonds,
-                ResourceIds.Sapphire,
-                ResourceIds.Ruby,
-                ResourceIds.Mithral,
-                ResourceIds.Dragonhide,
-            ]
-        ),
-        pack_values([120, 100, 100, 100, 20, 20, 20, 10, 1]),
+        pack_values([25,20,20,10]),
+        20
     )
 }
 

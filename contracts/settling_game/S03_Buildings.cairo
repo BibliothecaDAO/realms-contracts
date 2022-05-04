@@ -31,6 +31,10 @@ end
 func building_cost(building_id : felt) -> (cost : Cost):
 end
 
+@storage_var
+func building_lords_cost(building_id : felt) -> (lords : Uint256):
+end
+
 ###############
 # CONSTRUCTOR #
 ###############
@@ -60,10 +64,11 @@ end
 
 @external
 func set_building_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
-    building_id : felt, cost : Cost
+    building_id : felt, cost : Cost, lords : Uint256
 ):
     # TODO: auth + range checks on the cost struct
     building_cost.write(building_id, cost)
+    building_lords_cost.write(building_id, lords)
     return ()
 end
 
@@ -84,7 +89,8 @@ end
 @view
 func get_building_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     building_id : felt
-) -> (cost : Cost):
+) -> (cost : Cost, lords: Uint256):
     let (cost) = building_cost.read(building_id)
-    return (cost)
+    let (lords) = building_lords_cost.read(building_id)
+    return (cost, lords)
 end
