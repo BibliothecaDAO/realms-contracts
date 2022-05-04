@@ -127,12 +127,12 @@ namespace ExternalContractIds:
 end
 
 struct CryptData:
-    member name : felt  # string - name of the dungeon
     member environment : felt  # uint256 - environment of the dungeon (0-6)
     member legendary : felt  # uint256 - flag if dungeon is legendary (0/1)
     member size : felt  # uint256 - size (e.g. 6x6) of dungeon. (6-25)
-    member numDoors : felt  # uint256 - number of doors (0-12)
-    member numPoints : felt  # uint256 - number of points (0-12)
+    member num_doors : felt  # uint256 - number of doors (0-12)
+    member num_points : felt  # uint256 - number of points (0-12)
+    member name : felt  # string - name of the dungeon
 end
 
 namespace ResourceIds:

@@ -23,7 +23,7 @@ from openzeppelin.introspection.ERC165 import ERC165_supports_interface
 
 from openzeppelin.access.ownable import Ownable_initializer, Ownable_only_owner
 
-from contracts.settling_game.utils.game_structs import CryptData, RealmData
+from contracts.settling_game.utils.game_structs import CryptData
 #
 # Constructor
 #
@@ -190,41 +190,25 @@ end
 @external
 func fetch_crypt_data{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*}(crypt_id : Uint256) -> (realm_stats : RealmData):
+        bitwise_ptr : BitwiseBuiltin*}(crypt_id : Uint256) -> (crypt_stats : CryptData):
     alloc_locals
 
     let (data) = crypt_data.read(crypt_id)
 
     ## TODO: Update with bitmap for Crypts data
-    let (regions) = unpack_data(data, 0, 255)
-    let (cities) = unpack_data(data, 8, 255)
-    let (harbours) = unpack_data(data, 16, 255)
-    let (rivers) = unpack_data(data, 24, 255)
-    let (resource_number) = unpack_data(data, 32, 255)
-    let (resource_1) = unpack_data(data, 40, 255)
-    let (resource_2) = unpack_data(data, 48, 255)
-    let (resource_3) = unpack_data(data, 56, 255)
-    let (resource_4) = unpack_data(data, 64, 255)
-    let (resource_5) = unpack_data(data, 72, 255)
-    let (resource_6) = unpack_data(data, 80, 255)
-    let (resource_7) = unpack_data(data, 88, 255)
-    let (wonder) = unpack_data(data, 96, 255)
-    let (order) = unpack_data(data, 104, 255)
+    let (environment) = unpack_data(data, 0, 255)   # [0-3] uint256 - environment of the dungeon (0-6)
+    let (legendary) = unpack_data(data, 4, 255)     # [4] uint256 - flag if dungeon is legendary (0/1)
+    let (size) = unpack_data(data, 9, 255)          # [9-13] uint256 - size (e.g. 6x6) of dungeon. (6-25)
+    let (num_doors) = unpack_data(data, 14, 255)    # [14-17] uint256 - number of doors (0-12)
+    let (num_points) = unpack_data(data, 18, 255)   # [18-21] uint256 - number of points (0-12)
+    let (name) = unpack_data(data, 22, 255)         # [22-254] string - name of the dungeon (TBD if we can do this). We might want to bring over milan's name/seed generator
 
-    let realm_stats = RealmData(
-        regions=regions,
-        cities=cities,
-        harbours=harbours,
-        rivers=rivers,
-        resource_number=resource_number,
-        resource_1=resource_1,
-        resource_2=resource_2,
-        resource_3=resource_3,
-        resource_4=resource_4,
-        resource_5=resource_5,
-        resource_6=resource_6,
-        resource_7=resource_7,
-        wonder=wonder,
-        order=order)
-    return (realm_stats=realm_stats)
+    let crypt_stats = CryptData(
+        environment = environment,
+        legendary = legendary,
+        size = size,
+        num_doors = num_doors,
+        num_points = num_points,
+        name = name)
+    return (crypt_stats=crypt_stats)
 end
