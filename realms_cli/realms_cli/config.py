@@ -36,6 +36,7 @@ class Config:
         self.INITIAL_LORDS_SUPPLY = 500000000 * (10 ** 18)
 
         self.ADMIN_ADDRESS, _ = safe_load_deployment("account-0", self.nile_network)
+        self.USER_ADDRESS, _ = safe_load_deployment("account-1", self.nile_network)
 
         self.ARBITER_ADDRESS, _ = safe_load_deployment("arbiter", self.nile_network)
         self.CONTROLLER_ADDRESS, _ = safe_load_deployment("moduleController", self.nile_network)
