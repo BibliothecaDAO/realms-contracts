@@ -109,13 +109,10 @@ namespace ModuleIds:
     const L04_Calculator = 7
     const L05_Wonders = 8
     const S05_Wonders = 9
-<<<<<<< HEAD
-    const L07_Crypts = 10
-    const S07_Crypts = 11
-=======
-    const L06_Combat = 11
-    const S06_Combat = 12
->>>>>>> main
+    const L06_Combat = 10
+    const S06_Combat = 11
+    const L07_Crypts = 12
+    const S07_Crypts = 13
 end
 
 namespace ExternalContractIds:
@@ -130,9 +127,6 @@ namespace ExternalContractIds:
 end
 
 struct CryptData:
-    member layout : felt  # map - locations of walls/floors
-    member doors : felt # map - locations of doors
-    member points : felt # map - locations of points of interest
     member name : felt  # string - name of the dungeon
     member environment : felt  # uint256 - environment of the dungeon (0-6)
     member legendary : felt  # uint256 - flag if dungeon is legendary (0/1)
@@ -280,4 +274,15 @@ struct Cost:
     member packed_ids : felt
     # packed amounts of each resource
     member packed_amounts : felt
+end
+
+# struct holding the different environments for Crypts and Caverns dungeons
+# we'll use this to determine how many resources to grant during staking
+namespace EnvironmentIds:
+    const DesertOasis = 1
+    const StoneTemple = 2
+    const ForestRuins = 3
+    const MountainDeep = 4
+    const UnderwaterKeep = 5
+    const EmbersGlow = 6
 end

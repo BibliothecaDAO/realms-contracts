@@ -40,6 +40,86 @@
                 "size": 4,
                 "type": "struct"
             },
+            "__main__.CryptData": {
+                "full_name": "__main__.CryptData",
+                "members": {
+                    "environment": {
+                        "cairo_type": "felt",
+                        "offset": 1
+                    },
+                    "legendary": {
+                        "cairo_type": "felt",
+                        "offset": 2
+                    },
+                    "name": {
+                        "cairo_type": "felt",
+                        "offset": 0
+                    },
+                    "numDoors": {
+                        "cairo_type": "felt",
+                        "offset": 4
+                    },
+                    "numPoints": {
+                        "cairo_type": "felt",
+                        "offset": 5
+                    },
+                    "size": {
+                        "cairo_type": "felt",
+                        "offset": 3
+                    }
+                },
+                "size": 6,
+                "type": "struct"
+            },
+            "__main__.EnvironmentIds": {
+                "type": "namespace"
+            },
+            "__main__.EnvironmentIds.Args": {
+                "full_name": "__main__.EnvironmentIds.Args",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.EnvironmentIds.DesertOasis": {
+                "type": "const",
+                "value": 1
+            },
+            "__main__.EnvironmentIds.EmbersGlow": {
+                "type": "const",
+                "value": 6
+            },
+            "__main__.EnvironmentIds.ForestRuins": {
+                "type": "const",
+                "value": 3
+            },
+            "__main__.EnvironmentIds.ImplicitArgs": {
+                "full_name": "__main__.EnvironmentIds.ImplicitArgs",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.EnvironmentIds.MountainDeep": {
+                "type": "const",
+                "value": 4
+            },
+            "__main__.EnvironmentIds.Return": {
+                "full_name": "__main__.EnvironmentIds.Return",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.EnvironmentIds.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.EnvironmentIds.StoneTemple": {
+                "type": "const",
+                "value": 2
+            },
+            "__main__.EnvironmentIds.UnderwaterKeep": {
+                "type": "const",
+                "value": 5
+            },
             "__main__.ExternalContractIds": {
                 "type": "namespace"
             },
@@ -48,6 +128,10 @@
                 "members": {},
                 "size": 0,
                 "type": "struct"
+            },
+            "__main__.ExternalContractIds.Crypts": {
+                "type": "const",
+                "value": 7
             },
             "__main__.ExternalContractIds.ImplicitArgs": {
                 "full_name": "__main__.ExternalContractIds.ImplicitArgs",
@@ -76,6 +160,10 @@
             "__main__.ExternalContractIds.SIZEOF_LOCALS": {
                 "type": "const",
                 "value": 0
+            },
+            "__main__.ExternalContractIds.S_Crypts": {
+                "type": "const",
+                "value": 8
             },
             "__main__.ExternalContractIds.S_Realms": {
                 "type": "const",
@@ -126,7 +214,11 @@
             },
             "__main__.ModuleIds.L06_Combat": {
                 "type": "const",
-                "value": 11
+                "value": 10
+            },
+            "__main__.ModuleIds.L07_Crypts": {
+                "type": "const",
+                "value": 12
             },
             "__main__.ModuleIds.Return": {
                 "full_name": "__main__.ModuleIds.Return",
@@ -152,7 +244,11 @@
             },
             "__main__.ModuleIds.S06_Combat": {
                 "type": "const",
-                "value": 12
+                "value": 11
+            },
+            "__main__.ModuleIds.S07_Crypts": {
+                "type": "const",
+                "value": 13
             },
             "__main__.ModuleIds.SIZEOF_LOCALS": {
                 "type": "const",
