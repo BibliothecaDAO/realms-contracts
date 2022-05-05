@@ -62,41 +62,41 @@ def pack_squad(squad: Squad) -> PackedSquad:
     shift = 0x100
     p1 = (
         pack_troop(squad.t1_1)
-        + pack_troop(squad.t1_2) * shift ** 7
-        + pack_troop(squad.t1_3) * shift ** 14
-        + pack_troop(squad.t1_4) * shift ** 21
+        + pack_troop(squad.t1_2) * shift**7
+        + pack_troop(squad.t1_3) * shift**14
+        + pack_troop(squad.t1_4) * shift**21
     )
     p2 = (
         pack_troop(squad.t1_5)
-        + pack_troop(squad.t1_6) * shift ** 7
-        + pack_troop(squad.t1_7) * shift ** 14
-        + pack_troop(squad.t1_8) * shift ** 21
+        + pack_troop(squad.t1_6) * shift**7
+        + pack_troop(squad.t1_7) * shift**14
+        + pack_troop(squad.t1_8) * shift**21
     )
     p3 = (
         pack_troop(squad.t1_9)
-        + pack_troop(squad.t1_10) * shift ** 7
-        + pack_troop(squad.t1_11) * shift ** 14
-        + pack_troop(squad.t1_12) * shift ** 21
+        + pack_troop(squad.t1_10) * shift**7
+        + pack_troop(squad.t1_11) * shift**14
+        + pack_troop(squad.t1_12) * shift**21
     )
     p4 = (
         pack_troop(squad.t1_13)
-        + pack_troop(squad.t1_14) * shift ** 7
-        + pack_troop(squad.t1_15) * shift ** 14
-        + pack_troop(squad.t1_16) * shift ** 21
+        + pack_troop(squad.t1_14) * shift**7
+        + pack_troop(squad.t1_15) * shift**14
+        + pack_troop(squad.t1_16) * shift**21
     )
 
     p5 = (
         pack_troop(squad.t2_1)
-        + pack_troop(squad.t2_2) * shift ** 7
-        + pack_troop(squad.t2_3) * shift ** 14
-        + pack_troop(squad.t2_4) * shift ** 21
+        + pack_troop(squad.t2_2) * shift**7
+        + pack_troop(squad.t2_3) * shift**14
+        + pack_troop(squad.t2_4) * shift**21
     )
 
     p6 = (
         pack_troop(squad.t2_5)
-        + pack_troop(squad.t2_6) * shift ** 7
-        + pack_troop(squad.t2_7) * shift ** 14
-        + pack_troop(squad.t2_8) * shift ** 21
+        + pack_troop(squad.t2_6) * shift**7
+        + pack_troop(squad.t2_7) * shift**14
+        + pack_troop(squad.t2_8) * shift**21
     )
 
     p7 = pack_troop(squad.t3_1)
@@ -192,6 +192,10 @@ async def test_compute_min_roll_to_hit(l06_combat_tests):
             tx = await l06_combat_tests.test_compute_min_roll_to_hit(a, d).invoke()
             res = tx.result.min_roll
             assert exp == res
+
+    # test when there's no defence
+    tx = await l06_combat_tests.test_compute_min_roll_to_hit(40, 0).invoke()
+    assert tx.result.min_roll == 0
 
 
 @pytest.mark.asyncio
@@ -305,9 +309,7 @@ async def test_remove_troop_from_squad(library_combat_tests):
 
     modified_squad = squad
     for troop_idx in range(len(squad)):
-        tx = await library_combat_tests.test_remove_troop_from_squad(
-            troop_idx, modified_squad
-        ).invoke()
+        tx = await library_combat_tests.test_remove_troop_from_squad(troop_idx, modified_squad).invoke()
         modified_squad = tx.result.updated
         assert modified_squad[troop_idx] == EMPTY_TROOP
 
@@ -323,17 +325,13 @@ async def test_find_first_free_troop_slot_in_squad(library_combat_tests):
         if i == 24:
             tier = 3
 
-        tx = await library_combat_tests.test_find_first_free_troop_slot_in_squad(
-            partial_squad, tier
-        ).invoke()
+        tx = await library_combat_tests.test_find_first_free_troop_slot_in_squad(partial_squad, tier).invoke()
         assert tx.result.free_slot_index == i * troop_size
 
     full_squad = build_default_squad()
     for tier in [1, 2, 3]:
         with pytest.raises(StarkException):
-            await library_combat_tests.test_find_first_free_troop_slot_in_squad(
-                full_squad, tier
-            ).invoke()
+            await library_combat_tests.test_find_first_free_troop_slot_in_squad(full_squad, tier).invoke()
 
 
 @pytest.mark.asyncio

@@ -325,6 +325,11 @@ end
 func compute_min_roll_to_hit{range_check_ptr}(a : felt, d : felt) -> (min_roll : felt):
     alloc_locals
 
+    # in case there's no defence, any attack will succeed
+    if d == 0:
+        return (0)
+    end
+
     let (q, r) = unsigned_div_rem(a * 7, d)
     local t
     if r == 0:
