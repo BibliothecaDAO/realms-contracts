@@ -78,3 +78,14 @@ def parse_send(x):
     except ValueError:
         print(f"could not get tx_hash from message {x}")
     return 0x0, 0x0
+    
+def deploy(network, contract_alias):
+    """Nile deploy function."""
+    command = [
+        "nile",
+        "deploy",
+        "--network",
+        network,
+        contract_alias,
+    ]
+    return subprocess.check_output(command).strip().decode("utf-8")
