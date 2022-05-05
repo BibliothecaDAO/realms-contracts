@@ -40,10 +40,10 @@ struct RealmBuildings:
     member Granary : felt
     member Housing : felt
     member Amphitheater : felt
-    member Carpenter : felt
+    member ArcherTower : felt
     member School : felt
-    member Symposium : felt
-    member LogisticsOffice : felt
+    member MageTower : felt
+    member TradeOffice : felt
     member ExplorersGuild : felt
     member ParadeGrounds : felt
     member ResourceFacility : felt
@@ -63,10 +63,10 @@ namespace RealmBuildingsIds:
     const Granary = 7
     const Housing = 8
     const Amphitheater = 9
-    const Carpenter = 10
+    const ArcherTower = 10
     const School = 11
-    const Symposium = 12
-    const LogisticsOffice = 13
+    const MageTower = 12
+    const TradeOffice = 13
     const ExplorersGuild = 14
     const ParadeGrounds = 15
     const ResourceFacility = 16
@@ -86,10 +86,10 @@ namespace RealmBuildingLimitTraitsIds:
     const Granary = TraitsIds.City
     const Housing = TraitsIds.City
     const Amphitheater = TraitsIds.City
-    const Carpenter = TraitsIds.City
+    const ArcherTower = TraitsIds.City
     const School = TraitsIds.City
-    const Symposium = TraitsIds.City
-    const LogisticsOffice = TraitsIds.City
+    const MageTower = TraitsIds.City
+    const TradeOffice = TraitsIds.City
     const ExplorersGuild = TraitsIds.City
     const ParadeGrounds = TraitsIds.City
     const ResourceFacility = TraitsIds.City

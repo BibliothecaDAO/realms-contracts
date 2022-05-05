@@ -486,20 +486,20 @@ async def game_factory(token_factory):
 
     settling_logic = await starknet.deploy(
         source="contracts/settling_game/L01_Settling.cairo",
-        constructor_calldata=[],
+        constructor_calldata=[controller.contract_address],
     )
 
-    proxy_settling_logic = await starknet.deploy(
-        source="contracts/settling_game/proxy/PROXY_Logic.cairo",
-        constructor_calldata=[settling_logic.contract_address],
-    )
+    # proxy_settling_logic = await starknet.deploy(
+    #     source="contracts/settling_game/proxy/PROXY_Logic.cairo",
+    #     constructor_calldata=[settling_logic.contract_address],
+    # )
 
-    await admin_key.send_transaction(
-        account=admin_account,
-        to=proxy_settling_logic.contract_address,
-        selector_name='initializer',
-        calldata=[admin_account.contract_address, controller.contract_address],
-    )
+    # await admin_key.send_transaction(
+    #     account=admin_account,
+    #     to=proxy_settling_logic.contract_address,
+    #     selector_name='initializer',
+    #     calldata=[admin_account.contract_address, controller.contract_address],
+    # )
 
     settling_state = await starknet.deploy(
         source="contracts/settling_game/S01_Settling.cairo",
@@ -540,7 +540,7 @@ async def game_factory(token_factory):
         to=arbiter.contract_address,
         selector_name='batch_set_controller_addresses',
         calldata=[
-            proxy_settling_logic.contract_address,
+            settling_logic.contract_address,
             settling_state.contract_address,
             resources_logic.contract_address,
             resources_state.contract_address,
@@ -557,7 +557,7 @@ async def game_factory(token_factory):
         account=admin_account,
         to=s_realms.contract_address,
         selector_name='Set_module_access',
-        calldata=[proxy_settling_logic.contract_address],
+        calldata=[settling_logic.contract_address],
     )
 
     # set module access witin resources contract
@@ -569,17 +569,17 @@ async def game_factory(token_factory):
     )
 
     # test upgrade
-    V2_settling_logic = await starknet.deploy(
-        source="contracts/settling_game/L01_Settling.cairo",
-        constructor_calldata=[],
-    )
+    # V2_settling_logic = await starknet.deploy(
+    #     source="contracts/settling_game/L01_Settling.cairo",
+    #     constructor_calldata=[],
+    # )
 
-    await admin_key.send_transaction(
-        account=admin_account,
-        to=proxy_settling_logic.contract_address,
-        selector_name='upgrade',
-        calldata=[V2_settling_logic.contract_address],
-    )
+    # await admin_key.send_transaction(
+    #     account=admin_account,
+    #     to=settling_logic.contract_address,
+    #     selector_name='upgrade',
+    #     calldata=[V2_settling_logic.contract_address],
+    # )
     return (
         admin_account,
         treasury_account,
@@ -588,7 +588,7 @@ async def game_factory(token_factory):
         signers,
         arbiter,
         controller,
-        proxy_settling_logic,
+        settling_logic,
         settling_state,
         realms,
         resources,

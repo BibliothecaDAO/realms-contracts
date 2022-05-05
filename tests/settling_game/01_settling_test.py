@@ -31,13 +31,13 @@ FIRST_TOKEN_ID = uint(1)
 WONDER_TOKEN_ID = uint(839)
 
 # 1.5 * 7 Days
-DAYS = 86400
+DAYS = 1800
 STAKED_DAYS = 7
 
 LORDS_RATE = 25
 RESOURCES = 100
 STAKE_TIME = DAYS * STAKED_DAYS
-BUILDING_ID = 1
+BUILDING_ID = 8
 RESOURCE_ID = 2
 
 
@@ -51,7 +51,7 @@ async def test_mint_realm(game_factory):
     #################
 
     await signer.send_transaction(
-        account=admin_account, to=resources.contract_address, selector_name='mintBatch', calldata=[admin_account.contract_address, 5, *uint(1), *uint(2), *uint(3), *uint(4), *uint(5), 5, *uint(100), *uint(100), *uint(100), *uint(100), *uint(100)]
+        account=admin_account, to=resources.contract_address, selector_name='mintBatch', calldata=[admin_account.contract_address, 10, *uint(1), *uint(2), *uint(3), *uint(4), *uint(5), *uint(6), *uint(7), *uint(8), *uint(9), *uint(10), 10, *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500)]
     )
 
     # APPROVE RESOURCE CONTRACT FOR LORDS TRANSFERS - SET AT FULL SUPPLY TODO: NEEDS MORE SECURE SYSTEM
@@ -59,6 +59,10 @@ async def test_mint_realm(game_factory):
         account=treasury_account, to=lords.contract_address, selector_name='approve', calldata=[resources_logic.contract_address, *uint(INITIAL_SUPPLY)]
     )
 
+    await signer.send_transaction(
+        account=admin_account, to=lords.contract_address, selector_name='approve', calldata=[buildings_logic.contract_address, *uint(INITIAL_SUPPLY)]
+    )
+    
     await signers[1].send_transaction(
         account=treasury_account, to=lords.contract_address, selector_name='approve', calldata=[settling_logic.contract_address, *uint(INITIAL_SUPPLY)]
     )
@@ -69,9 +73,9 @@ async def test_mint_realm(game_factory):
         await signer.send_transaction(
             account=admin_account, to=resources_state.contract_address, selector_name='set_resource_upgrade_cost', calldata=[resource_id.value, resource_cost.resource_count, resource_cost.bits, resource_cost.packed_ids, resource_cost.packed_amounts]
         )
-    for troop_id, troop_cost in BUILDING_COSTS.items():
+    for building_id, building_cost in BUILDING_COSTS.items():
         await signer.send_transaction(
-            account=admin_account, to=buildings_state.contract_address, selector_name='set_building_cost', calldata=[troop_id.value, troop_cost.resource_count, troop_cost.bits, troop_cost.packed_ids, troop_cost.packed_amounts]
+            account=admin_account, to=buildings_state.contract_address, selector_name='set_building_cost', calldata=[building_id.value, building_cost.resource_count, building_cost.bits, building_cost.packed_ids, building_cost.packed_amounts, *uint(building_cost.lords)]
         )
 
     # REALM METADATA
@@ -166,14 +170,6 @@ async def test_mint_realm(game_factory):
     #############
     # BUILDINGS #
     #############
-
-    ids = await buildings_logic.fetch_building_cost_ids(BUILDING_ID).call()
-    values = await buildings_logic.fetch_building_cost_values(BUILDING_ID).call()
-
-    print(
-        f'Building {BUILDING_ID} Cost IDS: {ids.result[0]}')
-    print(
-        f'Building {BUILDING_ID} Cost Values: {values.result[0]}')
 
     # create building
     await signer.send_transaction(
