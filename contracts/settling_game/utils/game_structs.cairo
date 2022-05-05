@@ -44,9 +44,9 @@ struct RealmBuildings:
     member School : felt
     member MageTower : felt
     member TradeOffice : felt
-    member ExplorersGuild : felt
+    member Architect : felt
     member ParadeGrounds : felt
-    member ResourceFacility : felt
+    member Barracks : felt
     member Dock : felt
     member Fishmonger : felt
     member Farms : felt
@@ -67,9 +67,9 @@ namespace RealmBuildingsIds:
     const School = 11
     const MageTower = 12
     const TradeOffice = 13
-    const ExplorersGuild = 14
+    const Architect = 14
     const ParadeGrounds = 15
-    const ResourceFacility = 16
+    const Barracks = 16
     const Dock = 17
     const Fishmonger = 18
     const Farms = 19
@@ -90,9 +90,9 @@ namespace RealmBuildingLimitTraitsIds:
     const School = TraitsIds.City
     const MageTower = TraitsIds.City
     const TradeOffice = TraitsIds.City
-    const ExplorersGuild = TraitsIds.City
+    const Architect = TraitsIds.City
     const ParadeGrounds = TraitsIds.City
-    const ResourceFacility = TraitsIds.City
+    const Barracks = TraitsIds.City
     const Dock = TraitsIds.Harbour
     const Fishmonger = TraitsIds.Harbour
     const Farms = TraitsIds.River

@@ -332,14 +332,14 @@ func build_buildings{
         buildings[12] = id_13
     end
 
-    if building_id == RealmBuildingsIds.ExplorersGuild:
-        if current_buildings.ExplorersGuild == realms_data.cities:
+    if building_id == RealmBuildingsIds.Architect:
+        if current_buildings.Architect == realms_data.cities:
             assert_not_zero(0)
         end
-        local id_14 = (current_buildings.ExplorersGuild + 1) * SHIFT_6_14
+        local id_14 = (current_buildings.Architect + 1) * SHIFT_6_14
         buildings[13] = id_14
     else:
-        local id_14 = current_buildings.ExplorersGuild * SHIFT_6_14
+        local id_14 = current_buildings.Architect * SHIFT_6_14
         buildings[13] = id_14
     end
 
@@ -354,14 +354,14 @@ func build_buildings{
         buildings[14] = id_15
     end
 
-    if building_id == RealmBuildingsIds.ResourceFacility:
-        if current_buildings.ResourceFacility == realms_data.cities:
+    if building_id == RealmBuildingsIds.Barracks:
+        if current_buildings.Barracks == realms_data.cities:
             assert_not_zero(0)
         end
-        local id_16 = (current_buildings.ResourceFacility + 1) * SHIFT_6_16
+        local id_16 = (current_buildings.Barracks + 1) * SHIFT_6_16
         buildings[15] = id_16
     else:
-        local id_16 = current_buildings.ResourceFacility * SHIFT_6_16
+        local id_16 = current_buildings.Barracks * SHIFT_6_16
         buildings[15] = id_16
     end
 
@@ -443,9 +443,9 @@ func fetch_buildings_by_type{
     let (School) = unpack_data(data, 60, 63)
     let (MageTower) = unpack_data(data, 66, 63)
     let (TradeOffice) = unpack_data(data, 72, 63)
-    let (ExplorersGuild) = unpack_data(data, 78, 63)
+    let (Architect) = unpack_data(data, 78, 63)
     let (ParadeGrounds) = unpack_data(data, 84, 63)
-    let (ResourceFacility) = unpack_data(data, 90, 63)
+    let (Barracks) = unpack_data(data, 90, 63)
     let (Dock) = unpack_data(data, 96, 63)
     let (Fishmonger) = unpack_data(data, 102, 63)
     let (Farms) = unpack_data(data, 108, 63)
@@ -466,9 +466,9 @@ func fetch_buildings_by_type{
         School=School,
         MageTower=MageTower,
         TradeOffice=TradeOffice,
-        ExplorersGuild=ExplorersGuild,
+        Architect=Architect,
         ParadeGrounds=ParadeGrounds,
-        ResourceFacility=ResourceFacility,
+        Barracks=Barracks,
         Dock=Dock,
         Fishmonger=Fishmonger,
         Farms=Farms,
