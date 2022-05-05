@@ -1,6 +1,6 @@
 from collections import namedtuple
 from enum import IntEnum
-from tests.shared import pack_values
+from realms_cli.shared import pack_values
 
 Cost = namedtuple('Cost', 'resource_count bits packed_ids packed_amounts')
 CostWithLords = namedtuple(

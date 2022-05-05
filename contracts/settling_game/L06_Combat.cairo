@@ -213,10 +213,10 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
         controller, module_id=ModuleIds.S06_Combat
     )
     let (attacking_realm_data : RealmCombatData) = IS06_Combat.get_realm_combat_data(
-        controller, attacking_realm_id
+        combat_state_address, attacking_realm_id
     )
     let (defending_realm_data : RealmCombatData) = IS06_Combat.get_realm_combat_data(
-        controller, defending_realm_id
+        combat_state_address, defending_realm_id
     )
 
     let (attacker : Squad) = unpack_squad(attacking_realm_data.attacking_squad)
@@ -234,7 +234,7 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
         defending_squad=attacking_realm_data.defending_squad,
         last_attacked_at=attacking_realm_data.last_attacked_at,
     )
-    IS06_Combat.set_realm_combat_data(controller, attacking_realm_id, new_attacking_realm_data)
+    IS06_Combat.set_realm_combat_data(combat_state_address, attacking_realm_id, new_attacking_realm_data)
 
     let (now) = get_block_timestamp()
     let new_defending_realm_data = RealmCombatData(
@@ -242,7 +242,7 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
         defending_squad=new_defender,
         last_attacked_at=now,
     )
-    IS06_Combat.set_realm_combat_data(controller, defending_realm_id, new_defending_realm_data)
+    IS06_Combat.set_realm_combat_data(combat_state_address, defending_realm_id, new_defending_realm_data)
 
     # pillaging only if attacker wins
     if combat_outcome == COMBAT_OUTCOME_ATTACKER_WINS:
