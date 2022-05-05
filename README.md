@@ -56,6 +56,13 @@ Instead, you can use the [Github CLI](https://cli.github.com/) to auth from your
 4. Run `gh auth login` and follow the steps, pasting in your new access token when asked.
 </details>
 
+<details><summary>OSX ARM chips: Running without a container</summary>
+Docker performance on ARM chips is pretty poor, so we recommend running without a container until these perf issues are resolved:
+1. Pull down the repository
+2. Install dependencies: `pip3 install -r ./requirements.txt`
+3. Install realms cli: `pip3 install ./realms_cli`
+</details>
+
 If you have further questions about the development workflow, please ask in [#builders-chat in the Realms Discord](https://discord.gg/yP4BCbRjUs).
 
 ## Contributing
