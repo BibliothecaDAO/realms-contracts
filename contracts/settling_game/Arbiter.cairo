@@ -131,10 +131,12 @@ func batch_set_controller_addresses{
     module_07_addr : felt,
     module_08_addr : felt,
     module_09_addr : felt,
+    module_10_addr : felt,
+    module_11_addr : felt,
 ):
     Ownable_only_owner()
     let (controller) = controller_address.read()
-    IModuleController.set_initial_module_addresses(
+    IModuleController.set_initial_module_addresses( 
         controller,
         module_01_addr,
         module_02_addr,
@@ -145,6 +147,8 @@ func batch_set_controller_addresses{
         module_07_addr,
         module_08_addr,
         module_09_addr,
+        module_10_addr,
+        module_11_addr,
     )
     return ()
 end

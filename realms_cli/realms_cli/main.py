@@ -361,5 +361,22 @@ def attack_realm(attacking_realm, defending_realm, network):
         arguments=[*uint(attacking_realm), *uint(defending_realm), 1],
     )
 
+@click.command()
+@click.argument("realm_id", nargs=1)
+@click.option("--network", default="goerli")
+def get_troops(realm_id, network):
+    """
+    Gets troops on Realm
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="L06_Combat",
+        function="view_troops",
+        arguments=[*uint(realm_id)],
+    )
+    print(out)   
+
 # get happiness level of realm
 # get pillageable amount
