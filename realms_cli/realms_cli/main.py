@@ -322,7 +322,7 @@ def build_squad(realm_token_id, network):
         signer_alias=config.USER_ALIAS,
         contract_alias="L06_Combat",
         function="build_squad_from_troops_in_realm",
-        arguments=[1, 1, *uint(realm_token_id), 1],
+        arguments=[10, 1,1,1,1,1,1,1,1,1,1,1 *uint(realm_token_id), 1],
     )
 
 @click.command()
@@ -374,6 +374,23 @@ def get_troops(realm_id, network):
         network=config.nile_network,
         contract_alias="L06_Combat",
         function="view_troops",
+        arguments=[*uint(realm_id)],
+    )
+    print(out)   
+
+@click.command()
+@click.argument("realm_id", nargs=1)
+@click.option("--network", default="goerli")
+def get_combat_data(realm_id, network):
+    """
+    Gets Combat data
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="S06_Combat",
+        function="get_realm_combat_data",
         arguments=[*uint(realm_id)],
     )
     print(out)   

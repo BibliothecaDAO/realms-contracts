@@ -41,18 +41,44 @@ from contracts.settling_game.utils.library import (
     MODULE_initializer,
 )
 
+from openzeppelin.upgrades.library import (
+    Proxy_initializer,
+    Proxy_only_admin,
+    Proxy_set_implementation,
+    Proxy_get_implementation,
+    Proxy_set_admin,
+    Proxy_get_admin,
+)
+
 ###############
 # CONSTRUCTOR #
 ###############
 
-@constructor
-func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    address_of_controller : felt
-):
+@external
+func initializer{
+        syscall_ptr: felt*, 
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }(
+        address_of_controller : felt,
+        proxy_admin : felt
+    ):
     MODULE_initializer(address_of_controller)
-
+    Proxy_initializer(proxy_admin)
     return ()
 end
+
+@external
+func upgrade{
+        syscall_ptr: felt*, 
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }(new_implementation: felt):
+    Proxy_only_admin()
+    Proxy_set_implementation(new_implementation)
+    return ()
+end
+
 
 ############
 # EXTERNAL #

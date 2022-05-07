@@ -41,9 +41,18 @@ from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.imodules import (
     IModuleController,
     IS02_Resources,
-    IS01_Settling,
+    IL01_Settling,
     IL04_Calculator,
     IS05_Wonders,
+)
+
+from openzeppelin.upgrades.library import (
+    Proxy_initializer,
+    Proxy_only_admin,
+    Proxy_set_implementation,
+    Proxy_get_implementation,
+    Proxy_set_admin,
+    Proxy_get_admin,
 )
 
 ##########
@@ -57,13 +66,32 @@ end
 ###############
 # CONSTRUCTOR #
 ###############
-@constructor
-func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    address_of_controller : felt
-):
+
+@external
+func initializer{
+        syscall_ptr: felt*, 
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }(
+        address_of_controller : felt,
+        proxy_admin : felt
+    ):
     MODULE_initializer(address_of_controller)
+    Proxy_initializer(proxy_admin)
     return ()
 end
+
+@external
+func upgrade{
+        syscall_ptr: felt*, 
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }(new_implementation: felt):
+    Proxy_only_admin()
+    Proxy_set_implementation(new_implementation)
+    return ()
+end
+
 
 ############
 # EXTERNAL #
@@ -100,11 +128,6 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     # RESOURCE STATE
     let (resources_state_address) = IModuleController.get_module_address(
         controller, ModuleIds.S02_Resources
-    )
-
-    # SETTLING STATE
-    let (settling_state_address) = IModuleController.get_module_address(
-        controller, ModuleIds.S01_Settling
     )
 
     # SETTLING LOGIC
@@ -158,8 +181,8 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     end
 
     # SET VAULT TIME = REMAINDER - CURRENT_TIME
-    IS01_Settling.set_time_staked(settling_state_address, token_id, remainder)
-    IS01_Settling.set_time_vault_staked(settling_state_address, token_id, vault_remainder)
+    IL01_Settling.set_time_staked(settling_logic_address, token_id, remainder)
+    IL01_Settling.set_time_vault_staked(settling_logic_address, token_id, vault_remainder)
 
     # GET WONDER TAX
     let (wonder_tax) = IL04_Calculator.calculate_wonder_tax(calculator_address)
@@ -321,11 +344,6 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
         controller, ModuleIds.S02_Resources
     )
 
-    # SETTLING STATE
-    let (settling_state_address) = IModuleController.get_module_address(
-        controller, ModuleIds.S01_Settling
-    )
-
     # SETTLING LOGIC
     let (settling_logic_address) = IModuleController.get_module_address(
         controller, ModuleIds.L01_Settling
@@ -345,7 +363,7 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     end
 
     # SET VAULT TIME = REMAINDER - CURRENT_TIME
-    IS01_Settling.set_time_vault_staked(settling_state_address, token_id, pillagable_remainder)
+    IL01_Settling.set_time_vault_staked(settling_logic_address, token_id, pillagable_remainder)
 
     # GET OUTPUT FOR EACH RESOURCE
     let (r_1_output) = calculate_resource_output(token_id, realms_data.resource_1)
@@ -437,11 +455,11 @@ func get_available_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, r
 ) -> (days_accrued : felt, remainder : felt):
     let (controller) = MODULE_controller_address()
 
-    let (settling_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.S01_Settling
+    let (settling_logic_address) = IModuleController.get_module_address(
+        controller, ModuleIds.L01_Settling
     )
 
-    let (last_update) = IS01_Settling.get_time_staked(settling_state_address, token_id)
+    let (last_update) = IL01_Settling.get_time_staked(settling_logic_address, token_id)
 
     let (block_timestamp) = get_block_timestamp()
 
@@ -458,13 +476,13 @@ func get_available_vault_resources{
     alloc_locals
     let (controller) = MODULE_controller_address()
 
-    let (settling_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.S01_Settling
+    let (settling_logic_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=ModuleIds.L01_Settling
     )
 
     let (block_timestamp) = get_block_timestamp()
 
-    let (last_update) = IS01_Settling.get_time_vault_staked(settling_state_address, token_id)
+    let (last_update) = IL01_Settling.get_time_vault_staked(settling_logic_address, token_id)
 
     # CALC REMAINING DAYS
     let (days_accrued, seconds_left_over) = unsigned_div_rem(block_timestamp - last_update, DAY)
@@ -489,13 +507,13 @@ func get_pillaged_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ra
     alloc_locals
     let (controller) = MODULE_controller_address()
 
-    let (settling_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.S01_Settling
+    let (settling_logic_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=ModuleIds.L01_Settling
     )
 
     let (block_timestamp) = get_block_timestamp()
 
-    let (last_update) = IS01_Settling.get_time_vault_staked(settling_state_address, token_id)
+    let (last_update) = IL01_Settling.get_time_vault_staked(settling_logic_address, token_id)
 
     # CALC REMAINING DAYS
     let (days_accrued, seconds_left_over) = unsigned_div_rem(block_timestamp - last_update, DAY)

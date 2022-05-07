@@ -50,6 +50,15 @@ from contracts.settling_game.utils.constants import (
     DAY
 )
 
+from openzeppelin.upgrades.library import (
+    Proxy_initializer,
+    Proxy_only_admin,
+    Proxy_set_implementation,
+    Proxy_get_implementation,
+    Proxy_set_admin,
+    Proxy_get_admin,
+)
+
 #
 # events
 #
@@ -88,14 +97,42 @@ const COMBAT_TYPE_WISDOM_VS_AGILITY = 2
 const COMBAT_OUTCOME_ATTACKER_WINS = 1
 const COMBAT_OUTCOME_DEFENDER_WINS = 2
 
-@constructor
-func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    controller_addr : felt, xoroshiro_addr : felt
-):
-    MODULE_initializer(controller_addr)
+# @constructor
+# func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+#     controller_addr : felt, xoroshiro_addr : felt
+# ):
+#     MODULE_initializer(controller_addr)
+#     xoroshiro_address.write(xoroshiro_addr)
+#     return ()
+# end
+
+@external
+func initializer{
+        syscall_ptr: felt*, 
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }(
+        address_of_controller : felt,
+        xoroshiro_addr : felt,
+        proxy_admin : felt
+    ):
+    MODULE_initializer(address_of_controller)
     xoroshiro_address.write(xoroshiro_addr)
+    Proxy_initializer(proxy_admin)
     return ()
 end
+
+@external
+func upgrade{
+        syscall_ptr: felt*, 
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }(new_implementation: felt):
+    Proxy_only_admin()
+    Proxy_set_implementation(new_implementation)
+    return ()
+end
+
 
 # TODO: add owner checks
 

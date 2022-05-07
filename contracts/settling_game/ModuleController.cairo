@@ -91,7 +91,7 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     can_write_to.write(ModuleIds.L02_Resources, ModuleIds.S02_Resources, TRUE)
 
     # resources logic to settling state
-    can_write_to.write(ModuleIds.L02_Resources, ModuleIds.S01_Settling, TRUE)
+    can_write_to.write(ModuleIds.L02_Resources, ModuleIds.L01_Settling, TRUE)
 
     # resources logic to wonders state
     can_write_to.write(ModuleIds.L02_Resources, ModuleIds.S05_Wonders, TRUE)

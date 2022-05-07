@@ -96,35 +96,32 @@ func set_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     return ()
 end
 
-@external
 func set_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     amount : felt
 ):
-    MODULE_only_approved()
-
     total_realms_settled.write(amount)
     return ()
 end
 
 # TODO: AUDIT NEEDED
-@external
-func return_approved{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    MODULE_only_approved()
-    let (controller) = MODULE_controller_address()
+# @external
+# func return_approved{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+#     MODULE_only_approved()
+#     let (controller) = MODULE_controller_address()
 
-    # FETCH ADDRESSES
-    let (realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Realms
-    )
-    let (settle_logic_address) = IModuleController.get_module_address(
-        controller, ModuleIds.S01_Settling
-    )
+#     # FETCH ADDRESSES
+#     let (realms_address) = IModuleController.get_external_contract_address(
+#         controller, ExternalContractIds.Realms
+#     )
+#     let (settle_logic_address) = IModuleController.get_module_address(
+#         controller, ModuleIds.S01_Settling
+#     )
 
-    # SET APPROVAL TO ALLOW TRANSFER BACK TO OWNER
-    realms_IERC721.setApprovalForAll(realms_address, settle_logic_address, TRUE)
+#     # SET APPROVAL TO ALLOW TRANSFER BACK TO OWNER
+#     realms_IERC721.setApprovalForAll(realms_address, settle_logic_address, TRUE)
 
-    return ()
-end
+#     return ()
+# end
 
 ###########
 # GETTERS #
