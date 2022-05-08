@@ -1,4 +1,6 @@
-# Realms cli
+# Realms CLI
+
+This is in heavy development and things might not work as expected... Bring a torch to slay some STARK dragons...
 
 ## Prerequisites
 
@@ -28,34 +30,138 @@ Create an `.env.nile` in the realms_cli/ directory with the following entries:
 ```
 export STARKNET_PRIVATE_KEY=<A PRIVATE KEY>  # admin private key - see below to generate
 export STARKNET_NETWORK=alpha-goerli  # different from nile_network
-
 ```
 ⚠️ Never commit this file!
 </details>
 
 ---
 
-## Actions
+# Player Actions
 
+After your initial setup you will have to rerun the following commands on each new session:
 
-<details><summary>Create Wallet via CLI</summary>
+```bash
+$ source realms_cli/.env.nile
+$ pip install realms_cli/
+```
 
-NOTE: This is the temporary solution until native ArgentX integration
+<details><summary>Create Wallet via CLI [First time setup]</summary>
 
-1. Create private Key via `$ nile create_pk`
-2. Save in .env.nile as STARKNET_PRIVATE_KEY in the realms_cli directory 
-3. Run `$ source realms_cli/.env.nile`
-4. Run `$ nile setup STARKNET_PRIVATE_KEY --network goerli`
-5. Your address will be saved in the goerli.accounts.json with the account name account-1
+### NOTE: This is the temporary solution until native ArgentX integration
+
+1. First create a new private key
+```bash
+$ nile create_pk
+```
+2. Save in printed private key in the .env.nile you created in the previous step as STARKNET_PRIVATE_KEY
+3. The run the following to save it in your enviroment:
+```
+$ source realms_cli/.env.nile
+```
+4. The setup and deploy your account with the following:
+```
+$ nile setup STARKNET_PRIVATE_KEY --network goerli
+```
+5. Now your address will be saved in the goerli.accounts.json with the account name account-1 (NOTE: If you plan to contribute to the code, please delete reference of your account before commiting. There is a current limitation with nile that does not allow the saving of this information elsewhere.)
+
+</details>
+
+---
+<details><summary>Game Actions</summary>
+
+This is not the full list of actions and new commands are being frequently added. To find all the current available commands run
+
+``` bash
+nile
+```
+---
+
+### Mint Realm
+
+``` bash
+nile mint_realm 1
+
+```
+
+If your tx fails, someone has already minted this realm
+
+---
+
+### Set Metadata (use as temporary until production)
+
+```
+$ nile set_realm_data 1
+```
+
+---
+
+### Approve your Realms for game usage
+
+```
+$ nile approve_realm
+```
+
+---
+
+### Settle realm
+
+```
+$ nile settle_realm 1
+```
+
+---
+
+### Check Lords
+
+```
+$ nile check_lords
+```
+
+---
+
+### Check Realms
+
+```
+$ nile check_realms
+```
+
+---
+
+### Check Resources
+
+```
+$ nile check_resources
+```
+
+Of another user:
+
+```
+$ nile check_resources --address 0x000000
+```
+
+---
+
+### Claim resources
+
+Claims specific realms resources
+
+```
+$ nile claim_resources 1
+```
+
+---
+
 
 </details>
 
 ---
 
+# Admin Actions
+
 <details><summary>Deployment of the full game (ADMIN ONLY) [localhost/goerli]</summary>
 
 
-The following scripts deploy all contracts necessairy to test and play realms on localhost/goerli.
+The following scripts deploy all contracts necessary to test and play realms on localhost/goerli.
 
 ### 1. Admin
 
@@ -96,76 +202,3 @@ Add you cli entro to `realms_cli/pyproject.toml`
 Reinstall the plugin cli `pip install realms_cli/`
 
 </details>
-
----
-<details><summary>Player Actions [goerli]</summary>
-
----
-
-### Mint Realm
-
-`$ nile mint_realm 1`
-
-If your tx fails, someone has already minted this realm
-
----
-
-### Set Metadata (use as temporary until production)
-
-`$ nile set_realm_data 1`
-
----
-
-### Approve your Realms for game usage
-
-`$ nile approve_realm`
-
----
-
-### Settling
-
-`$ nile settle_realm 1`
-
----
-
-### Check lords [wip]
-
-`$ nile check_lords`
-
----
-
-### check realms [wip]
-
-`$ nile check_realms`
-
----
-
-### Check resources
-
-`$ nile check_resources`
-
-Of another user:
-
-`$ nile check_resources --address 0x000000`
-
----
-
-### Claim resources
-
-Claims specific realms resources
-
-`$ nile claim_resources 1`
-
-</details>
-
----
-
-## TODO
-
-#### Game:
-- Add all building costs (should be script that pulls from json, converts to binary then sends)
-- Add all resources costs (should be script that pulls from json, converts to binary then sends)
-
-#### Admin:
-- Add module replace 
-- Add new module (deploy module, call arbiter to include)
