@@ -12,3 +12,6 @@ def felt_to_str(felt: int) -> str:
 
 def pack_values(values: list) -> int:
     return int.from_bytes(struct.pack(f"<{len(values)}b", *values), "little")
+
+def uint(a):
+    return(a, 0)
