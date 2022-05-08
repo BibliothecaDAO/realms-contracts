@@ -65,14 +65,14 @@ func calculateHappiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     tokenId : Uint256
 ) -> (happiness : felt):
     alloc_locals
-    # calculate number of buildings realm has
-    # happiness = (culture-(population/100)) + (food-(population/100))
+
     let (local culture : felt) = calculateCulture(tokenId)
     let (local population : felt) = calculatePopulation(tokenId)
     let (local food : felt) = calculateFood(tokenId)
 
     let happiness = (culture - (population / 100)) + (food - (population / 100))
-    return (happiness=happiness)
+
+    return (happiness=100)
 end
 
 @view
@@ -89,7 +89,7 @@ func calculateCulture{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
         buildings_logic_address, tokenId
     )
 
-    let culture = 25 + (current_buildings.Amphitheater) + (current_buildings.Guild * 5) + (current_buildings.Castle * 5) + (current_buildings.Fairgrounds * 5)
+    let culture = 25 + (current_buildings.Amphitheater * 2) + (current_buildings.Guild * 5) + (current_buildings.Castle * 5) + (current_buildings.Fairgrounds * 5) + (current_buildings.Architect * 1) + (current_buildings.TradeOffice * 1) + (current_buildings.ParadeGrounds * 1) + (current_buildings.School * 3)
     return (culture=culture)
 end
 
@@ -107,7 +107,7 @@ func calculatePopulation{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
         buildings_logic_address, tokenId
     )
 
-    let population = 1000 + (RealmBuildings.Housing * 100)
+    let population = 1000 + (RealmBuildings.Housing * 75) + (RealmBuildings.Hamlet * 35) + (RealmBuildings.Farms * 10)
     return (population=population)
 end
 
@@ -125,9 +125,28 @@ func calculateFood{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
         buildings_logic_address, tokenId
     )
 
-    # TODO @milan add in # of troops
-    # TODO add rest of buildings
-    let food = 25 + (RealmBuildings.Farms) + (RealmBuildings.Granary) + (RealmBuildings.Fairgrounds * 5) + (RealmBuildings.RoyalReserve * 5) - (20)
+    let castleImpact = RealmBuildings.Castle * 1
+    let fairgroundsImpact = RealmBuildings.Fairgrounds * 5
+    let grandMarketImpact = RealmBuildings.GrandMarket * 5
+    let guildImpact = RealmBuildings.Guild * 1
+    let officerAcademyImpact = RealmBuildings.OfficerAcademy * 1
+    let royalReserveImpact = RealmBuildings.RoyalReserve * 5
+    let amphitheaterImpact = RealmBuildings.Amphitheater * 1
+    let archerTowerImpact = RealmBuildings.ArcherTower * 1
+    let barracksImpact = RealmBuildings.Barracks * 1
+    let dockImpact = RealmBuildings.Dock * 1
+    let farmImpact = RealmBuildings.Farms * 1
+    let fishMongerImpact = RealmBuildings.Fishmonger * 2
+    let granaryImpact = RealmBuildings.Granary * 3
+    let tradeOfficeImpact = RealmBuildings.TradeOffice * 1
+    let hamletImpact = RealmBuildings.Hamlet * 1
+    let housingImpact = RealmBuildings.Housing * 1
+    let mageTowerImpact = RealmBuildings.MageTower * 1
+    let paradeGroundsImpact = RealmBuildings.ParadeGrounds * 1
+    let schoolImpact = RealmBuildings.School * 1
+
+    let food = 25 - castleImpact + fairgroundsImpact + grandMarketImpact - guildImpact - officerAcademyImpact + royalReserveImpact - amphitheaterImpact - archerTowerImpact - barracksImpact - dockImpact + farmImpact + fishMongerImpact + granaryImpact - tradeOfficeImpact + hamletImpact - housingImpact - mageTowerImpact - paradeGroundsImpact - schoolImpact
+
     return (food=food)
 end
 

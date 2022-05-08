@@ -294,6 +294,27 @@
     {
         "inputs": [
             {
+                "name": "realm_id",
+                "type": "Uint256"
+            }
+        ],
+        "name": "view_troops",
+        "outputs": [
+            {
+                "name": "attacking_troops",
+                "type": "Squad"
+            },
+            {
+                "name": "defending_troops",
+                "type": "Squad"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "name": "attacking_realm_id",
                 "type": "Uint256"
             },

@@ -7,3 +7,6 @@ def print_over_colums(array_of_strings, cols=3, width=30):
             ans += "\n"
         ans += f"| {text.ljust(width)} "
     print(ans)
+
+def uint(a):
+    return(a, 0)
