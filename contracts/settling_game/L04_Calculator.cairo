@@ -83,6 +83,7 @@ func calculate_happiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
 ) -> (happiness : felt):
     alloc_locals
 
+    # FETCH VALUES
     let (local culture : felt) = calculateCulture(tokenId)
     let (local population : felt) = calculatePopulation(tokenId)
     let (local food : felt) = calculateFood(tokenId)
@@ -92,10 +93,9 @@ func calculate_happiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     let culture_calc = culture - pop_calc
 
     let food_calc = food - pop_calc
-
-    let (assert_check) = is_nn(100 + culture_calc + food_calc)
     
-    # %{ print(ids.happiness) %}
+    # SANITY FALL BACK CHECK INCASE OF OVERFLOW....
+    let (assert_check) = is_nn(100 + culture_calc + food_calc)
     if assert_check == 0:
         return (100)
     end
@@ -237,15 +237,16 @@ func calculateFood{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     return (food)
 end
 
-@view
-func calculateTribute{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    tokenId : Uint256
-) -> (tribute : felt):
-    # TOD0: Decreasing supply curve of Lords
-    # calculate number of buildings realm has
+# TODO: Make LORDS decrease over time...
+# @view
+# func calculateTribute{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+#     tokenId : Uint256
+# ) -> (tribute : felt):
+#     # TOD0: Decreasing supply curve of Lords
+#     # calculate number of buildings realm has
 
-    return (tribute=100)
-end
+#     return (tribute=100)
+# end
 
 @view
 func calculate_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (

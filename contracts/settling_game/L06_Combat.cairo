@@ -43,6 +43,7 @@ from contracts.settling_game.utils.library import (
     MODULE_controller_address,
     MODULE_only_approved,
     MODULE_initializer,
+    MODULE_only_arbiter
 )
 
 from contracts.settling_game.utils.constants import (
@@ -81,6 +82,18 @@ end
 func xoroshiro_address() -> (address : felt):
 end
 
+@storage_var
+func realm_combat_data(realm_id : Uint256) -> (combat_data : RealmCombatData):
+end
+
+@storage_var
+func troop_cost(troop_id : felt) -> (cost : Cost):
+end
+
+##########
+# CONSTS #
+##########
+
 # a min delay between attacks on a Realm; it can't
 # be attacked again during cooldown
 const ATTACK_COOLDOWN_PERIOD = DAY  # 1 day unit
@@ -96,6 +109,10 @@ const COMBAT_OUTCOME_DEFENDER_WINS = 2
 # used when adding or removing squads to Realms
 const ATTACKING_SQUAD_SLOT = 1
 const DEFENDING_SQUAD_SLOT = 2
+
+###############
+# CONSTRUCTOR #
+###############
 
 @external
 func initializer{
@@ -125,43 +142,7 @@ func upgrade{
 end
 
 # TODO: write documentation
-
-# TODO: emit events on each turn so we can display hits in UI
-
 # TODO: take a Realm's wall into consideration when attacking a Realm
-
-@view
-func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    attacking_realm_id : Uint256, defending_realm_id : Uint256
-) -> (yesno : felt):
-    # TODO: write tests for this
-
-    alloc_locals
-
-    let (controller) = MODULE_controller_address()
-
-    let (realm_combat_data : RealmCombatData) = get_realm_combat_data(defending_realm_id)
-
-    let (now) = get_block_timestamp()
-    let diff = now - realm_combat_data.last_attacked_at
-    let (was_attacked_recently) = is_le(diff, ATTACK_COOLDOWN_PERIOD)
-
-    if was_attacked_recently == 1:
-        return (FALSE)
-    end
-
-    # GET COMBAT DATA
-    let (realms_address) = IModuleController.get_external_contract_address(controller, ExternalContractIds.Realms)
-    let (attacking_realm_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, attacking_realm_id)
-    let (defending_realm_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, defending_realm_id)
-
-    if attacking_realm_data.order == defending_realm_data.order:
-        # intra-order attacks are not allowed
-        return (FALSE)
-    end
-
-    return (TRUE)
-end
 
 @external
 func build_squad_from_troops_in_realm{
@@ -206,20 +187,6 @@ func build_squad_from_troops_in_realm{
     Build_toops.emit(troop_ids_len, troop_ids, realm_id, slot)
 
     return ()
-end
-
-@view
-func view_troops{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
-    realm_id : Uint256
-) -> (attacking_troops : Squad, defending_troops : Squad):
-    alloc_locals
-
-    let (realm_data : RealmCombatData) = get_realm_combat_data(realm_id)
-
-    let (attacking_squad : Squad) = unpack_squad(realm_data.attacking_squad)
-    let (defending_squad : Squad) = unpack_squad(realm_data.defending_squad)
-
-    return(attacking_squad, defending_squad)
 end
 
 @external
@@ -286,6 +253,17 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     Combat_outcome.emit(attacking_realm_id, defending_realm_id, combat_outcome)
 
     return (combat_outcome)
+end
+
+############
+# INTERNAL #
+############
+
+func set_realm_combat_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    realm_id : Uint256, combat_data : RealmCombatData
+):
+    realm_combat_data.write(realm_id, combat_data)
+    return ()
 end
 
 func run_combat_loop{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
@@ -506,36 +484,9 @@ func load_troop_costs{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     return load_troop_costs(troop_ids_len - 1, troop_ids + 1, costs_idx + 1, costs)
 end
 
-@storage_var
-func realm_combat_data(realm_id : Uint256) -> (combat_data : RealmCombatData):
-end
-
-@storage_var
-func troop_cost(troop_id : felt) -> (cost : Cost):
-end
-
 ############
 # EXTERNAL #
 ############
-
-@external
-func set_realm_combat_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    realm_id : Uint256, combat_data : RealmCombatData
-):
-    # TODO: auth checks! but how? this gets called from L06 after a combat
-    realm_combat_data.write(realm_id, combat_data)
-    return ()
-end
-
-
-@external
-func set_troop_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
-    troop_id : felt, cost : Cost
-):
-    # TODO: auth + range checks on the cost struct
-    troop_cost.write(troop_id, cost)
-    return ()
-end
 
 # can be used to add, overwrite or remove a Squad from a Realm
 @external
@@ -543,7 +494,20 @@ func update_squad_in_realm{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : 
     s : Squad, realm_id : Uint256, slot : felt
 ):
     alloc_locals
-    # TODO: owner checks
+
+    let (caller) = get_caller_address()
+    let (controller) = MODULE_controller_address()
+
+    let (s_realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.S_Realms
+    )
+
+    let (owner) = realms_IERC721.ownerOf(s_realms_address, realm_id)
+
+    with_attr error_message("COMBAT: Not your realm ser"):
+        assert caller = owner
+    end
+
     let (realm_combat_data : RealmCombatData) = get_realm_combat_data(realm_id)
     let (packed_squad : PackedSquad) = pack_squad(s)
 
@@ -567,8 +531,35 @@ func update_squad_in_realm{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : 
 end
 
 ###########
+# SETTERS #
+###########
+
+@external
+func set_troop_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+    troop_id : felt, cost : Cost
+):
+    MODULE_only_arbiter()
+    troop_cost.write(troop_id, cost)
+    return ()
+end
+
+###########
 # GETTERS #
 ###########
+
+@view
+func view_troops{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+    realm_id : Uint256
+) -> (attacking_troops : Squad, defending_troops : Squad):
+    alloc_locals
+
+    let (realm_data : RealmCombatData) = get_realm_combat_data(realm_id)
+
+    let (attacking_squad : Squad) = unpack_squad(realm_data.attacking_squad)
+    let (defending_squad : Squad) = unpack_squad(realm_data.defending_squad)
+
+    return(attacking_squad, defending_squad)
+end
 
 @view
 func get_troop{range_check_ptr, bitwise_ptr : BitwiseBuiltin*}(troop_id : felt) -> (t : Troop):
@@ -590,4 +581,37 @@ func get_troop_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBui
 ) -> (cost : Cost):
     let (cost) = troop_cost.read(troop_id)
     return (cost)
+end
+
+@view
+func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    attacking_realm_id : Uint256, defending_realm_id : Uint256
+) -> (yesno : felt):
+    # TODO: write tests for this
+
+    alloc_locals
+
+    let (controller) = MODULE_controller_address()
+
+    let (realm_combat_data : RealmCombatData) = get_realm_combat_data(defending_realm_id)
+
+    let (now) = get_block_timestamp()
+    let diff = now - realm_combat_data.last_attacked_at
+    let (was_attacked_recently) = is_le(diff, ATTACK_COOLDOWN_PERIOD)
+
+    if was_attacked_recently == 1:
+        return (FALSE)
+    end
+
+    # GET COMBAT DATA
+    let (realms_address) = IModuleController.get_external_contract_address(controller, ExternalContractIds.Realms)
+    let (attacking_realm_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, attacking_realm_id)
+    let (defending_realm_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, defending_realm_id)
+
+    if attacking_realm_data.order == defending_realm_data.order:
+        # intra-order attacks are not allowed
+        return (FALSE)
+    end
+
+    return (TRUE)
 end

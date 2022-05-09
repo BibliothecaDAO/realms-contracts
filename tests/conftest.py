@@ -284,7 +284,7 @@ async def l06_combat_tests(starknet, xoroshiro) -> StarknetContract:
 
 @pytest.fixture(scope="module")
 async def s06_combat(starknet) -> StarknetContract:
-    contract = compile("contracts/settling_game/S06_Combat.cairo")
+    contract = compile("contracts/settling_game/L06_Combat.cairo")
     return await starknet.deploy(contract_def=contract)
 
 
