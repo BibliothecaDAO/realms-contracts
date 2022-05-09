@@ -39,9 +39,6 @@ from openzeppelin.upgrades.library import (
     Proxy_initializer,
     Proxy_only_admin,
     Proxy_set_implementation,
-    Proxy_get_implementation,
-    Proxy_set_admin,
-    Proxy_get_admin,
 )
 ##########
 # EVENTS #
@@ -188,7 +185,10 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     return (TRUE)
 end
 
-# ## VARS ###
+###########
+# SETTERS #
+###########
+
 # TIME_LEFT -> WHEN PLAYER CLAIMS, THIS IS THE REMAINDER TO BE PASSED BACK INTO STORAGE
 # THIS ALLOWS FULL DAYS TO BE CLAIMED ONLY AND ALLOWS LESS THAN FULL DAYS TO CONTINUE ACCRUREING
 @external

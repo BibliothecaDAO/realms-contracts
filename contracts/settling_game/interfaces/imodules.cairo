@@ -138,6 +138,8 @@ namespace IL04_Calculator:
     end
     func calculate_wonder_tax() -> (tax_percentage : felt):
     end
+    func calculate_happiness(token_id : Uint256) -> (happiness : felt):
+    end
 end
 
 @contract_interface

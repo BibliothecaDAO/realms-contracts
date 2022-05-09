@@ -126,7 +126,7 @@ async def test_mint_realm(game_factory):
     # 😊 STATS #
     ############
 
-    happiness = await calculator_logic.calculateHappiness(FIRST_TOKEN_ID).invoke()
+    happiness = await calculator_logic.calculate_happiness(FIRST_TOKEN_ID).invoke()
     # assert happiness.result.happiness == 25
     print(f'\033[1;31;40m😊 Happiness level is {happiness.result.happiness}\n')
 

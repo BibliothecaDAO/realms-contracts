@@ -14,8 +14,6 @@ from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.game_structs import RealmData, ModuleIds, ExternalContractIds, Cost
 from contracts.settling_game.utils.general import (
-    scale,
-    unpack_data,
     transform_costs_to_token_ids_values,
 )
 
@@ -186,19 +184,20 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # GET WONDER TAX
     let (wonder_tax) = IL04_Calculator.calculate_wonder_tax(calculator_address)
+    let (happiness) = IL04_Calculator.calculate_happiness(calculator_address, token_id)
 
     # SET MINT
     let treasury_mint_perc = wonder_tax
     let user_mint_rel_perc = 100 - wonder_tax
 
     # GET OUTPUT FOR EACH RESOURCE
-    let (r_1_output) = calculate_resource_output(token_id, realms_data.resource_1)
-    let (r_2_output) = calculate_resource_output(token_id, realms_data.resource_2)
-    let (r_3_output) = calculate_resource_output(token_id, realms_data.resource_3)
-    let (r_4_output) = calculate_resource_output(token_id, realms_data.resource_5)
-    let (r_5_output) = calculate_resource_output(token_id, realms_data.resource_5)
-    let (r_6_output) = calculate_resource_output(token_id, realms_data.resource_6)
-    let (r_7_output) = calculate_resource_output(token_id, realms_data.resource_7)
+    let (r_1_output) = calculate_resource_output(token_id, realms_data.resource_1, happiness)
+    let (r_2_output) = calculate_resource_output(token_id, realms_data.resource_2, happiness)
+    let (r_3_output) = calculate_resource_output(token_id, realms_data.resource_3, happiness)
+    let (r_4_output) = calculate_resource_output(token_id, realms_data.resource_5, happiness)
+    let (r_5_output) = calculate_resource_output(token_id, realms_data.resource_5, happiness)
+    let (r_6_output) = calculate_resource_output(token_id, realms_data.resource_6, happiness)
+    let (r_7_output) = calculate_resource_output(token_id, realms_data.resource_7, happiness)
 
     # ADD VALUES TO TEMP ARRAY FOR EACH AVAILABLE RESOURCE
     let (r_1_user) = calculate_total_claimable(
@@ -349,6 +348,11 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
         controller, ModuleIds.L01_Settling
     )
 
+    # CALCULATOR
+    let (calculator_address) = IModuleController.get_module_address(
+        controller, ModuleIds.L04_Calculator
+    )
+
     let (local resource_ids : Uint256*) = alloc()
     let (local user_mint : Uint256*) = alloc()
 
@@ -365,14 +369,16 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     # SET VAULT TIME = REMAINDER - CURRENT_TIME
     IL01_Settling.set_time_vault_staked(settling_logic_address, token_id, pillagable_remainder)
 
+    let (happiness) = IL04_Calculator.calculate_happiness(calculator_address, token_id)
+
     # GET OUTPUT FOR EACH RESOURCE
-    let (r_1_output) = calculate_resource_output(token_id, realms_data.resource_1)
-    let (r_2_output) = calculate_resource_output(token_id, realms_data.resource_2)
-    let (r_3_output) = calculate_resource_output(token_id, realms_data.resource_3)
-    let (r_4_output) = calculate_resource_output(token_id, realms_data.resource_5)
-    let (r_5_output) = calculate_resource_output(token_id, realms_data.resource_5)
-    let (r_6_output) = calculate_resource_output(token_id, realms_data.resource_6)
-    let (r_7_output) = calculate_resource_output(token_id, realms_data.resource_7)
+    let (r_1_output) = calculate_resource_output(token_id, realms_data.resource_1, happiness)
+    let (r_2_output) = calculate_resource_output(token_id, realms_data.resource_2, happiness)
+    let (r_3_output) = calculate_resource_output(token_id, realms_data.resource_3, happiness)
+    let (r_4_output) = calculate_resource_output(token_id, realms_data.resource_5, happiness)
+    let (r_5_output) = calculate_resource_output(token_id, realms_data.resource_5, happiness)
+    let (r_6_output) = calculate_resource_output(token_id, realms_data.resource_6, happiness)
+    let (r_7_output) = calculate_resource_output(token_id, realms_data.resource_7, happiness)
 
     # ADD VALUES TO TEMP ARRAY FOR EACH AVAILABLE RESOURCE
     let (r_1_user) = calculate_total_claimable(
@@ -468,6 +474,27 @@ func get_available_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, r
     return (days_accrued, seconds_left_over)
 end
 
+# FETCHES RESOURCES FOR PILLAGING!
+@view
+func get_pillaged_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
+) -> (days_accrued : felt, remainder : felt):
+    alloc_locals
+    let (controller) = MODULE_controller_address()
+
+    let (settling_logic_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=ModuleIds.L01_Settling
+    )
+
+    let (block_timestamp) = get_block_timestamp()
+
+    let (last_update) = IL01_Settling.get_time_vault_staked(settling_logic_address, token_id)
+
+    let (days_accrued, seconds_left_over) = unsigned_div_rem(block_timestamp - last_update, DAY)
+
+    return (days_accrued, seconds_left_over)
+end
+
 # FETCHES AVAILABLE RESOURCES PER VAULT
 @view
 func get_available_vault_resources{
@@ -499,28 +526,6 @@ func get_available_vault_resources{
     return (days_accrued, seconds_left_over)
 end
 
-# FETCHES RESOURCES FOR PILLAGING!
-@view
-func get_pillaged_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    token_id : Uint256
-) -> (days_accrued : felt, remainder : felt):
-    alloc_locals
-    let (controller) = MODULE_controller_address()
-
-    let (settling_logic_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.L01_Settling
-    )
-
-    let (block_timestamp) = get_block_timestamp()
-
-    let (last_update) = IL01_Settling.get_time_vault_staked(settling_logic_address, token_id)
-
-    # CALC REMAINING DAYS
-    let (days_accrued, seconds_left_over) = unsigned_div_rem(block_timestamp - last_update, DAY)
-
-    # else return days and remainder
-    return (days_accrued, seconds_left_over)
-end
 
 @view
 func check_if_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -598,8 +603,12 @@ func upgrade_resource{
     return ()
 end
 
+############
+# INTERNAL #
+############
+
 func calculate_resource_output{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    token_id : Uint256, resource_id : felt
+    token_id : Uint256, resource_id : felt, happiness : felt
 ) -> (value : felt):
     alloc_locals
     let (controller) = MODULE_controller_address()
@@ -612,6 +621,8 @@ func calculate_resource_output{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     # GET RESOURCE LEVEL
     let (level) = IS02_Resources.get_resource_level(resources_state_address, token_id, resource_id)
 
+    let (production_output, _) = unsigned_div_rem(BASE_RESOURCES_PER_DAY * happiness, 100)
+    
     local l
     # CALC
     if level == 0:

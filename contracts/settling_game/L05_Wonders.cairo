@@ -29,9 +29,6 @@ from contracts.settling_game.interfaces.imodules import (
     IS05_Wonders,
 )
 
-from contracts.settling_game.utils.game_structs import RealmData
-from contracts.settling_game.utils.general import unpack_data
-
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
 
