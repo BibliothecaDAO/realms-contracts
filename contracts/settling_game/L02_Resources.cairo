@@ -47,10 +47,7 @@ from contracts.settling_game.interfaces.imodules import (
 from openzeppelin.upgrades.library import (
     Proxy_initializer,
     Proxy_only_admin,
-    Proxy_set_implementation,
-    Proxy_get_implementation,
-    Proxy_set_admin,
-    Proxy_get_admin,
+    Proxy_set_implementation
 )
 
 ##########
@@ -59,6 +56,18 @@ from openzeppelin.upgrades.library import (
 
 @event
 func ResourceUpgraded(token_id : Uint256, building_id : felt, level : felt):
+end
+
+###########
+# STORAGE #
+###########
+
+@storage_var
+func resource_levels(token_id : Uint256, resource_id : felt) -> (level : felt):
+end
+
+@storage_var
+func resource_upgrade_cost(resource_id : felt) -> (cost : Cost):
 end
 
 ###############
@@ -123,11 +132,6 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         controller, ExternalContractIds.Resources
     )
 
-    # RESOURCE STATE
-    let (resources_state_address) = IModuleController.get_module_address(
-        controller, ModuleIds.S02_Resources
-    )
-
     # SETTLING LOGIC
     let (settling_logic_address) = IModuleController.get_module_address(
         controller, ModuleIds.L01_Settling
@@ -145,7 +149,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # WONDER STATE
     let (wonders_state_address) = IModuleController.get_module_address(
-        controller, ModuleIds.S05_Wonders
+        controller, ModuleIds.L05_Wonders
     )
 
     # FETCH OWNER
@@ -286,8 +290,6 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     # MINT LORDS
     IERC20.transferFrom(lords_address, treasury_address, owner, lords_available)
 
-    # TODO: AUDIT CHECK SECURE PATH TO MINT
-
     # MINT USERS RESOURCES
     IERC1155.mintBatch(
         resources_address,
@@ -318,10 +320,17 @@ end
 func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256, claimer : felt
 ):
-    # TODO: auth checks
     alloc_locals
     let (caller) = get_caller_address()
     let (controller) = MODULE_controller_address()
+
+    let (combat_address) = IModuleController.get_module_address(
+        controller, ModuleIds.L06_Combat
+    )
+
+    with_attr error_message("RESOURCES: ONLY COMBAT MODULE CAN CALL"):
+        assert caller = combat_address
+    end
 
     # REALMS CONTRACT
     let (realms_address) = IModuleController.get_external_contract_address(
@@ -336,11 +345,6 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     # RESOURCES 1155 CONTRACT
     let (resources_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Resources
-    )
-
-    # RESOURCE STATE
-    let (resources_state_address) = IModuleController.get_module_address(
-        controller, ModuleIds.S02_Resources
     )
 
     # SETTLING LOGIC
@@ -450,6 +454,53 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     return ()
 end
 
+@external
+func upgrade_resource{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*, range_check_ptr
+}(token_id : Uint256, resource_id : felt) -> ():
+    alloc_locals
+    let (caller) = get_caller_address()
+    let (controller) = MODULE_controller_address()
+
+    # resource contract
+    let (resource_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Resources
+    )
+
+    # sRealms contract
+    let (s_realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.S_Realms
+    )
+
+    # check owner of sRealm
+    let (owner) = realms_IERC721.ownerOf(contract_address=s_realms_address, token_id=token_id)
+
+    with_attr error_message("You do not own this Realm"):
+        assert caller = owner
+    end
+
+    # GET RESOURCE LEVEL
+    let (level) = get_resource_level(token_id, resource_id)
+
+    # GET UPGRADE VALUE
+    let (upgrade_cost : Cost) = get_resource_upgrade_cost(resource_id)
+    let (costs : Cost*) = alloc()
+    assert [costs] = upgrade_cost
+    let (token_ids : Uint256*) = alloc()
+    let (token_values : Uint256*) = alloc()
+    let (token_len : felt) = transform_costs_to_token_ids_values(1, costs, token_ids, token_values)
+
+    # BURN RESOURCES
+    IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
+
+    # INCREASE LEVEL
+    set_resource_level(token_id, resource_id, level + 1)
+
+    # EMIT
+    ResourceUpgraded.emit(token_id, resource_id, level + 1)
+    return ()
+end
+
 ###########
 # GETTERS #
 ###########
@@ -526,7 +577,6 @@ func get_available_vault_resources{
     return (days_accrued, seconds_left_over)
 end
 
-
 @view
 func check_if_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
@@ -545,63 +595,6 @@ func check_if_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     return (TRUE)
 end
 
-############
-# EXTERNAL #
-############
-
-@external
-func upgrade_resource{
-    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*, range_check_ptr
-}(token_id : Uint256, resource_id : felt) -> ():
-    alloc_locals
-    let (caller) = get_caller_address()
-    let (controller) = MODULE_controller_address()
-
-    # resource contract
-    let (resource_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Resources
-    )
-
-    # sRealms contract
-    let (s_realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.S_Realms
-    )
-
-    # check owner of sRealm
-    let (owner) = realms_IERC721.ownerOf(contract_address=s_realms_address, token_id=token_id)
-
-    with_attr error_message("You do not own this Realm"):
-        assert caller = owner
-    end
-
-    # STATE
-    let (resources_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.S02_Resources
-    )
-
-    # GET RESOURCE LEVEL
-    let (level) = IS02_Resources.get_resource_level(resources_state_address, token_id, resource_id)
-
-    # GET UPGRADE VALUE
-    let (upgrade_cost : Cost) = IS02_Resources.get_resource_upgrade_cost(
-        resources_state_address, resource_id
-    )
-    let (costs : Cost*) = alloc()
-    assert [costs] = upgrade_cost
-    let (token_ids : Uint256*) = alloc()
-    let (token_values : Uint256*) = alloc()
-    let (token_len : felt) = transform_costs_to_token_ids_values(1, costs, token_ids, token_values)
-
-    # BURN RESOURCES
-    IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
-
-    # INCREASE LEVEL
-    IS02_Resources.set_resource_level(resources_state_address, token_id, resource_id, level + 1)
-
-    # EMIT
-    ResourceUpgraded.emit(token_id, resource_id, level + 1)
-    return ()
-end
 
 ############
 # INTERNAL #
@@ -611,15 +604,9 @@ func calculate_resource_output{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     token_id : Uint256, resource_id : felt, happiness : felt
 ) -> (value : felt):
     alloc_locals
-    let (controller) = MODULE_controller_address()
-
-    # STATE
-    let (resources_state_address) = IModuleController.get_module_address(
-        controller, ModuleIds.S02_Resources
-    )
 
     # GET RESOURCE LEVEL
-    let (level) = IS02_Resources.get_resource_level(resources_state_address, token_id, resource_id)
+    let (level) = get_resource_level(token_id, resource_id)
 
     let (production_output, _) = unsigned_div_rem(BASE_RESOURCES_PER_DAY * happiness, 100)
     
@@ -635,9 +622,45 @@ func calculate_total_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     token_id : Uint256, resource_id : felt, days : felt, tax : felt, output : felt
 ) -> (value : Uint256):
     alloc_locals
-
     # days * current tax * output
     # we multiply by tax before dividing by 100
     let (total_work_generated, _) = unsigned_div_rem(days * tax * output, 100)
     return (Uint256(total_work_generated, 0))
+end
+
+func set_resource_level{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(token_id : Uint256, resource_id : felt, level : felt) -> ():
+    resource_levels.write(token_id, resource_id, level)
+    return ()
+end
+
+@external
+func set_resource_upgrade_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+    resource_id : felt, cost : Cost
+):
+    # TODO: auth + range checks on the cost struct
+    resource_upgrade_cost.write(resource_id, cost)
+    return ()
+end
+
+###########
+# GETTERS #
+###########
+
+@view
+func get_resource_level{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256, resource : felt
+) -> (level : felt):
+    let (level) = resource_levels.read(token_id, resource)
+
+    return (level=level)
+end
+
+@view
+func get_resource_upgrade_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+    resource_id : felt
+) -> (cost : Cost):
+    let (cost) = resource_upgrade_cost.read(resource_id)
+    return (cost)
 end

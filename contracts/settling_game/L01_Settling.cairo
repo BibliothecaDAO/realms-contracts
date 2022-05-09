@@ -38,8 +38,9 @@ from contracts.settling_game.interfaces.imodules import (
 from openzeppelin.upgrades.library import (
     Proxy_initializer,
     Proxy_only_admin,
-    Proxy_set_implementation,
+    Proxy_set_implementation
 )
+
 ##########
 # EVENTS #
 ##########
@@ -52,20 +53,16 @@ end
 func UnSettled(owner : felt, token_id : Uint256):
 end
 
-##########
+###########
 # STORAGE #
-##########
+###########
 
-# STAKE TIME - THIS IS USED AS THE MAIN IDENTIFIER FOR STAKING TIME.
+# STAKE TIME - THIS IS USED AS THE MAIN IDENTIFIER FOR STAKING TIME
 # IT IS UPDATED ON RESOURCE CLAIM, STAKE, UNSTAKE
 @storage_var
 func time_staked(token_id : Uint256) -> (time : felt):
 end
 
-# VESTING TIME - 7 DAYS
-# THIS IS THE STORAGE VAR FOR THE VAULT
-# THE VAULT STORES THE VESTED RESOURCES, IT CAN ONLY BE ACCESS WHEN A FULL EPOCH WORTH IS AVAILABLE
-# THIS IS CURRENTLY SET AT 7 DAYS
 @storage_var
 func time_vault_staked(token_id : Uint256) -> (time : felt):
 end
@@ -131,7 +128,7 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     s_realms_IERC721.mint(s_realms_address, caller, token_id)
 
     # SETS WORLD AND REALM STATE
-    set_world_state(token_id, caller, controller, realms_address)
+    _set_world_state(token_id, caller, controller, realms_address)
 
     # EMIT
     Settled.emit(caller, token_id)
@@ -156,9 +153,7 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     let (s_realms_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.S_Realms
     )
-    let (settle_state_address) = IModuleController.get_module_address(
-        controller, ModuleIds.S01_Settling
-    )
+
     let (resource_logic_address) = IModuleController.get_module_address(
         controller, ModuleIds.L02_Resources
     )
@@ -168,9 +163,9 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
 
     if can_claim == TRUE:
         IL02_Resources.claim_resources(resource_logic_address, token_id)
-        set_world_state(token_id, caller, controller, realms_address)
+        _set_world_state(token_id, caller, controller, realms_address)
     else:
-        set_world_state(token_id, caller, controller, realms_address)
+        _set_world_state(token_id, caller, controller, realms_address)
     end
 
     # TRANSFER REALM BACK TO OWNER
@@ -185,9 +180,9 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     return (TRUE)
 end
 
-###########
-# SETTERS #
-###########
+############
+# EXTERNAL #
+############
 
 # TIME_LEFT -> WHEN PLAYER CLAIMS, THIS IS THE REMAINDER TO BE PASSED BACK INTO STORAGE
 # THIS ALLOWS FULL DAYS TO BE CLAIMED ONLY AND ALLOWS LESS THAN FULL DAYS TO CONTINUE ACCRUREING
@@ -195,34 +190,17 @@ end
 func set_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256, time_left : felt
 ):
-    # MODULE_only_approved() TODO:
-
-    let (block_timestamp) = get_block_timestamp()
-
-    # SETS CURRENT TIME
-    time_staked.write(token_id, block_timestamp - time_left)
+    MODULE_only_approved()
+    _set_time_staked(token_id, time_left)
     return ()
 end
 
-# VAULT_TIME_LEFT -> WHEN PLAYER CLAIMS, THIS IS THE REMAINDER TO BE PASSED BACK INTO STORAGE
-# THIS ALLOWS FULL 7 DAYS TO BE CLAIMED ONLY AND ALLOWS LESS THAN FULL DAYS TO CONTINUE ACCRUREING
 @external
 func set_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256, time_left : felt
 ):
-    # MODULE_only_approved() TODO:
-
-    let (block_timestamp) = get_block_timestamp()
-
-    # SETS CURRENT TIME
-    time_vault_staked.write(token_id, block_timestamp - time_left)
-    return ()
-end
-
-func set_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    amount : felt
-):
-    total_realms_settled.write(amount)
+    MODULE_only_approved()
+    _set_time_vault_staked(token_id, time_left)
     return ()
 end
 
@@ -230,19 +208,42 @@ end
 # INTERNAL #
 ############
 
-func set_world_state{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+func _set_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256, time_left : felt
+):  
+    let (block_timestamp) = get_block_timestamp()
+    time_staked.write(token_id, block_timestamp - time_left)
+    return ()
+end
+
+func _set_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256, time_left : felt
+):
+    let (block_timestamp) = get_block_timestamp()
+    time_vault_staked.write(token_id, block_timestamp - time_left)
+    return ()
+end
+
+func _set_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    amount : felt
+):
+    total_realms_settled.write(amount)
+    return ()
+end
+
+func _set_world_state{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256,
     caller : felt,
     controller : felt,
     realms_address : felt,
 ):
     # SET REALM SETTLED/UNSETTLED STATE - PARSE 0 TO SET CURRENT TIME
-    set_time_staked(token_id, 0)
-    set_time_vault_staked(token_id, 0)
+    _set_time_staked(token_id, 0)
+    _set_time_vault_staked(token_id, 0)
 
     # CHECK REALMS STATE
     let (realms_settled) = get_total_realms_settled()
-    set_total_realms_settled(realms_settled + 1)
+    _set_total_realms_settled(realms_settled + 1)
 
     # GET REALM DATA
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)

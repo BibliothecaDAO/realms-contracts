@@ -40,12 +40,8 @@ from contracts.settling_game.utils.library import (
 from openzeppelin.upgrades.library import (
     Proxy_initializer,
     Proxy_only_admin,
-    Proxy_set_implementation,
-    Proxy_get_implementation,
-    Proxy_set_admin,
-    Proxy_get_admin,
+    Proxy_set_implementation
 )
-
 @external
 func initializer{
         syscall_ptr: felt*, 
@@ -263,7 +259,7 @@ func calculate_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
     let (controller) = MODULE_controller_address()
 
     let (settle_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.S01_Settling
+        contract_address=controller, module_id=ModuleIds.L01_Settling
     )
 
     let (realms_settled) = IS01_Settling.get_total_realms_settled(

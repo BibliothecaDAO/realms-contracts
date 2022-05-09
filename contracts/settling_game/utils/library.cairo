@@ -11,7 +11,7 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
-from starkware.starknet.common.syscalls import get_caller_address
+from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
 from starkware.cairo.common.math import assert_not_zero, assert_lt
 from starkware.cairo.common.uint256 import (
     Uint256,
@@ -66,16 +66,30 @@ func only_approved{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
 
     # Pass this address on to the ModuleController
     # Will revert the transaction if not.
-    let (success) = IModuleController.has_write_access(
-        contract_address=controller, address_attempting_to_write=caller
-    )
+    let (success) = IModuleController.has_write_access(controller, caller)
+
+    
+
     return (success)
 end
 
 func MODULE_only_approved{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    alloc_locals
     let (success) = only_approved()
-    assert_not_zero(success)
+    let (self) = check_self()
+    assert_not_zero(success + self)
     return ()
+end
+
+func check_self{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}()->(success: felt):
+    let (caller) = get_caller_address()
+    let (contract_address) = get_contract_address()
+
+    if caller == contract_address :
+        return(1)
+    end
+
+    return (0)
 end
 
 # ARBITER WRITE ACCESS CHECK
@@ -85,7 +99,7 @@ func only_arbiter{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     alloc_locals
     let (controller) = controller_address.read()
     let (caller) = get_caller_address()
-    let (current_arbiter) = IModuleController.get_arbiter(contract_address=controller)
+    let (current_arbiter) = IModuleController.get_arbiter(controller)
 
     if caller != current_arbiter:
         return (0)

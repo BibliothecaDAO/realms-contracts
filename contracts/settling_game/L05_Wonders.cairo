@@ -23,10 +23,7 @@ from contracts.settling_game.utils.general import scale
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
 from contracts.settling_game.interfaces.imodules import (
     IModuleController,
-    IS02_Resources,
-    IS01_Settling,
     IL04_Calculator,
-    IS05_Wonders,
 )
 
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
@@ -41,10 +38,7 @@ from contracts.settling_game.utils.library import (
 from openzeppelin.upgrades.library import (
     Proxy_initializer,
     Proxy_only_admin,
-    Proxy_set_implementation,
-    Proxy_get_implementation,
-    Proxy_set_admin,
-    Proxy_get_admin,
+    Proxy_set_implementation
 )
 
 ###############
@@ -97,9 +91,6 @@ func pay_wonder_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     let (resources_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Resources
     )
-    let (wonders_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.S05_Wonders
-    )
 
     # calculator logic contract
     let (calculator_address) = IModuleController.get_module_address(
@@ -110,7 +101,7 @@ func pay_wonder_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     assert_nn_le(current_epoch, epoch)
 
     # Set upkept for epoch
-    IS05_Wonders.set_wonder_epoch_upkeep(wonders_state_address, epoch, token_id, 1)
+    set_wonder_epoch_upkeep(epoch, token_id, 1)
 
     # Upkeep cost, to be moved
     let (local upkeep_token_ids : Uint256*) = alloc()
@@ -145,41 +136,20 @@ func update_wonder_settlement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
 
     let (controller) = MODULE_controller_address()
 
-    let (wonders_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.S05_Wonders
-    )
-
     # calculator logic contract
-    let (calculator_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.L04_Calculator
-    )
+    let (calculator_address) = IModuleController.get_module_address(controller, ModuleIds.L04_Calculator)
 
     let (current_epoch) = IL04_Calculator.calculate_epoch(calculator_address)
-    let (total_wonders_staked) = IS05_Wonders.get_total_wonders_staked(
-        contract_address=wonders_state_address, epoch=current_epoch
-    )
+    let (total_wonders_staked) = get_total_wonders_staked(current_epoch)
 
-    let (wonder_id_staked) = IS05_Wonders.get_wonder_id_staked(
-        contract_address=wonders_state_address, token_id=token_id
-    )
+    let (wonder_id_staked) = get_wonder_id_staked(token_id)
+
     if wonder_id_staked == 0:
-        IS05_Wonders.set_total_wonders_staked(
-            contract_address=wonders_state_address,
-            epoch=current_epoch,
-            amount=total_wonders_staked + 1,
-        )
-        IS05_Wonders.set_wonder_id_staked(
-            contract_address=wonders_state_address, token_id=token_id, epoch=current_epoch
-        )
+        set_total_wonders_staked(current_epoch,total_wonders_staked + 1)
+        set_wonder_id_staked(token_id, current_epoch)
     else:
-        IS05_Wonders.set_total_wonders_staked(
-            contract_address=wonders_state_address,
-            epoch=current_epoch,
-            amount=total_wonders_staked - 1,
-        )
-        IS05_Wonders.set_wonder_id_staked(
-            contract_address=wonders_state_address, token_id=token_id, epoch=0
-        )
+        set_total_wonders_staked(current_epoch, total_wonders_staked - 1)
+        set_wonder_id_staked(token_id, 0)
     end
     return ()
 end
@@ -196,15 +166,13 @@ func claim_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     let (s_realms_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.S_Realms
     )
-    let (wonders_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.S05_Wonders
-    )
+
     let (calculator_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.L04_Calculator
     )
 
     # Check that wonder is staked (this also checks if token_id a wonder at all)
-    let (staked_epoch) = IS05_Wonders.get_wonder_id_staked(wonders_state_address, token_id)
+    let (staked_epoch) = get_wonder_id_staked(token_id)
     assert_not_zero(staked_epoch)
 
     let claiming_epoch_start = staked_epoch + 1
@@ -218,7 +186,7 @@ func claim_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
 
     loop_epochs_claim(caller, token_id, current_epoch, claiming_epoch_start)
 
-    IS05_Wonders.set_wonder_id_staked(wonders_state_address, token_id, current_epoch - 1)
+    set_wonder_id_staked(token_id, current_epoch - 1)
 
     return ()
 end
@@ -234,13 +202,8 @@ func loop_epochs_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     end
 
     let (controller) = MODULE_controller_address()
-    let (wonders_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.S05_Wonders
-    )
 
-    let (epoch_upkept) = IS05_Wonders.get_wonder_epoch_upkeep(
-        wonders_state_address, claiming_epoch, token_id
-    )
+    let (epoch_upkept) = get_wonder_epoch_upkeep(claiming_epoch, token_id)
     if epoch_upkept == 1:
         # treasury address
         let (treasury_address) = IModuleController.get_external_contract_address(
@@ -250,16 +213,14 @@ func loop_epochs_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
         let (resources_address) = IModuleController.get_external_contract_address(
             controller, ExternalContractIds.Resources
         )
-        let (epoch_total_wonders) = IS05_Wonders.get_total_wonders_staked(
-            contract_address=wonders_state_address, epoch=claiming_epoch
-        )
+        let (epoch_total_wonders) = get_total_wonders_staked(claiming_epoch)
 
         let (ids_arr : Uint256*) = alloc()
+
         let (amounts_arr : Uint256*) = alloc()
 
         # Get claimable resources
         loop_resources_claim(
-            wonders_state_address,
             token_id,
             current_epoch,
             epoch_total_wonders,
@@ -280,19 +241,18 @@ func loop_epochs_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
 end
 
 func loop_resources_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    wonders_state_address : felt,
     token_id : Uint256,
     claiming_epoch : felt,
     epoch_total_wonders : felt,
     resource_claim_ids_len : felt,
-    resource_claim_ids : felt*,
+    resource_claim_ids : Uint256*,
     resource_claim_amounts_len : felt,
-    resource_claim_amounts : felt*,
+    resource_claim_amounts : Uint256*,
 ) -> (
     resource_claim_ids_len : felt,
-    resource_claim_ids : felt*,
+    resource_claim_ids : Uint256*,
     resource_claim_amounts_len : felt,
-    resource_claim_amounts : felt*,
+    resource_claim_amounts : Uint256*,
 ):
     alloc_locals
 
@@ -300,16 +260,13 @@ func loop_resources_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
 
     assert_in_range(resource_claim_amounts_len, 1, 2 ** 15)
     if below_max_id == 1:
-        let (resource_pool) = IS05_Wonders.get_tax_pool(
-            wonders_state_address, claiming_epoch, resource_claim_ids_len
-        )
+        let (resource_pool) = get_tax_pool(claiming_epoch, [resource_claim_ids])
         let (resource_claim_amount, _) = unsigned_div_rem(resource_pool, epoch_total_wonders)
 
-        assert resource_claim_ids[resource_claim_ids_len - 1] = resource_claim_ids_len
-        assert resource_claim_amounts[resource_claim_ids_len - 1] = resource_claim_amount
+        # assert resource_claim_ids[resource_claim_ids_len - 1] = resource_claim_ids_len
+        # assert resource_claim_amounts[resource_claim_ids_len - 1] = resource_claim_amount
 
         return loop_resources_claim(
-            wonders_state_address,
             token_id,
             claiming_epoch,
             epoch_total_wonders,
@@ -332,15 +289,13 @@ end
 func update_epoch_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     alloc_locals
     let (controller) = MODULE_controller_address()
-    let (wonders_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.S05_Wonders
-    )
+
     let (calculator_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.L04_Calculator
     )
 
     let (current_epoch) = IL04_Calculator.calculate_epoch(calculator_address)
-    let (last_updated_epoch) = IS05_Wonders.get_last_updated_epoch(wonders_state_address)
+    let (last_updated_epoch) = get_last_updated_epoch()
 
     # Epochs that havent been updated since last update or recursion
     let epochs_to_update = current_epoch - last_updated_epoch
@@ -351,15 +306,149 @@ func update_epoch_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
         let updating_epoch = current_epoch - epochs_to_update
 
         # roll over total wonders staked for the next epoch
-        let (total_wonders_staked) = IS05_Wonders.get_total_wonders_staked(
-            wonders_state_address, updating_epoch
-        )
-        IS05_Wonders.set_total_wonders_staked(
-            wonders_state_address, updating_epoch + 1, total_wonders_staked
-        )
+        let (total_wonders_staked) = get_total_wonders_staked(updating_epoch)
+        set_total_wonders_staked(updating_epoch + 1, total_wonders_staked)
 
-        IS05_Wonders.set_last_updated_epoch(wonders_state_address, updating_epoch + 1)
+        set_last_updated_epoch(updating_epoch + 1)
 
         return update_epoch_pool()
     end
+end
+###########
+# STORAGE #
+###########
+
+@storage_var
+func epoch_claimed(address : felt) -> (epoch : felt):
+end
+
+@storage_var
+func total_wonders_staked(epoch : felt) -> (amount : felt):
+end
+
+@storage_var
+func last_updated_epoch() -> (epoch : felt):
+end
+
+@storage_var
+func wonder_id_staked(token_id : Uint256) -> (epoch : felt):
+end
+
+@storage_var
+func wonder_epoch_upkeep(epoch : felt, token_id : Uint256) -> (upkept : felt):
+end
+
+@storage_var
+func tax_pool(epoch : felt, resource_id : Uint256) -> (supply : felt):
+end
+
+###########
+# SETTERS #
+###########
+
+func set_total_wonders_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    epoch : felt, amount : felt
+):
+    total_wonders_staked.write(epoch, amount)
+    return ()
+end
+
+func set_last_updated_epoch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    epoch : felt
+):
+    last_updated_epoch.write(epoch)
+    return ()
+end
+
+func set_wonder_id_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256, epoch : felt
+):
+    wonder_id_staked.write(token_id, epoch)
+
+    return ()
+end
+
+func set_wonder_epoch_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    epoch : felt, token_id : Uint256, upkept : felt
+):
+    wonder_epoch_upkeep.write(epoch, token_id, upkept)
+    return ()
+end
+
+func set_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    epoch : felt, resource_id : Uint256, amount : felt
+):
+    tax_pool.write(epoch, resource_id, amount)
+    return ()
+end
+
+func batch_set_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    epoch : felt,
+    resource_ids_len : felt,
+    resource_ids : Uint256*,
+    amounts_len : felt,
+    amounts : felt*,
+):
+    alloc_locals
+
+    # Update tax pool
+    if resource_ids_len == 0:
+        return ()
+    end
+    let (tax_pool) = get_tax_pool(epoch, [resource_ids])
+
+    set_tax_pool(0, [resource_ids], 0)
+
+    # Recurse
+    return batch_set_tax_pool(
+        epoch, resource_ids_len - 1, resource_ids + 1, amounts_len - 1, amounts + 1
+    )
+end
+
+###########
+# GETTERS #
+###########
+
+@view
+func get_total_wonders_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    epoch : felt
+) -> (amount : felt):
+    let (amount) = total_wonders_staked.read(epoch)
+
+    return (amount=amount)
+end
+
+@view
+func get_last_updated_epoch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    ) -> (epoch : felt):
+    let (epoch) = last_updated_epoch.read()
+
+    return (epoch=epoch)
+end
+
+@view
+func get_wonder_id_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
+) -> (wonder_id : felt):
+    let (wonder_id) = wonder_id_staked.read(token_id)
+
+    return (wonder_id=wonder_id)
+end
+
+@view
+func get_wonder_epoch_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    epoch : felt, token_id : Uint256
+) -> (upkept : felt):
+    let (upkept) = wonder_epoch_upkeep.read(epoch, token_id)
+
+    return (upkept=upkept)
+end
+
+@view
+func get_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    epoch : felt, resource_id : Uint256
+) -> (supply : felt):
+    let (supply) = tax_pool.read(epoch, resource_id)
+
+    return (supply)
 end

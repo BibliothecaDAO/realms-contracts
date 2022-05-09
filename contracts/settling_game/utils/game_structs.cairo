@@ -193,16 +193,16 @@ end
 
 namespace ModuleIds:
     const L01_Settling = 1
-    const S01_Settling = 2
-    const L02_Resources = 3
-    const S02_Resources = 4
-    const L03_Buildings = 5
-    const S03_Buildings = 6
-    const L04_Calculator = 7
-    const L05_Wonders = 8
-    const S05_Wonders = 9
-    const L06_Combat = 11
-    const S06_Combat = 12
+    # const S01_Settling = 2
+    const L02_Resources = 2
+    # const S02_Resources = 4
+    const L03_Buildings = 3
+    # const S03_Buildings = 6
+    const L04_Calculator = 4
+    const L05_Wonders = 5
+    # const S05_Wonders = 9
+    const L06_Combat = 6
+    # const S06_Combat = 12
 end
 
 namespace ExternalContractIds:
