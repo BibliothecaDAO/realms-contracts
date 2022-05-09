@@ -75,6 +75,22 @@ from openzeppelin.upgrades.library import (
 func BuildingBuilt(token_id : Uint256, building_id : felt):
 end
 
+###########
+# STORAGE #
+###########
+
+@storage_var
+func realm_buildings(token_id : Uint256) -> (buildings : felt):
+end
+
+@storage_var
+func building_cost(building_id : felt) -> (cost : Cost):
+end
+
+@storage_var
+func building_lords_cost(building_id : felt) -> (lords : Uint256):
+end
+
 ###############
 # CONSTRUCTOR #
 ###############
@@ -484,23 +500,6 @@ func fetch_buildings_by_type{
         ),
     )
 end
-
-###########
-# STORAGE #
-###########
-
-@storage_var
-func realm_buildings(token_id : Uint256) -> (buildings : felt):
-end
-
-@storage_var
-func building_cost(building_id : felt) -> (cost : Cost):
-end
-
-@storage_var
-func building_lords_cost(building_id : felt) -> (lords : Uint256):
-end
-
 
 ###########
 # SETTERS #

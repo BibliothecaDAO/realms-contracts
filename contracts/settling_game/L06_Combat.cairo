@@ -522,10 +522,9 @@ end
 func troop_cost(troop_id : felt) -> (cost : Cost):
 end
 
-#
-# public
-#
-
+############
+# EXTERNAL #
+############
 
 @external
 func set_realm_combat_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
