@@ -8,17 +8,15 @@
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import BitwiseBuiltin, HashBuiltin
-from starkware.cairo.common.dict_access import DictAccess
 from starkware.cairo.common.math import unsigned_div_rem
-from starkware.cairo.common.math_cmp import is_le, is_nn, is_nn_le
+from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.uint256 import Uint256
 from starkware.starknet.common.syscalls import get_block_timestamp, get_caller_address
 
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.imodules import (
     IModuleController,
-    IL02_Resources,
-    IS06_Combat,
+    IL02_Resources
 )
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
@@ -56,8 +54,6 @@ from openzeppelin.upgrades.library import (
     Proxy_only_admin,
     Proxy_set_implementation
 )
-
-
 
 ##########
 # EVENTS #
@@ -128,9 +124,6 @@ func upgrade{
     return ()
 end
 
-
-# TODO: add owner checks
-
 # TODO: write documentation
 
 # TODO: emit events on each turn so we can display hits in UI
@@ -157,10 +150,9 @@ func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
         return (FALSE)
     end
 
+    # GET COMBAT DATA
     let (realms_address) = IModuleController.get_external_contract_address(controller, ExternalContractIds.Realms)
-
     let (attacking_realm_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, attacking_realm_id)
-
     let (defending_realm_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, defending_realm_id)
 
     if attacking_realm_data.order == defending_realm_data.order:

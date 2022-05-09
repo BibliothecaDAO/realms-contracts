@@ -1,5 +1,5 @@
 # ____MODULE_L05___WONDERS_LOGIC
-#   TODO: Write Module Description
+#   Controls all logic around the Wonder tax.
 #
 # MIT License
 
@@ -8,18 +8,15 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.math import (
     assert_in_range,
-    assert_nn,
     assert_nn_le,
     unsigned_div_rem,
     assert_not_zero,
 )
 from starkware.cairo.common.math_cmp import is_nn_le
-from starkware.cairo.common.hash_state import hash_init, hash_update, HashState
 from starkware.cairo.common.alloc import alloc
-from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
-from starkware.cairo.common.uint256 import Uint256, uint256_eq
+from starkware.starknet.common.syscalls import get_caller_address
+from starkware.cairo.common.uint256 import Uint256
 
-from contracts.settling_game.utils.general import scale
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
 from contracts.settling_game.interfaces.imodules import (
     IModuleController,
@@ -382,6 +379,7 @@ func set_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     return ()
 end
 
+@external
 func batch_set_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     epoch : felt,
     resource_ids_len : felt,
@@ -390,7 +388,7 @@ func batch_set_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     amounts : felt*,
 ):
     alloc_locals
-
+    MODULE_only_approved()
     # Update tax pool
     if resource_ids_len == 0:
         return ()

@@ -507,36 +507,17 @@ async def game_factory(token_factory, compiled_proxy):
     settling_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L01_Settling.cairo", [
         controller.contract_address, admin_account.contract_address])
 
-    # settling_state = await starknet.deploy(
-    #     source="contracts/settling_game/S01_Settling.cairo",
-    #     constructor_calldata=[controller.contract_address],
-    # )
-
     resources_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L02_Resources.cairo", [
         controller.contract_address, admin_account.contract_address])
-
-    # resources_state = await starknet.deploy(
-    #     source="contracts/settling_game/S02_Resources.cairo",
-    #     constructor_calldata=[controller.contract_address],
-    # )
 
     buildings_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L03_Buildings.cairo", [
         controller.contract_address, admin_account.contract_address])
 
-    # buildings_state = await starknet.deploy(
-    #     source="contracts/settling_game/S03_Buildings.cairo",
-    #     constructor_calldata=[controller.contract_address],
-    # )
     calculator_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L04_Calculator.cairo", [
         controller.contract_address, admin_account.contract_address])
 
     wonders_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L05_Wonders.cairo", [
         controller.contract_address, admin_account.contract_address])
-
-    # wonders_state = await starknet.deploy(
-    #     source="contracts/settling_game/S05_Wonders.cairo",
-    #     constructor_calldata=[controller.contract_address],
-    # )
 
     xoroshiro128 = await starknet.deploy(
         source="contracts/utils/xoroshiro128_starstar.cairo",
@@ -546,11 +527,6 @@ async def game_factory(token_factory, compiled_proxy):
     combat_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L06_Combat.cairo", [
         controller.contract_address,
         xoroshiro128.contract_address, admin_account.contract_address])
-
-    # combat_state = await starknet.deploy(
-    #     source="contracts/settling_game/S06_Combat.cairo",
-    #     constructor_calldata=[controller.contract_address],
-    # )
 
     # The admin key controls the arbiter. Use it to have the arbiter
     # set the module deployment addresses in the controller.

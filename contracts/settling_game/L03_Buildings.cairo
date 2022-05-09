@@ -1,5 +1,5 @@
 # ____MODULE_L03___BUILDING_LOGIC
-#   TODO: Add Module Description
+#   Manages all buildings in game. Responsible for construction of buildings.
 #
 # MIT License
 
@@ -7,13 +7,10 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.bool import TRUE, FALSE
-from starkware.cairo.common.dict_access import DictAccess
-from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem, assert_not_zero
-from starkware.cairo.common.math_cmp import is_nn_le
-from starkware.cairo.common.hash_state import hash_init, hash_update, HashState
+from starkware.cairo.common.math import assert_not_zero
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address
-from starkware.cairo.common.uint256 import Uint256, uint256_eq
+from starkware.cairo.common.uint256 import Uint256
 
 from contracts.settling_game.utils.general import unpack_data, transform_costs_to_token_ids_values
 from contracts.settling_game.utils.game_structs import (
@@ -53,12 +50,13 @@ from contracts.settling_game.utils.constants import (
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
-from contracts.settling_game.interfaces.imodules import IModuleController, IS03_Buildings
+from contracts.settling_game.interfaces.imodules import IModuleController
 
 from contracts.settling_game.utils.library import (
     MODULE_controller_address,
     MODULE_only_approved,
     MODULE_initializer,
+    MODULE_only_arbiter
 )
 
 from openzeppelin.upgrades.library import (
@@ -441,10 +439,29 @@ func build_buildings{
     end
 
     tempvar value = buildings[19] + buildings[18] + buildings[17] + buildings[16] + buildings[15] + buildings[14] + buildings[13] + buildings[12] + buildings[11] + buildings[10] + buildings[9] + buildings[8] + buildings[7] + buildings[6] + buildings[5] + buildings[4] + buildings[3] + buildings[2] + buildings[1] + buildings[0]
-
-    set_realm_buildings(token_id, value)
+    
+    realm_buildings.write(token_id, value)
     return ()
 end
+
+###########
+# SETTERS #
+###########
+
+@external
+func set_building_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+    building_id : felt, cost : Cost, lords : Uint256
+):  
+    # TODO: range checks on the cost struct
+    MODULE_only_arbiter()
+    building_cost.write(building_id, cost)
+    building_lords_cost.write(building_id, lords)
+    return ()
+end
+
+###########
+# GETTERS #
+###########
 
 @view
 func fetch_buildings_by_type{
@@ -501,39 +518,13 @@ func fetch_buildings_by_type{
     )
 end
 
-###########
-# SETTERS #
-###########
-
-func set_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    token_id : Uint256, buildings_value : felt
-):
-    realm_buildings.write(token_id, buildings_value)
-
-    return ()
-end
-
-@external
-func set_building_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
-    building_id : felt, cost : Cost, lords : Uint256
-):
-    # TODO: auth + range checks on the cost struct
-    building_cost.write(building_id, cost)
-    building_lords_cost.write(building_id, lords)
-    return ()
-end
-
-###########
-# GETTERS #
-###########
-
 @view
 func get_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
 ) -> (buildings : felt):
     let (buildings) = realm_buildings.read(token_id)
 
-    return (buildings=buildings)
+    return (buildings)
 end
 
 @view

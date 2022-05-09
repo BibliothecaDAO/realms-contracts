@@ -9,25 +9,20 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
-from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem, assert_not_zero
+from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_nn_le, is_nn, is_le
-from starkware.cairo.common.hash_state import hash_init, hash_update, HashState
-from starkware.cairo.common.alloc import alloc
-from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
-from starkware.cairo.common.uint256 import Uint256, uint256_eq
+from starkware.starknet.common.syscalls import get_block_timestamp
+from starkware.cairo.common.uint256 import Uint256
 
 from contracts.settling_game.utils.game_structs import RealmBuildings, ModuleIds, BuildingsFood, BuildingsPopulation, BuildingsCulture
 
 from contracts.settling_game.utils.constants import (
-    TRUE,
-    FALSE,
-    GENESIS_TIMESTAMP,
     VAULT_LENGTH_SECONDS,
 )
 
 from contracts.settling_game.interfaces.imodules import (
     IModuleController,
-    IS01_Settling,
+    IL01_Settling,
     IL03_Buildings,
 )
 
@@ -42,6 +37,7 @@ from openzeppelin.upgrades.library import (
     Proxy_only_admin,
     Proxy_set_implementation
 )
+
 @external
 func initializer{
         syscall_ptr: felt*, 
@@ -73,7 +69,7 @@ func calculate_epoch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 ):
     let (controller) = MODULE_controller_address()
 
-    let (genesis_time_stamp) = IModuleController.get_genesis(contract_address=controller)
+    let (genesis_time_stamp) = IModuleController.get_genesis(controller)
 
     let (block_timestamp) = get_block_timestamp()
 
@@ -118,7 +114,7 @@ func calculate_happiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
         return (150)
     end
 
-    return (happiness=happiness)
+    return (happiness)
 end
 
 @view
@@ -156,9 +152,9 @@ func calculateCulture{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     let FarmsCulture = BuildingsCulture.Farms * current_buildings.Farms
     let HamletCulture = BuildingsCulture.Hamlet * current_buildings.Hamlet
 
-    let totalCulture = 10 + CastleCulture + FairgroundsCulture + RoyalReserveCulture + GrandMarketCulture + GuildCulture + OfficerAcademyCulture + GranaryCulture +HousingCulture + AmphitheaterCulture + ArcherTowerCulture + SchoolCulture + MageTowerCulture + TradeOfficeCulture + ArchitectCulture + ParadeGroundsCulture + BarracksCulture + DockCulture + FishmongerCulture + FarmsCulture + HamletCulture
+    let culture = 10 + CastleCulture + FairgroundsCulture + RoyalReserveCulture + GrandMarketCulture + GuildCulture + OfficerAcademyCulture + GranaryCulture +HousingCulture + AmphitheaterCulture + ArcherTowerCulture + SchoolCulture + MageTowerCulture + TradeOfficeCulture + ArchitectCulture + ParadeGroundsCulture + BarracksCulture + DockCulture + FishmongerCulture + FarmsCulture + HamletCulture
 
-    return (culture=totalCulture)
+    return (culture)
 end
 
 @view
@@ -196,9 +192,9 @@ func calculatePopulation{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     let FarmsPop = BuildingsPopulation.Farms * current_buildings.Farms
     let HamletPop = BuildingsPopulation.Hamlet * current_buildings.Hamlet
 
-    let totalPopulation = 100 + CastlePop + FairgroundsPop + RoyalReservePop + GrandMarketPop + GuildPop + OfficerAcademyPop + GranaryPop + HousingPop + AmphitheaterPop + ArcherTowerPop + SchoolPop + MageTowerPop + TradeOfficePop + ArchitectPop + ParadeGroundsPop + BarracksPop + DockPop + FishmongerPop + FarmsPop + HamletPop
+    let population = 100 + CastlePop + FairgroundsPop + RoyalReservePop + GrandMarketPop + GuildPop + OfficerAcademyPop + GranaryPop + HousingPop + AmphitheaterPop + ArcherTowerPop + SchoolPop + MageTowerPop + TradeOfficePop + ArchitectPop + ParadeGroundsPop + BarracksPop + DockPop + FishmongerPop + FarmsPop + HamletPop
 
-    return (population=totalPopulation)
+    return (population)
 end
 
 @view
@@ -236,15 +232,16 @@ func calculateFood{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     let FarmsFood = BuildingsFood.Farms * current_buildings.Farms
     let HamletFood = BuildingsFood.Hamlet * current_buildings.Hamlet
 
-    let totalFood = 10 + CastleFood + FairgroundsFood + RoyalReserveFood + GrandMarketFood + GuildFood + OfficerAcademyFood + GranaryFood +HousingFood + AmphitheaterFood + ArcherTowerFood + SchoolFood + MageTowerFood + TradeOfficeFood + ArchitectFood + ParadeGroundsFood + BarracksFood + DockFood + FishmongerFood + FarmsFood + HamletFood
+    let food = 10 + CastleFood + FairgroundsFood + RoyalReserveFood + GrandMarketFood + GuildFood + OfficerAcademyFood + GranaryFood +HousingFood + AmphitheaterFood + ArcherTowerFood + SchoolFood + MageTowerFood + TradeOfficeFood + ArchitectFood + ParadeGroundsFood + BarracksFood + DockFood + FishmongerFood + FarmsFood + HamletFood
 
-    return (food=totalFood)
+    return (food)
 end
 
 @view
 func calculateTribute{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     tokenId : Uint256
 ) -> (tribute : felt):
+    # TOD0: Decreasing supply curve of Lords
     # calculate number of buildings realm has
 
     return (tribute=100)
@@ -258,13 +255,9 @@ func calculate_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
 
     let (controller) = MODULE_controller_address()
 
-    let (settle_state_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.L01_Settling
-    )
+    let (settle_state_address) = IModuleController.get_module_address(controller, ModuleIds.L01_Settling)
 
-    let (realms_settled) = IS01_Settling.get_total_realms_settled(
-        contract_address=settle_state_address
-    )
+    let (realms_settled) = IL01_Settling.get_total_realms_settled(settle_state_address)
 
     let (less_than_tenth_settled) = is_nn_le(realms_settled, 1600)
 
