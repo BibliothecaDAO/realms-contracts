@@ -567,6 +567,14 @@
                 "size": 0,
                 "type": "struct"
             },
+            "__main__.IS06_Combat.GET_REALM_COMBAT_DATA_SELECTOR": {
+                "type": "const",
+                "value": 147211941305235602054475313680206545950876374768696521178472131157405746710
+            },
+            "__main__.IS06_Combat.GET_TROOP_COST_SELECTOR": {
+                "type": "const",
+                "value": 1142262527007193128860607965029190681394523498545858640813463529025198839576
+            },
             "__main__.IS06_Combat.ImplicitArgs": {
                 "full_name": "__main__.IS06_Combat.ImplicitArgs",
                 "members": {},
@@ -579,9 +587,33 @@
                 "size": 0,
                 "type": "struct"
             },
+            "__main__.IS06_Combat.SET_REALM_COMBAT_DATA_SELECTOR": {
+                "type": "const",
+                "value": 810431950465111029936988278624809212681851778809361770046587246582615533096
+            },
             "__main__.IS06_Combat.SIZEOF_LOCALS": {
                 "type": "const",
                 "value": 0
+            },
+            "__main__.IS06_Combat.UPDATE_SQUAD_IN_REALM_SELECTOR": {
+                "type": "const",
+                "value": 272170903425773598357172794034305105861777223758593354801130690827978640551
+            },
+            "__main__.IS06_Combat.alloc": {
+                "destination": "starkware.cairo.common.alloc.alloc",
+                "type": "alias"
+            },
+            "__main__.IS06_Combat.call_contract": {
+                "destination": "starkware.starknet.common.syscalls.call_contract",
+                "type": "alias"
+            },
+            "__main__.IS06_Combat.delegate_call": {
+                "destination": "starkware.starknet.common.syscalls.delegate_call",
+                "type": "alias"
+            },
+            "__main__.IS06_Combat.memcpy": {
+                "destination": "starkware.cairo.common.memcpy.memcpy",
+                "type": "alias"
             },
             "__main__.IS07_Crypts": {
                 "type": "namespace"
@@ -939,13 +971,21 @@
                 "type": "const",
                 "value": 2
             },
+            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.ArcherTower": {
+                "type": "const",
+                "value": 2
+            },
+            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Architect": {
+                "type": "const",
+                "value": 2
+            },
             "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Args": {
                 "full_name": "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Args",
                 "members": {},
                 "size": 0,
                 "type": "struct"
             },
-            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Carpenter": {
+            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Barracks": {
                 "type": "const",
                 "value": 2
             },
@@ -956,10 +996,6 @@
             "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Dock": {
                 "type": "const",
                 "value": 3
-            },
-            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.ExplorersGuild": {
-                "type": "const",
-                "value": 2
             },
             "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Fairgrounds": {
                 "type": "const",
@@ -999,7 +1035,7 @@
                 "size": 0,
                 "type": "struct"
             },
-            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.LogisticsOffice": {
+            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.MageTower": {
                 "type": "const",
                 "value": 2
             },
@@ -1008,10 +1044,6 @@
                 "value": 1
             },
             "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.ParadeGrounds": {
-                "type": "const",
-                "value": 2
-            },
-            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.ResourceFacility": {
                 "type": "const",
                 "value": 2
             },
@@ -1033,7 +1065,7 @@
                 "type": "const",
                 "value": 2
             },
-            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Symposium": {
+            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.TradeOffice": {
                 "type": "const",
                 "value": 2
             },
@@ -1044,9 +1076,17 @@
                         "cairo_type": "felt",
                         "offset": 8
                     },
-                    "Carpenter": {
+                    "ArcherTower": {
                         "cairo_type": "felt",
                         "offset": 9
+                    },
+                    "Architect": {
+                        "cairo_type": "felt",
+                        "offset": 13
+                    },
+                    "Barracks": {
+                        "cairo_type": "felt",
+                        "offset": 15
                     },
                     "Castle": {
                         "cairo_type": "felt",
@@ -1055,10 +1095,6 @@
                     "Dock": {
                         "cairo_type": "felt",
                         "offset": 16
-                    },
-                    "ExplorersGuild": {
-                        "cairo_type": "felt",
-                        "offset": 13
                     },
                     "Fairgrounds": {
                         "cairo_type": "felt",
@@ -1092,9 +1128,9 @@
                         "cairo_type": "felt",
                         "offset": 7
                     },
-                    "LogisticsOffice": {
+                    "MageTower": {
                         "cairo_type": "felt",
-                        "offset": 12
+                        "offset": 11
                     },
                     "OfficerAcademy": {
                         "cairo_type": "felt",
@@ -1104,10 +1140,6 @@
                         "cairo_type": "felt",
                         "offset": 14
                     },
-                    "ResourceFacility": {
-                        "cairo_type": "felt",
-                        "offset": 15
-                    },
                     "RoyalReserve": {
                         "cairo_type": "felt",
                         "offset": 1
@@ -1116,9 +1148,9 @@
                         "cairo_type": "felt",
                         "offset": 10
                     },
-                    "Symposium": {
+                    "TradeOffice": {
                         "cairo_type": "felt",
-                        "offset": 11
+                        "offset": 12
                     }
                 },
                 "size": 20,
@@ -1131,15 +1163,23 @@
                 "type": "const",
                 "value": 9
             },
+            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.ArcherTower": {
+                "type": "const",
+                "value": 10
+            },
+            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Architect": {
+                "type": "const",
+                "value": 14
+            },
             "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Args": {
                 "full_name": "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Args",
                 "members": {},
                 "size": 0,
                 "type": "struct"
             },
-            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Carpenter": {
+            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Barracks": {
                 "type": "const",
-                "value": 10
+                "value": 16
             },
             "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Castle": {
                 "type": "const",
@@ -1148,10 +1188,6 @@
             "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Dock": {
                 "type": "const",
                 "value": 17
-            },
-            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.ExplorersGuild": {
-                "type": "const",
-                "value": 14
             },
             "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Fairgrounds": {
                 "type": "const",
@@ -1191,9 +1227,9 @@
                 "size": 0,
                 "type": "struct"
             },
-            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.LogisticsOffice": {
+            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.MageTower": {
                 "type": "const",
-                "value": 13
+                "value": 12
             },
             "contracts.settling_game.utils.game_structs.RealmBuildingsIds.OfficerAcademy": {
                 "type": "const",
@@ -1202,10 +1238,6 @@
             "contracts.settling_game.utils.game_structs.RealmBuildingsIds.ParadeGrounds": {
                 "type": "const",
                 "value": 15
-            },
-            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.ResourceFacility": {
-                "type": "const",
-                "value": 16
             },
             "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Return": {
                 "full_name": "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Return",
@@ -1225,9 +1257,9 @@
                 "type": "const",
                 "value": 11
             },
-            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Symposium": {
+            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.TradeOffice": {
                 "type": "const",
-                "value": 12
+                "value": 13
             },
             "contracts.settling_game.utils.game_structs.RealmCombatData": {
                 "full_name": "contracts.settling_game.utils.game_structs.RealmCombatData",

@@ -71,7 +71,9 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     _resources_address : felt,
     _realms_address : felt,
     _treasury_address : felt,
-    _s_realms_address : felt
+    _s_realms_address : felt,
+    _crypts_address : felt,
+    _s_crypts_address : felt
 ):
     arbiter.write(arbiter_address)
 
@@ -105,13 +107,11 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     # wonders logic to state
     can_write_to.write(ModuleIds.L05_Wonders, ModuleIds.S05_Wonders, TRUE)
 
-<<<<<<< HEAD
-    # crypts logic to state
-    can_write_to.write(ModuleIds.L07_Crypts, ModuleIds.S07_Crypts, TRUE)
-=======
     # combat logic to state
     can_write_to.write(ModuleIds.L06_Combat, ModuleIds.S06_Combat, TRUE)
->>>>>>> main
+
+    # crypts logic to state
+    can_write_to.write(ModuleIds.L07_Crypts, ModuleIds.S07_Crypts, TRUE)
 
     # Lookup table for NON module contracts
     external_contract_table.write(ExternalContractIds.Lords, _lords_address)
@@ -176,13 +176,10 @@ func set_initial_module_addresses{
     module_07_addr : felt,
     module_08_addr : felt,
     module_09_addr : felt,
-<<<<<<< HEAD
-    module_12_addr : felt,
-    module_13_addr : felt
-=======
     module_10_addr : felt,
     module_11_addr : felt,
->>>>>>> main
+    module_12_addr : felt,
+    module_13_addr : felt
 ):
     only_arbiter()
 
@@ -222,7 +219,14 @@ func set_initial_module_addresses{
     address_of_module_id.write(ModuleIds.S05_Wonders, module_09_addr)
     module_id_of_address.write(module_09_addr, ModuleIds.S05_Wonders)
 
-<<<<<<< HEAD
+    # # Combat Logic
+    address_of_module_id.write(ModuleIds.L06_Combat, module_10_addr)
+    module_id_of_address.write(module_10_addr, ModuleIds.L06_Combat)
+
+    # # Combat State
+    address_of_module_id.write(ModuleIds.S06_Combat, module_11_addr)
+    module_id_of_address.write(module_11_addr, ModuleIds.S06_Combat)
+
      # # Crypts Logic
     address_of_module_id.write(ModuleIds.L07_Crypts, module_12_addr)
     module_id_of_address.write(module_12_addr, ModuleIds.L07_Crypts)
@@ -231,16 +235,6 @@ func set_initial_module_addresses{
     address_of_module_id.write(ModuleIds.S07_Crypts, module_13_addr)
     module_id_of_address.write(module_13_addr, ModuleIds.S07_Crypts)
 
-
-=======
-    # # Combat Logic
-    address_of_module_id.write(ModuleIds.L06_Combat, module_10_addr)
-    module_id_of_address.write(module_10_addr, ModuleIds.L06_Combat)
-
-    # # Combat State
-    address_of_module_id.write(ModuleIds.S06_Combat, module_11_addr)
-    module_id_of_address.write(module_11_addr, ModuleIds.S06_Combat)
->>>>>>> main
     return ()
 end
 

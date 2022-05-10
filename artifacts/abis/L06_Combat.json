@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 [
     {
         "members": [
@@ -235,6 +233,29 @@
         "type": "event"
     },
     {
+        "data": [
+            {
+                "name": "troop_ids_len",
+                "type": "felt"
+            },
+            {
+                "name": "troop_ids",
+                "type": "felt*"
+            },
+            {
+                "name": "realm_id",
+                "type": "Uint256"
+            },
+            {
+                "name": "slot",
+                "type": "felt"
+            }
+        ],
+        "keys": [],
+        "name": "Build_toops",
+        "type": "event"
+    },
+    {
         "inputs": [
             {
                 "name": "controller_addr",
@@ -339,4 +360,3 @@
         "type": "function"
     }
 ]
->>>>>>> main

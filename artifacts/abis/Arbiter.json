@@ -125,6 +125,14 @@
             {
                 "name": "module_09_addr",
                 "type": "felt"
+            },
+            {
+                "name": "module_10_addr",
+                "type": "felt"
+            },
+            {
+                "name": "module_11_addr",
+                "type": "felt"
             }
         ],
         "name": "batch_set_controller_addresses",

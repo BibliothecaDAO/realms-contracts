@@ -879,7 +879,7 @@
                                 "end_col": 38,
                                 "end_line": 3,
                                 "input_file": {
-                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/alloc.cairo"
+                                    "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/cairo/common/alloc.cairo"
                                 },
                                 "start_col": 5,
                                 "start_line": 3
@@ -891,7 +891,7 @@
                         "end_col": 12,
                         "end_line": 4,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/alloc.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/cairo/common/alloc.cairo"
                         },
                         "start_col": 5,
                         "start_line": 4
@@ -914,7 +914,7 @@
                         "end_col": 39,
                         "end_line": 5,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/alloc.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/cairo/common/alloc.cairo"
                         },
                         "start_col": 5,
                         "start_line": 5
@@ -944,7 +944,7 @@
                         "end_col": 40,
                         "end_line": 47,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 18,
                         "start_line": 47
@@ -975,7 +975,7 @@
                         "end_col": 27,
                         "end_line": 51,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 46
@@ -1006,7 +1006,7 @@
                         "end_col": 27,
                         "end_line": 51,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 46
@@ -1037,7 +1037,7 @@
                         "end_col": 27,
                         "end_line": 51,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 46
@@ -1068,7 +1068,7 @@
                         "end_col": 27,
                         "end_line": 51,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 46
@@ -1099,7 +1099,7 @@
                         "end_col": 27,
                         "end_line": 51,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 46
@@ -1132,7 +1132,7 @@
                                 "end_col": 88,
                                 "end_line": 52,
                                 "input_file": {
-                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                    "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                 },
                                 "start_col": 5,
                                 "start_line": 52
@@ -1144,21 +1144,21 @@
                         "end_col": 54,
                         "end_line": 55,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 39,
                                 "end_line": 42,
                                 "input_file": {
-                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                    "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 74,
                                         "end_line": 56,
                                         "input_file": {
-                                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                         },
                                         "start_col": 5,
                                         "start_line": 56
@@ -1200,7 +1200,7 @@
                         "end_col": 47,
                         "end_line": 56,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 26,
                         "start_line": 56
@@ -1232,7 +1232,7 @@
                         "end_col": 73,
                         "end_line": 56,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 57,
                         "start_line": 56
@@ -1264,7 +1264,7 @@
                         "end_col": 74,
                         "end_line": 56,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 56
@@ -1290,7 +1290,7 @@
                         "end_col": 90,
                         "end_line": 114,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 63,
                         "start_line": 114
@@ -1317,7 +1317,7 @@
                         "end_col": 91,
                         "end_line": 114,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 114
@@ -1345,7 +1345,7 @@
                                 "end_col": 93,
                                 "end_line": 115,
                                 "input_file": {
-                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                    "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                 },
                                 "start_col": 5,
                                 "start_line": 115
@@ -1357,21 +1357,21 @@
                         "end_col": 58,
                         "end_line": 116,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 44,
                                 "end_line": 112,
                                 "input_file": {
-                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                    "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 60,
                                         "end_line": 117,
                                         "input_file": {
-                                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                         },
                                         "start_col": 5,
                                         "start_line": 117
@@ -1408,7 +1408,7 @@
                         "end_col": 59,
                         "end_line": 117,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 28,
                         "start_line": 117
@@ -1435,7 +1435,7 @@
                         "end_col": 60,
                         "end_line": 117,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 117
@@ -1461,7 +1461,7 @@
                         "end_col": 94,
                         "end_line": 188,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 65,
                         "start_line": 188
@@ -1488,7 +1488,7 @@
                         "end_col": 95,
                         "end_line": 188,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 188
@@ -1516,7 +1516,7 @@
                                 "end_col": 95,
                                 "end_line": 189,
                                 "input_file": {
-                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                    "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                 },
                                 "start_col": 5,
                                 "start_line": 189
@@ -1528,21 +1528,21 @@
                         "end_col": 60,
                         "end_line": 190,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 46,
                                 "end_line": 186,
                                 "input_file": {
-                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                    "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 64,
                                         "end_line": 191,
                                         "input_file": {
-                                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                         },
                                         "start_col": 5,
                                         "start_line": 191
@@ -1579,7 +1579,7 @@
                         "end_col": 63,
                         "end_line": 191,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 30,
                         "start_line": 191
@@ -1606,7 +1606,7 @@
                         "end_col": 64,
                         "end_line": 191,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 191
@@ -1633,7 +1633,7 @@
                         "end_col": 79,
                         "end_line": 266,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 58,
                         "start_line": 266
@@ -1661,7 +1661,7 @@
                         "end_col": 97,
                         "end_line": 266,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 266
@@ -1689,7 +1689,7 @@
                         "end_col": 97,
                         "end_line": 266,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 266
@@ -1719,7 +1719,7 @@
                                 "end_col": 87,
                                 "end_line": 267,
                                 "input_file": {
-                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                    "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                 },
                                 "start_col": 5,
                                 "start_line": 267
@@ -1731,21 +1731,21 @@
                         "end_col": 53,
                         "end_line": 269,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 38,
                                 "end_line": 264,
                                 "input_file": {
-                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                    "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 34,
                                         "end_line": 270,
                                         "input_file": {
-                                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                         },
                                         "start_col": 5,
                                         "start_line": 270
@@ -1784,7 +1784,7 @@
                         "end_col": 33,
                         "end_line": 270,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 19,
                         "start_line": 270
@@ -1813,7 +1813,7 @@
                         "end_col": 34,
                         "end_line": 270,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 270
@@ -1840,7 +1840,7 @@
                         "end_col": 40,
                         "end_line": 284,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 18,
                         "start_line": 284
@@ -1868,7 +1868,7 @@
                         "end_col": 71,
                         "end_line": 284,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 283
@@ -1896,7 +1896,7 @@
                         "end_col": 71,
                         "end_line": 284,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 283
@@ -1924,7 +1924,7 @@
                         "end_col": 71,
                         "end_line": 284,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 283
@@ -1953,7 +1953,7 @@
                                 "end_col": 88,
                                 "end_line": 285,
                                 "input_file": {
-                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                    "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                 },
                                 "start_col": 5,
                                 "start_line": 285
@@ -1965,21 +1965,21 @@
                         "end_col": 54,
                         "end_line": 286,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 39,
                                 "end_line": 282,
                                 "input_file": {
-                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                    "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 14,
                                         "end_line": 287,
                                         "input_file": {
-                                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                         },
                                         "start_col": 5,
                                         "start_line": 287
@@ -2017,7 +2017,7 @@
                         "end_col": 14,
                         "end_line": 287,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 287
@@ -2046,7 +2046,7 @@
                         "end_col": 37,
                         "end_line": 303,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 18,
                         "start_line": 303
@@ -2076,7 +2076,7 @@
                         "end_col": 98,
                         "end_line": 303,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 302
@@ -2106,7 +2106,7 @@
                         "end_col": 98,
                         "end_line": 303,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 302
@@ -2136,7 +2136,7 @@
                         "end_col": 98,
                         "end_line": 303,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 302
@@ -2166,7 +2166,7 @@
                         "end_col": 98,
                         "end_line": 303,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 302
@@ -2196,7 +2196,7 @@
                         "end_col": 98,
                         "end_line": 303,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 302
@@ -2227,7 +2227,7 @@
                                 "end_col": 85,
                                 "end_line": 304,
                                 "input_file": {
-                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                    "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                 },
                                 "start_col": 5,
                                 "start_line": 304
@@ -2239,21 +2239,21 @@
                         "end_col": 51,
                         "end_line": 305,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "parent_location": [
                             {
                                 "end_col": 36,
                                 "end_line": 301,
                                 "input_file": {
-                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                    "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                 },
                                 "parent_location": [
                                     {
                                         "end_col": 14,
                                         "end_line": 306,
                                         "input_file": {
-                                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                         },
                                         "start_col": 5,
                                         "start_line": 306
@@ -2293,7 +2293,7 @@
                         "end_col": 14,
                         "end_line": 306,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "start_col": 5,
                         "start_line": 306
@@ -2633,7 +2633,7 @@
                                 "end_col": 38,
                                 "end_line": 264,
                                 "input_file": {
-                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                    "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                 },
                                 "parent_location": [
                                     {
@@ -2750,7 +2750,7 @@
                         "end_col": 38,
                         "end_line": 264,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "parent_location": [
                             {
@@ -3126,7 +3126,7 @@
                                 "end_col": 39,
                                 "end_line": 282,
                                 "input_file": {
-                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                    "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                 },
                                 "parent_location": [
                                     {
@@ -3881,7 +3881,7 @@
                                         "end_col": 44,
                                         "end_line": 112,
                                         "input_file": {
-                                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                         },
                                         "parent_location": [
                                             {
@@ -3989,7 +3989,7 @@
                         "end_col": 44,
                         "end_line": 112,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "parent_location": [
                             {
@@ -4992,7 +4992,7 @@
                                         "end_col": 39,
                                         "end_line": 42,
                                         "input_file": {
-                                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                         },
                                         "parent_location": [
                                             {
@@ -5479,7 +5479,7 @@
                         "end_col": 39,
                         "end_line": 42,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "parent_location": [
                             {
@@ -5938,7 +5938,7 @@
                                         "end_col": 39,
                                         "end_line": 42,
                                         "input_file": {
-                                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                         },
                                         "parent_location": [
                                             {
@@ -6409,7 +6409,7 @@
                         "end_col": 39,
                         "end_line": 42,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "parent_location": [
                             {
@@ -7027,7 +7027,7 @@
                                         "end_col": 39,
                                         "end_line": 42,
                                         "input_file": {
-                                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                         },
                                         "parent_location": [
                                             {
@@ -7522,7 +7522,7 @@
                         "end_col": 39,
                         "end_line": 42,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "parent_location": [
                             {
@@ -8201,7 +8201,7 @@
                                         "end_col": 39,
                                         "end_line": 42,
                                         "input_file": {
-                                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                         },
                                         "parent_location": [
                                             {
@@ -8549,7 +8549,7 @@
                         "end_col": 39,
                         "end_line": 42,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "parent_location": [
                             {
@@ -9045,7 +9045,7 @@
                                         "end_col": 39,
                                         "end_line": 42,
                                         "input_file": {
-                                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                         },
                                         "parent_location": [
                                             {
@@ -9532,7 +9532,7 @@
                         "end_col": 39,
                         "end_line": 42,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "parent_location": [
                             {
@@ -10156,7 +10156,7 @@
                                         "end_col": 39,
                                         "end_line": 42,
                                         "input_file": {
-                                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                         },
                                         "parent_location": [
                                             {
@@ -10498,7 +10498,7 @@
                         "end_col": 39,
                         "end_line": 42,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "parent_location": [
                             {
@@ -11094,7 +11094,7 @@
                                         "end_col": 39,
                                         "end_line": 42,
                                         "input_file": {
-                                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                         },
                                         "parent_location": [
                                             {
@@ -11494,7 +11494,7 @@
                         "end_col": 39,
                         "end_line": 42,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "parent_location": [
                             {
@@ -11994,7 +11994,7 @@
                                         "end_col": 39,
                                         "end_line": 42,
                                         "input_file": {
-                                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                         },
                                         "parent_location": [
                                             {
@@ -12330,7 +12330,7 @@
                         "end_col": 39,
                         "end_line": 42,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "parent_location": [
                             {
@@ -12882,7 +12882,7 @@
                                 "end_col": 38,
                                 "end_line": 264,
                                 "input_file": {
-                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                    "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                 },
                                 "parent_location": [
                                     {
@@ -12999,7 +12999,7 @@
                         "end_col": 38,
                         "end_line": 264,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "parent_location": [
                             {
@@ -13375,7 +13375,7 @@
                                 "end_col": 39,
                                 "end_line": 282,
                                 "input_file": {
-                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                    "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                 },
                                 "parent_location": [
                                     {
@@ -13996,7 +13996,7 @@
                                 "end_col": 38,
                                 "end_line": 264,
                                 "input_file": {
-                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                    "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                 },
                                 "parent_location": [
                                     {
@@ -14113,7 +14113,7 @@
                         "end_col": 38,
                         "end_line": 264,
                         "input_file": {
-                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                         },
                         "parent_location": [
                             {
@@ -14489,7 +14489,7 @@
                                 "end_col": 39,
                                 "end_line": 282,
                                 "input_file": {
-                                    "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                    "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                 },
                                 "parent_location": [
                                     {
@@ -15330,7 +15330,7 @@
                                         "end_col": 36,
                                         "end_line": 301,
                                         "input_file": {
-                                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/starknet/common/syscalls.cairo"
+                                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/starknet/common/syscalls.cairo"
                                         },
                                         "parent_location": [
                                             {

@@ -171,19 +171,6 @@ namespace IS05_Wonders:
 end
 
 @contract_interface
-namespace IS07_Crypts:
-    func set_time_staked(token_id : Uint256, time_left : felt):
-    end
-    func set_total_crypts_unlocked(amount : felt):
-    end
-    func get_time_staked(token_id : Uint256) -> (time : felt):
-    end
-    func get_total_crypts_unlocked() -> (amount : felt):
-    end
-    func return_approved():
-    end
-end
-
 namespace IS06_Combat:
     func get_realm_combat_data(realm_id : Uint256) -> (combat_data : RealmCombatData):
     end
@@ -195,5 +182,19 @@ namespace IS06_Combat:
     end
 
     func update_squad_in_realm(s : Squad, realm_id : Uint256, slot : felt):
+    end
+end
+
+@contract_interface
+namespace IS07_Crypts:
+    func set_time_staked(token_id : Uint256, time_left : felt):
+    end
+    func set_total_crypts_unlocked(amount : felt):
+    end
+    func get_time_staked(token_id : Uint256) -> (time : felt):
+    end
+    func get_total_crypts_unlocked() -> (amount : felt):
+    end
+    func return_approved():
     end
 end

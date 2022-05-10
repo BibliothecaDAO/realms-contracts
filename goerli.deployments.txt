@@ -16,13 +16,5 @@
 0x073f484a7e9ea443933bb2a2b086f68bd11e4ade422640cebebac5fe3e41e2c9:artifacts/abis/Resources_ERC1155_Mintable_Burnable.json:resources
 0x001b7ac04db99ab1054e411d757f87b8a3da95891633dc31a4a85a0fb34ec0b9:artifacts/abis/xoroshiro128_starstar.json:xoroshiro128_starstar
 0x0199bea1ac543e66bd7913a609283bcb99d9919309285808e19a2f73de08f1aa:artifacts/abis/S06_Combat.json:S06_Combat
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-0x0190961238687fe14ca1f1257c285420786216aa804ea3b899422cb97617df93:/home/vscode/.local/lib/python3.7/site-packages/nile/artifacts/abis/Account.json:account-1
-=======
 0x0773f0d058b0f7b777d08d62f506cfe6a5b2f4cccfba793c5f39c2c9de7a0a1c:artifacts/abis/L06_Combat.json:L06_Combat
 0x000c57d36e05c3a476e77c25d777ec9ccf2f5ec0417f5c7fd916ee6caa888ce7:/opt/homebrew/lib/python3.9/site-packages/nile/artifacts/abis/Account.json:account-1
->>>>>>> Stashed changes
-=======
-0x0773f0d058b0f7b777d08d62f506cfe6a5b2f4cccfba793c5f39c2c9de7a0a1c:artifacts/abis/L06_Combat.json:L06_Combat
->>>>>>> main
