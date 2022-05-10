@@ -176,3 +176,19 @@ def check_owner_of_s_realm(realm_token_id, network):
     )
     print(out)   
 
+@click.command()
+@click.argument("realm_token_id", nargs=1)
+@click.option("--network", default="goerli")
+def get_realm_data(realm_token_id, network):
+    """
+    Check settled Realms balance
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_realms",
+        function="get_realm_info",
+        arguments=[realm_token_id, 0],
+    )
+    print(out)   
