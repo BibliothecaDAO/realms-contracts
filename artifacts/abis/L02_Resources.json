@@ -17,6 +17,44 @@
         "type": "struct"
     },
     {
+        "members": [
+            {
+                "name": "resource_count",
+                "offset": 0,
+                "type": "felt"
+            },
+            {
+                "name": "bits",
+                "offset": 1,
+                "type": "felt"
+            },
+            {
+                "name": "packed_ids",
+                "offset": 2,
+                "type": "felt"
+            },
+            {
+                "name": "packed_amounts",
+                "offset": 3,
+                "type": "felt"
+            }
+        ],
+        "name": "Cost",
+        "size": 4,
+        "type": "struct"
+    },
+    {
+        "data": [
+            {
+                "name": "implementation",
+                "type": "felt"
+            }
+        ],
+        "keys": [],
+        "name": "Upgraded",
+        "type": "event"
+    },
+    {
         "data": [
             {
                 "name": "token_id",
@@ -40,11 +78,26 @@
             {
                 "name": "address_of_controller",
                 "type": "felt"
+            },
+            {
+                "name": "proxy_admin",
+                "type": "felt"
             }
         ],
-        "name": "constructor",
+        "name": "initializer",
         "outputs": [],
-        "type": "constructor"
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "new_implementation",
+                "type": "felt"
+            }
+        ],
+        "name": "upgrade",
+        "outputs": [],
+        "type": "function"
     },
     {
         "inputs": [
@@ -77,9 +130,24 @@
             {
                 "name": "token_id",
                 "type": "Uint256"
+            },
+            {
+                "name": "resource_id",
+                "type": "felt"
             }
         ],
-        "name": "get_available_resources",
+        "name": "upgrade_resource",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "token_id",
+                "type": "Uint256"
+            }
+        ],
+        "name": "days_accrued",
         "outputs": [
             {
                 "name": "days_accrued",
@@ -100,7 +168,7 @@
                 "type": "Uint256"
             }
         ],
-        "name": "get_available_vault_resources",
+        "name": "vault_days_accrued",
         "outputs": [
             {
                 "name": "days_accrued",
@@ -121,7 +189,7 @@
                 "type": "Uint256"
             }
         ],
-        "name": "get_pillaged_resources",
+        "name": "get_available_vault_days",
         "outputs": [
             {
                 "name": "days_accrued",
@@ -155,16 +223,54 @@
     {
         "inputs": [
             {
+                "name": "resource_id",
+                "type": "felt"
+            },
+            {
+                "name": "cost",
+                "type": "Cost"
+            }
+        ],
+        "name": "set_resource_upgrade_cost",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "name": "token_id",
                 "type": "Uint256"
             },
+            {
+                "name": "resource",
+                "type": "felt"
+            }
+        ],
+        "name": "get_resource_level",
+        "outputs": [
+            {
+                "name": "level",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
             {
                 "name": "resource_id",
                 "type": "felt"
             }
         ],
-        "name": "upgrade_resource",
-        "outputs": [],
+        "name": "get_resource_upgrade_cost",
+        "outputs": [
+            {
+                "name": "cost",
+                "type": "Cost"
+            }
+        ],
+        "stateMutability": "view",
         "type": "function"
     }
 ]

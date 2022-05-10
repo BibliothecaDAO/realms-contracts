@@ -17,15 +17,41 @@
         "type": "struct"
     },
     {
+        "data": [
+            {
+                "name": "implementation",
+                "type": "felt"
+            }
+        ],
+        "keys": [],
+        "name": "Upgraded",
+        "type": "event"
+    },
+    {
         "inputs": [
             {
                 "name": "address_of_controller",
                 "type": "felt"
+            },
+            {
+                "name": "proxy_admin",
+                "type": "felt"
             }
         ],
-        "name": "constructor",
+        "name": "initializer",
         "outputs": [],
-        "type": "constructor"
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "new_implementation",
+                "type": "felt"
+            }
+        ],
+        "name": "upgrade",
+        "outputs": [],
+        "type": "function"
     },
     {
         "inputs": [],
@@ -46,7 +72,7 @@
                 "type": "Uint256"
             }
         ],
-        "name": "calculateHappiness",
+        "name": "calculate_happiness",
         "outputs": [
             {
                 "name": "happiness",
@@ -101,23 +127,6 @@
         "outputs": [
             {
                 "name": "food",
-                "type": "felt"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "name": "tokenId",
-                "type": "Uint256"
-            }
-        ],
-        "name": "calculateTribute",
-        "outputs": [
-            {
-                "name": "tribute",
                 "type": "felt"
             }
         ],

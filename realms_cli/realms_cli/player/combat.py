@@ -22,7 +22,7 @@ def get_unit_cost(unit_id, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="S06_Combat",
+        contract_alias="proxy_L06_Combat",
         function="get_troop_cost",
         arguments=[unit_id],
     )
@@ -40,7 +40,7 @@ def build_squad(realm_token_id, network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="L06_Combat",
+        contract_alias="proxy_L06_Combat",
         function="build_squad_from_troops_in_realm",
         arguments=[1, 1, *uint(realm_token_id), 1],
     )
@@ -57,7 +57,7 @@ def can_attack(attacking_realm, defending_realm, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="L06_Combat",
+        contract_alias="proxy_L06_Combat",
         function="Realm_can_be_attacked",
         arguments=[*uint(attacking_realm), *uint(defending_realm)],
     )
@@ -76,7 +76,7 @@ def attack_realm(attacking_realm, defending_realm, network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="L06_Combat",
+        contract_alias="proxy_L06_Combat",
         function="initiate_combat",
         arguments=[*uint(attacking_realm), *uint(defending_realm), 1],
     )
@@ -92,7 +92,7 @@ def get_troops(realm_id, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="L06_Combat",
+        contract_alias="proxy_L06_Combat",
         function="view_troops",
         arguments=[*uint(realm_id)],
     )

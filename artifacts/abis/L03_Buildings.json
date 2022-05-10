@@ -19,6 +19,33 @@
     {
         "members": [
             {
+                "name": "resource_count",
+                "offset": 0,
+                "type": "felt"
+            },
+            {
+                "name": "bits",
+                "offset": 1,
+                "type": "felt"
+            },
+            {
+                "name": "packed_ids",
+                "offset": 2,
+                "type": "felt"
+            },
+            {
+                "name": "packed_amounts",
+                "offset": 3,
+                "type": "felt"
+            }
+        ],
+        "name": "Cost",
+        "size": 4,
+        "type": "struct"
+    },
+    {
+        "members": [
+            {
                 "name": "Fairgrounds",
                 "offset": 0,
                 "type": "felt"
@@ -64,7 +91,7 @@
                 "type": "felt"
             },
             {
-                "name": "Carpenter",
+                "name": "ArcherTower",
                 "offset": 9,
                 "type": "felt"
             },
@@ -74,17 +101,17 @@
                 "type": "felt"
             },
             {
-                "name": "Symposium",
+                "name": "MageTower",
                 "offset": 11,
                 "type": "felt"
             },
             {
-                "name": "LogisticsOffice",
+                "name": "TradeOffice",
                 "offset": 12,
                 "type": "felt"
             },
             {
-                "name": "ExplorersGuild",
+                "name": "Architect",
                 "offset": 13,
                 "type": "felt"
             },
@@ -94,7 +121,7 @@
                 "type": "felt"
             },
             {
-                "name": "ResourceFacility",
+                "name": "Barracks",
                 "offset": 15,
                 "type": "felt"
             },
@@ -126,6 +153,17 @@
     {
         "data": [
             {
+                "name": "implementation",
+                "type": "felt"
+            }
+        ],
+        "keys": [],
+        "name": "Upgraded",
+        "type": "event"
+    },
+    {
+        "data": [
+            {
                 "name": "token_id",
                 "type": "Uint256"
             },
@@ -143,11 +181,26 @@
             {
                 "name": "address_of_controller",
                 "type": "felt"
+            },
+            {
+                "name": "proxy_admin",
+                "type": "felt"
             }
         ],
-        "name": "constructor",
+        "name": "initializer",
         "outputs": [],
-        "type": "constructor"
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "new_implementation",
+                "type": "felt"
+            }
+        ],
+        "name": "upgrade",
+        "outputs": [],
+        "type": "function"
     },
     {
         "inputs": [
@@ -172,6 +225,25 @@
     {
         "inputs": [
             {
+                "name": "building_id",
+                "type": "felt"
+            },
+            {
+                "name": "cost",
+                "type": "Cost"
+            },
+            {
+                "name": "lords",
+                "type": "Uint256"
+            }
+        ],
+        "name": "set_building_cost",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "name": "token_id",
                 "type": "Uint256"
             }
@@ -181,6 +253,44 @@
             {
                 "name": "realm_buildings",
                 "type": "RealmBuildings"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "token_id",
+                "type": "Uint256"
+            }
+        ],
+        "name": "get_realm_buildings",
+        "outputs": [
+            {
+                "name": "buildings",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "building_id",
+                "type": "felt"
+            }
+        ],
+        "name": "get_building_cost",
+        "outputs": [
+            {
+                "name": "cost",
+                "type": "Cost"
+            },
+            {
+                "name": "lords",
+                "type": "Uint256"
             }
         ],
         "stateMutability": "view",

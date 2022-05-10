@@ -23,7 +23,7 @@ def mint_realm(realm_token_id, network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="realms",
+        contract_alias="proxy_realms",
         function="mint",
         arguments=[
             int(config.USER_ADDRESS, 16),  # felt
@@ -43,10 +43,10 @@ def approve_realm(network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="realms",
+        contract_alias="proxy_realms",
         function="setApprovalForAll",
         arguments=[
-            int(config.L01_SETTLING_ADDRESS, 16),  # uint1
+            int(config.L01_SETTLING_PROXY_ADDRESS, 16),  # uint1
             "1",               # true
         ],
     )
@@ -63,7 +63,7 @@ def settle_realm(realm_token_id, network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="L01_Settling",
+        contract_alias="proxy_L01_Settling",
         function="settle",
         arguments=[
             realm_token_id,  # uint1
@@ -90,7 +90,7 @@ def set_realm_data(realm_token_id, network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="realms",
+        contract_alias="proxy_realms",
         function="set_realm_data",
         arguments=[
             realm_token_id,   # uint 1
@@ -115,7 +115,7 @@ def check_realms(address, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="realms",
+        contract_alias="proxy_realms",
         function="balanceOf",
         arguments=[address],
     )
@@ -136,7 +136,7 @@ def check_s_realms(address, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="s_realms",
+        contract_alias="proxy_s_realms",
         function="balanceOf",
         arguments=[address],
     )
@@ -153,7 +153,7 @@ def check_owner_of_realm(realm_token_id, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="realms",
+        contract_alias="proxy_realms",
         function="ownerOf",
         arguments=[realm_token_id, 0],
     )
@@ -170,7 +170,7 @@ def check_owner_of_s_realm(realm_token_id, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="s_realms",
+        contract_alias="proxy_s_realms",
         function="ownerOf",
         arguments=[realm_token_id, 0],
     )

@@ -191,6 +191,108 @@
         "type": "struct"
     },
     {
+        "members": [
+            {
+                "name": "resource_count",
+                "offset": 0,
+                "type": "felt"
+            },
+            {
+                "name": "bits",
+                "offset": 1,
+                "type": "felt"
+            },
+            {
+                "name": "packed_ids",
+                "offset": 2,
+                "type": "felt"
+            },
+            {
+                "name": "packed_amounts",
+                "offset": 3,
+                "type": "felt"
+            }
+        ],
+        "name": "Cost",
+        "size": 4,
+        "type": "struct"
+    },
+    {
+        "members": [
+            {
+                "name": "attacking_squad",
+                "offset": 0,
+                "type": "PackedSquad"
+            },
+            {
+                "name": "defending_squad",
+                "offset": 7,
+                "type": "PackedSquad"
+            },
+            {
+                "name": "last_attacked_at",
+                "offset": 14,
+                "type": "felt"
+            }
+        ],
+        "name": "RealmCombatData",
+        "size": 15,
+        "type": "struct"
+    },
+    {
+        "members": [
+            {
+                "name": "p1",
+                "offset": 0,
+                "type": "felt"
+            },
+            {
+                "name": "p2",
+                "offset": 1,
+                "type": "felt"
+            },
+            {
+                "name": "p3",
+                "offset": 2,
+                "type": "felt"
+            },
+            {
+                "name": "p4",
+                "offset": 3,
+                "type": "felt"
+            },
+            {
+                "name": "p5",
+                "offset": 4,
+                "type": "felt"
+            },
+            {
+                "name": "p6",
+                "offset": 5,
+                "type": "felt"
+            },
+            {
+                "name": "p7",
+                "offset": 6,
+                "type": "felt"
+            }
+        ],
+        "name": "PackedSquad",
+        "size": 7,
+        "type": "struct"
+    },
+    {
+        "data": [
+            {
+                "name": "implementation",
+                "type": "felt"
+            }
+        ],
+        "keys": [],
+        "name": "Upgraded",
+        "type": "event"
+    },
+    {
         "data": [
             {
                 "name": "attacking_realm_id",
@@ -233,39 +335,56 @@
         "type": "event"
     },
     {
+        "data": [
+            {
+                "name": "troop_ids_len",
+                "type": "felt"
+            },
+            {
+                "name": "troop_ids",
+                "type": "felt*"
+            },
+            {
+                "name": "realm_id",
+                "type": "Uint256"
+            },
+            {
+                "name": "slot",
+                "type": "felt"
+            }
+        ],
+        "keys": [],
+        "name": "Build_toops",
+        "type": "event"
+    },
+    {
         "inputs": [
             {
-                "name": "controller_addr",
+                "name": "address_of_controller",
                 "type": "felt"
             },
             {
                 "name": "xoroshiro_addr",
                 "type": "felt"
+            },
+            {
+                "name": "proxy_admin",
+                "type": "felt"
             }
         ],
-        "name": "constructor",
+        "name": "initializer",
         "outputs": [],
-        "type": "constructor"
+        "type": "function"
     },
     {
         "inputs": [
             {
-                "name": "attacking_realm_id",
-                "type": "Uint256"
-            },
-            {
-                "name": "defending_realm_id",
-                "type": "Uint256"
-            }
-        ],
-        "name": "Realm_can_be_attacked",
-        "outputs": [
-            {
-                "name": "yesno",
+                "name": "new_implementation",
                 "type": "felt"
             }
         ],
-        "stateMutability": "view",
+        "name": "upgrade",
+        "outputs": [],
         "type": "function"
     },
     {
@@ -294,6 +413,64 @@
     {
         "inputs": [
             {
+                "name": "attacking_realm_id",
+                "type": "Uint256"
+            },
+            {
+                "name": "defending_realm_id",
+                "type": "Uint256"
+            },
+            {
+                "name": "attack_type",
+                "type": "felt"
+            }
+        ],
+        "name": "initiate_combat",
+        "outputs": [
+            {
+                "name": "combat_outcome",
+                "type": "felt"
+            }
+        ],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "s",
+                "type": "Squad"
+            },
+            {
+                "name": "realm_id",
+                "type": "Uint256"
+            },
+            {
+                "name": "slot",
+                "type": "felt"
+            }
+        ],
+        "name": "update_squad_in_realm",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "troop_id",
+                "type": "felt"
+            },
+            {
+                "name": "cost",
+                "type": "Cost"
+            }
+        ],
+        "name": "set_troop_cost",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "name": "realm_id",
                 "type": "Uint256"
             }
@@ -315,25 +492,73 @@
     {
         "inputs": [
             {
+                "name": "troop_id",
+                "type": "felt"
+            }
+        ],
+        "name": "get_troop",
+        "outputs": [
+            {
+                "name": "t",
+                "type": "Troop"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "realm_id",
+                "type": "Uint256"
+            }
+        ],
+        "name": "get_realm_combat_data",
+        "outputs": [
+            {
+                "name": "combat_data",
+                "type": "RealmCombatData"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "troop_id",
+                "type": "felt"
+            }
+        ],
+        "name": "get_troop_cost",
+        "outputs": [
+            {
+                "name": "cost",
+                "type": "Cost"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "name": "attacking_realm_id",
                 "type": "Uint256"
             },
             {
                 "name": "defending_realm_id",
                 "type": "Uint256"
-            },
-            {
-                "name": "attack_type",
-                "type": "felt"
             }
         ],
-        "name": "initiate_combat",
+        "name": "Realm_can_be_attacked",
         "outputs": [
             {
-                "name": "combat_outcome",
+                "name": "yesno",
                 "type": "felt"
             }
         ],
+        "stateMutability": "view",
         "type": "function"
     }
 ]

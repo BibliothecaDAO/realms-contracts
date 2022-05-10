@@ -17,6 +17,426 @@
         },
         "hints": {},
         "identifiers": {
+            "__main__.ArmyCap": {
+                "type": "namespace"
+            },
+            "__main__.ArmyCap.Amphitheater": {
+                "type": "const",
+                "value": 2
+            },
+            "__main__.ArmyCap.ArcherTower": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.ArmyCap.Architect": {
+                "type": "const",
+                "value": 1
+            },
+            "__main__.ArmyCap.Args": {
+                "full_name": "__main__.ArmyCap.Args",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.ArmyCap.Barracks": {
+                "type": "const",
+                "value": 1
+            },
+            "__main__.ArmyCap.Castle": {
+                "type": "const",
+                "value": 5
+            },
+            "__main__.ArmyCap.Dock": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.ArmyCap.Fairgrounds": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.ArmyCap.Farms": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.ArmyCap.Fishmonger": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.ArmyCap.Granary": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.ArmyCap.GrandMarket": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.ArmyCap.Guild": {
+                "type": "const",
+                "value": 5
+            },
+            "__main__.ArmyCap.Hamlet": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.ArmyCap.Housing": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.ArmyCap.ImplicitArgs": {
+                "full_name": "__main__.ArmyCap.ImplicitArgs",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.ArmyCap.MageTower": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.ArmyCap.OfficerAcademy": {
+                "type": "const",
+                "value": 5
+            },
+            "__main__.ArmyCap.ParadeGrounds": {
+                "type": "const",
+                "value": 2
+            },
+            "__main__.ArmyCap.Return": {
+                "full_name": "__main__.ArmyCap.Return",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.ArmyCap.RoyalReserve": {
+                "type": "const",
+                "value": 5
+            },
+            "__main__.ArmyCap.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.ArmyCap.School": {
+                "type": "const",
+                "value": 3
+            },
+            "__main__.ArmyCap.TradeOffice": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.BuildingsCulture": {
+                "type": "namespace"
+            },
+            "__main__.BuildingsCulture.Amphitheater": {
+                "type": "const",
+                "value": 2
+            },
+            "__main__.BuildingsCulture.ArcherTower": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.BuildingsCulture.Architect": {
+                "type": "const",
+                "value": 1
+            },
+            "__main__.BuildingsCulture.Args": {
+                "full_name": "__main__.BuildingsCulture.Args",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.BuildingsCulture.Barracks": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.BuildingsCulture.Castle": {
+                "type": "const",
+                "value": 5
+            },
+            "__main__.BuildingsCulture.Dock": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.BuildingsCulture.Fairgrounds": {
+                "type": "const",
+                "value": 5
+            },
+            "__main__.BuildingsCulture.Farms": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.BuildingsCulture.Fishmonger": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.BuildingsCulture.Granary": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.BuildingsCulture.GrandMarket": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.BuildingsCulture.Guild": {
+                "type": "const",
+                "value": 5
+            },
+            "__main__.BuildingsCulture.Hamlet": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.BuildingsCulture.Housing": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.BuildingsCulture.ImplicitArgs": {
+                "full_name": "__main__.BuildingsCulture.ImplicitArgs",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.BuildingsCulture.MageTower": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.BuildingsCulture.OfficerAcademy": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.BuildingsCulture.ParadeGrounds": {
+                "type": "const",
+                "value": 1
+            },
+            "__main__.BuildingsCulture.Return": {
+                "full_name": "__main__.BuildingsCulture.Return",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.BuildingsCulture.RoyalReserve": {
+                "type": "const",
+                "value": 5
+            },
+            "__main__.BuildingsCulture.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.BuildingsCulture.School": {
+                "type": "const",
+                "value": 3
+            },
+            "__main__.BuildingsCulture.TradeOffice": {
+                "type": "const",
+                "value": 1
+            },
+            "__main__.BuildingsFood": {
+                "type": "namespace"
+            },
+            "__main__.BuildingsFood.Amphitheater": {
+                "type": "const",
+                "value": -1
+            },
+            "__main__.BuildingsFood.ArcherTower": {
+                "type": "const",
+                "value": -1
+            },
+            "__main__.BuildingsFood.Architect": {
+                "type": "const",
+                "value": -1
+            },
+            "__main__.BuildingsFood.Args": {
+                "full_name": "__main__.BuildingsFood.Args",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.BuildingsFood.Barracks": {
+                "type": "const",
+                "value": -1
+            },
+            "__main__.BuildingsFood.Castle": {
+                "type": "const",
+                "value": -1
+            },
+            "__main__.BuildingsFood.Dock": {
+                "type": "const",
+                "value": -1
+            },
+            "__main__.BuildingsFood.Fairgrounds": {
+                "type": "const",
+                "value": 5
+            },
+            "__main__.BuildingsFood.Farms": {
+                "type": "const",
+                "value": 1
+            },
+            "__main__.BuildingsFood.Fishmonger": {
+                "type": "const",
+                "value": 2
+            },
+            "__main__.BuildingsFood.Granary": {
+                "type": "const",
+                "value": 3
+            },
+            "__main__.BuildingsFood.GrandMarket": {
+                "type": "const",
+                "value": 5
+            },
+            "__main__.BuildingsFood.Guild": {
+                "type": "const",
+                "value": -1
+            },
+            "__main__.BuildingsFood.Hamlet": {
+                "type": "const",
+                "value": 1
+            },
+            "__main__.BuildingsFood.Housing": {
+                "type": "const",
+                "value": -1
+            },
+            "__main__.BuildingsFood.ImplicitArgs": {
+                "full_name": "__main__.BuildingsFood.ImplicitArgs",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.BuildingsFood.MageTower": {
+                "type": "const",
+                "value": -1
+            },
+            "__main__.BuildingsFood.OfficerAcademy": {
+                "type": "const",
+                "value": -1
+            },
+            "__main__.BuildingsFood.ParadeGrounds": {
+                "type": "const",
+                "value": -1
+            },
+            "__main__.BuildingsFood.Return": {
+                "full_name": "__main__.BuildingsFood.Return",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.BuildingsFood.RoyalReserve": {
+                "type": "const",
+                "value": 5
+            },
+            "__main__.BuildingsFood.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.BuildingsFood.School": {
+                "type": "const",
+                "value": -1
+            },
+            "__main__.BuildingsFood.TradeOffice": {
+                "type": "const",
+                "value": -1
+            },
+            "__main__.BuildingsPopulation": {
+                "type": "namespace"
+            },
+            "__main__.BuildingsPopulation.Amphitheater": {
+                "type": "const",
+                "value": -10
+            },
+            "__main__.BuildingsPopulation.ArcherTower": {
+                "type": "const",
+                "value": -10
+            },
+            "__main__.BuildingsPopulation.Architect": {
+                "type": "const",
+                "value": -10
+            },
+            "__main__.BuildingsPopulation.Args": {
+                "full_name": "__main__.BuildingsPopulation.Args",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.BuildingsPopulation.Barracks": {
+                "type": "const",
+                "value": -10
+            },
+            "__main__.BuildingsPopulation.Castle": {
+                "type": "const",
+                "value": -10
+            },
+            "__main__.BuildingsPopulation.Dock": {
+                "type": "const",
+                "value": -10
+            },
+            "__main__.BuildingsPopulation.Fairgrounds": {
+                "type": "const",
+                "value": -10
+            },
+            "__main__.BuildingsPopulation.Farms": {
+                "type": "const",
+                "value": 10
+            },
+            "__main__.BuildingsPopulation.Fishmonger": {
+                "type": "const",
+                "value": -10
+            },
+            "__main__.BuildingsPopulation.Granary": {
+                "type": "const",
+                "value": -10
+            },
+            "__main__.BuildingsPopulation.GrandMarket": {
+                "type": "const",
+                "value": -10
+            },
+            "__main__.BuildingsPopulation.Guild": {
+                "type": "const",
+                "value": -10
+            },
+            "__main__.BuildingsPopulation.Hamlet": {
+                "type": "const",
+                "value": 35
+            },
+            "__main__.BuildingsPopulation.Housing": {
+                "type": "const",
+                "value": 75
+            },
+            "__main__.BuildingsPopulation.ImplicitArgs": {
+                "full_name": "__main__.BuildingsPopulation.ImplicitArgs",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.BuildingsPopulation.MageTower": {
+                "type": "const",
+                "value": -10
+            },
+            "__main__.BuildingsPopulation.OfficerAcademy": {
+                "type": "const",
+                "value": -10
+            },
+            "__main__.BuildingsPopulation.ParadeGrounds": {
+                "type": "const",
+                "value": -10
+            },
+            "__main__.BuildingsPopulation.Return": {
+                "full_name": "__main__.BuildingsPopulation.Return",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.BuildingsPopulation.RoyalReserve": {
+                "type": "const",
+                "value": -10
+            },
+            "__main__.BuildingsPopulation.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.BuildingsPopulation.School": {
+                "type": "const",
+                "value": -10
+            },
+            "__main__.BuildingsPopulation.TradeOffice": {
+                "type": "const",
+                "value": -10
+            },
             "__main__.Cost": {
                 "full_name": "__main__.Cost",
                 "members": {
@@ -110,49 +530,29 @@
             },
             "__main__.ModuleIds.L02_Resources": {
                 "type": "const",
-                "value": 3
+                "value": 2
             },
             "__main__.ModuleIds.L03_Buildings": {
                 "type": "const",
-                "value": 5
+                "value": 3
             },
             "__main__.ModuleIds.L04_Calculator": {
                 "type": "const",
-                "value": 7
+                "value": 4
             },
             "__main__.ModuleIds.L05_Wonders": {
                 "type": "const",
-                "value": 8
+                "value": 5
             },
             "__main__.ModuleIds.L06_Combat": {
                 "type": "const",
-                "value": 11
+                "value": 6
             },
             "__main__.ModuleIds.Return": {
                 "full_name": "__main__.ModuleIds.Return",
                 "members": {},
                 "size": 0,
                 "type": "struct"
-            },
-            "__main__.ModuleIds.S01_Settling": {
-                "type": "const",
-                "value": 2
-            },
-            "__main__.ModuleIds.S02_Resources": {
-                "type": "const",
-                "value": 4
-            },
-            "__main__.ModuleIds.S03_Buildings": {
-                "type": "const",
-                "value": 6
-            },
-            "__main__.ModuleIds.S05_Wonders": {
-                "type": "const",
-                "value": 9
-            },
-            "__main__.ModuleIds.S06_Combat": {
-                "type": "const",
-                "value": 12
             },
             "__main__.ModuleIds.SIZEOF_LOCALS": {
                 "type": "const",
@@ -200,13 +600,21 @@
                 "type": "const",
                 "value": 2
             },
+            "__main__.RealmBuildingLimitTraitsIds.ArcherTower": {
+                "type": "const",
+                "value": 2
+            },
+            "__main__.RealmBuildingLimitTraitsIds.Architect": {
+                "type": "const",
+                "value": 2
+            },
             "__main__.RealmBuildingLimitTraitsIds.Args": {
                 "full_name": "__main__.RealmBuildingLimitTraitsIds.Args",
                 "members": {},
                 "size": 0,
                 "type": "struct"
             },
-            "__main__.RealmBuildingLimitTraitsIds.Carpenter": {
+            "__main__.RealmBuildingLimitTraitsIds.Barracks": {
                 "type": "const",
                 "value": 2
             },
@@ -217,10 +625,6 @@
             "__main__.RealmBuildingLimitTraitsIds.Dock": {
                 "type": "const",
                 "value": 3
-            },
-            "__main__.RealmBuildingLimitTraitsIds.ExplorersGuild": {
-                "type": "const",
-                "value": 2
             },
             "__main__.RealmBuildingLimitTraitsIds.Fairgrounds": {
                 "type": "const",
@@ -260,7 +664,7 @@
                 "size": 0,
                 "type": "struct"
             },
-            "__main__.RealmBuildingLimitTraitsIds.LogisticsOffice": {
+            "__main__.RealmBuildingLimitTraitsIds.MageTower": {
                 "type": "const",
                 "value": 2
             },
@@ -269,10 +673,6 @@
                 "value": 1
             },
             "__main__.RealmBuildingLimitTraitsIds.ParadeGrounds": {
-                "type": "const",
-                "value": 2
-            },
-            "__main__.RealmBuildingLimitTraitsIds.ResourceFacility": {
                 "type": "const",
                 "value": 2
             },
@@ -294,7 +694,7 @@
                 "type": "const",
                 "value": 2
             },
-            "__main__.RealmBuildingLimitTraitsIds.Symposium": {
+            "__main__.RealmBuildingLimitTraitsIds.TradeOffice": {
                 "type": "const",
                 "value": 2
             },
@@ -305,9 +705,17 @@
                         "cairo_type": "felt",
                         "offset": 8
                     },
-                    "Carpenter": {
+                    "ArcherTower": {
                         "cairo_type": "felt",
                         "offset": 9
+                    },
+                    "Architect": {
+                        "cairo_type": "felt",
+                        "offset": 13
+                    },
+                    "Barracks": {
+                        "cairo_type": "felt",
+                        "offset": 15
                     },
                     "Castle": {
                         "cairo_type": "felt",
@@ -316,10 +724,6 @@
                     "Dock": {
                         "cairo_type": "felt",
                         "offset": 16
-                    },
-                    "ExplorersGuild": {
-                        "cairo_type": "felt",
-                        "offset": 13
                     },
                     "Fairgrounds": {
                         "cairo_type": "felt",
@@ -353,9 +757,9 @@
                         "cairo_type": "felt",
                         "offset": 7
                     },
-                    "LogisticsOffice": {
+                    "MageTower": {
                         "cairo_type": "felt",
-                        "offset": 12
+                        "offset": 11
                     },
                     "OfficerAcademy": {
                         "cairo_type": "felt",
@@ -365,10 +769,6 @@
                         "cairo_type": "felt",
                         "offset": 14
                     },
-                    "ResourceFacility": {
-                        "cairo_type": "felt",
-                        "offset": 15
-                    },
                     "RoyalReserve": {
                         "cairo_type": "felt",
                         "offset": 1
@@ -377,9 +777,9 @@
                         "cairo_type": "felt",
                         "offset": 10
                     },
-                    "Symposium": {
+                    "TradeOffice": {
                         "cairo_type": "felt",
-                        "offset": 11
+                        "offset": 12
                     }
                 },
                 "size": 20,
@@ -392,15 +792,23 @@
                 "type": "const",
                 "value": 9
             },
+            "__main__.RealmBuildingsIds.ArcherTower": {
+                "type": "const",
+                "value": 10
+            },
+            "__main__.RealmBuildingsIds.Architect": {
+                "type": "const",
+                "value": 14
+            },
             "__main__.RealmBuildingsIds.Args": {
                 "full_name": "__main__.RealmBuildingsIds.Args",
                 "members": {},
                 "size": 0,
                 "type": "struct"
             },
-            "__main__.RealmBuildingsIds.Carpenter": {
+            "__main__.RealmBuildingsIds.Barracks": {
                 "type": "const",
-                "value": 10
+                "value": 16
             },
             "__main__.RealmBuildingsIds.Castle": {
                 "type": "const",
@@ -409,10 +817,6 @@
             "__main__.RealmBuildingsIds.Dock": {
                 "type": "const",
                 "value": 17
-            },
-            "__main__.RealmBuildingsIds.ExplorersGuild": {
-                "type": "const",
-                "value": 14
             },
             "__main__.RealmBuildingsIds.Fairgrounds": {
                 "type": "const",
@@ -452,9 +856,9 @@
                 "size": 0,
                 "type": "struct"
             },
-            "__main__.RealmBuildingsIds.LogisticsOffice": {
+            "__main__.RealmBuildingsIds.MageTower": {
                 "type": "const",
-                "value": 13
+                "value": 12
             },
             "__main__.RealmBuildingsIds.OfficerAcademy": {
                 "type": "const",
@@ -463,10 +867,6 @@
             "__main__.RealmBuildingsIds.ParadeGrounds": {
                 "type": "const",
                 "value": 15
-            },
-            "__main__.RealmBuildingsIds.ResourceFacility": {
-                "type": "const",
-                "value": 16
             },
             "__main__.RealmBuildingsIds.Return": {
                 "full_name": "__main__.RealmBuildingsIds.Return",
@@ -486,9 +886,9 @@
                 "type": "const",
                 "value": 11
             },
-            "__main__.RealmBuildingsIds.Symposium": {
+            "__main__.RealmBuildingsIds.TradeOffice": {
                 "type": "const",
-                "value": 12
+                "value": 13
             },
             "__main__.RealmCombatData": {
                 "full_name": "__main__.RealmCombatData",

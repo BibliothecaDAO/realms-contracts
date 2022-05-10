@@ -39,7 +39,7 @@
                 "type": "felt"
             }
         ],
-        "name": "AssetReference",
+        "name": "BlockchainNamespace",
         "size": 1,
         "type": "struct"
     },
@@ -63,7 +63,7 @@
                 "type": "felt"
             }
         ],
-        "name": "TokenId",
+        "name": "AssetReference",
         "size": 1,
         "type": "struct"
     },
@@ -87,7 +87,7 @@
                 "type": "felt"
             }
         ],
-        "name": "BlockchainNamespace",
+        "name": "TokenId",
         "size": 1,
         "type": "struct"
     },

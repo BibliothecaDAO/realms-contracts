@@ -96,18 +96,6 @@
             {
                 "name": "module_06_addr",
                 "type": "felt"
-            },
-            {
-                "name": "module_07_addr",
-                "type": "felt"
-            },
-            {
-                "name": "module_08_addr",
-                "type": "felt"
-            },
-            {
-                "name": "module_09_addr",
-                "type": "felt"
             }
         ],
         "name": "set_initial_module_addresses",

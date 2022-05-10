@@ -21,6 +21,120 @@
                 "destination": "contracts.settling_game.utils.game_structs.Cost",
                 "type": "alias"
             },
+            "__main__.IArbiter": {
+                "type": "namespace"
+            },
+            "__main__.IArbiter.Args": {
+                "full_name": "__main__.IArbiter.Args",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.IArbiter.BATCH_SET_CONTROLLER_ADDRESSES_SELECTOR": {
+                "type": "const",
+                "value": 916702368142211369629799199523310390189614473996328593184403261912751083335
+            },
+            "__main__.IArbiter.ImplicitArgs": {
+                "full_name": "__main__.IArbiter.ImplicitArgs",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.IArbiter.Return": {
+                "full_name": "__main__.IArbiter.Return",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.IArbiter.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.IArbiter.alloc": {
+                "destination": "starkware.cairo.common.alloc.alloc",
+                "type": "alias"
+            },
+            "__main__.IArbiter.call_contract": {
+                "destination": "starkware.starknet.common.syscalls.call_contract",
+                "type": "alias"
+            },
+            "__main__.IArbiter.delegate_call": {
+                "destination": "starkware.starknet.common.syscalls.delegate_call",
+                "type": "alias"
+            },
+            "__main__.IArbiter.memcpy": {
+                "destination": "starkware.cairo.common.memcpy.memcpy",
+                "type": "alias"
+            },
+            "__main__.IL01_Settling": {
+                "type": "namespace"
+            },
+            "__main__.IL01_Settling.Args": {
+                "full_name": "__main__.IL01_Settling.Args",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.IL01_Settling.GET_TIME_STAKED_SELECTOR": {
+                "type": "const",
+                "value": 1570622911176718650802588052128102294435127696298567002935006393630097097296
+            },
+            "__main__.IL01_Settling.GET_TIME_VAULT_STAKED_SELECTOR": {
+                "type": "const",
+                "value": 1472063800170058114834417791056116454222885393950663004244138336240332701056
+            },
+            "__main__.IL01_Settling.GET_TOTAL_REALMS_SETTLED_SELECTOR": {
+                "type": "const",
+                "value": 1289707691282526749601648191794157068428529565529401135948572644103185618348
+            },
+            "__main__.IL01_Settling.ImplicitArgs": {
+                "full_name": "__main__.IL01_Settling.ImplicitArgs",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.IL01_Settling.RETURN_APPROVED_SELECTOR": {
+                "type": "const",
+                "value": 1696393834424446266737846438050425074554366368617579860239286081289242625946
+            },
+            "__main__.IL01_Settling.Return": {
+                "full_name": "__main__.IL01_Settling.Return",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "__main__.IL01_Settling.SET_TIME_STAKED_SELECTOR": {
+                "type": "const",
+                "value": 441943132134542682419611631511082909681195694539316736784646654217276811866
+            },
+            "__main__.IL01_Settling.SET_TIME_VAULT_STAKED_SELECTOR": {
+                "type": "const",
+                "value": 1229350355438680521784768637891434401617473047952357523000053267088577912296
+            },
+            "__main__.IL01_Settling.SET_TOTAL_REALMS_SETTLED_SELECTOR": {
+                "type": "const",
+                "value": 189328279677770191190421298426055950911943277770581767152301139682792609358
+            },
+            "__main__.IL01_Settling.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "__main__.IL01_Settling.alloc": {
+                "destination": "starkware.cairo.common.alloc.alloc",
+                "type": "alias"
+            },
+            "__main__.IL01_Settling.call_contract": {
+                "destination": "starkware.starknet.common.syscalls.call_contract",
+                "type": "alias"
+            },
+            "__main__.IL01_Settling.delegate_call": {
+                "destination": "starkware.starknet.common.syscalls.delegate_call",
+                "type": "alias"
+            },
+            "__main__.IL01_Settling.memcpy": {
+                "destination": "starkware.cairo.common.memcpy.memcpy",
+                "type": "alias"
+            },
             "__main__.IL02_Resources": {
                 "type": "namespace"
             },
@@ -132,6 +246,10 @@
                 "type": "const",
                 "value": 902406430682185101016678531694377858812957816510691735307102538004278029858
             },
+            "__main__.IL04_Calculator.CALCULATE_HAPPINESS_SELECTOR": {
+                "type": "const",
+                "value": 440523448443277856138180492029538049042453393845331593620375685319706977494
+            },
             "__main__.IL04_Calculator.CALCULATE_WONDER_TAX_SELECTOR": {
                 "type": "const",
                 "value": 676042765968943389474196736995275897398091804123611900457706579447525899029
@@ -177,6 +295,30 @@
                 "size": 0,
                 "type": "struct"
             },
+            "__main__.IL05_Wonders.BATCH_SET_TAX_POOL_SELECTOR": {
+                "type": "const",
+                "value": 188470454511296365593467231442958197113009652994894518546751637461550376399
+            },
+            "__main__.IL05_Wonders.GET_LAST_UPDATED_EPOCH_SELECTOR": {
+                "type": "const",
+                "value": 1556984439835137195844489235557437658801201853553775686976232446091573063367
+            },
+            "__main__.IL05_Wonders.GET_TAX_POOL_SELECTOR": {
+                "type": "const",
+                "value": 261835805975903703514027420891512962376269185512298392037641532215870576319
+            },
+            "__main__.IL05_Wonders.GET_TOTAL_WONDERS_STAKED_SELECTOR": {
+                "type": "const",
+                "value": 95040850110566052058272773696022720919740118686426041969397445345307709601
+            },
+            "__main__.IL05_Wonders.GET_WONDER_EPOCH_UPKEEP_SELECTOR": {
+                "type": "const",
+                "value": 1608664273664816447840747725423205302507015139971892772812654902787593654462
+            },
+            "__main__.IL05_Wonders.GET_WONDER_ID_STAKED_SELECTOR": {
+                "type": "const",
+                "value": 1425105680265072640137222328189513382060102398970133361812181432919033097635
+            },
             "__main__.IL05_Wonders.ImplicitArgs": {
                 "full_name": "__main__.IL05_Wonders.ImplicitArgs",
                 "members": {},
@@ -188,6 +330,26 @@
                 "members": {},
                 "size": 0,
                 "type": "struct"
+            },
+            "__main__.IL05_Wonders.SET_LAST_UPDATED_EPOCH_SELECTOR": {
+                "type": "const",
+                "value": 800775010025925920568296400895454513498735292914171303862375550088139058784
+            },
+            "__main__.IL05_Wonders.SET_TAX_POOL_SELECTOR": {
+                "type": "const",
+                "value": 135824034184227507949382341777062066039658606395595749763861856977675459340
+            },
+            "__main__.IL05_Wonders.SET_TOTAL_WONDERS_STAKED_SELECTOR": {
+                "type": "const",
+                "value": 656148850882325767221537425276404408598784463292287414636506902595238933451
+            },
+            "__main__.IL05_Wonders.SET_WONDER_EPOCH_UPKEEP_SELECTOR": {
+                "type": "const",
+                "value": 796798953900853276434661819861784943684772155369012106043069315593070005109
+            },
+            "__main__.IL05_Wonders.SET_WONDER_ID_STAKED_SELECTOR": {
+                "type": "const",
+                "value": 1784634550803670032633371435675316033697602003585503545090957777929260364296
             },
             "__main__.IL05_Wonders.SIZEOF_LOCALS": {
                 "type": "const",
@@ -294,327 +456,6 @@
                 "destination": "starkware.cairo.common.memcpy.memcpy",
                 "type": "alias"
             },
-            "__main__.IS01_Settling": {
-                "type": "namespace"
-            },
-            "__main__.IS01_Settling.Args": {
-                "full_name": "__main__.IS01_Settling.Args",
-                "members": {},
-                "size": 0,
-                "type": "struct"
-            },
-            "__main__.IS01_Settling.GET_TIME_STAKED_SELECTOR": {
-                "type": "const",
-                "value": 1570622911176718650802588052128102294435127696298567002935006393630097097296
-            },
-            "__main__.IS01_Settling.GET_TIME_VAULT_STAKED_SELECTOR": {
-                "type": "const",
-                "value": 1472063800170058114834417791056116454222885393950663004244138336240332701056
-            },
-            "__main__.IS01_Settling.GET_TOTAL_REALMS_SETTLED_SELECTOR": {
-                "type": "const",
-                "value": 1289707691282526749601648191794157068428529565529401135948572644103185618348
-            },
-            "__main__.IS01_Settling.ImplicitArgs": {
-                "full_name": "__main__.IS01_Settling.ImplicitArgs",
-                "members": {},
-                "size": 0,
-                "type": "struct"
-            },
-            "__main__.IS01_Settling.RETURN_APPROVED_SELECTOR": {
-                "type": "const",
-                "value": 1696393834424446266737846438050425074554366368617579860239286081289242625946
-            },
-            "__main__.IS01_Settling.Return": {
-                "full_name": "__main__.IS01_Settling.Return",
-                "members": {},
-                "size": 0,
-                "type": "struct"
-            },
-            "__main__.IS01_Settling.SET_TIME_STAKED_SELECTOR": {
-                "type": "const",
-                "value": 441943132134542682419611631511082909681195694539316736784646654217276811866
-            },
-            "__main__.IS01_Settling.SET_TIME_VAULT_STAKED_SELECTOR": {
-                "type": "const",
-                "value": 1229350355438680521784768637891434401617473047952357523000053267088577912296
-            },
-            "__main__.IS01_Settling.SET_TOTAL_REALMS_SETTLED_SELECTOR": {
-                "type": "const",
-                "value": 189328279677770191190421298426055950911943277770581767152301139682792609358
-            },
-            "__main__.IS01_Settling.SIZEOF_LOCALS": {
-                "type": "const",
-                "value": 0
-            },
-            "__main__.IS01_Settling.alloc": {
-                "destination": "starkware.cairo.common.alloc.alloc",
-                "type": "alias"
-            },
-            "__main__.IS01_Settling.call_contract": {
-                "destination": "starkware.starknet.common.syscalls.call_contract",
-                "type": "alias"
-            },
-            "__main__.IS01_Settling.delegate_call": {
-                "destination": "starkware.starknet.common.syscalls.delegate_call",
-                "type": "alias"
-            },
-            "__main__.IS01_Settling.memcpy": {
-                "destination": "starkware.cairo.common.memcpy.memcpy",
-                "type": "alias"
-            },
-            "__main__.IS02_Resources": {
-                "type": "namespace"
-            },
-            "__main__.IS02_Resources.Args": {
-                "full_name": "__main__.IS02_Resources.Args",
-                "members": {},
-                "size": 0,
-                "type": "struct"
-            },
-            "__main__.IS02_Resources.GET_RESOURCE_LEVEL_SELECTOR": {
-                "type": "const",
-                "value": 1149107753325219705879250662326081727472252721501772240122618592681448223907
-            },
-            "__main__.IS02_Resources.GET_RESOURCE_UPGRADE_COST_SELECTOR": {
-                "type": "const",
-                "value": 916236982850433202338707750245430013172545047392936926571300331696790009240
-            },
-            "__main__.IS02_Resources.ImplicitArgs": {
-                "full_name": "__main__.IS02_Resources.ImplicitArgs",
-                "members": {},
-                "size": 0,
-                "type": "struct"
-            },
-            "__main__.IS02_Resources.Return": {
-                "full_name": "__main__.IS02_Resources.Return",
-                "members": {},
-                "size": 0,
-                "type": "struct"
-            },
-            "__main__.IS02_Resources.SET_RESOURCE_LEVEL_SELECTOR": {
-                "type": "const",
-                "value": 1604127680997416665385195998928852199566641217623140655471371713088091196076
-            },
-            "__main__.IS02_Resources.SIZEOF_LOCALS": {
-                "type": "const",
-                "value": 0
-            },
-            "__main__.IS02_Resources.alloc": {
-                "destination": "starkware.cairo.common.alloc.alloc",
-                "type": "alias"
-            },
-            "__main__.IS02_Resources.call_contract": {
-                "destination": "starkware.starknet.common.syscalls.call_contract",
-                "type": "alias"
-            },
-            "__main__.IS02_Resources.delegate_call": {
-                "destination": "starkware.starknet.common.syscalls.delegate_call",
-                "type": "alias"
-            },
-            "__main__.IS02_Resources.memcpy": {
-                "destination": "starkware.cairo.common.memcpy.memcpy",
-                "type": "alias"
-            },
-            "__main__.IS03_Buildings": {
-                "type": "namespace"
-            },
-            "__main__.IS03_Buildings.Args": {
-                "full_name": "__main__.IS03_Buildings.Args",
-                "members": {},
-                "size": 0,
-                "type": "struct"
-            },
-            "__main__.IS03_Buildings.GET_BUILDING_COST_SELECTOR": {
-                "type": "const",
-                "value": 384233913515646994454365747905211577267277977626826533709748325189405264002
-            },
-            "__main__.IS03_Buildings.GET_REALM_BUILDINGS_SELECTOR": {
-                "type": "const",
-                "value": 265824653374470787403848927816442750437308827635540061292644923340191473658
-            },
-            "__main__.IS03_Buildings.GET_REALM_BUILDING_BY_ID_SELECTOR": {
-                "type": "const",
-                "value": 1798249676273766883406465876768460187725528603246090922697875645882280368317
-            },
-            "__main__.IS03_Buildings.ImplicitArgs": {
-                "full_name": "__main__.IS03_Buildings.ImplicitArgs",
-                "members": {},
-                "size": 0,
-                "type": "struct"
-            },
-            "__main__.IS03_Buildings.Return": {
-                "full_name": "__main__.IS03_Buildings.Return",
-                "members": {},
-                "size": 0,
-                "type": "struct"
-            },
-            "__main__.IS03_Buildings.SET_REALM_BUILDINGS_SELECTOR": {
-                "type": "const",
-                "value": 1807575394638220803210546243884278935695575269282047266620272597834000999818
-            },
-            "__main__.IS03_Buildings.SIZEOF_LOCALS": {
-                "type": "const",
-                "value": 0
-            },
-            "__main__.IS03_Buildings.alloc": {
-                "destination": "starkware.cairo.common.alloc.alloc",
-                "type": "alias"
-            },
-            "__main__.IS03_Buildings.call_contract": {
-                "destination": "starkware.starknet.common.syscalls.call_contract",
-                "type": "alias"
-            },
-            "__main__.IS03_Buildings.delegate_call": {
-                "destination": "starkware.starknet.common.syscalls.delegate_call",
-                "type": "alias"
-            },
-            "__main__.IS03_Buildings.memcpy": {
-                "destination": "starkware.cairo.common.memcpy.memcpy",
-                "type": "alias"
-            },
-            "__main__.IS05_Wonders": {
-                "type": "namespace"
-            },
-            "__main__.IS05_Wonders.Args": {
-                "full_name": "__main__.IS05_Wonders.Args",
-                "members": {},
-                "size": 0,
-                "type": "struct"
-            },
-            "__main__.IS05_Wonders.BATCH_SET_TAX_POOL_SELECTOR": {
-                "type": "const",
-                "value": 188470454511296365593467231442958197113009652994894518546751637461550376399
-            },
-            "__main__.IS05_Wonders.GET_LAST_UPDATED_EPOCH_SELECTOR": {
-                "type": "const",
-                "value": 1556984439835137195844489235557437658801201853553775686976232446091573063367
-            },
-            "__main__.IS05_Wonders.GET_TAX_POOL_SELECTOR": {
-                "type": "const",
-                "value": 261835805975903703514027420891512962376269185512298392037641532215870576319
-            },
-            "__main__.IS05_Wonders.GET_TOTAL_WONDERS_STAKED_SELECTOR": {
-                "type": "const",
-                "value": 95040850110566052058272773696022720919740118686426041969397445345307709601
-            },
-            "__main__.IS05_Wonders.GET_WONDER_EPOCH_UPKEEP_SELECTOR": {
-                "type": "const",
-                "value": 1608664273664816447840747725423205302507015139971892772812654902787593654462
-            },
-            "__main__.IS05_Wonders.GET_WONDER_ID_STAKED_SELECTOR": {
-                "type": "const",
-                "value": 1425105680265072640137222328189513382060102398970133361812181432919033097635
-            },
-            "__main__.IS05_Wonders.ImplicitArgs": {
-                "full_name": "__main__.IS05_Wonders.ImplicitArgs",
-                "members": {},
-                "size": 0,
-                "type": "struct"
-            },
-            "__main__.IS05_Wonders.Return": {
-                "full_name": "__main__.IS05_Wonders.Return",
-                "members": {},
-                "size": 0,
-                "type": "struct"
-            },
-            "__main__.IS05_Wonders.SET_LAST_UPDATED_EPOCH_SELECTOR": {
-                "type": "const",
-                "value": 800775010025925920568296400895454513498735292914171303862375550088139058784
-            },
-            "__main__.IS05_Wonders.SET_TAX_POOL_SELECTOR": {
-                "type": "const",
-                "value": 135824034184227507949382341777062066039658606395595749763861856977675459340
-            },
-            "__main__.IS05_Wonders.SET_TOTAL_WONDERS_STAKED_SELECTOR": {
-                "type": "const",
-                "value": 656148850882325767221537425276404408598784463292287414636506902595238933451
-            },
-            "__main__.IS05_Wonders.SET_WONDER_EPOCH_UPKEEP_SELECTOR": {
-                "type": "const",
-                "value": 796798953900853276434661819861784943684772155369012106043069315593070005109
-            },
-            "__main__.IS05_Wonders.SET_WONDER_ID_STAKED_SELECTOR": {
-                "type": "const",
-                "value": 1784634550803670032633371435675316033697602003585503545090957777929260364296
-            },
-            "__main__.IS05_Wonders.SIZEOF_LOCALS": {
-                "type": "const",
-                "value": 0
-            },
-            "__main__.IS05_Wonders.alloc": {
-                "destination": "starkware.cairo.common.alloc.alloc",
-                "type": "alias"
-            },
-            "__main__.IS05_Wonders.call_contract": {
-                "destination": "starkware.starknet.common.syscalls.call_contract",
-                "type": "alias"
-            },
-            "__main__.IS05_Wonders.delegate_call": {
-                "destination": "starkware.starknet.common.syscalls.delegate_call",
-                "type": "alias"
-            },
-            "__main__.IS05_Wonders.memcpy": {
-                "destination": "starkware.cairo.common.memcpy.memcpy",
-                "type": "alias"
-            },
-            "__main__.IS06_Combat": {
-                "type": "namespace"
-            },
-            "__main__.IS06_Combat.Args": {
-                "full_name": "__main__.IS06_Combat.Args",
-                "members": {},
-                "size": 0,
-                "type": "struct"
-            },
-            "__main__.IS06_Combat.GET_REALM_COMBAT_DATA_SELECTOR": {
-                "type": "const",
-                "value": 147211941305235602054475313680206545950876374768696521178472131157405746710
-            },
-            "__main__.IS06_Combat.GET_TROOP_COST_SELECTOR": {
-                "type": "const",
-                "value": 1142262527007193128860607965029190681394523498545858640813463529025198839576
-            },
-            "__main__.IS06_Combat.ImplicitArgs": {
-                "full_name": "__main__.IS06_Combat.ImplicitArgs",
-                "members": {},
-                "size": 0,
-                "type": "struct"
-            },
-            "__main__.IS06_Combat.Return": {
-                "full_name": "__main__.IS06_Combat.Return",
-                "members": {},
-                "size": 0,
-                "type": "struct"
-            },
-            "__main__.IS06_Combat.SET_REALM_COMBAT_DATA_SELECTOR": {
-                "type": "const",
-                "value": 810431950465111029936988278624809212681851778809361770046587246582615533096
-            },
-            "__main__.IS06_Combat.SIZEOF_LOCALS": {
-                "type": "const",
-                "value": 0
-            },
-            "__main__.IS06_Combat.UPDATE_SQUAD_IN_REALM_SELECTOR": {
-                "type": "const",
-                "value": 272170903425773598357172794034305105861777223758593354801130690827978640551
-            },
-            "__main__.IS06_Combat.alloc": {
-                "destination": "starkware.cairo.common.alloc.alloc",
-                "type": "alias"
-            },
-            "__main__.IS06_Combat.call_contract": {
-                "destination": "starkware.starknet.common.syscalls.call_contract",
-                "type": "alias"
-            },
-            "__main__.IS06_Combat.delegate_call": {
-                "destination": "starkware.starknet.common.syscalls.delegate_call",
-                "type": "alias"
-            },
-            "__main__.IS06_Combat.memcpy": {
-                "destination": "starkware.cairo.common.memcpy.memcpy",
-                "type": "alias"
-            },
             "__main__.RealmBuildings": {
                 "destination": "contracts.settling_game.utils.game_structs.RealmBuildings",
                 "type": "alias"
@@ -630,6 +471,426 @@
             "__main__.Uint256": {
                 "destination": "starkware.cairo.common.uint256.Uint256",
                 "type": "alias"
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap": {
+                "type": "namespace"
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Amphitheater": {
+                "type": "const",
+                "value": 2
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.ArcherTower": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Architect": {
+                "type": "const",
+                "value": 1
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Args": {
+                "full_name": "contracts.settling_game.utils.game_structs.ArmyCap.Args",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Barracks": {
+                "type": "const",
+                "value": 1
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Castle": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Dock": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Fairgrounds": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Farms": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Fishmonger": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Granary": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.GrandMarket": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Guild": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Hamlet": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Housing": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.ImplicitArgs": {
+                "full_name": "contracts.settling_game.utils.game_structs.ArmyCap.ImplicitArgs",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.MageTower": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.OfficerAcademy": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.ParadeGrounds": {
+                "type": "const",
+                "value": 2
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Return": {
+                "full_name": "contracts.settling_game.utils.game_structs.ArmyCap.Return",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.RoyalReserve": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.School": {
+                "type": "const",
+                "value": 3
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.TradeOffice": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture": {
+                "type": "namespace"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Amphitheater": {
+                "type": "const",
+                "value": 2
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.ArcherTower": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Architect": {
+                "type": "const",
+                "value": 1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Args": {
+                "full_name": "contracts.settling_game.utils.game_structs.BuildingsCulture.Args",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Barracks": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Castle": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Dock": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Fairgrounds": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Farms": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Fishmonger": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Granary": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.GrandMarket": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Guild": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Hamlet": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Housing": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.ImplicitArgs": {
+                "full_name": "contracts.settling_game.utils.game_structs.BuildingsCulture.ImplicitArgs",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.MageTower": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.OfficerAcademy": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.ParadeGrounds": {
+                "type": "const",
+                "value": 1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Return": {
+                "full_name": "contracts.settling_game.utils.game_structs.BuildingsCulture.Return",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.RoyalReserve": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.School": {
+                "type": "const",
+                "value": 3
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.TradeOffice": {
+                "type": "const",
+                "value": 1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood": {
+                "type": "namespace"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Amphitheater": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.ArcherTower": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Architect": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Args": {
+                "full_name": "contracts.settling_game.utils.game_structs.BuildingsFood.Args",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Barracks": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Castle": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Dock": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Fairgrounds": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Farms": {
+                "type": "const",
+                "value": 1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Fishmonger": {
+                "type": "const",
+                "value": 2
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Granary": {
+                "type": "const",
+                "value": 3
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.GrandMarket": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Guild": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Hamlet": {
+                "type": "const",
+                "value": 1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Housing": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.ImplicitArgs": {
+                "full_name": "contracts.settling_game.utils.game_structs.BuildingsFood.ImplicitArgs",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.MageTower": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.OfficerAcademy": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.ParadeGrounds": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Return": {
+                "full_name": "contracts.settling_game.utils.game_structs.BuildingsFood.Return",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.RoyalReserve": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.School": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.TradeOffice": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation": {
+                "type": "namespace"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Amphitheater": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.ArcherTower": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Architect": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Args": {
+                "full_name": "contracts.settling_game.utils.game_structs.BuildingsPopulation.Args",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Barracks": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Castle": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Dock": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Fairgrounds": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Farms": {
+                "type": "const",
+                "value": 10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Fishmonger": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Granary": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.GrandMarket": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Guild": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Hamlet": {
+                "type": "const",
+                "value": 35
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Housing": {
+                "type": "const",
+                "value": 75
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.ImplicitArgs": {
+                "full_name": "contracts.settling_game.utils.game_structs.BuildingsPopulation.ImplicitArgs",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.MageTower": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.OfficerAcademy": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.ParadeGrounds": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Return": {
+                "full_name": "contracts.settling_game.utils.game_structs.BuildingsPopulation.Return",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.RoyalReserve": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.School": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.TradeOffice": {
+                "type": "const",
+                "value": -10
             },
             "contracts.settling_game.utils.game_structs.Cost": {
                 "full_name": "contracts.settling_game.utils.game_structs.Cost",
@@ -724,49 +985,29 @@
             },
             "contracts.settling_game.utils.game_structs.ModuleIds.L02_Resources": {
                 "type": "const",
-                "value": 3
+                "value": 2
             },
             "contracts.settling_game.utils.game_structs.ModuleIds.L03_Buildings": {
                 "type": "const",
-                "value": 5
+                "value": 3
             },
             "contracts.settling_game.utils.game_structs.ModuleIds.L04_Calculator": {
                 "type": "const",
-                "value": 7
+                "value": 4
             },
             "contracts.settling_game.utils.game_structs.ModuleIds.L05_Wonders": {
                 "type": "const",
-                "value": 8
+                "value": 5
             },
             "contracts.settling_game.utils.game_structs.ModuleIds.L06_Combat": {
                 "type": "const",
-                "value": 11
+                "value": 6
             },
             "contracts.settling_game.utils.game_structs.ModuleIds.Return": {
                 "full_name": "contracts.settling_game.utils.game_structs.ModuleIds.Return",
                 "members": {},
                 "size": 0,
                 "type": "struct"
-            },
-            "contracts.settling_game.utils.game_structs.ModuleIds.S01_Settling": {
-                "type": "const",
-                "value": 2
-            },
-            "contracts.settling_game.utils.game_structs.ModuleIds.S02_Resources": {
-                "type": "const",
-                "value": 4
-            },
-            "contracts.settling_game.utils.game_structs.ModuleIds.S03_Buildings": {
-                "type": "const",
-                "value": 6
-            },
-            "contracts.settling_game.utils.game_structs.ModuleIds.S05_Wonders": {
-                "type": "const",
-                "value": 9
-            },
-            "contracts.settling_game.utils.game_structs.ModuleIds.S06_Combat": {
-                "type": "const",
-                "value": 12
             },
             "contracts.settling_game.utils.game_structs.ModuleIds.SIZEOF_LOCALS": {
                 "type": "const",
@@ -814,13 +1055,21 @@
                 "type": "const",
                 "value": 2
             },
+            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.ArcherTower": {
+                "type": "const",
+                "value": 2
+            },
+            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Architect": {
+                "type": "const",
+                "value": 2
+            },
             "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Args": {
                 "full_name": "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Args",
                 "members": {},
                 "size": 0,
                 "type": "struct"
             },
-            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Carpenter": {
+            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Barracks": {
                 "type": "const",
                 "value": 2
             },
@@ -831,10 +1080,6 @@
             "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Dock": {
                 "type": "const",
                 "value": 3
-            },
-            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.ExplorersGuild": {
-                "type": "const",
-                "value": 2
             },
             "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Fairgrounds": {
                 "type": "const",
@@ -874,7 +1119,7 @@
                 "size": 0,
                 "type": "struct"
             },
-            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.LogisticsOffice": {
+            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.MageTower": {
                 "type": "const",
                 "value": 2
             },
@@ -883,10 +1128,6 @@
                 "value": 1
             },
             "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.ParadeGrounds": {
-                "type": "const",
-                "value": 2
-            },
-            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.ResourceFacility": {
                 "type": "const",
                 "value": 2
             },
@@ -908,7 +1149,7 @@
                 "type": "const",
                 "value": 2
             },
-            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Symposium": {
+            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.TradeOffice": {
                 "type": "const",
                 "value": 2
             },
@@ -919,9 +1160,17 @@
                         "cairo_type": "felt",
                         "offset": 8
                     },
-                    "Carpenter": {
+                    "ArcherTower": {
                         "cairo_type": "felt",
                         "offset": 9
+                    },
+                    "Architect": {
+                        "cairo_type": "felt",
+                        "offset": 13
+                    },
+                    "Barracks": {
+                        "cairo_type": "felt",
+                        "offset": 15
                     },
                     "Castle": {
                         "cairo_type": "felt",
@@ -930,10 +1179,6 @@
                     "Dock": {
                         "cairo_type": "felt",
                         "offset": 16
-                    },
-                    "ExplorersGuild": {
-                        "cairo_type": "felt",
-                        "offset": 13
                     },
                     "Fairgrounds": {
                         "cairo_type": "felt",
@@ -967,9 +1212,9 @@
                         "cairo_type": "felt",
                         "offset": 7
                     },
-                    "LogisticsOffice": {
+                    "MageTower": {
                         "cairo_type": "felt",
-                        "offset": 12
+                        "offset": 11
                     },
                     "OfficerAcademy": {
                         "cairo_type": "felt",
@@ -979,10 +1224,6 @@
                         "cairo_type": "felt",
                         "offset": 14
                     },
-                    "ResourceFacility": {
-                        "cairo_type": "felt",
-                        "offset": 15
-                    },
                     "RoyalReserve": {
                         "cairo_type": "felt",
                         "offset": 1
@@ -991,9 +1232,9 @@
                         "cairo_type": "felt",
                         "offset": 10
                     },
-                    "Symposium": {
+                    "TradeOffice": {
                         "cairo_type": "felt",
-                        "offset": 11
+                        "offset": 12
                     }
                 },
                 "size": 20,
@@ -1006,15 +1247,23 @@
                 "type": "const",
                 "value": 9
             },
+            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.ArcherTower": {
+                "type": "const",
+                "value": 10
+            },
+            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Architect": {
+                "type": "const",
+                "value": 14
+            },
             "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Args": {
                 "full_name": "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Args",
                 "members": {},
                 "size": 0,
                 "type": "struct"
             },
-            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Carpenter": {
+            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Barracks": {
                 "type": "const",
-                "value": 10
+                "value": 16
             },
             "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Castle": {
                 "type": "const",
@@ -1023,10 +1272,6 @@
             "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Dock": {
                 "type": "const",
                 "value": 17
-            },
-            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.ExplorersGuild": {
-                "type": "const",
-                "value": 14
             },
             "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Fairgrounds": {
                 "type": "const",
@@ -1066,9 +1311,9 @@
                 "size": 0,
                 "type": "struct"
             },
-            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.LogisticsOffice": {
+            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.MageTower": {
                 "type": "const",
-                "value": 13
+                "value": 12
             },
             "contracts.settling_game.utils.game_structs.RealmBuildingsIds.OfficerAcademy": {
                 "type": "const",
@@ -1077,10 +1322,6 @@
             "contracts.settling_game.utils.game_structs.RealmBuildingsIds.ParadeGrounds": {
                 "type": "const",
                 "value": 15
-            },
-            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.ResourceFacility": {
-                "type": "const",
-                "value": 16
             },
             "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Return": {
                 "full_name": "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Return",
@@ -1100,9 +1341,9 @@
                 "type": "const",
                 "value": 11
             },
-            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Symposium": {
+            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.TradeOffice": {
                 "type": "const",
-                "value": 12
+                "value": 13
             },
             "contracts.settling_game.utils.game_structs.RealmCombatData": {
                 "full_name": "contracts.settling_game.utils.game_structs.RealmCombatData",

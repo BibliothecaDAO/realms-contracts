@@ -27527,6 +27527,426 @@
                 "destination": "starkware.cairo.common.math.unsigned_div_rem",
                 "type": "alias"
             },
+            "contracts.settling_game.utils.game_structs.ArmyCap": {
+                "type": "namespace"
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Amphitheater": {
+                "type": "const",
+                "value": 2
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.ArcherTower": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Architect": {
+                "type": "const",
+                "value": 1
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Args": {
+                "full_name": "contracts.settling_game.utils.game_structs.ArmyCap.Args",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Barracks": {
+                "type": "const",
+                "value": 1
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Castle": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Dock": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Fairgrounds": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Farms": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Fishmonger": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Granary": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.GrandMarket": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Guild": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Hamlet": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Housing": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.ImplicitArgs": {
+                "full_name": "contracts.settling_game.utils.game_structs.ArmyCap.ImplicitArgs",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.MageTower": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.OfficerAcademy": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.ParadeGrounds": {
+                "type": "const",
+                "value": 2
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.Return": {
+                "full_name": "contracts.settling_game.utils.game_structs.ArmyCap.Return",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.RoyalReserve": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.School": {
+                "type": "const",
+                "value": 3
+            },
+            "contracts.settling_game.utils.game_structs.ArmyCap.TradeOffice": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture": {
+                "type": "namespace"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Amphitheater": {
+                "type": "const",
+                "value": 2
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.ArcherTower": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Architect": {
+                "type": "const",
+                "value": 1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Args": {
+                "full_name": "contracts.settling_game.utils.game_structs.BuildingsCulture.Args",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Barracks": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Castle": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Dock": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Fairgrounds": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Farms": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Fishmonger": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Granary": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.GrandMarket": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Guild": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Hamlet": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Housing": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.ImplicitArgs": {
+                "full_name": "contracts.settling_game.utils.game_structs.BuildingsCulture.ImplicitArgs",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.MageTower": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.OfficerAcademy": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.ParadeGrounds": {
+                "type": "const",
+                "value": 1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.Return": {
+                "full_name": "contracts.settling_game.utils.game_structs.BuildingsCulture.Return",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.RoyalReserve": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.School": {
+                "type": "const",
+                "value": 3
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsCulture.TradeOffice": {
+                "type": "const",
+                "value": 1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood": {
+                "type": "namespace"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Amphitheater": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.ArcherTower": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Architect": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Args": {
+                "full_name": "contracts.settling_game.utils.game_structs.BuildingsFood.Args",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Barracks": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Castle": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Dock": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Fairgrounds": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Farms": {
+                "type": "const",
+                "value": 1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Fishmonger": {
+                "type": "const",
+                "value": 2
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Granary": {
+                "type": "const",
+                "value": 3
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.GrandMarket": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Guild": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Hamlet": {
+                "type": "const",
+                "value": 1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Housing": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.ImplicitArgs": {
+                "full_name": "contracts.settling_game.utils.game_structs.BuildingsFood.ImplicitArgs",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.MageTower": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.OfficerAcademy": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.ParadeGrounds": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.Return": {
+                "full_name": "contracts.settling_game.utils.game_structs.BuildingsFood.Return",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.RoyalReserve": {
+                "type": "const",
+                "value": 5
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.School": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsFood.TradeOffice": {
+                "type": "const",
+                "value": -1
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation": {
+                "type": "namespace"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Amphitheater": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.ArcherTower": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Architect": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Args": {
+                "full_name": "contracts.settling_game.utils.game_structs.BuildingsPopulation.Args",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Barracks": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Castle": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Dock": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Fairgrounds": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Farms": {
+                "type": "const",
+                "value": 10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Fishmonger": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Granary": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.GrandMarket": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Guild": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Hamlet": {
+                "type": "const",
+                "value": 35
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Housing": {
+                "type": "const",
+                "value": 75
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.ImplicitArgs": {
+                "full_name": "contracts.settling_game.utils.game_structs.BuildingsPopulation.ImplicitArgs",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.MageTower": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.OfficerAcademy": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.ParadeGrounds": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.Return": {
+                "full_name": "contracts.settling_game.utils.game_structs.BuildingsPopulation.Return",
+                "members": {},
+                "size": 0,
+                "type": "struct"
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.RoyalReserve": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.SIZEOF_LOCALS": {
+                "type": "const",
+                "value": 0
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.School": {
+                "type": "const",
+                "value": -10
+            },
+            "contracts.settling_game.utils.game_structs.BuildingsPopulation.TradeOffice": {
+                "type": "const",
+                "value": -10
+            },
             "contracts.settling_game.utils.game_structs.Cost": {
                 "full_name": "contracts.settling_game.utils.game_structs.Cost",
                 "members": {
@@ -27620,49 +28040,29 @@
             },
             "contracts.settling_game.utils.game_structs.ModuleIds.L02_Resources": {
                 "type": "const",
-                "value": 3
+                "value": 2
             },
             "contracts.settling_game.utils.game_structs.ModuleIds.L03_Buildings": {
                 "type": "const",
-                "value": 5
+                "value": 3
             },
             "contracts.settling_game.utils.game_structs.ModuleIds.L04_Calculator": {
                 "type": "const",
-                "value": 7
+                "value": 4
             },
             "contracts.settling_game.utils.game_structs.ModuleIds.L05_Wonders": {
                 "type": "const",
-                "value": 8
+                "value": 5
             },
             "contracts.settling_game.utils.game_structs.ModuleIds.L06_Combat": {
                 "type": "const",
-                "value": 11
+                "value": 6
             },
             "contracts.settling_game.utils.game_structs.ModuleIds.Return": {
                 "full_name": "contracts.settling_game.utils.game_structs.ModuleIds.Return",
                 "members": {},
                 "size": 0,
                 "type": "struct"
-            },
-            "contracts.settling_game.utils.game_structs.ModuleIds.S01_Settling": {
-                "type": "const",
-                "value": 2
-            },
-            "contracts.settling_game.utils.game_structs.ModuleIds.S02_Resources": {
-                "type": "const",
-                "value": 4
-            },
-            "contracts.settling_game.utils.game_structs.ModuleIds.S03_Buildings": {
-                "type": "const",
-                "value": 6
-            },
-            "contracts.settling_game.utils.game_structs.ModuleIds.S05_Wonders": {
-                "type": "const",
-                "value": 9
-            },
-            "contracts.settling_game.utils.game_structs.ModuleIds.S06_Combat": {
-                "type": "const",
-                "value": 12
             },
             "contracts.settling_game.utils.game_structs.ModuleIds.SIZEOF_LOCALS": {
                 "type": "const",
@@ -27710,13 +28110,21 @@
                 "type": "const",
                 "value": 2
             },
+            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.ArcherTower": {
+                "type": "const",
+                "value": 2
+            },
+            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Architect": {
+                "type": "const",
+                "value": 2
+            },
             "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Args": {
                 "full_name": "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Args",
                 "members": {},
                 "size": 0,
                 "type": "struct"
             },
-            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Carpenter": {
+            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Barracks": {
                 "type": "const",
                 "value": 2
             },
@@ -27727,10 +28135,6 @@
             "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Dock": {
                 "type": "const",
                 "value": 3
-            },
-            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.ExplorersGuild": {
-                "type": "const",
-                "value": 2
             },
             "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Fairgrounds": {
                 "type": "const",
@@ -27770,7 +28174,7 @@
                 "size": 0,
                 "type": "struct"
             },
-            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.LogisticsOffice": {
+            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.MageTower": {
                 "type": "const",
                 "value": 2
             },
@@ -27779,10 +28183,6 @@
                 "value": 1
             },
             "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.ParadeGrounds": {
-                "type": "const",
-                "value": 2
-            },
-            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.ResourceFacility": {
                 "type": "const",
                 "value": 2
             },
@@ -27804,7 +28204,7 @@
                 "type": "const",
                 "value": 2
             },
-            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.Symposium": {
+            "contracts.settling_game.utils.game_structs.RealmBuildingLimitTraitsIds.TradeOffice": {
                 "type": "const",
                 "value": 2
             },
@@ -27815,9 +28215,17 @@
                         "cairo_type": "felt",
                         "offset": 8
                     },
-                    "Carpenter": {
+                    "ArcherTower": {
                         "cairo_type": "felt",
                         "offset": 9
+                    },
+                    "Architect": {
+                        "cairo_type": "felt",
+                        "offset": 13
+                    },
+                    "Barracks": {
+                        "cairo_type": "felt",
+                        "offset": 15
                     },
                     "Castle": {
                         "cairo_type": "felt",
@@ -27826,10 +28234,6 @@
                     "Dock": {
                         "cairo_type": "felt",
                         "offset": 16
-                    },
-                    "ExplorersGuild": {
-                        "cairo_type": "felt",
-                        "offset": 13
                     },
                     "Fairgrounds": {
                         "cairo_type": "felt",
@@ -27863,9 +28267,9 @@
                         "cairo_type": "felt",
                         "offset": 7
                     },
-                    "LogisticsOffice": {
+                    "MageTower": {
                         "cairo_type": "felt",
-                        "offset": 12
+                        "offset": 11
                     },
                     "OfficerAcademy": {
                         "cairo_type": "felt",
@@ -27875,10 +28279,6 @@
                         "cairo_type": "felt",
                         "offset": 14
                     },
-                    "ResourceFacility": {
-                        "cairo_type": "felt",
-                        "offset": 15
-                    },
                     "RoyalReserve": {
                         "cairo_type": "felt",
                         "offset": 1
@@ -27887,9 +28287,9 @@
                         "cairo_type": "felt",
                         "offset": 10
                     },
-                    "Symposium": {
+                    "TradeOffice": {
                         "cairo_type": "felt",
-                        "offset": 11
+                        "offset": 12
                     }
                 },
                 "size": 20,
@@ -27902,15 +28302,23 @@
                 "type": "const",
                 "value": 9
             },
+            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.ArcherTower": {
+                "type": "const",
+                "value": 10
+            },
+            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Architect": {
+                "type": "const",
+                "value": 14
+            },
             "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Args": {
                 "full_name": "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Args",
                 "members": {},
                 "size": 0,
                 "type": "struct"
             },
-            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Carpenter": {
+            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Barracks": {
                 "type": "const",
-                "value": 10
+                "value": 16
             },
             "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Castle": {
                 "type": "const",
@@ -27919,10 +28327,6 @@
             "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Dock": {
                 "type": "const",
                 "value": 17
-            },
-            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.ExplorersGuild": {
-                "type": "const",
-                "value": 14
             },
             "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Fairgrounds": {
                 "type": "const",
@@ -27962,9 +28366,9 @@
                 "size": 0,
                 "type": "struct"
             },
-            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.LogisticsOffice": {
+            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.MageTower": {
                 "type": "const",
-                "value": 13
+                "value": 12
             },
             "contracts.settling_game.utils.game_structs.RealmBuildingsIds.OfficerAcademy": {
                 "type": "const",
@@ -27973,10 +28377,6 @@
             "contracts.settling_game.utils.game_structs.RealmBuildingsIds.ParadeGrounds": {
                 "type": "const",
                 "value": 15
-            },
-            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.ResourceFacility": {
-                "type": "const",
-                "value": 16
             },
             "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Return": {
                 "full_name": "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Return",
@@ -27996,9 +28396,9 @@
                 "type": "const",
                 "value": 11
             },
-            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.Symposium": {
+            "contracts.settling_game.utils.game_structs.RealmBuildingsIds.TradeOffice": {
                 "type": "const",
-                "value": 12
+                "value": 13
             },
             "contracts.settling_game.utils.game_structs.RealmCombatData": {
                 "full_name": "contracts.settling_game.utils.game_structs.RealmCombatData",

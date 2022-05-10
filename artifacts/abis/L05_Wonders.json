@@ -17,15 +17,41 @@
         "type": "struct"
     },
     {
+        "data": [
+            {
+                "name": "implementation",
+                "type": "felt"
+            }
+        ],
+        "keys": [],
+        "name": "Upgraded",
+        "type": "event"
+    },
+    {
         "inputs": [
             {
                 "name": "address_of_controller",
                 "type": "felt"
+            },
+            {
+                "name": "proxy_admin",
+                "type": "felt"
             }
         ],
-        "name": "constructor",
+        "name": "initializer",
         "outputs": [],
-        "type": "constructor"
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "new_implementation",
+                "type": "felt"
+            }
+        ],
+        "name": "upgrade",
+        "outputs": [],
+        "type": "function"
     },
     {
         "inputs": [
@@ -62,6 +88,121 @@
         ],
         "name": "claim_wonder_tax",
         "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "epoch",
+                "type": "felt"
+            },
+            {
+                "name": "resource_ids_len",
+                "type": "felt"
+            },
+            {
+                "name": "resource_ids",
+                "type": "Uint256*"
+            },
+            {
+                "name": "amounts_len",
+                "type": "felt"
+            },
+            {
+                "name": "amounts",
+                "type": "felt*"
+            }
+        ],
+        "name": "batch_set_tax_pool",
+        "outputs": [],
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "epoch",
+                "type": "felt"
+            }
+        ],
+        "name": "get_total_wonders_staked",
+        "outputs": [
+            {
+                "name": "amount",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "get_last_updated_epoch",
+        "outputs": [
+            {
+                "name": "epoch",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "token_id",
+                "type": "Uint256"
+            }
+        ],
+        "name": "get_wonder_id_staked",
+        "outputs": [
+            {
+                "name": "wonder_id",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "epoch",
+                "type": "felt"
+            },
+            {
+                "name": "token_id",
+                "type": "Uint256"
+            }
+        ],
+        "name": "get_wonder_epoch_upkeep",
+        "outputs": [
+            {
+                "name": "upkept",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "epoch",
+                "type": "felt"
+            },
+            {
+                "name": "resource_id",
+                "type": "Uint256"
+            }
+        ],
+        "name": "get_tax_pool",
+        "outputs": [
+            {
+                "name": "supply",
+                "type": "felt"
+            }
+        ],
+        "stateMutability": "view",
         "type": "function"
     }
 ]

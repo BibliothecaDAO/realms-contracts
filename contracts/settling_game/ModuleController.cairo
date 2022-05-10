@@ -84,27 +84,14 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     # settling to state
     can_write_to.write(ModuleIds.L01_Settling, ModuleIds.L01_Settling, TRUE)
     
-
     # settling to wonders logic
     can_write_to.write(ModuleIds.L01_Settling, ModuleIds.L05_Wonders, TRUE)
-
-    # # resources logic to state
-    # can_write_to.write(ModuleIds.L02_Resources, ModuleIds.S02_Resources, TRUE)
 
     # # resources logic to settling state
     can_write_to.write(ModuleIds.L02_Resources, ModuleIds.L01_Settling, TRUE)
 
     # # resources logic to wonders state
     can_write_to.write(ModuleIds.L02_Resources, ModuleIds.L05_Wonders, TRUE)
-
-    # # buildings to state
-    # can_write_to.write(ModuleIds.L03_Buildings, ModuleIds.S03_Buildings, TRUE)
-
-    # # wonders logic to state
-    # can_write_to.write(ModuleIds.L05_Wonders, ModuleIds.S05_Wonders, TRUE)
-
-    # # combat logic to state
-    # can_write_to.write(ModuleIds.L06_Combat, ModuleIds.S06_Combat, TRUE)
 
     # Lookup table for NON module contracts
     external_contract_table.write(ExternalContractIds.Lords, _lords_address)
@@ -171,25 +158,13 @@ func set_initial_module_addresses{
     address_of_module_id.write(ModuleIds.L01_Settling, module_01_addr)
     module_id_of_address.write(module_01_addr, ModuleIds.L01_Settling)
 
-    # # # Settling State
-    # address_of_module_id.write(ModuleIds.S01_Settling, module_02_addr)
-    # module_id_of_address.write(module_02_addr, ModuleIds.S01_Settling)
-
     # # # Resources Logic
     address_of_module_id.write(ModuleIds.L02_Resources, module_02_addr)
     module_id_of_address.write(module_02_addr, ModuleIds.L02_Resources)
 
-    # # # Resources State
-    # address_of_module_id.write(ModuleIds.S02_Resources, module_04_addr)
-    # module_id_of_address.write(module_04_addr, ModuleIds.S02_Resources)
-
     # # # Buildings Logic
     address_of_module_id.write(ModuleIds.L03_Buildings, module_03_addr)
     module_id_of_address.write(module_03_addr, ModuleIds.L03_Buildings)
-
-    # # # Buildings State
-    # address_of_module_id.write(ModuleIds.S03_Buildings, module_06_addr)
-    # module_id_of_address.write(module_06_addr, ModuleIds.S03_Buildings)
 
     # # # Calculator Logic
     address_of_module_id.write(ModuleIds.L04_Calculator, module_04_addr)
@@ -199,17 +174,10 @@ func set_initial_module_addresses{
     address_of_module_id.write(ModuleIds.L05_Wonders, module_05_addr)
     module_id_of_address.write(module_05_addr, ModuleIds.L05_Wonders)
 
-    # # # Wonders State
-    # address_of_module_id.write(ModuleIds.S05_Wonders, module_09_addr)
-    # module_id_of_address.write(module_09_addr, ModuleIds.S05_Wonders)
-
     # # # Combat Logic
     address_of_module_id.write(ModuleIds.L06_Combat, module_06_addr)
     module_id_of_address.write(module_06_addr, ModuleIds.L06_Combat)
 
-    # # # Combat State
-    # address_of_module_id.write(ModuleIds.S06_Combat, module_11_addr)
-    # module_id_of_address.write(module_11_addr, ModuleIds.S06_Combat)
     return ()
 end
 

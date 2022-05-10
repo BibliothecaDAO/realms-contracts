@@ -35,7 +35,7 @@ def check_resources(address, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="resources",
+        contract_alias="proxy_resources",
         function="balanceOfBatch",
         arguments=[
             n_resources,
@@ -58,14 +58,14 @@ def check_resources(address, network):
 @click.option("--network", default="goerli")
 def claim_resources(realm_token_id, network):
     """
-    Claim available resources
+    Claim available resources & lords
     """
     config = Config(nile_network=network)
 
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="L02_Resources",
+        contract_alias="proxy_L02_Resources",
         function="claim_resources",
         arguments=[
             realm_token_id,   # uint 1
