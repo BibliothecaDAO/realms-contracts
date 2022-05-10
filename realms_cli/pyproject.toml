@@ -43,20 +43,34 @@ flake8 = "^3.9.2"
 cairo-nile = "^0.5.0"
 [tool.poetry.plugins."nile_plugins"]
 # Here you specify you command name and location <command_name> = <package_method_location>
-"approve_realm" = "realms_cli.player.settle.approve_realm"
-"check_resources" = "realms_cli.player.resources.check_resources"
+# Admin
+"create_pk" = "realms_cli.player.account.create_pk"
+# Lords
 "check_lords" = "realms_cli.player.lords.check_lords"
+# Resources
+"check_resources" = "realms_cli.player.resources.check_resources"
+"mint_resources" = "realms_cli.admin.main.mint_resources"
+# Realms
+"approve_realm" = "realms_cli.player.settle.approve_realm"
 "check_realms" = "realms_cli.player.settle.check_realms"
 "check_s_realms" = "realms_cli.player.settle.check_s_realms"
 "check_owner_of_realm" = "realms_cli.player.settle.check_owner_of_realm"
 "check_owner_of_s_realm" = "realms_cli.player.settle.check_owner_of_s_realm"
 "claim_resources" = "realms_cli.player.resources.claim_resources"
-"create_pk" = "realms_cli.player.account.create_pk"
-"get_unit_cost" = "realms_cli.player.combat.get_unit_cost"
 "mint_realm" = "realms_cli.player.settle.mint_realm"
-"mint_resources" = "realms_cli.admin.main.mint_resources"
 "settle_realm" = "realms_cli.player.settle.settle_realm"
 "set_realm_data" = "realms_cli.player.settle.set_realm_data"
+# Crypts
+"approve_crypt" = "realms_cli.player.crypts.approve_crypt"
+"check_crypts" = "realms_cli.player.crypts.check_crypts"
+"check_s_crypts" = "realms_cli.player.crypts.check_s_crypts"
+"check_owner_of_crypt" = "realms_cli.player.crypts.check_owner_of_crypt"
+"check_owner_of_s_crypt" = "realms_cli.player.crypts.check_owner_of_s_crypt"
+"mint_crypt" = "realms_cli.player.crypts.mint_crypt"
+"settle_crypt" = "realms_cli.player.crypts.settle_crypt"
+"set_crypt_data" = "realms_cli.player.crypts.set_crypt_data"
+# Combat
+"get_unit_cost" = "realms_cli.player.combat.get_unit_cost"
 "build_squad" = "realms_cli.player.combat.build_squad"
 "can_attack" = "realms_cli.player.combat.can_attack"
 "attack_realm" = "realms_cli.player.combat.attack_realm"

@@ -20,6 +20,8 @@ def run(nre):
             strhex_as_strfelt(config.L04_CALCULATOR_ADDRESS),
             strhex_as_strfelt(config.L05_WONDERS_ADDRESS),
             strhex_as_strfelt(config.S05_WONDERS_ADDRESS),
+            strhex_as_strfelt(config.L07_CRYPTS_ADDRESS),
+            strhex_as_strfelt(config.S07_CRYPTS_ADDRESS)
         ],
     )
 
@@ -33,6 +35,18 @@ def run(nre):
             strhex_as_strfelt(config.L01_SETTLING_ADDRESS),
         ]
     )
+
+    # set module access within crypts access
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="s_crypts",
+        function="Set_module_access",
+        arguments=[
+            strhex_as_strfelt(config.L07_CRYPTS_ADDRESS),
+        ]
+    )
+
 
     # set module access within resources contract
     wrapped_send(

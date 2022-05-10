@@ -135,6 +135,17 @@ struct CryptData:
     member name : felt  # string - name of the dungeon
 end
 
+# struct holding the different environments for Crypts and Caverns dungeons
+# we'll use this to determine how many resources to grant during staking
+namespace EnvironmentIds:
+    const DesertOasis = 1
+    const StoneTemple = 2
+    const ForestRuins = 3
+    const MountainDeep = 4
+    const UnderwaterKeep = 5
+    const EmbersGlow = 6
+end
+
 namespace ResourceIds:
     const Wood = 1
     const Stone = 2
@@ -158,10 +169,16 @@ namespace ResourceIds:
     const Adamantine = 20
     const Mithral = 21
     const Dragonhide = 22
+    const DesertGlass = 23
+    const DivineCloth = 24
+    const CuriousSpore = 25
+    const UnrefinedOre = 26
+    const SunkenShekel = 27
+    const Demonhide = 28
     # IMPORTANT: if you're adding to this enum
     # make sure the SIZE is one greater than the
     # maximal value; certain algorithms depend on that
-    const SIZE = 23
+    const SIZE = 29
 end
 
 namespace TroopId:
@@ -274,15 +291,4 @@ struct Cost:
     member packed_ids : felt
     # packed amounts of each resource
     member packed_amounts : felt
-end
-
-# struct holding the different environments for Crypts and Caverns dungeons
-# we'll use this to determine how many resources to grant during staking
-namespace EnvironmentIds:
-    const DesertOasis = 1
-    const StoneTemple = 2
-    const ForestRuins = 3
-    const MountainDeep = 4
-    const UnderwaterKeep = 5
-    const EmbersGlow = 6
 end

@@ -46,6 +46,8 @@ class Config:
         self.REALMS_ADDRESS, _ = safe_load_deployment("realms", self.nile_network)
         self.RESOURCES_ADDRESS, _ = safe_load_deployment("resources", self.nile_network)
         self.S_REALMS_ADDRESS, _ = safe_load_deployment("s_realms", self.nile_network)
+        self.CRYPTS_ADDRESS, _ = safe_load_deployment("crypts", self.nile_network)
+        self.S_CRYPTS_ADDRESS, _ = safe_load_deployment("s_crypts", self.nile_network)
 
         self.L01_SETTLING_ADDRESS, _ = safe_load_deployment("L01_Settling", self.nile_network)
         self.S01_SETTLING_ADDRESS, _ = safe_load_deployment("S01_Settling", self.nile_network)
@@ -58,6 +60,8 @@ class Config:
         self.S05_WONDERS_ADDRESS, _ = safe_load_deployment("S05_Wonders", self.nile_network)
         self.L06_COMBAT_ADDRESS, _ = safe_load_deployment("L06_Combat", self.nile_network)
         self.S06_COMBAT_ADDRESS, _ = safe_load_deployment("S06_Combat", self.nile_network)
+        self.L07_CRYPTS_ADDRESS, _ = safe_load_deployment("L07_Crypts", self.nile_network)
+        self.S07_CRYPTS_ADDRESS, _ = safe_load_deployment("S07_Crypts", self.nile_network)
         self.XOROSHIRO_ADDRESS, _ = safe_load_deployment("xoroshiro128_starstar", self.nile_network)
 
         self.RESOURCES = [

@@ -29,7 +29,9 @@ def run(nre):
                 strhex_as_strfelt(config.RESOURCES_ADDRESS),
                 strhex_as_strfelt(config.REALMS_ADDRESS),
                 strhex_as_strfelt(config.ADMIN_ADDRESS),
-                strhex_as_strfelt(config.S_REALMS_ADDRESS)
+                strhex_as_strfelt(config.S_REALMS_ADDRESS),
+                strhex_as_strfelt(config.CRYPTS_ADDRESS),
+                strhex_as_strfelt(config.S_CRYPTS_ADDRESS)
             ],
     )
 
@@ -137,6 +139,24 @@ def run(nre):
         nre,
         "S05_Wonders",
         alias="S05_Wonders",
+        arguments=[
+            strhex_as_strfelt(config.CONTROLLER_ADDRESS),
+        ]
+    )
+
+    logged_deploy(
+        nre,
+        "S07_Crypts",
+        alias="S07_Crypts",
+        arguments=[
+            strhex_as_strfelt(config.CONTROLLER_ADDRESS),
+        ]
+    )
+
+    logged_deploy(
+        nre,
+        "S07_Crypts",
+        alias="S07_Crypts",
         arguments=[
             strhex_as_strfelt(config.CONTROLLER_ADDRESS),
         ]

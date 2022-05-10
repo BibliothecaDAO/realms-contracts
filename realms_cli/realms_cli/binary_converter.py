@@ -27,6 +27,7 @@ def createOutput(value, chunksize):
     return value
 
 
+# Maps the different attributes of a realm to a series of arra
 def map_realm(value, resources, wonders, orders):
     traits = []
     resourceIds = []
@@ -79,6 +80,34 @@ def map_realm(value, resources, wonders, orders):
     meta = traits + resourceLength + resourceIds + wonder + order
     return decimalToBinary(meta, 8)
 
+
+# Maps the different attributes of a crypt to a series of arra
+# def map_crypt(value, resources, legendary):
+# TODO: Add legendary data for resource generation
+def map_crypt(value, resources):
+    resourceIds = []
+    # legendary = []
+
+    for a in value['attributes']:
+        # add resources
+        if a['trait_type'] == "Resource":
+            for b in resources:
+                if b['trait'] == a['value']:
+                    resourceIds.append(b['id'])
+
+        # check if legendary
+        # if a['trait_type'] == "Legendary":
+        #     for l in legendary:
+        #         if l["yes"] in a['value']:
+        #             legendary.append(1)
+
+    # resource length to help with iteration in app
+    resourceLength = 1
+
+    # concat all together
+    # meta = resourceLength + resourceIds + legendary
+    meta = resourceLength + resourceIds
+    return decimalToBinary(meta, 8)
 
 if __name__ == '__main__':
 
