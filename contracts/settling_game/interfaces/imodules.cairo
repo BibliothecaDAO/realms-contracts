@@ -49,6 +49,8 @@ namespace IModuleController:
         module_07_addr : felt,
         module_08_addr : felt,
         module_09_addr : felt,
+        module_10_addr : felt,
+        module_11_addr : felt,
     ):
     end
 end
@@ -93,7 +95,7 @@ end
 
 @contract_interface
 namespace IS03_Buildings:
-    func get_building_cost(building_id : felt) -> (cost : Cost):
+    func get_building_cost(building_id : felt) -> (cost : Cost, lords : Uint256):
     end
 
     func get_realm_buildings(token_id : Uint256) -> (buildings : felt):

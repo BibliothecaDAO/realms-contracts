@@ -46,6 +46,10 @@ from contracts.settling_game.utils.library import (
     MODULE_initializer,
 )
 
+from contracts.settling_game.utils.constants import (
+    DAY
+)
+
 #
 # events
 #
@@ -60,6 +64,10 @@ func Combat_step(
 ):
 end
 
+@event
+func Build_toops(troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt):
+end
+
 #
 # storage
 #
@@ -70,7 +78,7 @@ end
 
 # a min delay between attacks on a Realm; it can't
 # be attacked again during cooldown
-const ATTACK_COOLDOWN_PERIOD = 86400  # 1 day
+const ATTACK_COOLDOWN_PERIOD = DAY  # 1 day unit
 
 # sets the attack type when initiating combat
 const COMBAT_TYPE_ATTACK_VS_DEFENSE = 1
@@ -96,14 +104,6 @@ end
 # TODO: emit events on each turn so we can display hits in UI
 
 # TODO: take a Realm's wall into consideration when attacking a Realm
-
-# TODO: from convo w/ Loaf:
-# so on a successful raid we need to extract 25% of the vault
-# which i have now added
-# so the owner of the realm can only withdraw after 7 days
-# but a raider can withdraw 25% at a time
-# so we need to add a function to the resources logic that can only be called by the combat module
-# which extracts 25% of the vault
 
 @view
 func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -154,13 +154,21 @@ func build_squad_from_troops_in_realm{
 }(troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt):
     alloc_locals
 
-    # TODO: auth
-
     let (caller) = get_caller_address()
     let (controller) = MODULE_controller_address()
     let (combat_state_address) = IModuleController.get_module_address(
         controller, ModuleIds.S06_Combat
     )
+
+    let (s_realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.S_Realms
+    )
+
+    let (owner) = realms_IERC721.ownerOf(s_realms_address, realm_id)
+
+    with_attr error_message("COMBAT: Not your realm ser"):
+        assert caller = owner
+    end
 
     # get the Cost for every Troop to build
     let (troop_costs : Cost*) = alloc()
@@ -183,9 +191,28 @@ func build_squad_from_troops_in_realm{
     let (squad) = build_squad_from_troops(troop_ids_len, troop_ids)
     IS06_Combat.update_squad_in_realm(combat_state_address, squad, realm_id, slot)
 
-    # TODO: emit an event?
+    Build_toops.emit(troop_ids_len, troop_ids, realm_id, slot)
 
     return ()
+end
+
+@view
+func view_troops{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+    realm_id : Uint256
+) -> (attacking_troops : Squad, defending_troops : Squad):
+    alloc_locals
+    let (controller) = MODULE_controller_address()
+    let (combat_state_address) = IModuleController.get_module_address(
+        controller, module_id=ModuleIds.S06_Combat
+    )
+    let (realm_data : RealmCombatData) = IS06_Combat.get_realm_combat_data(
+        combat_state_address, realm_id
+    )
+
+    let (attacking_squad : Squad) = unpack_squad(realm_data.attacking_squad)
+    let (defending_squad : Squad) = unpack_squad(realm_data.defending_squad)
+
+    return(attacking_squad, defending_squad)
 end
 
 @external
@@ -194,29 +221,27 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
 ) -> (combat_outcome : felt):
     alloc_locals
 
-    # TODO: uncomment this when the creation of the combat contracts in the test suite is proper
-    # with_attr error_message("caller is not attacking realm owner"):
-    #     let (caller) = get_caller_address()
-    #     let (controller_address_) = controller_address.read()
-    #     let (realms_address) = IModuleController.get_realms_address(contract_address=controller_address_)
-    #     let (owner) = realms_IERC721.ownerOf(contract_address=realms_address, token_id=attacking_realm_id)
-    #     assert caller = owner
-    # end
+    let (controller) = MODULE_controller_address()
+    let (caller) = get_caller_address()
 
-    with_attr error_message("cannot initiate combat"):
+    with_attr error_message("COMBAT: Cannot initiate combat"):
         let (can_attack) = Realm_can_be_attacked(attacking_realm_id, defending_realm_id)
+        let (s_realms_address) = IModuleController.get_external_contract_address(
+            controller, ExternalContractIds.S_Realms
+        )
+        let (owner) = realms_IERC721.ownerOf(s_realms_address, attacking_realm_id)
+        assert caller = owner
         assert can_attack = TRUE
     end
 
-    let (controller) = MODULE_controller_address()
     let (combat_state_address) = IModuleController.get_module_address(
         controller, module_id=ModuleIds.S06_Combat
     )
     let (attacking_realm_data : RealmCombatData) = IS06_Combat.get_realm_combat_data(
-        controller, attacking_realm_id
+        combat_state_address, attacking_realm_id
     )
     let (defending_realm_data : RealmCombatData) = IS06_Combat.get_realm_combat_data(
-        controller, defending_realm_id
+        combat_state_address, defending_realm_id
     )
 
     let (attacker : Squad) = unpack_squad(attacking_realm_data.attacking_squad)
@@ -227,14 +252,14 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     )
 
     let (new_attacker : PackedSquad) = pack_squad(attacker_end)
-    let (new_defender : PackedSquad) = pack_squad(defender_end)
+    let (new_defender : PackedSquad) = pack_squad(defender_end) 
 
     let new_attacking_realm_data = RealmCombatData(
         attacking_squad=new_attacker,
         defending_squad=attacking_realm_data.defending_squad,
         last_attacked_at=attacking_realm_data.last_attacked_at,
     )
-    IS06_Combat.set_realm_combat_data(controller, attacking_realm_id, new_attacking_realm_data)
+    IS06_Combat.set_realm_combat_data(combat_state_address, attacking_realm_id, new_attacking_realm_data)
 
     let (now) = get_block_timestamp()
     let new_defending_realm_data = RealmCombatData(
@@ -242,7 +267,7 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
         defending_squad=new_defender,
         last_attacked_at=now,
     )
-    IS06_Combat.set_realm_combat_data(controller, defending_realm_id, new_defending_realm_data)
+    IS06_Combat.set_realm_combat_data(combat_state_address, defending_realm_id, new_defending_realm_data)
 
     # pillaging only if attacker wins
     if combat_outcome == COMBAT_OUTCOME_ATTACKER_WINS:
@@ -324,6 +349,11 @@ end
 # min(math.ceil((a / d) * 7), 12)
 func compute_min_roll_to_hit{range_check_ptr}(a : felt, d : felt) -> (min_roll : felt):
     alloc_locals
+
+    # in case there's no defence, any attack will succeed
+    if d == 0:
+        return (0)
+    end
 
     let (q, r) = unsigned_div_rem(a * 7, d)
     local t

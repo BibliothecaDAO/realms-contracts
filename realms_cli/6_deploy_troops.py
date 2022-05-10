@@ -46,13 +46,13 @@ def run(nre):
         ]
     )
 
-    wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="arbiter",
-        function="appoint_contract_as_module",
-        arguments=[
-            strhex_as_strfelt(config.S06_COMBAT_ADDRESS),
-            12
-        ]
-    )    
+    # wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="arbiter",
+    #     function="appoint_contract_as_module",
+    #     arguments=[
+    #         strhex_as_strfelt(config.S06_COMBAT_ADDRESS),
+    #         12
+    #     ]
+    # )    
