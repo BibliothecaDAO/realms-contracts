@@ -42,7 +42,6 @@ After your initial setup you will have to rerun the following commands on each n
 
 ```bash
 $ source realms_cli/.env.nile
-$ pip install realms_cli/
 ```
 
 <details><summary>Create Wallet via CLI [First time setup]</summary>
@@ -186,6 +185,8 @@ The following scripts deploy all contracts necessary to test and play realms on 
 ### 6. Troops (or any other new module that needs adding updating)
 
 `$ nile run --network localhost realms_cli/6_deploy_troops.py`
+
+`$ nile run --network localhost realms_cli/7_upgrade.py`
 
 ### Tips
 

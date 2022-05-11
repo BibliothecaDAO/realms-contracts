@@ -538,7 +538,7 @@ end
 func set_troop_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     troop_id : felt, cost : Cost
 ):
-    MODULE_only_arbiter()
+    Proxy_only_admin()
     troop_cost.write(troop_id, cost)
     return ()
 end

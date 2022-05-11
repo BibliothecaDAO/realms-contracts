@@ -453,7 +453,7 @@ func set_building_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : Hash
     building_id : felt, cost : Cost, lords : Uint256
 ):  
     # TODO: range checks on the cost struct
-    MODULE_only_arbiter()
+    Proxy_only_admin()
     building_cost.write(building_id, cost)
     building_lords_cost.write(building_id, lords)
     return ()

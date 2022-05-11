@@ -628,7 +628,7 @@ end
 func set_resource_upgrade_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     resource_id : felt, cost : Cost
 ):
-    MODULE_only_arbiter()
+    Proxy_only_admin()
     resource_upgrade_cost.write(resource_id, cost)
     return ()
 end
