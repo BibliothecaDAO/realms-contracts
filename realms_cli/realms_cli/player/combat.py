@@ -36,7 +36,7 @@ def build_squad(realm_token_id, network):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_L06_Combat",
         function="build_squad_from_troops_in_realm",
-        arguments=[1, 1, *uint(realm_token_id), 1],
+        arguments=[2, 1, 8, *uint(realm_token_id), 1],
     )
 
 @click.command()

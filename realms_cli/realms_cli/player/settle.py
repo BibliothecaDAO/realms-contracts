@@ -11,6 +11,7 @@ from realms_cli.utils import print_over_colums
 from realms_cli.binary_converter import map_realm
 from realms_cli.shared import uint
 
+
 @click.command()
 @click.argument("realm_token_id", nargs=1)
 @click.option("--network", default="goerli")
@@ -32,6 +33,7 @@ def mint_realm(realm_token_id, network):
         ],
     )
 
+
 @click.command()
 @click.option("--network", default="goerli")
 def approve_realm(network):
@@ -50,6 +52,7 @@ def approve_realm(network):
             "1",               # true
         ],
     )
+
 
 @click.command()
 @click.argument("realm_token_id", nargs=1)
@@ -71,6 +74,7 @@ def settle_realm(realm_token_id, network):
         ],
     )
 
+
 @click.command()
 @click.argument("realm_token_id", nargs=1)
 @click.option("--network", default="goerli")
@@ -85,7 +89,8 @@ def set_realm_data(realm_token_id, network):
     orders = json.load(open("data/orders.json", "r"))
     wonders = json.load(open("data/wonders.json", ))
 
-    realm_data_felt = map_realm(realms[str(realm_token_id)], resources, wonders, orders)
+    realm_data_felt = map_realm(
+        realms[str(realm_token_id)], resources, wonders, orders)
 
     wrapped_send(
         network=config.nile_network,
@@ -119,7 +124,8 @@ def check_realms(address, network):
         function="balanceOf",
         arguments=[address],
     )
-    print(out)   
+    print(out)
+
 
 @click.command()
 @click.option("--address", default="", help="Account address in hex format 0x...")
@@ -140,7 +146,8 @@ def check_s_realms(address, network):
         function="balanceOf",
         arguments=[address],
     )
-    print(out)   
+    print('Ser, player has ' + out[0] + ' settled Realms...')
+
 
 @click.command()
 @click.argument("realm_token_id", nargs=1)
@@ -157,7 +164,8 @@ def check_owner_of_realm(realm_token_id, network):
         function="ownerOf",
         arguments=[realm_token_id, 0],
     )
-    print(out)   
+    print('Ser, owner of realm id: '+ realm_token_id + " is " + out)
+
 
 @click.command()
 @click.argument("realm_token_id", nargs=1)
@@ -174,7 +182,8 @@ def check_owner_of_s_realm(realm_token_id, network):
         function="ownerOf",
         arguments=[realm_token_id, 0],
     )
-    print(out)   
+    print('Ser, owner of settled realm id: '+ realm_token_id + " is " + out)
+
 
 @click.command()
 @click.argument("realm_token_id", nargs=1)
@@ -191,4 +200,4 @@ def get_realm_data(realm_token_id, network):
         function="get_realm_info",
         arguments=[realm_token_id, 0],
     )
-    print(out)   
+    print(out)

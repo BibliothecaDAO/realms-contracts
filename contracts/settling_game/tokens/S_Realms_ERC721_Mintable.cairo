@@ -30,9 +30,6 @@ from openzeppelin.upgrades.library import (
     Proxy_set_implementation
 )
 
-from contracts.settling_game.utils.general import unpack_data
-from contracts.settling_game.utils.game_structs import RealmData
-
 #
 # Initializer
 #

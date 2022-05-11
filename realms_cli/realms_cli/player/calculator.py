@@ -14,22 +14,20 @@ from realms_cli.shared import uint
 
 @click.command()
 @click.argument("realm_token_id", nargs=1)
-@click.argument("building_id", nargs=1)
 @click.option("--network", default="goerli")
-def build(realm_token_id, building_id, network):
+def happiness(realm_token_id, network):
     """
     Build a building
     """
     config = Config(nile_network=network)
 
-    wrapped_send(
+    out = wrapped_call(
         network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_L03_Buildings",
-        function="build",
+        contract_alias="proxy_L04_Calculator",
+        function="calculate_happiness",
         arguments=[
             realm_token_id,                 # uint 1
-            0,                              # uint 2
-            building_id
+            0,
         ],
     )
+    print(out)

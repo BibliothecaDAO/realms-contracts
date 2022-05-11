@@ -89,3 +89,61 @@ def days_available(realm_token_id, network):
         ],
     )
     print(out)
+
+@click.command()
+@click.argument("realm_token_id", nargs=1)
+@click.argument("resource_id", nargs=1)
+@click.option("--network", default="goerli")
+def upgrade_resource(realm_token_id, resource_id, network):
+    """
+    Upgrade resource
+    """
+    config = Config(nile_network=network)
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_L02_Resources",
+        function="upgrade_resource",
+        arguments=[
+            realm_token_id,   # uint 1
+            0,                # uint 2
+            resource_id
+        ],
+    )
+
+@click.command()
+@click.option("--network", default="goerli")
+def approve_resource_module(network):
+    """
+    Approve module to use resources
+    """
+    config = Config(nile_network=network)
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_resources",
+        function="setApprovalForAll",
+        arguments=[
+            int(config.L02_RESOURCES_PROXY_ADDRESS, 16),  # uint1
+            "1",               # true
+        ],
+    )
+
+@click.command()
+@click.argument("resource_id", nargs=1)
+@click.option("--network", default="goerli")
+def get_resource_upgrade_cost(resource_id, network):
+    """
+    Check resource costs
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_L02_Resources",
+        function="get_resource_upgrade_cost",
+        arguments=[resource_id],
+    )
+    print(out)

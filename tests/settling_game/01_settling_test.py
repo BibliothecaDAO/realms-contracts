@@ -69,10 +69,10 @@ async def test_mint_realm(game_factory):
 
     # RESOURCE COSTS
 
-    # for resource_id, resource_cost in RESOURCE_UPGRADE_COST.items():
-    #     await signer.send_transaction(
-    #         account=admin_account, to=resources_state.contract_address, selector_name='set_resource_upgrade_cost', calldata=[resource_id.value, resource_cost.resource_count, resource_cost.bits, resource_cost.packed_ids, resource_cost.packed_amounts]
-    #     )
+    for resource_id, resource_cost in RESOURCE_UPGRADE_COST.items():
+        await signer.send_transaction(
+            account=admin_account, to=resources_logic.contract_address, selector_name='set_resource_upgrade_cost', calldata=[resource_id.value, resource_cost.resource_count, resource_cost.bits, resource_cost.packed_ids, resource_cost.packed_amounts]
+        )
     # for building_id, building_cost in BUILDING_COSTS.items():
     #     await signer.send_transaction(
     #         account=admin_account, to=buildings_state.contract_address, selector_name='set_building_cost', calldata=[building_id.value, building_cost.resource_count, building_cost.bits, building_cost.packed_ids, building_cost.packed_amounts, *uint(building_cost.lords)]
