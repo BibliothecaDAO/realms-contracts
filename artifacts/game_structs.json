@@ -200,13 +200,21 @@
                 "type": "const",
                 "value": 2
             },
+            "__main__.RealmBuildingLimitTraitsIds.ArcherTower": {
+                "type": "const",
+                "value": 2
+            },
+            "__main__.RealmBuildingLimitTraitsIds.Architect": {
+                "type": "const",
+                "value": 2
+            },
             "__main__.RealmBuildingLimitTraitsIds.Args": {
                 "full_name": "__main__.RealmBuildingLimitTraitsIds.Args",
                 "members": {},
                 "size": 0,
                 "type": "struct"
             },
-            "__main__.RealmBuildingLimitTraitsIds.Carpenter": {
+            "__main__.RealmBuildingLimitTraitsIds.Barracks": {
                 "type": "const",
                 "value": 2
             },
@@ -217,10 +225,6 @@
             "__main__.RealmBuildingLimitTraitsIds.Dock": {
                 "type": "const",
                 "value": 3
-            },
-            "__main__.RealmBuildingLimitTraitsIds.ExplorersGuild": {
-                "type": "const",
-                "value": 2
             },
             "__main__.RealmBuildingLimitTraitsIds.Fairgrounds": {
                 "type": "const",
@@ -260,7 +264,7 @@
                 "size": 0,
                 "type": "struct"
             },
-            "__main__.RealmBuildingLimitTraitsIds.LogisticsOffice": {
+            "__main__.RealmBuildingLimitTraitsIds.MageTower": {
                 "type": "const",
                 "value": 2
             },
@@ -269,10 +273,6 @@
                 "value": 1
             },
             "__main__.RealmBuildingLimitTraitsIds.ParadeGrounds": {
-                "type": "const",
-                "value": 2
-            },
-            "__main__.RealmBuildingLimitTraitsIds.ResourceFacility": {
                 "type": "const",
                 "value": 2
             },
@@ -294,7 +294,7 @@
                 "type": "const",
                 "value": 2
             },
-            "__main__.RealmBuildingLimitTraitsIds.Symposium": {
+            "__main__.RealmBuildingLimitTraitsIds.TradeOffice": {
                 "type": "const",
                 "value": 2
             },
@@ -305,9 +305,17 @@
                         "cairo_type": "felt",
                         "offset": 8
                     },
-                    "Carpenter": {
+                    "ArcherTower": {
                         "cairo_type": "felt",
                         "offset": 9
+                    },
+                    "Architect": {
+                        "cairo_type": "felt",
+                        "offset": 13
+                    },
+                    "Barracks": {
+                        "cairo_type": "felt",
+                        "offset": 15
                     },
                     "Castle": {
                         "cairo_type": "felt",
@@ -316,10 +324,6 @@
                     "Dock": {
                         "cairo_type": "felt",
                         "offset": 16
-                    },
-                    "ExplorersGuild": {
-                        "cairo_type": "felt",
-                        "offset": 13
                     },
                     "Fairgrounds": {
                         "cairo_type": "felt",
@@ -353,9 +357,9 @@
                         "cairo_type": "felt",
                         "offset": 7
                     },
-                    "LogisticsOffice": {
+                    "MageTower": {
                         "cairo_type": "felt",
-                        "offset": 12
+                        "offset": 11
                     },
                     "OfficerAcademy": {
                         "cairo_type": "felt",
@@ -365,10 +369,6 @@
                         "cairo_type": "felt",
                         "offset": 14
                     },
-                    "ResourceFacility": {
-                        "cairo_type": "felt",
-                        "offset": 15
-                    },
                     "RoyalReserve": {
                         "cairo_type": "felt",
                         "offset": 1
@@ -377,9 +377,9 @@
                         "cairo_type": "felt",
                         "offset": 10
                     },
-                    "Symposium": {
+                    "TradeOffice": {
                         "cairo_type": "felt",
-                        "offset": 11
+                        "offset": 12
                     }
                 },
                 "size": 20,
@@ -392,15 +392,23 @@
                 "type": "const",
                 "value": 9
             },
+            "__main__.RealmBuildingsIds.ArcherTower": {
+                "type": "const",
+                "value": 10
+            },
+            "__main__.RealmBuildingsIds.Architect": {
+                "type": "const",
+                "value": 14
+            },
             "__main__.RealmBuildingsIds.Args": {
                 "full_name": "__main__.RealmBuildingsIds.Args",
                 "members": {},
                 "size": 0,
                 "type": "struct"
             },
-            "__main__.RealmBuildingsIds.Carpenter": {
+            "__main__.RealmBuildingsIds.Barracks": {
                 "type": "const",
-                "value": 10
+                "value": 16
             },
             "__main__.RealmBuildingsIds.Castle": {
                 "type": "const",
@@ -409,10 +417,6 @@
             "__main__.RealmBuildingsIds.Dock": {
                 "type": "const",
                 "value": 17
-            },
-            "__main__.RealmBuildingsIds.ExplorersGuild": {
-                "type": "const",
-                "value": 14
             },
             "__main__.RealmBuildingsIds.Fairgrounds": {
                 "type": "const",
@@ -452,9 +456,9 @@
                 "size": 0,
                 "type": "struct"
             },
-            "__main__.RealmBuildingsIds.LogisticsOffice": {
+            "__main__.RealmBuildingsIds.MageTower": {
                 "type": "const",
-                "value": 13
+                "value": 12
             },
             "__main__.RealmBuildingsIds.OfficerAcademy": {
                 "type": "const",
@@ -463,10 +467,6 @@
             "__main__.RealmBuildingsIds.ParadeGrounds": {
                 "type": "const",
                 "value": 15
-            },
-            "__main__.RealmBuildingsIds.ResourceFacility": {
-                "type": "const",
-                "value": 16
             },
             "__main__.RealmBuildingsIds.Return": {
                 "full_name": "__main__.RealmBuildingsIds.Return",
@@ -486,9 +486,9 @@
                 "type": "const",
                 "value": 11
             },
-            "__main__.RealmBuildingsIds.Symposium": {
+            "__main__.RealmBuildingsIds.TradeOffice": {
                 "type": "const",
-                "value": 12
+                "value": 13
             },
             "__main__.RealmCombatData": {
                 "full_name": "__main__.RealmCombatData",
