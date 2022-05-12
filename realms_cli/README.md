@@ -2,28 +2,31 @@
 
 This is in heavy development and things might not work as expected... Bring a torch to slay some STARK dragons...
 
-## Prerequisites
-
-This feature has been tested in 
+This feature has been tested in
 ```
-python 3.7.12
+python 3.7.13
 ---
 cairo-lang==0.8.1
 cairo-nile==0.6.1
 ```
 
+---
+## Regular Setup
+
+
 <details><summary>Python Setup</summary>
 
-1. Upgrade pip: `/usr/local/bin/python -m pip install --upgrade pip`
+
+1. Upgrade pip: `/usr/local/bin/python -m pip install --upgrade pip` (Note: This will [break for OSX users who install via homebrew](https://github.com/Homebrew/legacy-homebrew/issues/26900). The workaround is to upgrade with homebrew: `brew install python3` or python3<area>@3.7)
 2. Remove *all* previous cairo nile packages: `$ pip uninstall cairo-nile` and check with `$ pip freeze` to make sure it's removed.
 3. Install nile 0.6.1: `pip install cairo-nile`
 4. Install the realms_cli: `$ pip install realms_cli/` (ensure you are in the realms-contracts dir)
 
-You now should have the realms_cli commands available when you run `$ nile`. 
+You now should have the realms_cli commands available when you run `$ nile`.
 
 </details>
 
-<details><summary>Enviroment Setup</summary>
+<details><summary>Environment Setup</summary>
 
 Create an `.env.nile` in the realms_cli/ directory with the following entries:
 
@@ -32,11 +35,7 @@ export STARKNET_PRIVATE_KEY=<A PRIVATE KEY>  # admin private key - see below to 
 export STARKNET_NETWORK=alpha-goerli  # different from nile_network
 ```
 ⚠️ Never commit this file!
-</details>
 
----
-
-# Player Actions
 
 After your initial setup you will have to rerun the following commands on each new session:
 
@@ -44,6 +43,7 @@ After your initial setup you will have to rerun the following commands on each n
 $ source realms_cli/.env.nile
 $ pip install realms_cli/
 ```
+</details>
 
 <details><summary>Create Wallet via CLI [First time setup]</summary>
 
@@ -67,7 +67,102 @@ $ nile setup STARKNET_PRIVATE_KEY --network goerli
 </details>
 
 ---
-<details><summary>Game Actions</summary>
+## Docker Setup (only if you have docker installed)
+
+<details><summary>Generate Keys</summary>
+
+Run the following command to generate your keys
+
+```
+docker run --env STARKNET_NETWORK=alpha-goerli -it \
+  ghcr.io/bibliothecaforadventurers/loot:latest /bin/zsh -c "\
+  export STARKNET_PRIVATE_KEY=\`nile create_pk\` && \
+  nile setup STARKNET_PRIVATE_KEY --network goerli && \
+  export STARKNET_PUBLIC_KEY=\`egrep -o '[0-9]{20,}' /loot/realms-contracts/goerli.accounts.json | tail -1\` && \
+  export STARKNET_ACCOUNT_ADDRESS=\`egrep -o '0x\w{20,}' /loot/realms-contracts/goerli.accounts.json | tail -1\` && \
+  echo '\n' && \
+  echo STARKNET_PRIVATE_KEY=\$STARKNET_PRIVATE_KEY && \
+  echo STARKNET_PUBLIC_KEY=\$STARKNET_PUBLIC_KEY && \
+  echo STARKNET_ACCOUNT_ADDRESS=\$STARKNET_ACCOUNT_ADDRESS"
+```
+
+This will result in output that looks like
+
+```
+🚀 Deploying Account
+⏳ ️Deployment of Account successfully sent at 0x0686175e3db8a1b9ae5d02091bbf885a00d887aeda9aec04fe1802539a1f24d9
+🧾 Transaction hash: 0x220012496f4cc9fcea0f81b138c3c0a09e15698a5fd35fc50c8eef10b9f02d5
+📦 Registering deployment as account-1 in goerli.deployments.txt
+
+STARKNET_PRIVATE_KEY=3129792616408231248471974783948651331119707311003002655274854346627138219317
+STARKNET_PUBLIC_KEY=516739183064354262837439537937676007814205513236684073745044383316691771411
+STARKNET_ACCOUNT_ADDRESS=0x0686175e3db8a1b9ae5d02091bbf885a00d887aeda9aec04fe1802539a1f24d9
+```
+
+Take note of the `STARKNET_PRIVATE_KEY`, `STARKNET_PUBLIC_KEY` & `STARKNET_ACCOUNT_ADDRESS` values which will be needed to build your image.
+
+</details>
+
+<details><summary>Build Image</summary>
+
+Save this Dockerfile locally
+
+```dockerfile
+FROM ghcr.io/bibliothecaforadventurers/loot:latest
+
+ARG STARKNET_PRIVATE_KEY
+ENV STARKNET_PRIVATE_KEY=$STARKNET_PRIVATE_KEY
+ARG STARKNET_PUBLIC_KEY
+ENV STARKNET_PUBLIC_KEY=$STARKNET_PUBLIC_KEY
+ARG STARKNET_ACCOUNT_ADDRESS
+ENV STARKNET_ACCOUNT_ADDRESS=$STARKNET_ACCOUNT_ADDRESS
+ARG STARKNET_NETWORK
+ENV STARKNET_NETWORK=${STARKNET_NETWORK:-alpha-goerli}
+
+RUN echo "$STARKNET_ACCOUNT_ADDRESS:/usr/local/lib/python3.7/site-packages/nile/artifacts/abis/Account.json:account-1" >> /loot/realms-contracts/goerli.deployments.txt
+RUN sed -i -e "s/}}/}, \"$STARKNET_PUBLIC_KEY\": {\"address\": \"$STARKNET_ACCOUNT_ADDRESS\", \"index\": 1}}/" /loot/realms-contracts/goerli.accounts.json
+
+WORKDIR /loot/realms-contracts/
+ENTRYPOINT ["nile"]
+```
+
+In the directory you saved the Dockerfile, run the following command to build your Docker image. Replace the placeholders with the values from the previous section.
+
+⚠️ Never expose this image you've built to the public since your keys can be seen in docker history!
+
+```
+docker build \
+  --build-arg STARKNET_PRIVATE_KEY=<PRIVATE_KEY> \
+  --build-arg STARKNET_PUBLIC_KEY=<PUBLIC_KEY> \
+  --build-arg STARKNET_ACCOUNT_ADDRESS=<ACCOUNT_ADDRESS> \
+  . -t realms_cli
+```
+
+</details>
+
+
+<details><summary>Run Actions</summary>
+
+
+```bash
+# list available actions
+docker run -t realms_cli
+
+# run check_realms action
+docker run -t realms_cli check_realms
+
+# get shell access
+docker run -it --entrypoint /bin/zsh realms_cli
+
+```
+
+</details>
+
+---
+
+## Actions
+
+<details><summary>Player Game Actions</summary>
 
 This is not the full list of actions and new commands are being frequently added. To find all the current available commands run
 
@@ -154,14 +249,11 @@ $ nile claim_resources 1
 
 </details>
 
----
 
-# Admin Actions
-
-<details><summary>Deployment of the full game (ADMIN ONLY) [localhost/goerli]</summary>
+<details><summary>Admin Actions</summary>
 
 
-The following scripts deploy all contracts necessary to test and play realms on localhost/goerli.
+The following scripts deploy all contracts necessary to test and play realms on localhost/goerli (ADMIN ONLY).
 
 ### 1. Admin
 
