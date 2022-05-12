@@ -64,7 +64,7 @@
                 "type": "felt"
             },
             {
-                "name": "Carpenter",
+                "name": "ArcherTower",
                 "offset": 9,
                 "type": "felt"
             },
@@ -74,17 +74,17 @@
                 "type": "felt"
             },
             {
-                "name": "Symposium",
+                "name": "MageTower",
                 "offset": 11,
                 "type": "felt"
             },
             {
-                "name": "LogisticsOffice",
+                "name": "TradeOffice",
                 "offset": 12,
                 "type": "felt"
             },
             {
-                "name": "ExplorersGuild",
+                "name": "Architect",
                 "offset": 13,
                 "type": "felt"
             },
@@ -94,7 +94,7 @@
                 "type": "felt"
             },
             {
-                "name": "ResourceFacility",
+                "name": "Barracks",
                 "offset": 15,
                 "type": "felt"
             },
