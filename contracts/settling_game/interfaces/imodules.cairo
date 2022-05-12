@@ -105,6 +105,20 @@ namespace IL04_Calculator:
     end
     func calculate_happiness(token_id : Uint256) -> (happiness : felt):
     end
+    func calculate_tribute() -> (tribute : felt):
+    end
+end
+
+@contract_interface
+namespace IL06_Combat:
+    func build_squad_from_troops_in_realm(troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt):
+    end
+    func set_troop_cost(troop_id : felt, cost : Cost):
+    end
+    func view_troops(realm_id : Uint256) -> (attacking_troops : Squad, defending_troops : Squad):
+    end
+    func get_realm_combat_data(realm_id : Uint256) -> (combat_data : RealmCombatData):
+    end
 end
 
 @contract_interface

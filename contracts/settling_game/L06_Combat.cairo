@@ -25,7 +25,8 @@ from contracts.settling_game.library_combat import (
     compute_squad_stats,
     pack_squad,
     unpack_squad,
-    get_troop_internal
+    get_troop_internal,
+    get_troop_population
 )
 from contracts.settling_game.utils.game_structs import (
     ModuleIds,
@@ -43,7 +44,8 @@ from contracts.settling_game.utils.library import (
     MODULE_controller_address,
     MODULE_only_approved,
     MODULE_initializer,
-    MODULE_only_arbiter
+    MODULE_only_arbiter,
+    MODULE_ERC721_owner_check
 )
 
 from contracts.settling_game.utils.constants import (
@@ -144,6 +146,10 @@ end
 # TODO: write documentation
 # TODO: take a Realm's wall into consideration when attacking a Realm
 
+############
+# EXTERNAL #
+############
+
 @external
 func build_squad_from_troops_in_realm{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
@@ -153,32 +159,24 @@ func build_squad_from_troops_in_realm{
     let (caller) = get_caller_address()
     let (controller) = MODULE_controller_address()
 
-    let (s_realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.S_Realms
-    )
+    MODULE_ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
 
-    let (owner) = realms_IERC721.ownerOf(s_realms_address, realm_id)
+    # # get the Cost for every Troop to build
+    # let (troop_costs : Cost*) = alloc()
+    # load_troop_costs(troop_ids_len, troop_ids, 0, troop_costs)
 
-    with_attr error_message("COMBAT: Not your realm ser"):
-        assert caller = owner
-    end
+    # # transform costs into tokens
+    # let (token_ids : Uint256*) = alloc()
+    # let (token_values : Uint256*) = alloc()
+    # let (token_len : felt) = transform_costs_to_token_ids_values(
+    #     troop_ids_len, troop_costs, token_ids, token_values
+    # )
 
-    # get the Cost for every Troop to build
-    let (troop_costs : Cost*) = alloc()
-    load_troop_costs(troop_ids_len, troop_ids, 0, troop_costs)
-
-    # transform costs into tokens
-    let (token_ids : Uint256*) = alloc()
-    let (token_values : Uint256*) = alloc()
-    let (token_len : felt) = transform_costs_to_token_ids_values(
-        troop_ids_len, troop_costs, token_ids, token_values
-    )
-
-    # pay for the squad
-    let (resource_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Resources
-    )
-    IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
+    # # pay for the squad
+    # let (resource_address) = IModuleController.get_external_contract_address(
+    #     controller, ExternalContractIds.Resources
+    # )
+    # IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
 
     # assemble the squad, store it in a Realm
     let (squad) = build_squad_from_troops(troop_ids_len, troop_ids)
@@ -200,11 +198,7 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
 
     with_attr error_message("COMBAT: Cannot initiate combat"):
         let (can_attack) = Realm_can_be_attacked(attacking_realm_id, defending_realm_id)
-        let (s_realms_address) = IModuleController.get_external_contract_address(
-            controller, ExternalContractIds.S_Realms
-        )
-        let (owner) = realms_IERC721.ownerOf(s_realms_address, attacking_realm_id)
-        assert caller = owner
+        MODULE_ERC721_owner_check(attacking_realm_id, ExternalContractIds.S_Realms)
         assert can_attack = TRUE
     end
 
@@ -498,15 +492,7 @@ func update_squad_in_realm{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : 
     let (caller) = get_caller_address()
     let (controller) = MODULE_controller_address()
 
-    let (s_realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.S_Realms
-    )
-
-    let (owner) = realms_IERC721.ownerOf(s_realms_address, realm_id)
-
-    with_attr error_message("COMBAT: Not your realm ser"):
-        assert caller = owner
-    end
+    MODULE_ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
 
     let (realm_combat_data : RealmCombatData) = get_realm_combat_data(realm_id)
     let (packed_squad : PackedSquad) = pack_squad(s)
@@ -528,19 +514,6 @@ func update_squad_in_realm{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : 
         set_realm_combat_data(realm_id, new_realm_combat_data)
         return ()
     end
-end
-
-###########
-# SETTERS #
-###########
-
-@external
-func set_troop_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
-    troop_id : felt, cost : Cost
-):
-    Proxy_only_admin()
-    troop_cost.write(troop_id, cost)
-    return ()
 end
 
 ###########
@@ -614,4 +587,18 @@ func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     end
 
     return (TRUE)
+end
+
+
+#########
+# ADMIN #
+#########
+
+@external
+func set_troop_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+    troop_id : felt, cost : Cost
+):
+    # Proxy_only_admin()
+    troop_cost.write(troop_id, cost)
+    return ()
 end

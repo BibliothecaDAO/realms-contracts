@@ -14,16 +14,22 @@ from starkware.cairo.common.math_cmp import is_nn_le, is_nn, is_le
 from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
 
-from contracts.settling_game.utils.game_structs import RealmBuildings, ModuleIds, BuildingsFood, BuildingsPopulation, BuildingsCulture
-
-from contracts.settling_game.utils.constants import (
-    VAULT_LENGTH_SECONDS,
+from contracts.settling_game.utils.game_structs import (
+    RealmBuildings,
+    ModuleIds,
+    BuildingsFood,
+    BuildingsPopulation,
+    BuildingsCulture,
+    RealmCombatData,
 )
+
+from contracts.settling_game.utils.constants import VAULT_LENGTH_SECONDS, BASE_LORDS_PER_DAY
 
 from contracts.settling_game.interfaces.imodules import (
     IModuleController,
     IL01_Settling,
     IL03_Buildings,
+    IL06_Combat,
 )
 
 from contracts.settling_game.utils.library import (
@@ -35,29 +41,31 @@ from contracts.settling_game.utils.library import (
 from openzeppelin.upgrades.library import (
     Proxy_initializer,
     Proxy_only_admin,
-    Proxy_set_implementation
+    Proxy_set_implementation,
+)
+
+from contracts.settling_game.library_combat import (
+    build_squad_from_troops,
+    compute_squad_stats,
+    pack_squad,
+    unpack_squad,
+    get_troop_internal,
+    get_troop_population,
 )
 
 @external
-func initializer{
-        syscall_ptr: felt*, 
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(
-        address_of_controller : felt,
-        proxy_admin : felt
-    ):
+func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    address_of_controller : felt, proxy_admin : felt
+):
     MODULE_initializer(address_of_controller)
     Proxy_initializer(proxy_admin)
     return ()
 end
 
 @external
-func upgrade{
-        syscall_ptr: felt*, 
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(new_implementation: felt):
+func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    new_implementation : felt
+):
     Proxy_only_admin()
     Proxy_set_implementation(new_implementation)
     return ()
@@ -77,23 +85,25 @@ func calculate_epoch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     return (epoch=epoch)
 end
 
+
+
 @view
 func calculate_happiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    tokenId : Uint256
+    token_id : Uint256
 ) -> (happiness : felt):
     alloc_locals
 
     # FETCH VALUES
-    let (local culture : felt) = calculateCulture(tokenId)
-    let (local population : felt) = calculatePopulation(tokenId)
-    let (local food : felt) = calculateFood(tokenId)
+    let (local culture : felt) = calculate_culture(token_id)
+    let (local population : felt) = calculate_population(token_id)
+    let (local food : felt) = calculate_food(token_id)
 
     let pop_calc = population / 10
 
     let culture_calc = culture - pop_calc
 
     let food_calc = food - pop_calc
-    
+
     # SANITY FALL BACK CHECK INCASE OF OVERFLOW....
     let (assert_check) = is_nn(100 + culture_calc + food_calc)
     if assert_check == 0:
@@ -118,8 +128,23 @@ func calculate_happiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
 end
 
 @view
-func calculateCulture{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    tokenId : Uint256
+func calculate_troop_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
+) -> (happiness : felt):
+    alloc_locals
+    let (controller) = MODULE_controller_address()
+    let (combat_logic) = IModuleController.get_module_address(controller, ModuleIds.L06_Combat)
+    let (realm_combat_data : RealmCombatData) = IL06_Combat.get_realm_combat_data(combat_logic, token_id)
+
+    let (attacking_population) = get_troop_population(realm_combat_data.attacking_squad)
+    let (defending_population) = get_troop_population(realm_combat_data.defending_squad)
+
+    return (attacking_population + defending_population)
+end
+
+@view
+func calculate_culture{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
 ) -> (culture : felt):
     let (controller) = MODULE_controller_address()
 
@@ -128,7 +153,7 @@ func calculateCulture{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     )
 
     let (current_buildings : RealmBuildings) = IL03_Buildings.fetch_buildings_by_type(
-        buildings_logic_address, tokenId
+        buildings_logic_address, token_id
     )
 
     let CastleCulture = BuildingsCulture.Castle * current_buildings.Castle
@@ -145,22 +170,23 @@ func calculateCulture{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     let MageTowerCulture = BuildingsCulture.MageTower * current_buildings.MageTower
     let TradeOfficeCulture = BuildingsCulture.TradeOffice * current_buildings.TradeOffice
     let ArchitectCulture = BuildingsCulture.Architect * current_buildings.Architect
-    let ParadeGroundsCulture= BuildingsCulture.ParadeGrounds * current_buildings.ParadeGrounds
+    let ParadeGroundsCulture = BuildingsCulture.ParadeGrounds * current_buildings.ParadeGrounds
     let BarracksCulture = BuildingsCulture.Barracks * current_buildings.Barracks
     let DockCulture = BuildingsCulture.Dock * current_buildings.Dock
-    let FishmongerCulture= BuildingsCulture.Fishmonger * current_buildings.Fishmonger
+    let FishmongerCulture = BuildingsCulture.Fishmonger * current_buildings.Fishmonger
     let FarmsCulture = BuildingsCulture.Farms * current_buildings.Farms
     let HamletCulture = BuildingsCulture.Hamlet * current_buildings.Hamlet
 
-    let culture = 10 + CastleCulture + FairgroundsCulture + RoyalReserveCulture + GrandMarketCulture + GuildCulture + OfficerAcademyCulture + GranaryCulture +HousingCulture + AmphitheaterCulture + ArcherTowerCulture + SchoolCulture + MageTowerCulture + TradeOfficeCulture + ArchitectCulture + ParadeGroundsCulture + BarracksCulture + DockCulture + FishmongerCulture + FarmsCulture + HamletCulture
+    let culture = 10 + CastleCulture + FairgroundsCulture + RoyalReserveCulture + GrandMarketCulture + GuildCulture + OfficerAcademyCulture + GranaryCulture + HousingCulture + AmphitheaterCulture + ArcherTowerCulture + SchoolCulture + MageTowerCulture + TradeOfficeCulture + ArchitectCulture + ParadeGroundsCulture + BarracksCulture + DockCulture + FishmongerCulture + FarmsCulture + HamletCulture
 
     return (culture)
 end
 
 @view
-func calculatePopulation{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    tokenId : Uint256
+func calculate_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
 ) -> (population : felt):
+    alloc_locals
     let (controller) = MODULE_controller_address()
 
     let (buildings_logic_address) = IModuleController.get_module_address(
@@ -168,10 +194,10 @@ func calculatePopulation{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     )
 
     let (current_buildings : RealmBuildings) = IL03_Buildings.fetch_buildings_by_type(
-        buildings_logic_address, tokenId
+        buildings_logic_address, token_id
     )
 
-    let CastlePop= BuildingsPopulation.Castle * current_buildings.Castle
+    let CastlePop = BuildingsPopulation.Castle * current_buildings.Castle
     let FairgroundsPop = BuildingsPopulation.Fairgrounds * current_buildings.Fairgrounds
     let RoyalReservePop = BuildingsPopulation.RoyalReserve * current_buildings.RoyalReserve
     let GrandMarketPop = BuildingsPopulation.GrandMarket * current_buildings.GrandMarket
@@ -188,18 +214,21 @@ func calculatePopulation{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     let ParadeGroundsPop = BuildingsPopulation.ParadeGrounds * current_buildings.ParadeGrounds
     let BarracksPop = BuildingsPopulation.Barracks * current_buildings.Barracks
     let DockPop = BuildingsPopulation.Dock * current_buildings.Dock
-    let FishmongerPop= BuildingsPopulation.Fishmonger * current_buildings.Fishmonger
+    let FishmongerPop = BuildingsPopulation.Fishmonger * current_buildings.Fishmonger
     let FarmsPop = BuildingsPopulation.Farms * current_buildings.Farms
     let HamletPop = BuildingsPopulation.Hamlet * current_buildings.Hamlet
 
     let population = 100 + CastlePop + FairgroundsPop + RoyalReservePop + GrandMarketPop + GuildPop + OfficerAcademyPop + GranaryPop + HousingPop + AmphitheaterPop + ArcherTowerPop + SchoolPop + MageTowerPop + TradeOfficePop + ArchitectPop + ParadeGroundsPop + BarracksPop + DockPop + FishmongerPop + FarmsPop + HamletPop
 
-    return (population)
+    # TROOP POPULATION
+    let (troop_population) = calculate_troop_population(token_id)
+
+    return (population - troop_population)
 end
 
 @view
-func calculateFood{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    tokenId : Uint256
+func calculate_food{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
 ) -> (food : felt):
     let (controller) = MODULE_controller_address()
 
@@ -208,7 +237,7 @@ func calculateFood{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     )
 
     let (current_buildings : RealmBuildings) = IL03_Buildings.fetch_buildings_by_type(
-        buildings_logic_address, tokenId
+        buildings_logic_address, token_id
     )
 
     let CastleFood = BuildingsFood.Castle * current_buildings.Castle
@@ -232,21 +261,19 @@ func calculateFood{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     let FarmsFood = BuildingsFood.Farms * current_buildings.Farms
     let HamletFood = BuildingsFood.Hamlet * current_buildings.Hamlet
 
-    let food = 10 + CastleFood + FairgroundsFood + RoyalReserveFood + GrandMarketFood + GuildFood + OfficerAcademyFood + GranaryFood +HousingFood + AmphitheaterFood + ArcherTowerFood + SchoolFood + MageTowerFood + TradeOfficeFood + ArchitectFood + ParadeGroundsFood + BarracksFood + DockFood + FishmongerFood + FarmsFood + HamletFood
+    let food = 10 + CastleFood + FairgroundsFood + RoyalReserveFood + GrandMarketFood + GuildFood + OfficerAcademyFood + GranaryFood + HousingFood + AmphitheaterFood + ArcherTowerFood + SchoolFood + MageTowerFood + TradeOfficeFood + ArchitectFood + ParadeGroundsFood + BarracksFood + DockFood + FishmongerFood + FarmsFood + HamletFood
 
     return (food)
 end
 
 # TODO: Make LORDS decrease over time...
-# @view
-# func calculateTribute{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-#     tokenId : Uint256
-# ) -> (tribute : felt):
-#     # TOD0: Decreasing supply curve of Lords
-#     # calculate number of buildings realm has
+@view
+func calculate_tribute{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (tribute : felt):
+    # TOD0: Decreasing supply curve of Lords
+    # calculate number of buildings realm has
 
-#     return (tribute=100)
-# end
+return (tribute=BASE_LORDS_PER_DAY)
+end
 
 @view
 func calculate_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
@@ -256,7 +283,9 @@ func calculate_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
 
     let (controller) = MODULE_controller_address()
 
-    let (settle_state_address) = IModuleController.get_module_address(controller, ModuleIds.L01_Settling)
+    let (settle_state_address) = IModuleController.get_module_address(
+        controller, ModuleIds.L01_Settling
+    )
 
     let (realms_settled) = IL01_Settling.get_total_realms_settled(settle_state_address)
 

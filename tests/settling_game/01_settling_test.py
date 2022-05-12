@@ -130,11 +130,11 @@ async def test_mint_realm(game_factory):
     # assert happiness.result.happiness == 25
     print(f'\033[1;31;40m😊 Happiness level is {happiness.result.happiness}\n')
 
-    culture = await calculator_logic.calculateCulture(FIRST_TOKEN_ID).invoke()
+    culture = await calculator_logic.calculate_culture(FIRST_TOKEN_ID).invoke()
     # assert culture.result.culture == 25
     print(f'\033[1;31;40m😊 Culture level is {culture.result.culture}\n')
 
-    food = await calculator_logic.calculateFood(FIRST_TOKEN_ID).invoke()
+    food = await calculator_logic.calculate_food(FIRST_TOKEN_ID).invoke()
     # assert culture.result.culture == 25
     print(f'\033[1;31;40m😊 Culture level is {food.result.food}\n')
 

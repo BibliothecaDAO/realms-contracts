@@ -56,7 +56,8 @@ from contracts.settling_game.utils.library import (
     MODULE_controller_address,
     MODULE_only_approved,
     MODULE_initializer,
-    MODULE_only_arbiter
+    MODULE_only_arbiter,
+    MODULE_ERC721_owner_check
 )
 
 from openzeppelin.upgrades.library import (
@@ -131,31 +132,19 @@ func build{
     let (caller) = get_caller_address()
     let (controller) = MODULE_controller_address()
 
-    # S_REALMS_ADDRESS
-    let (s_realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.S_Realms
-    )
+    # AUTH
+    MODULE_ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
 
-    # OWNER CHECK
-    let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
-    assert caller = owner
-
-    # REALMS ADDRESS
+    # EXTERNAL ADDRESSES
     let (realms_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Realms
     )
-
-    # REALMS ADDRESS
     let (lords_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Lords
     )
-    
-    # TREASURY ADDRESS
     let (treasury_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Treasury
     )
-
-    # RESOURCES ADDRESS
     let (resource_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Resources
     )
@@ -445,21 +434,6 @@ func build_buildings{
 end
 
 ###########
-# SETTERS #
-###########
-
-@external
-func set_building_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
-    building_id : felt, cost : Cost, lords : Uint256
-):  
-    # TODO: range checks on the cost struct
-    Proxy_only_admin()
-    building_cost.write(building_id, cost)
-    building_lords_cost.write(building_id, lords)
-    return ()
-end
-
-###########
 # GETTERS #
 ###########
 
@@ -534,4 +508,19 @@ func get_building_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : Hash
     let (cost) = building_cost.read(building_id)
     let (lords) = building_lords_cost.read(building_id)
     return (cost, lords)
+end
+
+#########
+# ADMIN #
+#########
+
+@external
+func set_building_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+    building_id : felt, cost : Cost, lords : Uint256
+):  
+    # TODO: range checks on the cost struct
+    Proxy_only_admin()
+    building_cost.write(building_id, cost)
+    building_lords_cost.write(building_id, lords)
+    return ()
 end

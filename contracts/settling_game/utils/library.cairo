@@ -24,6 +24,8 @@ from starkware.cairo.common.uint256 import (
 
 from contracts.settling_game.interfaces.imodules import IModuleController
 
+from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
+
 ###########
 # STORAGE #
 ###########
@@ -113,4 +115,22 @@ func MODULE_only_arbiter{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     let (success) = only_arbiter()
     assert_not_zero(success)
     return ()
+end
+
+func MODULE_ERC721_owner_check{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+}(asset_id : Uint256, name_space : felt):
+
+    let (caller) = get_caller_address()
+    let (controller) = controller_address.read()
+    let (address) = IModuleController.get_external_contract_address(
+        controller, name_space
+    )
+
+    let (owner) = IERC721.ownerOf(address, asset_id)
+
+    with_attr error_message("ERC721_ERROR: Not your asset"):
+        assert caller = owner
+    end
+    return()
 end

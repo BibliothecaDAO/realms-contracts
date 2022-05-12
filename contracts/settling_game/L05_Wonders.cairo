@@ -38,6 +38,34 @@ from openzeppelin.upgrades.library import (
     Proxy_set_implementation
 )
 
+###########
+# STORAGE #
+###########
+
+@storage_var
+func epoch_claimed(address : felt) -> (epoch : felt):
+end
+
+@storage_var
+func total_wonders_staked(epoch : felt) -> (amount : felt):
+end
+
+@storage_var
+func last_updated_epoch() -> (epoch : felt):
+end
+
+@storage_var
+func wonder_id_staked(token_id : Uint256) -> (epoch : felt):
+end
+
+@storage_var
+func wonder_epoch_upkeep(epoch : felt, token_id : Uint256) -> (upkept : felt):
+end
+
+@storage_var
+func tax_pool(epoch : felt, resource_id : Uint256) -> (supply : felt):
+end
+
 ###############
 # CONSTRUCTOR #
 ###############
@@ -67,7 +95,6 @@ func upgrade{
     return ()
 end
 
-
 ############
 # EXTERNAL #
 ############
@@ -80,19 +107,17 @@ func pay_wonder_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     let (controller) = MODULE_controller_address()
     let (caller) = get_caller_address()
 
-    # treasury address
+    # ADDRESSES
     let (treasury_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Treasury
     )
-    # resources address
     let (resources_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Resources
     )
-
-    # calculator logic contract
     let (calculator_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.L04_Calculator
     )
+
     let (current_epoch) = IL04_Calculator.calculate_epoch(calculator_address)
 
     assert_nn_le(current_epoch, epoch)
@@ -310,33 +335,6 @@ func update_epoch_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
 
         return update_epoch_pool()
     end
-end
-###########
-# STORAGE #
-###########
-
-@storage_var
-func epoch_claimed(address : felt) -> (epoch : felt):
-end
-
-@storage_var
-func total_wonders_staked(epoch : felt) -> (amount : felt):
-end
-
-@storage_var
-func last_updated_epoch() -> (epoch : felt):
-end
-
-@storage_var
-func wonder_id_staked(token_id : Uint256) -> (epoch : felt):
-end
-
-@storage_var
-func wonder_epoch_upkeep(epoch : felt, token_id : Uint256) -> (upkept : felt):
-end
-
-@storage_var
-func tax_pool(epoch : felt, resource_id : Uint256) -> (supply : felt):
 end
 
 ###########
