@@ -1372,13 +1372,29 @@
                 "type": "const",
                 "value": 4
             },
+            "contracts.settling_game.utils.game_structs.ResourceIds.CuriousSpore": {
+                "type": "const",
+                "value": 25
+            },
             "contracts.settling_game.utils.game_structs.ResourceIds.DeepCrystal": {
                 "type": "const",
                 "value": 14
             },
+            "contracts.settling_game.utils.game_structs.ResourceIds.Demonhide": {
+                "type": "const",
+                "value": 28
+            },
+            "contracts.settling_game.utils.game_structs.ResourceIds.DesertGlass": {
+                "type": "const",
+                "value": 23
+            },
             "contracts.settling_game.utils.game_structs.ResourceIds.Diamonds": {
                 "type": "const",
                 "value": 11
+            },
+            "contracts.settling_game.utils.game_structs.ResourceIds.DivineCloth": {
+                "type": "const",
+                "value": 24
             },
             "contracts.settling_game.utils.game_structs.ResourceIds.Dragonhide": {
                 "type": "const",
@@ -1430,7 +1446,7 @@
             },
             "contracts.settling_game.utils.game_structs.ResourceIds.SIZE": {
                 "type": "const",
-                "value": 23
+                "value": 29
             },
             "contracts.settling_game.utils.game_structs.ResourceIds.SIZEOF_LOCALS": {
                 "type": "const",
@@ -1448,6 +1464,10 @@
                 "type": "const",
                 "value": 2
             },
+            "contracts.settling_game.utils.game_structs.ResourceIds.SunkenShekel": {
+                "type": "const",
+                "value": 27
+            },
             "contracts.settling_game.utils.game_structs.ResourceIds.TrueIce": {
                 "type": "const",
                 "value": 17
@@ -1455,6 +1475,10 @@
             "contracts.settling_game.utils.game_structs.ResourceIds.TwilightQuartz": {
                 "type": "const",
                 "value": 18
+            },
+            "contracts.settling_game.utils.game_structs.ResourceIds.UnrefinedOre": {
+                "type": "const",
+                "value": 26
             },
             "contracts.settling_game.utils.game_structs.ResourceIds.Wood": {
                 "type": "const",

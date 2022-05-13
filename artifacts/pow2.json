@@ -175,7 +175,7 @@
                         "end_col": 46,
                         "end_line": 6,
                         "input_file": {
-                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/cairo/lang/compiler/lib/registers.cairo"
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/lang/compiler/lib/registers.cairo"
                         },
                         "start_col": 5,
                         "start_line": 6
@@ -200,7 +200,7 @@
                         "end_col": 38,
                         "end_line": 22,
                         "input_file": {
-                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/cairo/common/registers.cairo"
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/registers.cairo"
                         },
                         "start_col": 23,
                         "start_line": 22
@@ -226,7 +226,7 @@
                         "end_col": 53,
                         "end_line": 25,
                         "input_file": {
-                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/cairo/common/registers.cairo"
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/registers.cairo"
                         },
                         "start_col": 27,
                         "start_line": 25
@@ -253,7 +253,7 @@
                         "end_col": 54,
                         "end_line": 25,
                         "input_file": {
-                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/cairo/common/registers.cairo"
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/registers.cairo"
                         },
                         "start_col": 17,
                         "start_line": 25
@@ -280,7 +280,7 @@
                         "end_col": 55,
                         "end_line": 25,
                         "input_file": {
-                            "filename": "/opt/homebrew/lib/python3.9/site-packages/starkware/cairo/common/registers.cairo"
+                            "filename": "/usr/local/lib/python3.7/site-packages/starkware/cairo/common/registers.cairo"
                         },
                         "start_col": 5,
                         "start_line": 25
