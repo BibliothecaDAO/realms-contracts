@@ -31,20 +31,49 @@ from openzeppelin.token.erc1155.library import (
     owner_or_approved,
 )
 
+from openzeppelin.upgrades.library import (
+    Proxy_initializer,
+    Proxy_only_admin,
+    Proxy_set_implementation
+)
+
 #
 # Constructor
 #
 
-@constructor
-func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(uri, owner):
+@external
+func initializer{
+        syscall_ptr: felt*, 
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }(
+        uri: felt,
+        owner: felt
+    ):
     ERC1155_initializer(uri)
     Ownable_initializer(owner)
+    return ()
+end
+
+@external
+func upgrade{
+        syscall_ptr: felt*, 
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }(new_implementation: felt):
+    Ownable_only_owner()
+    Proxy_set_implementation(new_implementation)
     return ()
 end
 
 #
 # Getters
 #
+
+@view
+func getOwner{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (owner: felt):
+    return Ownable_get_owner()
+end
 
 @view
 func supportsInterface(interfaceId : felt) -> (is_supported : felt):

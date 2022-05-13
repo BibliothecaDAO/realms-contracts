@@ -8,9 +8,6 @@ from ecdsa import SigningKey, SECP256k1
 from realms_cli.caller_invoker import wrapped_call, wrapped_send
 from realms_cli.config import Config
 from realms_cli.utils import print_over_colums
-from realms_cli.binary_converter import map_realm
-from realms_cli.shared import uint
-
 
 @click.command()
 @click.option("--address", default="", help="Account address in hex format 0x...")
@@ -35,7 +32,7 @@ def check_resources(address, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="resources",
+        contract_alias="proxy_resources",
         function="balanceOfBatch",
         arguments=[
             n_resources,
@@ -58,17 +55,95 @@ def check_resources(address, network):
 @click.option("--network", default="goerli")
 def claim_resources(realm_token_id, network):
     """
-    Claim available resources
+    Claim available resources & lords
     """
     config = Config(nile_network=network)
-
+    print(config.L02_RESOURCES_ADDRESS)
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="L02_Resources",
+        contract_alias="proxy_L02_Resources",
         function="claim_resources",
         arguments=[
             realm_token_id,   # uint 1
             0,                # uint 2
         ],
     )
+
+@click.command()
+@click.argument("realm_token_id", nargs=1)
+@click.option("--network", default="goerli")
+def days_available(realm_token_id, network):
+    """
+    Claim available resources & lords
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_L02_Resources",
+        function="days_accrued",
+        arguments=[
+            realm_token_id,   # uint 1
+            0,                # uint 2
+        ],
+    )
+    print(out)
+
+@click.command()
+@click.argument("realm_token_id", nargs=1)
+@click.argument("resource_id", nargs=1)
+@click.option("--network", default="goerli")
+def upgrade_resource(realm_token_id, resource_id, network):
+    """
+    Upgrade resource
+    """
+    config = Config(nile_network=network)
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_L02_Resources",
+        function="upgrade_resource",
+        arguments=[
+            realm_token_id,   # uint 1
+            0,                # uint 2
+            resource_id
+        ],
+    )
+
+@click.command()
+@click.option("--network", default="goerli")
+def approve_resource_module(network):
+    """
+    Approve module to use resources
+    """
+    config = Config(nile_network=network)
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_resources",
+        function="setApprovalForAll",
+        arguments=[
+            int(config.L02_RESOURCES_PROXY_ADDRESS, 16),  # uint1
+            "1",               # true
+        ],
+    )
+
+@click.command()
+@click.argument("resource_id", nargs=1)
+@click.option("--network", default="goerli")
+def get_resource_upgrade_cost(resource_id, network):
+    """
+    Check resource costs
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_L02_Resources",
+        function="get_resource_upgrade_cost",
+        arguments=[resource_id],
+    )
+    print(out)

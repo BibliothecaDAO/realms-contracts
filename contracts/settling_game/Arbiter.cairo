@@ -63,9 +63,8 @@ func replace_self{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     # The ModuleController has a fixed address. The Arbiter
     # may be upgraded by calling the ModuleController and declaring
     # the new Arbiter.
-    IModuleController.appoint_new_arbiter(
-        contract_address=controller, new_arbiter=new_arbiter_address
-    )
+    IModuleController.appoint_new_arbiter(controller, new_arbiter_address)
+
     return ()
 end
 
@@ -86,9 +85,7 @@ func appoint_contract_as_module{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     Ownable_only_owner()
     let (controller) = controller_address.read()
     # Call the ModuleController and enable the new address.
-    IModuleController.set_address_for_module_id(
-        contract_address=controller, module_id=module_id, module_address=module_address
-    )
+    IModuleController.set_address_for_module_id(controller, module_id, module_address)
     return ()
 end
 
@@ -127,28 +124,18 @@ func batch_set_controller_addresses{
     module_03_addr : felt,
     module_04_addr : felt,
     module_05_addr : felt,
-    module_06_addr : felt,
-    module_07_addr : felt,
-    module_08_addr : felt,
-    module_09_addr : felt,
-    module_10_addr : felt,
-    module_11_addr : felt,
+    module_06_addr : felt
 ):
     Ownable_only_owner()
     let (controller) = controller_address.read()
-    IModuleController.set_initial_module_addresses( 
+    IModuleController.set_initial_module_addresses(
         controller,
         module_01_addr,
         module_02_addr,
         module_03_addr,
         module_04_addr,
         module_05_addr,
-        module_06_addr,
-        module_07_addr,
-        module_08_addr,
-        module_09_addr,
-        module_10_addr,
-        module_11_addr,
+        module_06_addr
     )
     return ()
 end

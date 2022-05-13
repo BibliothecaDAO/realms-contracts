@@ -26,7 +26,7 @@ def check_lords(address, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="lords",
+        contract_alias="proxy_lords",
         function="balanceOf",
         arguments=[address],
     )

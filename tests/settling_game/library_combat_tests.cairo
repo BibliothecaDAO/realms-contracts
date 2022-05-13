@@ -14,6 +14,7 @@ from contracts.settling_game.library_combat import (
     array_to_troop,
     find_first_free_troop_slot_in_squad,
     build_squad_from_troops,
+    get_troop_population
 )
 
 @view
@@ -42,7 +43,7 @@ end
 
 @view
 func test_unpack_squad{range_check_ptr}(p : PackedSquad) -> (s : Squad):
-    let (s) = unpack_squad(p)
+    let (s : Squad) = unpack_squad(p)
     return (s)
 end
 
@@ -88,4 +89,12 @@ func test_build_squad_from_troops{range_check_ptr}(troop_ids_len : felt, troop_i
 ):
     let (s : Squad) = build_squad_from_troops(troop_ids_len, troop_ids)
     return (s)
+end
+
+@view
+func test_get_troop_population{range_check_ptr}(squad : PackedSquad) -> (population : felt):
+    alloc_locals
+    let (population) = get_troop_population(squad)
+
+    return (population=population)
 end
