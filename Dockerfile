@@ -11,3 +11,9 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
    libgmp3-dev \
    software-properties-common && \
    rm -rf /var/lib/apt/lists/*
+
+RUN mkdir /loot
+WORKDIR /loot/
+RUN git clone https://github.com/BibliothecaForAdventurers/realms-contracts.git
+WORKDIR /loot/realms-contracts/
+RUN pip3 install realms_cli/
