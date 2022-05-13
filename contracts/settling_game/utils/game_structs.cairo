@@ -334,11 +334,6 @@ struct SquadStats:
     member wisdom : felt
 end
 
-struct SquadPopulation:
-    member type : felt
-    member tier : felt
-end
-
 # this struct holds everything related to a Realm & combat
 # a Realm can have two squads, one used for attacking
 # and another used for defending; this struct holds them

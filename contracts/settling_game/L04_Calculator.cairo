@@ -97,11 +97,10 @@ func calculate_happiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     let (local culture : felt) = calculate_culture(token_id)
     let (local population : felt) = calculate_population(token_id)
     let (local food : felt) = calculate_food(token_id)
-
+    
+    # FETCH VALUES
     let pop_calc = population / 10
-
     let culture_calc = culture - pop_calc
-
     let food_calc = food - pop_calc
 
     # SANITY FALL BACK CHECK INCASE OF OVERFLOW....
@@ -112,14 +111,14 @@ func calculate_happiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
 
     let happiness = 100 + culture_calc + food_calc
 
+    # if happiness less than 50, cap it
     let (is_lessthan_threshold) = is_le(happiness, 50)
-
-    let (is_greaterthan_threshold) = is_le(150, happiness)
-
     if is_lessthan_threshold == 1:
         return (50)
     end
 
+    # if happiness greater than 150 cap it
+    let (is_greaterthan_threshold) = is_le(150, happiness)
     if is_greaterthan_threshold == 1:
         return (150)
     end
@@ -132,6 +131,8 @@ func calculate_troop_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     token_id : Uint256
 ) -> (happiness : felt):
     alloc_locals
+
+    # SUM TOTAL TROOP POPULATION
     let (controller) = MODULE_controller_address()
     let (combat_logic) = IModuleController.get_module_address(controller, ModuleIds.L06_Combat)
     let (realm_combat_data : RealmCombatData) = IL06_Combat.get_realm_combat_data(combat_logic, token_id)
@@ -146,12 +147,12 @@ end
 func calculate_culture{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
 ) -> (culture : felt):
-    let (controller) = MODULE_controller_address()
 
+    # SUM TOTAL CULTURE
+    let (controller) = MODULE_controller_address()
     let (buildings_logic_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.L03_Buildings
     )
-
     let (current_buildings : RealmBuildings) = IL03_Buildings.fetch_buildings_by_type(
         buildings_logic_address, token_id
     )
@@ -187,6 +188,7 @@ func calculate_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
     token_id : Uint256
 ) -> (population : felt):
     alloc_locals
+    # SUM TOTAL POPULATION
     let (controller) = MODULE_controller_address()
 
     let (buildings_logic_address) = IModuleController.get_module_address(

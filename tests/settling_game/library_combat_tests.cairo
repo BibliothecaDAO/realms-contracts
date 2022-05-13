@@ -1,6 +1,6 @@
 %lang starknet
 
-from contracts.settling_game.utils.game_structs import Squad, PackedSquad, SquadStats, Troop, SquadPopulation
+from contracts.settling_game.utils.game_structs import Squad, PackedSquad, SquadStats, Troop
 from contracts.settling_game.library_combat import (
     add_troop_to_squad,
     remove_troop_from_squad,
