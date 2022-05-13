@@ -136,3 +136,4 @@ dmypy.json
 .vscode/
 
 node_modules
+artifacts
