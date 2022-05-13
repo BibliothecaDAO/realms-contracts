@@ -17,7 +17,7 @@ from realms_cli.shared import uint
 @click.option("--network", default="goerli")
 def happiness(realm_token_id, network):
     """
-    Build a building
+    Fetch happiness of a Realm
     """
     config = Config(nile_network=network)
 

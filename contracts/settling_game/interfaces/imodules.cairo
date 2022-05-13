@@ -93,7 +93,7 @@ end
 
 @contract_interface
 namespace IL03_Buildings:
-    func fetch_buildings_by_type(token_id : Uint256) -> (realm_buildings : RealmBuildings):
+    func get_buildings_unpacked(token_id : Uint256) -> (realm_buildings : RealmBuildings):
     end
 end
 

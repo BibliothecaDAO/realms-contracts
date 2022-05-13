@@ -16,7 +16,7 @@ from starkware.cairo.common.uint256 import Uint256
 
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds, RealmData
 from contracts.settling_game.utils.constants import TRUE, FALSE
-from contracts.settling_game.utils.library import (
+from contracts.settling_game.library.library_module import ( 
     MODULE_controller_address,
     MODULE_only_approved,
     MODULE_initializer,

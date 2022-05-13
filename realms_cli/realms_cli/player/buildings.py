@@ -33,3 +33,23 @@ def build(realm_token_id, building_id, network):
             building_id
         ],
     )
+
+@click.command()
+@click.argument("realm_token_id", nargs=1)
+@click.option("--network", default="goerli")
+def get_buildings(realm_token_id, network):
+    """
+    Fetch happiness of a Realm
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_L03_Buildings",
+        function="get_buildings_unpacked",
+        arguments=[
+            realm_token_id,                 # uint 1
+            0,
+        ],
+    )
+    print(out)

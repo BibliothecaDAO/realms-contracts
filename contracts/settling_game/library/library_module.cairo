@@ -69,9 +69,6 @@ func only_approved{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     # Pass this address on to the ModuleController
     # Will revert the transaction if not.
     let (success) = IModuleController.has_write_access(controller, caller)
-
-    
-
     return (success)
 end
 

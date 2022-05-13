@@ -52,7 +52,7 @@ from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
 from contracts.settling_game.interfaces.imodules import IModuleController
 
-from contracts.settling_game.utils.library import (
+from contracts.settling_game.library.library_module import (
     MODULE_controller_address,
     MODULE_only_approved,
     MODULE_initializer,
@@ -154,11 +154,8 @@ func build{
         contract_address=realms_address, token_id=token_id
     )
 
-    # GET CURRENT BUILDINGS
-    let (current_building) = get_realm_buildings(token_id)
-
-    # CHECK CAN BUILD
-    build_buildings(token_id, current_building, building_id)
+    # BUILD
+    build_buildings(token_id, building_id)
 
     # GET BUILDING COSTS
     let (building_cost : Cost, lords : Uint256) = get_building_cost(building_id)
@@ -185,7 +182,6 @@ func build_buildings{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
 }(
     token_id : Uint256,
-    current_realm_buildings : felt,
     building_id : felt,
 ):
     alloc_locals
@@ -203,7 +199,7 @@ func build_buildings{
     )
 
     # GET CURRENT BUILDINGS
-    let (current_buildings : RealmBuildings) = fetch_buildings_by_type(token_id)
+    let (current_buildings : RealmBuildings) = get_buildings_unpacked(token_id)
 
     let (buildings : felt*) = alloc()
 
@@ -438,7 +434,7 @@ end
 ###########
 
 @view
-func fetch_buildings_by_type{
+func get_buildings_unpacked{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
 }(token_id : Uint256) -> (realm_buildings : RealmBuildings):
     alloc_locals

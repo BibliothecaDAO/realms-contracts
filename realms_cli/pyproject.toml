@@ -43,30 +43,41 @@ flake8 = "^3.9.2"
 cairo-nile = "^0.5.0"
 [tool.poetry.plugins."nile_plugins"]
 # Here you specify you command name and location <command_name> = <package_method_location>
-"approve_realm" = "realms_cli.player.settle.approve_realm"
-"check_resources" = "realms_cli.player.resources.check_resources"
+
+"create_pk" = "realms_cli.player.account.create_pk"
+
 "check_lords" = "realms_cli.player.lords.check_lords"
+
+"approve_realm" = "realms_cli.player.settle.approve_realm"
 "check_realms" = "realms_cli.player.settle.check_realms"
 "check_s_realms" = "realms_cli.player.settle.check_s_realms"
 "check_owner_of_realm" = "realms_cli.player.settle.check_owner_of_realm"
 "check_owner_of_s_realm" = "realms_cli.player.settle.check_owner_of_s_realm"
-"claim_resources" = "realms_cli.player.resources.claim_resources"
-"create_pk" = "realms_cli.player.account.create_pk"
-"get_unit_cost" = "realms_cli.player.combat.get_unit_cost"
+
 "mint_realm" = "realms_cli.player.settle.mint_realm"
-"mint_resources" = "realms_cli.admin.main.mint_resources"
 "settle_realm" = "realms_cli.player.settle.settle_realm"
 "set_realm_data" = "realms_cli.player.settle.set_realm_data"
+"get_realm_data" = "realms_cli.player.settle.get_realm_data"
+
+"happiness" = "realms_cli.player.calculator.happiness"
+
+"build" = "realms_cli.player.buildings.build"
+"get_buildings" = "realms_cli.player.buildings.get_buildings"
+
+"check_resources" = "realms_cli.player.resources.check_resources"
+"claim_resources" = "realms_cli.player.resources.claim_resources"
+"upgrade_resource" = "realms_cli.player.resources.upgrade_resource"
+"approve_resource_module" = "realms_cli.player.resources.approve_resource_module"
+"get_resource_upgrade_cost" = "realms_cli.player.resources.get_resource_upgrade_cost"
+"days_available" = "realms_cli.player.resources.days_available"
+
+"get_unit_cost" = "realms_cli.player.combat.get_unit_cost"
 "build_squad" = "realms_cli.player.combat.build_squad"
 "can_attack" = "realms_cli.player.combat.can_attack"
 "attack_realm" = "realms_cli.player.combat.attack_realm"
 "get_troops" = "realms_cli.player.combat.get_troops"
-"days_available" = "realms_cli.player.resources.days_available"
-"get_realm_data" = "realms_cli.player.settle.get_realm_data"
-"upgrade_module" = "realms_cli.admin.main.upgrade_module"
-"build" = "realms_cli.player.buildings.build"
-"happiness" = "realms_cli.player.calculator.happiness"
-"upgrade_resource" = "realms_cli.player.resources.upgrade_resource"
-"approve_resource_module" = "realms_cli.player.resources.approve_resource_module"
-"get_resource_upgrade_cost" = "realms_cli.player.resources.get_resource_upgrade_cost"
 "get_combat_data" = "realms_cli.player.combat.get_realm_combat_data"
+"get_xoroshiro" = "realms_cli.player.combat.get_xoroshiro"
+
+"mint_resources" = "realms_cli.admin.main.mint_resources"
+"upgrade_module" = "realms_cli.admin.main.upgrade_module"
