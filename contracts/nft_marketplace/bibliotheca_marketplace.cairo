@@ -1,9 +1,9 @@
 # Declare this file as a StarkNet contract and set the required
 # builtins.
 %lang starknet
-%builtins pedersen range_check
+%builtins pedersen range_check bitwise
 
-from starkware.cairo.common.cairo_builtins import HashBuiltin
+from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin, BitwiseBuiltin
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.messages import send_message_to_l1
 from starkware.starknet.common.syscalls import (
@@ -24,6 +24,11 @@ from openzeppelin.security.pausable import (
     Pausable_pause,
     Pausable_unpause,
     Pausable_when_not_paused,
+)
+from contracts.settling_game.utils.general import (
+    scale,
+    unpack_data,
+    transform_costs_to_token_ids_values,
 )
 
 ############
@@ -102,6 +107,37 @@ end
 ###################
 # TRADE FUNCTIONS #
 ###################
+
+@external
+func fetch_trade_data{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(trade_data: felt, price: felt, poster: felt) -> (trade: Trade):
+    alloc_locals
+
+    # let (data) = get_trade(trade_data)
+
+    let (token_contract) = unpack_data(18014416252971264319588, 0, 255)
+    let (t_id) = unpack_data(18014416252971264319588, 7, 255)
+    let (expiration) = unpack_data(18014416252971264319588, 27, 255)
+    let (status) = unpack_data(18014416252971264319588, 52, 255)
+    let (trade_id) = unpack_data(18014416252971264319588, 54, 255)
+
+    #token_id needs to be Uint256
+    let token_id: Uint256 = Uint256(t_id, 0)
+
+    let trade = Trade(
+        token_contract,
+        token_id,
+        expiration,
+        price,
+        poster,
+        status,
+        trade_id
+    )
+
+    return (trade)
+
+end
 
 @external
 func open_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
