@@ -44,7 +44,7 @@ RESOURCE_ID = 2
 @pytest.mark.asyncio
 @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
 async def test_mint_realm(game_factory):
-    admin_account, treasury_account, starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state, s_realms, buildings_logic, buildings_state, calculator_logic = game_factory
+    admin_account, treasury_account, starknet, accounts, signers, arbiter, controller, settling_logic, realms, resources, lords, resources_logic, s_realms, buildings_logic, calculator_logic = game_factory
 
     #################
     # VALUE SETTERS #
@@ -69,10 +69,10 @@ async def test_mint_realm(game_factory):
 
     # RESOURCE COSTS
 
-    # for resource_id, resource_cost in RESOURCE_UPGRADE_COST.items():
-    #     await signer.send_transaction(
-    #         account=admin_account, to=resources_state.contract_address, selector_name='set_resource_upgrade_cost', calldata=[resource_id.value, resource_cost.resource_count, resource_cost.bits, resource_cost.packed_ids, resource_cost.packed_amounts]
-    #     )
+    for resource_id, resource_cost in RESOURCE_UPGRADE_COST.items():
+        await signer.send_transaction(
+            account=admin_account, to=resources_logic.contract_address, selector_name='set_resource_upgrade_cost', calldata=[resource_id.value, resource_cost.resource_count, resource_cost.bits, resource_cost.packed_ids, resource_cost.packed_amounts]
+        )
     # for building_id, building_cost in BUILDING_COSTS.items():
     #     await signer.send_transaction(
     #         account=admin_account, to=buildings_state.contract_address, selector_name='set_building_cost', calldata=[building_id.value, building_cost.resource_count, building_cost.bits, building_cost.packed_ids, building_cost.packed_amounts, *uint(building_cost.lords)]
@@ -126,15 +126,15 @@ async def test_mint_realm(game_factory):
     # 😊 STATS #
     ############
 
-    happiness = await calculator_logic.calculateHappiness(FIRST_TOKEN_ID).invoke()
+    happiness = await calculator_logic.calculate_happiness(FIRST_TOKEN_ID).invoke()
     # assert happiness.result.happiness == 25
     print(f'\033[1;31;40m😊 Happiness level is {happiness.result.happiness}\n')
 
-    culture = await calculator_logic.calculateCulture(FIRST_TOKEN_ID).invoke()
+    culture = await calculator_logic.calculate_culture(FIRST_TOKEN_ID).invoke()
     # assert culture.result.culture == 25
     print(f'\033[1;31;40m😊 Culture level is {culture.result.culture}\n')
 
-    food = await calculator_logic.calculateFood(FIRST_TOKEN_ID).invoke()
+    food = await calculator_logic.calculate_food(FIRST_TOKEN_ID).invoke()
     # assert culture.result.culture == 25
     print(f'\033[1;31;40m😊 Culture level is {food.result.food}\n')
 

@@ -2,7 +2,7 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from contracts.settling_game.L06_Combat import (
-    run_combat_loop, attack, compute_min_roll_to_hit, hit_troop, hit_squad, to_arr)
+    run_combat_loop, attack, compute_min_roll_to_hit, hit_troop, hit_squad)
 from contracts.settling_game.utils.game_structs import Troop, Squad
 
 @view

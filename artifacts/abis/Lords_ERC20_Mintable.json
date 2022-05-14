@@ -55,6 +55,17 @@
         "type": "event"
     },
     {
+        "data": [
+            {
+                "name": "implementation",
+                "type": "felt"
+            }
+        ],
+        "keys": [],
+        "name": "Upgraded",
+        "type": "event"
+    },
+    {
         "inputs": [
             {
                 "name": "name",
@@ -77,13 +88,24 @@
                 "type": "felt"
             },
             {
-                "name": "owner",
+                "name": "proxy_admin",
                 "type": "felt"
             }
         ],
-        "name": "constructor",
+        "name": "initializer",
         "outputs": [],
-        "type": "constructor"
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "new_implementation",
+                "type": "felt"
+            }
+        ],
+        "name": "upgrade",
+        "outputs": [],
+        "type": "function"
     },
     {
         "inputs": [],
@@ -273,21 +295,6 @@
                 "type": "felt"
             }
         ],
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "name": "to",
-                "type": "felt"
-            },
-            {
-                "name": "amount",
-                "type": "Uint256"
-            }
-        ],
-        "name": "mint",
-        "outputs": [],
         "type": "function"
     }
 ]

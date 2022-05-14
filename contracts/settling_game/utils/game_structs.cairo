@@ -99,8 +99,101 @@ namespace RealmBuildingLimitTraitsIds:
     const Hamlet = TraitsIds.River
 end
 
+namespace BuildingsFood:
+    const Fairgrounds = 5
+    const RoyalReserve = 5
+    const GrandMarket = 5
+    const Castle = -1
+    const Guild = -1
+    const OfficerAcademy = -1
+    const Granary = 3
+    const Housing = -1
+    const Amphitheater = -1
+    const ArcherTower = -1
+    const School = -1
+    const MageTower = -1
+    const TradeOffice = -1
+    const Architect = -1
+    const ParadeGrounds = -1
+    const Barracks = -1
+    const Dock = -1
+    const Fishmonger = 2
+    const Farms = 1
+    const Hamlet = 1
+end
+
+namespace BuildingsCulture:
+    const Fairgrounds = 5
+    const RoyalReserve = 5
+    const GrandMarket = 0
+    const Castle = 5
+    const Guild = 5
+    const OfficerAcademy = 0
+    const Granary = 0
+    const Housing = 0
+    const Amphitheater = 2
+    const ArcherTower = 0
+    const School = 3
+    const MageTower = 0
+    const TradeOffice = 1
+    const Architect = 1
+    const ParadeGrounds = 1
+    const Barracks = 0
+    const Dock = 0
+    const Fishmonger = 0
+    const Farms = 0
+    const Hamlet = 0
+end
+
+namespace BuildingsPopulation:
+    const Fairgrounds = -10
+    const RoyalReserve = -10
+    const GrandMarket = -10
+    const Castle = -10
+    const Guild = -10
+    const OfficerAcademy = -10
+    const Granary = -10
+    const Housing = 75
+    const Amphitheater = -10
+    const ArcherTower = -10
+    const School = -10
+    const MageTower = -10
+    const TradeOffice = -10
+    const Architect = -10
+    const ParadeGrounds = -10
+    const Barracks = -10
+    const Dock = -10
+    const Fishmonger = -10
+    const Farms = 10
+    const Hamlet = 35
+end
+
+namespace ArmyCap:
+    const Fairgrounds = 0
+    const RoyalReserve = 5
+    const GrandMarket = 0
+    const Castle = 5
+    const Guild = 5
+    const OfficerAcademy = 5
+    const Granary = 0
+    const Housing = 0
+    const Amphitheater = 2
+    const ArcherTower = 0
+    const School = 3
+    const MageTower = 0
+    const TradeOffice = 0
+    const Architect = 1
+    const ParadeGrounds = 2
+    const Barracks = 1
+    const Dock = 0
+    const Fishmonger = 0
+    const Farms = 0
+    const Hamlet = 0
+end
+
 namespace ModuleIds:
     const L01_Settling = 1
+<<<<<<< HEAD
     const S01_Settling = 2
     const L02_Resources = 3
     const S02_Resources = 4
@@ -113,6 +206,18 @@ namespace ModuleIds:
     const S06_Combat = 11
     const L07_Crypts = 12
     const S07_Crypts = 13
+=======
+    # const S01_Settling = 2
+    const L02_Resources = 2
+    # const S02_Resources = 4
+    const L03_Buildings = 3
+    # const S03_Buildings = 6
+    const L04_Calculator = 4
+    const L05_Wonders = 5
+    # const S05_Wonders = 9
+    const L06_Combat = 6
+    # const S06_Combat = 12
+>>>>>>> proxy-test
 end
 
 namespace ExternalContractIds:
@@ -270,6 +375,11 @@ struct SquadStats:
     member defense : felt
     member vitality : felt
     member wisdom : felt
+end
+
+struct SquadPopulation:
+    member type : felt
+    member tier : felt
 end
 
 # this struct holds everything related to a Realm & combat

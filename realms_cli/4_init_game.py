@@ -11,17 +11,13 @@ def run(nre):
         contract_alias="arbiter",
         function="batch_set_controller_addresses",
         arguments=[
-            strhex_as_strfelt(config.L01_SETTLING_ADDRESS),
-            strhex_as_strfelt(config.S01_SETTLING_ADDRESS),
-            strhex_as_strfelt(config.L02_RESOURCES_ADDRESS),
-            strhex_as_strfelt(config.S02_RESOURCES_ADDRESS),
-            strhex_as_strfelt(config.L03_BUILDINGS_ADDRESS),
-            strhex_as_strfelt(config.S03_BUILDINGS_ADDRESS),
-            strhex_as_strfelt(config.L04_CALCULATOR_ADDRESS),
-            strhex_as_strfelt(config.L05_WONDERS_ADDRESS),
-            strhex_as_strfelt(config.S05_WONDERS_ADDRESS),
-            strhex_as_strfelt(config.L07_CRYPTS_ADDRESS),
-            strhex_as_strfelt(config.S07_CRYPTS_ADDRESS)
+            strhex_as_strfelt(config.L01_SETTLING_PROXY_ADDRESS),
+            strhex_as_strfelt(config.L02_RESOURCES_PROXY_ADDRESS),
+            strhex_as_strfelt(config.L03_BUILDINGS_PROXY_ADDRESS),
+            strhex_as_strfelt(config.L04_CALCULATOR_PROXY_ADDRESS),
+            strhex_as_strfelt(config.L05_WONDERS_PROXY_ADDRESS),
+            strhex_as_strfelt(config.L06_COMBAT_PROXY_ADDRESS),
+            strhex_as_strfelt(config.L07_CRYPTS_PROXY_ADDRESS),
         ],
     )
 
@@ -29,10 +25,10 @@ def run(nre):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
-        contract_alias="s_realms",
+        contract_alias="proxy_s_realms",
         function="Set_module_access",
         arguments=[
-            strhex_as_strfelt(config.L01_SETTLING_ADDRESS),
+            strhex_as_strfelt(config.L01_SETTLING_PROXY_ADDRESS),
         ]
     )
 
@@ -40,10 +36,10 @@ def run(nre):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
-        contract_alias="s_crypts",
+        contract_alias="proxy_s_crypts",
         function="Set_module_access",
         arguments=[
-            strhex_as_strfelt(config.L07_CRYPTS_ADDRESS),
+            strhex_as_strfelt(config.L07_CRYPTS_PROXY_ADDRESS),
         ]
     )
 
@@ -52,10 +48,10 @@ def run(nre):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
-        contract_alias="resources",
+        contract_alias="proxy_resources",
         function="Set_module_access",
         arguments=[
-            strhex_as_strfelt(config.L02_RESOURCES_ADDRESS),
+            strhex_as_strfelt(config.L02_RESOURCES_PROXY_ADDRESS),
         ]
     )
 
@@ -63,10 +59,10 @@ def run(nre):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
-        contract_alias="realms",
+        contract_alias="proxy_realms",
         function="setApprovalForAll",
         arguments=[
-            strhex_as_strfelt(config.L01_SETTLING_ADDRESS),
+            strhex_as_strfelt(config.L01_SETTLING_PROXY_ADDRESS),
             "1",
         ]
     )
@@ -74,10 +70,10 @@ def run(nre):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
-        contract_alias="lords",
+        contract_alias="proxy_lords",
         function="approve",
         arguments=[
-            strhex_as_strfelt(config.L01_SETTLING_ADDRESS),
+            strhex_as_strfelt(config.L01_SETTLING_PROXY_ADDRESS),
             str(config.INITIAL_LORDS_SUPPLY), 0
         ]
     )
@@ -85,10 +81,10 @@ def run(nre):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
-        contract_alias="lords",
+        contract_alias="proxy_lords",
         function="approve",
         arguments=[
-            strhex_as_strfelt(config.L02_RESOURCES_ADDRESS),
+            strhex_as_strfelt(config.L02_RESOURCES_PROXY_ADDRESS),
             str(config.INITIAL_LORDS_SUPPLY), 0
         ]
     )

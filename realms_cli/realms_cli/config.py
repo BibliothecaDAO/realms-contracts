@@ -49,19 +49,29 @@ class Config:
         self.CRYPTS_ADDRESS, _ = safe_load_deployment("crypts", self.nile_network)
         self.S_CRYPTS_ADDRESS, _ = safe_load_deployment("s_crypts", self.nile_network)
 
+        self.LORDS_PROXY_ADDRESS, _ = safe_load_deployment("proxy_lords", self.nile_network)
+        self.REALMS_PROXY_ADDRESS, _ = safe_load_deployment("proxy_realms", self.nile_network)
+        self.RESOURCES_PROXY_ADDRESS, _ = safe_load_deployment("proxy_resources", self.nile_network)
+        self.S_REALMS_PROXY_ADDRESS, _ = safe_load_deployment("proxy_s_realms", self.nile_network)
+        self.CRYPTS_PROXY_ADDRESS, _ = safe_load_deployment("proxy_crypts", self.nile_network)
+        self.S_CRYPTS_PROXY_ADDRESS, _ = safe_load_deployment("proxy_s_crypts", self.nile_network)
+
         self.L01_SETTLING_ADDRESS, _ = safe_load_deployment("L01_Settling", self.nile_network)
-        self.S01_SETTLING_ADDRESS, _ = safe_load_deployment("S01_Settling", self.nile_network)
         self.L02_RESOURCES_ADDRESS, _ = safe_load_deployment("L02_Resources", self.nile_network)
-        self.S02_RESOURCES_ADDRESS, _ = safe_load_deployment("S02_Resources", self.nile_network)
         self.L03_BUILDINGS_ADDRESS, _ = safe_load_deployment("L03_Buildings", self.nile_network)
-        self.S03_BUILDINGS_ADDRESS, _ = safe_load_deployment("S03_Buildings", self.nile_network)
         self.L04_CALCULATOR_ADDRESS, _ = safe_load_deployment("L04_Calculator", self.nile_network)
         self.L05_WONDERS_ADDRESS, _ = safe_load_deployment("L05_Wonders", self.nile_network)
-        self.S05_WONDERS_ADDRESS, _ = safe_load_deployment("S05_Wonders", self.nile_network)
         self.L06_COMBAT_ADDRESS, _ = safe_load_deployment("L06_Combat", self.nile_network)
-        self.S06_COMBAT_ADDRESS, _ = safe_load_deployment("S06_Combat", self.nile_network)
         self.L07_CRYPTS_ADDRESS, _ = safe_load_deployment("L07_Crypts", self.nile_network)
-        self.S07_CRYPTS_ADDRESS, _ = safe_load_deployment("S07_Crypts", self.nile_network)
+
+        self.L01_SETTLING_PROXY_ADDRESS, _ = safe_load_deployment("proxy_L01_Settling", self.nile_network)
+        self.L02_RESOURCES_PROXY_ADDRESS, _ = safe_load_deployment("proxy_L02_Resources", self.nile_network)
+        self.L03_BUILDINGS_PROXY_ADDRESS, _ = safe_load_deployment("proxy_L03_Buildings", self.nile_network)
+        self.L04_CALCULATOR_PROXY_ADDRESS, _ = safe_load_deployment("proxy_L04_Calculator", self.nile_network)
+        self.L05_WONDERS_PROXY_ADDRESS, _ = safe_load_deployment("proxy_L05_Wonders", self.nile_network)
+        self.L06_COMBAT_PROXY_ADDRESS, _ = safe_load_deployment("proxy_L06_Combat", self.nile_network) 
+        self.L06_CRYPTS_PROXY_ADDRESS, _ = safe_load_deployment("proxy_L07_Crypts", self.nile_network) 
+
         self.XOROSHIRO_ADDRESS, _ = safe_load_deployment("xoroshiro128_starstar", self.nile_network)
 
         self.RESOURCES = [
@@ -87,4 +97,10 @@ class Config:
             "Adamantine",
             "Mithral",
             "Dragonhide",
+            "DesertGlass",
+            "DivineCloth",
+            "CuriousSpre",
+            "UnrefinedOre",
+            "SunkenShekel",
+            "Demonhide"
         ]

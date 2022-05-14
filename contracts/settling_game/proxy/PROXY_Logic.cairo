@@ -4,12 +4,10 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
-from starkware.starknet.common.syscalls import delegate_l1_handler, delegate_call
+from starkware.starknet.common.syscalls import delegate_call
 from openzeppelin.upgrades.library import (
     Proxy_implementation_address,
-    Proxy_set_implementation,
-    Proxy_only_admin,
-    Proxy_set_admin,
+    Proxy_set_implementation
 )
 
 #

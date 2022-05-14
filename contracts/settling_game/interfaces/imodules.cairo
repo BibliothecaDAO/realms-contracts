@@ -9,6 +9,19 @@
 from starkware.cairo.common.uint256 import Uint256
 from contracts.settling_game.utils.game_structs import RealmBuildings, RealmCombatData, Cost, Squad
 
+@contract_interface
+namespace IArbiter:
+    func batch_set_controller_addresses(
+        module_01_addr : felt,
+        module_02_addr : felt,
+        module_03_addr : felt,
+        module_04_addr : felt,
+        module_05_addr : felt,
+        module_06_addr : felt
+    ):
+    end
+end
+
 # Interface for the ModuleController.
 @contract_interface
 namespace IModuleController:
@@ -45,18 +58,13 @@ namespace IModuleController:
         module_03_addr : felt,
         module_04_addr : felt,
         module_05_addr : felt,
-        module_06_addr : felt,
-        module_07_addr : felt,
-        module_08_addr : felt,
-        module_09_addr : felt,
-        module_10_addr : felt,
-        module_11_addr : felt,
+        module_06_addr : felt
     ):
     end
 end
 
 @contract_interface
-namespace IS01_Settling:
+namespace IL01_Settling:
     func set_time_staked(token_id : Uint256, time_left : felt):
     end
     func set_time_vault_staked(token_id : Uint256, time_left : felt):
@@ -74,37 +82,12 @@ namespace IS01_Settling:
 end
 
 @contract_interface
-namespace IS02_Resources:
-    func get_resource_level(token_id : Uint256, resource : felt) -> (level : felt):
-    end
-    func set_resource_level(token_id : Uint256, resource_id : felt, level : felt) -> ():
-    end
-    func get_resource_upgrade_cost(resource_id : felt) -> (cost : Cost):
-    end
-end
-
-@contract_interface
 namespace IL02_Resources:
     func check_if_claimable(token_id : Uint256) -> (can_claim : felt):
     end
     func claim_resources(token_id : Uint256):
     end
     func pillage_resources(token_id : Uint256, claimer : felt):
-    end
-end
-
-@contract_interface
-namespace IS03_Buildings:
-    func get_building_cost(building_id : felt) -> (cost : Cost, lords : Uint256):
-    end
-
-    func get_realm_buildings(token_id : Uint256) -> (buildings : felt):
-    end
-
-    func get_realm_building_by_id(token_id : Uint256, building_id : felt) -> (building : felt):
-    end
-
-    func set_realm_buildings(token_id : Uint256, buildings_value : felt) -> ():
     end
 end
 
@@ -120,16 +103,28 @@ namespace IL04_Calculator:
     end
     func calculate_wonder_tax() -> (tax_percentage : felt):
     end
+    func calculate_happiness(token_id : Uint256) -> (happiness : felt):
+    end
+    func calculate_tribute() -> (tribute : felt):
+    end
+end
+
+@contract_interface
+namespace IL06_Combat:
+    func build_squad_from_troops_in_realm(troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt):
+    end
+    func set_troop_cost(troop_id : felt, cost : Cost):
+    end
+    func view_troops(realm_id : Uint256) -> (attacking_troops : Squad, defending_troops : Squad):
+    end
+    func get_realm_combat_data(realm_id : Uint256) -> (combat_data : RealmCombatData):
+    end
 end
 
 @contract_interface
 namespace IL05_Wonders:
     func update_wonder_settlement(token_id : Uint256):
     end
-end
-
-@contract_interface
-namespace IS05_Wonders:
     func set_total_wonders_staked(epoch : felt, amount : felt):
     end
 
@@ -168,6 +163,7 @@ namespace IS05_Wonders:
 
     func get_tax_pool(epoch : felt, resource_id : felt) -> (supply : felt):
     end
+<<<<<<< HEAD
 end
 
 @contract_interface
@@ -197,4 +193,6 @@ namespace IS07_Crypts:
     end
     func return_approved():
     end
+=======
+>>>>>>> proxy-test
 end

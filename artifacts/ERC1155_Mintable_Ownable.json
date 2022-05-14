@@ -40,31 +40,19 @@
                     "type": "felt"
                 }
             ],
+            "name": "AssetReference",
+            "size": 1,
+            "type": "struct"
+        },
+        {
+            "members": [
+                {
+                    "name": "a",
+                    "offset": 0,
+                    "type": "felt"
+                }
+            ],
             "name": "BlockchainReference",
-            "size": 1,
-            "type": "struct"
-        },
-        {
-            "members": [
-                {
-                    "name": "a",
-                    "offset": 0,
-                    "type": "felt"
-                }
-            ],
-            "name": "TokenId",
-            "size": 1,
-            "type": "struct"
-        },
-        {
-            "members": [
-                {
-                    "name": "a",
-                    "offset": 0,
-                    "type": "felt"
-                }
-            ],
-            "name": "BlockchainNamespace",
             "size": 1,
             "type": "struct"
         },
@@ -88,7 +76,19 @@
                     "type": "felt"
                 }
             ],
-            "name": "AssetReference",
+            "name": "BlockchainNamespace",
+            "size": 1,
+            "type": "struct"
+        },
+        {
+            "members": [
+                {
+                    "name": "a",
+                    "offset": 0,
+                    "type": "felt"
+                }
+            ],
+            "name": "TokenId",
             "size": 1,
             "type": "struct"
         },

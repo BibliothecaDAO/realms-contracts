@@ -616,3 +616,18 @@ func build_empty_squad() -> (s : Squad):
         t3_1=Troop(0, 0, 0, 0, 0, 0, 0)),
     )
 end
+
+func get_troop_population{range_check_ptr}(squad : PackedSquad) -> (population : felt):
+    alloc_locals
+
+    let (s : Squad) = unpack_squad(squad)
+
+    let population = s.t1_1.tier + s.t1_2.tier + s.t1_3.tier + s.t1_4.tier +
+        s.t1_5.tier + s.t1_6.tier + s.t1_7.tier + s.t1_8.tier + s.t1_9.tier +
+        s.t1_10.tier + s.t1_11.tier + s.t1_12.tier + s.t1_13.tier + s.t1_14.tier +
+        s.t1_15.tier + s.t1_16.tier + (s.t2_1.tier / 2) + (s.t2_2.tier / 2) + (s.t2_3.tier / 2) +
+        (s.t2_4.tier / 2) + (s.t2_5.tier / 2) + (s.t2_6.tier / 2) + (s.t2_7.tier / 2) + (s.t2_8.tier / 2) +
+        (s.t3_1.tier / 3)
+
+    return (population=population)
+end

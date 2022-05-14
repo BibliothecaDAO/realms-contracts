@@ -7,16 +7,12 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem, assert_not_zero
-from starkware.cairo.common.math_cmp import is_nn_le
-from starkware.cairo.common.hash_state import hash_init, hash_update, HashState
-from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import (
     get_caller_address,
     get_block_timestamp,
     get_contract_address,
 )
-from starkware.cairo.common.uint256 import Uint256, uint256_eq
+from starkware.cairo.common.uint256 import Uint256
 
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds, RealmData
 from contracts.settling_game.utils.constants import TRUE, FALSE
@@ -30,7 +26,6 @@ from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
 from contracts.settling_game.interfaces.imodules import (
     IModuleController,
-    IS01_Settling,
     IL05_Wonders,
     IL02_Resources,
 )
@@ -38,11 +33,9 @@ from contracts.settling_game.interfaces.imodules import (
 from openzeppelin.upgrades.library import (
     Proxy_initializer,
     Proxy_only_admin,
-    Proxy_set_implementation,
-    Proxy_get_implementation,
-    Proxy_set_admin,
-    Proxy_get_admin,
+    Proxy_set_implementation
 )
+
 ##########
 # EVENTS #
 ##########
@@ -55,53 +48,52 @@ end
 func UnSettled(owner : felt, token_id : Uint256):
 end
 
+###########
+# STORAGE #
+###########
+
+# STAKE TIME - THIS IS USED AS THE MAIN IDENTIFIER FOR STAKING TIME
+# IT IS UPDATED ON RESOURCE CLAIM, STAKE, UNSTAKE
+@storage_var
+func time_staked(token_id : Uint256) -> (time : felt):
+end
+
+@storage_var
+func time_vault_staked(token_id : Uint256) -> (time : felt):
+end
+
+@storage_var
+func total_realms_settled() -> (amount : felt):
+end
+
 ###############
 # CONSTRUCTOR #
 ###############
 
-@constructor
-func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    address_of_controller : felt
-):
+@external
+func initializer{
+        syscall_ptr: felt*, 
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }(
+        address_of_controller : felt,
+        proxy_admin : felt
+    ):
     MODULE_initializer(address_of_controller)
+    Proxy_initializer(proxy_admin)
     return ()
 end
 
-# @external
-# func initializer{
-#         syscall_ptr : felt*,
-#         pedersen_ptr : HashBuiltin*,
-#         range_check_ptr
-#     }(proxy_admin: felt, address_of_controller : felt):
-#     Proxy_initializer(proxy_admin)
-#     MODULE_initializer(address_of_controller)
-#     return ()
-# end
-
-# @external
-# func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-#     new_implementation : felt
-# ):
-#     Proxy_only_admin()
-#     Proxy_set_implementation(new_implementation)
-#     return ()
-# end
-
-# @view
-# func get_implementation{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-#     address : felt
-# ):
-#     let (address) = Proxy_get_implementation()
-#     return (address)
-# end
-
-# @view
-# func get_admin{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-#     admin : felt
-# ):
-#     let (admin) = Proxy_get_admin()
-#     return (admin)
-# end
+@external
+func upgrade{
+        syscall_ptr: felt*, 
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }(new_implementation: felt):
+    Proxy_only_admin()
+    Proxy_set_implementation(new_implementation)
+    return ()
+end
 
 ############
 # EXTERNAL #
@@ -124,10 +116,6 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         controller, ExternalContractIds.S_Realms
     )
 
-    let (settle_state_address) = IModuleController.get_module_address(
-        controller, ModuleIds.S01_Settling
-    )
-
     # TRANSFER REALM
     realms_IERC721.transferFrom(realms_address, caller, contract_address, token_id)
 
@@ -135,7 +123,7 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     s_realms_IERC721.mint(s_realms_address, caller, token_id)
 
     # SETS WORLD AND REALM STATE
-    set_world_state(token_id, caller, controller, settle_state_address, realms_address)
+    _set_world_state(token_id, caller, controller, realms_address)
 
     # EMIT
     Settled.emit(caller, token_id)
@@ -160,9 +148,7 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     let (s_realms_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.S_Realms
     )
-    let (settle_state_address) = IModuleController.get_module_address(
-        controller, ModuleIds.S01_Settling
-    )
+
     let (resource_logic_address) = IModuleController.get_module_address(
         controller, ModuleIds.L02_Resources
     )
@@ -172,9 +158,9 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
 
     if can_claim == TRUE:
         IL02_Resources.claim_resources(resource_logic_address, token_id)
-        set_world_state(token_id, caller, controller, settle_state_address, realms_address)
+        _set_world_state(token_id, caller, controller, realms_address)
     else:
-        set_world_state(token_id, caller, controller, settle_state_address, realms_address)
+        _set_world_state(token_id, caller, controller, realms_address)
     end
 
     # TRANSFER REALM BACK TO OWNER
@@ -189,24 +175,66 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     return (TRUE)
 end
 
+# TIME_LEFT -> WHEN PLAYER CLAIMS, THIS IS THE REMAINDER TO BE PASSED BACK INTO STORAGE
+# THIS ALLOWS FULL DAYS TO BE CLAIMED ONLY AND ALLOWS LESS THAN FULL DAYS TO CONTINUE ACCRUREING
+@external
+func set_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256, time_left : felt
+):
+    MODULE_only_approved()
+    _set_time_staked(token_id, time_left)
+    return ()
+end
+
+@external
+func set_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256, time_left : felt
+):
+    MODULE_only_approved()
+    _set_time_vault_staked(token_id, time_left)
+    return ()
+end
+
 ############
 # INTERNAL #
 ############
 
-func set_world_state{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+func _set_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256, time_left : felt
+):  
+    let (block_timestamp) = get_block_timestamp()
+    time_staked.write(token_id, block_timestamp - time_left)
+    return ()
+end
+
+func _set_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256, time_left : felt
+):
+    let (block_timestamp) = get_block_timestamp()
+    time_vault_staked.write(token_id, block_timestamp - time_left)
+    return ()
+end
+
+func _set_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    amount : felt
+):
+    total_realms_settled.write(amount)
+    return ()
+end
+
+func _set_world_state{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256,
     caller : felt,
     controller : felt,
-    settle_state_address : felt,
     realms_address : felt,
 ):
     # SET REALM SETTLED/UNSETTLED STATE - PARSE 0 TO SET CURRENT TIME
-    IS01_Settling.set_time_staked(settle_state_address, token_id, 0)
-    IS01_Settling.set_time_vault_staked(settle_state_address, token_id, 0)
+    _set_time_staked(token_id, 0)
+    _set_time_vault_staked(token_id, 0)
 
     # CHECK REALMS STATE
-    let (realms_settled) = IS01_Settling.get_total_realms_settled(settle_state_address)
-    IS01_Settling.set_total_realms_settled(settle_state_address, realms_settled + 1)
+    let (realms_settled) = get_total_realms_settled()
+    _set_total_realms_settled(realms_settled + 1)
 
     # GET REALM DATA
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
@@ -220,4 +248,34 @@ func set_world_state{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         return ()
     end
     return ()
+end
+
+###########
+# GETTERS #
+###########
+
+@view
+func get_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
+) -> (time : felt):
+    let (time) = time_staked.read(token_id)
+
+    return (time=time)
+end
+
+@view
+func get_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
+) -> (time : felt):
+    let (time) = time_vault_staked.read(token_id)
+
+    return (time=time)
+end
+
+@view
+func get_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    ) -> (realms_settled : felt):
+    let (amount) = total_realms_settled.read()
+
+    return (realms_settled=amount)
 end
