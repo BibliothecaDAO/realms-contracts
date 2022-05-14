@@ -256,12 +256,3 @@ async def settle_realm(account, settling_logic, token):
     await signer.send_transaction(
         account=account, to=settling_logic.contract_address, selector_name='settle', calldata=[*token]
     )
-
-# async def test_get_set_troop_cost(account, buildings_state):
-#     for troop_id, troop_cost in BUILDING_COSTS.items():
-#         await signer.send_transaction(
-#             account=account, to=buildings_state.contract_address, selector_name='settle', calldata=[troop_id, troop_cost]
-#         )
-#         # await s06_combat.set_troop_cost(troop_id, troop_cost).invoke()
-#         # tx = await s06_combat.get_troop_cost(troop_id).invoke()
-#         # assert tx.result.cost == troop_cost
