@@ -108,61 +108,61 @@ def pack_troop(troop: Troop) -> int:
     return int.from_bytes(struct.pack("<7b", *troop), "little")
 
 
-# @pytest.mark.asyncio
-# async def test_get_troop(s06_combat):
-#     for idx, troop in enumerate(TROOPS):
-#         tx = await s06_combat.get_troop(idx + 1).invoke()
-#         assert troop == tx.result.t
+@pytest.mark.asyncio
+async def test_get_troop(s06_combat):
+    for idx, troop in enumerate(TROOPS):
+        tx = await s06_combat.get_troop(idx + 1).invoke()
+        assert troop == tx.result.t
 
-#     with pytest.raises(StarkException):
-#         await s06_combat.get_troop(0).invoke()
+    with pytest.raises(StarkException):
+        await s06_combat.get_troop(0).invoke()
 
-#     with pytest.raises(StarkException):
-#         await s06_combat.get_troop(len(TROOPS) + 1).invoke()
-
-
-# @pytest.mark.asyncio
-# async def test_unpack_troop(library_combat_tests):
-#     for troop in TROOPS:
-#         packed = pack_troop(troop)
-#         tx = await library_combat_tests.test_unpack_troop(packed).invoke()
-#         assert troop == tx.result.t
+    with pytest.raises(StarkException):
+        await s06_combat.get_troop(len(TROOPS) + 1).invoke()
 
 
-# @pytest.mark.asyncio
-# async def test_compute_squad_stats(library_combat_tests):
-#     squad = build_default_squad()
-#     tx = await library_combat_tests.test_compute_squad_stats(squad).invoke()
-#     stats = tx.result.stats
-
-#     assert stats.agility == sum([t.agility for t in squad])
-#     assert stats.attack == sum([t.attack for t in squad])
-#     assert stats.defense == sum([t.defense for t in squad])
-#     assert stats.vitality == sum([t.vitality for t in squad])
-#     assert stats.wisdom == sum([t.wisdom for t in squad])
+@pytest.mark.asyncio
+async def test_unpack_troop(library_combat_tests):
+    for troop in TROOPS:
+        packed = pack_troop(troop)
+        tx = await library_combat_tests.test_unpack_troop(packed).invoke()
+        assert troop == tx.result.t
 
 
-# @pytest.mark.asyncio
-# async def test_pack_squad(library_combat_tests):
-#     squad = build_default_squad()
-#     packed_squad = pack_squad(squad)
-#     tx = await library_combat_tests.test_pack_squad(squad).invoke()
-#     assert tx.result.p == packed_squad
+@pytest.mark.asyncio
+async def test_compute_squad_stats(library_combat_tests):
+    squad = build_default_squad()
+    tx = await library_combat_tests.test_compute_squad_stats(squad).invoke()
+    stats = tx.result.stats
 
-# @pytest.mark.asyncio
-# async def test_get_troop_population(library_combat_tests):
-#     squad = build_default_squad()
-#     packed_squad = pack_squad(squad)
-#     tx = await library_combat_tests.test_get_troop_population(packed_squad).invoke()
-#     assert tx.result.population == 25
+    assert stats.agility == sum([t.agility for t in squad])
+    assert stats.attack == sum([t.attack for t in squad])
+    assert stats.defense == sum([t.defense for t in squad])
+    assert stats.vitality == sum([t.vitality for t in squad])
+    assert stats.wisdom == sum([t.wisdom for t in squad])
 
 
-# @pytest.mark.asyncio
-# async def test_unpack_squad(library_combat_tests):
-#     squad = build_default_squad()
-#     packed_squad = pack_squad(squad)
-#     tx = await library_combat_tests.test_unpack_squad(packed_squad).invoke()
-#     assert tx.result.s == squad
+@pytest.mark.asyncio
+async def test_pack_squad(library_combat_tests):
+    squad = build_default_squad()
+    packed_squad = pack_squad(squad)
+    tx = await library_combat_tests.test_pack_squad(squad).invoke()
+    assert tx.result.p == packed_squad
+
+@pytest.mark.asyncio
+async def test_get_troop_population(library_combat_tests):
+    squad = build_default_squad()
+    packed_squad = pack_squad(squad)
+    tx = await library_combat_tests.test_get_troop_population(packed_squad).invoke()
+    assert tx.result.population == 25
+
+
+@pytest.mark.asyncio
+async def test_unpack_squad(library_combat_tests):
+    squad = build_default_squad()
+    packed_squad = pack_squad(squad)
+    tx = await library_combat_tests.test_unpack_squad(packed_squad).invoke()
+    assert tx.result.s == squad
 
 
 @pytest.mark.asyncio

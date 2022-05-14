@@ -179,7 +179,7 @@ async def test_mint_realm(game_factory):
     await signer.send_transaction(
         account=admin_account, to=buildings_logic.contract_address, selector_name='build', calldata=[*FIRST_TOKEN_ID, BUILDING_ID])
 
-    values = await buildings_logic.fetch_buildings_by_type(FIRST_TOKEN_ID).call()
+    values = await buildings_logic.get_buildings_unpacked(FIRST_TOKEN_ID).call()
 
     print(
         f'Realm {FIRST_TOKEN_ID} buildings: {values.result.realm_buildings}')
