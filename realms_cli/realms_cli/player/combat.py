@@ -26,9 +26,8 @@ def get_unit_cost(unit_id, network):
 @click.command()
 @click.option('--count', default=1, help='number of troops')
 @click.option("--network", default="goerli")
-@click.option('--troop_id', prompt=True)
 @click.option('--realm_token_id', prompt=True)
-def build_squad(network, count, troop_id, realm_token_id):
+def build_squad(network, count, realm_token_id):
     """
     Build squad on Realm
     """
@@ -39,7 +38,7 @@ def build_squad(network, count, troop_id, realm_token_id):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_L06_Combat",
         function="build_squad_from_troops_in_realm",
-        arguments=[count, troop_id, *uint(realm_token_id), 1],
+        arguments=[count, 1, *uint(realm_token_id), 1],
     )
 
 @click.command()
@@ -111,3 +110,19 @@ def get_combat_data(realm_id, network):
         arguments=[*uint(realm_id)],
     )
     print(out)   
+
+@click.command()
+@click.option("--network", default="goerli")
+def get_xoroshiro(network):
+    """
+    Gets xoroshiro random number
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_L06_Combat",
+        function="get_xoroshiro",
+        arguments=[1],
+    )
+    print(out)       

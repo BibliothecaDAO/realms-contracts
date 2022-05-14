@@ -32,7 +32,7 @@ from contracts.settling_game.interfaces.imodules import (
     IL06_Combat,
 )
 
-from contracts.settling_game.utils.library import (
+from contracts.settling_game.library.library_module import (
     MODULE_controller_address,
     MODULE_only_approved,
     MODULE_initializer,
@@ -44,14 +44,11 @@ from openzeppelin.upgrades.library import (
     Proxy_set_implementation,
 )
 
-from contracts.settling_game.library_combat import (
-    build_squad_from_troops,
-    compute_squad_stats,
-    pack_squad,
-    unpack_squad,
-    get_troop_internal,
-    get_troop_population,
-)
+from contracts.settling_game.library.library_combat import COMBAT
+
+###############
+# CONSTRUCTOR #
+###############
 
 @external
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -71,21 +68,22 @@ func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     return ()
 end
 
+###############
+# CALCULATORS #
+###############
+
 @view
 func calculate_epoch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
     epoch : felt
 ):
+    # CALCULATE EPOCH
     let (controller) = MODULE_controller_address()
-
     let (genesis_time_stamp) = IModuleController.get_genesis(controller)
-
     let (block_timestamp) = get_block_timestamp()
 
     let (epoch, _) = unsigned_div_rem(block_timestamp - genesis_time_stamp, VAULT_LENGTH_SECONDS)
     return (epoch=epoch)
 end
-
-
 
 @view
 func calculate_happiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -137,8 +135,8 @@ func calculate_troop_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     let (combat_logic) = IModuleController.get_module_address(controller, ModuleIds.L06_Combat)
     let (realm_combat_data : RealmCombatData) = IL06_Combat.get_realm_combat_data(combat_logic, token_id)
 
-    let (attacking_population) = get_troop_population(realm_combat_data.attacking_squad)
-    let (defending_population) = get_troop_population(realm_combat_data.defending_squad)
+    let (attacking_population) = COMBAT.get_troop_population(realm_combat_data.attacking_squad)
+    let (defending_population) = COMBAT.get_troop_population(realm_combat_data.defending_squad)
 
     return (attacking_population + defending_population)
 end
@@ -153,7 +151,7 @@ func calculate_culture{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     let (buildings_logic_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.L03_Buildings
     )
-    let (current_buildings : RealmBuildings) = IL03_Buildings.fetch_buildings_by_type(
+    let (current_buildings : RealmBuildings) = IL03_Buildings.get_buildings_unpacked(
         buildings_logic_address, token_id
     )
 
@@ -188,14 +186,13 @@ func calculate_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
     token_id : Uint256
 ) -> (population : felt):
     alloc_locals
+
     # SUM TOTAL POPULATION
     let (controller) = MODULE_controller_address()
-
     let (buildings_logic_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.L03_Buildings
     )
-
-    let (current_buildings : RealmBuildings) = IL03_Buildings.fetch_buildings_by_type(
+    let (current_buildings : RealmBuildings) = IL03_Buildings.get_buildings_unpacked(
         buildings_logic_address, token_id
     )
 
@@ -232,13 +229,13 @@ end
 func calculate_food{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
 ) -> (food : felt):
-    let (controller) = MODULE_controller_address()
 
+    # CALCULATE FOOD
+    let (controller) = MODULE_controller_address()
     let (buildings_logic_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.L03_Buildings
     )
-
-    let (current_buildings : RealmBuildings) = IL03_Buildings.fetch_buildings_by_type(
+    let (current_buildings : RealmBuildings) = IL03_Buildings.get_buildings_unpacked(
         buildings_logic_address, token_id
     )
 
@@ -283,8 +280,8 @@ func calculate_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
 ):
     alloc_locals
 
+    # CALCULATE WONDER TAX
     let (controller) = MODULE_controller_address()
-
     let (settle_state_address) = IModuleController.get_module_address(
         controller, ModuleIds.L01_Settling
     )

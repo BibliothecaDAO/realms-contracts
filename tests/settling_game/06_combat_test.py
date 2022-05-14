@@ -149,12 +149,12 @@ def pack_troop(troop: Troop) -> int:
 #     tx = await library_combat_tests.test_pack_squad(squad).invoke()
 #     assert tx.result.p == packed_squad
 
-@pytest.mark.asyncio
-async def test_get_troop_population(library_combat_tests):
-    squad = build_default_squad()
-    packed_squad = pack_squad(squad)
-    tx = await library_combat_tests.test_get_troop_population(packed_squad).invoke()
-    assert tx.result.population == 25
+# @pytest.mark.asyncio
+# async def test_get_troop_population(library_combat_tests):
+#     squad = build_default_squad()
+#     packed_squad = pack_squad(squad)
+#     tx = await library_combat_tests.test_get_troop_population(packed_squad).invoke()
+#     assert tx.result.population == 25
 
 
 # @pytest.mark.asyncio
@@ -162,20 +162,19 @@ async def test_get_troop_population(library_combat_tests):
 #     squad = build_default_squad()
 #     packed_squad = pack_squad(squad)
 #     tx = await library_combat_tests.test_unpack_squad(packed_squad).invoke()
-#     print(tx.result.s)
 #     assert tx.result.s == squad
 
 
-# @pytest.mark.asyncio
-# async def test_run_combat_loop(l06_combat_tests):
-#     attacker = build_default_squad()
-#     defender = build_partial_squad(12)
+@pytest.mark.asyncio
+async def test_run_combat_loop(l06_combat_tests):
+    attacker = build_default_squad()
+    defender = build_partial_squad(12)
 
-#     tx = await l06_combat_tests.test_run_combat_loop(attacker, defender, 1).invoke()
+    tx = await l06_combat_tests.test_run_combat_loop(attacker, defender, 1).invoke()
 
-#     res = tx.result
-#     assert len(res) == 3
-#     assert res.outcome == 1  # attacker wins, most likely outcome since defender is weak
+    res = tx.result
+    assert len(res) == 3
+    assert res.outcome == 1  # attacker wins, most likely outcome since defender is weak
 
 
 # @pytest.mark.asyncio

@@ -28,6 +28,9 @@ You now should have the realms_cli commands available when you run `$ nile`.
 
 <details><summary>Environment Setup</summary>
 
+1. Compile all the contracts with `$ nile compile` (The CLI calls these .json files, they are gitignored to avoid conflits.)
+2. Compile the account contract `$ nile compile openzeppelin/account/Account.cairo --account_contract`
+
 Create an `.env.nile` in the realms_cli/ directory with the following entries:
 
 ```

@@ -93,6 +93,9 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     # # resources logic to wonders state
     can_write_to.write(ModuleIds.L02_Resources, ModuleIds.L05_Wonders, TRUE)
 
+    # # combat can write to resources
+    can_write_to.write(ModuleIds.L06_Combat, ModuleIds.L02_Resources, TRUE)
+
     # Lookup table for NON module contracts
     external_contract_table.write(ExternalContractIds.Lords, _lords_address)
     external_contract_table.write(ExternalContractIds.Realms, _realms_address)
