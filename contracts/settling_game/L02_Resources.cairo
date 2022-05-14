@@ -405,6 +405,20 @@ func upgrade_resource{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*, range_check_ptr
 }(token_id : Uint256, resource_id : felt) -> ():
     alloc_locals
+
+    let (can_claim) = check_if_claimable(token_id)
+
+    if can_claim == TRUE:
+        claim_resources(token_id)
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    else:
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    end
+
     let (caller) = get_caller_address()
     let (controller) = MODULE_controller_address()
 

@@ -80,9 +80,6 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     genesis.write(block_timestamp)
 
     # write patterns known at deployment. E.g., 1->2, 1->3, 5->6.
-
-    # settling to state
-    can_write_to.write(ModuleIds.L01_Settling, ModuleIds.L01_Settling, TRUE)
     
     # settling to wonders logic
     can_write_to.write(ModuleIds.L01_Settling, ModuleIds.L05_Wonders, TRUE)

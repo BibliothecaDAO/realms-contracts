@@ -93,12 +93,10 @@ async def test_mint_realm(game_factory):
     # print realm details
     realm_info = await realms.get_realm_info(FIRST_TOKEN_ID).invoke()
     print(f'\033[1;33;40m🏰 | Realm metadata: {realm_info.result.realm_data}\n')
-    # assert realm_info.result.realm_data == map_realm(
-    #     realms_data[str(from_uint(FIRST_TOKEN_ID))], resources, wonders, orders)
 
-    # unpacked_realm_info = await realms.fetch_realm_data(FIRST_TOKEN_ID).invoke()
-    # print(
-    #     f'\033[1;33;40m🏰 | Realm unpacked: {unpacked_realm_info.result.realm_stats}\n')
+    unpacked_realm_info = await realms.fetch_realm_data(FIRST_TOKEN_ID).invoke()
+    print(
+        f'\033[1;33;40m🏰 | Realm unpacked: {unpacked_realm_info.result.realm_stats}\n')
 
     # check balance of Realm on account
     await checks_realms_balance(admin_account, realms, 2)
