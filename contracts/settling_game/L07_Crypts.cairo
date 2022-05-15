@@ -1,32 +1,39 @@
+# ____MODULE_L07___CRYPTS_LOGIC
+#   Staking/Unstaking a crypt.
+#
+# MIT License
+
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem, assert_not_zero
-from starkware.cairo.common.math_cmp import is_nn_le
-from starkware.cairo.common.hash_state import hash_init, hash_update, HashState
-from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import (
-    get_caller_address, get_block_timestamp, get_contract_address)
-from starkware.cairo.common.uint256 import Uint256, uint256_eq
+    get_caller_address,
+    get_block_timestamp,
+    get_contract_address,
+)
+from starkware.cairo.common.uint256 import Uint256
 
-from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds, CryptData
+from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds, RealmData
 from contracts.settling_game.utils.constants import TRUE, FALSE
-from contracts.settling_game.utils.library import (
-    MODULE_controller_address, MODULE_only_approved, MODULE_initializer)
+from contracts.settling_game.library.library_module import ( 
+    MODULE_controller_address,
+    MODULE_only_approved,
+    MODULE_initializer,
+)
 
+from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
 from contracts.settling_game.interfaces.crypts_IERC721 import crypts_IERC721
 from contracts.settling_game.interfaces.s_crypts_IERC721 import s_crypts_IERC721
 from contracts.settling_game.interfaces.imodules import (
-    IModuleController, IS07_Crypts, IL02_Resources)
+    IModuleController,
+    IL08_Crypts_Resources
+)
 
-# TODO:
-# ~~Refactor this file to take into account the Crypts contracts. This will mostly be just chaning contract address~~
-# Create Crypts Struct to conform with the Crypts Metadata (game_structs.cairo)
-# Refactor unpacking of crypts data witin the Crypts_ERC721_Mintable.cairo to enable fetching of information
-# Add module to Module controller and add extra module params to Arbiter
-# Add functions to L02_Resources.cairo to calculate the length of the stake (!!where can we double both crypts and realms functions to keep it DRY)
-
-# ____MODULE_L07___CRYPTS_LOGIC
+from openzeppelin.upgrades.library import (
+    Proxy_initializer,
+    Proxy_only_admin,
+    Proxy_set_implementation
+)
 
 ##########
 # EVENTS #
@@ -36,22 +43,49 @@ from contracts.settling_game.interfaces.imodules import (
 # Unstaked = 🔒 locked (because Lore ofc)
 
 @event
-func Unlocked(owner : felt, token_id : Uint256):
+func Settled(owner : felt, token_id : Uint256):
 end
 
 @event
-func Locked(owner : felt, token_id : Uint256):
+func UnSettled(owner : felt, token_id : Uint256):
+end
+
+###########
+# STORAGE #
+###########
+
+# STAKE TIME - THIS IS USED AS THE MAIN IDENTIFIER FOR STAKING TIME
+# IT IS UPDATED ON RESOURCE CLAIM, STAKE, UNSTAKE
+@storage_var
+func time_staked(token_id : Uint256) -> (time : felt):
 end
 
 ###############
 # CONSTRUCTOR #
 ###############
 
-@constructor
-func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        address_of_controller : felt):
-    # Store the address of the only fixed contract in the system.
+@external
+func initializer{
+        syscall_ptr: felt*, 
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }(
+        address_of_controller : felt,
+        proxy_admin : felt
+    ):
     MODULE_initializer(address_of_controller)
+    Proxy_initializer(proxy_admin)
+    return ()
+end
+
+@external
+func upgrade{
+        syscall_ptr: felt*, 
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }(new_implementation: felt):
+    Proxy_only_admin()
+    Proxy_set_implementation(new_implementation)
     return ()
 end
 
@@ -59,95 +93,156 @@ end
 # EXTERNAL #
 ############
 
-
-# STAKE - UNLOCKS CRYPT
+# SETTLES CRYPT
 @external
-func unlock_crypt{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256) -> (success : felt):
+func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
+) -> (success : felt):
     alloc_locals
     let (caller) = get_caller_address()
     let (controller) = MODULE_controller_address()
     let (contract_address) = get_contract_address()
 
     let (crypts_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Crypts)
+        controller, ExternalContractIds.Crypts
+    )
     let (s_crypts_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.S_Crypts)
-                
-    let (crypts_state_address) = IModuleController.get_module_address(
-        controller, ModuleIds.S07_Crypts)
-    let (resource_logic_address) = IModuleController.get_module_address(
-    controller, ModuleIds.L02_Resources)
+        controller, ExternalContractIds.S_Crypts
+    )
 
-    # TRANSFER CRYPT TO STAKING WALLET
-    # Crypt will be locked (on starknet and mainnet) until a user unstakes.
-    crypts_IERC721.transferFrom(crypts_address, caller, crypts_state_address, token_id)
+    # TRANSFER CRYPT
+    IERC721.transferFrom(crypts_address, caller, contract_address, token_id)
 
-    # MINT S_CRYPT IN USER'S WALLET
-    # S_CRYPT is a token that lives in a user's wallet and represents ownership of a staked crypt.
-    # When the crypt is unstaked, the S_CRYPT will be burned.
-    s_crypts_IERC721.mint(s_crypts_address, caller, token_id)
+    # MINT S_CRYPT
+    IERC721.mint(s_crypts_address, caller, token_id)
 
-    # PASS 0 to set the current time
-    IS07_Crypts.set_time_staked(crypts_state_address, token_id, 0)
+    # SETS TIME STAKED FOR FUTURE CLAIMS
+    _set_time_staked(token_id, 0)
 
-    # UPDATE UNLOCKED CRYPTS COUNTER
-    let (crypts_unlocked) = IS07_Crypts.get_total_crypts_unlocked( 
-        contract_address=crypts_state_address)
-    IS07_Crypts.set_total_crypts_unlocked(crypts_state_address, crypts_unlocked + 1)
+    # EMIT
+    Settled.emit(caller, token_id)
 
-    # UPDATE OTHER MODULES
-    let (crypts_data : CryptData) = crypts_IERC721.fetch_crypt_data(
-        contract_address=crypts_address, token_id=token_id)
-
-    # EMIT - STAKE
-    Unlocked.emit(caller, token_id)
-    # RETURN 1 (TRUE)
     return (TRUE)
 end
 
-# UNSTAKE - LOCKS CRYPT
+# UNSETTLES CRYPT
 @external
-func lock_crypt{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256) -> (success : felt):
+func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
+) -> (success : felt):
     alloc_locals
     let (caller) = get_caller_address()
     let (controller) = MODULE_controller_address()
-    let (block_timestamp) = get_block_timestamp()
+    let (contract_address) = get_contract_address()
 
-   # FETCH ADDRESSES
+    # FETCH ADDRESSES
     let (crypts_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Crypts)
+        controller, ExternalContractIds.Crypts
+    )
     let (s_crypts_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.S_Crypts)
-    let (crypts_state_address) = IModuleController.get_module_address(
-        controller, ModuleIds.S07_Crypts)
+        controller, ExternalContractIds.S_Crypts
+    )
+
     let (resource_logic_address) = IModuleController.get_module_address(
-        controller, ModuleIds.L02_Resources)
+        controller, ModuleIds.L08_Crypts_Resources
+    )
+
+    # CHECK NO PENDING RESOURCES
+    let (can_claim) = IL08_Crypts_Resources.check_if_claimable(resource_logic_address, token_id)
+
+    if can_claim == TRUE:
+        IL08_Crypts_Resources.claim_resources(resource_logic_address, token_id)
+        _set_time_staked(token_id, 0)
+    else:
+        _set_time_staked(token_id, 0)
+    end
 
     # TRANSFER CRYPT BACK TO OWNER
-    crypts_IERC721.transferFrom(crypts_address, crypts_state_address, caller, token_id)
+    IERC721.transferFrom(crypts_address, contract_address, caller, token_id)
 
     # BURN S_CRYPT
-    s_crypts_IERC721.burn(s_crypts_address, token_id)
+    IERC721.burn(s_crypts_address, token_id)
 
-    # TODO: TimeStamp - current Hardcoded
-    # PASS 0 to set the current time
-    IS07_Crypts.set_time_staked(crypts_state_address, token_id, 0)
+    # EMIT
+    UnSettled.emit(caller, token_id)
 
-    # TOD0: Claim resources if available before unsettling
-
-    # UPDATE STAKED CRYPTS COUNTER
-    let (crypts_unlocked) = IS07_Crypts.get_total_crypts_unlocked(
-        contract_address=crypts_state_address)
-    IS07_Crypts.set_total_crypts_unlocked(crypts_state_address, crypts_unlocked - 1)
-
-    # UPDATE OTHER MODULES
-    let (crypts_data : CryptData) = crypts_IERC721.fetch_crypt_data(
-        contract_address=crypts_address, token_id=token_id)
-
-    # EMIT - UNSTAKE
-    Locked.emit(caller, token_id)
-    # RETURN 1 (TRUE)
     return (TRUE)
+end
+
+# TIME_LEFT -> WHEN PLAYER CLAIMS, THIS IS THE REMAINDER TO BE PASSED BACK INTO STORAGE
+# THIS ALLOWS FULL DAYS TO BE CLAIMED ONLY AND ALLOWS LESS THAN FULL DAYS TO CONTINUE ACCRUREING
+@external
+func set_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256, time_left : felt
+):
+    MODULE_only_approved()
+    _set_time_staked(token_id, time_left)
+    return ()
+end
+
+@external
+func set_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256, time_left : felt
+):
+    MODULE_only_approved()
+    _set_time_vault_staked(token_id, time_left)
+    return ()
+end
+
+############
+# INTERNAL #
+############
+
+func _set_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256, time_left : felt
+):  
+    let (block_timestamp) = get_block_timestamp()
+    time_staked.write(token_id, block_timestamp - time_left)
+    return ()
+end
+
+func _set_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256, time_left : felt
+):
+    let (block_timestamp) = get_block_timestamp()
+    time_vault_staked.write(token_id, block_timestamp - time_left)
+    return ()
+end
+
+func _set_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    amount : felt
+):
+    total_realms_settled.write(amount)
+    return ()
+end
+
+
+###########
+# GETTERS #
+###########
+
+@view
+func get_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
+) -> (time : felt):
+    let (time) = time_staked.read(token_id)
+
+    return (time=time)
+end
+
+@view
+func get_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
+) -> (time : felt):
+    let (time) = time_vault_staked.read(token_id)
+
+    return (time=time)
+end
+
+@view
+func get_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    ) -> (realms_settled : felt):
+    let (amount) = total_realms_settled.read()
+
+    return (realms_settled=amount)
 end

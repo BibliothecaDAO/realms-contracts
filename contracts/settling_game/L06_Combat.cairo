@@ -20,14 +20,8 @@ from contracts.settling_game.interfaces.imodules import (
 )
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
-from contracts.settling_game.library_combat import (
-    build_squad_from_troops,
-    compute_squad_stats,
-    pack_squad,
-    unpack_squad,
-    get_troop_internal,
-    get_troop_population
-)
+from contracts.settling_game.library.library_combat import COMBAT
+
 from contracts.settling_game.utils.game_structs import (
     ModuleIds,
     RealmData,
@@ -40,7 +34,7 @@ from contracts.settling_game.utils.game_structs import (
     ExternalContractIds,
 )
 from contracts.settling_game.utils.general import unpack_data, transform_costs_to_token_ids_values
-from contracts.settling_game.utils.library import (
+from contracts.settling_game.library.library_module import (
     MODULE_controller_address,
     MODULE_only_approved,
     MODULE_initializer,
@@ -179,7 +173,7 @@ func build_squad_from_troops_in_realm{
     # IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
 
     # assemble the squad, store it in a Realm
-    let (squad) = build_squad_from_troops(troop_ids_len, troop_ids)
+    let (squad) = COMBAT.build_squad_from_troops(troop_ids_len, troop_ids)
     update_squad_in_realm(squad, realm_id, slot)
 
     Build_toops.emit(troop_ids_len, troop_ids, realm_id, slot)
@@ -205,15 +199,15 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     let (attacking_realm_data : RealmCombatData) = get_realm_combat_data(attacking_realm_id)
     let (defending_realm_data : RealmCombatData) = get_realm_combat_data(defending_realm_id)
 
-    let (attacker : Squad) = unpack_squad(attacking_realm_data.attacking_squad)
-    let (defender : Squad) = unpack_squad(defending_realm_data.defending_squad)
+    let (attacker : Squad) = COMBAT.unpack_squad(attacking_realm_data.attacking_squad)
+    let (defender : Squad) = COMBAT.unpack_squad(defending_realm_data.defending_squad)
 
     let (attacker_end, defender_end, combat_outcome) = run_combat_loop(
         attacker, defender, attack_type
     )
 
-    let (new_attacker : PackedSquad) = pack_squad(attacker_end)
-    let (new_defender : PackedSquad) = pack_squad(defender_end) 
+    let (new_attacker : PackedSquad) = COMBAT.pack_squad(attacker_end)
+    let (new_defender : PackedSquad) = COMBAT.pack_squad(defender_end) 
 
     let new_attacking_realm_data = RealmCombatData(
         attacking_squad=new_attacker,
@@ -230,7 +224,7 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     )
     set_realm_combat_data(defending_realm_id, new_defending_realm_data)
 
-    # pillaging only if attacker wins
+    # # pillaging only if attacker wins
     if combat_outcome == COMBAT_OUTCOME_ATTACKER_WINS:
         let (resources_logic_address) = IModuleController.get_module_address(
             controller, ModuleIds.L02_Resources
@@ -287,8 +281,8 @@ func attack{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
 ) -> (d_after_attack : Squad):
     alloc_locals
 
-    let (a_stats) = compute_squad_stats(a)
-    let (d_stats) = compute_squad_stats(d)
+    let (a_stats) = COMBAT.compute_squad_stats(a)
+    let (d_stats) = COMBAT.compute_squad_stats(d)
 
     if attack_type == COMBAT_TYPE_ATTACK_VS_DEFENSE:
         # attacker attacks with attack against defense,
@@ -495,7 +489,7 @@ func update_squad_in_realm{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : 
     MODULE_ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
 
     let (realm_combat_data : RealmCombatData) = get_realm_combat_data(realm_id)
-    let (packed_squad : PackedSquad) = pack_squad(s)
+    let (packed_squad : PackedSquad) = COMBAT.pack_squad(s)
 
     if slot == ATTACKING_SQUAD_SLOT:
         let new_realm_combat_data = RealmCombatData(
@@ -528,15 +522,21 @@ func view_troops{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuilti
 
     let (realm_data : RealmCombatData) = get_realm_combat_data(realm_id)
 
-    let (attacking_squad : Squad) = unpack_squad(realm_data.attacking_squad)
-    let (defending_squad : Squad) = unpack_squad(realm_data.defending_squad)
+    let (attacking_squad : Squad) = COMBAT.unpack_squad(realm_data.attacking_squad)
+    let (defending_squad : Squad) = COMBAT.unpack_squad(realm_data.defending_squad)
 
     return(attacking_squad, defending_squad)
 end
 
 @view
+func get_xoroshiro{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (x : felt):
+    let (xoroshiro) = xoroshiro_address.read()
+    return (xoroshiro)
+end
+
+@view
 func get_troop{range_check_ptr, bitwise_ptr : BitwiseBuiltin*}(troop_id : felt) -> (t : Troop):
-    let (t : Troop) = get_troop_internal(troop_id)
+    let (t : Troop) = COMBAT.get_troop_internal(troop_id)
     return (t)
 end
 
@@ -561,6 +561,7 @@ func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     attacking_realm_id : Uint256, defending_realm_id : Uint256
 ) -> (yesno : felt):
     # TODO: write tests for this
+    # TODO: Cannot attack own Realm
 
     alloc_locals
 

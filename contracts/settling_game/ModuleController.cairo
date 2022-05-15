@@ -82,21 +82,25 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     genesis.write(block_timestamp)
 
     # write patterns known at deployment. E.g., 1->2, 1->3, 5->6.
-
-    # settling to state
-    can_write_to.write(ModuleIds.L01_Settling, ModuleIds.L01_Settling, TRUE)
     
     # settling to wonders logic
     can_write_to.write(ModuleIds.L01_Settling, ModuleIds.L05_Wonders, TRUE)
 
-    # # resources logic to settling state
+    # resources logic to settling state
     can_write_to.write(ModuleIds.L02_Resources, ModuleIds.L01_Settling, TRUE)
 
-    # # resources logic to wonders state
+    # resources logic to wonders state
     can_write_to.write(ModuleIds.L02_Resources, ModuleIds.L05_Wonders, TRUE)
 
-    # crypts logic to state
-    can_write_to.write(ModuleIds.L07_Crypts, ModuleIds.S07_Crypts, TRUE)
+    # combat can write to resources
+    can_write_to.write(ModuleIds.L06_Combat, ModuleIds.L02_Resources, TRUE)
+
+    # crypts logic to resources
+    can_write_to.write(ModuleIds.L07_Crypts, ModuleIds.L08_Crypts_Resources, TRUE)
+
+    # resources logic to crypts state
+    can_write_to.write(ModuleIds.L08_Crypts_Resources, ModuleIds.L07_Crypts, TRUE)
+
 
     # Lookup table for NON module contracts
     external_contract_table.write(ExternalContractIds.Lords, _lords_address)
@@ -157,60 +161,39 @@ func set_initial_module_addresses{
     module_03_addr : felt,
     module_04_addr : felt,
     module_05_addr : felt,
-<<<<<<< HEAD
     module_06_addr : felt,
-    module_07_addr : felt,
-    module_08_addr : felt,
-    module_09_addr : felt,
-    module_10_addr : felt,
-    module_11_addr : felt,
-    module_12_addr : felt,
-    module_13_addr : felt
-=======
-    module_06_addr : felt
->>>>>>> proxy-test
+    module_07_addr : felt
 ):
     only_arbiter()
 
-    # # Settling Logic
+    # Settling Logic
     address_of_module_id.write(ModuleIds.L01_Settling, module_01_addr)
     module_id_of_address.write(module_01_addr, ModuleIds.L01_Settling)
 
-    # # # Resources Logic
+    # Resources Logic
     address_of_module_id.write(ModuleIds.L02_Resources, module_02_addr)
     module_id_of_address.write(module_02_addr, ModuleIds.L02_Resources)
 
-    # # # Buildings Logic
+    # Buildings Logic
     address_of_module_id.write(ModuleIds.L03_Buildings, module_03_addr)
     module_id_of_address.write(module_03_addr, ModuleIds.L03_Buildings)
 
-    # # # Calculator Logic
+    # Calculator Logic
     address_of_module_id.write(ModuleIds.L04_Calculator, module_04_addr)
     module_id_of_address.write(module_04_addr, ModuleIds.L04_Calculator)
 
-    # # # Wonders Logic
+    # Wonders Logic
     address_of_module_id.write(ModuleIds.L05_Wonders, module_05_addr)
     module_id_of_address.write(module_05_addr, ModuleIds.L05_Wonders)
 
-    # # # Combat Logic
+    # Combat Logic
     address_of_module_id.write(ModuleIds.L06_Combat, module_06_addr)
     module_id_of_address.write(module_06_addr, ModuleIds.L06_Combat)
 
-<<<<<<< HEAD
-    # # Combat State
-    address_of_module_id.write(ModuleIds.S06_Combat, module_11_addr)
-    module_id_of_address.write(module_11_addr, ModuleIds.S06_Combat)
+    # Crypts Logic
+    address_of_module_id.write(ModuleIds.L07_Crypts, module_07_addr)
+    module_id_of_address.write(module_07_addr, ModuleIds.L07_Crypts)
 
-     # # Crypts Logic
-    address_of_module_id.write(ModuleIds.L07_Crypts, module_12_addr)
-    module_id_of_address.write(module_12_addr, ModuleIds.L07_Crypts)
-
-    # # Crypts State
-    address_of_module_id.write(ModuleIds.S07_Crypts, module_13_addr)
-    module_id_of_address.write(module_13_addr, ModuleIds.S07_Crypts)
-
-=======
->>>>>>> proxy-test
     return ()
 end
 

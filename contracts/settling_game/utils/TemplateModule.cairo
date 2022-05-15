@@ -11,7 +11,7 @@ from starkware.starknet.common.syscalls import get_caller_address
 
 from contracts.settling_game.interfaces.imodules import IModuleController
 
-from contracts.settling_game.utils.library import (
+from contracts.settling_game.library.library_module import (
     MODULE_controller_address,
     MODULE_only_approved,
     MODULE_initializer,
@@ -33,7 +33,7 @@ from openzeppelin.upgrades.library import (
 # Steps - Copy and modify this template contract for new modules.
 # 1. Assign the new module the next available number in the contracts/ folder.
 # 2. Add to namespace within game_structs
-# 3. Increase module controller and arbiter contract functions to include new module.
+# 3. Increase module controller and arbiter contract functions to include new module. (Only if before game is live)
 # 4. Import any module dependencies from interfaces.imodules (above).
 # 5. Document which modules this module will interact with (above).
 # 6. Document which modules this module requires write access to.

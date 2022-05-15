@@ -18,10 +18,18 @@ def run(nre):
     # time.sleep(240)
 
     # set module access within realms access
+    # wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="proxy_L06_Combat",
+    #     function="upgrade",
+    #     arguments=[strhex_as_strfelt(config.L06_COMBAT_ADDRESS)]
+    # )
+
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_L06_Combat",
-        function="upgrade",
-        arguments=[strhex_as_strfelt(config.L06_COMBAT_ADDRESS)]
+        contract_alias="arbiter",
+        function="approve_module_to_module_write_access",
+        arguments=[6, 1]
     )

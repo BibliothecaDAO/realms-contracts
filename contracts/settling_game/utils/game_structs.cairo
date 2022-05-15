@@ -193,31 +193,13 @@ end
 
 namespace ModuleIds:
     const L01_Settling = 1
-<<<<<<< HEAD
-    const S01_Settling = 2
-    const L02_Resources = 3
-    const S02_Resources = 4
-    const L03_Buildings = 5
-    const S03_Buildings = 6
-    const L04_Calculator = 7
-    const L05_Wonders = 8
-    const S05_Wonders = 9
-    const L06_Combat = 10
-    const S06_Combat = 11
-    const L07_Crypts = 12
-    const S07_Crypts = 13
-=======
-    # const S01_Settling = 2
     const L02_Resources = 2
-    # const S02_Resources = 4
     const L03_Buildings = 3
-    # const S03_Buildings = 6
     const L04_Calculator = 4
     const L05_Wonders = 5
-    # const S05_Wonders = 9
     const L06_Combat = 6
-    # const S06_Combat = 12
->>>>>>> proxy-test
+    const L07_Crypts = 7
+    const L08_Crypts_Resources = 8
 end
 
 namespace ExternalContractIds:
@@ -375,11 +357,6 @@ struct SquadStats:
     member defense : felt
     member vitality : felt
     member wisdom : felt
-end
-
-struct SquadPopulation:
-    member type : felt
-    member tier : felt
 end
 
 # this struct holds everything related to a Realm & combat

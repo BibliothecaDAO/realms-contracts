@@ -26,7 +26,7 @@ from contracts.settling_game.interfaces.imodules import (
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
 
-from contracts.settling_game.utils.library import (
+from contracts.settling_game.library.library_module import (
     MODULE_controller_address,
     MODULE_only_approved,
     MODULE_initializer,

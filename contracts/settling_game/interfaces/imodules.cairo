@@ -17,7 +17,9 @@ namespace IArbiter:
         module_03_addr : felt,
         module_04_addr : felt,
         module_05_addr : felt,
-        module_06_addr : felt
+        module_06_addr : felt,
+        module_07_addr : felt,
+        module_08_addr : felt
     ):
     end
 end
@@ -58,7 +60,9 @@ namespace IModuleController:
         module_03_addr : felt,
         module_04_addr : felt,
         module_05_addr : felt,
-        module_06_addr : felt
+        module_06_addr : felt,
+        module_07_addr : felt,
+        module_08_addr : felt
     ):
     end
 end
@@ -93,7 +97,7 @@ end
 
 @contract_interface
 namespace IL03_Buildings:
-    func fetch_buildings_by_type(token_id : Uint256) -> (realm_buildings : RealmBuildings):
+    func get_buildings_unpacked(token_id : Uint256) -> (realm_buildings : RealmBuildings):
     end
 end
 
@@ -109,17 +113,6 @@ namespace IL04_Calculator:
     end
 end
 
-@contract_interface
-namespace IL06_Combat:
-    func build_squad_from_troops_in_realm(troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt):
-    end
-    func set_troop_cost(troop_id : felt, cost : Cost):
-    end
-    func view_troops(realm_id : Uint256) -> (attacking_troops : Squad, defending_troops : Squad):
-    end
-    func get_realm_combat_data(realm_id : Uint256) -> (combat_data : RealmCombatData):
-    end
-end
 
 @contract_interface
 namespace IL05_Wonders:
@@ -163,36 +156,39 @@ namespace IL05_Wonders:
 
     func get_tax_pool(epoch : felt, resource_id : felt) -> (supply : felt):
     end
-<<<<<<< HEAD
 end
 
 @contract_interface
-namespace IS06_Combat:
+namespace IL06_Combat:
+    func build_squad_from_troops_in_realm(troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt):
+    end
+    func set_troop_cost(troop_id : felt, cost : Cost):
+    end
+    func view_troops(realm_id : Uint256) -> (attacking_troops : Squad, defending_troops : Squad):
+    end
     func get_realm_combat_data(realm_id : Uint256) -> (combat_data : RealmCombatData):
     end
-
-    func set_realm_combat_data(realm_id : Uint256, combat_data : RealmCombatData):
-    end
-
-    func get_troop_cost(troop_id : felt) -> (cost : Cost):
-    end
-
-    func update_squad_in_realm(s : Squad, realm_id : Uint256, slot : felt):
-    end
 end
 
+
 @contract_interface
-namespace IS07_Crypts:
-    func set_time_staked(token_id : Uint256, time_left : felt):
+namespace IL07_Crypts:
+   func set_time_staked(token_id : Uint256, time_left : felt):
     end
-    func set_total_crypts_unlocked(amount : felt):
+    func set_total_crypts_settled(amount : felt):
     end
     func get_time_staked(token_id : Uint256) -> (time : felt):
     end
-    func get_total_crypts_unlocked() -> (amount : felt):
+    func get_total_crypts_settled() -> (amount : felt):
     end
     func return_approved():
     end
-=======
->>>>>>> proxy-test
+end
+
+@contract_interface
+namespace IL08_Crypts_Resources:
+    func check_if_claimable(token_id : Uint256) -> (can_claim : felt):
+    end
+    func claim_resources(token_id : Uint256):
+    end
 end

@@ -25,7 +25,7 @@ from contracts.settling_game.utils.constants import (
     BASE_LORDS_PER_DAY,
     PILLAGE_AMOUNT,
 )
-from contracts.settling_game.utils.library import (
+from contracts.settling_game.library.library_module import (
     MODULE_controller_address,
     MODULE_only_approved,
     MODULE_initializer,
@@ -34,13 +34,14 @@ from contracts.settling_game.utils.library import (
 )
 
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
+from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.imodules import (
     IModuleController,
     IL01_Settling,
     IL04_Calculator,
-    IL05_Wonders,
+    IL05_Wonders
 )
 
 from openzeppelin.upgrades.library import (
@@ -137,8 +138,9 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         controller, ModuleIds.L05_Wonders
     )
 
+
     # FETCH OWNER
-    let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
+    let (owner) = IERC721.ownerOf(s_realms_address, token_id)
 
     # ALLOW RESOURCE LOGIC ADDRESS TO CLAIM, BUT STILL RESTRICT
     if caller != settling_logic_address:
