@@ -174,9 +174,9 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     IERC1155.mintBatch(
         resources_address,
         owner,
-        RESOURCES_PER_CRYPT,  # The number of resources we're minting (which is always 1 for crypts)
+        RESOURCES_PER_CRYPT,
         resource_ids,
-        RESOURCES_PER_CRYPT,  # The number of resources we're minting (which is always 1 for crypts)
+        RESOURCES_PER_CRYPT,
         user_resources_value,
     )
 
