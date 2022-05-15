@@ -390,6 +390,10 @@ async def ctx_factory_desiege(copyable_deployment_desiege):
 
     return make
 
+###########################
+# GAME specific fixtures
+###########################
+
 @pytest.fixture(scope="session")
 def compiled_proxy():
     return compile("contracts/settling_game/proxy/PROXY_Logic.cairo")

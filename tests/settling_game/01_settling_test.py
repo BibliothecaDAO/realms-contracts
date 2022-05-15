@@ -93,12 +93,10 @@ async def test_mint_realm(game_factory):
     # print realm details
     realm_info = await realms.get_realm_info(FIRST_TOKEN_ID).invoke()
     print(f'\033[1;33;40m🏰 | Realm metadata: {realm_info.result.realm_data}\n')
-    # assert realm_info.result.realm_data == map_realm(
-    #     realms_data[str(from_uint(FIRST_TOKEN_ID))], resources, wonders, orders)
 
-    # unpacked_realm_info = await realms.fetch_realm_data(FIRST_TOKEN_ID).invoke()
-    # print(
-    #     f'\033[1;33;40m🏰 | Realm unpacked: {unpacked_realm_info.result.realm_stats}\n')
+    unpacked_realm_info = await realms.fetch_realm_data(FIRST_TOKEN_ID).invoke()
+    print(
+        f'\033[1;33;40m🏰 | Realm unpacked: {unpacked_realm_info.result.realm_stats}\n')
 
     # check balance of Realm on account
     await checks_realms_balance(admin_account, realms, 2)
@@ -179,7 +177,7 @@ async def test_mint_realm(game_factory):
     await signer.send_transaction(
         account=admin_account, to=buildings_logic.contract_address, selector_name='build', calldata=[*FIRST_TOKEN_ID, BUILDING_ID])
 
-    values = await buildings_logic.fetch_buildings_by_type(FIRST_TOKEN_ID).call()
+    values = await buildings_logic.get_buildings_unpacked(FIRST_TOKEN_ID).call()
 
     print(
         f'Realm {FIRST_TOKEN_ID} buildings: {values.result.realm_buildings}')
@@ -256,12 +254,3 @@ async def settle_realm(account, settling_logic, token):
     await signer.send_transaction(
         account=account, to=settling_logic.contract_address, selector_name='settle', calldata=[*token]
     )
-
-# async def test_get_set_troop_cost(account, buildings_state):
-#     for troop_id, troop_cost in BUILDING_COSTS.items():
-#         await signer.send_transaction(
-#             account=account, to=buildings_state.contract_address, selector_name='settle', calldata=[troop_id, troop_cost]
-#         )
-#         # await s06_combat.set_troop_cost(troop_id, troop_cost).invoke()
-#         # tx = await s06_combat.get_troop_cost(troop_id).invoke()
-#         # assert tx.result.cost == troop_cost

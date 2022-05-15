@@ -125,6 +125,10 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     # SETS WORLD AND REALM STATE
     _set_world_state(token_id, caller, controller, realms_address)
 
+    # CHECK REALMS STATE
+    let (realms_settled) = get_total_realms_settled()
+    _set_total_realms_settled(realms_settled + 1)
+
     # EMIT
     Settled.emit(caller, token_id)
 
@@ -168,6 +172,10 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
 
     # BURN S_REALM
     s_realms_IERC721.burn(s_realms_address, token_id)
+
+    # CHECK REALMS STATE
+    let (realms_settled) = get_total_realms_settled()
+    _set_total_realms_settled(realms_settled - 1)
 
     # EMIT
     UnSettled.emit(caller, token_id)
@@ -231,10 +239,6 @@ func _set_world_state{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     # SET REALM SETTLED/UNSETTLED STATE - PARSE 0 TO SET CURRENT TIME
     _set_time_staked(token_id, 0)
     _set_time_vault_staked(token_id, 0)
-
-    # CHECK REALMS STATE
-    let (realms_settled) = get_total_realms_settled()
-    _set_total_realms_settled(realms_settled + 1)
 
     # GET REALM DATA
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)

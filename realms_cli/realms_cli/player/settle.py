@@ -57,7 +57,7 @@ def approve_realm(network):
 @click.command()
 @click.argument("realm_token_id", nargs=1)
 @click.option("--network", default="goerli")
-def settle_realm(realm_token_id, network):
+def settle(realm_token_id, network):
     """
     Settle Realm
     """
@@ -68,6 +68,26 @@ def settle_realm(realm_token_id, network):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_L01_Settling",
         function="settle",
+        arguments=[
+            realm_token_id,  # uint1
+            0,               # uint2
+        ],
+    )
+
+@click.command()
+@click.argument("realm_token_id", nargs=1)
+@click.option("--network", default="goerli")
+def unsettle(realm_token_id, network):
+    """
+    Unsettle Realm
+    """
+    config = Config(nile_network=network)
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_L01_Settling",
+        function="unsettle",
         arguments=[
             realm_token_id,  # uint1
             0,               # uint2
