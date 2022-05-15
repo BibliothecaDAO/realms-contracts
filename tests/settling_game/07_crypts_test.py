@@ -34,9 +34,8 @@ stake_time = 129600 * 7
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
-async def test_mint_realm(game_factory):
-    admin_account, treasury_account, starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state, s_realms, buildings_logic, buildings_state, calculator_logic = game_factory
-    # TODO: Add Crypts ^^^^
+async def test_mint_crypt(game_factory):
+    admin_account, treasury_account, starknet, accounts, signers, arbiter, controller, settling_logic, realms, resources, lords, resources_logic, s_realms, buildings_logic, calculator_logic, crypts, s_crypts, crypts_logic, crypts_resources_logic = game_factory
 
     #################
     # VALUE SETTERS #
