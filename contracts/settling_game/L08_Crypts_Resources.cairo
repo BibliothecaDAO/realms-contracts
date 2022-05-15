@@ -161,7 +161,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (r_output, r_resource_id) = get_output_per_environment(crypts_data.environment)
 
     # CHECK IF LEGENDARY
-    let (r_legendary) = crypts_data.legendary
+    let r_legendary = crypts_data.legendary
     
     # CHECK HOW MANY RESOURCES * DAYS WE SHOULD GIVE OUT
     let (r_user_resources_value) = calculate_resource_output(days, token_id, r_resource_id, r_output, r_legendary)
@@ -311,7 +311,7 @@ func get_output_per_environment{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     alloc_locals
 
     # Each environment has a designated resourceId
-    let (r_resource_id) = 22 + environment    # Environment struct is 1->6 and Crypts resources are 23->28
+    let r_resource_id = 22 + environment    # Environment struct is 1->6 and Crypts resources are 23->28
 
     if environment == 1:
         return(EnvironmentProduction.DesertOasis, r_resource_id)
@@ -338,17 +338,17 @@ end
 
 # RETURNS RESOURCE OUTPUT
 func calculate_resource_output{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    days : felt, token_id : felt, resource_id : felt, output : felt, legendary : felt
-) -> (value : felt):
+    days : felt, token_id : Uint256, resource_id : felt, output : felt, legendary : felt
+) -> (value : Uint256):
     alloc_locals
 
     # GET RESOURCE LEVEL
     let (level) = get_resource_level(token_id, resource_id)
 
     # LEGENDARY MAPS EARN MORE RESOURCES
-    let (legendary_multiplier) = legendary * LEGENDARY_MULTIPLIER
+    let legendary_multiplier = legendary * LEGENDARY_MULTIPLIER
 
-    let (total_work_generated, _) = unsigned_div_rem(days * level * output * legendary_multiplier)
+    let (total_work_generated, _) = unsigned_div_rem(days * level * output * legendary_multiplier, 100)
 
     # IF LEVEL 0 RETURN NO INCREASE
     # if level == 0:
