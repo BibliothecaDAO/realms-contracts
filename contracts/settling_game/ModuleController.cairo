@@ -162,7 +162,8 @@ func set_initial_module_addresses{
     module_04_addr : felt,
     module_05_addr : felt,
     module_06_addr : felt,
-    module_07_addr : felt
+    module_07_addr : felt,
+    module_08_addr : felt
 ):
     only_arbiter()
 
@@ -193,6 +194,11 @@ func set_initial_module_addresses{
     # Crypts Logic
     address_of_module_id.write(ModuleIds.L07_Crypts, module_07_addr)
     module_id_of_address.write(module_07_addr, ModuleIds.L07_Crypts)
+
+    # Crypts Resources Logic
+    address_of_module_id.write(ModuleIds.L08_Crypts_Resources, module_08_addr)
+    module_id_of_address.write(module_08_addr, ModuleIds.L08_Crypts_Resources)
+
 
     return ()
 end

@@ -54,8 +54,8 @@ end
 # STORAGE #
 ###########
 
-# STAKE TIME - THIS IS USED AS THE MAIN IDENTIFIER FOR STAKING TIME
-# IT IS UPDATED ON RESOURCE CLAIM, STAKE, UNSTAKE
+# STAKE TIME - This is used as the main identifier for staking time
+# It is updated on Resource Claim, Stake, Unstake
 @storage_var
 func time_staked(token_id : Uint256) -> (time : felt):
 end
@@ -114,7 +114,7 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     IERC721.transferFrom(crypts_address, caller, contract_address, token_id)
 
     # MINT S_CRYPT
-    IERC721.mint(s_crypts_address, caller, token_id)
+    s_crypts_IERC721.mint(s_crypts_address, caller, token_id)
 
     # SETS TIME STAKED FOR FUTURE CLAIMS
     _set_time_staked(token_id, 0)
@@ -161,7 +161,7 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     IERC721.transferFrom(crypts_address, contract_address, caller, token_id)
 
     # BURN S_CRYPT
-    IERC721.burn(s_crypts_address, token_id)
+    s_crypts_IERC721.burn(s_crypts_address, token_id)
 
     # EMIT
     UnSettled.emit(caller, token_id)
@@ -180,15 +180,6 @@ func set_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     return ()
 end
 
-@external
-func set_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    token_id : Uint256, time_left : felt
-):
-    MODULE_only_approved()
-    _set_time_vault_staked(token_id, time_left)
-    return ()
-end
-
 ############
 # INTERNAL #
 ############
@@ -198,21 +189,6 @@ func _set_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
 ):  
     let (block_timestamp) = get_block_timestamp()
     time_staked.write(token_id, block_timestamp - time_left)
-    return ()
-end
-
-func _set_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    token_id : Uint256, time_left : felt
-):
-    let (block_timestamp) = get_block_timestamp()
-    time_vault_staked.write(token_id, block_timestamp - time_left)
-    return ()
-end
-
-func _set_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    amount : felt
-):
-    total_realms_settled.write(amount)
     return ()
 end
 
@@ -228,21 +204,4 @@ func get_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (time) = time_staked.read(token_id)
 
     return (time=time)
-end
-
-@view
-func get_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    token_id : Uint256
-) -> (time : felt):
-    let (time) = time_vault_staked.read(token_id)
-
-    return (time=time)
-end
-
-@view
-func get_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    ) -> (realms_settled : felt):
-    let (amount) = total_realms_settled.read()
-
-    return (realms_settled=amount)
 end

@@ -1,13 +1,17 @@
+# TODO: Look at settling test, pull in what makes sense here
+
 import pytest
 import asyncio
 import json
 from openzeppelin.tests.utils import Signer, uint, str_to_felt
 import time
 
-from scripts.binary_converter import map_realm
+# TODO: Add Crypts to map_realm + pull in json
+from realms_cli.realms_cli.binary_converter import map_realm
 
 from tests.conftest import set_block_timestamp
 
+# TODO: Pull in crypts JSON data
 json_realms = json.load(open('data/realms.json'))
 
 # ACCOUNTS
@@ -32,6 +36,7 @@ stake_time = 129600 * 7
 @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
 async def test_mint_realm(game_factory):
     admin_account, treasury_account, starknet, accounts, signers, arbiter, controller, settling_logic, settling_state, realms, resources, lords, resources_logic, resources_state, s_realms, buildings_logic, buildings_state, calculator_logic = game_factory
+    # TODO: Add Crypts ^^^^
 
     #################
     # VALUE SETTERS #
@@ -40,6 +45,7 @@ async def test_mint_realm(game_factory):
     await signer.send_transaction(
         account=admin_account, to=resources.contract_address, selector_name='mintBatch', calldata=[admin_account.contract_address, 5, *uint(1), *uint(2), *uint(3), *uint(4), *uint(5), 5, *uint(100), *uint(100), *uint(100), *uint(100), *uint(100)]
     )
+
 
     # TODO: Set CRYPTS
     # METADATA

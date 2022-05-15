@@ -175,11 +175,7 @@ end
 namespace IL07_Crypts:
    func set_time_staked(token_id : Uint256, time_left : felt):
     end
-    func set_total_crypts_settled(amount : felt):
-    end
     func get_time_staked(token_id : Uint256) -> (time : felt):
-    end
-    func get_total_crypts_settled() -> (amount : felt):
     end
     func return_approved():
     end

@@ -14,20 +14,20 @@ namespace TraitsIds:
 end
 
 struct RealmData:
-    member regions : felt  #
-    member cities : felt  #
-    member harbours : felt  #
-    member rivers : felt  #
-    member resource_number : felt  #
-    member resource_1 : felt  #
-    member resource_2 : felt  #
-    member resource_3 : felt  #
-    member resource_4 : felt  #
-    member resource_5 : felt  #
-    member resource_6 : felt  #
-    member resource_7 : felt  #
-    member wonder : felt  #
-    member order : felt  #
+    member regions : felt
+    member cities : felt
+    member harbours : felt
+    member rivers : felt
+    member resource_number : felt
+    member resource_1 : felt
+    member resource_2 : felt
+    member resource_3 : felt
+    member resource_4 : felt
+    member resource_5 : felt
+    member resource_6 : felt
+    member resource_7 : felt
+    member wonder : felt
+    member order : felt
 end
 
 struct RealmBuildings:
@@ -214,7 +214,7 @@ namespace ExternalContractIds:
 end
 
 struct CryptData:
-    member environment : felt  # uint256 - environment of the dungeon (0-6)
+    member environment : felt  # uint256 - environment of the dungeon (1-6)
     member legendary : felt  # uint256 - flag if dungeon is legendary (0/1)
     member size : felt  # uint256 - size (e.g. 6x6) of dungeon. (6-25)
     member num_doors : felt  # uint256 - number of doors (0-12)
@@ -233,7 +233,17 @@ namespace EnvironmentIds:
     const EmbersGlow = 6
 end
 
+namespace EnvironmentProduction:
+    const DesertOasis = 170
+    const StoneTemple = 90
+    const ForestRuins = 80
+    const MountainDeep = 60
+    const UnderwaterKeep = 25
+    const EmbersGlow = 10
+end
+
 namespace ResourceIds:
+    # Realms Resources
     const Wood = 1
     const Stone = 2
     const Coal = 3
@@ -256,6 +266,7 @@ namespace ResourceIds:
     const Adamantine = 20
     const Mithral = 21
     const Dragonhide = 22
+    # Crypts and Caverns Resources
     const DesertGlass = 23
     const DivineCloth = 24
     const CuriousSpore = 25
@@ -303,8 +314,8 @@ struct Troop:
     member wisdom : felt
 end
 
-# TODO: add a t4 Troop that's a Character from our Character module;
-#       it should be optional
+# # TODO: add a t4 Troop that's a Character from our Character module;
+# #       it should be optional
 struct Squad:
     # tier 1 troops
     member t1_1 : Troop
