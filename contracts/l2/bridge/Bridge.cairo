@@ -28,8 +28,9 @@ end
 func l2_realms_contract_address() -> (res: felt):
 end
 
+# 1 or 2
 @storage_var
-func token_owners(token_id: Uint256) -> (owner: felt):
+func journey_versions(token_id: Uint256) -> (version: felt):
 end
 
 @constructor
@@ -85,6 +86,7 @@ func depositFromL1{
     } (
         from_address: felt, # Starknet special field - filled for L1 caller contract
         to: felt,
+        journey_version: felt,
         token_ids_len: felt, 
         token_ids: felt*
     ):
@@ -93,17 +95,18 @@ func depositFromL1{
     let (address) = l1_lockbox_contract_address.read()
     assert from_address = address
 
-    bridge_mint_loop(to, token_ids_len, token_ids)
+    bridge_transfer_loop(to, journey_version, token_ids_len, token_ids)
 
     return ()
 end
 
-func bridge_mint_loop{
+func bridge_transfer_loop{
         syscall_ptr: felt*, 
         pedersen_ptr: HashBuiltin*,
         range_check_ptr
     } (
-        to: felt, 
+        to: felt,
+        journey_version: felt,
         token_ids_len: felt, 
         token_ids: felt*
     ):
@@ -128,7 +131,10 @@ func bridge_mint_loop{
         tokenId=token_id
     )
 
-    bridge_mint_loop(to, token_ids_len - 2, token_ids + 2)
+    # Save Journey for future withdrawal - we need to know which contract to call
+    journey_versions.write(token_id, journey_version)
+
+    bridge_transfer_loop(to, journey_version, token_ids_len - 2, token_ids + 2)
 
     return ()
 end
@@ -156,6 +162,8 @@ func withdrawToL1{
     let (message_payload: felt*) = alloc()
 
     assert message_payload[0] = to_address
+
+    # TODO: add journey_versions here
 
     # Collect all token_ids
     withdraw_loop(to_address, token_ids_len, token_ids, 1, message_payload + 1)
