@@ -150,8 +150,8 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     end
 
     let (local resource_ids : Uint256*) = alloc()
-    let (local user_mint : Uint256*) = alloc()
-    let (local wonder_tax_arr : Uint256*) = alloc()
+    let (local user_resources_value : Uint256*) = alloc()
+    let (local wonder_tax_resources_value : Uint256*) = alloc()
 
     # FETCH REALM DATA
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
@@ -178,7 +178,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # SET MINT
     let treasury_mint_perc = wonder_tax
-    let user_mint_rel_perc = 100 - wonder_tax
+    let user_resources_value_rel_perc = 100 - wonder_tax
 
     # GET OUTPUT FOR EACH RESOURCE
     let (r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output,
@@ -194,13 +194,13 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     )
 
     # USER CLAIM
-    let (r_1_user) = calculate_total_claimable(days, user_mint_rel_perc, r_1_output)
-    let (r_2_user) = calculate_total_claimable(days, user_mint_rel_perc, r_2_output)
-    let (r_3_user) = calculate_total_claimable(days, user_mint_rel_perc, r_3_output)
-    let (r_4_user) = calculate_total_claimable(days, user_mint_rel_perc, r_4_output)
-    let (r_5_user) = calculate_total_claimable(days, user_mint_rel_perc, r_5_output)
-    let (r_6_user) = calculate_total_claimable(days, user_mint_rel_perc, r_6_output)
-    let (r_7_user) = calculate_total_claimable(days, user_mint_rel_perc, r_7_output)
+    let (r_1_user) = calculate_total_claimable(days, user_resources_value_rel_perc, r_1_output)
+    let (r_2_user) = calculate_total_claimable(days, user_resources_value_rel_perc, r_2_output)
+    let (r_3_user) = calculate_total_claimable(days, user_resources_value_rel_perc, r_3_output)
+    let (r_4_user) = calculate_total_claimable(days, user_resources_value_rel_perc, r_4_output)
+    let (r_5_user) = calculate_total_claimable(days, user_resources_value_rel_perc, r_5_output)
+    let (r_6_user) = calculate_total_claimable(days, user_resources_value_rel_perc, r_6_output)
+    let (r_7_user) = calculate_total_claimable(days, user_resources_value_rel_perc, r_7_output)
 
     # WONDER TAX  
     let (r_1_wonder) = calculate_total_claimable(days, treasury_mint_perc, r_1_output)
@@ -213,43 +213,43 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # ADD VALUES TO TEMP ARRAY FOR EACH AVAILABLE RESOURCE
     assert resource_ids[0] = Uint256(realms_data.resource_1, 0)
-    assert user_mint[0] = r_1_user
-    assert wonder_tax_arr[0] = r_1_wonder
+    assert user_resources_value[0] = r_1_user
+    assert wonder_tax_resources_value[0] = r_1_wonder
 
     if realms_data.resource_2 != 0:
         assert resource_ids[1] = Uint256(realms_data.resource_2, 0)
-        assert user_mint[1] = r_2_user
-        assert wonder_tax_arr[1] = r_2_wonder
+        assert user_resources_value[1] = r_2_user
+        assert wonder_tax_resources_value[1] = r_2_wonder
     end
 
     if realms_data.resource_3 != 0:
         assert resource_ids[2] = Uint256(realms_data.resource_3, 0)
-        assert user_mint[2] = r_3_user
-        assert wonder_tax_arr[2] = r_3_wonder
+        assert user_resources_value[2] = r_3_user
+        assert wonder_tax_resources_value[2] = r_3_wonder
     end
 
     if realms_data.resource_4 != 0:
         assert resource_ids[3] = Uint256(realms_data.resource_4, 0)
-        assert user_mint[3] = r_4_user
-        assert wonder_tax_arr[3] = r_4_wonder
+        assert user_resources_value[3] = r_4_user
+        assert wonder_tax_resources_value[3] = r_4_wonder
     end
 
     if realms_data.resource_5 != 0:
         assert resource_ids[4] = Uint256(realms_data.resource_5, 0)
-        assert user_mint[4] = r_5_user
-        assert wonder_tax_arr[4] = r_5_wonder
+        assert user_resources_value[4] = r_5_user
+        assert wonder_tax_resources_value[4] = r_5_wonder
     end
 
     if realms_data.resource_6 != 0:
         assert resource_ids[5] = Uint256(realms_data.resource_6, 0)
-        assert user_mint[5] = r_6_user
-        assert wonder_tax_arr[5] = r_6_wonder
+        assert user_resources_value[5] = r_6_user
+        assert wonder_tax_resources_value[5] = r_6_wonder
     end
 
     if realms_data.resource_7 != 0:
         assert resource_ids[6] = Uint256(realms_data.resource_7, 0)
-        assert user_mint[6] = r_7_user
-        assert wonder_tax_arr[6] = r_7_wonder
+        assert user_resources_value[6] = r_7_user
+        assert wonder_tax_resources_value[6] = r_7_wonder
     end
 
     # LORDS MINT
@@ -266,7 +266,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         realms_data.resource_number,
         resource_ids,
         realms_data.resource_number,
-        user_mint,
+        user_resources_value,
     )
 
     # GET EPOCH
@@ -279,7 +279,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         realms_data.resource_number,
         resource_ids,
         realms_data.resource_number,
-        wonder_tax_arr,
+        wonder_tax_resources_value,
     )
 
     return ()
@@ -354,39 +354,39 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
 
     # ADD VALUES TO TEMP ARRAY FOR EACH AVAILABLE RESOURCE
     let (local resource_ids : Uint256*) = alloc()
-    let (local user_mint : Uint256*) = alloc()
+    let (local user_resources_value : Uint256*) = alloc()
 
     assert resource_ids[0] = Uint256(realms_data.resource_1, 0)
-    assert user_mint[0] = r_1_user
+    assert user_resources_value[0] = r_1_user
 
     if realms_data.resource_2 != 0:
         assert resource_ids[1] = Uint256(realms_data.resource_2, 0)
-        assert user_mint[1] = r_2_user
+        assert user_resources_value[1] = r_2_user
     end
 
     if realms_data.resource_3 != 0:
         assert resource_ids[2] = Uint256(realms_data.resource_3, 0)
-        assert user_mint[2] = r_3_user
+        assert user_resources_value[2] = r_3_user
     end
 
     if realms_data.resource_4 != 0:
         assert resource_ids[3] = Uint256(realms_data.resource_4, 0)
-        assert user_mint[3] = r_4_user
+        assert user_resources_value[3] = r_4_user
     end
 
     if realms_data.resource_5 != 0:
         assert resource_ids[4] = Uint256(realms_data.resource_5, 0)
-        assert user_mint[4] = r_5_user
+        assert user_resources_value[4] = r_5_user
     end
 
     if realms_data.resource_6 != 0:
         assert resource_ids[5] = Uint256(realms_data.resource_6, 0)
-        assert user_mint[5] = r_6_user
+        assert user_resources_value[5] = r_6_user
     end
 
     if realms_data.resource_7 != 0:
         assert resource_ids[6] = Uint256(realms_data.resource_7, 0)
-        assert user_mint[6] = r_7_user
+        assert user_resources_value[6] = r_7_user
     end
 
     # MINT PILLAGED RESOURCES TO VICTOR
@@ -396,7 +396,7 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
         realms_data.resource_number,
         resource_ids,
         realms_data.resource_number,
-        user_mint,
+        user_resources_value,
     )
 
     return ()
