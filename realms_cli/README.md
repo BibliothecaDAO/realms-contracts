@@ -283,6 +283,8 @@ The following scripts deploy all contracts necessary to test and play realms on 
 
 `$ nile run --network localhost realms_cli/7_upgrade.py`
 
+`$ nile run --network goerli realms_cli/8_deploy_AMM.py`
+
 ### Tips
 
 If you want to check a tx hash, run either
@@ -296,5 +298,22 @@ Or `$ starknet get_transaction_receipt --hash TXHASH` (only for non-localhost)
 Add your logic to `realms_cli/realms_cli/main.py`
 Add you cli entro to `realms_cli/pyproject.toml`
 Reinstall the plugin cli `pip install realms_cli/`
+
+</details>
+
+---
+# Notes on proxy deployments 
+
+<details><summary>Must read first</summary>
+
+Proxy contracts have some quirks which you must understand before playing with them.
+
+1. Proxies do not know what functions they have in them. This means you need to use the implementation abi when calling them.
+2. This means when you have deployed them you must replace the .json of the proxy with the implementation .json - Seen below
+
+```
+0x0708ccaad83939596224933ffc265cf468aeaccabac7bbe6d04fee416308785d:artifacts/abis/Exchange_ERC20_1155.json:Exchange_ERC20_1155
+0x01dc57f37705770448008e8083da883a06d81b28f01c6a398a010fff12703401:artifacts/abis/Exchange_ERC20_1155.json:proxy_Exchange_ERC20_1155
+```
 
 </details>

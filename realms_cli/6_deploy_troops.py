@@ -15,25 +15,6 @@ def run(nre):
     #     ],
     # )
 
-    # logged_deploy(
-    #     nre,
-    #     "L06_Combat",
-    #     alias="L06_Combat",
-    #     arguments=[
-    #         strhex_as_strfelt(config.CONTROLLER_ADDRESS),
-    #         strhex_as_strfelt(config.XOROSHIRO_ADDRESS)
-    #     ],
-    # )
-    
-    # logged_deploy(
-    #     nre,
-    #     "S06_Combat",
-    #     alias="S06_Combat",
-    #     arguments=[
-    #         strhex_as_strfelt(config.CONTROLLER_ADDRESS),
-    #     ],
-    # )
-
     # set module access within realms access
     wrapped_send(
         network=config.nile_network,

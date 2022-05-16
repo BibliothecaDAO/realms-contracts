@@ -96,10 +96,6 @@ async def _build_copyable_deployment():
         account=compile("openzeppelin/account/Account.cairo"),
         lords=compile(
             "contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo"),
-        realms=compile(
-            "contracts/settling_game/tokens/Realms_ERC721_Mintable.cairo"),
-        s_realms=compile(
-            "contracts/settling_game/tokens/S_Realms_ERC721_Mintable.cairo"),
         resources=compile(
             "contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo"
         ),
@@ -115,43 +111,19 @@ async def _build_copyable_deployment():
         }
     )
 
-    lords = await starknet.deploy(
-        contract_def=defs.lords,
-        constructor_calldata=[
-            str_to_felt("Lords"),  # name
-            str_to_felt("LRD"),  # symbol
-            11,  # decimal
-            *uint(INITIAL_LORDS_SUPPLY),  # initial supply
-            accounts.admin.contract_address,  # recipient
-            accounts.admin.contract_address,
-        ],
-    )
+    lords = await proxy_builder(compiled_proxy, starknet, signers["admin"], accounts.admin.contract_address, "contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo", [
+        str_to_felt("Lords"),
+        str_to_felt("LRD"),
+        18,
+        *uint(initial_supply),
+        accounts.admin.contract_address,
+        accounts.admin.contract_address,
+    ])
 
-    realms = await starknet.deploy(
-        contract_def=defs.realms,
-        constructor_calldata=[
-            str_to_felt("Realms"),  # name
-            str_to_felt("Realms"),  # ticker
-            accounts.admin.contract_address,  # contract_owner
-        ],
-    )
-
-    s_realms = await starknet.deploy(
-        contract_def=defs.s_realms,
-        constructor_calldata=[
-            str_to_felt("SRealms"),  # name
-            str_to_felt("SRealms"),  # ticker
-            accounts.admin.contract_address,  # contract_owner
-        ],
-    )
-
-    resources = await starknet.deploy(
-        contract_def=defs.resources,
-        constructor_calldata=[
-            1234,
-            accounts.admin.contract_address,  # recipient
-        ],
-    )
+    resources = await proxy_builder(compiled_proxy, starknet, signers["admin"], accounts.admin.contract_address, "contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo", [
+        1234,
+         accounts.admin.contract_address
+    ])
 
     return SimpleNamespace(
         starknet=starknet,
@@ -159,18 +131,13 @@ async def _build_copyable_deployment():
         accounts=accounts,
         serialized_contracts=dict(
             admin=serialize_contract(accounts.admin, defs.account.abi),
-            arbiter=serialize_contract(accounts.arbiter, defs.account.abi),
             lords=serialize_contract(lords, defs.lords.abi),
-            realms=serialize_contract(realms, defs.realms.abi),
-            s_realms=serialize_contract(s_realms, defs.s_realms.abi),
             resources=serialize_contract(resources, defs.resources.abi),
             user1=serialize_contract(accounts.user1, defs.account.abi),
         ),
         addresses=SimpleNamespace(
             admin=accounts.admin.contract_address,
-            arbiter=accounts.arbiter.contract_address,
             lords=lords.contract_address,
-            realms=realms.contract_address,
             resources=resources.contract_address,
             user1=accounts.user1.contract_address,
         ),
@@ -296,11 +263,6 @@ async def library_combat_tests(starknet) -> StarknetContract:
 @pytest.fixture(scope="module")
 async def utils_general_tests(starknet) -> StarknetContract:
     contract = compile("tests/settling_game/utils/general_tests.cairo")
-    return await starknet.deploy(contract_def=contract)
-
-@pytest.fixture(scope="module")
-async def l04_Calculator(starknet) -> StarknetContract:
-    contract = compile("contracts/settling_game/L04_Calculator.cairo")
     return await starknet.deploy(contract_def=contract)
 
 ###########################

@@ -34,9 +34,14 @@ from openzeppelin.token.erc1155.library import (
     ERC1155_safeBatchTransferFrom,
     ERC1155_mint,
     ERC1155_burn,
-    owner_or_approved,
     IERC1155_RECEIVER_ID,
     ON_ERC1155_RECEIVED_SELECTOR,
+)
+
+from openzeppelin.upgrades.library import (
+    Proxy_initializer,
+    Proxy_only_admin,
+    Proxy_set_implementation
 )
 
 @event
@@ -100,21 +105,41 @@ end
 func royalty_fee_address() -> (royalty_fee_address : felt):
 end
 
-@constructor
-func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    currency_address_ : felt,
-    token_address_ : felt,
-    lp_fee_thousands_ : Uint256,
-    royalty_fee_thousands_ : Uint256,
-    royalty_fee_address_ : felt,
-):
+###############
+# CONSTRUCTOR #
+###############
+
+@external
+func initializer{
+        syscall_ptr: felt*, 
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }(
+        currency_address_ : felt,
+        token_address_ : felt,
+        lp_fee_thousands_ : Uint256,
+        royalty_fee_thousands_ : Uint256,
+        royalty_fee_address_ : felt,
+        proxy_admin : felt
+    ):
     currency_address.write(currency_address_)
     token_address.write(token_address_)
     lp_fee_thousands.write(lp_fee_thousands_)
     set_royalty_info(royalty_fee_thousands_, royalty_fee_address_)
+    Proxy_initializer(proxy_admin)
     return ()
 end
 
+@external
+func upgrade{
+        syscall_ptr: felt*, 
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }(new_implementation: felt):
+    Proxy_only_admin()
+    Proxy_set_implementation(new_implementation)
+    return ()
+end
 #
 # Admin
 #
