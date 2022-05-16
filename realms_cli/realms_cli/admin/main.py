@@ -20,7 +20,7 @@ def mint_resources(network):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_resources",
         function="mintBatch",
-        arguments=[int(config.USER_ADDRESS, 16), 10, *uint(1), *uint(2), *uint(3), *uint(4), *uint(5), *uint(6), *uint(7), *uint(8), *uint(9), *uint(10), 10, *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500)
+        arguments=[int(config.ADMIN_ADDRESS, 16), 22, *uint(1), *uint(2), *uint(3), *uint(4), *uint(5), *uint(6), *uint(7), *uint(8), *uint(9), *uint(10), *uint(11), *uint(12), *uint(13), *uint(14), *uint(15), *uint(16), *uint(17), *uint(18), *uint(19), *uint(20), *uint(21),*uint(22), 22, *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000)
         ],
     )
 
