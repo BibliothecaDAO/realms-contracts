@@ -11,13 +11,9 @@ from .game_structs import BUILDING_COSTS, RESOURCE_UPGRADE_COST
 
 from tests.conftest import set_block_timestamp
 
-realms_data = json.load(open('data/realms.json'))
+crypts_data = json.load(open('data/crypts.json'))
 
 resources = json.load(open('data/resources.json'))
-
-orders = json.load(open('data/orders.json'))
-
-wonders = json.load(open('data/wonders.json'))
 
 # ACCOUNTS
 NUM_SIGNING_ACCOUNTS = 2
@@ -55,145 +51,104 @@ async def test_mint_crypt(game_factory):
     )
 
     # APPROVE RESOURCE CONTRACT FOR LORDS TRANSFERS - SET AT FULL SUPPLY TODO: NEEDS MORE SECURE SYSTEM
-    await signers[1].send_transaction(
-        account=treasury_account, to=lords.contract_address, selector_name='approve', calldata=[resources_logic.contract_address, *uint(INITIAL_SUPPLY)]
-    )
+    # await signers[1].send_transaction(
+    #     account=treasury_account, to=lords.contract_address, selector_name='approve', calldata=[resources_logic.contract_address, *uint(INITIAL_SUPPLY)]
+    # )
 
-    await signer.send_transaction(
-        account=admin_account, to=lords.contract_address, selector_name='approve', calldata=[buildings_logic.contract_address, *uint(INITIAL_SUPPLY)]
-    )
+    # await signer.send_transaction(
+    #     account=admin_account, to=lords.contract_address, selector_name='approve', calldata=[buildings_logic.contract_address, *uint(INITIAL_SUPPLY)]
+    # )
     
-    await signers[1].send_transaction(
-        account=treasury_account, to=lords.contract_address, selector_name='approve', calldata=[settling_logic.contract_address, *uint(INITIAL_SUPPLY)]
-    )
+    # await signers[1].send_transaction(
+    #     account=treasury_account, to=lords.contract_address, selector_name='approve', calldata=[settling_logic.contract_address, *uint(INITIAL_SUPPLY)]
+    # )
 
     # RESOURCE COSTS
 
-    for resource_id, resource_cost in RESOURCE_UPGRADE_COST.items():
-        await signer.send_transaction(
-            account=admin_account, to=resources_logic.contract_address, selector_name='set_resource_upgrade_cost', calldata=[resource_id.value, resource_cost.resource_count, resource_cost.bits, resource_cost.packed_ids, resource_cost.packed_amounts]
-        )
+    # for resource_id, resource_cost in RESOURCE_UPGRADE_COST.items():
+    #     await signer.send_transaction(
+    #         account=admin_account, to=resources_logic.contract_address, selector_name='set_resource_upgrade_cost', calldata=[resource_id.value, resource_cost.resource_count, resource_cost.bits, resource_cost.packed_ids, resource_cost.packed_amounts]
+    #     )
     # for building_id, building_cost in BUILDING_COSTS.items():
     #     await signer.send_transaction(
     #         account=admin_account, to=buildings_state.contract_address, selector_name='set_building_cost', calldata=[building_id.value, building_cost.resource_count, building_cost.bits, building_cost.packed_ids, building_cost.packed_amounts, *uint(building_cost.lords)]
     #     )
 
-    # REALM METADATA
-
-    await set_realm_meta(admin_account, realms, FIRST_TOKEN_ID)
-    await set_realm_meta(admin_account, realms, WONDER_TOKEN_ID)
+    # IMPORT CRYPTS METADATA (so we can mint)
+    await set_crypt_meta(admin_account, crypts, FIRST_TOKEN_ID)
 
     ########
     # MINT #
     ########
 
-    await mint_realm(admin_account, realms, FIRST_TOKEN_ID)
-    await mint_realm(admin_account, realms, WONDER_TOKEN_ID)
+    await mint_crypt(admin_account, crypts, FIRST_TOKEN_ID)
 
-    # print realm details
-    realm_info = await realms.get_realm_info(FIRST_TOKEN_ID).invoke()
-    print(f'\033[1;33;40m🏰 | Realm metadata: {realm_info.result.realm_data}\n')
+    # print crypt details
+    crypt_info = await realms.get_crypt_info(FIRST_TOKEN_ID).invoke()
+    print(f'\033[1;33;40m🏰 | Crypt metadata: {crypt_info.result.crypt_data}\n')
 
-    unpacked_realm_info = await realms.fetch_realm_data(FIRST_TOKEN_ID).invoke()
+    unpacked_crypt_info = await crypts.fetch_crypt_data(FIRST_TOKEN_ID).invoke()
     print(
-        f'\033[1;33;40m🏰 | Realm unpacked: {unpacked_realm_info.result.realm_stats}\n')
+        f'\033[1;33;40m🏰 | Crypt unpacked: {unpacked_crypt_info.result.crypt_stats}\n')
 
-    # check balance of Realm on account
-    await checks_realms_balance(admin_account, realms, 2)
+    # check balance of Crypt on account
+    await checks_crypts_balance(admin_account, crypts, 2)
 
     # set approval for Settling contract to use Realm
     await signer.send_transaction(
-        account=admin_account, to=realms.contract_address, selector_name='setApprovalForAll', calldata=[settling_logic.contract_address, 1]
+        account=admin_account, to=crypts.contract_address, selector_name='setApprovalForAll', calldata=[crypts_logic.contract_address, 1]
     )
 
     ##########
     # SETTLE #
     ##########
 
-    print(f'\033[2;31🏰 Settling Realm...\n')
-    await settle_realm(admin_account, settling_logic, FIRST_TOKEN_ID)
-    await settle_realm(admin_account, settling_logic, WONDER_TOKEN_ID)
+    print(f'\033[2;31🏰 Settling Cryptm...\n')
+    await settle_crypt(admin_account, crypts_logic, FIRST_TOKEN_ID)
 
     # check transfer
-    await checks_realms_balance(admin_account, realms, 0)
+    await checks_crypts_balance(admin_account, crypts, 0)
 
     # # increments time by 1.5 days to simulate stake
     set_block_timestamp(starknet.state, round(time.time()) + STAKE_TIME)
 
-    ############
-    # 😊 STATS #
-    ############
 
-    happiness = await calculator_logic.calculate_happiness(FIRST_TOKEN_ID).invoke()
-    # assert happiness.result.happiness == 25
-    print(f'\033[1;31;40m😊 Happiness level is {happiness.result.happiness}\n')
-
-    culture = await calculator_logic.calculate_culture(FIRST_TOKEN_ID).invoke()
-    # assert culture.result.culture == 25
-    print(f'\033[1;31;40m😊 Culture level is {culture.result.culture}\n')
-
-    food = await calculator_logic.calculate_food(FIRST_TOKEN_ID).invoke()
-    # assert culture.result.culture == 25
-    print(f'\033[1;31;40m😊 Culture level is {food.result.food}\n')
-
-    tax_percentage_info = await calculator_logic.calculate_wonder_tax().call()
-    print(
-        f'\033[1;31;40m😊 Wonder Tax {tax_percentage_info.result.tax_percentage}\n')
-
-    #####################
-    # RESOURCES & LORDS #
-    #####################
+    #############
+    # RESOURCES #
+    #############
 
     # CLAIM RESOURCES
-    await claim_resources(admin_account, resources_logic, FIRST_TOKEN_ID)
+    await claim_resources(admin_account, crypts_resources_logic, FIRST_TOKEN_ID)
 
     await show_resource_balance(admin_account, resources)
 
-    await show_lords_balance(admin_account, lords)
+    # # # UPGRADE RESOURCE
+    # print(
+    #     f'\n \033[1;33;40m🔥 Upgrading Resource.... 🔥\n')
 
-    # # UPGRADE RESOURCE
-    print(
-        f'\n \033[1;33;40m🔥 Upgrading Resource.... 🔥\n')
+    # await signer.send_transaction(
+    #     account=admin_account, to=resources_logic.contract_address, selector_name='upgrade_resource', calldata=[*FIRST_TOKEN_ID, RESOURCE_ID]
+    # )
 
-    await signer.send_transaction(
-        account=admin_account, to=resources_logic.contract_address, selector_name='upgrade_resource', calldata=[*FIRST_TOKEN_ID, RESOURCE_ID]
-    )
-
-    await show_resource_balance(admin_account, resources)
+    # await show_resource_balance(admin_account, resources)
 
     # increment another time so more resource accure
     set_block_timestamp(starknet.state, round(
         time.time()) + STAKE_TIME * 2)
 
-    await claim_resources(admin_account, resources_logic, FIRST_TOKEN_ID)
+    await claim_resources(admin_account, crypts_resources_logic, FIRST_TOKEN_ID)
 
     await show_resource_balance(admin_account, resources)
 
-    #############
-    # BUILDINGS #
-    #############
-
-    # create building
-    await signer.send_transaction(
-        account=admin_account, to=buildings_logic.contract_address, selector_name='build', calldata=[*FIRST_TOKEN_ID, BUILDING_ID])
-
-    values = await buildings_logic.get_buildings_unpacked(FIRST_TOKEN_ID).call()
-
-    print(
-        f'Realm {FIRST_TOKEN_ID} buildings: {values.result.realm_buildings}')
-
-    set_block_timestamp(starknet.state, round(
-        time.time()) + STAKE_TIME * 3)
-
     ##################
-    # UNSETTLE REALM #
+    # UNSETTLE CRYPT #
     ##################
 
     await signer.send_transaction(
-        account=admin_account, to=settling_logic.contract_address, selector_name='unsettle', calldata=[*FIRST_TOKEN_ID]
+        account=admin_account, to=crypts_logic.contract_address, selector_name='unsettle', calldata=[*FIRST_TOKEN_ID]
     )
     await show_resource_balance(admin_account, resources)
-    await checks_realms_balance(admin_account, realms, 1)
+    await checks_crypts_balance(admin_account, crypts, 1)
 
 #########
 # CALLS #
@@ -202,55 +157,47 @@ async def test_mint_crypt(game_factory):
 
 async def show_resource_balance(account, resources):
     """prints resource balance"""
-    for index in range(22):
+    for index in range(28):
         player_resource_value = await resources.balanceOf(account.contract_address, uint(index + 1)).invoke()
         if player_resource_value.result.balance[0] > 0:
             print(
                 f'\033[1;33;40m🔥 | Resource {index + 1} balance is: {player_resource_value.result.balance[0]}')
 
 
-async def show_lords_balance(account, lords):
-    """claims lords"""
-    player_lords_value = await lords.balanceOf(account.contract_address).invoke()
-    print(
-        f'\n \033[1;33;40m👛 | $LORDS {player_lords_value.result.balance[0]}\n')
-    assert player_lords_value.result.balance[0] == STAKED_DAYS * LORDS_RATE
-
-
-async def claim_resources(account, resources_logic, token):
+async def claim_resources(account, crypts_resources_logic, token):
     """claims resources"""
     await signer.send_transaction(
-        account=account, to=resources_logic.contract_address, selector_name='claim_resources', calldata=[*token]
+        account=account, to=crypts_resources_logic.contract_address, selector_name='claim_resources', calldata=[*token]
     )
 
 
-async def checks_realms_balance(account, realms, assert_value):
-    """check realms balance"""
-    balance_of = await realms.balanceOf(account.contract_address).invoke()
+async def checks_crypts_balance(account, crypts, assert_value):
+    """check crypts balance"""
+    balance_of = await crypts.balanceOf(account.contract_address).invoke()
     assert balance_of.result.balance[0] == assert_value
     print(
-        f'🏰 | Realms Balance: {balance_of.result.balance[0]}\n')
+        f'☠️ | Crypts Balance: {balance_of.result.balance[0]}\n')
 
 
-async def set_realm_meta(account, realms, token):
-    """set realm metadata"""
+async def set_crypt_meta(account, crypts, token):
+    """set crypts metadata"""
     await signer.send_transaction(
-        account, realms.contract_address, 'set_realm_data', [
-            *token, map_realm(
-        realms_data[str(from_uint(token))], resources, wonders, orders)]
+        account, crypts.contract_address, 'set_crypt_data', [
+            *token, map_realm(  ## TODO: Update map_realm to support crypts (via json)
+        crypts_data[str(from_uint(token))], environment)]
     )
 
 
-async def mint_realm(account, realms, token):
-    """mint realm"""
+async def mint_crypt(account, crypts, token):
+    """mint crypt"""
     await signer.send_transaction(
-        account, realms.contract_address, 'mint', [
+        account, crypts.contract_address, 'mint', [
             account.contract_address, *token]
     )
 
 
-async def settle_realm(account, settling_logic, token):
-    """settle realm"""
+async def settle_crypt(account, crypts_logic, token):
+    """settle crypt"""
     await signer.send_transaction(
-        account=account, to=settling_logic.contract_address, selector_name='settle', calldata=[*token]
+        account=account, to=crypts_logic.contract_address, selector_name='settle', calldata=[*token]
     )

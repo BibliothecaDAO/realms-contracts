@@ -111,6 +111,14 @@ def map_crypt(value, resources):
 
 if __name__ == '__main__':
 
+    crypts = json.load(open("data/crypts_test.json"))
+    output = []
+    for index in range(10):
+        print("ID: " + str(crypts["dungeons"][index]["tokenId"]))
+        print("Environment: " + crypts["dungeons"][index]["environment"])
+        print("Legendary: " + str(crypts["dungeons"][index]["legendary"]))
+        print("\n")
+
     # f = open("data/realms_bit.json", "a")
     # output = []
     # for index in range(8000):
@@ -121,30 +129,30 @@ if __name__ == '__main__':
     # # with open('scripts/json_data.json', 'w') as outfile:
     # #     outfile.write(str(createOutput(buildings, 6)))
 
-    building_costs = [6, 6, 6, 6, 6, 6, 6, 6, 6]
+    # building_costs = [6, 6, 6, 6, 6, 6, 6, 6, 6]
 
-    resource_ids = [1, 4, 6]
-    resource_values = [10, 10, 10, 10, 10]
+    # resource_ids = [1, 4, 6]
+    # resource_values = [10, 10, 10, 10, 10]
 
-    buildings = [
-        {
-            "name": "Fairgrounds",
-            "id": 1,
-            "costs": [2, 12, 31, 21, 7],
-            "ids":[2, 2, 3, 4, 7]
-        }
-    ]
+    # buildings = [
+    #     {
+    #         "name": "Fairgrounds",
+    #         "id": 1,
+    #         "costs": [2, 12, 31, 21, 7],
+    #         "ids":[2, 2, 3, 4, 7]
+    #     }
+    # ]
 
 
-    realms = json.load(open('data/realms.json'))
+    # realms = json.load(open('data/realms.json'))
 
-    resources = json.load(open('data/resources.json'))
+    # resources = json.load(open('data/resources.json'))
 
-    orders = json.load(open('data/orders.json'))
+    # orders = json.load(open('data/orders.json'))
 
-    wonders = json.load(open('data/wonders.json'))
+    # wonders = json.load(open('data/wonders.json'))
 
-    print(decimalToBinary(resource_ids, 8))
-    print(decimalToBinary(resource_values, 12))
+    # print(decimalToBinary(resource_ids, 8))
+    # print(decimalToBinary(resource_values, 12))
 
-    print(map_realm(realms["1"], resources, wonders, orders))
+    # print(map_realm(realms["1"], resources, wonders, orders))
