@@ -111,7 +111,7 @@ def map_crypt(value, resources):
 
 if __name__ == '__main__':
 
-    crypts = json.load(open("data/crypts_test.json"))
+    crypts = json.load(open("data/crypts.json"))
     output = []
     for index in range(10):
         print("ID: " + str(crypts["dungeons"][index]["tokenId"]))
