@@ -6,7 +6,6 @@ from realms_cli.config import Config, strhex_as_strfelt, safe_load_deployment
 from realms_cli.shared import uint, expanded_uint_list
 from realms_cli.deployer import logged_deploy
 
-
 @click.command()
 @click.option("--network", default="goerli")
 def set_initial_liq(network):
@@ -39,53 +38,26 @@ def set_initial_liq(network):
 
 @click.command()
 @click.option("--network", default="goerli")
-def set_lords_approval(network):
+def buy_tokens(network):
     """
     Claim available resources
     """
     config = Config(nile_network=network)
 
+    resource_ids = [1, 2]
+    resource_values = [10, 10]
 
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_lords",
-        function="increaseAllowance",
-        arguments=[strhex_as_strfelt(config.Exchange_ERC20_1155_PROXY_ADDRESS), *uint(50000 * (10 ** 18))],
-    )
-
-@click.command()
-@click.option("--network", default="goerli")
-def set_resources_approval(network):
-    """
-    Claim available resources
-    """
-    config = Config(nile_network=network)
-
-
-    wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_resources",
-        function="setApprovalForAll",
-        arguments=[strhex_as_strfelt(config.Exchange_ERC20_1155_PROXY_ADDRESS), 1],
-    )
-
-@click.command()
-@click.argument("token_id", nargs=1)
-@click.option("--network", default="goerli")
-def get_currency_r(token_id, network):
-    """
-    Fetch happiness of a Realm
-    """
-    config = Config(nile_network=network)
-
-    out = wrapped_call(
-        network=config.nile_network,
         contract_alias="proxy_Exchange_ERC20_1155",
-        function="get_currency_reserves",
+        function="buy_tokens",
         arguments=[
-                *uint(token_id)
+            *uint(1000),
+            len(resource_ids),
+            *expanded_uint_list(resource_ids),
+            len(resource_ids),
+            *expanded_uint_list(resource_values),
+            1652694322
         ],
-    )
-    print(out)
+    )    
