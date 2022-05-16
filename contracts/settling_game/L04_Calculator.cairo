@@ -38,6 +38,8 @@ from contracts.settling_game.library.library_module import (
     MODULE_initializer,
 )
 
+from contracts.settling_game.library.library_calculator import CALCULATOR
+
 from openzeppelin.upgrades.library import (
     Proxy_initializer,
     Proxy_only_admin,
@@ -92,35 +94,13 @@ func calculate_happiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     alloc_locals
 
     # FETCH VALUES
-    let (local culture : felt) = calculate_culture(token_id)
-    let (local population : felt) = calculate_population(token_id)
-    let (local food : felt) = calculate_food(token_id)
+    let (culture) = calculate_culture(token_id)
+    let (population) = calculate_population(token_id)
+    let (food) = calculate_food(token_id)
+
+    # GET HAPPINESS
+    let (happiness) = CALCULATOR.get_happiness(culture, population, food)
     
-    # FETCH VALUES
-    let pop_calc = population / 10
-    let culture_calc = culture - pop_calc
-    let food_calc = food - pop_calc
-
-    # SANITY FALL BACK CHECK INCASE OF OVERFLOW....
-    let (assert_check) = is_nn(100 + culture_calc + food_calc)
-    if assert_check == 0:
-        return (100)
-    end
-
-    let happiness = 100 + culture_calc + food_calc
-
-    # if happiness less than 50, cap it
-    let (is_lessthan_threshold) = is_le(happiness, 50)
-    if is_lessthan_threshold == 1:
-        return (50)
-    end
-
-    # if happiness greater than 150 cap it
-    let (is_greaterthan_threshold) = is_le(150, happiness)
-    if is_greaterthan_threshold == 1:
-        return (150)
-    end
-
     return (happiness)
 end
 
@@ -229,6 +209,7 @@ end
 func calculate_food{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
 ) -> (food : felt):
+    alloc_locals
 
     # CALCULATE FOOD
     let (controller) = MODULE_controller_address()
@@ -262,7 +243,9 @@ func calculate_food{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
 
     let food = 10 + CastleFood + FairgroundsFood + RoyalReserveFood + GrandMarketFood + GuildFood + OfficerAcademyFood + GranaryFood + HousingFood + AmphitheaterFood + ArcherTowerFood + SchoolFood + MageTowerFood + TradeOfficeFood + ArchitectFood + ParadeGroundsFood + BarracksFood + DockFood + FishmongerFood + FarmsFood + HamletFood
 
-    return (food)
+    let (troop_population) = calculate_troop_population(token_id)
+
+    return (food - troop_population)
 end
 
 # TODO: Make LORDS decrease over time...

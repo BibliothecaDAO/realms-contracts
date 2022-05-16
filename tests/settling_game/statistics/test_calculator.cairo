@@ -4,6 +4,7 @@ from starkware.cairo.common.math_cmp import is_nn, is_le
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
 from lib.cairo_math_64x61.contracts.Math64x61 import Math64x61_div
 from contracts.settling_game.utils.game_structs import BuildingsFood, BuildingsPopulation, BuildingsCulture
+from contracts.settling_game.library.library_calculator import CALCULATOR
 
 const food = 10
 const culture = 10
@@ -29,27 +30,24 @@ const Dock = 0
 const Fishmonger = 0
 const Farms = 0
 const Hamlet = 0
-const troops = 0
-
-
+const troops = 50
 
 const testHappiness = 100
-const outPut = 100
-
+const output = 100
 
 @external
 func test_production_cap{syscall_ptr : felt*, range_check_ptr}():
     alloc_locals
 
-    let (production_output, _) = unsigned_div_rem(outPut * testHappiness, 100)
+    let (production_output, _) = unsigned_div_rem(output * testHappiness, 100)
 
-    %{ print(ids.production_output) %}
+    assert production_output = 100
 
     return ()
 end
 
 @external
-func test_food{syscall_ptr : felt*, range_check_ptr}():
+func test_happiness{syscall_ptr : felt*, range_check_ptr}():
     alloc_locals
 
     let castleFood = BuildingsFood.Castle * Castle
@@ -118,43 +116,15 @@ func test_food{syscall_ptr : felt*, range_check_ptr}():
     let troopsFood = troops * - 1
     let troopsPop = troops * - 1
 
-    let totalFood = 10 + castleFood + FairgroundsFood + RoyalReserveFood + GrandMarketFood + GuildFood + OfficerAcademyFood + GranaryFood +HousingFood + AmphitheaterFood + ArcherTowerFood + SchoolFood + MageTowerFood + TradeOfficeFood + ArchitectFood + ParadeGroundsFood + BarracksFood + DockFood + FishmongerFood + FarmsFood + HamletFood + troopsFood
+    let food = 10 + castleFood + FairgroundsFood + RoyalReserveFood + GrandMarketFood + GuildFood + OfficerAcademyFood + GranaryFood +HousingFood + AmphitheaterFood + ArcherTowerFood + SchoolFood + MageTowerFood + TradeOfficeFood + ArchitectFood + ParadeGroundsFood + BarracksFood + DockFood + FishmongerFood + FarmsFood + HamletFood + troopsFood
 
-    let totalPopulation = 100 + castlePop + FairgroundsPop + RoyalReservePop + GrandMarketPop + GuildPop + OfficerAcademyPop + GranaryPop +HousingPop + AmphitheaterPop + ArcherTowerPop + SchoolPop + MageTowerPop + TradeOfficePop + ArchitectPop + ParadeGroundsPop + BarracksPop + DockPop + FishmongerPop + FarmsPop + HamletPop + troopsPop
+    let population = 100 + castlePop + FairgroundsPop + RoyalReservePop + GrandMarketPop + GuildPop + OfficerAcademyPop + GranaryPop +HousingPop + AmphitheaterPop + ArcherTowerPop + SchoolPop + MageTowerPop + TradeOfficePop + ArchitectPop + ParadeGroundsPop + BarracksPop + DockPop + FishmongerPop + FarmsPop + HamletPop + troopsPop
 
-    let totalCulture = 10 + castleCulture + FairgroundsCulture + RoyalReserveCulture + GrandMarketCulture + GuildCulture + OfficerAcademyCulture + GranaryCulture +HousingCulture + AmphitheaterCulture + ArcherTowerCulture + SchoolCulture + MageTowerCulture + TradeOfficeCulture + ArchitectCulture + ParadeGroundsCulture + BarracksCulture + DockCulture + FishmongerCulture + FarmsCulture + HamletCulture
+    let culture = 10 + castleCulture + FairgroundsCulture + RoyalReserveCulture + GrandMarketCulture + GuildCulture + OfficerAcademyCulture + GranaryCulture + HousingCulture + AmphitheaterCulture + ArcherTowerCulture + SchoolCulture + MageTowerCulture + TradeOfficeCulture + ArchitectCulture + ParadeGroundsCulture + BarracksCulture + DockCulture + FishmongerCulture + FarmsCulture + HamletCulture
     
-    let pop_calc = totalPopulation / 10
+    let (happiness) = CALCULATOR.get_happiness(culture, population, food)
 
-    let culture_calc = totalCulture - pop_calc
-
-    let food_calc = totalFood - pop_calc
-
-    let (assert_check) = is_nn(100 + culture_calc + food_calc)
-    
-    # %{ print(ids.happiness) %}
-    if assert_check == 0:
-        %{ print(100 + ids.culture_calc + ids.food_calc) %}
-        return ()
-    end
-
-    let happiness = 100 + culture_calc + food_calc
-
-    let (is_lessthan_threshold) = is_le(happiness, 50)
-
-    let (is_greaterthan_threshold) = is_le(150, happiness)
-
-    if is_lessthan_threshold == 1:
-        %{ print(50) %}
-        return ()
-    end
-
-    if is_greaterthan_threshold == 1:
-        %{ print(150) %}
-        return ()
-    end
-
-    %{ print(ids.happiness) %}
+    assert happiness = 60
 
     return ()
 end

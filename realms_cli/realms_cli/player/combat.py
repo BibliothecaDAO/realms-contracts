@@ -6,6 +6,7 @@ from realms_cli.config import Config
 from realms_cli.shared import uint
 import json
 
+
 @click.command()
 @click.argument("unit_id", nargs=1)
 @click.option("--network", default="goerli")
@@ -21,15 +22,16 @@ def get_unit_cost(unit_id, network):
         function="get_troop_cost",
         arguments=[unit_id],
     )
-    print(out)   
+    print(out)
+
 
 @click.command()
-@click.option('--count', default=1, help='number of troops')
+@click.option('--count', default=10, help='number of troops')
 @click.option("--network", default="goerli")
 @click.option('--realm_token_id', prompt=True)
 def build_squad(network, count, realm_token_id):
     """
-    Build squad on Realm
+    Build squad on a Realm
     """
     config = Config(nile_network=network)
 
@@ -38,8 +40,10 @@ def build_squad(network, count, realm_token_id):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_L06_Combat",
         function="build_squad_from_troops_in_realm",
-        arguments=[count, 1, *uint(realm_token_id), 1],
+        arguments=[count, 1, 1, 1, 1, 1, 1, 1,
+                   1, 1, 1, *uint(realm_token_id), 1],
     )
+
 
 @click.command()
 @click.argument("attacking_realm", nargs=1)
@@ -57,7 +61,8 @@ def can_attack(attacking_realm, defending_realm, network):
         function="Realm_can_be_attacked",
         arguments=[*uint(attacking_realm), *uint(defending_realm)],
     )
-    print(out)   
+    print(out)
+
 
 @click.command()
 @click.argument("attacking_realm", nargs=1)
@@ -77,6 +82,7 @@ def attack_realm(attacking_realm, defending_realm, network):
         arguments=[*uint(attacking_realm), *uint(defending_realm), 1],
     )
 
+
 @click.command()
 @click.argument("realm_id", nargs=1)
 @click.option("--network", default="goerli")
@@ -92,7 +98,8 @@ def get_troops(realm_id, network):
         function="view_troops",
         arguments=[*uint(realm_id)],
     )
-    print(out)   
+    print(out)
+
 
 @click.command()
 @click.argument("realm_id", nargs=1)
@@ -109,7 +116,8 @@ def get_combat_data(realm_id, network):
         function="get_realm_combat_data",
         arguments=[*uint(realm_id)],
     )
-    print(out)   
+    print(out)
+
 
 @click.command()
 @click.option("--network", default="goerli")
@@ -125,4 +133,4 @@ def get_xoroshiro(network):
         function="get_xoroshiro",
         arguments=[1],
     )
-    print(out)       
+    print(out)

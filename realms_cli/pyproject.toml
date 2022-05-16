@@ -44,26 +44,36 @@ cairo-nile = "^0.5.0"
 [tool.poetry.plugins."nile_plugins"]
 # Here you specify you command name and location <command_name> = <package_method_location>
 
+#-----------PLAYER
 "create_pk" = "realms_cli.player.account.create_pk"
 
+#-----------LORDS
 "check_lords" = "realms_cli.player.lords.check_lords"
 
+#-----------SETTLING
 "approve_realm" = "realms_cli.player.settle.approve_realm"
 "check_realms" = "realms_cli.player.settle.check_realms"
 "check_s_realms" = "realms_cli.player.settle.check_s_realms"
 "check_owner_of_realm" = "realms_cli.player.settle.check_owner_of_realm"
 "check_owner_of_s_realm" = "realms_cli.player.settle.check_owner_of_s_realm"
-
 "mint_realm" = "realms_cli.player.settle.mint_realm"
-"settle_realm" = "realms_cli.player.settle.settle_realm"
+"settle" = "realms_cli.player.settle.settle_realm"
+"unsettle" = "realms_cli.player.settle.unsettle"
 "set_realm_data" = "realms_cli.player.settle.set_realm_data"
 "get_realm_data" = "realms_cli.player.settle.get_realm_data"
 
+#-----------CALCULATOR
+"troop_population" = "realms_cli.player.calculator.troop_population"
 "happiness" = "realms_cli.player.calculator.happiness"
+"food" = "realms_cli.player.calculator.food"
+"culture" = "realms_cli.player.calculator.culture"
+"population" = "realms_cli.player.calculator.population"
 
+#-----------BUILDINGS
 "build" = "realms_cli.player.buildings.build"
 "get_buildings" = "realms_cli.player.buildings.get_buildings"
 
+#-----------RESOURCES
 "check_resources" = "realms_cli.player.resources.check_resources"
 "claim_resources" = "realms_cli.player.resources.claim_resources"
 "upgrade_resource" = "realms_cli.player.resources.upgrade_resource"
@@ -71,6 +81,7 @@ cairo-nile = "^0.5.0"
 "get_resource_upgrade_cost" = "realms_cli.player.resources.get_resource_upgrade_cost"
 "days_available" = "realms_cli.player.resources.days_available"
 
+#-----------COMBAT
 "get_unit_cost" = "realms_cli.player.combat.get_unit_cost"
 "build_squad" = "realms_cli.player.combat.build_squad"
 "can_attack" = "realms_cli.player.combat.can_attack"
@@ -79,5 +90,6 @@ cairo-nile = "^0.5.0"
 "get_combat_data" = "realms_cli.player.combat.get_realm_combat_data"
 "get_xoroshiro" = "realms_cli.player.combat.get_xoroshiro"
 
+#-----------ADMIN
 "mint_resources" = "realms_cli.admin.main.mint_resources"
 "upgrade_module" = "realms_cli.admin.main.upgrade_module"
