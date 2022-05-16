@@ -4,7 +4,6 @@ import click
 from realms_cli.caller_invoker import wrapped_call, wrapped_send
 from realms_cli.config import Config
 from realms_cli.shared import uint
-import json
 
 
 @click.command()
@@ -26,13 +25,15 @@ def get_unit_cost(unit_id, network):
 
 
 @click.command()
-@click.option('--count', default=10, help='number of troops')
+@click.option('--troops', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='Troop Ids', prompt=True)
 @click.option("--network", default="goerli")
-@click.option('--realm_token_id', prompt=True)
-def build_squad(network, count, realm_token_id):
+@click.option('--realm_token_id', help='Realm Id', prompt=True)
+def build_squad(network, troops, realm_token_id):
     """
     Build squad on a Realm
     """
+    troops = [c.strip() for c in troops.split(',')]
     config = Config(nile_network=network)
 
     wrapped_send(
@@ -40,14 +41,13 @@ def build_squad(network, count, realm_token_id):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_L06_Combat",
         function="build_squad_from_troops_in_realm",
-        arguments=[count, 1, 1, 1, 1, 1, 1, 1,
-                   1, 1, 1, *uint(realm_token_id), 1],
+        arguments=[len(troops), *troops,
+                   *uint(realm_token_id), 1],
     )
 
-
 @click.command()
-@click.argument("attacking_realm", nargs=1)
-@click.argument("defending_realm", nargs=1)
+@click.argument("attacking_realm", nargs=1, prompt=True, help='Attacking Realm')
+@click.argument("defending_realm", nargs=1, prompt=True, help='Defending Realm')
 @click.option("--network", default="goerli")
 def can_attack(attacking_realm, defending_realm, network):
     """
