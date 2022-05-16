@@ -102,3 +102,4 @@ cairo-nile = "^0.5.0"
 "get_currency_r" =  "realms_cli.exchange.admin.get_currency_r"
 
 "buy_tokens" =  "realms_cli.exchange.trade.buy_tokens"
+"sell_tokens" =  "realms_cli.exchange.trade.sell_tokens"
