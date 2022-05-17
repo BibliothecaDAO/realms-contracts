@@ -581,6 +581,115 @@ func get_all_resource_output{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, r
     return (r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output, r_7_output)
 end
 
+@view
+func get_all_resource_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256,
+) -> (
+    user_mint_len : felt,
+    user_mint : Uint256*,
+    lords_available : Uint256
+):
+    alloc_locals
+    let (caller) = get_caller_address()
+    let (controller) = MODULE_controller_address()
+
+    # CONTRACT ADDRESSES
+
+    let (realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Realms
+    )
+    let (calculator_address) = IModuleController.get_module_address(
+        controller, ModuleIds.L04_Calculator
+    )
+    let (wonders_logic_address) = IModuleController.get_module_address(
+        controller, ModuleIds.L05_Wonders
+    )
+
+    let (local resource_ids : Uint256*) = alloc()
+    let (local user_mint : Uint256*) = alloc()
+
+    # FETCH REALM DATA
+    let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
+
+    # CALC DAYS
+    let (total_days, remainder) = days_accrued(token_id)
+
+    # CALC VAULT DAYS
+    let (total_vault_days, vault_remainder) = get_available_vault_days(token_id)
+
+    # CHECK DAYS + VAULT > 1
+    let days = total_days + total_vault_days
+
+    # GET WONDER TAX
+    let (wonder_tax) = IL04_Calculator.calculate_wonder_tax(calculator_address)
+
+    # SET MINT
+    let treasury_mint_perc = wonder_tax
+    let user_mint_rel_perc = 100 - wonder_tax
+
+    # GET OUTPUT FOR EACH RESOURCE
+    let (r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output,
+        r_7_output) = get_all_resource_output(
+        token_id,
+        realms_data.resource_1,
+        realms_data.resource_2,
+        realms_data.resource_3,
+        realms_data.resource_4,
+        realms_data.resource_5,
+        realms_data.resource_6,
+        realms_data.resource_7
+    )
+
+    # USER CLAIM
+    let (r_1_user) = calculate_total_claimable(days, user_mint_rel_perc, r_1_output)
+    let (r_2_user) = calculate_total_claimable(days, user_mint_rel_perc, r_2_output)
+    let (r_3_user) = calculate_total_claimable(days, user_mint_rel_perc, r_3_output)
+    let (r_4_user) = calculate_total_claimable(days, user_mint_rel_perc, r_4_output)
+    let (r_5_user) = calculate_total_claimable(days, user_mint_rel_perc, r_5_output)
+    let (r_6_user) = calculate_total_claimable(days, user_mint_rel_perc, r_6_output)
+    let (r_7_user) = calculate_total_claimable(days, user_mint_rel_perc, r_7_output)
+
+    # ADD VALUES TO TEMP ARRAY FOR EACH AVAILABLE RESOURCE
+    assert resource_ids[0] = Uint256(realms_data.resource_1, 0)
+    assert user_mint[0] = r_1_user
+
+    if realms_data.resource_2 != 0:
+        assert resource_ids[1] = Uint256(realms_data.resource_2, 0)
+        assert user_mint[1] = r_2_user
+    end
+
+    if realms_data.resource_3 != 0:
+        assert resource_ids[2] = Uint256(realms_data.resource_3, 0)
+        assert user_mint[2] = r_3_user
+    end
+
+    if realms_data.resource_4 != 0:
+        assert resource_ids[3] = Uint256(realms_data.resource_4, 0)
+        assert user_mint[3] = r_4_user
+    end
+
+    if realms_data.resource_5 != 0:
+        assert resource_ids[4] = Uint256(realms_data.resource_5, 0)
+        assert user_mint[4] = r_5_user
+    end
+
+    if realms_data.resource_6 != 0:
+        assert resource_ids[5] = Uint256(realms_data.resource_6, 0)
+        assert user_mint[5] = r_6_user
+    end
+
+    if realms_data.resource_7 != 0:
+        assert resource_ids[6] = Uint256(realms_data.resource_7, 0)
+        assert user_mint[6] = r_7_user
+    end
+
+    # LORDS MINT
+    let (tribute) = IL04_Calculator.calculate_tribute(calculator_address)
+    let lords_available = Uint256(total_days * tribute, 0)
+
+    return (realms_data.resource_number, user_mint, lords_available)
+end
+
 # GET RESOURCE LEVEL
 @view
 func get_resource_level{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(

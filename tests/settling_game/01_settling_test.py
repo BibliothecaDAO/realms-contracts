@@ -120,6 +120,8 @@ async def test_mint_realm(game_factory):
     # # increments time by 1.5 days to simulate stake
     set_block_timestamp(starknet.state, round(time.time()) + STAKE_TIME)
 
+    await get_resource_lords_claimable(resources_logic)
+    
     ############
     # 😊 STATS #
     ############
@@ -231,6 +233,11 @@ async def checks_realms_balance(account, realms, assert_value):
     print(
         f'🏰 | Realms Balance: {balance_of.result.balance[0]}\n')
 
+async def get_resource_lords_claimable(resource_logic):
+    """check realms balance"""
+    balance_of = await resource_logic.get_all_resource_claimable(FIRST_TOKEN_ID).invoke()
+    print(
+        f'Claimable resources: {balance_of.result}\n')
 
 async def set_realm_meta(account, realms, token):
     """set realm metadata"""
