@@ -15,3 +15,9 @@ def pack_values(values: list) -> int:
 
 def uint(a):
     return(a, 0)
+
+def expanded_uint_list(arr):
+    """
+    Convert array of ints into flattened array of uints.
+    """
+    return list(sum([uint(a) for a in arr], ()))

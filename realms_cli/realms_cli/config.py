@@ -74,6 +74,9 @@ class Config:
 
         self.XOROSHIRO_ADDRESS, _ = safe_load_deployment("xoroshiro128_starstar", self.nile_network)
 
+        self.Exchange_ERC20_1155_ADDRESS, _ = safe_load_deployment("Exchange_ERC20_1155", self.nile_network)
+        self.Exchange_ERC20_1155_PROXY_ADDRESS, _ = safe_load_deployment("proxy_Exchange_ERC20_1155", self.nile_network)
+
         self.RESOURCES = [
             "Wood",
             "Stone",

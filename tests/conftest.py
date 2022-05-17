@@ -1,5 +1,3 @@
-# conftest.py - Full deployment of the game state
-
 from starkware.starknet.business_logic.state.state import BlockInfo
 from starkware.starknet.testing.starknet import Starknet, StarknetContract
 from starkware.starknet.services.api.contract_definition import ContractDefinition
@@ -98,17 +96,9 @@ async def _build_copyable_deployment():
         account=compile("openzeppelin/account/Account.cairo"),
         lords=compile(
             "contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo"),
-        realms=compile(
-            "contracts/settling_game/tokens/Realms_ERC721_Mintable.cairo"),
-        s_realms=compile(
-            "contracts/settling_game/tokens/S_Realms_ERC721_Mintable.cairo"),
         resources=compile(
-            "contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo"),
-        crypts=compile(
-            "contracts/settling_game/tokens/Crypts_ERC721_Mintable.cairo"),
-        s_crypts=compile(
-            "contracts/settling_game/tokens/S_Crypts_ERC721_Mintable.cairo"),
-        
+            "contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo"
+        ),
     )
 
     signers = dict(admin=Signer(83745982347), arbiter=Signer(
@@ -121,61 +111,19 @@ async def _build_copyable_deployment():
         }
     )
 
-    lords = await starknet.deploy(
-        contract_def=defs.lords,
-        constructor_calldata=[
-            str_to_felt("Lords"),  # name
-            str_to_felt("LRD"),  # symbol
-            11,  # decimal
-            *uint(INITIAL_LORDS_SUPPLY),  # initial supply
-            accounts.admin.contract_address,  # recipient
-            accounts.admin.contract_address,
-        ],
-    )
+    lords = await proxy_builder(compiled_proxy, starknet, signers["admin"], accounts.admin.contract_address, "contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo", [
+        str_to_felt("Lords"),
+        str_to_felt("LRD"),
+        18,
+        *uint(initial_supply),
+        accounts.admin.contract_address,
+        accounts.admin.contract_address,
+    ])
 
-    realms = await starknet.deploy(
-        contract_def=defs.realms,
-        constructor_calldata=[
-            str_to_felt("Realms"),  # name
-            str_to_felt("Realms"),  # ticker
-            accounts.admin.contract_address,  # contract_owner
-        ],
-    )
-
-    s_realms = await starknet.deploy(
-        contract_def=defs.s_realms,
-        constructor_calldata=[
-            str_to_felt("SRealms"),  # name
-            str_to_felt("SRealms"),  # ticker
-            accounts.admin.contract_address,  # contract_owner
-        ],
-    )
-
-    crypts = await starknet.deploy(
-        contract_def=defs.crypts,
-        constructor_calldata=[
-            str_to_felt("Crypts"),  # name
-            str_to_felt("Crypts"),  # ticker
-            accounts.admin.contract_address,  # contract_owner
-        ],
-    )
-
-    s_crypts = await starknet.deploy(
-        contract_def=defs.s_crypts,
-        constructor_calldata=[
-            str_to_felt("SCrypts"),  # name
-            str_to_felt("SCrypts"),  # ticker
-            accounts.admin.contract_address,  # contract_owner
-        ],
-    )
-
-    resources = await starknet.deploy(
-        contract_def=defs.resources,
-        constructor_calldata=[
-            1234,
-            accounts.admin.contract_address,  # recipient
-        ],
-    )
+    resources = await proxy_builder(compiled_proxy, starknet, signers["admin"], accounts.admin.contract_address, "contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo", [
+        1234,
+         accounts.admin.contract_address
+    ])
 
     return SimpleNamespace(
         starknet=starknet,
@@ -183,21 +131,13 @@ async def _build_copyable_deployment():
         accounts=accounts,
         serialized_contracts=dict(
             admin=serialize_contract(accounts.admin, defs.account.abi),
-            arbiter=serialize_contract(accounts.arbiter, defs.account.abi),
             lords=serialize_contract(lords, defs.lords.abi),
-            realms=serialize_contract(realms, defs.realms.abi),
-            s_realms=serialize_contract(s_realms, defs.s_realms.abi),
-            crypts=serialize_contract(realms, defs.crypts.abi),
-            s_crypts=serialize_contract(s_crypts, defs.s_crypts.abi),
             resources=serialize_contract(resources, defs.resources.abi),
             user1=serialize_contract(accounts.user1, defs.account.abi),
         ),
         addresses=SimpleNamespace(
             admin=accounts.admin.contract_address,
-            arbiter=accounts.arbiter.contract_address,
             lords=lords.contract_address,
-            realms=realms.contract_address,
-            crypts=crypts.contract_address,
             resources=resources.contract_address,
             user1=accounts.user1.contract_address,
         ),
@@ -325,11 +265,6 @@ async def utils_general_tests(starknet) -> StarknetContract:
     contract = compile("tests/settling_game/utils/general_tests.cairo")
     return await starknet.deploy(contract_def=contract)
 
-@pytest.fixture(scope="module")
-async def l04_Calculator(starknet) -> StarknetContract:
-    contract = compile("contracts/settling_game/L04_Calculator.cairo")
-    return await starknet.deploy(contract_def=contract)
-
 ###########################
 # DESIEGE specific fixtures
 ###########################
@@ -452,10 +387,6 @@ async def proxy_builder(compiled_proxy, starknet, signer, account, contract, cal
 
     return set_proxy
 
-###########
-# SETTLING#
-###########
-
 @pytest.fixture(scope='session')
 async def token_factory(account_factory, compiled_proxy):
     (starknet, accounts, signers) = account_factory
@@ -479,19 +410,18 @@ async def token_factory(account_factory, compiled_proxy):
         str_to_felt("Realms"),  # ticker
         admin_account.contract_address,  # contract_owner
     ])
-
-    proxy_resources = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo", [
-        1234,
-        admin_account.contract_address
-    ])
-
+    
     proxy_crypts = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/tokens/Crypts_ERC721_Mintable.cairo", [
         str_to_felt("Crypts"),  # name
         str_to_felt("Crypts"),  # ticker
         admin_account.contract_address,  # contract_owner
     ])
 
-    # TODO: Add in Crypts and S_Crypts
+    proxy_resources = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo", [
+        1234,
+        admin_account.contract_address
+    ])
+
     proxy_s_realms = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/tokens/S_Realms_ERC721_Mintable.cairo", [
         str_to_felt("S_Realms"),  # name
         str_to_felt("S_Realms"),  # ticker
@@ -513,9 +443,9 @@ async def token_factory(account_factory, compiled_proxy):
         signers,
         proxy_lords,
         proxy_realms,
+        proxy_crypts,
         proxy_resources,
         proxy_s_realms,
-        proxy_crypts,
         proxy_s_crypts
     )
 
@@ -531,9 +461,9 @@ async def game_factory(token_factory, compiled_proxy):
         signers,
         lords,
         realms,
+        crypts,
         resources,
         s_realms,
-        crypts,
         s_crypts
     ) = token_factory
 
@@ -557,7 +487,6 @@ async def game_factory(token_factory, compiled_proxy):
         calldata=[controller.contract_address],
     )
 
-    # Settling game logic contracts
     settling_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L01_Settling.cairo", [
         controller.contract_address, admin_account.contract_address])
 
@@ -573,13 +502,6 @@ async def game_factory(token_factory, compiled_proxy):
     wonders_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L05_Wonders.cairo", [
         controller.contract_address, admin_account.contract_address])
 
-    # Crypts and Caverns logic contracts
-    crypts_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L07_Crypts.cairo", [
-        controller.contract_address, admin_account.contract_address])
-
-    crypts_resources_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L08_Crypts_Resources.cairo", [
-        controller.contract_address, admin_account.contract_address])
-
     xoroshiro128 = await starknet.deploy(
         source="contracts/utils/xoroshiro128_starstar.cairo",
         constructor_calldata=[controller.contract_address],
@@ -588,6 +510,13 @@ async def game_factory(token_factory, compiled_proxy):
     combat_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L06_Combat.cairo", [
         controller.contract_address,
         xoroshiro128.contract_address, admin_account.contract_address])
+
+    crypts_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L07_Crypts.cairo", [
+        controller.contract_address, admin_account.contract_address])
+
+    crypts_resources_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L08_Crypts_Resources.cairo", [
+        controller.contract_address, admin_account.contract_address])
+
 
     # The admin key controls the arbiter. Use it to have the arbiter
     # set the module deployment addresses in the controller.
@@ -620,7 +549,7 @@ async def game_factory(token_factory, compiled_proxy):
         account=admin_account,
         to=s_crypts.contract_address,
         selector_name='Set_module_access',
-        calldata=[crypts_logic.contract_address],
+        calldata=[settling_logic.contract_address],
     )
 
     # set module access witin resources contract
@@ -629,15 +558,6 @@ async def game_factory(token_factory, compiled_proxy):
         to=resources.contract_address,
         selector_name='Set_module_access',
         calldata=[resources_logic.contract_address],
-    )
-
-    # TODO: Do we need this? 
-    # set module access witin crypts_resources contract
-    await admin_key.send_transaction(
-        account=admin_account,
-        to=resources.contract_address,
-        selector_name='Set_module_access',
-        calldata=[crypts_resources_logic.contract_address],
     )
 
     return (

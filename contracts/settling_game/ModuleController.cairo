@@ -95,12 +95,14 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     # combat can write to resources
     can_write_to.write(ModuleIds.L06_Combat, ModuleIds.L02_Resources, TRUE)
 
+    # # combat can write to settling
+    can_write_to.write(ModuleIds.L06_Combat, ModuleIds.L01_Settling, TRUE)
+
     # crypts logic to resources
     can_write_to.write(ModuleIds.L07_Crypts, ModuleIds.L08_Crypts_Resources, TRUE)
 
     # resources logic to crypts state
     can_write_to.write(ModuleIds.L08_Crypts_Resources, ModuleIds.L07_Crypts, TRUE)
-
 
     # Lookup table for NON module contracts
     external_contract_table.write(ExternalContractIds.Lords, _lords_address)
