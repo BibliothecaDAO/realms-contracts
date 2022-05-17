@@ -89,7 +89,7 @@ async def starknet() -> Starknet:
     starknet = await Starknet.empty()
     return starknet
 
-async def _build_copyable_deployment():
+async def _build_copyable_deployment(compiled_proxy):
     starknet = await Starknet.empty()
 
     defs = SimpleNamespace(
@@ -111,7 +111,7 @@ async def _build_copyable_deployment():
         }
     )
 
-    lords = await proxy_builder(compiled_proxy, starknet, signers["admin"], accounts.admin.contract_address, "contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo", [
+    lords = await proxy_builder(compile("contracts/settling_game/proxy/PROXY_Logic.cairo"), starknet, signers["admin"], accounts.admin, "contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo", [
         str_to_felt("Lords"),
         str_to_felt("LRD"),
         18,
@@ -120,7 +120,7 @@ async def _build_copyable_deployment():
         accounts.admin.contract_address,
     ])
 
-    resources = await proxy_builder(compiled_proxy, starknet, signers["admin"], accounts.admin.contract_address, "contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo", [
+    resources = await proxy_builder(compile("contracts/settling_game/proxy/PROXY_Logic.cairo"), starknet, signers["admin"], accounts.admin, "contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo", [
         1234,
          accounts.admin.contract_address
     ])
@@ -145,11 +145,11 @@ async def _build_copyable_deployment():
 
 
 @pytest.fixture(scope="session")
-async def copyable_deployment(request):
+async def copyable_deployment(request, compiled_proxy):
     CACHE_KEY = "deployment"
     val = request.config.cache.get(CACHE_KEY, None)
     if val is None:
-        val = await _build_copyable_deployment()
+        val = await _build_copyable_deployment(compiled_proxy)
         res = dill.dumps(val).decode("cp437")
         request.config.cache.set(CACHE_KEY, res)
     else:
