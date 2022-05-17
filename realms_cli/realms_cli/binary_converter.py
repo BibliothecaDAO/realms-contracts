@@ -125,15 +125,8 @@ def map_crypt(value, environments, affinities):
 
 
     # concat all together
-    meta = resourceLength + resourceIds + legendary
+    meta = resourceLength + resourceIds + environment + legendary + size + numDoors + numPoints + affinity
 
-    print("size: " + str(size[0]))
-    print("affinity: " + str(affinity[0]))
-    print("environment: " + str(environment[0]))
-    print("legendary: " + str(legendary[0]))
-    print("resource: " + str(resourceIds[0]))
-    print("numDoors: " + str(numDoors[0]))
-    print("numPoints: " + str(numPoints[0]))
     return decimalToBinary(meta, 8)
 
 if __name__ == '__main__':
@@ -148,41 +141,34 @@ if __name__ == '__main__':
     # # with open('scripts/json_data.json', 'w') as outfile:
     # #     outfile.write(str(createOutput(buildings, 6)))
 
-    # building_costs = [6, 6, 6, 6, 6, 6, 6, 6, 6]
+    building_costs = [6, 6, 6, 6, 6, 6, 6, 6, 6]
 
-    # resource_ids = [1, 4, 6]
-    # resource_values = [10, 10, 10, 10, 10]
+    resource_ids = [1, 4, 6]
+    resource_values = [10, 10, 10, 10, 10]
 
-    # buildings = [
-    #     {
-    #         "name": "Fairgrounds",
-    #         "id": 1,
-    #         "costs": [2, 12, 31, 21, 7],
-    #         "ids":[2, 2, 3, 4, 7]
-    #     }
-    # ]
+    buildings = [
+        {
+            "name": "Fairgrounds",
+            "id": 1,
+            "costs": [2, 12, 31, 21, 7],
+            "ids":[2, 2, 3, 4, 7]
+        }
+    ]
 
-    # Quicklt test Realms metadata
-    # realms = json.load(open('data/realms.json'))
+    # Quickly test Realms metadata
+    realms = json.load(open('data/realms.json'))
+    resources = json.load(open('data/resources.json'))
+    orders = json.load(open('data/orders.json'))
+    wonders = json.load(open('data/wonders.json'))
 
-    # resources = json.load(open('data/resources.json'))
+    print(decimalToBinary(resource_ids, 8))
+    print(decimalToBinary(resource_values, 12))
 
-    # orders = json.load(open('data/orders.json'))
-
-    # wonders = json.load(open('data/wonders.json'))
-
-    # print(decimalToBinary(resource_ids, 8))
-    # print(decimalToBinary(resource_values, 12))
-
-    # print(map_realm(realms["1"], resources, wonders, orders))
+    print(map_realm(realms["1"], resources, wonders, orders))
 
     # Quickly test Crypts metadata
     crypts = json.load(open("data/crypts.json"))
     environments = json.load(open("data/crypts_environments.json"))
     affinities = json.load(open("data/crypts_affinities.json"))
 
-    output = []
-    for index in range(15):
-        print("ID: " + str(crypts["dungeons"][index]["tokenId"]))
-        map_crypt(crypts["dungeons"][index], environments, affinities)
-        print("\n")
+    print(map_crypt(crypts["dungeons"][1], environments, affinities))
