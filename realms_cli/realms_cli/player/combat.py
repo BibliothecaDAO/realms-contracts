@@ -46,8 +46,8 @@ def build_squad(network, troops, realm_token_id):
     )
 
 @click.command()
-@click.argument("attacking_realm", nargs=1, prompt=True, help='Attacking Realm')
-@click.argument("defending_realm", nargs=1, prompt=True, help='Defending Realm')
+@click.argument("attacking_realm", nargs=1)
+@click.argument("defending_realm", nargs=1)
 @click.option("--network", default="goerli")
 def can_attack(attacking_realm, defending_realm, network):
     """
