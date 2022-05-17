@@ -1,0 +1,234 @@
+[
+    {
+        "name": "Agony",
+        "id": 1
+    },
+    {
+        "name": "Blight",
+        "id": 2
+    },
+    {
+        "name": "Bone",
+        "id": 3
+    },
+    {
+        "name": "Brilliance",
+        "id": 4
+    },
+    {
+        "name": "Brimstone",
+        "id": 5
+    },
+    {
+        "name": "Corruption",
+        "id": 6
+    },
+    {
+        "name": "Dread",
+        "id": 7
+    },
+    {
+        "name": "Dusk",
+        "id": 8
+    },
+    {
+        "name": "Enlightenment",
+        "id": 9
+    },
+    {
+        "name": "Fury",
+        "id": 10
+    },
+    {
+        "name": "Fire",
+        "id": 11
+    },
+    {
+        "name": "Giants",
+        "id": 12
+    },
+    {
+        "name": "Gloom",
+        "id": 13
+    },
+    {
+        "name": "Hate",
+        "id": 14
+    },
+    {
+        "name": "Havoc",
+        "id": 15
+    },
+    {
+        "name": "Honour",
+        "id": 16
+    },
+    {
+        "name": "Horror",
+        "id": 17
+    },
+    {
+        "name": "Loathing",
+        "id": 18
+    },
+    {
+        "name": "Mire",
+        "id": 19
+    },
+    {
+        "name": "Mist",
+        "id": 20
+    },
+    {
+        "name": "Needles",
+        "id": 21
+    },
+    {
+        "name": "Pain",
+        "id": 22
+    },
+    {
+        "name": "Pandemonium",
+        "id": 23
+    },
+    {
+        "name": "Pine",
+        "id": 24
+    },
+    {
+        "name": "Rage",
+        "id": 25
+    },
+    {
+        "name": "Rapture",
+        "id": 26
+    },
+    {
+        "name": "Sand",
+        "id": 27
+    },
+    {
+        "name": "Sorrow",
+        "id": 28
+    },
+    {
+        "name": "the Apocalypse",
+        "id": 29
+    },
+    {
+        "name": "the Beast",
+        "id": 30
+    },
+    {
+        "name": "the Behemoth",
+        "id": 31
+    },
+    {
+        "name": "the Brood",
+        "id": 32
+    },
+    {
+        "name": "the Fox",
+        "id": 33
+    },
+    {
+        "name": "the Gale",
+        "id": 34
+    },
+    {
+        "name": "the Golem",
+        "id": 35
+    },
+    {
+        "name": "the Kraken",
+        "id": 36
+    },
+    {
+        "name": "the Leech",
+        "id": 37
+    },
+    {
+        "name": "the Moon",
+        "id": 38
+    },
+    {
+        "name": "the Phoenix",
+        "id": 39
+    },
+    {
+        "name": "the Plague",
+        "id": 40
+    },
+    {
+        "name": "the Root",
+        "id": 41
+    },
+    {
+        "name": "the Song",
+        "id": 42
+    },
+    {
+        "name": "the Stars",
+        "id": 43
+    },
+    {
+        "name":  "the Storm",
+        "id": 44
+    },
+    {
+        "name": "the Sun",
+        "id": 45
+    },
+    {
+        "name": "the Tear",
+        "id": 46
+    },
+    {
+        "name": "the Titans",
+        "id": 47
+    },
+    {
+        "name": "the Twins",
+        "id": 48
+    },
+    {
+        "name": "the Willows",
+        "id": 49
+    },
+    {
+        "name": "the Wisp",
+        "id": 50
+    },
+    {
+        "name": "the Viper",
+        "id": 51
+    },
+    {
+        "name": "the Vortex",
+        "id": 52
+    },
+    {
+        "name": "Torment",
+        "id": 53
+    },
+    {
+        "name": "Vengeance",
+        "id": 54
+    },
+    {
+        "name": "Victory",
+        "id": 55
+    },
+    {
+        "name": "Woe",
+        "id": 2
+    },
+    {
+        "name":  "Wisdom",
+        "id": 2
+    },
+    {
+        "name": "Wrath",
+        "id": 31
+    }
+]
