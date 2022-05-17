@@ -21,7 +21,7 @@ from openzeppelin.introspection.ERC165 import (
 )
 
 @storage_var
-func l1_lockbox_contract_address() -> (res: felt):
+func l1_bridge_contract_address() -> (res: felt):
 end
 
 @storage_var
@@ -86,16 +86,15 @@ func depositFromL1{
     } (
         from_address: felt, # Starknet special field - filled for L1 caller contract
         to: felt,
-        journey_version: felt,
-        token_ids_len: felt, 
-        token_ids: felt*
+        data_len: felt, 
+        data: felt*
     ):
     alloc_locals
     # Make sure the message was sent by the intended L1 contract.
-    let (address) = l1_lockbox_contract_address.read()
+    let (address) = l1_bridge_contract_address.read()
     assert from_address = address
 
-    bridge_transfer_loop(to, journey_version, token_ids_len, token_ids)
+    bridge_transfer_loop(to, data_len, data)
 
     return ()
 end
@@ -106,18 +105,19 @@ func bridge_transfer_loop{
         range_check_ptr
     } (
         to: felt,
-        journey_version: felt,
-        token_ids_len: felt, 
-        token_ids: felt*
+        data_len: felt, 
+        data: felt*
     ):
     alloc_locals
     
-    if token_ids_len == 0:
+    if data_len == 0:
         return ()
     end
 
     # Recreate Uin256 from low/high values
-    tempvar token_id: Uint256 = Uint256([token_ids], [token_ids + 1])
+    tempvar token_id: Uint256 = Uint256([data], [data + 1])
+
+    tempvar journey_version = [data + 2]
     
     # Not tested and not sure but this call probably should be here - no big overhead 
     let (realms_address) = l2_realms_contract_address.read()
@@ -131,10 +131,10 @@ func bridge_transfer_loop{
         tokenId=token_id
     )
 
-    # Save Journey for future withdrawal - we need to know which contract to call
+    # Save Journey for future withdrawal - we need to know which contract to call on L1
     journey_versions.write(token_id, journey_version)
 
-    bridge_transfer_loop(to, journey_version, token_ids_len - 2, token_ids + 2)
+    bridge_transfer_loop(to, data_len - 3, data + 3)
 
     return ()
 end
@@ -163,18 +163,16 @@ func withdrawToL1{
 
     assert message_payload[0] = to_address
 
-    # TODO: add journey_versions here
-
     # Collect all token_ids
     withdraw_loop(to_address, token_ids_len, token_ids, 1, message_payload + 1)
 
     # Send a message
-    let (l1_lockbox_addr) = l1_lockbox_contract_address.read()
+    let (l1_bridge_addr) = l1_bridge_contract_address.read()
     
-    tempvar payload_size = 1 + (token_ids_len * 2)
+    tempvar payload_size = 1 + (token_ids_len * 3) # 2 for low/high, 1 for journey version
     
     send_message_to_l1(
-        to_address=l1_lockbox_addr,
+        to_address=l1_bridge_addr,
         payload_size=payload_size,
         payload=message_payload
     )
@@ -225,15 +223,19 @@ func withdraw_loop{
     # Save to payload
     assert [message_payload] = token_id.low
     assert [message_payload + 1] = token_id.high
+
+    # Get Journey version
+    let (journey_version) = journey_versions.read(token_id)
+    assert [message_payload + 2] = journey_version
  
-    withdraw_loop(to, token_ids_len - 1, token_ids + 2, message_payload_len + 2, message_payload + 2)
+    withdraw_loop(to, token_ids_len - 1, token_ids + Uint256.SIZE, message_payload_len + 3, message_payload + 3)
 
     return ()
 end
 
 
 @external
-func set_l1_lockbox_contract_address{
+func set_l1_bridge_contract_address{
         syscall_ptr: felt*,
         pedersen_ptr: HashBuiltin*,
         range_check_ptr
@@ -243,7 +245,7 @@ func set_l1_lockbox_contract_address{
 
     Ownable_only_owner()
 
-    l1_lockbox_contract_address.write(new_address)
+    l1_bridge_contract_address.write(new_address)
 
     return ()
 end
@@ -265,14 +267,14 @@ func set_l2_realms_contract_address{
 end
 
 @view
-func get_l1_lockbox_contract_address{
+func get_l1_bridge_contract_address{
         syscall_ptr: felt*,
         pedersen_ptr: HashBuiltin*,
         range_check_ptr
     } (
     ) -> (address: felt):
 
-    let (address) = l1_lockbox_contract_address.read()
+    let (address) = l1_bridge_contract_address.read()
 
     return (address)
 end

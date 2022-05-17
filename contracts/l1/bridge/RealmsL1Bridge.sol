@@ -7,7 +7,8 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "./IRealmsBridgeLockbox.sol";
 import "./IStarknetCore.sol";
-import "./IJourney.sol";
+import "./IJourneyV1.sol";
+import "./IJourneyV2.sol";
 
 contract RealmsL1Bridge is
     OwnableUpgradeable,
@@ -15,8 +16,8 @@ contract RealmsL1Bridge is
     IERC721Receiver,
     IRealmsBridgeLockbox
 {
-    IJourney public journeyV1Address;
-    IJourney public journeyV2Address;
+    IJourneyV1 public journeyV1Address;
+    IJourneyV2 public journeyV2Address;
 
     // The StarkNet core contract.
     uint256 public l2BridgeAddress;
@@ -33,7 +34,6 @@ contract RealmsL1Bridge is
     ) public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
-        l1RealmsContract = IERC721(_l1RealmsAddress);
         starknetCore = IStarknetCore(_starknetCoreAddress);
     }
 
@@ -41,20 +41,16 @@ contract RealmsL1Bridge is
         l2BridgeAddress = _newAddress;
     }
 
-    function setL1RealmsContract(address _newRealmsAddress) external onlyOwner {
-        l1RealmsContract = IERC721(_newRealmsAddress);
-    }
-
     function setStarknetCore(address _starknetCoreAddress) external onlyOwner {
         starknetCore = IStarknetCore(_starknetCoreAddress);
     }
 
     function setJourneyV1Address(address _newAddress) external onlyOwner {
-        journeyV1Address = IJourney(_newAddress);
+        journeyV1Address = IJourneyV1(_newAddress);
     }
 
     function setJourneyV2Address(address _newAddress) external onlyOwner {
-        journeyV1Address = IJourney(_newAddress);
+        journeyV2Address = IJourneyV2(_newAddress);
     }
 
     /*
@@ -63,32 +59,31 @@ contract RealmsL1Bridge is
     function depositToL2(
         uint256 _l2AccountAddress,
         uint256[] memory _realmIds,
-        uint256 journeyVersion
+        uint256[] journeyVersions
     ) external nonReentrant {
         require(l2BridgeAddress != 0, "L2_CONTRACT_ADDRESS_REQUIRED");
-        require(journeyVersion > 0 && journeyVersion <= 2, "INCORRECT_JOURNEY_VERSION");
         
         for (uint256 i = 0; i < _realmIds.length; i++) {
-            // address owner = l1RealmsContract.ownerOf(_realmIds[i]);
-
-            if (journeyVersion == 1) {
+            if (journeyVersions[i] == 1) {
                 address owner = journeyV1Address.checkOwner(_realmIds[i]);
                 require(owner == msg.sender, "SENDER_NOT_REALM_OWNER");
             }
 
-            // TODO: l1RealmsContract.setApprovalForAll ???
-            // l1RealmsContract.safeTransferFrom(owner, address(this), _realmIds[i]);
+            if (journeyVersions[i] == 2) {
+                address owner = journeyV2Address.ownership(_realmIds[i]);
+                require(owner == msg.sender, "SENDER_NOT_REALM_OWNER");
+            }
         }
 
-        uint256[] memory payload = new uint256[](3 + (_realmIds.length * 2));
-        // payload[0] = uint256(uint160(address(msg.sender))); // address should be converted to uint256 first
+        uint256[] memory payload = new uint256[](2 + (_realmIds.length * 3));
         payload[0] = _l2AccountAddress;
-        payload[1] = journeyVersion;
-        payload[2] = _realmIds.length * 2; // multiplying because there are low/high values for each uint256
+        payload[1] = _realmIds.length * 3; // multiplying because: 2 low/high values + 1 journey version
+
         for (uint256 i = 0; i < _realmIds.length; i++) {
           (uint256 low, uint256 high) = splitUint256(_realmIds[i]);
-          payload[3 + (i * 2)] = low; // save low bits
-          payload[3 + (i * 2) + 1] = high; // save high bits
+          payload[2 + (i * 2)] = low; // save low bits
+          payload[2 + (i * 2) + 1] = high; // save high bits
+          payload[2 + (i * 2) + 2] = journeyVersions[i];
         }
 
         // Send the message to the StarkNet core contract.
@@ -98,19 +93,21 @@ contract RealmsL1Bridge is
     function withdrawFromL2(
         address _to,
         uint256[] memory _realmIds,
-        uint256 journeyVersion
-    ) public override {
+        uint256[] memory _journeyVersions
+    ) public {
         require(l2BridgeAddress != 0, "L2_CONTRACT_ADDRESS_REQUIRED");
         
         // Construct the withdrawal message's payload.
         uint256[] memory payload = new uint256[](1 + (_realmIds.length * 2));
 
-        payload[0] = uint256(uint160(address(_to))); // TODO: needs to be tested 
-        
+        // Address to send Realms to
+        payload[0] = uint256(uint160(address(_to))); // TODO: needs to be tested
+
         for (uint256 i = 0; i < _realmIds.length; i++) {
           (uint256 low, uint256 high) = splitUint256(_realmIds[i]);
-          payload[1 + (i * 2)] = low; // save low bits
-          payload[1 + (i * 2) + 1] = high; // save high bits
+          payload[2 + (i * 2)] = low; // save low bits
+          payload[2 + (i * 2) + 1] = high; // save high bits
+          payload[2 + (i * 2) + 2] = _journeyVersions[i];
         }
 
         // Consume the message from the StarkNet core contract.
@@ -118,11 +115,13 @@ contract RealmsL1Bridge is
         starknetCore.consumeMessageFromL2(l2BridgeAddress, payload);
 
         for (uint256 i = 0; i < _realmIds.length; i++) {
-            if (journeyVersion == 1) {
+            if (_journeyVersions[i] == 1) {
                 journeyV1Address.bridgeWithdraw(_to, _realmIds);
             }
-
-            // TODO: V2?
+            
+            if (_journeyVersions[i] == 2) {
+                journeyV2Address.bridgeWithdraw(_to, _realmIds);
+            }
         }
     }
 
