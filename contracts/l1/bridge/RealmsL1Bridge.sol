@@ -59,7 +59,7 @@ contract RealmsL1Bridge is
     function depositToL2(
         uint256 _l2AccountAddress,
         uint256[] memory _realmIds,
-        uint256[] journeyVersions
+        uint256[] memory journeyVersions
     ) external nonReentrant {
         require(l2BridgeAddress != 0, "L2_CONTRACT_ADDRESS_REQUIRED");
         
