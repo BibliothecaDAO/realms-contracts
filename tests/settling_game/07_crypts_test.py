@@ -49,10 +49,6 @@ async def test_mint_crypt(game_factory):
     # VALUE SETTERS #
     #################
 
-    await signer.send_transaction(
-        account=admin_account, to=resources.contract_address, selector_name='mintBatch', calldata=[admin_account.contract_address, 10, *uint(1), *uint(2), *uint(3), *uint(4), *uint(5), *uint(6), *uint(7), *uint(8), *uint(9), *uint(10), 10, *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500)]
-    )
-
     # IMPORT CRYPTS METADATA (so we can mint)
     await set_crypt_meta(admin_account, crypts, FIRST_TOKEN_ID)
 
@@ -71,7 +67,7 @@ async def test_mint_crypt(game_factory):
         f'\033[1;33;40m🏰 | Crypt unpacked: {unpacked_crypt_info.result.crypt_stats}\n')
 
     # check balance of Crypt on account
-    await checks_crypts_balance(admin_account, crypts, 2)
+    await checks_crypts_balance(admin_account, crypts, 1)   # Check that we've minted one
 
     # set approval for Crypts Logic contract to use Crypts
     await signer.send_transaction(
@@ -86,7 +82,7 @@ async def test_mint_crypt(game_factory):
     await settle_crypt(admin_account, crypts_logic, FIRST_TOKEN_ID)
 
     # check transfer
-    await checks_crypts_balance(admin_account, crypts, 0)
+    await checks_crypts_balance(admin_account, crypts, 0)   # We settled and don't have any crypts (only s_crypts)
 
     # # increments time by 1.5 days to simulate stake
     set_block_timestamp(starknet.state, round(time.time()) + STAKE_TIME)
@@ -115,10 +111,7 @@ async def test_mint_crypt(game_factory):
     set_block_timestamp(starknet.state, round(
         time.time()) + STAKE_TIME * 2)
 
-    await claim_resources(admin_account, crypts_resources_logic, FIRST_TOKEN_ID)
-
-    await show_resource_balance(admin_account, resources)
-
+    
     ##################
     # UNSETTLE CRYPT #
     ##################
