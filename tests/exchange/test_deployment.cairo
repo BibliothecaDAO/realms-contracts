@@ -28,6 +28,8 @@ namespace ILords:
         proxy_admin : felt,
     ):
     end
+    func approve(spender : felt, amount : Uint256):
+    end
 end
 
 @contract_interface
@@ -37,6 +39,9 @@ namespace IResources:
     func mintBatch(
         to : felt, ids_len : felt, ids : Uint256*, amounts_len : felt, amounts : Uint256*
     ):
+    end
+
+    func setApprovalForAll(operator : felt, approved : felt):
     end
 end
 
@@ -82,7 +87,7 @@ func test_full_deploy{syscall_ptr : felt*, range_check_ptr}() -> (lords : felt):
     %{ print("lords") %}
     %{ ids.lords = deploy_contract("./contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo", []).contract_address %}
     %{ ids.proxy_lords = deploy_contract("./contracts/settling_game/proxy/PROXY_Logic.cairo", [ids.lords]).contract_address %}
-    ILords.initializer(proxy_lords, 1234, 1234, 18, Uint256(50000, 0), Account, Account)
+
 
     %{ print("resources") %}
     %{ ids.resources = deploy_contract("./contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo", []).contract_address %}
@@ -101,23 +106,32 @@ func test_full_deploy{syscall_ptr : felt*, range_check_ptr}() -> (lords : felt):
         Account,
         Account,
     )
+
+    ILords.initializer(
+        proxy_lords, 1234, 1234, 18, Uint256(5000000000000000000000, 0), proxy_ERC1155_AMM, proxy_ERC1155_AMM
+    )
+
     let (resources_mint : Uint256*) = alloc()
     let (values : Uint256*) = alloc()
+    let (lords_values : Uint256*) = alloc()
 
     assert resources_mint[0] = Uint256(1, 0)
     assert resources_mint[1] = Uint256(2, 0)
 
-    assert values[0] = Uint256(100, 0)
+    assert values[0] = Uint256(10, 0)
     assert values[1] = Uint256(100, 0)
 
-    IResources.mintBatch(
-        proxy_resources,
-        Account,
-        2,
-        resources_mint,
-        2,
-        values
-    )
-    
+    assert lords_values[0] = Uint256(100, 0)
+    assert lords_values[1] = Uint256(100, 0)
+
+    # MINT RESOURCES
+    IResources.mintBatch(proxy_resources, Account, 2, resources_mint, 2, values)
+
+    # APPROVALS
+    IResources.setApprovalForAll(proxy_resources, proxy_ERC1155_AMM, 1)
+    ILords.approve(proxy_lords, proxy_ERC1155_AMM, Uint256(5000000000000000000000, 0))
+
+    IAMM.initial_liquidity(proxy_ERC1155_AMM, 2, lords_values, 2, resources_mint, 2, values)
+
     return (lords=lords)
 end
