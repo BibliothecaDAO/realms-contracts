@@ -1,0 +1,105 @@
+# Poetry pyproject.toml: https://python-poetry.org/docs/pyproject/
+
+[build-system]
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "realms_cli"
+version = "0.1.0"
+description = "Nile plugin for greeting"
+readme = "README.md"
+authors = [
+  "Fran Algaba <f.algaba.work@gmail.com>"
+]
+license = "MIT"
+# Pypi classifiers: https://pypi.org/classifiers/
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[tool.poetry.dependencies]
+python = "^3.7.11"
+click = "^8.0.4"
+
+[tool.poetry.dev-dependencies]
+darglint = "^1.5.8"
+isort = "^5.7.0"
+pyupgrade = "^2.7.4"
+black = "^20.8b1"
+mypy = "^0.790"
+bandit = "^1.7.0"
+safety = "^1.10.3"
+pytest = "^6.2.1"
+pylint = "^2.6.0"
+pydocstyle = "^5.1.1"
+pre-commit = "^2.9.3"
+flake8 = "^3.9.2"
+
+# We need to specify that click commands are Poetry entrypoints of type `nile_plugins`. Do not modify this
+cairo-nile = "^0.5.0"
+[tool.poetry.plugins."nile_plugins"]
+# Here you specify you command name and location <command_name> = <package_method_location>
+
+#-----------PLAYER
+"create_pk" = "realms_cli.player.account.create_pk"
+
+#-----------LORDS
+"check_lords" = "realms_cli.player.lords.check_lords"
+
+#-----------SETTLING
+"approve_realm" = "realms_cli.player.settle.approve_realm"
+"check_realms" = "realms_cli.player.settle.check_realms"
+"check_s_realms" = "realms_cli.player.settle.check_s_realms"
+"check_owner_of_realm" = "realms_cli.player.settle.check_owner_of_realm"
+"check_owner_of_s_realm" = "realms_cli.player.settle.check_owner_of_s_realm"
+"mint_realm" = "realms_cli.player.settle.mint_realm"
+"settle" = "realms_cli.player.settle.settle_realm"
+"unsettle" = "realms_cli.player.settle.unsettle"
+"set_realm_data" = "realms_cli.player.settle.set_realm_data"
+"get_realm_data" = "realms_cli.player.settle.get_realm_data"
+
+#-----------CALCULATOR
+"troop_population" = "realms_cli.player.calculator.troop_population"
+"happiness" = "realms_cli.player.calculator.happiness"
+"food" = "realms_cli.player.calculator.food"
+"culture" = "realms_cli.player.calculator.culture"
+"population" = "realms_cli.player.calculator.population"
+
+#-----------BUILDINGS
+"build" = "realms_cli.player.buildings.build"
+"get_buildings" = "realms_cli.player.buildings.get_buildings"
+
+#-----------RESOURCES
+"check_resources" = "realms_cli.player.resources.check_resources"
+"claim_resources" = "realms_cli.player.resources.claim_resources"
+"upgrade_resource" = "realms_cli.player.resources.upgrade_resource"
+"approve_resource_module" = "realms_cli.player.resources.approve_resource_module"
+"get_resource_upgrade_cost" = "realms_cli.player.resources.get_resource_upgrade_cost"
+"days_available" = "realms_cli.player.resources.days_available"
+
+#-----------COMBAT
+"get_unit_cost" = "realms_cli.player.combat.get_unit_cost"
+"build_squad" = "realms_cli.player.combat.build_squad"
+"can_attack" = "realms_cli.player.combat.can_attack"
+"attack_realm" = "realms_cli.player.combat.attack_realm"
+"get_troops" = "realms_cli.player.combat.get_troops"
+"get_combat_data" = "realms_cli.player.combat.get_realm_combat_data"
+"get_xoroshiro" = "realms_cli.player.combat.get_xoroshiro"
+
+#-----------ADMIN
+"mint_resources" = "realms_cli.admin.main.mint_resources"
+"upgrade_module" = "realms_cli.admin.main.upgrade_module"
+
+#-----------MARKET
+"set_initial_liq" = "realms_cli.exchange.admin.set_initial_liq"
+"set_lords_approval" =  "realms_cli.exchange.admin.set_lords_approval"
+"set_resources_approval" =  "realms_cli.exchange.admin.set_resources_approval"
+
+"get_currency_r" =  "realms_cli.exchange.admin.get_currency_r"
+
+"buy_tokens" = "realms_cli.exchange.trade.buy_tokens"
+"sell_tokens" = "realms_cli.exchange.trade.sell_tokens"

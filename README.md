@@ -34,6 +34,29 @@ Finally, visit [The Atlas](https://atlas.bibliothecadao.xyz/) to see the Settlin
 
 If you want to get involved, join the [Realms x Bibliotheca Discord](https://discord.gg/uQnjZhZPfu).
 
+## Development
+
+We've placed individual development documentation inside each project's README and included general documentation for loading the monorepo in VSCode with our container in this file:
+
+<details><summary>Development Workflow</summary>
+If you are using VSCode, we provide a development container with all required dependencies.  (Note: this requires [Docker](https://docs.docker.com/get-docker/) and the [Remote - Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)).
+
+When opening VS Code, it should ask you to re-open the project in a container, if it finds
+the .devcontainer folder. If not, you can open the Command Palette (`cmd + shift + p`),
+and run “Remote-Containers: Rebuild and Reopen in Container”.
+
+<details><summary>Logging into your dev container</summary>
+The development container loads settings and the repository information on your local computer but cannot read your GitHub login credentials from your local computer.
+
+Instead, you can use the [Github CLI](https://cli.github.com/) to auth from your dev container:
+
+1. Download the [Github CLI](https://cli.github.com/).
+2. Visit the [Github Tokens page](https://github.com/settings/tokens) and click `Generate New Token` to create a new token that will be used in your dev container. Make sure to save it somewhere as the token is only visible upon creation.
+3. With the container loaded, open the dev container terminal in vscode.
+4. Run `gh auth login` and follow the steps, pasting in your new access token when asked.
+</details>
+
+If you have further questions about the development workflow, please ask in [#builders-chat in the Realms Discord](https://discord.gg/yP4BCbRjUs).
 
 ## Contributing
 

@@ -1,22 +1,22 @@
 %lang starknet
-%builtins pedersen range_check
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
 
-from contracts.Ownable_base import (
+from openzeppelin.access.ownable import (
     Ownable_initializer,
     Ownable_only_owner,
     Ownable_transfer_ownership,
     Ownable_get_owner,
 )
+
 from contracts.desiege.utils.interfaces import (
     IModuleController,
     I02_TowerStorage,
     IDivineEclipseElements,
 )
-from contracts.token.ERC1155.IERC1155_Mintable_Ownable import IERC1155
-
+from contracts.desiege.tokens.ERC1155.IERC1155_Mintable_Ownable import IERC1155
+ 
 const ModuleIdentifier_DivineEclipse = 'divine-eclipse'
 
 # ############# Storage ################

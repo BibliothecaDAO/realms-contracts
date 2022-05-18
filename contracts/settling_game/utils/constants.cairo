@@ -1,5 +1,12 @@
+# Constants utility contract
+#   A set of constants that are used throughout the project
+#   and/or not provided by cairo (e.g. TRUE / FALSE)
+#
+# MIT License
+
 %lang starknet
 
+# BIT SHIFTS
 const SHIFT_8_1 = 2 ** 0
 const SHIFT_8_2 = 2 ** 8
 const SHIFT_8_3 = 2 ** 16
@@ -42,16 +49,21 @@ const SHIFT_6_18 = 2 ** 102
 const SHIFT_6_19 = 2 ** 108
 const SHIFT_6_20 = 2 ** 114
 
+# BOOLS
 const TRUE = 1
 const FALSE = 0
 
+# SETTLING
 const VAULT_LENGTH = 7  # days
-const DAY = 86400  # sec
-const VAULT_LENGTH_SECONDS = VAULT_LENGTH * DAY
+const DAY = 1800  # day cycle length
+const VAULT_LENGTH_SECONDS = VAULT_LENGTH * DAY  # vault is always 7 * day cycle
 
+# PRODUCTION
 const BASE_RESOURCES_PER_DAY = 100
 const BASE_LORDS_PER_DAY = 25
 
+# COMBAT
 const GENESIS_TIMESTAMP = 1645743897
 
+# COMBAT
 const PILLAGE_AMOUNT = 25

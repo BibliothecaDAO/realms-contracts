@@ -1,11 +1,11 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.202.5/containers/python-3
 {
-	"name": "Roll Your Own",
+	"name": "Loot",
 	"runArgs": [
 		"--init"
 	],
-	"image": "ghcr.io/dopedao/ryo:latest",
+	"image": "ghcr.io/bibliothecaforadventurers/loot:latest",
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
 		"python.pythonPath": "/usr/local/bin/python",
@@ -29,10 +29,12 @@
 		"ms-python.vscode-pylance",
 		"ericglau.cairo-ls",
 		"starkware.cairo",
-		"golang.go",
 		"graphql.vscode-graphql",
 		"redhat.vscode-yaml"
 	],
+	"containerEnv": {
+		"OWNER_PRIVATE_KEY": "${localEnv:OWNER_PRIVATE_KEY}"
+	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 	// Use 'postCreateCommand' to run commands after the container is created.

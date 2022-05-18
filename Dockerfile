@@ -12,14 +12,8 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
    software-properties-common && \
    rm -rf /var/lib/apt/lists/*
 
-# Add Node
-FROM node:16.14.2
-ENV NODE_ENV=production
-
-WORKDIR /
-
-COPY ["package.json", "yarn.json*", "./"]
-
-RUN yarn install --production
-
-COPY . .
+RUN mkdir /loot
+WORKDIR /loot/
+RUN git clone https://github.com/BibliothecaForAdventurers/realms-contracts.git
+WORKDIR /loot/realms-contracts/
+RUN pip3 install realms_cli/

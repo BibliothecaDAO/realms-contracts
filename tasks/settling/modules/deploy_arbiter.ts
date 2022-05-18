@@ -13,4 +13,4 @@ async function main() {
   await deployContract(contractName, contractName, [ownerAccount])
 }
 
-main()
+export default main()

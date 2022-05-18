@@ -16,4 +16,4 @@ async function main() {
     await deployContract(stateContractName, stateContractName, [moduleControllerAddress])
 }
 
-main()
+export default main()
