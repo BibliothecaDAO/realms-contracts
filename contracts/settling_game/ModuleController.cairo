@@ -71,7 +71,7 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     _resources_address : felt,
     _realms_address : felt,
     _treasury_address : felt,
-    _s_realms_address : felt
+    _s_realms_address : felt,
 ):
     arbiter.write(arbiter_address)
 
@@ -80,7 +80,7 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     genesis.write(block_timestamp)
 
     # write patterns known at deployment. E.g., 1->2, 1->3, 5->6.
-    
+
     # settling to wonders logic
     can_write_to.write(ModuleIds.L01_Settling, ModuleIds.L05_Wonders, TRUE)
 
@@ -153,7 +153,7 @@ func set_initial_module_addresses{
     module_03_addr : felt,
     module_04_addr : felt,
     module_05_addr : felt,
-    module_06_addr : felt
+    module_06_addr : felt,
 ):
     only_arbiter()
 
