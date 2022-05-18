@@ -6,14 +6,14 @@ def run(nre):
 
     config = Config(nre.network)
 
-    # logged_deploy(
-    #     nre,
-    #     "xoroshiro128_starstar",
-    #     alias="xoroshiro128_starstar",
-    #     arguments=[
-    #         '0x10AF',
-    #     ],
-    # )
+    logged_deploy(
+        nre,
+        "xoroshiro128_starstar",
+        alias="xoroshiro128_starstar",
+        arguments=[
+            '0x10AF',
+        ],
+    )
 
     # set module access within realms access
     wrapped_send(
