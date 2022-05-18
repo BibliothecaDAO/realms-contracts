@@ -549,7 +549,7 @@ async def game_factory(token_factory, compiled_proxy):
         account=admin_account,
         to=s_crypts.contract_address,
         selector_name='Set_module_access',
-        calldata=[settling_logic.contract_address],
+        calldata=[crypts_logic.contract_address],
     )
 
     # set module access witin resources contract
@@ -558,6 +558,14 @@ async def game_factory(token_factory, compiled_proxy):
         to=resources.contract_address,
         selector_name='Set_module_access',
         calldata=[resources_logic.contract_address],
+    )
+
+     # set module access witin crypts resources contract
+    await admin_key.send_transaction(
+        account=admin_account,
+        to=resources.contract_address,
+        selector_name='Set_module_access',
+        calldata=[crypts_resources_logic.contract_address],
     )
 
     return (
