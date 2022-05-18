@@ -5,7 +5,7 @@ from openzeppelin.tests.utils import Signer, uint, str_to_felt, from_uint, felt_
 import time
 from enum import IntEnum
 
-from realms_cli.realms_cli.binary_converter import map_realm
+from realms_cli.realms_cli.binary_converter import map_crypt
 
 from .game_structs import BUILDING_COSTS, RESOURCE_UPGRADE_COST
 
@@ -13,7 +13,10 @@ from tests.conftest import set_block_timestamp
 
 crypts_data = json.load(open('data/crypts.json'))
 
-resources = json.load(open('data/resources.json'))
+environments = json.load(open("data/crypts_environments.json"))
+
+affinities = json.load(open("data/crypts_affinities.json"))
+
 
 # ACCOUNTS
 NUM_SIGNING_ACCOUNTS = 2
@@ -50,30 +53,6 @@ async def test_mint_crypt(game_factory):
         account=admin_account, to=resources.contract_address, selector_name='mintBatch', calldata=[admin_account.contract_address, 10, *uint(1), *uint(2), *uint(3), *uint(4), *uint(5), *uint(6), *uint(7), *uint(8), *uint(9), *uint(10), 10, *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500)]
     )
 
-    # APPROVE RESOURCE CONTRACT FOR LORDS TRANSFERS - SET AT FULL SUPPLY TODO: NEEDS MORE SECURE SYSTEM
-    # await signers[1].send_transaction(
-    #     account=treasury_account, to=lords.contract_address, selector_name='approve', calldata=[resources_logic.contract_address, *uint(INITIAL_SUPPLY)]
-    # )
-
-    # await signer.send_transaction(
-    #     account=admin_account, to=lords.contract_address, selector_name='approve', calldata=[buildings_logic.contract_address, *uint(INITIAL_SUPPLY)]
-    # )
-    
-    # await signers[1].send_transaction(
-    #     account=treasury_account, to=lords.contract_address, selector_name='approve', calldata=[settling_logic.contract_address, *uint(INITIAL_SUPPLY)]
-    # )
-
-    # RESOURCE COSTS
-
-    # for resource_id, resource_cost in RESOURCE_UPGRADE_COST.items():
-    #     await signer.send_transaction(
-    #         account=admin_account, to=resources_logic.contract_address, selector_name='set_resource_upgrade_cost', calldata=[resource_id.value, resource_cost.resource_count, resource_cost.bits, resource_cost.packed_ids, resource_cost.packed_amounts]
-    #     )
-    # for building_id, building_cost in BUILDING_COSTS.items():
-    #     await signer.send_transaction(
-    #         account=admin_account, to=buildings_state.contract_address, selector_name='set_building_cost', calldata=[building_id.value, building_cost.resource_count, building_cost.bits, building_cost.packed_ids, building_cost.packed_amounts, *uint(building_cost.lords)]
-    #     )
-
     # IMPORT CRYPTS METADATA (so we can mint)
     await set_crypt_meta(admin_account, crypts, FIRST_TOKEN_ID)
 
@@ -94,7 +73,7 @@ async def test_mint_crypt(game_factory):
     # check balance of Crypt on account
     await checks_crypts_balance(admin_account, crypts, 2)
 
-    # set approval for Settling contract to use Realm
+    # set approval for Crypts Logic contract to use Crypts
     await signer.send_transaction(
         account=admin_account, to=crypts.contract_address, selector_name='setApprovalForAll', calldata=[crypts_logic.contract_address, 1]
     )
@@ -183,8 +162,7 @@ async def set_crypt_meta(account, crypts, token):
     """set crypts metadata"""
     await signer.send_transaction(
         account, crypts.contract_address, 'set_crypt_data', [
-            *token, map_realm(  ## TODO: Update map_realm to support crypts (via json)
-        crypts_data[str(from_uint(token))], environment)]
+            *token, map_crypt(crypts_data[str(from_uint(token))], environments, affinities)]
     )
 
 
