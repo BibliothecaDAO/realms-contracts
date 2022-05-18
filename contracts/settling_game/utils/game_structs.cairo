@@ -354,3 +354,13 @@ struct Cost:
     # packed amounts of each resource
     member packed_amounts : felt
 end
+
+struct ResourceOutput:
+    member resource_1 : felt
+    member resource_2 : felt
+    member resource_3 : felt
+    member resource_4 : felt
+    member resource_5 : felt
+    member resource_6 : felt
+    member resource_7 : felt
+end    
