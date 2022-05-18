@@ -41,7 +41,7 @@ from openzeppelin.token.erc1155.library import (
 from openzeppelin.upgrades.library import (
     Proxy_initializer,
     Proxy_only_admin,
-    Proxy_set_implementation
+    Proxy_set_implementation,
 )
 
 @event
@@ -110,18 +110,14 @@ end
 ###############
 
 @external
-func initializer{
-        syscall_ptr: felt*, 
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(
-        currency_address_ : felt,
-        token_address_ : felt,
-        lp_fee_thousands_ : Uint256,
-        royalty_fee_thousands_ : Uint256,
-        royalty_fee_address_ : felt,
-        proxy_admin : felt
-    ):
+func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    currency_address_ : felt,
+    token_address_ : felt,
+    lp_fee_thousands_ : Uint256,
+    royalty_fee_thousands_ : Uint256,
+    royalty_fee_address_ : felt,
+    proxy_admin : felt,
+):
     currency_address.write(currency_address_)
     token_address.write(token_address_)
     lp_fee_thousands.write(lp_fee_thousands_)
@@ -131,11 +127,9 @@ func initializer{
 end
 
 @external
-func upgrade{
-        syscall_ptr: felt*, 
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(new_implementation: felt):
+func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    new_implementation : felt
+):
     Proxy_only_admin()
     Proxy_set_implementation(new_implementation)
     return ()

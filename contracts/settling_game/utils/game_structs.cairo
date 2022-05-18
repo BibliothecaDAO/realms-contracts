@@ -363,4 +363,4 @@ struct ResourceOutput:
     member resource_5 : felt
     member resource_6 : felt
     member resource_7 : felt
-end    
+end

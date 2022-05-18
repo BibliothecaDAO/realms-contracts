@@ -17,7 +17,7 @@ namespace IArbiter:
         module_03_addr : felt,
         module_04_addr : felt,
         module_05_addr : felt,
-        module_06_addr : felt
+        module_06_addr : felt,
     ):
     end
 end
@@ -58,7 +58,7 @@ namespace IModuleController:
         module_03_addr : felt,
         module_04_addr : felt,
         module_05_addr : felt,
-        module_06_addr : felt
+        module_06_addr : felt,
     ):
     end
 end
@@ -111,7 +111,9 @@ end
 
 @contract_interface
 namespace IL06_Combat:
-    func build_squad_from_troops_in_realm(troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt):
+    func build_squad_from_troops_in_realm(
+        troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt
+    ):
     end
     func set_troop_cost(troop_id : felt, cost : Cost):
     end

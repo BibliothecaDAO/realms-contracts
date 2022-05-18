@@ -16,7 +16,6 @@ namespace CALCULATOR:
     func get_happiness{syscall_ptr : felt*, range_check_ptr}(
         culture : felt, population : felt, food : felt
     ) -> (happiness : felt):
-
         alloc_locals
         # FETCH VALUES
         let (population_calculation, _) = unsigned_div_rem(population, 10)

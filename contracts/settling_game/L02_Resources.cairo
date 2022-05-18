@@ -187,7 +187,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         realms_data.resource_6,
         realms_data.resource_7,
     )
-    
+
     # USER CLAIM
     let (r_1_user) = calculate_total_claimable(days, user_mint_rel_perc, r_1_output)
     let (r_2_user) = calculate_total_claimable(days, user_mint_rel_perc, r_2_output)
@@ -214,7 +214,14 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     )
 
     let (resource_mint_len : felt, resource_wonder_mint : Uint256*) = get_mintable_resources(
-        realms_data, r_1_wonder, r_2_wonder, r_3_wonder, r_4_wonder, r_5_wonder, r_6_wonder, r_7_wonder
+        realms_data,
+        r_1_wonder,
+        r_2_wonder,
+        r_3_wonder,
+        r_4_wonder,
+        r_5_wonder,
+        r_6_wonder,
+        r_7_wonder,
     )
 
     # LORDS MINT
@@ -223,7 +230,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # FETCH OWNER
     let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
-    
+
     # MINT LORDS
     IERC20.transferFrom(lords_address, treasury_address, owner, lords_available)
 
@@ -580,7 +587,6 @@ func get_all_resource_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     let (r_5_user) = calculate_total_claimable(days, user_mint_rel_perc, r_5_output)
     let (r_6_user) = calculate_total_claimable(days, user_mint_rel_perc, r_6_output)
     let (r_7_user) = calculate_total_claimable(days, user_mint_rel_perc, r_7_output)
-
 
     let (resource_mint_len : felt, resource_mint : Uint256*) = get_mintable_resources(
         realms_data, r_1_user, r_2_user, r_3_user, r_4_user, r_5_user, r_6_user, r_7_user

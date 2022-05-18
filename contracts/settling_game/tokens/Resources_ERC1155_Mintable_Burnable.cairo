@@ -34,7 +34,7 @@ from openzeppelin.token.erc1155.library import (
 from openzeppelin.upgrades.library import (
     Proxy_initializer,
     Proxy_only_admin,
-    Proxy_set_implementation
+    Proxy_set_implementation,
 )
 
 #
@@ -42,25 +42,18 @@ from openzeppelin.upgrades.library import (
 #
 
 @external
-func initializer{
-        syscall_ptr: felt*, 
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(
-        uri: felt,
-        owner: felt
-    ):
+func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    uri : felt, owner : felt
+):
     ERC1155_initializer(uri)
     Ownable_initializer(owner)
     return ()
 end
 
 @external
-func upgrade{
-        syscall_ptr: felt*, 
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(new_implementation: felt):
+func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    new_implementation : felt
+):
     Ownable_only_owner()
     Proxy_set_implementation(new_implementation)
     return ()
@@ -71,7 +64,9 @@ end
 #
 
 @view
-func getOwner{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (owner: felt):
+func getOwner{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+    owner : felt
+):
     return Ownable_get_owner()
 end
 
