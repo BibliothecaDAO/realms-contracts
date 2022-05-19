@@ -104,7 +104,7 @@ def map_crypt(value, environments, affinities):
     resourceIds = [23 + int(environment[0])]   # Crypts resources are 23->28. Environments start at id 0 in our json.
     
     # resource length to help with iteration in app
-    resourceLength = [1]  # We only have 1 resource per dungeon
+    # resourceLength = [1]  # We only have 1 resource per dungeon
 
 
     # legendary is used as a multiplier for resource output
@@ -124,7 +124,17 @@ def map_crypt(value, environments, affinities):
             affinity[0] = a["id"]
 
     # concat all together
-    meta = resourceLength + resourceIds + environment + legendary + size + numDoors + numPoints + affinity
+    # print('resourceLength: ' + str(resourceLength[0]))
+    print('resourceIds: ' + str(resourceIds[0]))
+    print('environment: ' + str(environment[0]))
+    print('legendary: ' + str(legendary[0]))
+    print('size: ' + str(size[0]))
+    print('numDoors: ' + str(numDoors[0]))
+    print('numPoints: ' + str(numPoints[0]))
+    print('affinity: ' + str(affinity[0]))
+
+    # meta = resourceLength + resourceIds + environment + legendary + size + numDoors + numPoints + affinity
+    meta = resourceIds + environment + legendary + size + numDoors + numPoints + affinity
 
     return decimalToBinary(meta, 8)
 
