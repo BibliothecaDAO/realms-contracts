@@ -934,15 +934,20 @@ func get_all_sell_price{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
 
     # Loop
     let (local prices : Uint256*) = alloc()
-    let (sell_prices) = get_all_sell_price_loop(
-        token_ids_len, token_ids, token_amounts_len, token_amounts
+    let (sell_prices : Uint256*) = get_all_sell_price_loop(
+        token_ids_len, token_ids, token_amounts_len, token_amounts, token_amounts_len, prices
     )
-    
-    return ((sell_prices - prices) / Uint256.SIZE , sell_prices)
+
+    return (token_amounts_len, prices)
 end
 
 func get_all_sell_price_loop{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    token_ids_len : felt, token_ids : Uint256*, token_amounts_len : felt, token_amounts : Uint256*
+    token_ids_len : felt,
+    token_ids : Uint256*,
+    token_amounts_len : felt,
+    token_amounts : Uint256*,
+    prices_len : felt,
+    prices : Uint256*,
 ) -> (total_token_value : Uint256*):
     alloc_locals
 
@@ -963,6 +968,10 @@ func get_all_sell_price_loop{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, r
     let (currency_reserves_ : Uint256) = currency_reserves.read([token_ids])
     let (token_reserves : Uint256) = IERC1155.balanceOf(token_address_, contract, [token_ids])
 
+    # FOR TESTS
+    # let currency_reserves_ = Uint256(10000, 0)
+    # let token_reserves = Uint256(1000, 0)
+
     # Calculate prices
     let (currency_amount_sans_royal) = get_sell_price(
         [token_amounts], currency_reserves_, token_reserves
@@ -970,15 +979,85 @@ func get_all_sell_price_loop{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, r
 
     # Add royalty fee
     let (royalty_fee) = get_royalty_for_price(currency_amount_sans_royal)
-    let (currency_amount) = uint256_sub(currency_amount_sans_royal, royalty_fee)
+    let (currency_amount : Uint256) = uint256_sub(currency_amount_sans_royal, royalty_fee)
 
-    token_amounts.high = currency_amount.high
-    token_amounts.low = currency_amount.low
+    prices.high = currency_amount.high
+    prices.low = currency_amount.low
 
     return get_all_sell_price_loop(
         token_ids_len - 1,
         token_ids + Uint256.SIZE,
         token_amounts_len - 1,
         token_amounts + Uint256.SIZE,
+        prices_len - 1,
+        prices + Uint256.SIZE,
+    )
+end
+
+@external
+func get_all_buy_price{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_ids_len : felt, token_ids : Uint256*, token_amounts_len : felt, token_amounts : Uint256*
+) -> (prices_len: felt, prices : Uint256*):
+    alloc_locals
+
+    # Loop
+    let (local prices : Uint256*) = alloc()
+    let (sell_prices : Uint256*) = get_all_buy_price_loop(
+        token_ids_len, token_ids, token_amounts_len, token_amounts, token_amounts_len, prices
+    )
+
+    return (token_amounts_len, prices)
+end
+
+func get_all_buy_price_loop{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_ids_len : felt,
+    token_ids : Uint256*,
+    token_amounts_len : felt,
+    token_amounts : Uint256*,
+    prices_len : felt,
+    prices : Uint256*,
+) -> (total_token_value : Uint256*):
+    alloc_locals
+
+    # Recursive break
+    if token_ids_len == 0:
+        return (token_amounts)
+    end
+
+    let (contract) = get_contract_address()
+
+    let (token_address_) = token_address.read()
+    let (currency_address_) = currency_address.read()
+
+    let (royalty_fee_thousands_) = royalty_fee_thousands.read()
+    let (royalty_fee_address_) = royalty_fee_address.read()
+
+    # # Read current reserve levels
+    let (currency_reserves_ : Uint256) = currency_reserves.read([token_ids])
+    let (token_reserves : Uint256) = IERC1155.balanceOf(token_address_, contract, [token_ids])
+
+    # FOR TESTS
+    # let currency_reserves_ = Uint256(10000, 0)
+    # let token_reserves = Uint256(1000, 0)
+
+    # Calculate prices
+    let (currency_amount_sans_royal) = get_buy_price(
+        [token_amounts], currency_reserves_, token_reserves
+    )
+
+    # Add royalty fee
+    let (royalty_fee) = get_royalty_for_price(currency_amount_sans_royal)
+    let (currency_amount, _) = uint256_add(currency_amount_sans_royal, royalty_fee)  # Overflow will never happen here
+
+    prices.high = currency_amount.high
+    prices.low = currency_amount.low
+
+    return get_all_buy_price_loop(
+        token_ids_len - 1,
+        token_ids + Uint256.SIZE,
+        token_amounts_len - 1,
+        token_amounts + Uint256.SIZE,
+        prices_len - 1,
+        prices + Uint256.SIZE,
     )
 end

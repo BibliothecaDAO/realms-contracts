@@ -101,3 +101,61 @@ def sell_tokens(resource_ids, resource_values, min_currency, network):
             int(time.time() + 3000)
         ],
     )
+
+@click.command()
+@click.option('--resource_ids', is_flag=False, metavar='<columns>', type=click.STRING, help='Resource Ids', prompt=True)
+@click.option('--resource_values', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='Resource values', prompt=True)
+@click.option("--network", default="goerli")
+def get_all_sell_price(resource_ids, resource_values, network):
+    """
+    Get all sell price
+    """
+    # split columns by ',' and remove whitespace
+    resource_ids = [c.strip() for c in resource_ids.split(',')]
+    resource_values = [c.strip() for c in resource_values.split(',')]
+
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_Exchange_ERC20_1155",
+        function="get_all_sell_price",
+        arguments=[
+            len(resource_ids),
+            *expanded_uint_list(resource_ids),
+            len(resource_ids),
+            *expanded_uint_list(resource_values)
+        ],
+    )
+
+    print(out)
+
+@click.command()
+@click.option('--resource_ids', is_flag=False, metavar='<columns>', type=click.STRING, help='Resource Ids', prompt=True)
+@click.option('--resource_values', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='Resource values', prompt=True)
+@click.option("--network", default="goerli")
+def get_all_buy_price(resource_ids, resource_values, network):
+    """
+    Get all sell price
+    """
+    # split columns by ',' and remove whitespace
+    resource_ids = [c.strip() for c in resource_ids.split(',')]
+    resource_values = [c.strip() for c in resource_values.split(',')]
+
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_Exchange_ERC20_1155",
+        function="get_all_buy_price",
+        arguments=[
+            len(resource_ids),
+            *expanded_uint_list(resource_ids),
+            len(resource_ids),
+            *expanded_uint_list(resource_values)
+        ],
+    )
+
+    print(out)

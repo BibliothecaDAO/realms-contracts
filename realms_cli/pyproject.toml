@@ -103,3 +103,5 @@ cairo-nile = "^0.5.0"
 
 "buy_tokens" =  "realms_cli.exchange.trade.buy_tokens"
 "sell_tokens" =  "realms_cli.exchange.trade.sell_tokens"
+"get_all_buy_price" = "realms_cli.exchange.trade.get_all_buy_price"
+"get_all_sell_price" = "realms_cli.exchange.trade.get_all_sell_price"
