@@ -25,18 +25,15 @@ signer = Signer(123456789987654321)
 # LORDS SUPPLY
 INITIAL_SUPPLY = 1000000 * (10 ** 18)
 
-# REALM TOKENS TO MINT
+# CRYPTS TOKENS TO MINT
 FIRST_TOKEN_ID = uint(1)
-WONDER_TOKEN_ID = uint(839)
 
 # 1.5 * 7 Days
 DAYS = 1800
 STAKED_DAYS = 7
 
-LORDS_RATE = 25
 RESOURCES = 100
 STAKE_TIME = DAYS * STAKED_DAYS
-BUILDING_ID = 8
 RESOURCE_ID = 2
 
 
@@ -59,7 +56,7 @@ async def test_mint_crypt(game_factory):
     await mint_crypt(admin_account, crypts, FIRST_TOKEN_ID)
 
     # print crypt details
-    crypt_info = await realms.get_crypt_info(FIRST_TOKEN_ID).invoke()
+    crypt_info = await crypts.get_crypt_info(FIRST_TOKEN_ID).invoke()
     print(f'\033[1;33;40m🏰 | Crypt metadata: {crypt_info.result.crypt_data}\n')
 
     unpacked_crypt_info = await crypts.fetch_crypt_data(FIRST_TOKEN_ID).invoke()
@@ -155,7 +152,8 @@ async def set_crypt_meta(account, crypts, token):
     """set crypts metadata"""
     await signer.send_transaction(
         account, crypts.contract_address, 'set_crypt_data', [
-            *token, map_crypt(crypts_data[str(from_uint(token))], environments, affinities)]
+            *token, map_crypt(
+                crypts_data[str(from_uint(token))], environments, affinities)]
     )
 
 

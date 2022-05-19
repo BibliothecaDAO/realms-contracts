@@ -123,7 +123,6 @@ def map_crypt(value, environments, affinities):
         if a["name"] == affinity_name:
             affinity[0] = a["id"]
 
-
     # concat all together
     meta = resourceLength + resourceIds + environment + legendary + size + numDoors + numPoints + affinity
 
@@ -171,4 +170,4 @@ if __name__ == '__main__':
     environments = json.load(open("data/crypts_environments.json"))
     affinities = json.load(open("data/crypts_affinities.json"))
 
-    print(map_crypt(crypts["dungeons"][1], environments, affinities))
+    print(map_crypt(crypts["1"], environments, affinities))
