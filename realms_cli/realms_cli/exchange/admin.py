@@ -15,12 +15,15 @@ def set_initial_liq(network):
     """
     config = Config(nile_network=network)
 
+    resource = 100 * 10 ** 18
+    currency = 1000 * 10 ** 18
+
     resource_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
                     12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
-    resource_values = [100, 100, 100, 100, 100, 100, 100, 100, 100, 100,
-                       100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
-    currency_values = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000,
-                       1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
+    resource_values = [resource, resource, resource, resource, resource, resource, resource, resource, resource, resource,
+                       resource, resource, resource, resource, resource, resource, resource, resource, resource, resource, resource, resource]
+    currency_values = [currency, currency, currency, currency, currency, currency, currency, currency, currency, currency,
+                       currency, currency, currency, currency, currency, currency, currency, currency, currency, currency, currency, currency]
 
     wrapped_send(
         network=config.nile_network,
@@ -41,10 +44,9 @@ def set_initial_liq(network):
 @click.option("--network", default="goerli")
 def set_lords_approval(network):
     """
-    Claim available resources
+    Set Lords approval for AMM
     """
     config = Config(nile_network=network)
-
 
     wrapped_send(
         network=config.nile_network,
@@ -58,10 +60,9 @@ def set_lords_approval(network):
 @click.option("--network", default="goerli")
 def set_resources_approval(network):
     """
-    Claim available resources
+    Set resource approval for AMM
     """
     config = Config(nile_network=network)
-
 
     wrapped_send(
         network=config.nile_network,

@@ -5,6 +5,7 @@ from realms_cli.caller_invoker import wrapped_call, wrapped_send, compile, deplo
 from realms_cli.config import Config, strhex_as_strfelt, safe_load_deployment
 from realms_cli.shared import uint, expanded_uint_list
 from realms_cli.deployer import logged_deploy
+from realms_cli.utils import print_over_colums
 import time
 
 
@@ -103,59 +104,76 @@ def sell_tokens(resource_ids, resource_values, min_currency, network):
     )
 
 @click.command()
-@click.option('--resource_ids', is_flag=False, metavar='<columns>', type=click.STRING, help='Resource Ids', prompt=True)
-@click.option('--resource_values', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='Resource values', prompt=True)
 @click.option("--network", default="goerli")
-def get_all_sell_price(resource_ids, resource_values, network):
+def get_all_sell_price(network):
     """
     Get all sell price
     """
-    # split columns by ',' and remove whitespace
-    resource_ids = [c.strip() for c in resource_ids.split(',')]
-    resource_values = [c.strip() for c in resource_values.split(',')]
-
     config = Config(nile_network=network)
+    n_resources = len(config.RESOURCES)
+
+    uints = []
+    values = []
+    for i in range(n_resources):
+        uints.append(str(i+1))
+        uints.append("0")
+        values.append(1 * 10 ** 18)
+        values.append("0")
 
     out = wrapped_call(
         network=config.nile_network,
         contract_alias="proxy_Exchange_ERC20_1155",
         function="get_all_sell_price",
         arguments=[
-            len(resource_ids),
-            *expanded_uint_list(resource_ids),
-            len(resource_ids),
-            *expanded_uint_list(resource_values)
+            n_resources,
+            *uints,
+            n_resources,
+            *values,
         ],
     )
+    
+    out = out.split(" ")
+    pretty_out = []
+    for i, resource in enumerate(config.RESOURCES):
+        pretty_out.append(f"{resource} : {round(int(out[i*2+1], 16) / 1000000000000000000, 4)}")
 
-    print(out)
+    print_over_colums(pretty_out)
+
 
 @click.command()
-@click.option('--resource_ids', is_flag=False, metavar='<columns>', type=click.STRING, help='Resource Ids', prompt=True)
-@click.option('--resource_values', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='Resource values', prompt=True)
 @click.option("--network", default="goerli")
-def get_all_buy_price(resource_ids, resource_values, network):
+def get_all_buy_price(network):
     """
-    Get all sell price
+    Get all buy price
     """
     # split columns by ',' and remove whitespace
-    resource_ids = [c.strip() for c in resource_ids.split(',')]
-    resource_values = [c.strip() for c in resource_values.split(',')]
 
     config = Config(nile_network=network)
+    n_resources = len(config.RESOURCES)
+    
+    uints = []
+    values = []
+    for i in range(n_resources):
+        uints.append(str(i+1))
+        uints.append("0")
+        values.append(1 * 10 ** 18)
+        values.append("0")
 
     out = wrapped_call(
         network=config.nile_network,
         contract_alias="proxy_Exchange_ERC20_1155",
         function="get_all_buy_price",
         arguments=[
-            len(resource_ids),
-            *expanded_uint_list(resource_ids),
-            len(resource_ids),
-            *expanded_uint_list(resource_values)
+            n_resources,
+            *uints,
+            n_resources,
+            *values,
         ],
     )
+    
+    out = out.split(" ")
+    pretty_out = []
+    for i, resource in enumerate(config.RESOURCES):
+        pretty_out.append(f"{resource} : {round(int(out[i*2+1], 16) / 1000000000000000000, 4)}")
 
-    print(out)
+    print_over_colums(pretty_out)

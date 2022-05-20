@@ -543,3 +543,109 @@ async def game_factory(token_factory, compiled_proxy):
         calculator_logic
     )
     
+@pytest.fixture(scope='session')
+async def resource_factory(token_factory, compiled_proxy):
+    (
+        starknet,
+        admin_key,
+        admin_account,
+        treasury_account,
+        accounts,
+        signers,
+        lords,
+        realms,
+        resources,
+        s_realms,
+    ) = token_factory
+
+    arbiter = await deploy_contract(starknet, "contracts/settling_game/Arbiter.cairo", [admin_account.contract_address])
+    controller = await deploy_contract(starknet, "contracts/settling_game/ModuleController.cairo", [
+            arbiter.contract_address,
+            lords.contract_address,
+            resources.contract_address,
+            realms.contract_address,
+            treasury_account.contract_address,
+            s_realms.contract_address
+        ])
+
+    print('batch set')
+    await admin_key.send_transaction(
+        account=admin_account,
+        to=arbiter.contract_address,
+        selector_name='set_address_of_controller',
+        calldata=[controller.contract_address],
+    )
+
+    settling_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L01_Settling.cairo", [
+        controller.contract_address, admin_account.contract_address])
+
+    resources_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L02_Resources.cairo", [
+        controller.contract_address, admin_account.contract_address])
+
+    # buildings_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L03_Buildings.cairo", [
+    #     controller.contract_address, admin_account.contract_address])
+
+    calculator_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L04_Calculator.cairo", [
+        controller.contract_address, admin_account.contract_address])
+
+    wonders_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L05_Wonders.cairo", [
+        controller.contract_address, admin_account.contract_address])
+
+    # xoroshiro128 = await starknet.deploy(
+    #     source="contracts/utils/xoroshiro128_starstar.cairo",
+    #     constructor_calldata=[controller.contract_address],
+    # )
+
+    # combat_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L06_Combat.cairo", [
+    #     controller.contract_address,
+    #     xoroshiro128.contract_address, admin_account.contract_address])
+
+    # The admin key controls the arbiter. Use it to have the arbiter
+    # set the module deployment addresses in the controller.
+    await admin_key.send_transaction(
+        account=admin_account,
+        to=arbiter.contract_address,
+        selector_name='batch_set_controller_addresses',
+        calldata=[
+            settling_logic.contract_address,
+            resources_logic.contract_address,
+            123,
+            calculator_logic.contract_address,
+            wonders_logic.contract_address,
+            123,
+        ],
+    )
+
+    # set module access witin S_Realm contract
+    await admin_key.send_transaction(
+        account=admin_account,
+        to=s_realms.contract_address,
+        selector_name='Set_module_access',
+        calldata=[settling_logic.contract_address],
+    )
+
+    # set module access witin resources contract
+    await admin_key.send_transaction(
+        account=admin_account,
+        to=resources.contract_address,
+        selector_name='Set_module_access',
+        calldata=[resources_logic.contract_address],
+    )
+
+    return (
+        admin_account,
+        treasury_account,
+        starknet,
+        accounts,
+        signers,
+        arbiter,
+        controller,
+        settling_logic,
+        realms,
+        resources,
+        lords,
+        resources_logic,
+        s_realms,
+        calculator_logic
+    )
+        

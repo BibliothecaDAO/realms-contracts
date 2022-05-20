@@ -10,6 +10,7 @@ from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
+from starkware.cairo.common.pow import pow
 
 from contracts.settling_game.utils.game_structs import (
     RealmData,
@@ -226,8 +227,9 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # LORDS MINT
     let (tribute) = IL04_Calculator.calculate_tribute(calculator_address)
-    let lords_available = Uint256(total_days * tribute, 0)
-
+    
+    let lords_available = Uint256(total_days * tribute * 10 ** 18, 0)
+    
     # FETCH OWNER
     let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
 
@@ -594,7 +596,7 @@ func get_all_resource_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
 
     # LORDS MINT
     let (tribute) = IL04_Calculator.calculate_tribute(calculator_address)
-    let lords_available = Uint256(total_days * tribute, 0)
+    let lords_available = Uint256(total_days * tribute * 10 ** 18, 0)
 
     return (realms_data.resource_number, resource_mint, lords_available)
 end
@@ -648,7 +650,8 @@ func calculate_total_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     # days * current tax * output
     # we multiply by tax before dividing by 100
     let (total_work_generated, _) = unsigned_div_rem(days * tax * output, 100)
-    return (Uint256(total_work_generated, 0))
+
+    return (Uint256(total_work_generated * 10 ** 18, 0))
 end
 
 ###########

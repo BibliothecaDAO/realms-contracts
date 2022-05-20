@@ -45,7 +45,7 @@ def check_resources(address, network):
     out = out.split(" ")
     pretty_out = []
     for i, resource in enumerate(config.RESOURCES):
-        pretty_out.append(f"{resource} : {out[i*2+1]}")
+        pretty_out.append(f"{resource} : {int(out[i*2+1], 16) / 1000000000000000000}")
 
     print_over_colums(pretty_out)
 
