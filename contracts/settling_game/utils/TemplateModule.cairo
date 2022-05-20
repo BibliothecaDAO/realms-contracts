@@ -11,7 +11,7 @@ from starkware.starknet.common.syscalls import get_caller_address
 
 from contracts.settling_game.interfaces.imodules import IModuleController
 
-from contracts.settling_game.utils.library.library_module import (
+from contracts.settling_game.library.library_module import (
     MODULE_controller_address,
     MODULE_only_approved,
     MODULE_initializer,
@@ -20,7 +20,7 @@ from contracts.settling_game.utils.library.library_module import (
 from openzeppelin.upgrades.library import (
     Proxy_initializer,
     Proxy_only_admin,
-    Proxy_set_implementation
+    Proxy_set_implementation,
 )
 
 # ____MODULE_XXX___BUILDING_STATE
@@ -46,25 +46,18 @@ from openzeppelin.upgrades.library import (
 ###############
 
 @external
-func initializer{
-        syscall_ptr: felt*, 
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(
-        address_of_controller : felt,
-        proxy_admin : felt
-    ):
+func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    address_of_controller : felt, proxy_admin : felt
+):
     MODULE_initializer(address_of_controller)
     Proxy_initializer(proxy_admin)
     return ()
 end
 
 @external
-func upgrade{
-        syscall_ptr: felt*, 
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(new_implementation: felt):
+func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    new_implementation : felt
+):
     Proxy_only_admin()
     Proxy_set_implementation(new_implementation)
     return ()

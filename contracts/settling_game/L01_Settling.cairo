@@ -16,7 +16,7 @@ from starkware.cairo.common.uint256 import Uint256
 
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds, RealmData
 from contracts.settling_game.utils.constants import TRUE, FALSE
-from contracts.settling_game.library.library_module import ( 
+from contracts.settling_game.library.library_module import (
     MODULE_controller_address,
     MODULE_only_approved,
     MODULE_initializer,
@@ -33,7 +33,7 @@ from contracts.settling_game.interfaces.imodules import (
 from openzeppelin.upgrades.library import (
     Proxy_initializer,
     Proxy_only_admin,
-    Proxy_set_implementation
+    Proxy_set_implementation,
 )
 
 ##########
@@ -71,25 +71,18 @@ end
 ###############
 
 @external
-func initializer{
-        syscall_ptr: felt*, 
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(
-        address_of_controller : felt,
-        proxy_admin : felt
-    ):
+func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    address_of_controller : felt, proxy_admin : felt
+):
     MODULE_initializer(address_of_controller)
     Proxy_initializer(proxy_admin)
     return ()
 end
 
 @external
-func upgrade{
-        syscall_ptr: felt*, 
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(new_implementation: felt):
+func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    new_implementation : felt
+):
     Proxy_only_admin()
     Proxy_set_implementation(new_implementation)
     return ()
@@ -209,7 +202,7 @@ end
 
 func _set_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256, time_left : felt
-):  
+):
     let (block_timestamp) = get_block_timestamp()
     time_staked.write(token_id, block_timestamp - time_left)
     return ()
@@ -231,10 +224,7 @@ func _set_total_realms_settled{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
 end
 
 func _set_world_state{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    token_id : Uint256,
-    caller : felt,
-    controller : felt,
-    realms_address : felt,
+    token_id : Uint256, caller : felt, controller : felt, realms_address : felt
 ):
     # SET REALM SETTLED/UNSETTLED STATE - PARSE 0 TO SET CURRENT TIME
     _set_time_staked(token_id, 0)

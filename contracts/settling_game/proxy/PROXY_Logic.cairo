@@ -5,10 +5,7 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import delegate_call
-from openzeppelin.upgrades.library import (
-    Proxy_implementation_address,
-    Proxy_set_implementation
-)
+from openzeppelin.upgrades.library import Proxy_implementation_address, Proxy_set_implementation
 
 #
 # Constructor
