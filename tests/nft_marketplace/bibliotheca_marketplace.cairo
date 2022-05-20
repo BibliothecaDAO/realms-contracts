@@ -16,6 +16,8 @@ from starkware.cairo.common.uint256 import (
     Uint256, uint256_add, uint256_sub, uint256_le, uint256_lt, uint256_check, uint256_eq
 )
 
+# from contracts.nft_marketplace.bibliotheca_marketplace import fetch_trade_data
+
 @storage_var
 func caller_address() -> (i : felt):
 end
@@ -33,8 +35,15 @@ namespace LordsInterface:
     end
 end
 
+# @contract_interface
+# namespace LordsMarketplace:
+#     func fetch_trade_data(trade_data: felt, price: felt, poster: felt):
+#     end
+# end
+
+
 @external
-func test_fetch_trade_data{syscall_ptr : felt*, range_check_ptr}():
+func test_fetch_trade_data{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}():
     alloc_locals
 
     local contract_address: felt
@@ -47,16 +56,25 @@ func test_fetch_trade_data{syscall_ptr : felt*, range_check_ptr}():
     %{ ids.Account = deploy_contract("./openzeppelin/account/Account.cairo", [123456]).contract_address %}
 
     %{ print("lords") %}
-    %{ ids.lords = deploy_contract("./contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo", [1234, 1234, 18, ids.supply, ids.Account, ids.Account]).contract_address %}
-    %{ print("lords1") %}
+    %{ ids.lords = deploy_contract("./contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo", [1234, 1234, 18, 1000000000000000000000000, 0, ids.Account, ids.Account]).contract_address %}
+    %{ print("lords contract: " + str(ids.lords)) %}
     %{ ids.proxy_lords = deploy_contract("./contracts/settling_game/proxy/PROXY_Logic.cairo", [ids.lords]).contract_address %}
-    LordsInterface.initializer(proxy_lords, 1234, 1234, 18, Uint256(50000, 0), ids.Account, ids.Account)
+    %{ print("proxy_lords contract: " + str(ids.proxy_lords)) %}
+    # LordsInterface.initializer(proxy_lords, 1234, 1234, 18, supply, Account, Account)
 
     #Deploy contract, put address into a local variable. Second argument is calldata array
     %{ ids.contract_address = deploy_contract("./contracts/nft_marketplace/bibliotheca_marketplace.cairo", 
-        [ids.lords, 
+        [ids.proxy_lords, 
         ids.caller, 
         ids.caller]).contract_address %}
+    
+    %{ print("realms_marketplace contract: " + str(ids.contract_address)) %}
+
+    local trade_data: felt = 18014416252971264319588
+    local price: felt = 1000000000000000000
+
+    fetch_trade_data(trade_data, price, caller)
+
     return ()
 end
 
