@@ -3,7 +3,7 @@ import click
 
 from realms_cli.caller_invoker import wrapped_call, wrapped_send, compile, deploy
 from realms_cli.config import Config, strhex_as_strfelt, safe_load_deployment
-from realms_cli.shared import uint, expanded_uint_list
+from realms_cli.shared import uint, expanded_uint_list, from_bn
 from realms_cli.deployer import logged_deploy
 
 
@@ -18,12 +18,9 @@ def set_initial_liq(network):
     resource = 100 * 10 ** 18
     currency = 1000 * 10 ** 18
 
-    resource_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-                    12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
-    resource_values = [resource, resource, resource, resource, resource, resource, resource, resource, resource, resource,
-                       resource, resource, resource, resource, resource, resource, resource, resource, resource, resource, resource, resource]
-    currency_values = [currency, currency, currency, currency, currency, currency, currency, currency, currency, currency,
-                       currency, currency, currency, currency, currency, currency, currency, currency, currency, currency, currency, currency]
+    resource_ids = [21]
+    resource_values = [resource]
+    currency_values = [currency]
 
     wrapped_send(
         network=config.nile_network,
@@ -77,7 +74,7 @@ def set_resources_approval(network):
 @click.option("--network", default="goerli")
 def get_currency_r(token_id, network):
     """
-    Fetch happiness of a Realm
+    Get currency level of specific resource
     """
     config = Config(nile_network=network)
 
@@ -89,4 +86,6 @@ def get_currency_r(token_id, network):
                 *uint(token_id)
         ],
     )
+    out = out.split(" ")
+    print(from_bn(out[0]))
     print(out)

@@ -31,3 +31,9 @@ def expanded_uint_list_decimals(arr):
     Convert array of ints into flattened array of uints.
     """
     return list(sum([uint_decimal(a) for a in arr], ()))
+
+def from_bn(a):
+    """
+    Convert 18 decimals into 4 decimals
+    """
+    return round(int(a, 16) / 1000000000000000000, 4)
