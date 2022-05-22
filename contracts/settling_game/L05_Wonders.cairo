@@ -18,10 +18,7 @@ from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import Uint256
 
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
-from contracts.settling_game.interfaces.imodules import (
-    IModuleController,
-    IL04_Calculator,
-)
+from contracts.settling_game.interfaces.imodules import IModuleController, IL04_Calculator
 
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
@@ -35,7 +32,7 @@ from contracts.settling_game.library.library_module import (
 from openzeppelin.upgrades.library import (
     Proxy_initializer,
     Proxy_only_admin,
-    Proxy_set_implementation
+    Proxy_set_implementation,
 )
 
 ###########
@@ -71,25 +68,18 @@ end
 ###############
 
 @external
-func initializer{
-        syscall_ptr: felt*, 
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(
-        address_of_controller : felt,
-        proxy_admin : felt
-    ):
+func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    address_of_controller : felt, proxy_admin : felt
+):
     MODULE_initializer(address_of_controller)
     Proxy_initializer(proxy_admin)
     return ()
 end
 
 @external
-func upgrade{
-        syscall_ptr: felt*, 
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(new_implementation: felt):
+func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    new_implementation : felt
+):
     Proxy_only_admin()
     Proxy_set_implementation(new_implementation)
     return ()
@@ -159,7 +149,9 @@ func update_wonder_settlement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     let (controller) = MODULE_controller_address()
 
     # calculator logic contract
-    let (calculator_address) = IModuleController.get_module_address(controller, ModuleIds.L04_Calculator)
+    let (calculator_address) = IModuleController.get_module_address(
+        controller, ModuleIds.L04_Calculator
+    )
 
     let (current_epoch) = IL04_Calculator.calculate_epoch(calculator_address)
     let (total_wonders_staked) = get_total_wonders_staked(current_epoch)
@@ -167,7 +159,7 @@ func update_wonder_settlement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     let (wonder_id_staked) = get_wonder_id_staked(token_id)
 
     if wonder_id_staked == 0:
-        set_total_wonders_staked(current_epoch,total_wonders_staked + 1)
+        set_total_wonders_staked(current_epoch, total_wonders_staked + 1)
         set_wonder_id_staked(token_id, current_epoch)
     else:
         set_total_wonders_staked(current_epoch, total_wonders_staked - 1)
@@ -243,13 +235,7 @@ func loop_epochs_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
 
         # Get claimable resources
         loop_resources_claim(
-            token_id,
-            current_epoch,
-            epoch_total_wonders,
-            1,
-            ids_arr,
-            1,
-            amounts_arr,
+            token_id, current_epoch, epoch_total_wonders, 1, ids_arr, 1, amounts_arr
         )
 
         # Transfer claimable resources

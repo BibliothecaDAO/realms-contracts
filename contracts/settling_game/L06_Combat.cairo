@@ -14,10 +14,7 @@ from starkware.cairo.common.uint256 import Uint256
 from starkware.starknet.common.syscalls import get_block_timestamp, get_caller_address
 
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
-from contracts.settling_game.interfaces.imodules import (
-    IModuleController,
-    IL02_Resources
-)
+from contracts.settling_game.interfaces.imodules import IModuleController, IL02_Resources
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library.library_combat import COMBAT
@@ -39,17 +36,15 @@ from contracts.settling_game.library.library_module import (
     MODULE_only_approved,
     MODULE_initializer,
     MODULE_only_arbiter,
-    MODULE_ERC721_owner_check
+    MODULE_ERC721_owner_check,
 )
 
-from contracts.settling_game.utils.constants import (
-    DAY
-)
+from contracts.settling_game.utils.constants import DAY
 
 from openzeppelin.upgrades.library import (
     Proxy_initializer,
     Proxy_only_admin,
-    Proxy_set_implementation
+    Proxy_set_implementation,
 )
 
 ##########
@@ -111,15 +106,9 @@ const DEFENDING_SQUAD_SLOT = 2
 ###############
 
 @external
-func initializer{
-        syscall_ptr: felt*, 
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(
-        address_of_controller : felt,
-        xoroshiro_addr : felt,
-        proxy_admin : felt
-    ):
+func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    address_of_controller : felt, xoroshiro_addr : felt, proxy_admin : felt
+):
     MODULE_initializer(address_of_controller)
     xoroshiro_address.write(xoroshiro_addr)
     Proxy_initializer(proxy_admin)
@@ -127,11 +116,9 @@ func initializer{
 end
 
 @external
-func upgrade{
-        syscall_ptr: felt*, 
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(new_implementation: felt):
+func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    new_implementation : felt
+):
     Proxy_only_admin()
     Proxy_set_implementation(new_implementation)
     return ()
@@ -207,7 +194,7 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     )
 
     let (new_attacker : PackedSquad) = COMBAT.pack_squad(attacker_end)
-    let (new_defender : PackedSquad) = COMBAT.pack_squad(defender_end) 
+    let (new_defender : PackedSquad) = COMBAT.pack_squad(defender_end)
 
     let new_attacking_realm_data = RealmCombatData(
         attacking_squad=new_attacker,
@@ -455,10 +442,7 @@ func hit_troop{range_check_ptr}(t : Troop, hits : felt) -> (
 end
 
 func load_troop_costs{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    troop_ids_len : felt,
-    troop_ids : felt*,
-    costs_idx : felt,
-    costs : Cost*,
+    troop_ids_len : felt, troop_ids : felt*, costs_idx : felt, costs : Cost*
 ):
     alloc_locals
 
@@ -525,11 +509,13 @@ func view_troops{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuilti
     let (attacking_squad : Squad) = COMBAT.unpack_squad(realm_data.attacking_squad)
     let (defending_squad : Squad) = COMBAT.unpack_squad(realm_data.defending_squad)
 
-    return(attacking_squad, defending_squad)
+    return (attacking_squad, defending_squad)
 end
 
 @view
-func get_xoroshiro{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (x : felt):
+func get_xoroshiro{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+    x : felt
+):
     let (xoroshiro) = xoroshiro_address.read()
     return (xoroshiro)
 end
@@ -578,9 +564,15 @@ func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     end
 
     # GET COMBAT DATA
-    let (realms_address) = IModuleController.get_external_contract_address(controller, ExternalContractIds.Realms)
-    let (attacking_realm_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, attacking_realm_id)
-    let (defending_realm_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, defending_realm_id)
+    let (realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Realms
+    )
+    let (attacking_realm_data : RealmData) = realms_IERC721.fetch_realm_data(
+        realms_address, attacking_realm_id
+    )
+    let (defending_realm_data : RealmData) = realms_IERC721.fetch_realm_data(
+        realms_address, defending_realm_id
+    )
 
     if attacking_realm_data.order == defending_realm_data.order:
         # intra-order attacks are not allowed
@@ -589,7 +581,6 @@ func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
 
     return (TRUE)
 end
-
 
 #########
 # ADMIN #

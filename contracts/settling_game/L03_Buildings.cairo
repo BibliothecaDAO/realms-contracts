@@ -19,7 +19,7 @@ from contracts.settling_game.utils.game_structs import (
     RealmBuildingsIds,
     ModuleIds,
     ExternalContractIds,
-    Cost
+    Cost,
 )
 
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
@@ -57,13 +57,13 @@ from contracts.settling_game.library.library_module import (
     MODULE_only_approved,
     MODULE_initializer,
     MODULE_only_arbiter,
-    MODULE_ERC721_owner_check
+    MODULE_ERC721_owner_check,
 )
 
 from openzeppelin.upgrades.library import (
     Proxy_initializer,
     Proxy_only_admin,
-    Proxy_set_implementation
+    Proxy_set_implementation,
 )
 
 ##########
@@ -95,25 +95,18 @@ end
 ###############
 
 @external
-func initializer{
-        syscall_ptr: felt*, 
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(
-        address_of_controller : felt,
-        proxy_admin : felt
-    ):
+func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    address_of_controller : felt, proxy_admin : felt
+):
     MODULE_initializer(address_of_controller)
     Proxy_initializer(proxy_admin)
     return ()
 end
 
 @external
-func upgrade{
-        syscall_ptr: felt*, 
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(new_implementation: felt):
+func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    new_implementation : felt
+):
     Proxy_only_admin()
     Proxy_set_implementation(new_implementation)
     return ()
@@ -170,7 +163,7 @@ func build{
     IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
 
     # TRANSFER LORDS
-    IERC20.transfer(lords_address, treasury_address, lords) 
+    IERC20.transfer(lords_address, treasury_address, lords)
 
     # EMIT
     BuildingBuilt.emit(token_id, building_id)
@@ -180,10 +173,7 @@ end
 
 func build_buildings{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-}(
-    token_id : Uint256,
-    building_id : felt,
-):
+}(token_id : Uint256, building_id : felt):
     alloc_locals
 
     let (controller) = MODULE_controller_address()
@@ -335,7 +325,7 @@ func build_buildings{
         buildings[11] = id_12
     end
 
-    if building_id == RealmBuildingsIds.TradeOffice: 
+    if building_id == RealmBuildingsIds.TradeOffice:
         if current_buildings.TradeOffice == realms_data.cities:
             assert_not_zero(0)
         end
@@ -424,7 +414,7 @@ func build_buildings{
     end
 
     tempvar value = buildings[19] + buildings[18] + buildings[17] + buildings[16] + buildings[15] + buildings[14] + buildings[13] + buildings[12] + buildings[11] + buildings[10] + buildings[9] + buildings[8] + buildings[7] + buildings[6] + buildings[5] + buildings[4] + buildings[3] + buildings[2] + buildings[1] + buildings[0]
-    
+
     realm_buildings.write(token_id, value)
     return ()
 end
@@ -500,7 +490,7 @@ end
 @view
 func get_building_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     building_id : felt
-) -> (cost : Cost, lords: Uint256):
+) -> (cost : Cost, lords : Uint256):
     let (cost) = building_cost.read(building_id)
     let (lords) = building_lords_cost.read(building_id)
     return (cost, lords)
@@ -513,7 +503,7 @@ end
 @external
 func set_building_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     building_id : felt, cost : Cost, lords : Uint256
-):  
+):
     # TODO: range checks on the cost struct
     Proxy_only_admin()
     building_cost.write(building_id, cost)

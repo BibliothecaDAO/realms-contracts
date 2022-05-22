@@ -100,7 +100,7 @@ func calculate_happiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
 
     # GET HAPPINESS
     let (happiness) = CALCULATOR.get_happiness(culture, population, food)
-    
+
     return (happiness)
 end
 
@@ -113,7 +113,9 @@ func calculate_troop_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     # SUM TOTAL TROOP POPULATION
     let (controller) = MODULE_controller_address()
     let (combat_logic) = IModuleController.get_module_address(controller, ModuleIds.L06_Combat)
-    let (realm_combat_data : RealmCombatData) = IL06_Combat.get_realm_combat_data(combat_logic, token_id)
+    let (realm_combat_data : RealmCombatData) = IL06_Combat.get_realm_combat_data(
+        combat_logic, token_id
+    )
 
     let (attacking_population) = COMBAT.get_troop_population(realm_combat_data.attacking_squad)
     let (defending_population) = COMBAT.get_troop_population(realm_combat_data.defending_squad)
@@ -125,7 +127,6 @@ end
 func calculate_culture{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
 ) -> (culture : felt):
-
     # SUM TOTAL CULTURE
     let (controller) = MODULE_controller_address()
     let (buildings_logic_address) = IModuleController.get_module_address(
@@ -250,11 +251,13 @@ end
 
 # TODO: Make LORDS decrease over time...
 @view
-func calculate_tribute{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (tribute : felt):
+func calculate_tribute{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+    tribute : felt
+):
     # TOD0: Decreasing supply curve of Lords
     # calculate number of buildings realm has
 
-return (tribute=BASE_LORDS_PER_DAY)
+    return (tribute=BASE_LORDS_PER_DAY)
 end
 
 @view

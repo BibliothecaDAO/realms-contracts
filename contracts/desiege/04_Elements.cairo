@@ -16,7 +16,7 @@ from contracts.desiege.utils.interfaces import (
     IDivineEclipseElements,
 )
 from contracts.desiege.tokens.ERC1155.IERC1155_Mintable_Ownable import IERC1155
- 
+
 const ModuleIdentifier_DivineEclipse = 'divine-eclipse'
 
 # ############# Storage ################

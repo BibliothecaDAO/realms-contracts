@@ -113,7 +113,6 @@ namespace IL04_Calculator:
     end
 end
 
-
 @contract_interface
 namespace IL05_Wonders:
     func update_wonder_settlement(token_id : Uint256):
@@ -160,7 +159,9 @@ end
 
 @contract_interface
 namespace IL06_Combat:
-    func build_squad_from_troops_in_realm(troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt):
+    func build_squad_from_troops_in_realm(
+        troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt
+    ):
     end
     func set_troop_cost(troop_id : felt, cost : Cost):
     end
@@ -169,7 +170,6 @@ namespace IL06_Combat:
     func get_realm_combat_data(realm_id : Uint256) -> (combat_data : RealmCombatData):
     end
 end
-
 
 @contract_interface
 namespace IL07_Crypts:

@@ -80,12 +80,14 @@ func MODULE_only_approved{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
     return ()
 end
 
-func check_self{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}()->(success: felt):
+func check_self{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+    success : felt
+):
     let (caller) = get_caller_address()
     let (contract_address) = get_contract_address()
 
-    if caller == contract_address :
-        return(1)
+    if caller == contract_address:
+        return (1)
     end
 
     return (0)
@@ -114,20 +116,17 @@ func MODULE_only_arbiter{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     return ()
 end
 
-func MODULE_ERC721_owner_check{
-    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-}(asset_id : Uint256, name_space : felt):
-
+func MODULE_ERC721_owner_check{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    asset_id : Uint256, name_space : felt
+):
     let (caller) = get_caller_address()
     let (controller) = controller_address.read()
-    let (address) = IModuleController.get_external_contract_address(
-        controller, name_space
-    )
+    let (address) = IModuleController.get_external_contract_address(controller, name_space)
 
     let (owner) = IERC721.ownerOf(address, asset_id)
 
     with_attr error_message("ERC721_ERROR: Not your asset"):
         assert caller = owner
     end
-    return()
+    return ()
 end
