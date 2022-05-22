@@ -126,8 +126,8 @@ def map_crypt(value, environments, affinities):
     # concat all together
     meta = resourceIds + environment + legendary + size + numDoors + numPoints + affinity
 
-    # We pack the crypts with 8 bits to correspond to realms' mask settings
-    return decimalToBinary(meta, 8)
+    # We pack the crypts with 6 bits as our largest number is 55
+    return decimalToBinary(meta, 6)
 
 if __name__ == '__main__':
 
