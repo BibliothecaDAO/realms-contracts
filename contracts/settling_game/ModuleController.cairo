@@ -73,7 +73,7 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     _treasury_address : felt,
     _s_realms_address : felt,
     _crypts_address : felt,
-    _s_crypts_address : felt
+    _s_crypts_address : felt,
 ):
     arbiter.write(arbiter_address)
 
@@ -165,7 +165,7 @@ func set_initial_module_addresses{
     module_05_addr : felt,
     module_06_addr : felt,
     module_07_addr : felt,
-    module_08_addr : felt
+    module_08_addr : felt,
 ):
     only_arbiter()
 
@@ -200,7 +200,6 @@ func set_initial_module_addresses{
     # Crypts Resources Logic
     address_of_module_id.write(ModuleIds.L08_Crypts_Resources, module_08_addr)
     module_id_of_address.write(module_08_addr, ModuleIds.L08_Crypts_Resources)
-
 
     return ()
 end

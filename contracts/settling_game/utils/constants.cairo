@@ -59,8 +59,8 @@ const DAY = 1800  # day cycle length
 const VAULT_LENGTH_SECONDS = VAULT_LENGTH * DAY  # vault is always 7 * day cycle
 
 # CRYPTS
-const RESOURCES_PER_CRYPT = 1   # We only generate one resource per crypt (vs up to 7 per realm)
-const LEGENDARY_MULTIPLIER = 10 # Legendary maps generate 10x resources as non-egendat
+const RESOURCES_PER_CRYPT = 1  # We only generate one resource per crypt (vs up to 7 per realm)
+const LEGENDARY_MULTIPLIER = 10  # Legendary maps generate 10x resources as non-egendat
 
 # PRODUCTION
 const BASE_RESOURCES_PER_DAY = 100
@@ -71,4 +71,3 @@ const GENESIS_TIMESTAMP = 1645743897
 
 # COMBAT
 const PILLAGE_AMOUNT = 25
-

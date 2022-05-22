@@ -17,7 +17,7 @@ from contracts.settling_game.utils.game_structs import (
     ExternalContractIds,
     Cost,
     ResourceIds,
-    EnvironmentProduction
+    EnvironmentProduction,
 )
 from contracts.settling_game.utils.general import transform_costs_to_token_ids_values
 
@@ -26,7 +26,7 @@ from contracts.settling_game.utils.constants import (
     FALSE,
     DAY,
     RESOURCES_PER_CRYPT,
-    LEGENDARY_MULTIPLIER
+    LEGENDARY_MULTIPLIER,
 )
 from contracts.settling_game.library.library_module import (
     MODULE_controller_address,
@@ -40,10 +40,7 @@ from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
 from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.crypts_IERC721 import crypts_IERC721
-from contracts.settling_game.interfaces.imodules import (
-    IModuleController,
-    IL07_Crypts,
-)
+from contracts.settling_game.interfaces.imodules import IModuleController, IL07_Crypts
 
 from openzeppelin.upgrades.library import (
     Proxy_initializer,
@@ -105,7 +102,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (caller) = get_caller_address()
     let (controller) = MODULE_controller_address()
 
-    ## CONTRACT ADDRESSES
+    # # CONTRACT ADDRESSES
 
     # EXTERNAL CONTRACTS
     # Crypts ERC721 Token
@@ -121,7 +118,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         controller, ExternalContractIds.Resources
     )
 
-    ## INTERNAL CONTRACTS
+    # # INTERNAL CONTRACTS
     # Crypts Logic Contract
     let (crypts_logic_address) = IModuleController.get_module_address(
         controller, ModuleIds.L07_Crypts
@@ -162,9 +159,11 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # CHECK IF LEGENDARY
     let r_legendary = crypts_data.legendary
-    
+
     # CHECK HOW MANY RESOURCES * DAYS WE SHOULD GIVE OUT
-    let (r_user_resources_value) = calculate_resource_output(days, token_id, r_resource_id, r_output, r_legendary)
+    let (r_user_resources_value) = calculate_resource_output(
+        days, token_id, r_resource_id, r_output, r_legendary
+    )
 
     # ADD VALUES TO TEMP ARRAY FOR EACH AVAILABLE RESOURCE
     assert resource_ids[0] = Uint256(r_resource_id, 0)
@@ -182,7 +181,6 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     return ()
 end
-
 
 @external
 func upgrade_resource{
@@ -304,32 +302,29 @@ end
 @view
 func get_output_per_environment{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     environment : felt
-) -> (
-    r_output : felt,
-    r_resource_id : felt
-):
+) -> (r_output : felt, r_resource_id : felt):
     alloc_locals
 
     # Each environment has a designated resourceId
-    let r_resource_id = 22 + environment    # Environment struct is 1->6 and Crypts resources are 23->28
+    let r_resource_id = 22 + environment  # Environment struct is 1->6 and Crypts resources are 23->28
 
     if environment == 1:
-        return(EnvironmentProduction.DesertOasis, r_resource_id)
+        return (EnvironmentProduction.DesertOasis, r_resource_id)
     end
     if environment == 2:
-        return(EnvironmentProduction.StoneTemple, r_resource_id)
+        return (EnvironmentProduction.StoneTemple, r_resource_id)
     end
     if environment == 3:
-        return(EnvironmentProduction.ForestRuins, r_resource_id)
+        return (EnvironmentProduction.ForestRuins, r_resource_id)
     end
     if environment == 4:
-        return(EnvironmentProduction.MountainDeep, r_resource_id)
+        return (EnvironmentProduction.MountainDeep, r_resource_id)
     end
     if environment == 5:
-        return(EnvironmentProduction.UnderwaterKeep, r_resource_id)
+        return (EnvironmentProduction.UnderwaterKeep, r_resource_id)
     end
     # 6 - Ember's glow is theo pnly one left
-    return(EnvironmentProduction.EmbersGlow, r_resource_id)
+    return (EnvironmentProduction.EmbersGlow, r_resource_id)
 end
 
 ############
@@ -348,7 +343,9 @@ func calculate_resource_output{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     # LEGENDARY MAPS EARN MORE RESOURCES
     let legendary_multiplier = legendary * LEGENDARY_MULTIPLIER
 
-    let (total_work_generated, _) = unsigned_div_rem(days * level * output * legendary_multiplier, 100)
+    let (total_work_generated, _) = unsigned_div_rem(
+        days * level * output * legendary_multiplier, 100
+    )
 
     # IF LEVEL 0 RETURN NO INCREASE
     # if level == 0:

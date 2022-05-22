@@ -15,7 +15,7 @@ from starkware.cairo.common.uint256 import Uint256
 
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds, RealmData
 from contracts.settling_game.utils.constants import TRUE, FALSE
-from contracts.settling_game.library.library_module import ( 
+from contracts.settling_game.library.library_module import (
     MODULE_controller_address,
     MODULE_only_approved,
     MODULE_initializer,
@@ -24,15 +24,12 @@ from contracts.settling_game.library.library_module import (
 from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
 from contracts.settling_game.interfaces.crypts_IERC721 import crypts_IERC721
 from contracts.settling_game.interfaces.s_crypts_IERC721 import s_crypts_IERC721
-from contracts.settling_game.interfaces.imodules import (
-    IModuleController,
-    IL08_Crypts_Resources
-)
+from contracts.settling_game.interfaces.imodules import IModuleController, IL08_Crypts_Resources
 
 from openzeppelin.upgrades.library import (
     Proxy_initializer,
     Proxy_only_admin,
-    Proxy_set_implementation
+    Proxy_set_implementation,
 )
 
 ##########
@@ -65,25 +62,18 @@ end
 ###############
 
 @external
-func initializer{
-        syscall_ptr: felt*, 
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(
-        address_of_controller : felt,
-        proxy_admin : felt
-    ):
+func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    address_of_controller : felt, proxy_admin : felt
+):
     MODULE_initializer(address_of_controller)
     Proxy_initializer(proxy_admin)
     return ()
 end
 
 @external
-func upgrade{
-        syscall_ptr: felt*, 
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(new_implementation: felt):
+func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    new_implementation : felt
+):
     Proxy_only_admin()
     Proxy_set_implementation(new_implementation)
     return ()
@@ -186,12 +176,11 @@ end
 
 func _set_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256, time_left : felt
-):  
+):
     let (block_timestamp) = get_block_timestamp()
     time_staked.write(token_id, block_timestamp - time_left)
     return ()
 end
-
 
 ###########
 # GETTERS #

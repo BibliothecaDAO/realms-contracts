@@ -44,7 +44,7 @@ from contracts.settling_game.interfaces.imodules import (
     IModuleController,
     IL01_Settling,
     IL04_Calculator,
-    IL05_Wonders
+    IL05_Wonders,
 )
 
 from openzeppelin.upgrades.library import (

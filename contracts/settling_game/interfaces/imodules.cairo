@@ -19,7 +19,7 @@ namespace IArbiter:
         module_05_addr : felt,
         module_06_addr : felt,
         module_07_addr : felt,
-        module_08_addr : felt
+        module_08_addr : felt,
     ):
     end
 end
@@ -62,7 +62,7 @@ namespace IModuleController:
         module_05_addr : felt,
         module_06_addr : felt,
         module_07_addr : felt,
-        module_08_addr : felt
+        module_08_addr : felt,
     ):
     end
 end
@@ -173,7 +173,7 @@ end
 
 @contract_interface
 namespace IL07_Crypts:
-   func set_time_staked(token_id : Uint256, time_left : felt):
+    func set_time_staked(token_id : Uint256, time_left : felt):
     end
     func get_time_staked(token_id : Uint256) -> (time : felt):
     end
