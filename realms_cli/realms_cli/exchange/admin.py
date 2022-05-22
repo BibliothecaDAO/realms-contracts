@@ -68,24 +68,3 @@ def set_resources_approval(network):
         function="setApprovalForAll",
         arguments=[strhex_as_strfelt(config.Exchange_ERC20_1155_PROXY_ADDRESS), 1],
     )
-
-@click.command()
-@click.argument("token_id", nargs=1)
-@click.option("--network", default="goerli")
-def get_currency_r(token_id, network):
-    """
-    Get currency level of specific resource
-    """
-    config = Config(nile_network=network)
-
-    out = wrapped_call(
-        network=config.nile_network,
-        contract_alias="proxy_Exchange_ERC20_1155",
-        function="get_currency_reserves",
-        arguments=[
-                *uint(token_id)
-        ],
-    )
-    out = out.split(" ")
-    print(from_bn(out[0]))
-    print(out)
