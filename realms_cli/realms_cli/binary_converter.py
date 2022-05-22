@@ -124,18 +124,9 @@ def map_crypt(value, environments, affinities):
             affinity[0] = a["id"]
 
     # concat all together
-    # print('resourceLength: ' + str(resourceLength[0]))
-    print('resourceIds: ' + str(resourceIds[0]))
-    print('environment: ' + str(environment[0]))
-    print('legendary: ' + str(legendary[0]))
-    print('size: ' + str(size[0]))
-    print('numDoors: ' + str(numDoors[0]))
-    print('numPoints: ' + str(numPoints[0]))
-    print('affinity: ' + str(affinity[0]))
-
-    # meta = resourceLength + resourceIds + environment + legendary + size + numDoors + numPoints + affinity
     meta = resourceIds + environment + legendary + size + numDoors + numPoints + affinity
 
+    # We pack the crypts with 8 bits to correspond to realms' mask settings
     return decimalToBinary(meta, 8)
 
 if __name__ == '__main__':

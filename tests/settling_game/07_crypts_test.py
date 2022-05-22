@@ -57,11 +57,11 @@ async def test_mint_crypt(game_factory):
 
     # print crypt details
     crypt_info = await crypts.get_crypt_info(FIRST_TOKEN_ID).invoke()
-    print(f'\033[1;33;40m🏰 | Crypt metadata: {crypt_info.result.crypt_data}\n')
+    print(f'\033[1;33;40m☠️ | Crypt metadata: {crypt_info.result.crypt_data}\n')
 
     unpacked_crypt_info = await crypts.fetch_crypt_data(FIRST_TOKEN_ID).invoke()
     print(
-        f'\033[1;33;40m🏰 | Crypt unpacked: {unpacked_crypt_info.result.crypt_stats}\n')
+        f'\033[1;33;40m☠️ | Crypt unpacked: {unpacked_crypt_info.result.crypt_stats}\n')
 
     # check balance of Crypt on account
     await checks_crypts_balance(admin_account, crypts, 1)   # Check that we've minted one
@@ -75,7 +75,7 @@ async def test_mint_crypt(game_factory):
     # SETTLE #
     ##########
 
-    print(f'\033[2;31🏰 Settling Cryptm...\n')
+    print(f'\033[2;31☠️ Settling Crypt...\n')
     await settle_crypt(admin_account, crypts_logic, FIRST_TOKEN_ID)
 
     # check transfer
