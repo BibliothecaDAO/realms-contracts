@@ -6,7 +6,7 @@ from realms_cli.config import Config, strhex_as_strfelt, safe_load_deployment
 from realms_cli.shared import uint
 from realms_cli.deployer import logged_deploy
 
-resources = uint(10000000 * 10 **18 )
+resources = uint(100000000 * 10 **18 )
 
 @click.command()
 @click.option("--network", default="goerli")
