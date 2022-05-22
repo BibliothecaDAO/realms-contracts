@@ -7,7 +7,7 @@ from realms_cli.shared import uint, expanded_uint_list, expanded_uint_list_decim
 from realms_cli.deployer import logged_deploy
 from realms_cli.utils import print_over_colums
 import time
-
+import sys
 
 @click.command()
 @click.option('--max_currency', type=click.STRING, help='Maximum to sell', prompt=True)
@@ -25,6 +25,9 @@ def buy_tokens(resource_ids, resource_values, max_currency, network):
     resource_ids = [c.strip() for c in resource_ids.split(',')]
     resource_values = [c.strip() for c in resource_values.split(',')]
 
+    if len(resource_ids) != len(resource_values):
+        raise Exception('you must pass equal length ids and values')
+        
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
@@ -54,6 +57,9 @@ def sell_tokens(resource_ids, resource_values, min_currency, network):
     # split columns by ',' and remove whitespace
     resource_ids = [c.strip() for c in resource_ids.split(',')]
     resource_values = [c.strip() for c in resource_values.split(',')]
+
+    if len(resource_ids) != len(resource_values):
+        raise Exception('you must pass equal length ids and values')
 
     config = Config(nile_network=network)
 
@@ -159,6 +165,9 @@ def get_buy_price(resource_ids, resource_values, network):
     # split columns by ',' and remove whitespace
     resource_ids = [c.strip() for c in resource_ids.split(',')]
     resource_values = [c.strip() for c in resource_values.split(',')]
+
+    if len(resource_ids) != len(resource_values):
+        raise Exception('you must pass equal length ids and values')
 
     config = Config(nile_network=network)
     n_resources = len(resource_ids)
