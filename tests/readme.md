@@ -64,3 +64,10 @@ Use as e.g.: `@pytest.fixture(scope="session")`. From https://docs.pytest.org/en
 >`package`: the fixture is destroyed during teardown of the last test in the package.
 >
 >`session`: the fixture is destroyed at the end of the test session.
+
+
+# Protostar testing
+
+Protostar is useful for testing small algorithms. This technique is still very much a WIP and best practices are still being discovered.
+
+`$ protostar test tests/exchange/test_formulas.cairo`

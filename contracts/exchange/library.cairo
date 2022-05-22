@@ -7,7 +7,7 @@ from starkware.starknet.common.syscalls import (
     get_contract_address,
     get_block_timestamp,
 )
-from starkware.cairo.common.math import assert_nn, assert_le, assert_not_zero
+from starkware.cairo.common.math import assert_nn, assert_le, assert_not_zero, assert_not_equal
 from starkware.cairo.common.math_cmp import is_not_zero
 from starkware.cairo.common.uint256 import (
     Uint256,
@@ -20,8 +20,12 @@ from starkware.cairo.common.uint256 import (
     uint256_eq,
 )
 
-# NOT IMPLEMENTED YET. REFACTORING FOR v2
+
 namespace AMM:
+    # input arguments are:
+    # 1) exact amount of token to sell
+    # 2) currency reserve amount
+    # 3) token reserve amount
     func get_sell_price{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_amount : Uint256,
         currency_reserves : Uint256,
@@ -54,10 +58,21 @@ namespace AMM:
         end
 
         let (price, _) = uint256_unsigned_div_rem(numerator, denominator_fee)
+
+        # Sanity fallback check to see if price is 0
+        with_attr error_message("Price cannot be 0"):
+            let (is_zero) = uint256_le(price, Uint256(0, 0))
+            assert_not_equal(is_zero, 1)
+        end    
+
         # Rounding errors favour the contract
         return (price)
     end
 
+    # input arguments are:
+    # 1) exact amount of token to buy
+    # 2) currency reserve amount
+    # 3) token reserve amount
     func get_buy_price{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         token_amount : Uint256,
         currency_reserves : Uint256,
@@ -74,8 +89,12 @@ namespace AMM:
         with_attr error_message("Values too large"):
             assert mul_overflow = Uint256(0, 0)
         end
-        let (denominator) = uint256_sub(token_reserves, token_amount)
 
+        let (denominator) = uint256_sub(token_reserves, token_amount)
+        with_attr error_message("Can't buy 100% of the AMM"):
+            let (is_z) = uint256_eq(denominator, Uint256(0, 0))
+            assert is_z = 0
+        end
         # Add LP fee
         let (numerator, mul_overflow) = uint256_mul(numerator, Uint256(1000, 0))
         with_attr error_message("Numerator overflow"):

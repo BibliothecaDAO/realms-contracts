@@ -13,12 +13,28 @@ from contracts.exchange.library import AMM
 func test_full_sell_price{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     alloc_locals
     let token_amount = Uint256(1000 * 10 ** 18, 0)
-    let currency_reserves = Uint256(100 * 10 ** 18, 0)
-    let token_reserves = Uint256(100000 * 10 ** 18, 0)
+    let currency_reserves = Uint256(10 * 10 ** 18, 0)
+    let token_reserves = Uint256(100 * 10 ** 18, 0)
 
     let lp_fee = Uint256(100, 0)
 
     let (price) = AMM.get_sell_price(token_amount, currency_reserves, token_reserves, lp_fee)
+
+    %{ print(ids.price.low / 1 * 10 ** 18) %}
+
+    return ()
+end
+
+@external
+func test_full_buy_price{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    alloc_locals
+    let token_amount = Uint256(100 * 10 ** 18, 0)
+    let currency_reserves = Uint256(100 * 10 ** 18, 0)
+    let token_reserves = Uint256(1000 * 10 ** 18, 0)
+
+    let lp_fee = Uint256(100, 0)
+
+    let (price) = AMM.get_buy_price(token_amount, currency_reserves, token_reserves, lp_fee)
 
     %{ print(ids.price.low / 1 * 10 ** 18) %}
 
