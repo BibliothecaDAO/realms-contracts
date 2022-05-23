@@ -10,7 +10,6 @@ from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
-from starkware.cairo.common.pow import pow
 
 from contracts.settling_game.utils.game_structs import (
     RealmData,

@@ -1,14 +1,12 @@
+# AMM LIBRARY
+# The purpose of the library is to hold any abstracted logic from the AMM. This allows cleaner test suites.
+
+# MIT LICENCE
+
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
-from starkware.cairo.common.alloc import alloc
-from starkware.starknet.common.syscalls import (
-    get_caller_address,
-    get_contract_address,
-    get_block_timestamp,
-)
-from starkware.cairo.common.math import assert_nn, assert_le, assert_not_zero, assert_not_equal
-from starkware.cairo.common.math_cmp import is_not_zero
+from starkware.cairo.common.math import assert_not_equal
 from starkware.cairo.common.uint256 import (
     Uint256,
     uint256_add,
@@ -16,10 +14,8 @@ from starkware.cairo.common.uint256 import (
     uint256_mul,
     uint256_unsigned_div_rem,
     uint256_le,
-    uint256_lt,
     uint256_eq,
 )
-
 
 namespace AMM:
     # input arguments are:
