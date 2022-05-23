@@ -31,6 +31,14 @@ from contracts.settling_game.utils.general import (
     transform_costs_to_token_ids_values,
 )
 
+from contracts.settling_game.utils.constants import (
+    SHIFT_NFT_1,
+    SHIFT_NFT_2,
+    SHIFT_NFT_3,
+    SHIFT_NFT_4,
+    SHIFT_NFT_5
+)
+
 ############
 # MAPPINGS #
 ############
@@ -286,6 +294,25 @@ func assert_poster{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     assert caller = trade.poster
 
     return ()
+end
+
+func pack_trade_data{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*}(
+    trade: Trade
+):
+    alloc_locals
+
+    let (nft_params: felt*) = alloc()
+
+    nft_params[0] = trade.token_contract * SHIFT_NFT_1
+    nft_params[1] = trade.token_id * SHIFT_NFT_2
+    nft_params[2] = trade.expiration * SHIFT_NFT_3
+    nft_params[3] = trade.status * SHIFT_NFT_4
+    nft_params[4] = trade.trade_id * SHIFT_NFT_5
+
+    tempvar value = nft_params[4] + nft_params[3] + nft_params[2] + nft_params[1] + nft_params[0] 
+
+    return (value)
+
 end
 
 ###########
