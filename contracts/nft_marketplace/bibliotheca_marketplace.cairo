@@ -116,11 +116,11 @@ func fetch_trade_data{
 
     # let (data) = get_trade(trade_data)
 
-    let (token_contract) = unpack_data(trade_data, 0, 255)
-    let (t_id) = unpack_data(trade_data, 7, 255)
-    let (expiration) = unpack_data(trade_data, 27, 255)
-    let (status) = unpack_data(trade_data, 52, 255)
-    let (trade_id) = unpack_data(trade_data, 54, 255)
+    let (token_contract) = unpack_data(trade_data, 0, 33554431)
+    let (t_id) = unpack_data(trade_data, 7, 33554431)
+    let (expiration) = unpack_data(trade_data, 27, 33554431)
+    let (status) = unpack_data(trade_data, 52, 33554431)
+    let (trade_id) = unpack_data(trade_data, 54, 33554431)
 
     #token_id needs to be Uint256
     let token_id: Uint256 = Uint256(t_id, 0)
@@ -134,7 +134,6 @@ func fetch_trade_data{
         status,
         trade_id
     )
-
     return (trade)
 
 end

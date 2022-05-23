@@ -60,7 +60,7 @@ func test_fetch_trade_data{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range
     %{ print("lords contract: " + str(ids.lords)) %}
     %{ ids.proxy_lords = deploy_contract("./contracts/settling_game/proxy/PROXY_Logic.cairo", [ids.lords]).contract_address %}
     %{ print("proxy_lords contract: " + str(ids.proxy_lords)) %}
-    # LordsInterface.initializer(proxy_lords, 1234, 1234, 18, supply, Account, Account)
+    LordsInterface.initializer(proxy_lords, 1234, 1234, 18, supply, Account, Account)
 
     #Deploy contract, put address into a local variable. Second argument is calldata array
     %{ ids.contract_address = deploy_contract("./contracts/nft_marketplace/bibliotheca_marketplace.cairo", 
