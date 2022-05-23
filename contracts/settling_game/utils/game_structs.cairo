@@ -197,7 +197,7 @@ namespace ModuleIds:
     const L03_Buildings = 3
     const L04_Calculator = 4
     const L05_Wonders = 5
-    const L06_Combat = 11   # TODO: Refactor Combat code so this can be 6 to fit in sequence with other contracts
+    const L06_Combat = 11  # TODO: Refactor Combat code so this can be 6 to fit in sequence with other contracts
     const L07_Crypts = 7
     const L08_Crypts_Resources = 8
 end

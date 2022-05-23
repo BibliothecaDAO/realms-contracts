@@ -44,7 +44,6 @@ from openzeppelin.upgrades.library import (
     Proxy_set_implementation,
 )
 
-
 ###############
 # CONSTRUCTOR #
 ###############
@@ -159,7 +158,6 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     return ()
 end
 
-
 ###########
 # GETTERS #
 ###########
@@ -248,9 +246,7 @@ func calculate_resource_output{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     # LEGENDARY MAPS EARN MORE RESOURCES
     let legendary_multiplier = legendary * LEGENDARY_MULTIPLIER
 
-    let (total_work_generated, _) = unsigned_div_rem(
-        days * output * legendary_multiplier, 100
-    )
+    let (total_work_generated, _) = unsigned_div_rem(days * output * legendary_multiplier, 100)
 
     return (Uint256(total_work_generated * 10 ** 18, 0))
 end

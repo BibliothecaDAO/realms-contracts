@@ -39,10 +39,7 @@ from openzeppelin.introspection.ERC165 import ERC165_supports_interface
 
 from openzeppelin.access.ownable import Ownable_initializer, Ownable_only_owner
 
-from openzeppelin.upgrades.library import (
-    Proxy_initializer,
-    Proxy_set_implementation,
-)
+from openzeppelin.upgrades.library import Proxy_initializer, Proxy_set_implementation
 
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.game_structs import CryptData
