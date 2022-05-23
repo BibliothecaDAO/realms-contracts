@@ -48,25 +48,6 @@ from openzeppelin.upgrades.library import (
     Proxy_set_implementation,
 )
 
-##########
-# EVENTS #
-# ########
-
-@event
-func ResourceUpgraded(token_id : Uint256, building_id : felt, level : felt):
-end
-
-###########
-# STORAGE #
-###########
-
-@storage_var
-func resource_levels(token_id : Uint256, resource_id : felt) -> (level : felt):
-end
-
-@storage_var
-func resource_upgrade_cost(resource_id : felt) -> (cost : Cost):
-end
 
 ###############
 # CONSTRUCTOR #
@@ -182,57 +163,6 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     return ()
 end
 
-@external
-func upgrade_resource{
-    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*, range_check_ptr
-}(token_id : Uint256, resource_id : felt) -> ():
-    alloc_locals
-
-    let (can_claim) = check_if_claimable(token_id)
-
-    if can_claim == TRUE:
-        claim_resources(token_id)
-        tempvar syscall_ptr = syscall_ptr
-        tempvar range_check_ptr = range_check_ptr
-        tempvar pedersen_ptr = pedersen_ptr
-    else:
-        tempvar syscall_ptr = syscall_ptr
-        tempvar range_check_ptr = range_check_ptr
-        tempvar pedersen_ptr = pedersen_ptr
-    end
-
-    let (caller) = get_caller_address()
-    let (controller) = MODULE_controller_address()
-
-    # CONTRACT ADDRESSES
-    let (resource_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Resources
-    )
-
-    # AUTH
-    MODULE_ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
-
-    # GET RESOURCE LEVEL
-    let (level) = get_resource_level(token_id, resource_id)
-
-    # GET UPGRADE VALUE
-    let (upgrade_cost : Cost) = get_resource_upgrade_cost(resource_id)
-    let (costs : Cost*) = alloc()
-    assert [costs] = upgrade_cost
-    let (token_ids : Uint256*) = alloc()
-    let (token_values : Uint256*) = alloc()
-    let (token_len : felt) = transform_costs_to_token_ids_values(1, costs, token_ids, token_values)
-
-    # BURN RESOURCES
-    IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
-
-    # INCREASE LEVEL
-    set_resource_level(token_id, resource_id, level + 1)
-
-    # EMIT
-    ResourceUpgraded.emit(token_id, resource_id, level + 1)
-    return ()
-end
 
 ###########
 # GETTERS #
@@ -280,24 +210,6 @@ end
 # GETTERS #
 ###########
 
-# GET RESOURCE LEVEL
-@view
-func get_resource_level{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    token_id : Uint256, resource : felt
-) -> (level : felt):
-    let (level) = resource_levels.read(token_id, resource)
-    return (level=level)
-end
-
-# GET COSTS
-@view
-func get_resource_upgrade_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
-    resource_id : felt
-) -> (cost : Cost):
-    let (cost) = resource_upgrade_cost.read(resource_id)
-    return (cost)
-end
-
 # GET OUTPUT PER ENViRONMENT
 @view
 func get_output_per_environment{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -337,40 +249,12 @@ func calculate_resource_output{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
 ) -> (value : Uint256):
     alloc_locals
 
-    # GET RESOURCE LEVEL
-    let (level) = get_resource_level(token_id, resource_id)
-
     # LEGENDARY MAPS EARN MORE RESOURCES
     let legendary_multiplier = legendary * LEGENDARY_MULTIPLIER
 
     let (total_work_generated, _) = unsigned_div_rem(
-        days * level * output * legendary_multiplier, 100
+        days * output * legendary_multiplier, 100
     )
 
     return (Uint256(total_work_generated * 10 ** 18, 0))
-end
-
-###########
-# SETTERS #
-###########
-
-# SET LEVEL
-func set_resource_level{
-    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-}(token_id : Uint256, resource_id : felt, level : felt) -> ():
-    resource_levels.write(token_id, resource_id, level)
-    return ()
-end
-
-#########
-# ADMIN #
-#########
-
-@external
-func set_resource_upgrade_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
-    resource_id : felt, cost : Cost
-):
-    Proxy_only_admin()
-    resource_upgrade_cost.write(resource_id, cost)
-    return ()
 end
