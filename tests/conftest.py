@@ -649,3 +649,36 @@ async def resource_factory(token_factory, compiled_proxy):
         calculator_logic
     )
         
+@pytest.fixture(scope='session')
+async def exchange_token_factory(account_factory, compiled_proxy):
+    (starknet, accounts, signers) = account_factory
+    admin_key = signers[0]
+    admin_account = accounts[0]
+    treasury_account = accounts[1]
+
+    set_block_timestamp(starknet.state, round(time.time()))
+
+    proxy_lords = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo", [
+        str_to_felt("Lords"),
+        str_to_felt("LRD"),
+        18,
+        *uint(initial_supply),
+        treasury_account.contract_address,
+        treasury_account.contract_address,
+    ])
+
+    proxy_resources = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo", [
+        1234,
+        admin_account.contract_address
+    ])
+
+    return (
+        starknet,
+        admin_key,
+        admin_account,
+        treasury_account,
+        accounts,
+        signers,
+        proxy_lords,
+        proxy_resources
+    )

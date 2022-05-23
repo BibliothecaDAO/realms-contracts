@@ -999,7 +999,7 @@ end
 func set_royalty_info{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     royalty_fee_thousands_ : Uint256, royalty_fee_address_ : felt
 ):
-    Proxy_only_admin()
+    # Proxy_only_admin()
     royalty_fee_thousands.write(royalty_fee_thousands_)
     royalty_fee_address.write(royalty_fee_address_)
     return ()
