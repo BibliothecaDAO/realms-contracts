@@ -149,8 +149,6 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     end
 
     let (local resource_ids : Uint256*) = alloc()
-    let (local user_resources_value : Uint256*) = alloc()
-    let (local wonder_tax_resources_value : Uint256*) = alloc()
 
     # FETCH REALM DATA
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
@@ -567,7 +565,6 @@ func get_all_resource_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     let (wonder_tax) = IL04_Calculator.calculate_wonder_tax(calculator_address)
 
     # SET MINT
-    let treasury_mint_perc = wonder_tax
     let user_mint_rel_perc = 100 - wonder_tax
 
     # GET OUTPUT FOR EACH RESOURCE

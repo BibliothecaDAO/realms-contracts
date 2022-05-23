@@ -16,7 +16,6 @@ from contracts.settling_game.utils.game_structs import (
     ModuleIds,
     ExternalContractIds,
     Cost,
-    ResourceIds,
     EnvironmentProduction,
 )
 from contracts.settling_game.utils.general import transform_costs_to_token_ids_values
@@ -30,13 +29,10 @@ from contracts.settling_game.utils.constants import (
 )
 from contracts.settling_game.library.library_module import (
     MODULE_controller_address,
-    MODULE_only_approved,
     MODULE_initializer,
-    MODULE_only_arbiter,
     MODULE_ERC721_owner_check,
 )
 
-from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
 from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.crypts_IERC721 import crypts_IERC721
@@ -129,7 +125,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (crypts_data : CryptData) = crypts_IERC721.fetch_crypt_data(crypts_address, token_id)
 
     # CALC DAYS
-    let (days, remainder) = days_accrued(token_id)
+    let (days, _) = days_accrued(token_id)
 
     with_attr error_message("RESOURCES: Nothing Claimable."):
         assert_not_zero(days)

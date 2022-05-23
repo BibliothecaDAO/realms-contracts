@@ -6,7 +6,7 @@
 
 %lang starknet
 
-from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin, BitwiseBuiltin
+from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.uint256 import Uint256
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.math import assert_not_zero
@@ -21,7 +21,6 @@ from openzeppelin.token.erc721.library import (
     ERC721_initializer,
     ERC721_approve,
     ERC721_setApprovalForAll,
-    ERC721_only_token_owner,
     ERC721_setTokenURI,
 )
 
@@ -42,7 +41,6 @@ from openzeppelin.access.ownable import Ownable_initializer, Ownable_only_owner,
 
 from openzeppelin.upgrades.library import (
     Proxy_initializer,
-    Proxy_only_admin,
     Proxy_set_implementation,
 )
 
