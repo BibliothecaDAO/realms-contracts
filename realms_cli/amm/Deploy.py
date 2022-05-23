@@ -27,46 +27,46 @@ def run(nre):
     #     ]
     # )
 
-    print('🕒 Waiting for deploy before invoking... 3 minutes for testnet')
-    time.sleep(180)
-
-    wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_Exchange_ERC20_1155",
-        function="initializer",
-        arguments=[
-            strhex_as_strfelt(config.LORDS_PROXY_ADDRESS),
-            strhex_as_strfelt(config.RESOURCES_PROXY_ADDRESS),
-            *uint(100),
-            *uint(100),
-            strhex_as_strfelt(config.ADMIN_ADDRESS),
-            strhex_as_strfelt(config.ADMIN_ADDRESS)
-        ],
-    )
-
-    module, _ = safe_load_deployment('proxy_Exchange_ERC20_1155', 'goerli')
-
-    wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_resources",
-        function="setApprovalForAll",
-        arguments=[strhex_as_strfelt(module), 1],
-    )
-
-    wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_lords",
-        function="increaseAllowance",
-        arguments=[strhex_as_strfelt(module), *uint(50000000 * (10 ** 18))],
-    )
+    # print('🕒 Waiting for deploy before invoking... 3 minutes for testnet')
+    # time.sleep(180)
 
     # wrapped_send(
     #     network=config.nile_network,
     #     signer_alias=config.ADMIN_ALIAS,
     #     contract_alias="proxy_Exchange_ERC20_1155",
-    #     function="upgrade",
-    #     arguments=[strhex_as_strfelt(config.Exchange_ERC20_1155_ADDRESS)],
+    #     function="initializer",
+    #     arguments=[
+    #         strhex_as_strfelt(config.LORDS_PROXY_ADDRESS),
+    #         strhex_as_strfelt(config.RESOURCES_PROXY_ADDRESS),
+    #         *uint(100),
+    #         *uint(100),
+    #         strhex_as_strfelt(config.ADMIN_ADDRESS),
+    #         strhex_as_strfelt(config.ADMIN_ADDRESS)
+    #     ],
     # )
+
+    # module, _ = safe_load_deployment('proxy_Exchange_ERC20_1155', 'goerli')
+
+    # wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="proxy_resources",
+    #     function="setApprovalForAll",
+    #     arguments=[strhex_as_strfelt(module), 1],
+    # )
+
+    # wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="proxy_lords",
+    #     function="increaseAllowance",
+    #     arguments=[strhex_as_strfelt(module), *uint(50000000 * (10 ** 18))],
+    # )
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="proxy_Exchange_ERC20_1155",
+        function="upgrade",
+        arguments=[strhex_as_strfelt(config.Exchange_ERC20_1155_ADDRESS)],
+    )

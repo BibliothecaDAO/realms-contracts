@@ -724,11 +724,10 @@ func get_buy_price_with_royalty{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     alloc_locals
 
     let (lp_fee_thousands_) = lp_fee_thousands.read()
-    let (lp_fee) = uint256_sub(Uint256(1000, 0), lp_fee_thousands_)
 
     # Calculate prices
     let (price_sans_royalty) = AMM.get_buy_price(
-        token_amount, currency_reserves, token_reserves, lp_fee
+        token_amount, currency_reserves, token_reserves, lp_fee_thousands_
     )
 
     let (royalty_fee) = get_royalty_for_price(price_sans_royalty)
@@ -748,11 +747,10 @@ func get_sell_price_with_royalty{syscall_ptr : felt*, pedersen_ptr : HashBuiltin
     alloc_locals
 
     let (lp_fee_thousands_) = lp_fee_thousands.read()
-    let (lp_fee) = uint256_sub(Uint256(1000, 0), lp_fee_thousands_)
 
     # Calculate prices
     let (price_sans_royalty) = AMM.get_sell_price(
-        token_amount, currency_reserves, token_reserves, lp_fee
+        token_amount, currency_reserves, token_reserves, lp_fee_thousands_
     )
 
     let (royalty_fee) = get_royalty_for_price(price_sans_royalty)
