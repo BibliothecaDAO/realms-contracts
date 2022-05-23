@@ -262,7 +262,7 @@ def get_lp_pos(address, network):
     out = out.split(" ")
     pretty_out = []
     for i, resource in enumerate(config.RESOURCES):
-        pretty_out.append(f"LP {resource} : {round(int(out[i*2+1], 16) / 1000000000000000000, 4)}")
+        pretty_out.append(f"LP {resource} : {from_bn(out[i*2+1])}")
 
     print_over_colums(pretty_out)
 

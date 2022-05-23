@@ -533,11 +533,10 @@ func buy_tokens_loop{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (token_reserves : Uint256) = IERC1155.balanceOf(token_address_, contract, [token_ids])
 
     let (lp_fee_thousands_) = lp_fee_thousands.read()
-    let (lp_fee) = uint256_sub(Uint256(1000, 0), lp_fee_thousands_)
 
     # Calculate prices
     let (currency_amount_sans_royal) = AMM.get_buy_price(
-        [token_amounts], currency_reserves_, token_reserves, lp_fee
+        [token_amounts], currency_reserves_, token_reserves, lp_fee_thousands_
     )
 
     # Add royalty fee
@@ -648,11 +647,10 @@ func sell_tokens_loop{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     IERC1155.safeTransferFrom(token_address_, caller, contract, [token_ids], [token_amounts])
 
     let (lp_fee_thousands_) = lp_fee_thousands.read()
-    let (lp_fee) = uint256_sub(Uint256(1000, 0), lp_fee_thousands_)
 
     # Calculate prices
     let (currency_amount_sans_royal) = AMM.get_sell_price(
-        [token_amounts], currency_reserves_, token_reserves, lp_fee
+        [token_amounts], currency_reserves_, token_reserves, lp_fee_thousands_
     )
 
     # Add royalty fee

@@ -1,4 +1,4 @@
-def print_over_colums(array_of_strings, cols=3, width=50):
+def print_over_colums(array_of_strings, cols=2, width=40):
     """Takes in an array of strings and prints the content over a
      number of colums."""
     ans = ""
