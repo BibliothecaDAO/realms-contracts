@@ -347,13 +347,7 @@ func calculate_resource_output{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
         days * level * output * legendary_multiplier, 100
     )
 
-    # IF LEVEL 0 RETURN NO INCREASE
-    # if level == 0:
-    #     return (production_output)
-    # end
-    # return ((level + 1) * production_output)   # HACK: Just to get this compiling
-
-    return (Uint256(total_work_generated, 0))
+    return (Uint256(total_work_generated * 10 ** 18, 0))
 end
 
 ###########
