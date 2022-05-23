@@ -73,7 +73,7 @@ func test_fetch_trade_data{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range
     local trade_data: felt = 18014416252971264319588
     local price: felt = 1000000000000000000
 
-    fetch_trade_data(trade_data, price, caller)
+    # let (trade) = fetch_trade_data(trade_data, price, caller)
 
     return ()
 end
