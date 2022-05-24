@@ -15,10 +15,8 @@ from contracts.settling_game.utils.game_structs import (
     CryptData,
     ModuleIds,
     ExternalContractIds,
-    Cost,
     EnvironmentProduction,
 )
-from contracts.settling_game.utils.general import transform_costs_to_token_ids_values
 
 from contracts.settling_game.utils.constants import (
     TRUE,
@@ -138,7 +136,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # CHECK HOW MANY RESOURCES * DAYS WE SHOULD GIVE OUT
     let (r_user_resources_value) = calculate_resource_output(
-        days, token_id, r_resource_id, r_output, r_legendary
+        days, r_output, r_legendary
     )
 
     # ADD VALUES TO TEMP ARRAY FOR EACH AVAILABLE RESOURCE
@@ -241,7 +239,7 @@ end
 
 # RETURNS RESOURCE OUTPUT
 func calculate_resource_output{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    days : felt, token_id : Uint256, resource_id : felt, output : felt, legendary : felt
+    days : felt, output : felt, legendary : felt
 ) -> (value : Uint256):
     alloc_locals
 
