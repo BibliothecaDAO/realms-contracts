@@ -175,7 +175,9 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # SET MINT
     let treasury_mint_perc = wonder_tax
-    let user_resources_value_rel_perc = 100 - wonder_tax
+    with_attr error_message("RESOURCES: resource id underflowed a felt."):
+        let user_resources_value_rel_perc = 100 - wonder_tax
+    end
 
     # GET OUTPUT FOR EACH RESOURCE
     let (r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output,
