@@ -8,6 +8,7 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256
+from starkware.cairo.common.math import assert_not_equal
 
 from openzeppelin.token.erc721.library import (
     ERC721_name,
@@ -21,7 +22,7 @@ from openzeppelin.token.erc721.library import (
     ERC721_approve,
     ERC721_setApprovalForAll,
     ERC721_only_token_owner,
-    ERC721_setTokenURI,
+    ERC721_setTokenURI
 )
 
 from openzeppelin.token.erc721_enumerable.library import (
@@ -35,7 +36,7 @@ from openzeppelin.token.erc721_enumerable.library import (
     ERC721_Enumerable_safeTransferFrom,
 )
 
-from openzeppelin.introspection.ERC165 import ERC165_supports_interface
+from openzeppelin.introspection.ERC165 import ERC165_supports_interface, INVALID_ID
 
 from openzeppelin.access.ownable import Ownable_initializer, Ownable_only_owner
 
@@ -100,8 +101,11 @@ end
 func supportsInterface{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     interfaceId : felt
 ) -> (success : felt):
-    let (success) = ERC165_supports_interface(interfaceId)
-    return (success)
+    with_attr error_message("ERC165: invalid interface id"):
+        let (success) = ERC165_supports_interface(interfaceId)
+        assert_not_equal(success, INVALID_ID)   # Make sure we don't get a gnarly error from ERC165 contract
+        return (success)
+    end
 end
 
 @view
