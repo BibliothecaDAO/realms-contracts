@@ -212,7 +212,9 @@ func get_output_per_environment{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     alloc_locals
 
     # Each environment has a designated resourceId
-    let r_resource_id = 22 + environment  # Environment struct is 1->6 and Crypts resources are 23->28
+    with_attr error_message("RESOURCES: resource id overflowed a felt."):
+        let r_resource_id = 22 + environment  # Environment struct is 1->6 and Crypts resources are 23->28
+    end
 
     if environment == 1:
         return (EnvironmentProduction.DesertOasis, r_resource_id)
