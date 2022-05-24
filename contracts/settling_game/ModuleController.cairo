@@ -72,6 +72,8 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     _realms_address : felt,
     _treasury_address : felt,
     _s_realms_address : felt,
+    _crypts_address : felt,
+    _s_crypts_address : felt,
 ):
     arbiter.write(arbiter_address)
 
@@ -84,22 +86,30 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     # settling to wonders logic
     can_write_to.write(ModuleIds.L01_Settling, ModuleIds.L05_Wonders, TRUE)
 
-    # # resources logic to settling state
+    # resources logic to settling state
     can_write_to.write(ModuleIds.L02_Resources, ModuleIds.L01_Settling, TRUE)
 
-    # # resources logic to wonders state
+    # resources logic to wonders state
     can_write_to.write(ModuleIds.L02_Resources, ModuleIds.L05_Wonders, TRUE)
 
-    # # combat can write to resources
+    # combat can write to resources
     can_write_to.write(ModuleIds.L06_Combat, ModuleIds.L02_Resources, TRUE)
 
-    # # combat can write to resources
+    # # combat can write to settling
     can_write_to.write(ModuleIds.L06_Combat, ModuleIds.L01_Settling, TRUE)
+
+    # crypts logic to resources
+    can_write_to.write(ModuleIds.L07_Crypts, ModuleIds.L08_Crypts_Resources, TRUE)
+
+    # resources logic to crypts state
+    can_write_to.write(ModuleIds.L08_Crypts_Resources, ModuleIds.L07_Crypts, TRUE)
 
     # Lookup table for NON module contracts
     external_contract_table.write(ExternalContractIds.Lords, _lords_address)
     external_contract_table.write(ExternalContractIds.Realms, _realms_address)
     external_contract_table.write(ExternalContractIds.S_Realms, _s_realms_address)
+    external_contract_table.write(ExternalContractIds.Crypts, _crypts_address)
+    external_contract_table.write(ExternalContractIds.S_Crypts, _s_crypts_address)
     external_contract_table.write(ExternalContractIds.Resources, _resources_address)
     external_contract_table.write(ExternalContractIds.Treasury, _treasury_address)
 
@@ -154,32 +164,42 @@ func set_initial_module_addresses{
     module_04_addr : felt,
     module_05_addr : felt,
     module_06_addr : felt,
+    module_07_addr : felt,
+    module_08_addr : felt,
 ):
     only_arbiter()
 
-    # # Settling Logic
+    # Settling Logic
     address_of_module_id.write(ModuleIds.L01_Settling, module_01_addr)
     module_id_of_address.write(module_01_addr, ModuleIds.L01_Settling)
 
-    # # # Resources Logic
+    # Resources Logic
     address_of_module_id.write(ModuleIds.L02_Resources, module_02_addr)
     module_id_of_address.write(module_02_addr, ModuleIds.L02_Resources)
 
-    # # # Buildings Logic
+    # Buildings Logic
     address_of_module_id.write(ModuleIds.L03_Buildings, module_03_addr)
     module_id_of_address.write(module_03_addr, ModuleIds.L03_Buildings)
 
-    # # # Calculator Logic
+    # Calculator Logic
     address_of_module_id.write(ModuleIds.L04_Calculator, module_04_addr)
     module_id_of_address.write(module_04_addr, ModuleIds.L04_Calculator)
 
-    # # # Wonders Logic
+    # Wonders Logic
     address_of_module_id.write(ModuleIds.L05_Wonders, module_05_addr)
     module_id_of_address.write(module_05_addr, ModuleIds.L05_Wonders)
 
-    # # # Combat Logic
+    # Combat Logic
     address_of_module_id.write(ModuleIds.L06_Combat, module_06_addr)
     module_id_of_address.write(module_06_addr, ModuleIds.L06_Combat)
+
+    # Crypts Logic
+    address_of_module_id.write(ModuleIds.L07_Crypts, module_07_addr)
+    module_id_of_address.write(module_07_addr, ModuleIds.L07_Crypts)
+
+    # Crypts Resources Logic
+    address_of_module_id.write(ModuleIds.L08_Crypts_Resources, module_08_addr)
+    module_id_of_address.write(module_08_addr, ModuleIds.L08_Crypts_Resources)
 
     return ()
 end

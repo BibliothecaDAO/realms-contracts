@@ -17,6 +17,7 @@ def run(nre):
             strhex_as_strfelt(config.L04_CALCULATOR_PROXY_ADDRESS),
             strhex_as_strfelt(config.L05_WONDERS_PROXY_ADDRESS),
             strhex_as_strfelt(config.L06_COMBAT_PROXY_ADDRESS),
+            strhex_as_strfelt(config.L07_CRYPTS_PROXY_ADDRESS),
         ],
     )
 
@@ -30,6 +31,18 @@ def run(nre):
             strhex_as_strfelt(config.L01_SETTLING_PROXY_ADDRESS),
         ]
     )
+
+    # set module access within crypts access
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="proxy_s_crypts",
+        function="Set_module_access",
+        arguments=[
+            strhex_as_strfelt(config.L07_CRYPTS_PROXY_ADDRESS),
+        ]
+    )
+
 
     # set module access within resources contract
     wrapped_send(

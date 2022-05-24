@@ -5,7 +5,7 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero
+from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
@@ -37,6 +37,7 @@ from contracts.settling_game.library.library_module import (
 )
 
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
+from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.imodules import (
@@ -132,6 +133,9 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         controller, ModuleIds.L05_Wonders
     )
 
+    # FETCH OWNER
+    let (owner) = IERC721.ownerOf(s_realms_address, token_id)
+
     # ALLOW RESOURCE LOGIC ADDRESS TO CLAIM, BUT STILL RESTRICT
     if caller != settling_logic_address:
         MODULE_ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
@@ -145,8 +149,6 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     end
 
     let (local resource_ids : Uint256*) = alloc()
-    let (local user_mint : Uint256*) = alloc()
-    let (local wonder_tax_arr : Uint256*) = alloc()
 
     # FETCH REALM DATA
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
@@ -173,7 +175,11 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # SET MINT
     let treasury_mint_perc = wonder_tax
-    let user_mint_rel_perc = 100 - wonder_tax
+    with_attr error_message("RESOURCES: resource id underflowed a felt."):
+        # Make sure wonder_tax doesn't divide by zero
+        assert_le(wonder_tax, 100)
+        let user_resources_value_rel_perc = 100 - wonder_tax
+    end
 
     # GET OUTPUT FOR EACH RESOURCE
     let (r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output,
@@ -189,13 +195,13 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     )
 
     # USER CLAIM
-    let (r_1_user) = calculate_total_claimable(days, user_mint_rel_perc, r_1_output)
-    let (r_2_user) = calculate_total_claimable(days, user_mint_rel_perc, r_2_output)
-    let (r_3_user) = calculate_total_claimable(days, user_mint_rel_perc, r_3_output)
-    let (r_4_user) = calculate_total_claimable(days, user_mint_rel_perc, r_4_output)
-    let (r_5_user) = calculate_total_claimable(days, user_mint_rel_perc, r_5_output)
-    let (r_6_user) = calculate_total_claimable(days, user_mint_rel_perc, r_6_output)
-    let (r_7_user) = calculate_total_claimable(days, user_mint_rel_perc, r_7_output)
+    let (r_1_user) = calculate_total_claimable(days, user_resources_value_rel_perc, r_1_output)
+    let (r_2_user) = calculate_total_claimable(days, user_resources_value_rel_perc, r_2_output)
+    let (r_3_user) = calculate_total_claimable(days, user_resources_value_rel_perc, r_3_output)
+    let (r_4_user) = calculate_total_claimable(days, user_resources_value_rel_perc, r_4_output)
+    let (r_5_user) = calculate_total_claimable(days, user_resources_value_rel_perc, r_5_output)
+    let (r_6_user) = calculate_total_claimable(days, user_resources_value_rel_perc, r_6_output)
+    let (r_7_user) = calculate_total_claimable(days, user_resources_value_rel_perc, r_7_output)
 
     # WONDER TAX
     let (r_1_wonder) = calculate_total_claimable(days, treasury_mint_perc, r_1_output)
@@ -563,7 +569,6 @@ func get_all_resource_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     let (wonder_tax) = IL04_Calculator.calculate_wonder_tax(calculator_address)
 
     # SET MINT
-    let treasury_mint_perc = wonder_tax
     let user_mint_rel_perc = 100 - wonder_tax
 
     # GET OUTPUT FOR EACH RESOURCE

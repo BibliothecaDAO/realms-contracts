@@ -1,0 +1,26 @@
+[
+    {
+        "name": "Desert Oasis",
+        "id": 1
+    },
+    {
+        "name": "Stone Temple",
+        "id": 2
+    },
+    {
+        "name": "Forest Ruins",
+        "id": 3
+    },
+    {
+        "name": "Mountain Deep",
+        "id": 4
+    },
+    {
+        "name": "Underwater Keep",
+        "id": 5
+    },
+    {
+        "name": "Ember's Glow",
+        "id": 6
+    }
+]
