@@ -5,7 +5,7 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero
+from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
@@ -176,6 +176,8 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     # SET MINT
     let treasury_mint_perc = wonder_tax
     with_attr error_message("RESOURCES: resource id underflowed a felt."):
+        # Make sure wonder_tax doesn't divide by zero
+        assert_le(wonder_tax, 100)
         let user_resources_value_rel_perc = 100 - wonder_tax
     end
 
