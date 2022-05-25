@@ -56,11 +56,12 @@ func test_fetch_trade_data{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range
     %{ ids.Account = deploy_contract("./openzeppelin/account/Account.cairo", [123456]).contract_address %}
 
     %{ print("lords") %}
-    %{ ids.lords = deploy_contract("./contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo", [1234, 1234, 18, 1000000000000000000000000, 0, ids.Account, ids.Account]).contract_address %}
+    %{ ids.lords = deploy_contract("./contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo", []).contract_address %}
     %{ print("lords contract: " + str(ids.lords)) %}
     %{ ids.proxy_lords = deploy_contract("./contracts/settling_game/proxy/PROXY_Logic.cairo", [ids.lords]).contract_address %}
     %{ print("proxy_lords contract: " + str(ids.proxy_lords)) %}
     LordsInterface.initializer(proxy_lords, 1234, 1234, 18, supply, Account, Account)
+    %{ print("lords interface initialized") %}
 
     #Deploy contract, put address into a local variable. Second argument is calldata array
     %{ ids.contract_address = deploy_contract("./contracts/nft_marketplace/bibliotheca_marketplace.cairo", 

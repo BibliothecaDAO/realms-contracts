@@ -11,7 +11,7 @@ from starkware.starknet.common.syscalls import (
     get_contract_address,
     get_block_timestamp,
 )
-from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem
+from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem, assert_lt_felt
 from starkware.cairo.common.uint256 import Uint256, uint256_le
 
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
@@ -124,11 +124,11 @@ func fetch_trade_data{
 
     # let (data) = get_trade(trade_data)
 
-    let (token_contract) = unpack_data(trade_data, 0, 33554431)
-    let (t_id) = unpack_data(trade_data, 7, 33554431)
+    let (token_contract) = unpack_data(trade_data, 0, 127)
+    let (t_id) = unpack_data(trade_data, 7, 1048575)
     let (expiration) = unpack_data(trade_data, 27, 33554431)
-    let (status) = unpack_data(trade_data, 52, 33554431)
-    let (trade_id) = unpack_data(trade_data, 54, 33554431)
+    let (status) = unpack_data(trade_data, 52, 3)
+    let (trade_id) = unpack_data(trade_data, 54, 1048575)
 
     #token_id needs to be Uint256
     let token_id: Uint256 = Uint256(t_id, 0)
@@ -296,23 +296,47 @@ func assert_poster{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     return ()
 end
 
-func pack_trade_data{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*}(
-    trade: Trade
-):
+func pack_trade_data{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(trade: Trade) -> (trade_data: felt):
     alloc_locals
 
     let (nft_params: felt*) = alloc()
 
-    nft_params[0] = trade.token_contract * SHIFT_NFT_1
-    nft_params[1] = trade.token_id * SHIFT_NFT_2
-    nft_params[2] = trade.expiration * SHIFT_NFT_3
-    nft_params[3] = trade.status * SHIFT_NFT_4
-    nft_params[4] = trade.trade_id * SHIFT_NFT_5
+    local id_1 = trade.token_contract * SHIFT_NFT_1
+    nft_params[0] = id_1
 
-    tempvar value = nft_params[4] + nft_params[3] + nft_params[2] + nft_params[1] + nft_params[0] 
+    local t_id: Uint256 = trade.token_id
+    let (local tid: felt) = _uint_to_felt(t_id)
+    local id_2 = tid * SHIFT_NFT_3
+    nft_params[1] = id_2
+
+    # nft_params[1] = trade.token_id * SHIFT_NFT_2
+    local id_3 = trade.expiration * SHIFT_NFT_3
+    nft_params[2] = id_3
+
+    local id_4 = trade.status * SHIFT_NFT_4
+    nft_params[3] = id_4
+
+    local id_5 = trade.trade_id * SHIFT_NFT_5
+    nft_params[4] = id_5
+    # nft_params[2] = trade.expiration * SHIFT_NFT_3
+    # nft_params[3] = trade.status * SHIFT_NFT_4
+    # nft_params[4] = trade.trade_id * SHIFT_NFT_5
+
+    tempvar value = nft_params[4] + nft_params[3] + nft_params[2] + nft_params[1] + nft_params[0]
+    # tempvar value = nft_params[4] + nft_params[3] + nft_params[2] + nft_params[1] + nft_params[0] 
 
     return (value)
 
+end
+
+func _uint_to_felt{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    } (value: Uint256) -> (value: felt):
+    assert_lt_felt(value.high, 2**123)
+    return (value.high * (2 ** 128) + value.low)
 end
 
 ###########
