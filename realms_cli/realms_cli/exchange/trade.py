@@ -34,7 +34,7 @@ def buy_tokens(resource_ids, resource_values, max_currency, network):
         contract_alias="proxy_Exchange_ERC20_1155",
         function="buy_tokens",
         arguments=[
-            *uint_decimal(max_currency),
+            *uint_decimal(max_currency), #computed
             len(resource_ids),
             *expanded_uint_list(resource_ids),
             len(resource_ids),
@@ -69,7 +69,7 @@ def sell_tokens(resource_ids, resource_values, min_currency, network):
         contract_alias="proxy_Exchange_ERC20_1155",
         function="sell_tokens",
         arguments=[
-            *uint_decimal(min_currency),
+            *uint_decimal(min_currency), #computed
             len(resource_ids),
             *expanded_uint_list(resource_ids),
             len(resource_ids),

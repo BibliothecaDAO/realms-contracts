@@ -663,8 +663,8 @@ async def exchange_token_factory(account_factory, compiled_proxy):
         str_to_felt("LRD"),
         18,
         *uint(initial_supply),
-        treasury_account.contract_address,
-        treasury_account.contract_address,
+        admin_account.contract_address,
+        admin_account.contract_address,
     ])
 
     proxy_resources = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo", [
