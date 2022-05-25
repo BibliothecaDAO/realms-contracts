@@ -52,17 +52,27 @@ from openzeppelin.upgrades.library import (
 ##########
 
 @event
-func Combat_outcome(attacking_realm_id : Uint256, defending_realm_id : Uint256, outcome : felt):
-end
-
-@event
-func Combat_step(
-    attacking_squad : Squad, defending_squad : Squad, attack_type : felt, hit_points : felt
+func CombatOutcome(
+    battle_id : felt, attacking_realm_id : Uint256, defending_realm_id : Uint256, outcome : felt
 ):
 end
 
 @event
-func Build_toops(troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt):
+func CombatStep(
+    battle_id : felt,
+    attacking_realm_id : Uint256,
+    defending_realm_id : Uint256,
+    attacking_squad : Squad,
+    defending_squad : Squad,
+    attack_type : felt,
+    hit_points : felt,
+):
+end
+
+@event
+func BuildTroops(
+    squad : Squad, troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt
+):
 end
 
 ###########
@@ -79,6 +89,10 @@ end
 
 @storage_var
 func troop_cost(troop_id : felt) -> (cost : Cost):
+end
+
+@storage_var
+func battle_id() -> (id : felt):
 end
 
 ##########
@@ -163,7 +177,7 @@ func build_squad_from_troops_in_realm{
     let (squad) = COMBAT.build_squad_from_troops(troop_ids_len, troop_ids)
     update_squad_in_realm(squad, realm_id, slot)
 
-    Build_toops.emit(troop_ids_len, troop_ids, realm_id, slot)
+    BuildTroops.emit(squad, troop_ids_len, troop_ids, realm_id, slot)
 
     return ()
 end
@@ -182,6 +196,9 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
         MODULE_ERC721_owner_check(attacking_realm_id, ExternalContractIds.S_Realms)
         assert can_attack = TRUE
     end
+
+    # Battle ID
+    let (battle_id_) = battle_id.read() 
 
     let (attacking_realm_data : RealmCombatData) = get_realm_combat_data(attacking_realm_id)
     let (defending_realm_data : RealmCombatData) = get_realm_combat_data(defending_realm_id)
@@ -225,7 +242,10 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
         tempvar range_check_ptr = range_check_ptr
     end
 
-    Combat_outcome.emit(attacking_realm_id, defending_realm_id, combat_outcome)
+    CombatOutcome.emit(battle_id_, attacking_realm_id, defending_realm_id, combat_outcome)
+
+    # Increment Battle ID
+    battle_id.write(battle_id_ + 1)
 
     return (combat_outcome)
 end
@@ -295,7 +315,7 @@ func attack{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     tempvar pedersen_ptr = pedersen_ptr
 
     let (d_after_attack) = hit_squad(d, hit_points)
-    Combat_step.emit(a, d, attack_type, hit_points)
+    CombatStep.emit(a, d, attack_type, hit_points)
     return (d_after_attack)
 end
 
