@@ -16,6 +16,7 @@ from starkware.cairo.common.uint256 import (
     Uint256, uint256_add, uint256_sub, uint256_le, uint256_lt, uint256_check, uint256_eq
 )
 
+from contracts.nft_marketplace.interfaces.imodules import NFT_Marketplace
 # from contracts.nft_marketplace.bibliotheca_marketplace import fetch_trade_data
 
 @storage_var
@@ -74,7 +75,15 @@ func test_fetch_trade_data{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range
     local trade_data: felt = 18014416252971264319588
     local price: felt = 1000000000000000000
 
-    # let (trade) = fetch_trade_data(trade_data, price, caller)
+    # let (trade) = contract_address.fetch_trade_data(trade_data, price, caller)
+    # NFT_Marketplace.pack_trade_data()
+
+    let trade: Trade = NFT_Marketplace.fetch_trade_data(contract_address, trade_data, price, contract_address)
+    assert_eq(trade.token_contract = 100)
+    assert_eq(trade.token_id = 100)
+    assert_eq(trade.expiration = 31536000)
+    assert_eq(trade.status = 3)
+    assert_eq(trade.trade_id = 1000000)
 
     return ()
 end
