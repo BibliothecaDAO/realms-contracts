@@ -308,3 +308,39 @@ def get_token_r(token_id, network):
     out = out.split(" ")
     print(from_bn(out[0]))
     # print(int(out[0]))    
+
+@click.command()
+@click.option("--network", default="goerli")
+def get_all_rates(network):
+    """
+    Get all rates excluding any fees
+    """
+    config = Config(nile_network=network)
+    n_resources = len(config.RESOURCES)
+
+    uints = []
+    values = []
+    for i in range(n_resources):
+        uints.append(str(i+1))
+        uints.append("0")
+        values.append(1 * 10 ** 18)
+        values.append("0")
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_Exchange_ERC20_1155",
+        function="get_all_rates",
+        arguments=[
+            n_resources,
+            *uints,
+            n_resources,
+            *values,
+        ],
+    )
+    
+    out = out.split(" ")
+    pretty_out = []
+    for i, resource in enumerate(config.RESOURCES):
+        pretty_out.append(f"1 {resource} sells {from_bn(out[i*2+1])}  $LORDS")
+    print('MARKET SELL PRICES PER LORDS')
+    print_over_colums(pretty_out)

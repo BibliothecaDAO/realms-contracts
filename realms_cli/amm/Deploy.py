@@ -1,4 +1,4 @@
-from realms_cli.caller_invoker import wrapped_send
+from realms_cli.caller_invoker import wrapped_call, wrapped_send, compile, deploy
 from realms_cli.deployer import logged_deploy
 from realms_cli.config import Config, strhex_as_strfelt, safe_load_deployment
 import time
@@ -9,12 +9,14 @@ def run(nre):
 
     config = Config(nre.network)
 
-    # logged_deploy(
-    #     nre,
-    #     "Exchange_ERC20_1155",
-    #     alias="Exchange_ERC20_1155",
-    #     arguments=[],
-    # )
+    compile(contract_alias="contracts/exchange/Exchange_ERC20_1155.cairo")
+
+    logged_deploy(
+        nre,
+        "Exchange_ERC20_1155",
+        alias="Exchange_ERC20_1155",
+        arguments=[],
+    )
 
     # module, _ = safe_load_deployment('Exchange_ERC20_1155', 'goerli')
 
@@ -28,7 +30,7 @@ def run(nre):
     # )
 
     # print('🕒 Waiting for deploy before invoking... 3 minutes for testnet')
-    # time.sleep(180)
+    time.sleep(180)
 
     # wrapped_send(
     #     network=config.nile_network,
@@ -63,10 +65,12 @@ def run(nre):
     #     arguments=[strhex_as_strfelt(module), *uint(50000000 * (10 ** 18))],
     # )
 
+    module, _ = safe_load_deployment('Exchange_ERC20_1155', 'goerli')
+
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
         contract_alias="proxy_Exchange_ERC20_1155",
         function="upgrade",
-        arguments=[strhex_as_strfelt(config.Exchange_ERC20_1155_ADDRESS)],
+        arguments=[strhex_as_strfelt(module)],
     )
