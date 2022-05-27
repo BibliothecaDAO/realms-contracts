@@ -70,10 +70,10 @@ func test_find_first_free_troop_slot_in_squad(s : Squad, tier : felt) -> (free_s
 end
 
 @view
-func test_build_squad_from_troops{range_check_ptr}(troop_ids_len : felt, troop_ids : felt*) -> (
+func test_add_troops_to_squad{range_check_ptr}(s : Squad, troop_ids_len : felt, troop_ids : felt*) -> (
     squad : Squad
 ):
-    let (s : Squad) = COMBAT.build_squad_from_troops(troop_ids_len, troop_ids)
+    let (s : Squad) = COMBAT.add_troops_to_squad(s, troop_ids_len, troop_ids)
     return (s)
 end
 

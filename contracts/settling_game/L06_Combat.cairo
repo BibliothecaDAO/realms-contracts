@@ -51,8 +51,7 @@ from openzeppelin.upgrades.library import (
 ##########
 
 @event
-func CombatOutcome_1(attacking_realm_id : Uint256, defending_realm_id : Uint256, outcome : felt
-):
+func CombatOutcome_1(attacking_realm_id : Uint256, defending_realm_id : Uint256, outcome : felt):
 end
 
 @event
@@ -167,7 +166,13 @@ func build_squad_from_troops_in_realm{
     # IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
 
     # assemble the squad, store it in a Realm
-    let (squad) = COMBAT.build_squad_from_troops(troop_ids_len, troop_ids)
+    let (realm_combat_data : RealmCombatData) = get_realm_combat_data(realm_id)
+    if slot == ATTACKING_SQUAD_SLOT:
+        let current_squad : Squad = COMBAT.unpack_squad(realm_combat_data.attacking_squad)
+    else:
+        let current_squad : Squad = COMBAT.unpack_squad(realm_combat_data.defending_squad)
+    end
+    let (squad) = COMBAT.add_troops_to_squad(current_squad, troop_ids_len, troop_ids)
     update_squad_in_realm(squad, realm_id, slot)
 
     BuildTroops_1.emit(squad, troop_ids_len, troop_ids, realm_id, slot)
@@ -257,7 +262,8 @@ func run_combat_loop{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
 ) -> (attacker : Squad, defender : Squad, outcome : felt):
     alloc_locals
 
-    let (step_defender) = attack(attacking_realm_id, defending_realm_id, attacker, defender, attack_type
+    let (step_defender) = attack(
+        attacking_realm_id, defending_realm_id, attacker, defender, attack_type
     )
     # because hits are distributed from tier 1 troops to tier 3, if the only tier 3
     # troop has 0 vitality, we can assume the whole squad has been defeated
@@ -266,14 +272,16 @@ func run_combat_loop{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
         return (attacker, step_defender, COMBAT_OUTCOME_ATTACKER_WINS)
     end
 
-    let (step_attacker) = attack(attacking_realm_id, defending_realm_id, step_defender, attacker, attack_type
+    let (step_attacker) = attack(
+        attacking_realm_id, defending_realm_id, step_defender, attacker, attack_type
     )
     if step_attacker.t3_1.vitality == 0:
         # attacker is defeated
         return (step_attacker, step_defender, COMBAT_OUTCOME_DEFENDER_WINS)
     end
 
-    return run_combat_loop(attacking_realm_id, defending_realm_id, step_attacker, step_defender, attack_type
+    return run_combat_loop(
+        attacking_realm_id, defending_realm_id, step_attacker, step_defender, attack_type
     )
 end
 
@@ -313,8 +321,7 @@ func attack{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     tempvar pedersen_ptr = pedersen_ptr
 
     let (d_after_attack) = hit_squad(d, hit_points)
-    CombatStep_1.emit(attacking_realm_id, defending_realm_id, a, d, attack_type, hit_points
-    )
+    CombatStep_1.emit(attacking_realm_id, defending_realm_id, a, d, attack_type, hit_points)
     return (d_after_attack)
 end
 

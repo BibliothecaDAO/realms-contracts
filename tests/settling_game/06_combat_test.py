@@ -58,6 +58,11 @@ def build_partial_squad(first_empty_slot: int) -> Squad:
     return squad
 
 
+def build_empty_squad() -> Squad:
+    no_troops = [EMPTY_TROOP] * 25
+    return Squad(*no_troops)
+
+
 def pack_squad(squad: Squad) -> PackedSquad:
     shift = 0x100
     p1 = (
@@ -148,6 +153,7 @@ async def test_pack_squad(library_combat_tests):
     packed_squad = pack_squad(squad)
     tx = await library_combat_tests.test_pack_squad(squad).invoke()
     assert tx.result.p == packed_squad
+
 
 @pytest.mark.asyncio
 async def test_get_troop_population(library_combat_tests):
@@ -384,15 +390,17 @@ async def test_get_set_troop_cost(s06_combat):
 
 
 @pytest.mark.asyncio
-async def test_build_squad_from_troops(library_combat_tests):
+async def test_add_troops_to_squad(library_combat_tests):
+    empty_squad = build_empty_squad()
     squad = build_default_squad()
     troop_ids = [TroopId.Watchman] * 16 + [TroopId.Guard] * 8 + [TroopId.GuardCaptain]
-    tx = await library_combat_tests.test_build_squad_from_troops(troop_ids).invoke()
+    tx = await library_combat_tests.test_add_troops_to_squad(empty_squad, troop_ids).invoke()
     assert tx.result.squad == squad
 
-    squad = build_partial_squad(4)
+    current_squad = build_partial_squad(4)
+    squad = build_partial_squad(8)
     troop_ids = [TroopId.Watchman] * 4
-    tx = await library_combat_tests.test_build_squad_from_troops(troop_ids).invoke()
+    tx = await library_combat_tests.test_add_troops_to_squad(current_squad, troop_ids).invoke()
     assert tx.result.squad == squad
 
 
