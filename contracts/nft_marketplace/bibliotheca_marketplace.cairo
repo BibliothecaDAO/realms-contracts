@@ -263,6 +263,36 @@ func cancel_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     return ()
 end
 
+@external
+func pack_trade_data{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(trade: Trade) -> (trade_data: felt):
+    alloc_locals
+
+    let (nft_params: felt*) = alloc()
+
+    local id_1 = trade.token_contract * SHIFT_NFT_1
+    nft_params[0] = id_1
+
+    local t_id: Uint256 = trade.token_id
+    let (local tid: felt) = _uint_to_felt(t_id)
+    local id_2 = tid * SHIFT_NFT_2
+    nft_params[1] = id_2
+
+    local id_3 = trade.expiration * SHIFT_NFT_3
+    nft_params[2] = id_3
+
+    local id_4 = trade.status * SHIFT_NFT_4
+    nft_params[3] = id_4
+
+    local id_5 = trade.trade_id * SHIFT_NFT_5
+    nft_params[4] = id_5
+
+    tempvar value = nft_params[4] + nft_params[3] + nft_params[2] + nft_params[1] + nft_params[0]
+
+    return (value)
+
+end
+
 ###########
 # HELPERS #
 ###########
@@ -294,40 +324,6 @@ func assert_poster{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     assert caller = trade.poster
 
     return ()
-end
-
-@external
-func pack_trade_data{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(trade: Trade) -> (trade_data: felt):
-    alloc_locals
-
-    let (nft_params: felt*) = alloc()
-
-    local id_1 = trade.token_contract * SHIFT_NFT_1
-    nft_params[0] = id_1
-
-    local t_id: Uint256 = trade.token_id
-    let (local tid: felt) = _uint_to_felt(t_id)
-    local id_2 = tid * SHIFT_NFT_2
-    nft_params[1] = id_2
-
-    # nft_params[1] = trade.token_id * SHIFT_NFT_2
-    local id_3 = trade.expiration * SHIFT_NFT_3
-    nft_params[2] = id_3
-
-    local id_4 = trade.status * SHIFT_NFT_4
-    nft_params[3] = id_4
-
-    local id_5 = trade.trade_id * SHIFT_NFT_5
-    nft_params[4] = id_5
-    # nft_params[2] = trade.expiration * SHIFT_NFT_3
-    # nft_params[3] = trade.status * SHIFT_NFT_4
-    # nft_params[4] = trade.trade_id * SHIFT_NFT_5
-
-    tempvar value = nft_params[4] + nft_params[3] + nft_params[2] + nft_params[1] + nft_params[0]
-
-    return (value)
-
 end
 
 func _uint_to_felt{

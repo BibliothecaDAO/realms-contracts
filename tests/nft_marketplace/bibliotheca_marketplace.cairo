@@ -96,7 +96,6 @@ func test_fetch_trade_data{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range
     assert_eq(trade.status, 3)
     assert_eq(trade.trade_id, 1000000)
 
-
     # pack_trade_data test
     let (packed_trade_data: felt) = NFT_Marketplace.pack_trade_data(contract_address=contract_address, trade=trade)
     assert_eq(packed_trade_data, trade_data)
