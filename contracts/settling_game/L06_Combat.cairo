@@ -51,7 +51,22 @@ from openzeppelin.upgrades.library import (
 ##########
 
 @event
-func CombatOutcome_1(attacking_realm_id : Uint256, defending_realm_id : Uint256, outcome : felt):
+func CombatStart_1(
+    attacking_realm_id : Uint256,
+    defending_realm_id : Uint256,
+    attacking_squad : Squad,
+    defending_squad : Squad,
+):
+end
+
+@event
+func CombatOutcome_1(
+    attacking_realm_id : Uint256,
+    defending_realm_id : Uint256,
+    attacking_squad : Squad,
+    defending_squad : Squad,
+    outcome : felt,
+):
 end
 
 @event
@@ -201,6 +216,9 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     let (attacker : Squad) = COMBAT.unpack_squad(attacking_realm_data.attacking_squad)
     let (defender : Squad) = COMBAT.unpack_squad(defending_realm_data.defending_squad)
 
+    # EMIT FIRST
+    CombatStart_1.emit(attacking_realm_id, defending_realm_id, attacker, defender)
+
     let (attacker_end, defender_end, combat_outcome) = run_combat_loop(
         attacking_realm_id, defending_realm_id, attacker, defender, attack_type
     )
@@ -223,6 +241,9 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     )
     set_realm_combat_data(defending_realm_id, new_defending_realm_data)
 
+    let (attacker_after_combat : Squad) = COMBAT.unpack_squad(new_attacker)
+    let (defender_after_combat : Squad) = COMBAT.unpack_squad(new_defender)
+
     # # pillaging only if attacker wins
     if combat_outcome == COMBAT_OUTCOME_ATTACKER_WINS:
         let (resources_logic_address) = IModuleController.get_module_address(
@@ -237,7 +258,13 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
         tempvar range_check_ptr = range_check_ptr
     end
 
-    CombatOutcome_1.emit(attacking_realm_id, defending_realm_id, combat_outcome)
+    CombatOutcome_1.emit(
+        attacking_realm_id,
+        defending_realm_id,
+        attacker_after_combat,
+        defender_after_combat,
+        combat_outcome,
+    )
 
     return (combat_outcome)
 end
