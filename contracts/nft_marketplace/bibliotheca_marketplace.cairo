@@ -296,6 +296,7 @@ func assert_poster{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     return ()
 end
 
+@external
 func pack_trade_data{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(trade: Trade) -> (trade_data: felt):
     alloc_locals
@@ -307,7 +308,7 @@ func pack_trade_data{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
 
     local t_id: Uint256 = trade.token_id
     let (local tid: felt) = _uint_to_felt(t_id)
-    local id_2 = tid * SHIFT_NFT_3
+    local id_2 = tid * SHIFT_NFT_2
     nft_params[1] = id_2
 
     # nft_params[1] = trade.token_id * SHIFT_NFT_2
@@ -324,7 +325,6 @@ func pack_trade_data{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     # nft_params[4] = trade.trade_id * SHIFT_NFT_5
 
     tempvar value = nft_params[4] + nft_params[3] + nft_params[2] + nft_params[1] + nft_params[0]
-    # tempvar value = nft_params[4] + nft_params[3] + nft_params[2] + nft_params[1] + nft_params[0] 
 
     return (value)
 
