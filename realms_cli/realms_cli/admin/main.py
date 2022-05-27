@@ -33,25 +33,22 @@ def upgrade_module(module_name, network):
     """
 
     # REMOVES LINE FROM TXT FILE
+    with open("goerli.deployments.txt","r+") as f:
+        new_f = f.readlines()
+        f.seek(0)
+        for line in new_f:
+            if module_name + ".json:" + module_name not in line:
+                f.write(line)
+        f.truncate()
 
     config = Config(nile_network=network)
 
-    # with open("goerli.deployments.txt","r+") as f:
-    #     new_f = f.readlines()
-    #     f.seek(0)
-    #     for line in new_f:
-    #         if module_name + ".json:" + module_name not in line:
-    #             f.write(line)
-    #     f.truncate()
+    compile(contract_alias="contracts/settling_game/" + module_name + ".cairo")
 
-    # config = Config(nile_network=network)
-
-    # compile(contract_alias="contracts/settling_game/" + module_name + ".cairo")
-
-    # deploy(
-    #     network=network,
-    #     alias=module_name
-    # )
+    deploy(
+        network=network,
+        alias=module_name
+    )
 
     module, _ = safe_load_deployment(module_name, network)
 
