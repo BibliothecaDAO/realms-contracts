@@ -5,16 +5,16 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import "./IRealmsBridgeLockbox.sol";
-import "./IStarknetCore.sol";
-import "./IJourneyV1.sol";
-import "./IJourneyV2.sol";
+import "./interfaces/IRealmsL1Bridge.sol";
+import "./interfaces/IStarknetCore.sol";
+import "./interfaces/IJourneyV1.sol";
+import "./interfaces/IJourneyV2.sol";
 
 contract RealmsL1Bridge is
     OwnableUpgradeable,
     ReentrancyGuardUpgradeable,
     IERC721Receiver,
-    IRealmsBridgeLockbox
+    IRealmsL1Bridge
 {
     IJourneyV1 public journeyV1Address;
     IJourneyV2 public journeyV2Address;
