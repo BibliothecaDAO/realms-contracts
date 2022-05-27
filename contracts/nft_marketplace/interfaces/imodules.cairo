@@ -158,5 +158,7 @@ namespace NFT_Marketplace:
     end
     func fetch_trade_data(trade_data: felt, price: felt, poster: felt) -> (trade: Trade):
     end
+    func _uint_to_felt(value: Uint256) -> (value: felt):
+    end
 end
 

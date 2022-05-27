@@ -1,5 +1,5 @@
 ["protostar.config"]
-protostar_version = "0.1.0"
+protostar_version = "0.2.0"
 
 ["protostar.project"]
 libs_path = "realms marketplace"
@@ -8,3 +8,6 @@ libs_path = "realms marketplace"
 marketplace = [
     "./contracts/nft_marketplace/bibliotheca_marketplace.cairo",
 ]
+
+["protostar.shared_command_configs"]
+cairo_path = ["./contracts"]

@@ -1,5 +1,5 @@
 %lang starknet
-%builtins pedersen range_check bitwise
+# %builtins pedersen range_check bitwise
 
 from protostar.asserts import (
     assert_eq, assert_not_eq, assert_signed_lt, assert_signed_le, assert_signed_gt,
@@ -16,8 +16,7 @@ from starkware.cairo.common.uint256 import (
     Uint256, uint256_add, uint256_sub, uint256_le, uint256_lt, uint256_check, uint256_eq
 )
 
-from contracts.nft_marketplace.interfaces.imodules import NFT_Marketplace
-# from contracts.nft_marketplace.bibliotheca_marketplace import fetch_trade_data
+from nft_marketplace.interfaces.imodules import Trade
 
 @storage_var
 func caller_address() -> (i : felt):
@@ -36,11 +35,14 @@ namespace LordsInterface:
     end
 end
 
-# @contract_interface
-# namespace LordsMarketplace:
-#     func fetch_trade_data(trade_data: felt, price: felt, poster: felt):
-#     end
-# end
+@contract_interface
+namespace NFTM:
+    func pack_trade_data(trade: Trade) -> (trade_data: felt):
+    end
+
+    func fetch_trade_data(trade_data: felt, price: felt, poster: felt) -> (trade: Trade):
+    end
+end
 
 
 @external
@@ -75,15 +77,19 @@ func test_fetch_trade_data{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range
     local trade_data: felt = 18014416252971264319588
     local price: felt = 1000000000000000000
 
-    # let (trade) = contract_address.fetch_trade_data(trade_data, price, caller)
-    # NFT_Marketplace.pack_trade_data()
+    NFTM.fetch_trade_data(contract_address=contract_address, trade_data=trade_data, price=price, poster=contract_address)
+    
+    # # fetch_trade_data test
+    # let (trade: Trade) = NFT_Marketplace.fetch_trade_data(contract_address, trade_data, price, contract_address)
+    # assert_eq(trade.token_contract, 100)
+    # # assert_eq(_uint_to_felt(trade.token_id), 100)
+    # assert_eq(trade.expiration, 31536000)
+    # assert_eq(trade.status, 3)
+    # assert_eq(trade.trade_id, 1000000)
 
-    let trade: Trade = NFT_Marketplace.fetch_trade_data(contract_address, trade_data, price, contract_address)
-    assert_eq(trade.token_contract = 100)
-    assert_eq(trade.token_id = 100)
-    assert_eq(trade.expiration = 31536000)
-    assert_eq(trade.status = 3)
-    assert_eq(trade.trade_id = 1000000)
+    # # pack_trade_data test
+    # let (packed_trade_data: felt) = NFT_Marketplace.pack_trade_data(contract_address, trade)
+    # assert_eq(packed_trade_data, trade_data)
 
     return ()
 end
