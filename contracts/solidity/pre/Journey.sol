@@ -4,8 +4,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
-import "../shared/interfaces/RealmsToken.sol";
-import "../shared/interfaces/LordsToken.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Journey is ERC721Holder, Ownable, ReentrancyGuard, Pausable {
     event StakeRealms(uint256[] tokenIds, address player);
@@ -15,8 +15,8 @@ contract Journey is ERC721Holder, Ownable, ReentrancyGuard, Pausable {
     mapping(uint256 => address) ownership;
     mapping(address => mapping(uint256 => uint256)) public realmsStaked;
 
-    LordsToken lordsToken;
-    RealmsToken realmsToken;
+    IERC20 lordsToken;
+    IERC721 realmsToken;
 
     // contracts
     address bridge;
@@ -37,8 +37,8 @@ contract Journey is ERC721Holder, Ownable, ReentrancyGuard, Pausable {
         lordsPerRealm = _lordsPerRealm;
         epoch = _epoch;
 
-        lordsToken = LordsToken(_lordsToken);
-        realmsToken = RealmsToken(_realmsAddress);
+        lordsToken = IERC20(_lordsToken);
+        realmsToken = IERC721(_realmsAddress);
     }
 
     /**
@@ -49,11 +49,11 @@ contract Journey is ERC721Holder, Ownable, ReentrancyGuard, Pausable {
     }
 
     function updateRealmsAddress(address _newRealms) external onlyOwner {
-        realmsToken = RealmsToken(_newRealms);
+        realmsToken = IERC721(_newRealms);
     }
 
     function updateLordsAddress(address _newLords) external onlyOwner {
-        lordsToken = LordsToken(_newLords);
+        lordsToken = IERC20(_newLords);
     }
 
     function updateEpochLength(uint256 _newEpoch) external onlyOwner {
