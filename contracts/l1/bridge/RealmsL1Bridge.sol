@@ -29,7 +29,6 @@ contract RealmsL1Bridge is
         512408049450392852989582095984328044240489742106100269794433337059943365139;
 
     function initialize(
-        address _l1RealmsAddress,
         address _starknetCoreAddress
     ) public initializer {
         __Ownable_init();
