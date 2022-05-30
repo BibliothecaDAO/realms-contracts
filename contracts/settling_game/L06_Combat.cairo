@@ -442,6 +442,7 @@ func hit_troop{range_check_ptr}(t : Troop, hits : felt) -> (
     if kills_troop == 1:
         # t.vitality <= hits
         let ht = Troop(
+            id=t.id,
             type=t.type,
             tier=t.tier,
             agility=t.agility,
@@ -455,6 +456,7 @@ func hit_troop{range_check_ptr}(t : Troop, hits : felt) -> (
     else:
         # t.vitality > hits
         let ht = Troop(
+            id=t.id,
             type=t.type,
             tier=t.tier,
             agility=t.agility,

@@ -3,15 +3,15 @@ from enum import IntEnum
 from tests.shared import pack_values
 
 Cost = namedtuple('Cost', 'resource_count bits packed_ids packed_amounts')
-CostWithLords = namedtuple(
-    'Cost', 'resource_count bits packed_ids packed_amounts lords')
-Troop = namedtuple('Troop', 'type tier agility attack defense vitality wisdom')
+CostWithLords = namedtuple('Cost', 'resource_count bits packed_ids packed_amounts lords')
+Troop = namedtuple('Troop', 'id type tier agility attack defense vitality wisdom')
 Squad = namedtuple(
     'Squad',
     't1_1 t1_2 t1_3 t1_4 t1_5 t1_6 t1_7 t1_8 t1_9 t1_10 t1_11 t1_12 t1_13 t1_14 t1_15 t1_16 '
     + 't2_1 t2_2 t2_3 t2_4 t2_5 t2_6 t2_7 t2_8 t3_1',
 )
-PackedSquad = namedtuple('PackedSquad', 'p1 p2 p3 p4 p5 p6 p7')
+PackedSquad = namedtuple('PackedSquad', 'p1 p2')
+
 
 class TroopId(IntEnum):
     Watchman = 1
@@ -30,6 +30,7 @@ class TroopId(IntEnum):
     Mage = 14
     Arcanist = 15
     GrandMarshal = 16
+
 
 class ResourceIds(IntEnum):
     Wood = 1
@@ -55,6 +56,7 @@ class ResourceIds(IntEnum):
     Mithral = 21
     Dragonhide = 22
 
+
 class BuildingId(IntEnum):
     Fairgrounds = 1
     RoyalReserve = 2
@@ -76,6 +78,7 @@ class BuildingId(IntEnum):
     Fishmonger = 18
     Farms = 19
     Hamlet = 20
+
 
 BUILDING_COSTS = {
     BuildingId.Fairgrounds: CostWithLords(
