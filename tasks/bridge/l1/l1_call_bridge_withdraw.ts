@@ -8,9 +8,9 @@ dotenv.config()
 
 async function main() {
 
-  const lockboxFactory = await hardhatEthers.getContractFactory("RealmsBridgeLockbox");
+  const lockboxFactory = await hardhatEthers.getContractFactory("RealmsL1Bridge");
 
-  const lockbox = await lockboxFactory.attach(process.env[`L1_REALMS_BRIDGE_LOCKBOX_ADDRESS_${network.name.toUpperCase()}`])
+  const lockbox = await lockboxFactory.attach(process.env[`L1_REALMS_BRIDGE_LOCKBOX_${network.name.toUpperCase()}`])
 
   const res = await lockbox.withdrawFromL2("0xa035bf657bd2fbde2ec374bec968b85715512f29", ["27"])
 

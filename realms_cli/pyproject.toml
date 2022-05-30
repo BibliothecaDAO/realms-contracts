@@ -103,3 +103,6 @@ cairo-nile = "^0.5.0"
 
 "buy_tokens" = "realms_cli.exchange.trade.buy_tokens"
 "sell_tokens" = "realms_cli.exchange.trade.sell_tokens"
+
+#----------- Bridge
+"set_l1_bridge_contract_address" = "realms_cli.bridge.admin.set_l1_bridge_contract_address"

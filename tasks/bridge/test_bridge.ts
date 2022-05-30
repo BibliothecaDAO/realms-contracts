@@ -11,9 +11,9 @@ async function main() {
   const tokenIds = ["27"]
 
   const lootRealmsFactory = await hardhatEthers.getContractFactory("LootRealms");
-  const lockboxFactory = await hardhatEthers.getContractFactory("RealmsBridgeLockbox");
+  const lockboxFactory = await hardhatEthers.getContractFactory("RealmsL1Bridge");
   const lootRealms = await lootRealmsFactory.attach(process.env[`L1_REALMS_ADDRESS_${network.name.toUpperCase()}`])
-  const lockbox = await lockboxFactory.attach(process.env[`L1_REALMS_BRIDGE_LOCKBOX_ADDRESS_${network.name.toUpperCase()}`])
+  const lockbox = await lockboxFactory.attach(process.env[`L1_REALMS_BRIDGE_LOCKBOX_${network.name.toUpperCase()}`])
 
   // Mint
   // for (let i = 0; i < tokenIds.length; i++) {
@@ -24,7 +24,7 @@ async function main() {
   // // console.log(await lootRealms.ownerOf(tokenId.toString()))
 
   // // Approving
-  // const tx2 = await lootRealms.setApprovalForAll(process.env[`L1_REALMS_BRIDGE_LOCKBOX_ADDRESS_${network.name.toUpperCase()}`], true)
+  // const tx2 = await lootRealms.setApprovalForAll(process.env[`L1_REALMS_BRIDGE_LOCKBOX_${network.name.toUpperCase()}`], true)
   // console.log(`Approved: ${tx2.hash}`)
 
   // Depositing

@@ -19,6 +19,11 @@ from openzeppelin.introspection.ERC165 import (
     ERC165_supports_interface,
     ERC165_register_interface
 )
+from openzeppelin.upgrades.library import (
+    Proxy_initializer,
+    Proxy_only_admin,
+    Proxy_set_implementation,
+)
 
 @storage_var
 func l1_bridge_contract_address() -> (res: felt):
@@ -33,21 +38,29 @@ end
 func journey_versions(token_id: Uint256) -> (version: felt):
 end
 
-@constructor
-func constructor{
-        syscall_ptr: felt*, 
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    } (
-        owner: felt,
-        l2_realms_address: felt
-    ):
-    Ownable_initializer(owner)
+###############
+# CONSTRUCTOR #
+###############
 
+@external
+func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    proxy_admin : felt,
+    l2_realms_address: felt
+):
+    Ownable_initializer(proxy_admin)
+    Proxy_initializer(proxy_admin)
     ERC165_register_interface(IERC721_RECEIVER_ID)
-
     l2_realms_contract_address.write(l2_realms_address)
 
+    return ()
+end
+
+@external
+func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    new_implementation : felt
+):
+    Proxy_only_admin()
+    Proxy_set_implementation(new_implementation)
     return ()
 end
 
