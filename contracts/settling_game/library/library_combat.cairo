@@ -174,7 +174,6 @@ namespace COMBAT:
     end
 
     func pack_troop{range_check_ptr}(t : Troop) -> (packed : felt):
-        assert_not_zero(t.id)
         assert_lt(t.id, TroopId.SIZE)
         assert_le(t.vitality, 255)
         let packed = t.id + t.vitality * SHIFT
