@@ -621,6 +621,9 @@ func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     # GET COMBAT DATA
     let (realms_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Realms
+    )    
+    let (s_realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.S_Realms
     )
     let (attacking_realm_data : RealmData) = realms_IERC721.fetch_realm_data(
         realms_address, attacking_realm_id
@@ -636,10 +639,10 @@ func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
 
     # CANNOT ATTACK YOUR OWN
     let (attacking_realm_owner) = realms_IERC721.ownerOf(
-        realms_address, attacking_realm_id
+        s_realms_address, attacking_realm_id
     )
     let (defending_realm_owner) = realms_IERC721.ownerOf(
-        realms_address, defending_realm_id
+        s_realms_address, defending_realm_id
     )
 
     if attacking_realm_owner == defending_realm_owner:
