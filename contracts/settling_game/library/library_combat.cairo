@@ -182,16 +182,16 @@ namespace COMBAT:
 
     func unpack_troop{range_check_ptr}(packed : felt) -> (t : Troop):
         alloc_locals
-        let (vitality, id) = unsigned_div_rem(packed, SHIFT)
-        if id == 0:
+        let (vitality, troop_id) = unsigned_div_rem(packed, SHIFT)
+        if troop_id == 0:
             return (
                 Troop(id=0, type=0, tier=0, agility=0, attack=0, defense=0, vitality=0, wisdom=0)
             )
         end
-        let (type, tier, agility, attack, defense, wisdom) = get_troop_properties(id)
+        let (type, tier, agility, attack, defense, _, wisdom) = get_troop_properties(troop_id)
 
         return (
-            Troop(id=id, type=type, tier=tier, agility=agility, attack=attack, defense=defense, vitality=vitality, wisdom=wisdom),
+            Troop(id=troop_id, type=type, tier=tier, agility=agility, attack=attack, defense=defense, vitality=vitality, wisdom=wisdom),
         )
     end
 
@@ -200,7 +200,7 @@ namespace COMBAT:
     # this way, we don't have to store them on-chain which allows for more efficient
     # packing (only troop ID and vitality have to be stored)
     func get_troop_properties{range_check_ptr}(troop_id : felt) -> (
-        type, tier, agility, attack, defense, wisdom
+        type, tier, agility, attack, defense, vitality, wisdom
     ):
         assert_not_zero(troop_id)
         assert_lt(troop_id, TroopId.SIZE)
@@ -211,6 +211,7 @@ namespace COMBAT:
         let (agility_label) = get_label_location(troop_agility_per_id)
         let (attack_label) = get_label_location(troop_attack_per_id)
         let (defense_label) = get_label_location(troop_defense_per_id)
+        let (vitality_label) = get_label_location(troop_vitality_per_id)
         let (wisdom_label) = get_label_location(troop_wisdom_per_id)
 
         return (
@@ -219,6 +220,7 @@ namespace COMBAT:
             [agility_label + idx],
             [attack_label + idx],
             [defense_label + idx],
+            [vitality_label + idx],
             [wisdom_label + idx],
         )
 
@@ -267,14 +269,14 @@ namespace COMBAT:
         dw 4  # Knight Commander
         dw 4  # Scout
         dw 8  # Archer
-        dw 16  # Sniper
+        dw 16 # Sniper
         dw 1  # Scorpio
         dw 2  # Ballista
         dw 4  # Catapult
         dw 2  # Apprentice
         dw 4  # Mage
         dw 8  # Arcanist
-        dw 16  # Grand Marshal
+        dw 16 # Grand Marshal
 
         troop_attack_per_id:
         dw 1  # Watchman
@@ -282,22 +284,22 @@ namespace COMBAT:
         dw 4  # Guard Captain
         dw 4  # Squire
         dw 8  # Knight
-        dw 16  # Knight Commander
+        dw 16 # Knight Commander
         dw 3  # Scout
         dw 6  # Archer
-        dw 12  # Sniper
+        dw 12 # Sniper
         dw 4  # Scorpio
         dw 8  # Ballista
-        dw 16  # Catapult
+        dw 16 # Catapult
         dw 2  # Apprentice
         dw 4  # Mage
         dw 8  # Arcanist
-        dw 16  # Grand Marshal
+        dw 16 # Grand Marshal
 
         troop_defense_per_id:
         dw 3  # Watchman
         dw 6  # Guard
-        dw 12  # Guard Captain
+        dw 12 # Guard Captain
         dw 1  # Squire
         dw 2  # Knight
         dw 4  # Knight Commander
@@ -310,7 +312,25 @@ namespace COMBAT:
         dw 1  # Apprentice
         dw 2  # Mage
         dw 4  # Arcanist
-        dw 16  # Grand Marshal
+        dw 16 # Grand Marshal
+
+        troop_vitality_per_id:
+        dw 4  # Watchman
+        dw 8  # Guard
+        dw 16 # Guard Captain
+        dw 1  # Squire
+        dw 2  # Knight
+        dw 4  # Knight Commander
+        dw 1  # Scout
+        dw 2  # Archer
+        dw 4  # Sniper
+        dw 3  # Scorpio
+        dw 6  # Ballista
+        dw 12 # Catapult
+        dw 1  # Apprentice
+        dw 2  # Mage
+        dw 4  # Arcanist
+        dw 16 # Grand Marshal
 
         troop_wisdom_per_id:
         dw 1  # Watchman
@@ -318,7 +338,7 @@ namespace COMBAT:
         dw 4  # Guard Captain
         dw 3  # Squire
         dw 6  # Knight
-        dw 12  # Knight Commander
+        dw 12 # Knight Commander
         dw 1  # Scout
         dw 2  # Archer
         dw 4  # Sniper
@@ -327,8 +347,8 @@ namespace COMBAT:
         dw 4  # Catapult
         dw 4  # Apprentice
         dw 8  # Mage
-        dw 16  # Arcanist
-        dw 16  # Grand Marshal
+        dw 16 # Arcanist
+        dw 16 # Grand Marshal
     end
 
     func get_troop_internal{range_check_ptr}(troop_id : felt) -> (t : Troop):
@@ -337,104 +357,10 @@ namespace COMBAT:
             assert_lt(troop_id, TroopId.SIZE)
         end
 
-        if troop_id == TroopId.Watchman:
-            return (
-                Troop(id=troop_id, type=TroopType.Melee, tier=1, agility=1, attack=1, defense=3, vitality=4, wisdom=1),
-            )
-        end
-
-        if troop_id == TroopId.Guard:
-            return (
-                Troop(id=troop_id, type=TroopType.Melee, tier=2, agility=2, attack=2, defense=6, vitality=8, wisdom=2),
-            )
-        end
-
-        if troop_id == TroopId.GuardCaptain:
-            return (
-                Troop(id=troop_id, type=TroopType.Melee, tier=3, agility=4, attack=4, defense=12, vitality=16, wisdom=4),
-            )
-        end
-
-        if troop_id == TroopId.Squire:
-            return (
-                Troop(id=troop_id, type=TroopType.Melee, tier=1, agility=1, attack=4, defense=1, vitality=1, wisdom=3),
-            )
-        end
-
-        if troop_id == TroopId.Knight:
-            return (
-                Troop(id=troop_id, type=TroopType.Melee, tier=2, agility=2, attack=8, defense=2, vitality=2, wisdom=6),
-            )
-        end
-
-        if troop_id == TroopId.KnightCommander:
-            return (
-                Troop(id=troop_id, type=TroopType.Melee, tier=3, agility=4, attack=16, defense=4, vitality=4, wisdom=12),
-            )
-        end
-
-        if troop_id == TroopId.Scout:
-            return (
-                Troop(id=troop_id, type=TroopType.Ranged, tier=1, agility=4, attack=3, defense=1, vitality=1, wisdom=1),
-            )
-        end
-
-        if troop_id == TroopId.Archer:
-            return (
-                Troop(id=troop_id, type=TroopType.Ranged, tier=2, agility=8, attack=6, defense=2, vitality=2, wisdom=2),
-            )
-        end
-
-        if troop_id == TroopId.Sniper:
-            return (
-                Troop(id=troop_id, type=TroopType.Ranged, tier=3, agility=16, attack=12, defense=4, vitality=4, wisdom=4),
-            )
-        end
-
-        if troop_id == TroopId.Scorpio:
-            return (
-                Troop(id=troop_id, type=TroopType.Siege, tier=1, agility=1, attack=4, defense=1, vitality=3, wisdom=1),
-            )
-        end
-
-        if troop_id == TroopId.Ballista:
-            return (
-                Troop(id=troop_id, type=TroopType.Siege, tier=2, agility=2, attack=8, defense=2, vitality=6, wisdom=2),
-            )
-        end
-
-        if troop_id == TroopId.Catapult:
-            return (
-                Troop(id=troop_id, type=TroopType.Siege, tier=3, agility=4, attack=16, defense=4, vitality=12, wisdom=4),
-            )
-        end
-
-        if troop_id == TroopId.Apprentice:
-            return (
-                Troop(id=troop_id, type=TroopType.Ranged, tier=1, agility=2, attack=2, defense=1, vitality=1, wisdom=4),
-            )
-        end
-
-        if troop_id == TroopId.Mage:
-            return (
-                Troop(id=troop_id, type=TroopType.Ranged, tier=2, agility=4, attack=4, defense=2, vitality=2, wisdom=8),
-            )
-        end
-
-        if troop_id == TroopId.Arcanist:
-            return (
-                Troop(id=troop_id, type=TroopType.Ranged, tier=3, agility=8, attack=8, defense=4, vitality=4, wisdom=16),
-            )
-        end
-
-        if troop_id == TroopId.GrandMarshal:
-            return (
-                Troop(id=troop_id, type=TroopType.Melee, tier=3, agility=16, attack=16, defense=16, vitality=16, wisdom=16),
-            )
-        end
-
-        # shouldn't ever happen thanks to the asserts at the beginning
-        return (Troop(id=0, type=0, tier=0, agility=0, attack=0, defense=0, vitality=0, wisdom=0))
+        let (type, tier, agility, attack, defense, vitality, wisdom) = get_troop_properties(troop_id)
+        return (
+            Troop(id=troop_id, type=type, tier=tier, agility=agility, attack=attack, defense=defense, vitality=vitality, wisdom=wisdom)
+        )
     end
 
     func add_troop_to_squad(t : Troop, s : Squad) -> (updated : Squad):
