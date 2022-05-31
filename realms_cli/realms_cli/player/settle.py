@@ -3,13 +3,11 @@ import json
 import click
 
 from nile.core.account import Account
-from ecdsa import SigningKey, SECP256k1
 
-from realms_cli.caller_invoker import wrapped_call, wrapped_send
+from realms_cli.caller_invoker import call_multi, wrapped_call, wrapped_send
 from realms_cli.config import Config
-from realms_cli.utils import print_over_colums
+from realms_cli.utils import parse_multi_input
 from realms_cli.binary_converter import map_realm
-from realms_cli.shared import uint
 
 
 @click.command()
@@ -21,16 +19,18 @@ def mint_realm(realm_token_id, network):
     """
     config = Config(nile_network=network)
 
+    realm_token_ids = parse_multi_input(realm_token_id)
+    calldata = [
+        [int(config.USER_ADDRESS, 16), id, 0]
+        for id in realm_token_ids
+    ]
+
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_realms",
         function="mint",
-        arguments=[
-            int(config.USER_ADDRESS, 16),  # felt
-            realm_token_id,                 # uint 1
-            0,                              # uint 2
-        ],
+        arguments=calldata
     )
 
 
@@ -63,15 +63,18 @@ def settle(realm_token_id, network):
     """
     config = Config(nile_network=network)
 
+    realm_token_ids = parse_multi_input(realm_token_id)
+    calldata = [
+        [id, 0]
+        for id in realm_token_ids
+    ]
+
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_L01_Settling",
         function="settle",
-        arguments=[
-            realm_token_id,  # uint1
-            0,               # uint2
-        ],
+        arguments=calldata
     )
 
 @click.command()
@@ -83,15 +86,18 @@ def unsettle(realm_token_id, network):
     """
     config = Config(nile_network=network)
 
+    realm_token_ids = parse_multi_input(realm_token_id)
+    calldata = [
+        [id, 0]
+        for id in realm_token_ids
+    ]
+
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_L01_Settling",
         function="unsettle",
-        arguments=[
-            realm_token_id,  # uint1
-            0,               # uint2
-        ],
+        arguments=calldata,
     )
 
 
@@ -109,19 +115,18 @@ def set_realm_data(realm_token_id, network):
     orders = json.load(open("data/orders.json", "r"))
     wonders = json.load(open("data/wonders.json", ))
 
-    realm_data_felt = map_realm(
-        realms[str(realm_token_id)], resources, wonders, orders)
+    realm_token_ids = parse_multi_input(realm_token_id)
+    calldata = [
+        [id, 0, map_realm(realms[str(id)], resources, wonders, orders)]
+        for id in realm_token_ids
+    ]
 
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_realms",
         function="set_realm_data",
-        arguments=[
-            realm_token_id,   # uint 1
-            0,                # uint 2
-            realm_data_felt,  # felt
-        ],
+        arguments=calldata,
     )
 
 
@@ -221,3 +226,35 @@ def get_realm_data(realm_token_id, network):
         arguments=[realm_token_id, 0],
     )
     print(out)
+
+@click.command()
+@click.option("--network", default="goerli")
+def get_owned(network):
+    """
+    Check settled Realms balance
+    """
+    config = Config(nile_network=network)
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_realms",
+        function="balanceOf",
+        arguments=[int(config.USER_ADDRESS, 16)],
+    )
+    n_realms, _ = out.split(" ")
+
+    print(f"You own {n_realms} unsettled realms.")
+    
+    calldata = [
+        [int(config.USER_ADDRESS, 16), i, 0]
+        for i in range(int(n_realms))
+    ]
+
+    stdout = call_multi(
+        network=config.nile_network,
+        contract_alias="proxy_realms",
+        function="tokenOfOwnerByIndex",
+        calldata=calldata,
+    )
+
+    for realm_id in stdout:
+        print(realm_id.strip(" 0\n"), end=", ")
