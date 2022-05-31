@@ -298,6 +298,10 @@ namespace TroopId:
     const Mage = 14
     const Arcanist = 15
     const GrandMarshal = 16
+    # IMPORTANT: if you're adding to this enum
+    # make sure the SIZE is one greater than the
+    # maximal value; certain algorithms depend on that
+    const SIZE = 17
 end
 
 namespace TroopType:
@@ -307,6 +311,7 @@ namespace TroopType:
 end
 
 struct Troop:
+    member id : felt  # TroopId
     member type : felt  # TroopType
     member tier : felt
     member agility : felt
@@ -352,16 +357,11 @@ struct Squad:
 end
 
 struct PackedSquad:
-    # one packed troop fits into 7 bytes
-    # one felt is ~31 bytes -> can hold 4 troops
-    # a squad has 25 troops -> fits into 7 felts when packed
-    member p1 : felt  # packed Troops t1_1 ... t1_4
-    member p2 : felt  # packed Troops t1_5 ... t1_8
-    member p3 : felt  # packed Troops t1_9 ... t1_12
-    member p4 : felt  # packed Troops t1_13 ... t1_16
-    member p5 : felt  # packed Troops t2_1 ... t2_4
-    member p6 : felt  # packed Troops t2_5 ... t2_8
-    member p7 : felt  # packed Troop t3_1
+    # one packed troop fits into 2 bytes (troop ID + vitality)
+    # one felt is ~31 bytes -> can hold 15 troops
+    # a squad has 25 troops -> fits into 2 felts when packed
+    member p1 : felt  # packed Troops t1_1 ... t1_15
+    member p2 : felt  # packed Troops t1_16 ... t3_1
 end
 
 struct SquadStats:

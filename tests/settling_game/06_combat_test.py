@@ -7,25 +7,25 @@ import struct
 import pytest
 from starkware.starkware_utils.error_handling import StarkException
 
-from .game_structs import Cost, Troop, Squad, PackedSquad, ResourceIds, TroopId, TROOP_COSTS
+from .game_structs import Troop, Squad, PackedSquad, ResourceIds, TroopId, TROOP_COSTS
 
-EMPTY_TROOP = Troop(0, 0, 0, 0, 0, 0, 0)
-WATCHMAN = Troop(1, 1, 1, 1, 3, 4, 1)
-GUARD = Troop(1, 2, 2, 2, 6, 8, 2)
-GUARD_CAPTAIN = Troop(1, 3, 4, 4, 12, 16, 4)
-SQUIRE = Troop(1, 1, 1, 4, 1, 1, 3)
-KNIGHT = Troop(1, 2, 2, 8, 2, 2, 6)
-KNIGHT_COMMANDER = Troop(1, 3, 4, 16, 4, 4, 12)
-SCOUT = Troop(2, 1, 4, 3, 1, 1, 1)
-ARCHER = Troop(2, 2, 8, 6, 2, 2, 2)
-SNIPER = Troop(2, 3, 16, 12, 4, 4, 4)
-SCORPIO = Troop(3, 1, 1, 4, 1, 3, 1)
-BALLISTA = Troop(3, 2, 2, 8, 2, 6, 2)
-CATAPULT = Troop(3, 3, 4, 16, 4, 12, 4)
-APPRENTICE = Troop(2, 1, 2, 2, 1, 1, 4)
-MAGE = Troop(2, 2, 4, 4, 2, 2, 8)
-ARCANIST = Troop(2, 3, 8, 8, 4, 4, 16)
-GRAND_MARSHAL = Troop(1, 3, 16, 16, 16, 16, 16)
+EMPTY_TROOP = Troop(0, 0, 0, 0, 0, 0, 0, 0)
+WATCHMAN = Troop(TroopId.Watchman, 1, 1, 1, 1, 3, 4, 1)
+GUARD = Troop(TroopId.Guard, 1, 2, 2, 2, 6, 8, 2)
+GUARD_CAPTAIN = Troop(TroopId.GuardCaptain, 1, 3, 4, 4, 12, 16, 4)
+SQUIRE = Troop(TroopId.Squire, 1, 1, 1, 4, 1, 1, 3)
+KNIGHT = Troop(TroopId.Knight, 1, 2, 2, 8, 2, 2, 6)
+KNIGHT_COMMANDER = Troop(TroopId.KnightCommander, 1, 3, 4, 16, 4, 4, 12)
+SCOUT = Troop(TroopId.Scout, 2, 1, 4, 3, 1, 1, 1)
+ARCHER = Troop(TroopId.Archer, 2, 2, 8, 6, 2, 2, 2)
+SNIPER = Troop(TroopId.Sniper, 2, 3, 16, 12, 4, 4, 4)
+SCORPIO = Troop(TroopId.Scorpio, 3, 1, 1, 4, 1, 3, 1)
+BALLISTA = Troop(TroopId.Ballista, 3, 2, 2, 8, 2, 6, 2)
+CATAPULT = Troop(TroopId.Catapult, 3, 3, 4, 16, 4, 12, 4)
+APPRENTICE = Troop(TroopId.Apprentice, 2, 1, 2, 2, 1, 1, 4)
+MAGE = Troop(TroopId.Mage, 2, 2, 4, 4, 2, 2, 8)
+ARCANIST = Troop(TroopId.Arcanist, 2, 3, 8, 8, 4, 4, 16)
+GRAND_MARSHAL = Troop(TroopId.GrandMarshal, 1, 3, 16, 16, 16, 16, 16)
 TROOPS = [
     WATCHMAN,
     GUARD,
@@ -67,50 +67,40 @@ def pack_squad(squad: Squad) -> PackedSquad:
     shift = 0x100
     p1 = (
         pack_troop(squad.t1_1)
-        + pack_troop(squad.t1_2) * shift**7
-        + pack_troop(squad.t1_3) * shift**14
-        + pack_troop(squad.t1_4) * shift**21
+        + pack_troop(squad.t1_2) * shift**2
+        + pack_troop(squad.t1_3) * shift**4
+        + pack_troop(squad.t1_4) * shift**6
+        + pack_troop(squad.t1_5) * shift**8
+        + pack_troop(squad.t1_6) * shift**10
+        + pack_troop(squad.t1_7) * shift**12
+        + pack_troop(squad.t1_8) * shift**14
+        + pack_troop(squad.t1_9) * shift**16
+        + pack_troop(squad.t1_10) * shift**18
+        + pack_troop(squad.t1_11) * shift**20
+        + pack_troop(squad.t1_12) * shift**22
+        + pack_troop(squad.t1_13) * shift**24
+        + pack_troop(squad.t1_14) * shift**26
+        + pack_troop(squad.t1_15) * shift**28
     )
+
     p2 = (
-        pack_troop(squad.t1_5)
-        + pack_troop(squad.t1_6) * shift**7
-        + pack_troop(squad.t1_7) * shift**14
-        + pack_troop(squad.t1_8) * shift**21
-    )
-    p3 = (
-        pack_troop(squad.t1_9)
-        + pack_troop(squad.t1_10) * shift**7
-        + pack_troop(squad.t1_11) * shift**14
-        + pack_troop(squad.t1_12) * shift**21
-    )
-    p4 = (
-        pack_troop(squad.t1_13)
-        + pack_troop(squad.t1_14) * shift**7
-        + pack_troop(squad.t1_15) * shift**14
-        + pack_troop(squad.t1_16) * shift**21
-    )
-
-    p5 = (
-        pack_troop(squad.t2_1)
-        + pack_troop(squad.t2_2) * shift**7
-        + pack_troop(squad.t2_3) * shift**14
-        + pack_troop(squad.t2_4) * shift**21
-    )
-
-    p6 = (
-        pack_troop(squad.t2_5)
-        + pack_troop(squad.t2_6) * shift**7
+        pack_troop(squad.t1_16)
+        + pack_troop(squad.t2_1) * shift**2
+        + pack_troop(squad.t2_2) * shift**4
+        + pack_troop(squad.t2_3) * shift**6
+        + pack_troop(squad.t2_4) * shift**8
+        + pack_troop(squad.t2_5) * shift**10
+        + pack_troop(squad.t2_6) * shift**12
         + pack_troop(squad.t2_7) * shift**14
-        + pack_troop(squad.t2_8) * shift**21
+        + pack_troop(squad.t2_8) * shift**16
+        + pack_troop(squad.t3_1) * shift**18
     )
 
-    p7 = pack_troop(squad.t3_1)
-
-    return PackedSquad(p1, p2, p3, p4, p5, p6, p7)
+    return PackedSquad(p1, p2)
 
 
 def pack_troop(troop: Troop) -> int:
-    return int.from_bytes(struct.pack("<7b", *troop), "little")
+    return int.from_bytes(struct.pack("<2b", *[troop.id, troop.vitality]), "little")
 
 
 @pytest.mark.asyncio
@@ -127,11 +117,24 @@ async def test_get_troop(s06_combat):
 
 
 @pytest.mark.asyncio
+async def test_pack_troop(library_combat_tests):
+    tx = await library_combat_tests.test_pack_troop(GUARD).invoke()
+    assert tx.result.packed == pack_troop(GUARD)
+
+    wounded = Troop(TroopId.Guard, 1, 2, 2, 2, 6, 1, 2)
+    tx = await library_combat_tests.test_pack_troop(wounded).invoke()
+    assert tx.result.packed == pack_troop(wounded)
+
+
+@pytest.mark.asyncio
 async def test_unpack_troop(library_combat_tests):
     for troop in TROOPS:
         packed = pack_troop(troop)
         tx = await library_combat_tests.test_unpack_troop(packed).invoke()
         assert troop == tx.result.t
+
+    tx = await library_combat_tests.test_unpack_troop(0).invoke()
+    assert tx.result.t == (0, 0, 0, 0, 0, 0, 0, 0)
 
 
 @pytest.mark.asyncio
@@ -156,19 +159,24 @@ async def test_pack_squad(library_combat_tests):
 
 
 @pytest.mark.asyncio
-async def test_get_troop_population(library_combat_tests):
-    squad = build_default_squad()
-    packed_squad = pack_squad(squad)
-    tx = await library_combat_tests.test_get_troop_population(packed_squad).invoke()
-    assert tx.result.population == 25
-
-
-@pytest.mark.asyncio
 async def test_unpack_squad(library_combat_tests):
     squad = build_default_squad()
     packed_squad = pack_squad(squad)
     tx = await library_combat_tests.test_unpack_squad(packed_squad).invoke()
     assert tx.result.s == squad
+
+    squad = build_partial_squad(13)
+    packed_squad = pack_squad(squad)
+    tx = await library_combat_tests.test_unpack_squad(packed_squad).invoke()
+    assert tx.result.s == squad
+
+
+@pytest.mark.asyncio
+async def test_get_troop_population(library_combat_tests):
+    squad = build_default_squad()
+    packed_squad = pack_squad(squad)
+    tx = await library_combat_tests.test_get_troop_population(packed_squad).invoke()
+    assert tx.result.population == 25
 
 
 @pytest.mark.asyncio
@@ -329,7 +337,7 @@ async def test_remove_troop_from_squad(library_combat_tests):
 
 @pytest.mark.asyncio
 async def test_find_first_free_troop_slot_in_squad(library_combat_tests):
-    troop_size = 7  # Cairo's Troop.SIZE, also the number of element in Troop
+    troop_size = 8  # Cairo's Troop.SIZE, also the number of elements in Troop
     for i in range(25):
         partial_squad = build_partial_squad(i)
         tier = 1
@@ -350,7 +358,7 @@ async def test_find_first_free_troop_slot_in_squad(library_combat_tests):
 @pytest.mark.asyncio
 async def test_update_squad_in_realm(s06_combat):
     realm_id = (1, 0)
-    packed_empty_squad = PackedSquad(0, 0, 0, 0, 0, 0, 0)
+    packed_empty_squad = PackedSquad(0, 0)
     default_squad = build_default_squad()
     packed_default_squad = pack_squad(default_squad)
 

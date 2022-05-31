@@ -22,6 +22,18 @@ func test_compute_squad_stats(s : Squad) -> (stats : SquadStats):
 end
 
 @view
+func test_pack_troop{range_check_ptr}(t : Troop) -> (packed : felt):
+    let (p) = COMBAT.pack_troop(t)
+    return (p)
+end
+
+@view
+func test_unpack_troop{range_check_ptr}(packed : felt) -> (t : Troop):
+    let (t) = COMBAT.unpack_troop(packed)
+    return (t)
+end
+
+@view
 func test_pack_squad{range_check_ptr}(s : Squad) -> (p : PackedSquad):
     let (p) = COMBAT.pack_squad(s)
     return (p)
@@ -31,12 +43,6 @@ end
 func test_unpack_squad{range_check_ptr}(p : PackedSquad) -> (s : Squad):
     let (s : Squad) = COMBAT.unpack_squad(p)
     return (s)
-end
-
-@view
-func test_unpack_troop{range_check_ptr}(packed : felt) -> (t : Troop):
-    let (t) = COMBAT.unpack_troop(packed)
-    return (t)
 end
 
 @view
@@ -70,9 +76,9 @@ func test_find_first_free_troop_slot_in_squad(s : Squad, tier : felt) -> (free_s
 end
 
 @view
-func test_add_troops_to_squad{range_check_ptr}(s : Squad, troop_ids_len : felt, troop_ids : felt*) -> (
-    squad : Squad
-):
+func test_add_troops_to_squad{range_check_ptr}(
+    s : Squad, troop_ids_len : felt, troop_ids : felt*
+) -> (squad : Squad):
     let (s : Squad) = COMBAT.add_troops_to_squad(s, troop_ids_len, troop_ids)
     return (s)
 end
