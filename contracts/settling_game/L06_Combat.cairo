@@ -51,7 +51,7 @@ from openzeppelin.upgrades.library import (
 ##########
 
 @event
-func CombatStart_1(
+func CombatStart_2(
     attacking_realm_id : Uint256,
     defending_realm_id : Uint256,
     attacking_squad : Squad,
@@ -60,7 +60,7 @@ func CombatStart_1(
 end
 
 @event
-func CombatOutcome_1(
+func CombatOutcome_2(
     attacking_realm_id : Uint256,
     defending_realm_id : Uint256,
     attacking_squad : Squad,
@@ -621,7 +621,7 @@ func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     # GET COMBAT DATA
     let (realms_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Realms
-    )    
+    )
     let (s_realms_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.S_Realms
     )
@@ -638,12 +638,8 @@ func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     end
 
     # CANNOT ATTACK YOUR OWN
-    let (attacking_realm_owner) = realms_IERC721.ownerOf(
-        s_realms_address, attacking_realm_id
-    )
-    let (defending_realm_owner) = realms_IERC721.ownerOf(
-        s_realms_address, defending_realm_id
-    )
+    let (attacking_realm_owner) = realms_IERC721.ownerOf(s_realms_address, attacking_realm_id)
+    let (defending_realm_owner) = realms_IERC721.ownerOf(s_realms_address, defending_realm_id)
 
     if attacking_realm_owner == defending_realm_owner:
         return (FALSE)
