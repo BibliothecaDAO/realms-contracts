@@ -634,6 +634,18 @@ func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
         return (FALSE)
     end
 
+    # CANNOT ATTACK YOUR OWN
+    let (attacking_realm_owner) = realms_IERC721.ownerOf(
+        realms_address, attacking_realm_id
+    )
+    let (defending_realm_owner) = realms_IERC721.ownerOf(
+        realms_address, defending_realm_id
+    )
+
+    if attacking_realm_owner == defending_realm_owner:
+        return (FALSE)
+    end
+
     return (TRUE)
 end
 
