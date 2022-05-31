@@ -55,7 +55,7 @@ func CombatOutcome_1(attacking_realm_id : Uint256, defending_realm_id : Uint256,
 end
 
 @event
-func CombatStep_1(
+func CombatStep_2(
     attacking_realm_id : Uint256,
     defending_realm_id : Uint256,
     attacking_squad : Squad,
@@ -66,7 +66,7 @@ func CombatStep_1(
 end
 
 @event
-func BuildTroops_1(
+func BuildTroops_2(
     squad : Squad, troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt
 ):
 end
@@ -175,7 +175,7 @@ func build_squad_from_troops_in_realm{
     let (squad) = COMBAT.add_troops_to_squad(current_squad, troop_ids_len, troop_ids)
     update_squad_in_realm(squad, realm_id, slot)
 
-    BuildTroops_1.emit(squad, troop_ids_len, troop_ids, realm_id, slot)
+    BuildTroops_2.emit(squad, troop_ids_len, troop_ids, realm_id, slot)
 
     return ()
 end
@@ -321,7 +321,7 @@ func attack{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     tempvar pedersen_ptr = pedersen_ptr
 
     let (d_after_attack) = hit_squad(d, hit_points)
-    CombatStep_1.emit(attacking_realm_id, defending_realm_id, a, d, attack_type, hit_points)
+    CombatStep_2.emit(attacking_realm_id, defending_realm_id, a, d, attack_type, hit_points)
     return (d_after_attack)
 end
 
@@ -442,6 +442,7 @@ func hit_troop{range_check_ptr}(t : Troop, hits : felt) -> (
     if kills_troop == 1:
         # t.vitality <= hits
         let ht = Troop(
+            id=t.id,
             type=t.type,
             tier=t.tier,
             agility=t.agility,
@@ -455,6 +456,7 @@ func hit_troop{range_check_ptr}(t : Troop, hits : felt) -> (
     else:
         # t.vitality > hits
         let ht = Troop(
+            id=t.id,
             type=t.type,
             tier=t.tier,
             agility=t.agility,
