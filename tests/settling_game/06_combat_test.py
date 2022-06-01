@@ -173,10 +173,13 @@ async def test_unpack_squad(library_combat_tests):
 
 @pytest.mark.asyncio
 async def test_get_troop_population(library_combat_tests):
-    squad = build_default_squad()
-    packed_squad = pack_squad(squad)
+    packed_squad = pack_squad(build_default_squad())
     tx = await library_combat_tests.test_get_troop_population(packed_squad).invoke()
     assert tx.result.population == 25
+
+    packed_squad = pack_squad(build_partial_squad(20))
+    tx = await library_combat_tests.test_get_troop_population(packed_squad).invoke()
+    assert tx.result.population == 20
 
 
 @pytest.mark.asyncio

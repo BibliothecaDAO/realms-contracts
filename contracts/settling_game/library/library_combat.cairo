@@ -269,14 +269,14 @@ namespace COMBAT:
         dw 4  # Knight Commander
         dw 4  # Scout
         dw 8  # Archer
-        dw 16 # Sniper
+        dw 16  # Sniper
         dw 1  # Scorpio
         dw 2  # Ballista
         dw 4  # Catapult
         dw 2  # Apprentice
         dw 4  # Mage
         dw 8  # Arcanist
-        dw 16 # Grand Marshal
+        dw 16  # Grand Marshal
 
         troop_attack_per_id:
         dw 1  # Watchman
@@ -284,22 +284,22 @@ namespace COMBAT:
         dw 4  # Guard Captain
         dw 4  # Squire
         dw 8  # Knight
-        dw 16 # Knight Commander
+        dw 16  # Knight Commander
         dw 3  # Scout
         dw 6  # Archer
-        dw 12 # Sniper
+        dw 12  # Sniper
         dw 4  # Scorpio
         dw 8  # Ballista
-        dw 16 # Catapult
+        dw 16  # Catapult
         dw 2  # Apprentice
         dw 4  # Mage
         dw 8  # Arcanist
-        dw 16 # Grand Marshal
+        dw 16  # Grand Marshal
 
         troop_defense_per_id:
         dw 3  # Watchman
         dw 6  # Guard
-        dw 12 # Guard Captain
+        dw 12  # Guard Captain
         dw 1  # Squire
         dw 2  # Knight
         dw 4  # Knight Commander
@@ -312,12 +312,12 @@ namespace COMBAT:
         dw 1  # Apprentice
         dw 2  # Mage
         dw 4  # Arcanist
-        dw 16 # Grand Marshal
+        dw 16  # Grand Marshal
 
         troop_vitality_per_id:
         dw 4  # Watchman
         dw 8  # Guard
-        dw 16 # Guard Captain
+        dw 16  # Guard Captain
         dw 1  # Squire
         dw 2  # Knight
         dw 4  # Knight Commander
@@ -326,11 +326,11 @@ namespace COMBAT:
         dw 4  # Sniper
         dw 3  # Scorpio
         dw 6  # Ballista
-        dw 12 # Catapult
+        dw 12  # Catapult
         dw 1  # Apprentice
         dw 2  # Mage
         dw 4  # Arcanist
-        dw 16 # Grand Marshal
+        dw 16  # Grand Marshal
 
         troop_wisdom_per_id:
         dw 1  # Watchman
@@ -338,7 +338,7 @@ namespace COMBAT:
         dw 4  # Guard Captain
         dw 3  # Squire
         dw 6  # Knight
-        dw 12 # Knight Commander
+        dw 12  # Knight Commander
         dw 1  # Scout
         dw 2  # Archer
         dw 4  # Sniper
@@ -347,8 +347,8 @@ namespace COMBAT:
         dw 4  # Catapult
         dw 4  # Apprentice
         dw 8  # Mage
-        dw 16 # Arcanist
-        dw 16 # Grand Marshal
+        dw 16  # Arcanist
+        dw 16  # Grand Marshal
     end
 
     func get_troop_internal{range_check_ptr}(troop_id : felt) -> (t : Troop):
@@ -357,9 +357,11 @@ namespace COMBAT:
             assert_lt(troop_id, TroopId.SIZE)
         end
 
-        let (type, tier, agility, attack, defense, vitality, wisdom) = get_troop_properties(troop_id)
+        let (type, tier, agility, attack, defense, vitality, wisdom) = get_troop_properties(
+            troop_id
+        )
         return (
-            Troop(id=troop_id, type=type, tier=tier, agility=agility, attack=attack, defense=defense, vitality=vitality, wisdom=wisdom)
+            Troop(id=troop_id, type=type, tier=tier, agility=agility, attack=attack, defense=defense, vitality=vitality, wisdom=wisdom),
         )
     end
 
@@ -629,14 +631,83 @@ namespace COMBAT:
         alloc_locals
 
         let (s : Squad) = unpack_squad(squad)
+        tempvar p = 0
+        if s.t1_1.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t1_2.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t1_3.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t1_4.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t1_5.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t1_6.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t1_7.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t1_8.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t1_9.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t1_10.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t1_11.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t1_12.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t1_13.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t1_14.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t1_15.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t1_16.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t2_1.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t2_2.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t2_3.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t2_4.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t2_5.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t2_6.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t2_7.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t2_8.id != 0:
+            tempvar p = p + 1
+        end
+        if s.t3_1.id != 0:
+            tempvar p = p + 1
+        end
 
-        let population = s.t1_1.tier + s.t1_2.tier + s.t1_3.tier + s.t1_4.tier +
-            s.t1_5.tier + s.t1_6.tier + s.t1_7.tier + s.t1_8.tier + s.t1_9.tier +
-            s.t1_10.tier + s.t1_11.tier + s.t1_12.tier + s.t1_13.tier + s.t1_14.tier +
-            s.t1_15.tier + s.t1_16.tier + (s.t2_1.tier / 2) + (s.t2_2.tier / 2) + (s.t2_3.tier / 2) +
-            (s.t2_4.tier / 2) + (s.t2_5.tier / 2) + (s.t2_6.tier / 2) + (s.t2_7.tier / 2) + (s.t2_8.tier / 2) +
-            (s.t3_1.tier / 3)
-
-        return (population=population)
+        return (p)
     end
 end
