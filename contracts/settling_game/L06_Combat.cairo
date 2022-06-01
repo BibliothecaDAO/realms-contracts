@@ -217,7 +217,7 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     let (defender : Squad) = COMBAT.unpack_squad(defending_realm_data.defending_squad)
 
     # EMIT FIRST
-    CombatStart_1.emit(attacking_realm_id, defending_realm_id, attacker, defender)
+    CombatStart_2.emit(attacking_realm_id, defending_realm_id, attacker, defender)
 
     let (attacker_end, defender_end, combat_outcome) = run_combat_loop(
         attacking_realm_id, defending_realm_id, attacker, defender, attack_type
@@ -258,7 +258,7 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
         tempvar range_check_ptr = range_check_ptr
     end
 
-    CombatOutcome_1.emit(
+    CombatOutcome_2.emit(
         attacking_realm_id,
         defending_realm_id,
         attacker_after_combat,

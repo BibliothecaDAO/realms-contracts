@@ -111,16 +111,16 @@ func calculate_troop_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     alloc_locals
 
     # SUM TOTAL TROOP POPULATION
-    let (controller) = MODULE_controller_address()
-    let (combat_logic) = IModuleController.get_module_address(controller, ModuleIds.L06_Combat)
-    let (realm_combat_data : RealmCombatData) = IL06_Combat.get_realm_combat_data(
-        combat_logic, token_id
-    )
+    # let (controller) = MODULE_controller_address()
+    # let (combat_logic) = IModuleController.get_module_address(controller, ModuleIds.L06_Combat)
+    # let (realm_combat_data : RealmCombatData) = IL06_Combat.get_realm_combat_data(
+    #     combat_logic, token_id
+    # )
 
-    let (attacking_population) = COMBAT.get_troop_population(realm_combat_data.attacking_squad)
-    let (defending_population) = COMBAT.get_troop_population(realm_combat_data.defending_squad)
+    # let (attacking_population) = COMBAT.get_troop_population(realm_combat_data.attacking_squad)
+    # let (defending_population) = COMBAT.get_troop_population(realm_combat_data.defending_squad)
 
-    return (attacking_population + defending_population)
+    return (0)
 end
 
 @view
