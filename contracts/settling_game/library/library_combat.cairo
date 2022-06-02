@@ -385,14 +385,20 @@ namespace COMBAT:
         return (updated)
     end
 
-    func remove_troop_from_squad(troop_idx : felt, s : Squad) -> (updated : Squad):
+    func remove_troop_from_squad{range_check_ptr}(troop_idx : felt, s : Squad) -> (updated : Squad):
         alloc_locals
+
+        assert_lt(troop_idx, Squad.SIZE / Troop.SIZE)
 
         let (sarr_len, sarr) = squad_to_array(s)
         let (a) = alloc()
         memcpy(a, sarr, troop_idx * Troop.SIZE)
         memset(a + troop_idx * Troop.SIZE, 0, Troop.SIZE)
-        memcpy(a + (troop_idx + 1) * Troop.SIZE, sarr, Squad.SIZE - (troop_idx + 1) * Troop.SIZE)
+        memcpy(
+            a + (troop_idx + 1) * Troop.SIZE,
+            sarr + (troop_idx + 1) * Troop.SIZE,
+            Squad.SIZE - (troop_idx + 1) * Troop.SIZE
+        )
         let (updated) = array_to_squad(sarr_len, a)
 
         return (updated)
@@ -551,7 +557,7 @@ namespace COMBAT:
         let (len, t3_1) = troop_to_array(s.t3_1)
         memcpy(a + Troop.SIZE * 24, t3_1, len)
 
-        return (Troop.SIZE * 25, a)
+        return (Squad.SIZE, a)
     end
 
     func troop_to_array(t : Troop) -> (a_len : felt, a : felt*):
@@ -625,6 +631,19 @@ namespace COMBAT:
         let (updated : Squad) = add_troop_to_squad(troop, current)
 
         return add_troops_to_squad(updated, troop_ids_len - 1, troop_ids + 1)
+    end
+
+    func remove_troops_from_squad{range_check_ptr}(
+        current : Squad, troop_idxs_len : felt, troop_idxs : felt*
+    ) -> (squad : Squad):
+        alloc_locals
+
+        if troop_idxs_len == 0:
+            return (current)
+        end
+
+        let (updated : Squad) = remove_troop_from_squad([troop_idxs], current)
+        return remove_troops_from_squad(updated, troop_idxs_len - 1, troop_idxs + 1)
     end
 
     func get_troop_population{range_check_ptr}(squad : PackedSquad) -> (population : felt):

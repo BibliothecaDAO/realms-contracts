@@ -201,12 +201,9 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
 ) -> (combat_outcome : felt):
     alloc_locals
 
-    let (controller) = MODULE_controller_address()
-    let (caller) = get_caller_address()
-
     with_attr error_message("COMBAT: Cannot initiate combat"):
-        let (can_attack) = Realm_can_be_attacked(attacking_realm_id, defending_realm_id)
         MODULE_ERC721_owner_check(attacking_realm_id, ExternalContractIds.S_Realms)
+        let (can_attack) = Realm_can_be_attacked(attacking_realm_id, defending_realm_id)
         assert can_attack = TRUE
     end
 
@@ -217,7 +214,7 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     let (defender : Squad) = COMBAT.unpack_squad(defending_realm_data.defending_squad)
 
     # EMIT FIRST
-    CombatStart_1.emit(attacking_realm_id, defending_realm_id, attacker, defender)
+    CombatStart_2.emit(attacking_realm_id, defending_realm_id, attacker, defender)
 
     let (attacker_end, defender_end, combat_outcome) = run_combat_loop(
         attacking_realm_id, defending_realm_id, attacker, defender, attack_type
@@ -246,6 +243,7 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
 
     # # pillaging only if attacker wins
     if combat_outcome == COMBAT_OUTCOME_ATTACKER_WINS:
+        let (controller) = MODULE_controller_address()
         let (resources_logic_address) = IModuleController.get_module_address(
             controller, ModuleIds.L02_Resources
         )
@@ -253,12 +251,14 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
         IL02_Resources.pillage_resources(resources_logic_address, defending_realm_id, caller)
         tempvar syscall_ptr = syscall_ptr
         tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
     else:
         tempvar syscall_ptr = syscall_ptr
         tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
     end
 
-    CombatOutcome_1.emit(
+    CombatOutcome_2.emit(
         attacking_realm_id,
         defending_realm_id,
         attacker_after_combat,
@@ -267,6 +267,29 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     )
 
     return (combat_outcome)
+end
+
+# remove one or more troops from a particular squad
+# troops to be removed are identified the their index in a Squad (0-based indexing)
+@external
+func remove_troops_from_squad_in_realm{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+    troop_idxs_len : felt, troop_idxs : felt*, realm_id : Uint256, slot : felt):
+    alloc_locals
+
+    MODULE_ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
+
+    let (realm_combat_data : RealmCombatData) = get_realm_combat_data(realm_id)
+
+    if slot == ATTACKING_SQUAD_SLOT:
+        let (squad) = COMBAT.unpack_squad(realm_combat_data.attacking_squad)
+    else:
+        let (squad) = COMBAT.unpack_squad(realm_combat_data.defending_squad)
+    end
+
+    let (updated_squad) = COMBAT.remove_troops_from_squad(squad, troop_idxs_len, troop_idxs)
+    update_squad_in_realm(updated_squad, realm_id, slot)
+
+    return()
 end
 
 ############
@@ -511,19 +534,11 @@ func load_troop_costs{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     return load_troop_costs(troop_ids_len - 1, troop_ids + 1, costs_idx + 1, costs)
 end
 
-############
-# EXTERNAL #
-############
-
 # can be used to add, overwrite or remove a Squad from a Realm
-@external
 func update_squad_in_realm{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     s : Squad, realm_id : Uint256, slot : felt
 ):
     alloc_locals
-
-    let (caller) = get_caller_address()
-    let (controller) = MODULE_controller_address()
 
     MODULE_ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
 
