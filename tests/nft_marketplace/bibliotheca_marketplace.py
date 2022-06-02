@@ -83,6 +83,17 @@ async def test_update_currency_token(marketplace_factory):
     currency_address = (await ctx.realms.get_currency_token().call()).result.currency_token_address
     assert currency_address == ctx.lords.contract_address
 
+#
+# Test trade bitmapping
+#
+
+# @pytest.mark.asyncio
+# async def test_trade_bitmapping(marketplace_factory):
+#     ctx = marketplace_factory
+#     testing = await ctx.fetch_trade_data() #.invoke(10,10,10)
+#     print("hellO" + testing.result)
+
+#     return ctx
 
 # #
 # # Open Trade with user
