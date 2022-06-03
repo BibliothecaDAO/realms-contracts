@@ -133,7 +133,7 @@ def set_realm_data(realm_token_id, network):
 @click.command()
 @click.option("--address", default="", help="Account address in hex format 0x...")
 @click.option("--network", default="goerli")
-def check_realms(address, network):
+def check_realms(address, network) -> str:
     """
     Check Realms balance
     """
@@ -149,7 +149,7 @@ def check_realms(address, network):
         function="balanceOf",
         arguments=[address],
     )
-    print(out)
+    return out
 
 
 @click.command()
@@ -228,24 +228,29 @@ def get_realm_data(realm_token_id, network):
     print(out)
 
 @click.command()
+@click.option("--address", default="", help="Account address in hex format 0x...")
 @click.option("--network", default="goerli")
-def get_owned(network):
+def get_owned(address, network):
     """
     Check settled Realms balance
     """
     config = Config(nile_network=network)
+
+    # out = check_realms(address, network)
     out = wrapped_call(
         network=config.nile_network,
         contract_alias="proxy_realms",
         function="balanceOf",
-        arguments=[int(config.USER_ADDRESS, 16)],
+        arguments=[int(address or config.USER_ADDRESS, 16)],
     )
     n_realms, _ = out.split(" ")
 
     print(f"You own {n_realms} unsettled realms.")
-    
+    print("Quering which unsettled realms you own.")
+
+    # prepare for multi-call
     calldata = [
-        [int(config.USER_ADDRESS, 16), i, 0]
+        [int(address or config.USER_ADDRESS, 16), i, 0]
         for i in range(int(n_realms))
     ]
 
@@ -257,4 +262,34 @@ def get_owned(network):
     )
 
     for realm_id in stdout:
-        print(realm_id.strip(" 0\n"), end=", ")
+        print(realm_id.strip(" 0\n"), end=",")
+
+    #
+    # s_realms
+    #
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_s_realms",
+        function="balanceOf",
+        arguments=[int(address or config.USER_ADDRESS, 16)],
+    )
+    n_realms, _ = out.split(" ")
+
+    print(f"You own {n_realms} settled realms.")
+
+    # prepare for multi-call
+    calldata = [
+        [int(address or config.USER_ADDRESS, 16), i, 0]
+        for i in range(int(n_realms))
+    ]
+
+    stdout = call_multi(
+        network=config.nile_network,
+        contract_alias="proxy_s_realms",
+        function="tokenOfOwnerByIndex",
+        calldata=calldata,
+    )
+
+    for realm_id in stdout:
+        print(realm_id.strip(" 0\n"), end=",")

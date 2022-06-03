@@ -28,5 +28,5 @@ def parse_multi_input(cli_input) -> List:
         return list(range(int(low), int(high)+1))
     if "," in cli_input:
         words = cli_input.split(",")
-        return words
+        return [int(word) for word in words]
     return [cli_input]

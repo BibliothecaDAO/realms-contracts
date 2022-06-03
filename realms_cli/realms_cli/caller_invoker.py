@@ -7,7 +7,7 @@ from nile import deployments
 from nile.core.call_or_invoke import call_or_invoke
 
 def send_multi(self, to, method, calldata, nonce=None):
-    """Execute a tx going through an Account contract."""
+    """Execute a tx going through an Account contract. Inspired from openzeppelin."""
     target_address, _ = next(deployments.load(to, self.network)) or to
     calldata = [[int(x) for x in c] for c in calldata]
 

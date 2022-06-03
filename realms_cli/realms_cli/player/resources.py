@@ -7,7 +7,7 @@ from ecdsa import SigningKey, SECP256k1
 
 from realms_cli.caller_invoker import wrapped_call, wrapped_send
 from realms_cli.config import Config
-from realms_cli.utils import print_over_colums
+from realms_cli.utils import print_over_colums, parse_multi_input
 
 @click.command()
 @click.option("--address", default="", help="Account address in hex format 0x...")
@@ -58,16 +58,19 @@ def claim_resources(realm_token_id, network):
     Claim available resources & lords
     """
     config = Config(nile_network=network)
-    print(config.L02_RESOURCES_ADDRESS)
+
+    realm_token_ids = parse_multi_input(realm_token_id)
+    calldata = [
+        [id, 0]
+        for id in realm_token_ids
+    ]
+
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_L02_Resources",
         function="claim_resources",
-        arguments=[
-            realm_token_id,   # uint 1
-            0,                # uint 2
-        ],
+        arguments=calldata
     )
 
 @click.command()
