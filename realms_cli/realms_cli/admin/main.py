@@ -62,3 +62,21 @@ def upgrade_module(module_name, network):
     )
 
     print('Have patience, you might need to wait 30s before invoking this')
+
+@click.command()
+@click.argument("to_address", nargs=1)
+@click.argument("token_id", nargs=1)
+@click.option("--network", default="goerli")
+def transfer_to(to_address, network, token_id):
+    """
+    Transfer a (minted) realm from the admin account to a target account.
+    """
+    config = Config(nile_network=network)
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="realms",
+        function="transferFrom",
+        arguments=[int(config.ADMIN_ADDRESS, 16), int(to_address, 16), token_id],
+    )
