@@ -9,6 +9,7 @@ from realms_cli.caller_invoker import wrapped_call, wrapped_send
 from realms_cli.config import Config
 from realms_cli.utils import print_over_colums, parse_multi_input
 
+
 @click.command()
 @click.option("--address", default="", help="Account address in hex format 0x...")
 @click.option("--network", default="goerli")
@@ -45,7 +46,8 @@ def check_resources(address, network):
     out = out.split(" ")
     pretty_out = []
     for i, resource in enumerate(config.RESOURCES):
-        pretty_out.append(f"{resource} : {int(out[i*2+1], 16) / 1000000000000000000}")
+        pretty_out.append(
+            f"{resource} : {int(out[i*2+1], 16) / 1000000000000000000}")
 
     print_over_colums(pretty_out)
 
@@ -73,6 +75,7 @@ def claim_resources(realm_token_id, network):
         arguments=calldata
     )
 
+
 @click.command()
 @click.argument("realm_token_id", nargs=1)
 @click.option("--network", default="goerli")
@@ -92,6 +95,7 @@ def days_available(realm_token_id, network):
         ],
     )
     print(out)
+
 
 @click.command()
 @click.argument("realm_token_id", nargs=1)
@@ -115,6 +119,7 @@ def upgrade_resource(realm_token_id, resource_id, network):
         ],
     )
 
+
 @click.command()
 @click.option("--network", default="goerli")
 def approve_resource_module(network):
@@ -134,6 +139,7 @@ def approve_resource_module(network):
         ],
     )
 
+
 @click.command()
 @click.argument("resource_id", nargs=1)
 @click.option("--network", default="goerli")
@@ -148,5 +154,26 @@ def get_resource_upgrade_cost(resource_id, network):
         contract_alias="proxy_L02_Resources",
         function="get_resource_upgrade_cost",
         arguments=[resource_id],
+    )
+    print(out)
+
+
+@click.command()
+@click.argument("realm_token_id", nargs=1)
+@click.option("--network", default="goerli")
+def get_vault(realm_token_id, network):
+    """
+    Check resource costs
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_L02_Resources",
+        function="get_all_vault_raidable",
+        arguments=[
+            realm_token_id,
+            0,
+        ],
     )
     print(out)

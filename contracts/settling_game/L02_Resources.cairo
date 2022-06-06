@@ -226,9 +226,9 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # LORDS MINT
     let (tribute) = IL04_Calculator.calculate_tribute(calculator_address)
-    
+
     let lords_available = Uint256(total_days * tribute * 10 ** 18, 0)
-    
+
     # FETCH OWNER
     let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
 
@@ -616,6 +616,54 @@ func get_resource_upgrade_cost{range_check_ptr, syscall_ptr : felt*, pedersen_pt
 ) -> (cost : Cost):
     let (cost) = resource_upgrade_cost.read(resource_id)
     return (cost)
+end
+
+@view
+func get_all_vault_raidable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
+) -> (user_mint_len : felt, user_mint : Uint256*):
+    alloc_locals
+    let (caller) = get_caller_address()
+    let (controller) = MODULE_controller_address()
+
+    # CONTRACT ADDRESSES
+    let (realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Realms
+    )
+
+    # FETCH REALM DATA
+    let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
+
+    # CALC VAULT DAYS
+    let (total_vault_days, vault_remainder) = vault_days_accrued(token_id)
+
+    # GET OUTPUT FOR EACH RESOURCE
+    let (r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output,
+        r_7_output) = get_all_resource_output(
+        token_id,
+        realms_data.resource_1,
+        realms_data.resource_2,
+        realms_data.resource_3,
+        realms_data.resource_4,
+        realms_data.resource_5,
+        realms_data.resource_6,
+        realms_data.resource_7,
+    )
+
+    # USER CLAIM
+    let (r_1_user) = calculate_total_claimable(total_vault_days, PILLAGE_AMOUNT, r_1_output)
+    let (r_2_user) = calculate_total_claimable(total_vault_days, PILLAGE_AMOUNT, r_2_output)
+    let (r_3_user) = calculate_total_claimable(total_vault_days, PILLAGE_AMOUNT, r_3_output)
+    let (r_4_user) = calculate_total_claimable(total_vault_days, PILLAGE_AMOUNT, r_4_output)
+    let (r_5_user) = calculate_total_claimable(total_vault_days, PILLAGE_AMOUNT, r_5_output)
+    let (r_6_user) = calculate_total_claimable(total_vault_days, PILLAGE_AMOUNT, r_6_output)
+    let (r_7_user) = calculate_total_claimable(total_vault_days, PILLAGE_AMOUNT, r_7_output)
+
+    let (resource_mint_len : felt, resource_mint : Uint256*) = get_mintable_resources(
+        realms_data, r_1_user, r_2_user, r_3_user, r_4_user, r_5_user, r_6_user, r_7_user
+    )
+
+    return (realms_data.resource_number, resource_mint)
 end
 
 ############
