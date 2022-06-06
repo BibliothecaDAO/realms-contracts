@@ -5,7 +5,7 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le
+from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le, assert_nn
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
@@ -233,7 +233,13 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     # LORDS MINT
     let (tribute) = IL04_Calculator.calculate_tribute(calculator_address)
 
-    let lords_available = Uint256(total_days * tribute * 10 ** 18, 0)
+    let lords_bn = total_days * tribute * 10 ** 18
+
+    with_attr error_message("RESOURCES: lords value greater than 0"):
+        assert_nn(lords_bn)
+    end
+
+    let lords_available = Uint256(lords_bn, 0)
 
     # FETCH OWNER
     let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
@@ -594,13 +600,20 @@ func get_all_resource_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     let (r_6_user) = calculate_total_claimable(days, user_mint_rel_perc, r_6_output)
     let (r_7_user) = calculate_total_claimable(days, user_mint_rel_perc, r_7_output)
 
-    let (resource_mint_len : felt, resource_mint : Uint256*) = get_mintable_resources(
+    let (_, resource_mint : Uint256*) = get_mintable_resources(
         realms_data, r_1_user, r_2_user, r_3_user, r_4_user, r_5_user, r_6_user, r_7_user
     )
 
     # LORDS MINT
     let (tribute) = IL04_Calculator.calculate_tribute(calculator_address)
-    let lords_available = Uint256(total_days * tribute * 10 ** 18, 0)
+
+    let lords_bn = total_days * tribute * 10 ** 18
+
+    with_attr error_message("RESOURCES: lords value greater than 0"):
+        assert_nn(lords_bn)
+    end
+
+    let lords_available = Uint256(lords_bn, 0)
 
     return (realms_data.resource_number, resource_mint, lords_available)
 end
@@ -664,7 +677,7 @@ func get_all_vault_raidable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ra
     let (r_6_user) = calculate_total_claimable(total_vault_days, PILLAGE_AMOUNT, r_6_output)
     let (r_7_user) = calculate_total_claimable(total_vault_days, PILLAGE_AMOUNT, r_7_output)
 
-    let (resource_mint_len : felt, resource_mint : Uint256*) = get_mintable_resources(
+    let (_, resource_mint : Uint256*) = get_mintable_resources(
         realms_data, r_1_user, r_2_user, r_3_user, r_4_user, r_5_user, r_6_user, r_7_user
     )
 
@@ -701,9 +714,16 @@ func calculate_total_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     alloc_locals
     # days * current tax * output
     # we multiply by tax before dividing by 100
+
     let (total_work_generated, _) = unsigned_div_rem(days * tax * output, 100)
 
-    return (Uint256(total_work_generated * 10 ** 18, 0))
+    let work_bn = total_work_generated * 10 ** 18
+
+    with_attr error_message("RESOURCES: work bn greater than"):
+        assert_nn(work_bn)
+    end
+
+    return (Uint256(work_bn, 0))
 end
 
 ###########
