@@ -13,7 +13,11 @@ from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.uint256 import Uint256
 from starkware.starknet.common.syscalls import get_block_timestamp, get_caller_address, get_tx_info
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
-from contracts.settling_game.interfaces.imodules import IModuleController, IL02_Resources, IL04_Calculator
+from contracts.settling_game.interfaces.imodules import (
+    IModuleController,
+    IL02_Resources,
+    IL04_Calculator,
+)
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library.library_combat import COMBAT
@@ -153,7 +157,6 @@ func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
 end
 
 # TODO: write documentation
-# TODO: take a Realm's wall into consideration when attacking a Realm
 
 ############
 # EXTERNAL #
@@ -319,8 +322,12 @@ func inflict_wall_defense{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : H
     alloc_locals
 
     let (controller : felt) = MODULE_controller_address()
-    let (calculator_addr : felt) = IModuleController.get_module_address(controller, ModuleIds.L04_Calculator)
-    let (defending_population : felt) = IL04_Calculator.calculate_population(calculator_addr, defending_realm_id)
+    let (calculator_addr : felt) = IModuleController.get_module_address(
+        controller, ModuleIds.L04_Calculator
+    )
+    let (defending_population : felt) = IL04_Calculator.calculate_population(
+        calculator_addr, defending_realm_id
+    )
 
     let (q, _) = unsigned_div_rem(defending_population, POPULATION_PER_HIT_POINT)
     let (is_in_range) = is_le(q, MAX_WALL_DEFENSE_HIT_POINTS)
