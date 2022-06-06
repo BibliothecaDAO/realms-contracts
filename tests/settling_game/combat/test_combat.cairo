@@ -3,7 +3,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.uint256 import Uint256, uint256_add
 from starkware.cairo.common.math_cmp import is_nn, is_le
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
-from lib.cairo_math_64x61.contracts.Math64x61 import Math64x61_div
+# from lib.cairo_math_64x61.contracts.Math64x61 import Math64x61_div
 from contracts.settling_game.utils.game_structs import BuildingsFood, BuildingsPopulation, BuildingsCulture
 from contracts.settling_game.interfaces.imodules import IArbiter, IL06_Combat
 from contracts.settling_game.utils.game_structs import RealmBuildings, RealmCombatData, Cost, Squad

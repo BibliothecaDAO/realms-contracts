@@ -115,3 +115,25 @@ def run(nre):
             strhex_as_strfelt(config.ADMIN_ADDRESS), # contract_owner
         ],
     )
+
+    logged_deploy(
+        nre,
+        "Crypts_ERC721_Mintable",
+        alias="crypts",
+        arguments=[
+            "1234",  # name
+            "1234",  # ticker
+            strhex_as_strfelt(config.ADMIN_ADDRESS), # contract_owner
+        ],
+    )
+
+    logged_deploy(
+        nre,
+        "S_Crypts_ERC721_Mintable",
+        alias="s_crypts",
+        arguments=[
+            "12345",  # name
+            "12345",  # ticker
+            strhex_as_strfelt(config.ADMIN_ADDRESS), # contract_owner
+        ],
+    )

@@ -189,3 +189,11 @@ def run(nre):
         function="initializer",
         arguments=[strhex_as_strfelt(config.CONTROLLER_ADDRESS), strhex_as_strfelt(config.XOROSHIRO_ADDRESS), strhex_as_strfelt(config.ADMIN_ADDRESS)],
     )        
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="proxy_L07_Crypts",
+        function="initializer",
+        arguments=[strhex_as_strfelt(config.CONTROLLER_ADDRESS), strhex_as_strfelt(config.ADMIN_ADDRESS)],
+    )        

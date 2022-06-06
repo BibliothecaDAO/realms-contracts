@@ -317,3 +317,19 @@ Proxy contracts have some quirks which you must understand before playing with t
 ```
 
 </details>
+
+---
+# Common ERrors
+
+<strong><pre>{"code": "StarknetErrorCode.UNINITIALIZED_CONTRACT", "message": "Contract with address 0x6352aa8d59cb656526162e3fd5017bcc02a8f6f1036748cb7221a8f30e89770 is not deployed."}.</pre></strong>
+
+First - wait 30 seconds and try again as the deployment doesn't happen immediately. 
+
+If you're still getting this error, it likely means that your goerli.deployments.txt doesn't have account-1 (user account) or is appending the account to account-2. 
+
+Restore your goerli.deployments.txt to its original state (use `main` branch as source of truth). Next, delete the line with account-1 (and account-2 if it exists) and re-run `nile setup STARKNET_PRIVATE_KEY --network goerli` to re-add add your private key to goerli.deployments.txt.
+
+<strong><pre>`    int(config.USER_ADDRESS, 16),  # felt
+TypeError: int() can't convert non-string with explicit base`</pre></strong>
+
+This error means that your user address (account-1) in the file goerli.deployments.txt is not being read correctly. Make sure your account-1 line is on its own line and contains the correct address. In some cases, the account-1 will be appended to an existing line so move it to its own line.

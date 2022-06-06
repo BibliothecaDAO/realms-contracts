@@ -89,7 +89,7 @@ async def starknet() -> Starknet:
     starknet = await Starknet.empty()
     return starknet
 
-async def _build_copyable_deployment(compiled_proxy):
+async def _build_copyable_deployment():
     starknet = await Starknet.empty()
 
     defs = SimpleNamespace(
@@ -111,7 +111,7 @@ async def _build_copyable_deployment(compiled_proxy):
         }
     )
 
-    lords = await proxy_builder(compile("contracts/settling_game/proxy/PROXY_Logic.cairo"), starknet, signers["admin"], accounts.admin, "contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo", [
+    lords = await proxy_builder(compiled_proxy, starknet, signers["admin"], accounts.admin.contract_address, "contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo", [
         str_to_felt("Lords"),
         str_to_felt("LRD"),
         18,
@@ -120,7 +120,7 @@ async def _build_copyable_deployment(compiled_proxy):
         accounts.admin.contract_address,
     ])
 
-    resources = await proxy_builder(compile("contracts/settling_game/proxy/PROXY_Logic.cairo"), starknet, signers["admin"], accounts.admin, "contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo", [
+    resources = await proxy_builder(compiled_proxy, starknet, signers["admin"], accounts.admin.contract_address, "contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo", [
         1234,
          accounts.admin.contract_address
     ])
@@ -145,11 +145,11 @@ async def _build_copyable_deployment(compiled_proxy):
 
 
 @pytest.fixture(scope="session")
-async def copyable_deployment(request, compiled_proxy):
+async def copyable_deployment(request):
     CACHE_KEY = "deployment"
     val = request.config.cache.get(CACHE_KEY, None)
     if val is None:
-        val = await _build_copyable_deployment(compiled_proxy)
+        val = await _build_copyable_deployment()
         res = dill.dumps(val).decode("cp437")
         request.config.cache.set(CACHE_KEY, res)
     else:
@@ -590,142 +590,3 @@ async def game_factory(token_factory, compiled_proxy):
         crypts_resources_logic
     )
     
-@pytest.fixture(scope='session')
-async def resource_factory(token_factory, compiled_proxy):
-    (
-        starknet,
-        admin_key,
-        admin_account,
-        treasury_account,
-        accounts,
-        signers,
-        lords,
-        realms,
-        resources,
-        s_realms,
-    ) = token_factory
-
-    arbiter = await deploy_contract(starknet, "contracts/settling_game/Arbiter.cairo", [admin_account.contract_address])
-    controller = await deploy_contract(starknet, "contracts/settling_game/ModuleController.cairo", [
-            arbiter.contract_address,
-            lords.contract_address,
-            resources.contract_address,
-            realms.contract_address,
-            treasury_account.contract_address,
-            s_realms.contract_address
-        ])
-
-    print('batch set')
-    await admin_key.send_transaction(
-        account=admin_account,
-        to=arbiter.contract_address,
-        selector_name='set_address_of_controller',
-        calldata=[controller.contract_address],
-    )
-
-    settling_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L01_Settling.cairo", [
-        controller.contract_address, admin_account.contract_address])
-
-    resources_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L02_Resources.cairo", [
-        controller.contract_address, admin_account.contract_address])
-
-    # buildings_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L03_Buildings.cairo", [
-    #     controller.contract_address, admin_account.contract_address])
-
-    calculator_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L04_Calculator.cairo", [
-        controller.contract_address, admin_account.contract_address])
-
-    wonders_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L05_Wonders.cairo", [
-        controller.contract_address, admin_account.contract_address])
-
-    # xoroshiro128 = await starknet.deploy(
-    #     source="contracts/utils/xoroshiro128_starstar.cairo",
-    #     constructor_calldata=[controller.contract_address],
-    # )
-
-    # combat_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L06_Combat.cairo", [
-    #     controller.contract_address,
-    #     xoroshiro128.contract_address, admin_account.contract_address])
-
-    # The admin key controls the arbiter. Use it to have the arbiter
-    # set the module deployment addresses in the controller.
-    await admin_key.send_transaction(
-        account=admin_account,
-        to=arbiter.contract_address,
-        selector_name='batch_set_controller_addresses',
-        calldata=[
-            settling_logic.contract_address,
-            resources_logic.contract_address,
-            123,
-            calculator_logic.contract_address,
-            wonders_logic.contract_address,
-            123,
-        ],
-    )
-
-    # set module access witin S_Realm contract
-    await admin_key.send_transaction(
-        account=admin_account,
-        to=s_realms.contract_address,
-        selector_name='Set_module_access',
-        calldata=[settling_logic.contract_address],
-    )
-
-    # set module access witin resources contract
-    await admin_key.send_transaction(
-        account=admin_account,
-        to=resources.contract_address,
-        selector_name='Set_module_access',
-        calldata=[resources_logic.contract_address],
-    )
-
-    return (
-        admin_account,
-        treasury_account,
-        starknet,
-        accounts,
-        signers,
-        arbiter,
-        controller,
-        settling_logic,
-        realms,
-        resources,
-        lords,
-        resources_logic,
-        s_realms,
-        calculator_logic
-    )
-        
-@pytest.fixture(scope='session')
-async def exchange_token_factory(account_factory, compiled_proxy):
-    (starknet, accounts, signers) = account_factory
-    admin_key = signers[0]
-    admin_account = accounts[0]
-    treasury_account = accounts[1]
-
-    set_block_timestamp(starknet.state, round(time.time()))
-
-    proxy_lords = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo", [
-        str_to_felt("Lords"),
-        str_to_felt("LRD"),
-        18,
-        *uint(initial_supply),
-        admin_account.contract_address,
-        admin_account.contract_address,
-    ])
-
-    proxy_resources = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo", [
-        1234,
-        admin_account.contract_address
-    ])
-
-    return (
-        starknet,
-        admin_key,
-        admin_account,
-        treasury_account,
-        accounts,
-        signers,
-        proxy_lords,
-        proxy_resources
-    )
