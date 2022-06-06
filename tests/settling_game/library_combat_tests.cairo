@@ -10,7 +10,9 @@ func test_add_troop_to_squad(t : Troop, s : Squad) -> (updated : Squad):
 end
 
 @view
-func test_remove_troop_from_squad{range_check_ptr}(troop_idx : felt, s : Squad) -> (updated : Squad):
+func test_remove_troop_from_squad{range_check_ptr}(troop_idx : felt, s : Squad) -> (
+    updated : Squad
+):
     let (updated) = COMBAT.remove_troop_from_squad(troop_idx, s)
     return (updated)
 end
@@ -64,12 +66,6 @@ func test_array_to_squad{range_check_ptr}(a_len : felt, a : felt*) -> (s : Squad
 end
 
 @view
-func test_array_to_troop(a_len : felt, a : felt*) -> (t : Troop):
-    let (troop) = COMBAT.array_to_troop(a_len, a)
-    return (troop)
-end
-
-@view
 func test_find_first_free_troop_slot_in_squad(s : Squad, tier : felt) -> (free_slot_index : felt):
     let (idx) = COMBAT.find_first_free_troop_slot_in_squad(s, tier)
     return (idx)
@@ -84,7 +80,9 @@ func test_add_troops_to_squad{range_check_ptr}(
 end
 
 @view
-func test_remove_troops_from_squad{range_check_ptr}(s : Squad, troop_idxs_len : felt, troop_idxs : felt*) -> (squad : Squad):
+func test_remove_troops_from_squad{range_check_ptr}(
+    s : Squad, troop_idxs_len : felt, troop_idxs : felt*
+) -> (squad : Squad):
     let (s : Squad) = COMBAT.remove_troops_from_squad(s, troop_idxs_len, troop_idxs)
     return (s)
 end
