@@ -10,7 +10,7 @@ func test_add_troop_to_squad(t : Troop, s : Squad) -> (updated : Squad):
 end
 
 @view
-func test_remove_troop_from_squad(troop_idx : felt, s : Squad) -> (updated : Squad):
+func test_remove_troop_from_squad{range_check_ptr}(troop_idx : felt, s : Squad) -> (updated : Squad):
     let (updated) = COMBAT.remove_troop_from_squad(troop_idx, s)
     return (updated)
 end
@@ -80,6 +80,12 @@ func test_add_troops_to_squad{range_check_ptr}(
     s : Squad, troop_ids_len : felt, troop_ids : felt*
 ) -> (squad : Squad):
     let (s : Squad) = COMBAT.add_troops_to_squad(s, troop_ids_len, troop_ids)
+    return (s)
+end
+
+@view
+func test_remove_troops_from_squad{range_check_ptr}(s : Squad, troop_idxs_len : felt, troop_idxs : felt*) -> (squad : Squad):
+    let (s : Squad) = COMBAT.remove_troops_from_squad(s, troop_idxs_len, troop_idxs)
     return (s)
 end
 

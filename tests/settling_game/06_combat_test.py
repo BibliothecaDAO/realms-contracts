@@ -1,4 +1,3 @@
-from enum import IntEnum
 import functools
 import math
 import operator
@@ -103,6 +102,21 @@ def pack_troop(troop: Troop) -> int:
     return int.from_bytes(struct.pack("<2b", *[troop.id, troop.vitality]), "little")
 
 
+def assert_equal_troops(trooplike1, trooplike2):
+    # python-built squads have TroopId enum values as
+    # troop.id whereas squads returned from Cairo have
+    # only integer values in their place; this makes
+    # sure we're always comparing only int values
+    assert int(trooplike1.id) == int(trooplike2.id)
+    assert trooplike1[1:] == trooplike2[1:]
+
+
+def assert_equal_squads(squadlike1, squadlike2):
+    assert len(squadlike1) == len(squadlike2)
+    for i in range(len(squadlike1)):
+        assert_equal_troops(squadlike1[i], squadlike2[i])
+
+
 @pytest.mark.asyncio
 async def test_get_troop(s06_combat):
     for idx, troop in enumerate(TROOPS):
@@ -163,12 +177,12 @@ async def test_unpack_squad(library_combat_tests):
     squad = build_default_squad()
     packed_squad = pack_squad(squad)
     tx = await library_combat_tests.test_unpack_squad(packed_squad).invoke()
-    assert tx.result.s == squad
+    assert_equal_squads(tx.result.s, squad)
 
     squad = build_partial_squad(13)
     packed_squad = pack_squad(squad)
     tx = await library_combat_tests.test_unpack_squad(packed_squad).invoke()
-    assert tx.result.s == squad
+    assert_equal_squads(tx.result.s, squad)
 
 
 @pytest.mark.asyncio
@@ -295,7 +309,7 @@ async def test_array_to_squad(library_combat_tests):
     s = build_default_squad()
     flattened = functools.reduce(operator.concat, [list(t) for t in s])
     tx = await library_combat_tests.test_array_to_squad(flattened).invoke()
-    assert tx.result.s == s
+    assert_equal_squads(s, tx.result.s)
 
 
 @pytest.mark.asyncio
@@ -331,11 +345,15 @@ async def test_add_troop_to_squad(library_combat_tests):
 async def test_remove_troop_from_squad(library_combat_tests):
     squad = build_default_squad()
 
-    modified_squad = squad
     for troop_idx in range(len(squad)):
-        tx = await library_combat_tests.test_remove_troop_from_squad(troop_idx, modified_squad).invoke()
+        tx = await library_combat_tests.test_remove_troop_from_squad(troop_idx, squad).invoke()
         modified_squad = tx.result.updated
-        assert modified_squad[troop_idx] == EMPTY_TROOP
+
+        for idx in range(len(squad)):
+            if idx == troop_idx:
+                assert modified_squad[idx] == EMPTY_TROOP
+            else:
+                assert_equal_troops(modified_squad[idx], squad[idx])
 
 
 @pytest.mark.asyncio
@@ -406,13 +424,30 @@ async def test_add_troops_to_squad(library_combat_tests):
     squad = build_default_squad()
     troop_ids = [TroopId.Watchman] * 16 + [TroopId.Guard] * 8 + [TroopId.GuardCaptain]
     tx = await library_combat_tests.test_add_troops_to_squad(empty_squad, troop_ids).invoke()
-    assert tx.result.squad == squad
+    assert_equal_squads(tx.result.squad, squad)
 
     current_squad = build_partial_squad(4)
     squad = build_partial_squad(8)
     troop_ids = [TroopId.Watchman] * 4
     tx = await library_combat_tests.test_add_troops_to_squad(current_squad, troop_ids).invoke()
-    assert tx.result.squad == squad
+    assert_equal_squads(tx.result.squad, squad)
+
+
+@pytest.mark.asyncio
+async def test_remove_troops_from_squad(library_combat_tests):
+    squad = build_default_squad()
+    idxs = [0, 15, 16, 24]  # t1_1, t1_16, t2_1, t3_1
+    tx = await library_combat_tests.test_remove_troops_from_squad(squad, idxs).invoke()
+    updated_squad = tx.result.squad
+
+    for idx in range(len(squad)):
+        if idx in idxs:
+            assert updated_squad[idx] == EMPTY_TROOP
+        else:
+            assert_equal_troops(updated_squad[idx], squad[idx])
+
+    with pytest.raises(StarkException):
+        await library_combat_tests.test_remove_troops_from_squad(squad, [len(squad) + 1]).invoke()
 
 
 # even though this tests a func in utils, it is
