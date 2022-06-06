@@ -11,6 +11,7 @@ from starkware.cairo.common.math import (
 from starkware.cairo.common.memcpy import memcpy
 from starkware.cairo.common.memset import memset
 from starkware.cairo.common.registers import get_label_location
+from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
 
 from contracts.settling_game.utils.game_structs import (
     Squad,
@@ -397,7 +398,7 @@ namespace COMBAT:
         memcpy(
             a + (troop_idx + 1) * Troop.SIZE,
             sarr + (troop_idx + 1) * Troop.SIZE,
-            Squad.SIZE - (troop_idx + 1) * Troop.SIZE
+            Squad.SIZE - (troop_idx + 1) * Troop.SIZE,
         )
         let (updated) = array_to_squad(sarr_len, a)
 
@@ -498,124 +499,18 @@ namespace COMBAT:
     end
 
     func squad_to_array(s : Squad) -> (a_len : felt, a : felt*):
-        alloc_locals
-        let (a) = alloc()
-
-        # tier 1
-        let (len, t1_1) = troop_to_array(s.t1_1)
-        memcpy(a, t1_1, len)
-        let (len, t1_2) = troop_to_array(s.t1_2)
-        memcpy(a + Troop.SIZE, t1_2, len)
-        let (len, t1_3) = troop_to_array(s.t1_3)
-        memcpy(a + Troop.SIZE * 2, t1_3, len)
-        let (len, t1_4) = troop_to_array(s.t1_4)
-        memcpy(a + Troop.SIZE * 3, t1_4, len)
-        let (len, t1_5) = troop_to_array(s.t1_5)
-        memcpy(a + Troop.SIZE * 4, t1_5, len)
-        let (len, t1_6) = troop_to_array(s.t1_6)
-        memcpy(a + Troop.SIZE * 5, t1_6, len)
-        let (len, t1_7) = troop_to_array(s.t1_7)
-        memcpy(a + Troop.SIZE * 6, t1_7, len)
-        let (len, t1_8) = troop_to_array(s.t1_8)
-        memcpy(a + Troop.SIZE * 7, t1_8, len)
-        let (len, t1_9) = troop_to_array(s.t1_9)
-        memcpy(a + Troop.SIZE * 8, t1_9, len)
-        let (len, t1_10) = troop_to_array(s.t1_10)
-        memcpy(a + Troop.SIZE * 9, t1_10, len)
-        let (len, t1_11) = troop_to_array(s.t1_11)
-        memcpy(a + Troop.SIZE * 10, t1_11, len)
-        let (len, t1_12) = troop_to_array(s.t1_12)
-        memcpy(a + Troop.SIZE * 11, t1_12, len)
-        let (len, t1_13) = troop_to_array(s.t1_13)
-        memcpy(a + Troop.SIZE * 12, t1_13, len)
-        let (len, t1_14) = troop_to_array(s.t1_14)
-        memcpy(a + Troop.SIZE * 13, t1_14, len)
-        let (len, t1_15) = troop_to_array(s.t1_15)
-        memcpy(a + Troop.SIZE * 14, t1_15, len)
-        let (len, t1_16) = troop_to_array(s.t1_16)
-        memcpy(a + Troop.SIZE * 15, t1_16, len)
-
-        # tier 2
-        let (len, t2_1) = troop_to_array(s.t2_1)
-        memcpy(a + Troop.SIZE * 16, t2_1, len)
-        let (len, t2_2) = troop_to_array(s.t2_2)
-        memcpy(a + Troop.SIZE * 17, t2_2, len)
-        let (len, t2_3) = troop_to_array(s.t2_3)
-        memcpy(a + Troop.SIZE * 18, t2_3, len)
-        let (len, t2_4) = troop_to_array(s.t2_4)
-        memcpy(a + Troop.SIZE * 19, t2_4, len)
-        let (len, t2_5) = troop_to_array(s.t2_5)
-        memcpy(a + Troop.SIZE * 20, t2_5, len)
-        let (len, t2_6) = troop_to_array(s.t2_6)
-        memcpy(a + Troop.SIZE * 21, t2_6, len)
-        let (len, t2_7) = troop_to_array(s.t2_7)
-        memcpy(a + Troop.SIZE * 22, t2_7, len)
-        let (len, t2_8) = troop_to_array(s.t2_8)
-        memcpy(a + Troop.SIZE * 23, t2_8, len)
-
-        # tier 3
-        let (len, t3_1) = troop_to_array(s.t3_1)
-        memcpy(a + Troop.SIZE * 24, t3_1, len)
-
-        return (Squad.SIZE, a)
+        let (fp_val, _) = get_fp_and_pc()
+        return (Squad.SIZE, cast(fp_val - 2 - Squad.SIZE, felt*))
     end
 
     func troop_to_array(t : Troop) -> (a_len : felt, a : felt*):
-        let (a) = alloc()
-        assert [a] = t.id
-        assert [a + 1] = t.type
-        assert [a + 2] = t.tier
-        assert [a + 3] = t.agility
-        assert [a + 4] = t.attack
-        assert [a + 5] = t.defense
-        assert [a + 6] = t.vitality
-        assert [a + 7] = t.wisdom
-        return (Troop.SIZE, a)
+        let (fp_val, _) = get_fp_and_pc()
+        return (Troop.SIZE, cast(fp_val - 2 - Troop.SIZE, felt*))
     end
 
     func array_to_squad(a_len : felt, a : felt*) -> (s : Squad):
-        alloc_locals
-
-        let (t1_1) = array_to_troop(Troop.SIZE, a)
-        let (t1_2) = array_to_troop(Troop.SIZE, a + Troop.SIZE)
-        let (t1_3) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 2)
-        let (t1_4) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 3)
-        let (t1_5) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 4)
-        let (t1_6) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 5)
-        let (t1_7) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 6)
-        let (t1_8) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 7)
-        let (t1_9) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 8)
-        let (t1_10) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 9)
-        let (t1_11) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 10)
-        let (t1_12) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 11)
-        let (t1_13) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 12)
-        let (t1_14) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 13)
-        let (t1_15) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 14)
-        let (t1_16) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 15)
-
-        let (t2_1) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 16)
-        let (t2_2) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 17)
-        let (t2_3) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 18)
-        let (t2_4) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 19)
-        let (t2_5) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 20)
-        let (t2_6) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 21)
-        let (t2_7) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 22)
-        let (t2_8) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 23)
-
-        let (t3_1) = array_to_troop(Troop.SIZE, a + Troop.SIZE * 24)
-
-        return (
-            Squad(t1_1=t1_1, t1_2=t1_2, t1_3=t1_3, t1_4=t1_4, t1_5=t1_5, t1_6=t1_6,
-            t1_7=t1_7, t1_8=t1_8, t1_9=t1_9, t1_10=t1_10, t1_11=t1_11, t1_12=t1_12,
-            t1_13=t1_13, t1_14=t1_14, t1_15=t1_15, t1_16=t1_16, t2_1=t2_1, t2_2=t2_2,
-            t2_3=t2_3, t2_4=t2_4, t2_5=t2_5, t2_6=t2_6, t2_7=t2_7, t2_8=t2_8, t3_1=t3_1),
-        )
-    end
-
-    func array_to_troop(a_len : felt, a : felt*) -> (t : Troop):
-        return (
-            Troop(id=[a], type=[a + 1], tier=[a + 2], agility=[a + 3], attack=[a + 4], defense=[a + 5], vitality=[a + 6], wisdom=[a + 7]),
-        )
+        let squad : Squad* = cast(a, Squad*)
+        return ([squad])
     end
 
     func add_troops_to_squad{range_check_ptr}(
