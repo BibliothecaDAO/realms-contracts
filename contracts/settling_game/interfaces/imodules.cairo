@@ -105,11 +105,19 @@ end
 namespace IL04_Calculator:
     func calculate_epoch() -> (epoch : felt):
     end
-    func calculate_wonder_tax() -> (tax_percentage : felt):
-    end
     func calculate_happiness(token_id : Uint256) -> (happiness : felt):
     end
+    func calculate_troop_population(token_id : Uint256) -> (troop_population : felt):
+    end
+    func calculate_culture(token_id : Uint256) -> (culture : felt):
+    end
+    func calculate_population(token_id : Uint256) -> (population : felt):
+    end
+    func calculate_food(token_id : Uint256) -> (food : felt):
+    end
     func calculate_tribute() -> (tribute : felt):
+    end
+    func calculate_wonder_tax() -> (tax_percentage : felt):
     end
 end
 
