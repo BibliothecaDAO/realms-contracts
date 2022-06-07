@@ -67,6 +67,16 @@ namespace COMBAT:
         )
     end
 
+    func compute_squad_vitality(s : Squad) -> (vitality : felt):
+        let vitality = s.t1_1.vitality + s.t1_2.vitality + s.t1_3.vitality + s.t1_4.vitality +
+            s.t1_5.vitality + s.t1_6.vitality + s.t1_7.vitality + s.t1_8.vitality + s.t1_9.vitality +
+            s.t1_10.vitality + s.t1_11.vitality + s.t1_12.vitality + s.t1_13.vitality + s.t1_14.vitality +
+            s.t1_15.vitality + s.t1_16.vitality + s.t2_1.vitality + s.t2_2.vitality + s.t2_3.vitality +
+            s.t2_4.vitality + s.t2_5.vitality + s.t2_6.vitality + s.t2_7.vitality + s.t2_8.vitality +
+            s.t3_1.vitality
+        return (vitality)
+    end
+
     func pack_squad{range_check_ptr}(s : Squad) -> (p : PackedSquad):
         alloc_locals
 

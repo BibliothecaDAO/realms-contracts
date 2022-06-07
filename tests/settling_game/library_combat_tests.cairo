@@ -24,6 +24,12 @@ func test_compute_squad_stats(s : Squad) -> (stats : SquadStats):
 end
 
 @view
+func test_compute_squad_vitality(s : Squad) -> (vitality : felt):
+    let (vitality) = COMBAT.compute_squad_vitality(s)
+    return (vitality)
+end
+
+@view
 func test_pack_troop{range_check_ptr}(t : Troop) -> (packed : felt):
     let (p) = COMBAT.pack_troop(t)
     return (p)

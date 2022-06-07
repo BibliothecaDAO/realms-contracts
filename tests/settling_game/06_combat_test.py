@@ -165,6 +165,13 @@ async def test_compute_squad_stats(library_combat_tests):
 
 
 @pytest.mark.asyncio
+async def test_compute_squad_vitality(library_combat_tests):
+    squad = build_default_squad()
+    tx = await library_combat_tests.test_compute_squad_vitality(squad).invoke()
+    assert tx.result.vitality == sum([t.vitality for t in squad])
+
+
+@pytest.mark.asyncio
 async def test_pack_squad(library_combat_tests):
     squad = build_default_squad()
     packed_squad = pack_squad(squad)

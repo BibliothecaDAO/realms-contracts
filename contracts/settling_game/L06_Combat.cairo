@@ -315,9 +315,9 @@ func run_combat_loop{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     let (step_defender) = attack(
         attacking_realm_id, defending_realm_id, attacker, defender, attack_type
     )
-    # because hits are distributed from tier 1 troops to tier 3, if the only tier 3
-    # troop has 0 vitality, we can assume the whole squad has been defeated
-    if step_defender.t3_1.vitality == 0:
+
+    let (defender_vitality) = COMBAT.compute_squad_vitality(step_defender)
+    if defender_vitality == 0:
         # defender is defeated
         return (attacker, step_defender, COMBAT_OUTCOME_ATTACKER_WINS)
     end
@@ -325,7 +325,8 @@ func run_combat_loop{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     let (step_attacker) = attack(
         attacking_realm_id, defending_realm_id, step_defender, attacker, attack_type
     )
-    if step_attacker.t3_1.vitality == 0:
+    let (attacker_vitality) = COMBAT.compute_squad_vitality(step_attacker)
+    if attacker_vitality == 0:
         # attacker is defeated
         return (step_attacker, step_defender, COMBAT_OUTCOME_DEFENDER_WINS)
     end
