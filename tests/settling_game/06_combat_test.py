@@ -276,7 +276,7 @@ async def test_hit_troop(l06_combat_tests):
     troop = Troop(*tx.result.hit_troop)
     hits_left = tx.result.remaining_hits
 
-    assert troop.vitality == 0
+    assert troop == EMPTY_TROOP
     assert hits_left == 27 - WATCHMAN.vitality
 
     # test injury
@@ -284,7 +284,8 @@ async def test_hit_troop(l06_combat_tests):
     troop = Troop(*tx.result.hit_troop)
     hits_left = tx.result.remaining_hits
 
-    assert troop.vitality == WATCHMAN.vitality - 2
+    hit_watchman = Troop(TroopId.Watchman, 1, 1, 1, 1, 3, 2, 1)
+    assert troop == hit_watchman
     assert hits_left == 0
 
     # test no hit
@@ -292,7 +293,7 @@ async def test_hit_troop(l06_combat_tests):
     troop = Troop(*tx.result.hit_troop)
     hits_left = tx.result.remaining_hits
 
-    assert troop.vitality == WATCHMAN.vitality
+    assert troop == WATCHMAN
     assert hits_left == 0
 
 

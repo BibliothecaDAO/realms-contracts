@@ -272,8 +272,9 @@ end
 # remove one or more troops from a particular squad
 # troops to be removed are identified the their index in a Squad (0-based indexing)
 @external
-func remove_troops_from_squad_in_realm{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
-    troop_idxs_len : felt, troop_idxs : felt*, realm_id : Uint256, slot : felt):
+func remove_troops_from_squad_in_realm{
+    range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
+}(troop_idxs_len : felt, troop_idxs : felt*, realm_id : Uint256, slot : felt):
     alloc_locals
 
     MODULE_ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
@@ -289,7 +290,7 @@ func remove_troops_from_squad_in_realm{range_check_ptr, syscall_ptr : felt*, ped
     let (updated_squad) = COMBAT.remove_troops_from_squad(squad, troop_idxs_len, troop_idxs)
     update_squad_in_realm(updated_squad, realm_id, slot)
 
-    return()
+    return ()
 end
 
 ############
@@ -492,16 +493,7 @@ func hit_troop{range_check_ptr}(t : Troop, hits : felt) -> (
     let (kills_troop) = is_le(t.vitality, hits)
     if kills_troop == 1:
         # t.vitality <= hits
-        let ht = Troop(
-            id=t.id,
-            type=t.type,
-            tier=t.tier,
-            agility=t.agility,
-            attack=t.attack,
-            defense=t.defense,
-            vitality=0,
-            wisdom=t.wisdom,
-        )
+        let ht = Troop(id=0, type=0, tier=0, agility=0, attack=0, defense=0, vitality=0, wisdom=0)
         let rem = hits - t.vitality
         return (ht, rem)
     else:
