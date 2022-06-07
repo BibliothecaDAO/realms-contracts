@@ -298,36 +298,6 @@ async def test_hit_troop(l06_combat_tests):
 
 
 @pytest.mark.asyncio
-async def test_squad_to_array(library_combat_tests):
-    s = build_default_squad()
-    tx = await library_combat_tests.test_squad_to_array(s).invoke()
-    flattened = functools.reduce(operator.concat, [list(t) for t in s])
-    assert tx.result.a == flattened
-
-
-@pytest.mark.asyncio
-async def test_troop_to_array(library_combat_tests):
-    for t in TROOPS:
-        tx = await library_combat_tests.test_troop_to_array(t).invoke()
-        assert tx.result.a == list(t)
-
-
-@pytest.mark.asyncio
-async def test_array_to_squad(library_combat_tests):
-    s = build_default_squad()
-    flattened = functools.reduce(operator.concat, [list(t) for t in s])
-    tx = await library_combat_tests.test_array_to_squad(flattened).invoke()
-    assert_equal_squads(s, tx.result.s)
-
-
-@pytest.mark.asyncio
-async def test_array_to_troop(library_combat_tests):
-    a = list(SNIPER)
-    tx = await library_combat_tests.test_array_to_troop(a).invoke()
-    assert tx.result.t == SNIPER
-
-
-@pytest.mark.asyncio
 async def test_add_troop_to_squad(library_combat_tests):
     partial_squad = build_partial_squad(3)
 

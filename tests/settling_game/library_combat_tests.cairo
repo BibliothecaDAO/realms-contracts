@@ -54,24 +54,6 @@ func test_unpack_squad{range_check_ptr}(p : PackedSquad) -> (s : Squad):
 end
 
 @view
-func test_squad_to_array{range_check_ptr}(s : Squad) -> (a_len : felt, a : felt*):
-    let (a_len : felt, a : felt*) = COMBAT.squad_to_array(s)
-    return (a_len, a)
-end
-
-@view
-func test_troop_to_array{range_check_ptr}(t : Troop) -> (a_len : felt, a : felt*):
-    let (a_len : felt, a : felt*) = COMBAT.troop_to_array(t)
-    return (a_len, a)
-end
-
-@view
-func test_array_to_squad{range_check_ptr}(a_len : felt, a : felt*) -> (s : Squad):
-    let (squad) = COMBAT.array_to_squad(a_len, a)
-    return (squad)
-end
-
-@view
 func test_find_first_free_troop_slot_in_squad(s : Squad, tier : felt) -> (free_slot_index : felt):
     let (idx) = COMBAT.find_first_free_troop_slot_in_squad(s, tier)
     return (idx)
