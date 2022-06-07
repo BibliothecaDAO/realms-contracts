@@ -13,7 +13,11 @@ from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.uint256 import Uint256
 from starkware.starknet.common.syscalls import get_block_timestamp, get_caller_address, get_tx_info
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
-from contracts.settling_game.interfaces.imodules import IModuleController, IL02_Resources
+from contracts.settling_game.interfaces.imodules import (
+    IModuleController,
+    IL02_Resources,
+    IL04_Calculator,
+)
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library.library_combat import COMBAT
@@ -122,6 +126,13 @@ const COMBAT_OUTCOME_DEFENDER_WINS = 2
 const ATTACKING_SQUAD_SLOT = 1
 const DEFENDING_SQUAD_SLOT = 2
 
+# when defending, how many population does it take
+# to inflict a single hit point on the attacker
+const POPULATION_PER_HIT_POINT = 50
+# upper limit (inclusive) of how many hit points
+# can a defense wall inflict on the attacker
+const MAX_WALL_DEFENSE_HIT_POINTS = 5
+
 ###############
 # CONSTRUCTOR #
 ###############
@@ -146,7 +157,6 @@ func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
 end
 
 # TODO: write documentation
-# TODO: take a Realm's wall into consideration when attacking a Realm
 
 ############
 # EXTERNAL #
@@ -215,6 +225,8 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
 
     # EMIT FIRST
     CombatStart_2.emit(attacking_realm_id, defending_realm_id, attacker, defender)
+
+    let (attacker_breached_wall : Squad) = inflict_wall_defense(attacker, defending_realm_id)
 
     let (attacker_end, defender_end, combat_outcome) = run_combat_loop(
         attacking_realm_id, defending_realm_id, attacker, defender, attack_type
@@ -302,6 +314,31 @@ func set_realm_combat_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
 ):
     realm_combat_data.write(realm_id, combat_data)
     return ()
+end
+
+func inflict_wall_defense{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+    attacker : Squad, defending_realm_id : Uint256
+) -> (damaged : Squad):
+    alloc_locals
+
+    let (controller : felt) = MODULE_controller_address()
+    let (calculator_addr : felt) = IModuleController.get_module_address(
+        controller, ModuleIds.L04_Calculator
+    )
+    let (defending_population : felt) = IL04_Calculator.calculate_population(
+        calculator_addr, defending_realm_id
+    )
+
+    let (q, _) = unsigned_div_rem(defending_population, POPULATION_PER_HIT_POINT)
+    let (is_in_range) = is_le(q, MAX_WALL_DEFENSE_HIT_POINTS)
+    if is_in_range == TRUE:
+        tempvar hit_points = q
+    else:
+        tempvar hit_points = MAX_WALL_DEFENSE_HIT_POINTS
+    end
+
+    let (damaged : Squad) = hit_squad(attacker, hit_points)
+    return (damaged)
 end
 
 func run_combat_loop{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
