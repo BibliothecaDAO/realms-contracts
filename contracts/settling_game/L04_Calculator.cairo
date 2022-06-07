@@ -107,7 +107,7 @@ end
 @view
 func calculate_troop_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
-) -> (happiness : felt):
+) -> (troop_population : felt):
     alloc_locals
 
     # SUM TOTAL TROOP POPULATION

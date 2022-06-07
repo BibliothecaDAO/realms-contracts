@@ -67,6 +67,16 @@ namespace COMBAT:
         )
     end
 
+    func compute_squad_vitality(s : Squad) -> (vitality : felt):
+        let vitality = s.t1_1.vitality + s.t1_2.vitality + s.t1_3.vitality + s.t1_4.vitality +
+            s.t1_5.vitality + s.t1_6.vitality + s.t1_7.vitality + s.t1_8.vitality + s.t1_9.vitality +
+            s.t1_10.vitality + s.t1_11.vitality + s.t1_12.vitality + s.t1_13.vitality + s.t1_14.vitality +
+            s.t1_15.vitality + s.t1_16.vitality + s.t2_1.vitality + s.t2_2.vitality + s.t2_3.vitality +
+            s.t2_4.vitality + s.t2_5.vitality + s.t2_6.vitality + s.t2_7.vitality + s.t2_8.vitality +
+            s.t3_1.vitality
+        return (vitality)
+    end
+
     func pack_squad{range_check_ptr}(s : Squad) -> (p : PackedSquad):
         alloc_locals
 
@@ -368,41 +378,39 @@ namespace COMBAT:
 
     func add_troop_to_squad(t : Troop, s : Squad) -> (updated : Squad):
         alloc_locals
-
+        let (__fp__, _) = get_fp_and_pc()
         let (free_slot) = find_first_free_troop_slot_in_squad(s, t.tier)
-        let (sarr_len, sarr) = squad_to_array(s)
-        let (_, tarr) = troop_to_array(t)
-
         let (a) = alloc()
-        memcpy(a, sarr, free_slot)
-        memcpy(a + free_slot, tarr, Troop.SIZE)
+
+        memcpy(a, &s, free_slot)
+        memcpy(a + free_slot, &t, Troop.SIZE)
         memcpy(
             a + free_slot + Troop.SIZE,
-            sarr + free_slot + Troop.SIZE,
+            &s + free_slot + Troop.SIZE,
             Squad.SIZE - free_slot - Troop.SIZE,
         )
-        let (updated) = array_to_squad(sarr_len, a)
 
-        return (updated)
+        let updated = cast(a, Squad*)
+        return ([updated])
     end
 
     func remove_troop_from_squad{range_check_ptr}(troop_idx : felt, s : Squad) -> (updated : Squad):
         alloc_locals
-
         assert_lt(troop_idx, Squad.SIZE / Troop.SIZE)
 
-        let (sarr_len, sarr) = squad_to_array(s)
+        let (__fp__, _) = get_fp_and_pc()
         let (a) = alloc()
-        memcpy(a, sarr, troop_idx * Troop.SIZE)
+
+        memcpy(a, &s, troop_idx * Troop.SIZE)
         memset(a + troop_idx * Troop.SIZE, 0, Troop.SIZE)
         memcpy(
             a + (troop_idx + 1) * Troop.SIZE,
-            sarr + (troop_idx + 1) * Troop.SIZE,
+            &s + (troop_idx + 1) * Troop.SIZE,
             Squad.SIZE - (troop_idx + 1) * Troop.SIZE,
         )
-        let (updated) = array_to_squad(sarr_len, a)
 
-        return (updated)
+        let updated = cast(a, Squad*)
+        return ([updated])
     end
 
     func find_first_free_troop_slot_in_squad(s : Squad, tier : felt) -> (free_slot_index : felt):
@@ -496,21 +504,6 @@ namespace COMBAT:
         end
 
         return (0)
-    end
-
-    func squad_to_array(s : Squad) -> (a_len : felt, a : felt*):
-        let (fp_val, _) = get_fp_and_pc()
-        return (Squad.SIZE, cast(fp_val - 2 - Squad.SIZE, felt*))
-    end
-
-    func troop_to_array(t : Troop) -> (a_len : felt, a : felt*):
-        let (fp_val, _) = get_fp_and_pc()
-        return (Troop.SIZE, cast(fp_val - 2 - Troop.SIZE, felt*))
-    end
-
-    func array_to_squad(a_len : felt, a : felt*) -> (s : Squad):
-        let squad : Squad* = cast(a, Squad*)
-        return ([squad])
     end
 
     func add_troops_to_squad{range_check_ptr}(

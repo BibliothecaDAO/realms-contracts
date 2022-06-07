@@ -24,6 +24,12 @@ func test_compute_squad_stats(s : Squad) -> (stats : SquadStats):
 end
 
 @view
+func test_compute_squad_vitality(s : Squad) -> (vitality : felt):
+    let (vitality) = COMBAT.compute_squad_vitality(s)
+    return (vitality)
+end
+
+@view
 func test_pack_troop{range_check_ptr}(t : Troop) -> (packed : felt):
     let (p) = COMBAT.pack_troop(t)
     return (p)
@@ -45,24 +51,6 @@ end
 func test_unpack_squad{range_check_ptr}(p : PackedSquad) -> (s : Squad):
     let (s : Squad) = COMBAT.unpack_squad(p)
     return (s)
-end
-
-@view
-func test_squad_to_array{range_check_ptr}(s : Squad) -> (a_len : felt, a : felt*):
-    let (a_len : felt, a : felt*) = COMBAT.squad_to_array(s)
-    return (a_len, a)
-end
-
-@view
-func test_troop_to_array{range_check_ptr}(t : Troop) -> (a_len : felt, a : felt*):
-    let (a_len : felt, a : felt*) = COMBAT.troop_to_array(t)
-    return (a_len, a)
-end
-
-@view
-func test_array_to_squad{range_check_ptr}(a_len : felt, a : felt*) -> (s : Squad):
-    let (squad) = COMBAT.array_to_squad(a_len, a)
-    return (squad)
 end
 
 @view

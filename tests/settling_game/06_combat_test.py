@@ -165,6 +165,13 @@ async def test_compute_squad_stats(library_combat_tests):
 
 
 @pytest.mark.asyncio
+async def test_compute_squad_vitality(library_combat_tests):
+    squad = build_default_squad()
+    tx = await library_combat_tests.test_compute_squad_vitality(squad).invoke()
+    assert tx.result.vitality == sum([t.vitality for t in squad])
+
+
+@pytest.mark.asyncio
 async def test_pack_squad(library_combat_tests):
     squad = build_default_squad()
     packed_squad = pack_squad(squad)
@@ -269,7 +276,7 @@ async def test_hit_troop(l06_combat_tests):
     troop = Troop(*tx.result.hit_troop)
     hits_left = tx.result.remaining_hits
 
-    assert troop.vitality == 0
+    assert troop == EMPTY_TROOP
     assert hits_left == 27 - WATCHMAN.vitality
 
     # test injury
@@ -277,7 +284,8 @@ async def test_hit_troop(l06_combat_tests):
     troop = Troop(*tx.result.hit_troop)
     hits_left = tx.result.remaining_hits
 
-    assert troop.vitality == WATCHMAN.vitality - 2
+    hit_watchman = Troop(TroopId.Watchman, 1, 1, 1, 1, 3, 2, 1)
+    assert troop == hit_watchman
     assert hits_left == 0
 
     # test no hit
@@ -285,38 +293,8 @@ async def test_hit_troop(l06_combat_tests):
     troop = Troop(*tx.result.hit_troop)
     hits_left = tx.result.remaining_hits
 
-    assert troop.vitality == WATCHMAN.vitality
+    assert troop == WATCHMAN
     assert hits_left == 0
-
-
-@pytest.mark.asyncio
-async def test_squad_to_array(library_combat_tests):
-    s = build_default_squad()
-    tx = await library_combat_tests.test_squad_to_array(s).invoke()
-    flattened = functools.reduce(operator.concat, [list(t) for t in s])
-    assert tx.result.a == flattened
-
-
-@pytest.mark.asyncio
-async def test_troop_to_array(library_combat_tests):
-    for t in TROOPS:
-        tx = await library_combat_tests.test_troop_to_array(t).invoke()
-        assert tx.result.a == list(t)
-
-
-@pytest.mark.asyncio
-async def test_array_to_squad(library_combat_tests):
-    s = build_default_squad()
-    flattened = functools.reduce(operator.concat, [list(t) for t in s])
-    tx = await library_combat_tests.test_array_to_squad(flattened).invoke()
-    assert_equal_squads(s, tx.result.s)
-
-
-@pytest.mark.asyncio
-async def test_array_to_troop(library_combat_tests):
-    a = list(SNIPER)
-    tx = await library_combat_tests.test_array_to_troop(a).invoke()
-    assert tx.result.t == SNIPER
 
 
 @pytest.mark.asyncio
