@@ -50,10 +50,19 @@ The development container loads settings and the repository information on your 
 
 Instead, you can use the [Github CLI](https://cli.github.com/) to auth from your dev container:
 
-1. Download the [Github CLI](https://cli.github.com/).
+1. Download the [Github CLI](https://github.com/cli/cli/blob/trunk/docs/install_linux.md#debian-ubuntu-linux-raspberry-pi-os-apt).
 2. Visit the [Github Tokens page](https://github.com/settings/tokens) and click `Generate New Token` to create a new token that will be used in your dev container. Make sure to save it somewhere as the token is only visible upon creation.
 3. With the container loaded, open the dev container terminal in vscode.
 4. Run `gh auth login` and follow the steps, pasting in your new access token when asked.
+</details>
+
+<details><summary>OSX ARM chips: Running without a container</summary>
+Docker performance on ARM chips is pretty poor, so we recommend running without a container until these perf issues are resolved:
+1. Pull down the repository
+2. Install homebrew: https://brew.sh/
+3. Install gmp: `brew install gmp`
+4. Install dependencies: `pip3 install -r ./requirements.txt`
+5. Install realms cli: `pip3 install ./realms_cli`
 </details>
 
 If you have further questions about the development workflow, please ask in [#builders-chat in the Realms Discord](https://discord.gg/yP4BCbRjUs).
@@ -68,6 +77,7 @@ We encourage pull requests.
 2. **Fork the repo** so you can make and test changes in your local repository.
 3. **Test your changes** Follow the procedures for testing in each contract sub-directory (e.g. [/contracts/settling_game](./contracts/settling_game/) and make sure your tests (manual and/or automated) pass.
 4. **Create a pull request** and describe the changes you made. Include a reference to the Issue you created.
+5. **Verify cairo lint warnings** run through the 'Files Changed' tab for your PR and resolve any warnings. These do not show up locally so you need to view them on GitHub.
 5. **Monitor and respond to comments** made by the team around code standards and suggestions. Most pull requests will have some back and forth.
 
 If you have further questions, visit [#builders-chat in our discord](https://discord.gg/yP4BCbRjUs) and make sure to reference your issue number.

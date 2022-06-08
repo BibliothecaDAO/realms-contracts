@@ -49,7 +49,14 @@ const SHIFT_6_18 = 2 ** 102
 const SHIFT_6_19 = 2 ** 108
 const SHIFT_6_20 = 2 ** 114
 
-# BOOLS
+const SHIFT_NFT_1 = 2 ** 0
+const SHIFT_NFT_2 = 2 ** 7
+const SHIFT_NFT_3 = 2 ** 27
+const SHIFT_NFT_4 = 2 ** 52
+const SHIFT_NFT_5 = 2 ** 54
+
+
+
 const TRUE = 1
 const FALSE = 0
 
@@ -57,6 +64,10 @@ const FALSE = 0
 const VAULT_LENGTH = 7  # days
 const DAY = 1800  # day cycle length
 const VAULT_LENGTH_SECONDS = VAULT_LENGTH * DAY  # vault is always 7 * day cycle
+
+# CRYPTS
+const RESOURCES_PER_CRYPT = 1  # We only generate one resource per crypt (vs up to 7 per realm)
+const LEGENDARY_MULTIPLIER = 10  # Legendary maps generate 10x resources as non-egendat
 
 # PRODUCTION
 const BASE_RESOURCES_PER_DAY = 100

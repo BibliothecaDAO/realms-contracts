@@ -152,5 +152,47 @@
         "colour": "#ec4899",
         "colourClass": "bg-pink-500 border-pink-500",
         "id": 22
+    },
+    {
+        "trait": "Desert Glass",
+        "value": 23,
+        "colour": "#ec4899",
+        "colourClass": "bg-pink-500 border-pink-500",
+        "id": 23
+    },
+    {
+        "trait": "Divine Cloth",
+        "value": 24,
+        "colour": "#ec4899",
+        "colourClass": "bg-pink-500 border-pink-500",
+        "id": 24
+    },
+    {
+        "trait": "Curious Spore",
+        "value": 25,
+        "colour": "#ec4899",
+        "colourClass": "bg-pink-500 border-pink-500",
+        "id": 25
+    },
+    {
+        "trait": "Unrefined Ore",
+        "value": 26,
+        "colour": "#ec4899",
+        "colourClass": "bg-pink-500 border-pink-500",
+        "id": 26
+    },
+    {
+        "trait": "Sunken Shekel",
+        "value": 26,
+        "colour": "#ec4899",
+        "colourClass": "bg-pink-500 border-pink-500",
+        "id": 26
+    },
+    {
+        "trait": "Demonhide",
+        "value": 27,
+        "colour": "#ec4899",
+        "colourClass": "bg-pink-500 border-pink-500",
+        "id": 27
     }
 ]

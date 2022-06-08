@@ -5,7 +5,7 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero
+from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le, assert_nn
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
@@ -37,6 +37,7 @@ from contracts.settling_game.library.library_module import (
 )
 
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
+from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.imodules import (
@@ -132,6 +133,9 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         controller, ModuleIds.L05_Wonders
     )
 
+    # FETCH OWNER
+    let (owner) = IERC721.ownerOf(s_realms_address, token_id)
+
     # ALLOW RESOURCE LOGIC ADDRESS TO CLAIM, BUT STILL RESTRICT
     if caller != settling_logic_address:
         MODULE_ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
@@ -145,8 +149,6 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     end
 
     let (local resource_ids : Uint256*) = alloc()
-    let (local user_mint : Uint256*) = alloc()
-    let (local wonder_tax_arr : Uint256*) = alloc()
 
     # FETCH REALM DATA
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
@@ -173,7 +175,11 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # SET MINT
     let treasury_mint_perc = wonder_tax
-    let user_mint_rel_perc = 100 - wonder_tax
+    with_attr error_message("RESOURCES: resource id underflowed a felt."):
+        # Make sure wonder_tax doesn't divide by zero
+        assert_le(wonder_tax, 100)
+        let user_resources_value_rel_perc = 100 - wonder_tax
+    end
 
     # GET OUTPUT FOR EACH RESOURCE
     let (r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output,
@@ -189,13 +195,13 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     )
 
     # USER CLAIM
-    let (r_1_user) = calculate_total_claimable(days, user_mint_rel_perc, r_1_output)
-    let (r_2_user) = calculate_total_claimable(days, user_mint_rel_perc, r_2_output)
-    let (r_3_user) = calculate_total_claimable(days, user_mint_rel_perc, r_3_output)
-    let (r_4_user) = calculate_total_claimable(days, user_mint_rel_perc, r_4_output)
-    let (r_5_user) = calculate_total_claimable(days, user_mint_rel_perc, r_5_output)
-    let (r_6_user) = calculate_total_claimable(days, user_mint_rel_perc, r_6_output)
-    let (r_7_user) = calculate_total_claimable(days, user_mint_rel_perc, r_7_output)
+    let (r_1_user) = calculate_total_claimable(days, user_resources_value_rel_perc, r_1_output)
+    let (r_2_user) = calculate_total_claimable(days, user_resources_value_rel_perc, r_2_output)
+    let (r_3_user) = calculate_total_claimable(days, user_resources_value_rel_perc, r_3_output)
+    let (r_4_user) = calculate_total_claimable(days, user_resources_value_rel_perc, r_4_output)
+    let (r_5_user) = calculate_total_claimable(days, user_resources_value_rel_perc, r_5_output)
+    let (r_6_user) = calculate_total_claimable(days, user_resources_value_rel_perc, r_6_output)
+    let (r_7_user) = calculate_total_claimable(days, user_resources_value_rel_perc, r_7_output)
 
     # WONDER TAX
     let (r_1_wonder) = calculate_total_claimable(days, treasury_mint_perc, r_1_output)
@@ -226,9 +232,15 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # LORDS MINT
     let (tribute) = IL04_Calculator.calculate_tribute(calculator_address)
-    
-    let lords_available = Uint256(total_days * tribute * 10 ** 18, 0)
-    
+
+    let lords_bn = total_days * tribute * 10 ** 18
+
+    with_attr error_message("RESOURCES: lords value greater than 0"):
+        assert_nn(lords_bn)
+    end
+
+    let lords_available = Uint256(lords_bn, 0)
+
     # FETCH OWNER
     let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
 
@@ -564,7 +576,6 @@ func get_all_resource_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     let (wonder_tax) = IL04_Calculator.calculate_wonder_tax(calculator_address)
 
     # SET MINT
-    let treasury_mint_perc = wonder_tax
     let user_mint_rel_perc = 100 - wonder_tax
 
     # GET OUTPUT FOR EACH RESOURCE
@@ -589,13 +600,20 @@ func get_all_resource_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     let (r_6_user) = calculate_total_claimable(days, user_mint_rel_perc, r_6_output)
     let (r_7_user) = calculate_total_claimable(days, user_mint_rel_perc, r_7_output)
 
-    let (resource_mint_len : felt, resource_mint : Uint256*) = get_mintable_resources(
+    let (_, resource_mint : Uint256*) = get_mintable_resources(
         realms_data, r_1_user, r_2_user, r_3_user, r_4_user, r_5_user, r_6_user, r_7_user
     )
 
     # LORDS MINT
     let (tribute) = IL04_Calculator.calculate_tribute(calculator_address)
-    let lords_available = Uint256(total_days * tribute * 10 ** 18, 0)
+
+    let lords_bn = total_days * tribute * 10 ** 18
+
+    with_attr error_message("RESOURCES: lords value greater than 0"):
+        assert_nn(lords_bn)
+    end
+
+    let lords_available = Uint256(lords_bn, 0)
 
     return (realms_data.resource_number, resource_mint, lords_available)
 end
@@ -616,6 +634,54 @@ func get_resource_upgrade_cost{range_check_ptr, syscall_ptr : felt*, pedersen_pt
 ) -> (cost : Cost):
     let (cost) = resource_upgrade_cost.read(resource_id)
     return (cost)
+end
+
+@view
+func get_all_vault_raidable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
+) -> (user_mint_len : felt, user_mint : Uint256*):
+    alloc_locals
+    let (caller) = get_caller_address()
+    let (controller) = MODULE_controller_address()
+
+    # CONTRACT ADDRESSES
+    let (realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Realms
+    )
+
+    # FETCH REALM DATA
+    let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
+
+    # CALC VAULT DAYS
+    let (total_vault_days, vault_remainder) = vault_days_accrued(token_id)
+
+    # GET OUTPUT FOR EACH RESOURCE
+    let (r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output,
+        r_7_output) = get_all_resource_output(
+        token_id,
+        realms_data.resource_1,
+        realms_data.resource_2,
+        realms_data.resource_3,
+        realms_data.resource_4,
+        realms_data.resource_5,
+        realms_data.resource_6,
+        realms_data.resource_7,
+    )
+
+    # USER CLAIM
+    let (r_1_user) = calculate_total_claimable(total_vault_days, PILLAGE_AMOUNT, r_1_output)
+    let (r_2_user) = calculate_total_claimable(total_vault_days, PILLAGE_AMOUNT, r_2_output)
+    let (r_3_user) = calculate_total_claimable(total_vault_days, PILLAGE_AMOUNT, r_3_output)
+    let (r_4_user) = calculate_total_claimable(total_vault_days, PILLAGE_AMOUNT, r_4_output)
+    let (r_5_user) = calculate_total_claimable(total_vault_days, PILLAGE_AMOUNT, r_5_output)
+    let (r_6_user) = calculate_total_claimable(total_vault_days, PILLAGE_AMOUNT, r_6_output)
+    let (r_7_user) = calculate_total_claimable(total_vault_days, PILLAGE_AMOUNT, r_7_output)
+
+    let (_, resource_mint : Uint256*) = get_mintable_resources(
+        realms_data, r_1_user, r_2_user, r_3_user, r_4_user, r_5_user, r_6_user, r_7_user
+    )
+
+    return (realms_data.resource_number, resource_mint)
 end
 
 ############
@@ -648,9 +714,16 @@ func calculate_total_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     alloc_locals
     # days * current tax * output
     # we multiply by tax before dividing by 100
+
     let (total_work_generated, _) = unsigned_div_rem(days * tax * output, 100)
 
-    return (Uint256(total_work_generated * 10 ** 18, 0))
+    let work_bn = total_work_generated * 10 ** 18
+
+    with_attr error_message("RESOURCES: work bn greater than"):
+        assert_nn(work_bn)
+    end
+
+    return (Uint256(work_bn, 0))
 end
 
 ###########

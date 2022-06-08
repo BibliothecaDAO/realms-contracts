@@ -54,6 +54,16 @@ class ResourceIds(IntEnum):
     Adamantine = 20
     Mithral = 21
     Dragonhide = 22
+    DesertGlass = 23
+    DivineCloth = 24
+    CuriousSpore = 25
+    UnrefinedOre = 26
+    SunkenShekel = 27
+    Demonhide = 28
+
+# class Legendary(IntEnum):
+    # Yes = 1
+    
 
 class BuildingId(IntEnum):
     Fairgrounds = 1

@@ -83,6 +83,7 @@ cairo-nile = "^0.5.0"
 "approve_resource_module" = "realms_cli.player.resources.approve_resource_module"
 "get_resource_upgrade_cost" = "realms_cli.player.resources.get_resource_upgrade_cost"
 "days_available" = "realms_cli.player.resources.days_available"
+"get_vault" = "realms_cli.player.resources.get_vault"
 
 #-----------COMBAT
 "get_unit_cost" = "realms_cli.player.combat.get_unit_cost"
@@ -118,3 +119,5 @@ cairo-nile = "^0.5.0"
 "get_all_sell_price" = "realms_cli.exchange.trade.get_all_sell_price"
 "get_all_buy_price" = "realms_cli.exchange.trade.get_all_buy_price"
 "get_all_rates" = "realms_cli.exchange.trade.get_all_rates"
+
+"transfer_lords" = "realms_cli.player.lords.transfer_lords"
