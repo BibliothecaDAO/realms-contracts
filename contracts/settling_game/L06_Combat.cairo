@@ -410,7 +410,9 @@ func attack{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     tempvar pedersen_ptr = pedersen_ptr
 
     let (d_after_attack) = hit_squad(d, hit_points)
-    CombatStep_2.emit(attacking_realm_id, defending_realm_id, a, d, attack_type, hit_points)
+    CombatStep_2.emit(
+        attacking_realm_id, defending_realm_id, a, d_after_attack, attack_type, hit_points
+    )
     return (d_after_attack)
 end
 

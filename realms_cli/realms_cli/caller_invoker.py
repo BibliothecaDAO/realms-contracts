@@ -2,6 +2,7 @@ import re
 import time
 import subprocess
 
+
 def call(network, contract_alias, function, arguments):
     """Nile call function."""
     command = [
@@ -14,6 +15,7 @@ def call(network, contract_alias, function, arguments):
         *map(str, arguments),
     ]
     return subprocess.check_output(command).strip().decode("utf-8")
+
 
 def wrapped_call(network, contract_alias, function, arguments):
     """Send command with some extra functionality such as tx status check and built-in timeout.
@@ -29,6 +31,7 @@ def wrapped_call(network, contract_alias, function, arguments):
     # return out such that it can me prettified at a higher level
     return out
 
+
 def send(network, signer_alias, contract_alias, function, arguments):
     """Nile send function."""
     command = [
@@ -40,8 +43,11 @@ def send(network, signer_alias, contract_alias, function, arguments):
         contract_alias,
         function,
         *map(str, arguments),
+        "--max_fee",
+        "10000000000000000"
     ]
     return subprocess.check_output(command).strip().decode("utf-8")
+
 
 def wrapped_send(network, signer_alias, contract_alias, function, arguments):
     """Send command with some extra functionality such as tx status check and built-in timeout.
@@ -57,7 +63,8 @@ def wrapped_send(network, signer_alias, contract_alias, function, arguments):
     get_tx_status(network, tx_hash,)
     print("------- SEND ----------------------------------------------------")
 
-def get_tx_status(network, tx_hash : str) -> dict:
+
+def get_tx_status(network, tx_hash: str) -> dict:
     """Returns transaction receipt in dict."""
     command = [
         "nile",
@@ -69,6 +76,7 @@ def get_tx_status(network, tx_hash : str) -> dict:
     out_raw = subprocess.check_output(command).strip().decode("utf-8")
     return out_raw
 
+
 def parse_send(x):
     """Extract information from send command."""
     # address is 64, tx_hash is 64 chars long
@@ -78,7 +86,8 @@ def parse_send(x):
     except ValueError:
         print(f"could not get tx_hash from message {x}")
     return 0x0, 0x0
-    
+
+
 def deploy(network, alias):
     """Nile deploy function."""
     command = [
@@ -91,6 +100,7 @@ def deploy(network, alias):
         alias,
     ]
     return subprocess.check_output(command).strip().decode("utf-8")
+
 
 def compile(contract_alias):
     """Nile call function."""
