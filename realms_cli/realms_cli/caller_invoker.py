@@ -1,3 +1,4 @@
+import os
 import re
 import subprocess
 import asyncio
@@ -17,7 +18,10 @@ def send_multi(self, to, method, calldata, nonce=None):
         )
 
     (call_array, calldata, sig_r, sig_s) = self.signer.sign_transaction(
-        sender=self.address, calls=[[target_address, method, c] for c in calldata], nonce=nonce
+        sender=self.address,
+        calls=[[target_address, method, c] for c in calldata],
+        nonce=nonce,
+        max_fee=int(os.environ["MAX_FEE"]),
     )
 
     params = []
@@ -34,6 +38,7 @@ def send_multi(self, to, method, calldata, nonce=None):
         params=params,
         network=self.network,
         signature=[str(sig_r), str(sig_s)],
+        max_fee=int(os.environ["MAX_FEE"]),
     )
 
 # bind it to the account class, needed for signage
@@ -108,7 +113,7 @@ def send(network, signer_alias, contract_alias, function, arguments) -> str:
     account = Account(signer_alias, network)
     if isinstance(arguments[0], list):
         return account.send_multi(contract_alias, function, arguments)
-    return account.send(contract_alias, function, arguments)
+    return account.send_multi(contract_alias, function, [arguments])
 
 def wrapped_send(network, signer_alias, contract_alias, function, arguments):
     """Send command with some extra functionality such as tx status check and built-in timeout.

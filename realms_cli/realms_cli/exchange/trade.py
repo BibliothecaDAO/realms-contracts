@@ -30,7 +30,7 @@ def buy_tokens(resource_ids, resource_values, max_currency, network):
         
     wrapped_send(
         network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
+        signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Exchange_ERC20_1155",
         function="buy_tokens",
         arguments=[
@@ -65,7 +65,7 @@ def sell_tokens(resource_ids, resource_values, min_currency, network):
 
     wrapped_send(
         network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
+        signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Exchange_ERC20_1155",
         function="sell_tokens",
         arguments=[
@@ -171,7 +171,7 @@ def get_buy_price(resource_ids, resource_values, network):
 
     config = Config(nile_network=network)
     n_resources = len(resource_ids)
-    
+
     out = wrapped_call(
         network=config.nile_network,
         contract_alias="proxy_Exchange_ERC20_1155",

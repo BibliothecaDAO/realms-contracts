@@ -46,6 +46,8 @@ cairo-nile = "^0.5.0"
 
 #-----------PLAYER
 "create_pk" = "realms_cli.player.account.create_pk"
+"transfer_realm" = "realms_cli.player.account.transfer_realm"
+"transfer_s_realm" = "realms_cli.player.account.transfer_s_realm"
 
 #-----------LORDS
 "check_lords" = "realms_cli.player.lords.check_lords"

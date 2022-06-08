@@ -232,7 +232,7 @@ def get_realm_data(realm_token_id, network):
 @click.option("--network", default="goerli")
 def get_owned(address, network):
     """
-    Check settled Realms balance
+    Get owned realms and owned settled realms.
     """
     config = Config(nile_network=network)
 
@@ -261,8 +261,9 @@ def get_owned(address, network):
         calldata=calldata,
     )
 
-    for realm_id in stdout:
-        print(realm_id.strip(" 0\n"), end=",")
+    realm_ids = [int(realm_id.strip(" 0\n")) for realm_id in stdout]
+    realm_ids.sort()
+    print(",".join(map(str, realm_ids)))
 
     #
     # s_realms
@@ -291,5 +292,6 @@ def get_owned(address, network):
         calldata=calldata,
     )
 
-    for realm_id in stdout:
-        print(realm_id.strip(" 0\n"), end=",")
+    realm_ids = [int(realm_id.strip(" 0\n")) for realm_id in stdout]
+    realm_ids.sort()
+    print(",".join(map(str, realm_ids)))
