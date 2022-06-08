@@ -325,11 +325,11 @@ func inflict_wall_defense{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : H
     let (calculator_addr : felt) = IModuleController.get_module_address(
         controller, ModuleIds.L04_Calculator
     )
-    let (defending_population : felt) = IL04_Calculator.calculate_population(
-        calculator_addr, defending_realm_id
-    )
+    # let (defending_population : felt) = IL04_Calculator.calculate_population(
+    #     calculator_addr, defending_realm_id
+    # )
 
-    let (q, _) = unsigned_div_rem(defending_population, POPULATION_PER_HIT_POINT)
+    let (q, _) = unsigned_div_rem(5, POPULATION_PER_HIT_POINT)
     let (is_in_range) = is_le(q, MAX_WALL_DEFENSE_HIT_POINTS)
     if is_in_range == TRUE:
         tempvar hit_points = q
