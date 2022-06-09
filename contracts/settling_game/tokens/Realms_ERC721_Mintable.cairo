@@ -6,7 +6,7 @@
 
 %lang starknet
 
-from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin, BitwiseBuiltin
+from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256
 
 from openzeppelin.token.erc721.library import (
@@ -41,7 +41,6 @@ from openzeppelin.access.ownable import Ownable_initializer, Ownable_only_owner
 
 from openzeppelin.upgrades.library import (
     Proxy_initializer,
-    Proxy_only_admin,
     Proxy_set_implementation,
 )
 

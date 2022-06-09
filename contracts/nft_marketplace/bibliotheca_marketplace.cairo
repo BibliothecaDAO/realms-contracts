@@ -1,9 +1,9 @@
 # Declare this file as a StarkNet contract and set the required
 # builtins.
 %lang starknet
-%builtins pedersen range_check
+%builtins pedersen range_check bitwise
 
-from starkware.cairo.common.cairo_builtins import HashBuiltin
+from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin, BitwiseBuiltin
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.messages import send_message_to_l1
 from starkware.starknet.common.syscalls import (
@@ -11,7 +11,7 @@ from starkware.starknet.common.syscalls import (
     get_contract_address,
     get_block_timestamp,
 )
-from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem
+from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem, assert_lt_felt
 from starkware.cairo.common.uint256 import Uint256, uint256_le
 
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
@@ -24,6 +24,19 @@ from openzeppelin.security.pausable import (
     Pausable_pause,
     Pausable_unpause,
     Pausable_when_not_paused,
+)
+from contracts.settling_game.utils.general import (
+    scale,
+    unpack_data,
+    transform_costs_to_token_ids_values,
+)
+
+from contracts.settling_game.utils.constants import (
+    SHIFT_NFT_1,
+    SHIFT_NFT_2,
+    SHIFT_NFT_3,
+    SHIFT_NFT_4,
+    SHIFT_NFT_5
 )
 
 ############
@@ -102,6 +115,36 @@ end
 ###################
 # TRADE FUNCTIONS #
 ###################
+
+@external
+func fetch_trade_data{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(trade_data: felt, price: felt, poster: felt) -> (trade: Trade):
+    alloc_locals
+
+    # let (data) = get_trade(trade_data)
+
+    let (token_contract) = unpack_data(trade_data, 0, 127)
+    let (t_id) = unpack_data(trade_data, 7, 1048575)
+    let (expiration) = unpack_data(trade_data, 27, 33554431)
+    let (status) = unpack_data(trade_data, 52, 3)
+    let (trade_id) = unpack_data(trade_data, 54, 1048575)
+
+    #token_id needs to be Uint256
+    let token_id: Uint256 = Uint256(t_id, 0)
+
+    let trade = Trade(
+        token_contract,
+        token_id,
+        expiration,
+        price,
+        poster,
+        status,
+        trade_id
+    )
+    return (trade)
+
+end
 
 @external
 func open_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -220,6 +263,36 @@ func cancel_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     return ()
 end
 
+@external
+func pack_trade_data{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(trade: Trade) -> (trade_data: felt):
+    alloc_locals
+
+    let (nft_params: felt*) = alloc()
+
+    local id_1 = trade.token_contract * SHIFT_NFT_1
+    nft_params[0] = id_1
+
+    local t_id: Uint256 = trade.token_id
+    let (local tid: felt) = _uint_to_felt(t_id)
+    local id_2 = tid * SHIFT_NFT_2
+    nft_params[1] = id_2
+
+    local id_3 = trade.expiration * SHIFT_NFT_3
+    nft_params[2] = id_3
+
+    local id_4 = trade.status * SHIFT_NFT_4
+    nft_params[3] = id_4
+
+    local id_5 = trade.trade_id * SHIFT_NFT_5
+    nft_params[4] = id_5
+
+    tempvar value = nft_params[4] + nft_params[3] + nft_params[2] + nft_params[1] + nft_params[0]
+
+    return (value)
+
+end
+
 ###########
 # HELPERS #
 ###########
@@ -251,6 +324,15 @@ func assert_poster{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     assert caller = trade.poster
 
     return ()
+end
+
+func _uint_to_felt{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    } (value: Uint256) -> (value: felt):
+    assert_lt_felt(value.high, 2**123)
+    return (value.high * (2 ** 128) + value.low)
 end
 
 ###########

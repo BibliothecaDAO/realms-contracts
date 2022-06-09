@@ -42,7 +42,6 @@ from openzeppelin.access.ownable import Ownable_initializer, Ownable_only_owner,
 
 from openzeppelin.upgrades.library import (
     Proxy_initializer,
-    Proxy_only_admin,
     Proxy_set_implementation,
 )
 

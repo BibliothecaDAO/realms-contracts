@@ -19,7 +19,10 @@ def send_multi(self, to, method, calldata, nonce=None):
         )
 
     (call_array, calldata, sig_r, sig_s) = self.signer.sign_transaction(
-        sender=self.address, calls=[[target_address, method, c] for c in calldata], nonce=nonce, max_fee=int(os.environ["MAX_FEE"]),
+        sender=self.address,
+        calls=[[target_address, method, c] for c in calldata],
+        nonce=nonce,
+        max_fee=int(os.environ["MAX_FEE"]),
     )
 
     params = []

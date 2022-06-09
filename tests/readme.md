@@ -9,6 +9,7 @@ To run all tests:
 To run a specific test:
 
 `$ pytest -s tests/settling_game/01_settling_test.py`
+`$ pytest -s tests/settling_game/02_resources_test.py`
 `$ pytest -s tests/settling_game/06_combat_test.py`
 `$ pytest -s tests/exchange/exchange_ERC20_1155_test.py`
 
@@ -63,3 +64,10 @@ Use as e.g.: `@pytest.fixture(scope="session")`. From https://docs.pytest.org/en
 >`package`: the fixture is destroyed during teardown of the last test in the package.
 >
 >`session`: the fixture is destroyed at the end of the test session.
+
+
+# Protostar testing
+
+Protostar is useful for testing small algorithms. This technique is still very much a WIP and best practices are still being discovered.
+
+`$ protostar test tests/exchange/test_formulas.cairo`
