@@ -13,7 +13,11 @@ from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.uint256 import Uint256
 from starkware.starknet.common.syscalls import get_block_timestamp, get_caller_address, get_tx_info
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
-from contracts.settling_game.interfaces.imodules import IModuleController, IL02_Resources
+from contracts.settling_game.interfaces.imodules import (
+    IModuleController,
+    IL02_Resources,
+    IL04_Calculator,
+)
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library.library_combat import COMBAT
@@ -51,12 +55,26 @@ from openzeppelin.upgrades.library import (
 ##########
 
 @event
-func CombatOutcome_1(attacking_realm_id : Uint256, defending_realm_id : Uint256, outcome : felt
+func CombatStart_2(
+    attacking_realm_id : Uint256,
+    defending_realm_id : Uint256,
+    attacking_squad : Squad,
+    defending_squad : Squad,
 ):
 end
 
 @event
-func CombatStep_1(
+func CombatOutcome_2(
+    attacking_realm_id : Uint256,
+    defending_realm_id : Uint256,
+    attacking_squad : Squad,
+    defending_squad : Squad,
+    outcome : felt,
+):
+end
+
+@event
+func CombatStep_2(
     attacking_realm_id : Uint256,
     defending_realm_id : Uint256,
     attacking_squad : Squad,
@@ -67,7 +85,7 @@ func CombatStep_1(
 end
 
 @event
-func BuildTroops_1(
+func BuildTroops_2(
     squad : Squad, troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt
 ):
 end
@@ -108,6 +126,13 @@ const COMBAT_OUTCOME_DEFENDER_WINS = 2
 const ATTACKING_SQUAD_SLOT = 1
 const DEFENDING_SQUAD_SLOT = 2
 
+# when defending, how many population does it take
+# to inflict a single hit point on the attacker
+const POPULATION_PER_HIT_POINT = 50
+# upper limit (inclusive) of how many hit points
+# can a defense wall inflict on the attacker
+const MAX_WALL_DEFENSE_HIT_POINTS = 5
+
 ###############
 # CONSTRUCTOR #
 ###############
@@ -132,7 +157,6 @@ func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
 end
 
 # TODO: write documentation
-# TODO: take a Realm's wall into consideration when attacking a Realm
 
 ############
 # EXTERNAL #
@@ -167,10 +191,16 @@ func build_squad_from_troops_in_realm{
     # IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
 
     # assemble the squad, store it in a Realm
-    let (squad) = COMBAT.build_squad_from_troops(troop_ids_len, troop_ids)
+    let (realm_combat_data : RealmCombatData) = get_realm_combat_data(realm_id)
+    if slot == ATTACKING_SQUAD_SLOT:
+        let current_squad : Squad = COMBAT.unpack_squad(realm_combat_data.attacking_squad)
+    else:
+        let current_squad : Squad = COMBAT.unpack_squad(realm_combat_data.defending_squad)
+    end
+    let (squad) = COMBAT.add_troops_to_squad(current_squad, troop_ids_len, troop_ids)
     update_squad_in_realm(squad, realm_id, slot)
 
-    BuildTroops_1.emit(squad, troop_ids_len, troop_ids, realm_id, slot)
+    BuildTroops_2.emit(squad, troop_ids_len, troop_ids, realm_id, slot)
 
     return ()
 end
@@ -181,12 +211,9 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
 ) -> (combat_outcome : felt):
     alloc_locals
 
-    let (controller) = MODULE_controller_address()
-    let (caller) = get_caller_address()
-
     with_attr error_message("COMBAT: Cannot initiate combat"):
-        let (can_attack) = Realm_can_be_attacked(attacking_realm_id, defending_realm_id)
         MODULE_ERC721_owner_check(attacking_realm_id, ExternalContractIds.S_Realms)
+        let (can_attack) = Realm_can_be_attacked(attacking_realm_id, defending_realm_id)
         assert can_attack = TRUE
     end
 
@@ -195,6 +222,11 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
 
     let (attacker : Squad) = COMBAT.unpack_squad(attacking_realm_data.attacking_squad)
     let (defender : Squad) = COMBAT.unpack_squad(defending_realm_data.defending_squad)
+
+    # EMIT FIRST
+    CombatStart_2.emit(attacking_realm_id, defending_realm_id, attacker, defender)
+
+    let (attacker_breached_wall : Squad) = inflict_wall_defense(attacker, defending_realm_id)
 
     let (attacker_end, defender_end, combat_outcome) = run_combat_loop(
         attacking_realm_id, defending_realm_id, attacker, defender, attack_type
@@ -218,8 +250,12 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     )
     set_realm_combat_data(defending_realm_id, new_defending_realm_data)
 
+    let (attacker_after_combat : Squad) = COMBAT.unpack_squad(new_attacker)
+    let (defender_after_combat : Squad) = COMBAT.unpack_squad(new_defender)
+
     # # pillaging only if attacker wins
     if combat_outcome == COMBAT_OUTCOME_ATTACKER_WINS:
+        let (controller) = MODULE_controller_address()
         let (resources_logic_address) = IModuleController.get_module_address(
             controller, ModuleIds.L02_Resources
         )
@@ -227,14 +263,46 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
         IL02_Resources.pillage_resources(resources_logic_address, defending_realm_id, caller)
         tempvar syscall_ptr = syscall_ptr
         tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
     else:
         tempvar syscall_ptr = syscall_ptr
         tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
     end
 
-    CombatOutcome_1.emit(attacking_realm_id, defending_realm_id, combat_outcome)
+    CombatOutcome_2.emit(
+        attacking_realm_id,
+        defending_realm_id,
+        attacker_after_combat,
+        defender_after_combat,
+        combat_outcome,
+    )
 
     return (combat_outcome)
+end
+
+# remove one or more troops from a particular squad
+# troops to be removed are identified the their index in a Squad (0-based indexing)
+@external
+func remove_troops_from_squad_in_realm{
+    range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
+}(troop_idxs_len : felt, troop_idxs : felt*, realm_id : Uint256, slot : felt):
+    alloc_locals
+
+    MODULE_ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
+
+    let (realm_combat_data : RealmCombatData) = get_realm_combat_data(realm_id)
+
+    if slot == ATTACKING_SQUAD_SLOT:
+        let (squad) = COMBAT.unpack_squad(realm_combat_data.attacking_squad)
+    else:
+        let (squad) = COMBAT.unpack_squad(realm_combat_data.defending_squad)
+    end
+
+    let (updated_squad) = COMBAT.remove_troops_from_squad(squad, troop_idxs_len, troop_idxs)
+    update_squad_in_realm(updated_squad, realm_id, slot)
+
+    return ()
 end
 
 ############
@@ -248,6 +316,31 @@ func set_realm_combat_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     return ()
 end
 
+func inflict_wall_defense{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+    attacker : Squad, defending_realm_id : Uint256
+) -> (damaged : Squad):
+    alloc_locals
+
+    let (controller : felt) = MODULE_controller_address()
+    let (calculator_addr : felt) = IModuleController.get_module_address(
+        controller, ModuleIds.L04_Calculator
+    )
+    # let (defending_population : felt) = IL04_Calculator.calculate_population(
+    #     calculator_addr, defending_realm_id
+    # )
+
+    let (q, _) = unsigned_div_rem(5, POPULATION_PER_HIT_POINT)
+    let (is_in_range) = is_le(q, MAX_WALL_DEFENSE_HIT_POINTS)
+    if is_in_range == TRUE:
+        tempvar hit_points = q
+    else:
+        tempvar hit_points = MAX_WALL_DEFENSE_HIT_POINTS
+    end
+
+    let (damaged : Squad) = hit_squad(attacker, hit_points)
+    return (damaged)
+end
+
 func run_combat_loop{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     attacking_realm_id : Uint256,
     defending_realm_id : Uint256,
@@ -257,23 +350,27 @@ func run_combat_loop{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
 ) -> (attacker : Squad, defender : Squad, outcome : felt):
     alloc_locals
 
-    let (step_defender) = attack(attacking_realm_id, defending_realm_id, attacker, defender, attack_type
+    let (step_defender) = attack(
+        attacking_realm_id, defending_realm_id, attacker, defender, attack_type
     )
-    # because hits are distributed from tier 1 troops to tier 3, if the only tier 3
-    # troop has 0 vitality, we can assume the whole squad has been defeated
-    if step_defender.t3_1.vitality == 0:
+
+    let (defender_vitality) = COMBAT.compute_squad_vitality(step_defender)
+    if defender_vitality == 0:
         # defender is defeated
         return (attacker, step_defender, COMBAT_OUTCOME_ATTACKER_WINS)
     end
 
-    let (step_attacker) = attack(attacking_realm_id, defending_realm_id, step_defender, attacker, attack_type
+    let (step_attacker) = attack(
+        attacking_realm_id, defending_realm_id, step_defender, attacker, attack_type
     )
-    if step_attacker.t3_1.vitality == 0:
+    let (attacker_vitality) = COMBAT.compute_squad_vitality(step_attacker)
+    if attacker_vitality == 0:
         # attacker is defeated
         return (step_attacker, step_defender, COMBAT_OUTCOME_DEFENDER_WINS)
     end
 
-    return run_combat_loop(attacking_realm_id, defending_realm_id, step_attacker, step_defender, attack_type
+    return run_combat_loop(
+        attacking_realm_id, defending_realm_id, step_attacker, step_defender, attack_type
     )
 end
 
@@ -313,7 +410,8 @@ func attack{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     tempvar pedersen_ptr = pedersen_ptr
 
     let (d_after_attack) = hit_squad(d, hit_points)
-    CombatStep_1.emit(attacking_realm_id, defending_realm_id, a, d, attack_type, hit_points
+    CombatStep_2.emit(
+        attacking_realm_id, defending_realm_id, a, d_after_attack, attack_type, hit_points
     )
     return (d_after_attack)
 end
@@ -434,20 +532,13 @@ func hit_troop{range_check_ptr}(t : Troop, hits : felt) -> (
     let (kills_troop) = is_le(t.vitality, hits)
     if kills_troop == 1:
         # t.vitality <= hits
-        let ht = Troop(
-            type=t.type,
-            tier=t.tier,
-            agility=t.agility,
-            attack=t.attack,
-            defense=t.defense,
-            vitality=0,
-            wisdom=t.wisdom,
-        )
+        let ht = Troop(id=0, type=0, tier=0, agility=0, attack=0, defense=0, vitality=0, wisdom=0)
         let rem = hits - t.vitality
         return (ht, rem)
     else:
         # t.vitality > hits
         let ht = Troop(
+            id=t.id,
             type=t.type,
             tier=t.tier,
             agility=t.agility,
@@ -475,19 +566,11 @@ func load_troop_costs{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     return load_troop_costs(troop_ids_len - 1, troop_ids + 1, costs_idx + 1, costs)
 end
 
-############
-# EXTERNAL #
-############
-
 # can be used to add, overwrite or remove a Squad from a Realm
-@external
 func update_squad_in_realm{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     s : Squad, realm_id : Uint256, slot : felt
 ):
     alloc_locals
-
-    let (caller) = get_caller_address()
-    let (controller) = MODULE_controller_address()
 
     MODULE_ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
 
@@ -586,6 +669,9 @@ func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     let (realms_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Realms
     )
+    let (s_realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.S_Realms
+    )
     let (attacking_realm_data : RealmData) = realms_IERC721.fetch_realm_data(
         realms_address, attacking_realm_id
     )
@@ -595,6 +681,14 @@ func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
 
     if attacking_realm_data.order == defending_realm_data.order:
         # intra-order attacks are not allowed
+        return (FALSE)
+    end
+
+    # CANNOT ATTACK YOUR OWN
+    let (attacking_realm_owner) = realms_IERC721.ownerOf(s_realms_address, attacking_realm_id)
+    let (defending_realm_owner) = realms_IERC721.ownerOf(s_realms_address, defending_realm_id)
+
+    if attacking_realm_owner == defending_realm_owner:
         return (FALSE)
     end
 

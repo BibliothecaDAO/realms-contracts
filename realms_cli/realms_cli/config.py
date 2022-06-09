@@ -53,8 +53,8 @@ class Config:
         self.REALMS_PROXY_ADDRESS, _ = safe_load_deployment("proxy_realms", self.nile_network)
         self.RESOURCES_PROXY_ADDRESS, _ = safe_load_deployment("proxy_resources", self.nile_network)
         self.S_REALMS_PROXY_ADDRESS, _ = safe_load_deployment("proxy_s_realms", self.nile_network)
-        self.CRYPTS_PROXY_ADDRESS, _ = safe_load_deployment("proxy_crypts", self.nile_network)
-        self.S_CRYPTS_PROXY_ADDRESS, _ = safe_load_deployment("proxy_s_crypts", self.nile_network)
+        # self.CRYPTS_PROXY_ADDRESS, _ = safe_load_deployment("proxy_crypts", self.nile_network)
+        # self.S_CRYPTS_PROXY_ADDRESS, _ = safe_load_deployment("proxy_s_crypts", self.nile_network)
 
         self.L01_SETTLING_ADDRESS, _ = safe_load_deployment("L01_Settling", self.nile_network)
         self.L02_RESOURCES_ADDRESS, _ = safe_load_deployment("L02_Resources", self.nile_network)
@@ -62,7 +62,7 @@ class Config:
         self.L04_CALCULATOR_ADDRESS, _ = safe_load_deployment("L04_Calculator", self.nile_network)
         self.L05_WONDERS_ADDRESS, _ = safe_load_deployment("L05_Wonders", self.nile_network)
         self.L06_COMBAT_ADDRESS, _ = safe_load_deployment("L06_Combat", self.nile_network)
-        self.L07_CRYPTS_ADDRESS, _ = safe_load_deployment("L07_Crypts", self.nile_network)
+        # self.L07_CRYPTS_ADDRESS, _ = safe_load_deployment("L07_Crypts", self.nile_network)
 
         self.L01_SETTLING_PROXY_ADDRESS, _ = safe_load_deployment("proxy_L01_Settling", self.nile_network)
         self.L02_RESOURCES_PROXY_ADDRESS, _ = safe_load_deployment("proxy_L02_Resources", self.nile_network)
@@ -70,7 +70,7 @@ class Config:
         self.L04_CALCULATOR_PROXY_ADDRESS, _ = safe_load_deployment("proxy_L04_Calculator", self.nile_network)
         self.L05_WONDERS_PROXY_ADDRESS, _ = safe_load_deployment("proxy_L05_Wonders", self.nile_network)
         self.L06_COMBAT_PROXY_ADDRESS, _ = safe_load_deployment("proxy_L06_Combat", self.nile_network) 
-        self.L06_CRYPTS_PROXY_ADDRESS, _ = safe_load_deployment("proxy_L07_Crypts", self.nile_network) 
+        # self.L07_CRYPTS_PROXY_ADDRESS, _ = safe_load_deployment("proxy_L07_Crypts", self.nile_network) 
 
         self.XOROSHIRO_ADDRESS, _ = safe_load_deployment("xoroshiro128_starstar", self.nile_network)
 

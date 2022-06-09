@@ -7,6 +7,7 @@ from nile.core.account import Account
 from nile import deployments
 from nile.core.call_or_invoke import call_or_invoke
 
+
 def send_multi(self, to, method, calldata, nonce=None):
     """Execute a tx going through an Account contract. Inspired from openzeppelin."""
     target_address, _ = next(deployments.load(to, self.network)) or to
@@ -41,8 +42,10 @@ def send_multi(self, to, method, calldata, nonce=None):
         max_fee=int(os.environ["MAX_FEE"]),
     )
 
+
 # bind it to the account class, needed for signage
 Account.send_multi = send_multi
+
 
 def call(network, contract_alias, function, arguments) -> str:
     """Nile call function."""
@@ -57,6 +60,7 @@ def call(network, contract_alias, function, arguments) -> str:
         *map(str, arguments),
     ]
     return subprocess.check_output(command).strip().decode("utf-8")
+
 
 async def _call_async(network, contract_alias, function, arguments) -> str:
     """Nile async call function."""
@@ -81,6 +85,7 @@ async def _call_async(network, contract_alias, function, arguments) -> str:
         print(f'[stderr]\n{stderr.decode()}')
     return stdout.decode()
 
+
 async def _call_sync_manager(network, contract_alias, function, calldata) -> str:
     """"Helper function to create multiple coroutines."""
     stdout = await asyncio.gather(*[
@@ -90,9 +95,11 @@ async def _call_sync_manager(network, contract_alias, function, calldata) -> str
 
     return stdout
 
+
 def call_multi(network, contract_alias, function, calldata) -> str:
     """Launches the async call manager to launch a pool of calls."""
     return asyncio.run(_call_sync_manager(network, contract_alias, function, calldata))
+
 
 def wrapped_call(network, contract_alias, function, arguments) -> str:
     """Send command with some extra functionality such as tx status check and built-in timeout.
@@ -108,12 +115,14 @@ def wrapped_call(network, contract_alias, function, arguments) -> str:
     # return out such that it can be prettified at a higher level
     return out
 
+
 def send(network, signer_alias, contract_alias, function, arguments) -> str:
     """Nile send function."""
     account = Account(signer_alias, network)
     if isinstance(arguments[0], list):
         return account.send_multi(contract_alias, function, arguments)
     return account.send_multi(contract_alias, function, [arguments])
+
 
 def wrapped_send(network, signer_alias, contract_alias, function, arguments):
     """Send command with some extra functionality such as tx status check and built-in timeout.
@@ -129,7 +138,8 @@ def wrapped_send(network, signer_alias, contract_alias, function, arguments):
     get_tx_status(network, tx_hash,)
     print("------- SEND ----------------------------------------------------")
 
-def get_tx_status(network, tx_hash : str) -> dict:
+
+def get_tx_status(network, tx_hash: str) -> dict:
     """Returns transaction receipt in dict."""
     command = [
         "nile",
@@ -141,6 +151,7 @@ def get_tx_status(network, tx_hash : str) -> dict:
     out_raw = subprocess.check_output(command).strip().decode("utf-8")
     return out_raw
 
+
 def parse_send(x):
     """Extract information from send command."""
     # address is 64, tx_hash is 64 chars long
@@ -150,7 +161,8 @@ def parse_send(x):
     except ValueError:
         print(f"could not get tx_hash from message {x}")
     return 0x0, 0x0
-    
+
+
 def deploy(network, alias) -> str:
     """Nile deploy function."""
     command = [
@@ -163,6 +175,7 @@ def deploy(network, alias) -> str:
         alias,
     ]
     return subprocess.check_output(command).strip().decode("utf-8")
+
 
 def compile(contract_alias) -> str:
     """Nile call function."""
