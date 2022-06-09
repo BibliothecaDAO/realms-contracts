@@ -6,12 +6,13 @@ from realms_cli.config import Config, strhex_as_strfelt, safe_load_deployment
 from realms_cli.shared import uint
 from realms_cli.deployer import logged_deploy
 
+resources = uint(100000000 * 10 **18 )
 
 @click.command()
 @click.option("--network", default="goerli")
 def mint_resources(network):
     """
-    Claim available resources
+    Mint batch resources
     """
     config = Config(nile_network=network)
 
@@ -20,7 +21,7 @@ def mint_resources(network):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_resources",
         function="mintBatch",
-        arguments=[int(config.ADMIN_ADDRESS, 16), 22, *uint(1), *uint(2), *uint(3), *uint(4), *uint(5), *uint(6), *uint(7), *uint(8), *uint(9), *uint(10), *uint(11), *uint(12), *uint(13), *uint(14), *uint(15), *uint(16), *uint(17), *uint(18), *uint(19), *uint(20), *uint(21),*uint(22), 22, *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000), *uint(10000)
+        arguments=[int(config.ADMIN_ADDRESS, 16), 22, *uint(1), *uint(2), *uint(3), *uint(4), *uint(5), *uint(6), *uint(7), *uint(8), *uint(9), *uint(10), *uint(11), *uint(12), *uint(13), *uint(14), *uint(15), *uint(16), *uint(17), *uint(18), *uint(19), *uint(20), *uint(21),*uint(22), 22, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources
         ],
     )
 
@@ -61,3 +62,21 @@ def upgrade_module(module_name, network):
     )
 
     print('Have patience, you might need to wait 30s before invoking this')
+
+@click.command()
+@click.argument("to_address", nargs=1)
+@click.argument("token_id", nargs=1)
+@click.option("--network", default="goerli")
+def transfer_to(to_address, network, token_id):
+    """
+    Transfer a (minted) realm from the admin account to a target account.
+    """
+    config = Config(nile_network=network)
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="realms",
+        function="transferFrom",
+        arguments=[int(config.ADMIN_ADDRESS, 16), int(to_address, 16), token_id],
+    )

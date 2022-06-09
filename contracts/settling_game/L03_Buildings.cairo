@@ -163,7 +163,7 @@ func build{
     IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
 
     # TRANSFER LORDS
-    IERC20.transfer(lords_address, treasury_address, lords)
+    # IERC20.transfer(lords_address, treasury_address, lords)
 
     # EMIT
     BuildingBuilt.emit(token_id, building_id)

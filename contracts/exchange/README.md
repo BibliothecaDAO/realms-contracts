@@ -1,23 +1,29 @@
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/uQnjZhZPfu)
 [![Twitter](https://badgen.net/badge/icon/twitter?icon=twitter&label)](https://twitter.com/LootRealms)
 
-![This is an image](/static/realmslogo.jpg)
+![This is an image](/static/Resource_Emporium.png)
 
-# 💰 Resource Swap (AMM)
+# Token Emporium (AMM)
 
-## Swap - Exchange ERC20 and ERC1155 contract tokens
+## What is the Emporium?
 
-The exchange contract allows trades between pairs of ERC20 and ERC1155 contract tokens.
-The contract is based on the [NiftyswapExchange20.sol contract](https://github.com/0xsequence/niftyswap/blob/master/src/contracts/exchange/NiftyswapExchange20.sol) and its [specifications](https://github.com/0xsequence/niftyswap/blob/master/SPECIFICATIONS.md).
+### The Emporium a traditional AMM with a slight variation. Users can trade up to `n` amount of ERC1155 tokens in one transaction with a ERC20 token!
+
+<hr>
+
+## History of the Emporium
+
+The contract is heavily based on the [NiftyswapExchange20.sol contract](https://github.com/0xsequence/niftyswap/blob/master/src/contracts/exchange/NiftyswapExchange20.sol) and its [specifications](https://github.com/0xsequence/niftyswap/blob/master/SPECIFICATIONS.md). 
 
 One deployed contract will handle pairs between the ERC20 currency and all the tokens on an ERC1155.
 Each pair has its price curve tracked individually.
+
 Price changes on one token pair will not affect another.
 
 The exchange contract itself is ERC1155 compliant and will issue LP tokens with a token type id corresponding to the token type id in the pair.
-These tokens can be freely traded or used in other DeFi applications.
+These tokens can then be freely traded or used in other DeFi applications!
 
-**This folder contains Exchange contracts. If you're looking for another contract, please see the [directory of our Realms Smart Contracts](/).**
+**This folder contains Exchange contracts. If you're looking for another contract, please see the [directory of our Realms Smart Contracts](https://github.com/BibliothecaForAdventurers/realms-contracts).**
 
 <hr>
 
@@ -48,11 +54,11 @@ The contract can be broken into a number of sections:
 
 ---
 
-## Initialisation
+# Initialisation
 
-The exchange is initialised through the constructor and initial liquidity pool addition.
+The exchange is initialised through the proxy pattern for now. You are welcome to just implement a set constructor if you prefer that.
 
-### Constructor
+## Setup
 
 Each deployment of the contract will work with pairs between an ERC20 contract and all the tokens on an ERC1155 contract. This means one contract can manage multiple exchange pairs. 
 
@@ -60,7 +66,26 @@ The constructor takes the address for the ERC20 and ERC1155 token contracts, and
 
 The liquidity provider fee is provided in the thousandths. e.g. A value of 15 would equate to a 1.5% fee on trades.
 
-### Initial Liquidity
+```
+@external
+func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    currency_address_ : felt,
+    token_address_ : felt,
+    lp_fee_thousands_ : Uint256,
+    royalty_fee_thousands_ : Uint256,
+    royalty_fee_address_ : felt,
+    proxy_admin : felt,
+):
+    currency_address.write(currency_address_) # ERC20 address of currency token
+    token_address.write(token_address_) # ERC1155 address of tokens
+    lp_fee_thousands.write(lp_fee_thousands_) # LP Fees
+    set_royalty_info(royalty_fee_thousands_, royalty_fee_address_) # Currency Royalty
+    Proxy_initializer(proxy_admin)
+    return ()
+end
+```
+
+## Initial Liquidity
 
 Use this method to provide the initial liquidity to a pair.
 
@@ -70,6 +95,73 @@ When calling this method you provide the currency amount, ERC1155 token type id 
 This sets the initial price of the pair. We expect any large enough variation in pricing to be corrected via arbitrage.
 
 The exchange issues liquidity pool tokens equivalent to the supplied currency.
+
+```
+@external
+func initial_liquidity{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    currency_amounts_len : felt,
+    currency_amounts : Uint256*,
+    token_ids_len : felt,
+    token_ids : Uint256*,
+    token_amounts_len : felt,
+    token_amounts : Uint256*,
+):
+    alloc_locals
+
+    # Recursive break
+    if currency_amounts_len == 0:
+        return ()
+    end
+
+    assert currency_amounts_len = token_ids_len
+    assert currency_amounts_len = token_amounts_len
+
+    let (caller) = get_caller_address()
+    let (contract) = get_contract_address()
+
+    let (token_address_) = token_address.read()
+    let (currency_address_) = currency_address.read()
+
+    # Only valid for first liquidity add to LP
+    let (currency_reserves_ : Uint256) = currency_reserves.read([token_ids])
+    with_attr error_message("Only valid for initial liquidity add"):
+        assert currency_reserves_ = Uint256(0, 0)
+    end
+
+    # Transfer currency and token to exchange
+    IERC20.transferFrom(currency_address_, caller, contract, [currency_amounts])
+    tempvar syscall_ptr : felt* = syscall_ptr
+    IERC1155.safeTransferFrom(token_address_, caller, contract, [token_ids], [token_amounts])
+
+    # Assert otherwise rounding error could end up being significant on second deposit
+    let (ok) = uint256_le(Uint256(1000, 0), [currency_amounts])
+    with_attr error_message("Must supply larger currency for initial deposit"):
+        assert_not_zero(ok)
+    end
+
+    # Update currency reserve size for token id before transfer
+    currency_reserves.write([token_ids], [currency_amounts])
+
+    # Initial liquidity is currency amount deposited
+    lp_reserves.write([token_ids], [currency_amounts])
+
+    # Mint LP tokens
+    ERC1155_mint(caller, [token_ids], [currency_amounts])
+
+    # Emit event
+    liquidity_added.emit(caller, [currency_amounts], [token_ids], [token_amounts])
+
+    # Recurse
+    return initial_liquidity(
+        currency_amounts_len - 1,
+        currency_amounts + Uint256.SIZE,
+        token_ids_len - 1,
+        token_ids + Uint256.SIZE,
+        token_amounts_len - 1,
+        token_amounts + Uint256.SIZE,
+    )
+end
+```
 
 ---
 
@@ -161,7 +253,8 @@ The caller instead supplies the minimum amount of currency they are willing to r
 
 ### Get Buy / Sell Price
 
-The `get_buy_price` and `get_sell_price` functions are read only functions used to get the current price according to the `x * y = k` curve, and take into consideration the exchange fee.
+The `get_all_buy_price` and `get_all_sell_price` functions are read only functions used to get the current price according to the `x * y = k` curve, and take into consideration the exchange fee.
+
 These methods are separated from the buy and sell methods so that they can be used for price display on frontends.
 
 The liquidity provider fee is stored in the thousandths. e.g. A value of `15` would equate to a 1.5% fee on trades. Thus `1000` is used as a static value in these calculations.
@@ -188,127 +281,6 @@ There are additional method to support the ERC1155 compliance of LP tokens provi
 
 ---
 
-## Getting Setup
-
-<details><summary>Initial Setup</summary>
-
-<p>
-
-Clone this repo and use our docker shell to interact with starknet:
-
-```
-git clone git@github.com:BibliothecaForAdventurers/realms-contracts.git
-cd realms-contracts
-scripts/shell starknet --version
-```
-
-The CLI allows you to deploy to StarkNet and read/write to contracts
-already deployed. The CLI communicates with a server that StarkNet
-runs, which bundles the requests, executes the program (contracts are
-Cairo programs), creates and aggregates validity proofs, then posts them
-to the Goerli Ethereum testnet. Learn more in the Cairo language and StarkNet
-docs [here](https://www.cairo-lang.org/docs/), which also has instructions for manual
-installation if you are not using docker.
-
-</p>
-</details>
-<details><summary>Development Workflow</summary>
-
-If you are using VSCode, we provide a development container with all required dependencies.
-When opening VS Code, it should ask you to re-open the project in a container, if it finds
-the .devcontainer folder. If not, you can open the Command Palette (`cmd + shift + p`),
-and run “Remote-Containers: Rebuild and Reopen in Container”.
-
-## Outline
-
-Flow:
-
-1. Compile the contract with the CLI
-2. Test using pytest
-3. Deploy with CLI
-4. Interact using the CLI or the explorer
-
-### Compile
-
-The compiler will check the integrity of the code locally.
-It will also produce an ABI, which is a mapping of the contract functions
-(used to interact with the contract).
-
-Compile all contracts:
-
-```
-nile compile
-```
-
-Compile an individual contract:
-
-```
-nile compile contracts/exchange/Exchange_ERC20_1155.cairo
-```
-
-### Test
-
-Run all github actions tests: `scripts/test`
-
-Run individual tests
-
-```
-scripts/shell pytest -s testing/l2/Exchange_ERC20_1155.test.py
-```
-
-### Deploy
-
-Start up a local StarkNet devnet with:
-
-```
-nile node
-```
-
-Then run the deployment of all the contracts. This uses nile
-and handles passing addresses between the modules to create a
-permissions system.
-
-```
-scripts/deploy
-```
-</details>
-
-<hr>
-
-## Contributing
-
-<details><summary>How to Contribute</summary>
-
-We encourage pull requests!
-
-1. **Create an [issue](https://github.com/BibliothecaForAdventurers/realms-contracts/issues)** to describe the improvement you're making. Provide as much detail as possible in the beginning so the team understands your improvement.
-2. **Fork the repo** so you can make and test changes in your local repository.
-3. **Test your changes** Follow the procedures for testing in each contract sub-directory (e.g. [/contracts/settling_game](./contracts/settling_game/) and make sure your tests (manual and/or automated) pass.
-4. **Create a pull request** and describe the changes you made. Include a reference to the Issue you created.
-5. **Monitor and respond to comments** made by the team around code standards and suggestions. Most pull requests will have some back and forth.
-
-If you have further questions, visit [#builders-chat in our discord](https://discord.gg/yP4BCbRjUs) and make sure to reference your issue number.
-
-Thank you for taking the time to make our project better!
-
-</details>
-<hr>
-
-## External Reading Sources
-
-StarkNet is very new. Best practices are being discovered. We have amalgamated the best resources we think to guide you on your journey.
-
-<details><summary>Guides & Docs</summary>
-
-- https://perama-v.github.io/cairo/intro/
-- https://hackmd.io/@RoboTeddy/BJZFu56wF
-- https://starknet.io/docs/
-</details>
-<details><summary>Discords to Join</summary>
-
-- [StarkNet](https://discord.gg/XzvgKTTptb)
-- [MatchBox DAO](https://discord.gg/uj7wMxsmYw)
-</details>
 
 ## Realms Repositories
 

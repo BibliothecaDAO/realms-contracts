@@ -50,6 +50,7 @@ def map_realm(value, resources, wonders, orders):
             for b in resources:
                 if b['trait'] == a['value']:
                     resourceIds.append(b['id'])
+        resourceIds.sort()
 
         # add wonders
         if a['trait_type'] == "Wonder (translated)":

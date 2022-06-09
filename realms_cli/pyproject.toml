@@ -46,6 +46,8 @@ cairo-nile = "^0.5.0"
 
 #-----------PLAYER
 "create_pk" = "realms_cli.player.account.create_pk"
+"transfer_realm" = "realms_cli.player.account.transfer_realm"
+"transfer_s_realm" = "realms_cli.player.account.transfer_s_realm"
 
 #-----------LORDS
 "check_lords" = "realms_cli.player.lords.check_lords"
@@ -61,6 +63,7 @@ cairo-nile = "^0.5.0"
 "unsettle" = "realms_cli.player.settle.unsettle"
 "set_realm_data" = "realms_cli.player.settle.set_realm_data"
 "get_realm_data" = "realms_cli.player.settle.get_realm_data"
+"get_owned" = "realms_cli.player.settle.get_owned"
 
 #-----------CALCULATOR
 "troop_population" = "realms_cli.player.calculator.troop_population"
@@ -80,6 +83,7 @@ cairo-nile = "^0.5.0"
 "approve_resource_module" = "realms_cli.player.resources.approve_resource_module"
 "get_resource_upgrade_cost" = "realms_cli.player.resources.get_resource_upgrade_cost"
 "days_available" = "realms_cli.player.resources.days_available"
+"get_vault" = "realms_cli.player.resources.get_vault"
 
 #-----------COMBAT
 "get_unit_cost" = "realms_cli.player.combat.get_unit_cost"
@@ -93,13 +97,27 @@ cairo-nile = "^0.5.0"
 #-----------ADMIN
 "mint_resources" = "realms_cli.admin.main.mint_resources"
 "upgrade_module" = "realms_cli.admin.main.upgrade_module"
+"transfer_to" = "realms_cli.admin.main.transfer_to"
 
 #-----------MARKET
 "set_initial_liq" = "realms_cli.exchange.admin.set_initial_liq"
 "set_lords_approval" =  "realms_cli.exchange.admin.set_lords_approval"
 "set_resources_approval" =  "realms_cli.exchange.admin.set_resources_approval"
 
-"get_currency_r" =  "realms_cli.exchange.admin.get_currency_r"
+"get_currency_r" =  "realms_cli.exchange.trade.get_currency_r"
+"get_token_r" =  "realms_cli.exchange.trade.get_token_r"
 
-"buy_tokens" = "realms_cli.exchange.trade.buy_tokens"
-"sell_tokens" = "realms_cli.exchange.trade.sell_tokens"
+"buy_tokens" =  "realms_cli.exchange.trade.buy_tokens"
+"sell_tokens" =  "realms_cli.exchange.trade.sell_tokens"
+
+"get_buy_price" =  "realms_cli.exchange.trade.get_buy_price"
+
+"add_liq" = "realms_cli.exchange.trade.add_liq"
+
+"get_lp_pos" = "realms_cli.exchange.trade.get_lp_pos"
+
+"get_all_sell_price" = "realms_cli.exchange.trade.get_all_sell_price"
+"get_all_buy_price" = "realms_cli.exchange.trade.get_all_buy_price"
+"get_all_rates" = "realms_cli.exchange.trade.get_all_rates"
+
+"transfer_lords" = "realms_cli.player.lords.transfer_lords"

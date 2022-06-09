@@ -43,15 +43,15 @@ RESOURCE_ID = 2
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('account_factory', [dict(num_signers=NUM_SIGNING_ACCOUNTS)], indirect=True)
-async def test_mint_realm(game_factory):
-    admin_account, treasury_account, starknet, accounts, signers, arbiter, controller, settling_logic, realms, resources, lords, resources_logic, s_realms, buildings_logic, calculator_logic, crypts, s_crypts, crypts_logic, crypts_resources_logic = game_factory
+async def test_mint_realm(resource_factory):
+    admin_account, treasury_account, starknet, accounts, signers, arbiter, controller, settling_logic, realms, resources, lords, resources_logic, s_realms, calculator_logic = resource_factory
 
     #################
     # VALUE SETTERS #
     #################
 
     await signer.send_transaction(
-        account=admin_account, to=resources.contract_address, selector_name='mintBatch', calldata=[admin_account.contract_address, 10, *uint(1), *uint(2), *uint(3), *uint(4), *uint(5), *uint(6), *uint(7), *uint(8), *uint(9), *uint(10), 10, *uint(500 * 10 ** 18), *uint(500 * 10 ** 18), *uint(500 * 10 ** 18), *uint(500 * 10 ** 18), *uint(500 * 10 ** 18), *uint(500 * 10 ** 18), *uint(500 * 10 ** 18), *uint(500 * 10 ** 18), *uint(500 * 10 ** 18), *uint(500 * 10 ** 18)]
+        account=admin_account, to=resources.contract_address, selector_name='mintBatch', calldata=[admin_account.contract_address, 10, *uint(1), *uint(2), *uint(3), *uint(4), *uint(5), *uint(6), *uint(7), *uint(8), *uint(9), *uint(10), 10, *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500), *uint(500)]
     )
 
     # APPROVE RESOURCE CONTRACT FOR LORDS TRANSFERS - SET AT FULL SUPPLY TODO: NEEDS MORE SECURE SYSTEM
@@ -59,23 +59,15 @@ async def test_mint_realm(game_factory):
         account=treasury_account, to=lords.contract_address, selector_name='approve', calldata=[resources_logic.contract_address, *uint(INITIAL_SUPPLY)]
     )
 
-    await signer.send_transaction(
-        account=admin_account, to=lords.contract_address, selector_name='approve', calldata=[buildings_logic.contract_address, *uint(INITIAL_SUPPLY)]
-    )
-    
     await signers[1].send_transaction(
         account=treasury_account, to=lords.contract_address, selector_name='approve', calldata=[settling_logic.contract_address, *uint(INITIAL_SUPPLY)]
     )
 
     # RESOURCE COSTS
 
-    for resource_id, resource_cost in RESOURCE_UPGRADE_COST.items():
-        await signer.send_transaction(
-            account=admin_account, to=resources_logic.contract_address, selector_name='set_resource_upgrade_cost', calldata=[resource_id.value, resource_cost.resource_count, resource_cost.bits, resource_cost.packed_ids, resource_cost.packed_amounts]
-        )
-    # for building_id, building_cost in BUILDING_COSTS.items():
+    # for resource_id, resource_cost in RESOURCE_UPGRADE_COST.items():
     #     await signer.send_transaction(
-    #         account=admin_account, to=buildings_state.contract_address, selector_name='set_building_cost', calldata=[building_id.value, building_cost.resource_count, building_cost.bits, building_cost.packed_ids, building_cost.packed_amounts, *uint(building_cost.lords)]
+    #         account=admin_account, to=resources_logic.contract_address, selector_name='set_resource_upgrade_cost', calldata=[resource_id.value, resource_cost.resource_count, resource_cost.bits, resource_cost.packed_ids, resource_cost.packed_amounts]
     #     )
 
     # REALM METADATA
@@ -171,21 +163,6 @@ async def test_mint_realm(game_factory):
 
     await show_resource_balance(admin_account, resources)
 
-    #############
-    # BUILDINGS #
-    #############
-
-    # create building
-    await signer.send_transaction(
-        account=admin_account, to=buildings_logic.contract_address, selector_name='build', calldata=[*FIRST_TOKEN_ID, BUILDING_ID])
-
-    values = await buildings_logic.get_buildings_unpacked(FIRST_TOKEN_ID).call()
-
-    print(
-        f'Realm {FIRST_TOKEN_ID} buildings: {values.result.realm_buildings}')
-
-    set_block_timestamp(starknet.state, round(
-        time.time()) + STAKE_TIME * 3)
 
     ##################
     # UNSETTLE REALM #
@@ -216,7 +193,7 @@ async def show_lords_balance(account, lords):
     player_lords_value = await lords.balanceOf(account.contract_address).invoke()
     print(
         f'\n \033[1;33;40m👛 | $LORDS {player_lords_value.result.balance[0]}\n')
-    assert player_lords_value.result.balance[0] == STAKED_DAYS * LORDS_RATE * (10 ** 18)
+    assert player_lords_value.result.balance[0] == STAKED_DAYS * LORDS_RATE
 
 
 async def claim_resources(account, resources_logic, token):
