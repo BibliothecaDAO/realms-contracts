@@ -333,3 +333,15 @@ Restore your goerli.deployments.txt to its original state (use `main` branch as 
 TypeError: int() can't convert non-string with explicit base`</pre></strong>
 
 This error means that your user address (account-1) in the file goerli.deployments.txt is not being read correctly. Make sure your account-1 line is on its own line and contains the correct address. In some cases, the account-1 will be appended to an existing line so move it to its own line.
+
+
+----
+
+
+1. Export PK from Argent
+2. Save as STARKNET_PRIVATE_KEY in env
+3. `source realms_cli/.env.nile`
+4. `python scripts/script.py`
+5. Save the printed public key in the goerli.accounts.json in address-1
+6. Copy your address from argent and save it in both goerli.accounts.json and in goerli.deployments.txt (replacing the account-1 address)
+7. `pip install realms_cli/`
