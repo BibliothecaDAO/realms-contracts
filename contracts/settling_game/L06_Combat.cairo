@@ -229,7 +229,7 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     let (attacker_breached_wall : Squad) = inflict_wall_defense(attacker, defending_realm_id)
 
     let (attacker_end, defender_end, combat_outcome) = run_combat_loop(
-        attacking_realm_id, defending_realm_id, attacker, defender, attack_type
+        attacking_realm_id, defending_realm_id, attacker_breached_wall, defender, attack_type
     )
 
     let (new_attacker : PackedSquad) = COMBAT.pack_squad(attacker_end)
