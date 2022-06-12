@@ -1,6 +1,4 @@
-import functools
 import math
-import operator
 import struct
 
 import pytest
@@ -435,7 +433,7 @@ async def test_remove_troops_from_squad(library_combat_tests):
 # and sum_values_by_key in general.cairo file, as it calls them all
 @pytest.mark.asyncio
 async def test_transform_costs_to_token_ids_values(utils_general_tests):
-    costs = [TROOP_COSTS[1], TROOP_COSTS[2]]
+    costs = [TROOP_COSTS[TroopId.Watchman], TROOP_COSTS[TroopId.Guard]]
     tx = await utils_general_tests.test_transform_costs_to_token_ids_values(costs).invoke()
 
     expected_ids = [
@@ -447,3 +445,18 @@ async def test_transform_costs_to_token_ids_values(utils_general_tests):
 
     assert tx.result.ids == [utils_general_tests.Uint256(low=v, high=0) for v in expected_ids]
     assert tx.result.values == [utils_general_tests.Uint256(low=v, high=0) for v in expected_values]
+
+
+@pytest.mark.asyncio
+async def test_load_troop_costs(l06_combat_tests):
+    troops = [TroopId.Watchman, TroopId.Guard, TroopId.Scorpio]
+
+    # set_troop_cost is automatically imported/exposed in the contract
+    # due to the way how the compiler works, so we can call it directly
+    for troop_id in troops:
+        await l06_combat_tests.set_troop_cost(troop_id, TROOP_COSTS[troop_id]).invoke()
+    tx = await l06_combat_tests.test_load_troop_costs(troops).invoke()
+
+    assert len(tx.result.costs) == len(troops)
+    for idx, troop_id in enumerate(troops):
+        assert tx.result.costs[idx] == TROOP_COSTS[troop_id]
