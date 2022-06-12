@@ -561,7 +561,7 @@ func load_troop_costs{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     end
 
     let (cost : Cost) = get_troop_cost([troop_ids])
-    assert [costs + costs_idx] = cost
+    assert costs[costs_idx] = cost
 
     return load_troop_costs(troop_ids_len - 1, troop_ids + 1, costs_idx + 1, costs)
 end

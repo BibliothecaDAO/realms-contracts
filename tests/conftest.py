@@ -231,10 +231,7 @@ async def account_factory(request, compiled_account):
 @pytest.fixture(scope="module")
 async def l06_combat(starknet, xoroshiro) -> StarknetContract:
     contract = compile("contracts/settling_game/L06_Combat.cairo")
-    return await starknet.deploy(
-        contract_def=contract, constructor_calldata=[
-            11, xoroshiro.contract_address]
-    )
+    return await starknet.deploy(contract_def=contract)
 
 @pytest.fixture(scope="module")
 async def l06_combat_tests(starknet, xoroshiro) -> StarknetContract:
@@ -375,9 +372,9 @@ async def proxy_builder(compiled_proxy, starknet, signer, account, contract, cal
         contract_def=compiled_proxy,
         constructor_calldata=[implementation.contract_address],
     )
-    
+
     set_proxy = proxy.replace_abi(implementation.abi)
-    
+
     await signer.send_transaction(
         account=account,
         to=set_proxy.contract_address,
@@ -410,7 +407,7 @@ async def token_factory(account_factory, compiled_proxy):
         str_to_felt("Realms"),  # ticker
         admin_account.contract_address,  # contract_owner
     ])
-    
+
     proxy_crypts = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/tokens/Crypts_ERC721_Mintable.cairo", [
         str_to_felt("Crypts"),  # name
         str_to_felt("Crypts"),  # ticker
@@ -589,7 +586,7 @@ async def game_factory(token_factory, compiled_proxy):
         crypts_logic,
         crypts_resources_logic
     )
-    
+
 @pytest.fixture(scope='session')
 async def resource_factory(token_factory, compiled_proxy):
     (
@@ -695,7 +692,7 @@ async def resource_factory(token_factory, compiled_proxy):
         s_realms,
         calculator_logic
     )
-        
+
 @pytest.fixture(scope='session')
 async def exchange_token_factory(account_factory, compiled_proxy):
     (starknet, accounts, signers) = account_factory
