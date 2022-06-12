@@ -173,22 +173,22 @@ func build_squad_from_troops_in_realm{
 
     MODULE_ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
 
-    # # get the Cost for every Troop to build
-    # let (troop_costs : Cost*) = alloc()
-    # load_troop_costs(troop_ids_len, troop_ids, 0, troop_costs)
+    # get the Cost for every Troop to build
+    let (troop_costs : Cost*) = alloc()
+    load_troop_costs(troop_ids_len, troop_ids, 0, troop_costs)
 
-    # # transform costs into tokens
-    # let (token_ids : Uint256*) = alloc()
-    # let (token_values : Uint256*) = alloc()
-    # let (token_len : felt) = transform_costs_to_token_ids_values(
-    #     troop_ids_len, troop_costs, token_ids, token_values
-    # )
+    # transform costs into tokens
+    let (token_ids : Uint256*) = alloc()
+    let (token_values : Uint256*) = alloc()
+    let (token_len : felt) = transform_costs_to_token_ids_values(
+        troop_ids_len, troop_costs, token_ids, token_values
+    )
 
-    # # pay for the squad
-    # let (resource_address) = IModuleController.get_external_contract_address(
-    #     controller, ExternalContractIds.Resources
-    # )
-    # IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
+    # pay for the squad
+    let (resource_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Resources
+    )
+    IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
 
     # assemble the squad, store it in a Realm
     let (realm_combat_data : RealmCombatData) = get_realm_combat_data(realm_id)
