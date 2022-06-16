@@ -16,6 +16,12 @@ namespace s_realms_IERC721:
     func symbol() -> (symbol : felt):
     end
 
+    func tokenByIndex(index : Uint256) -> (tokenId : Uint256):
+    end
+
+    func tokenOfOwnerByIndex(owner : felt, index : Uint256) -> (tokenId : Uint256):
+    end
+
     func balanceOf(owner : felt) -> (balance : Uint256):
     end
 
