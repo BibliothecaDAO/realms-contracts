@@ -85,15 +85,30 @@ func set_relic_holder{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_ch
 
     let (isEq) = uint256_eq(current_relic_owner, loser_token_id)
 
+    # Capture Relic if owned by loser
     # If Relic is owned by loser, send to victor
     if isEq == 1:
         _set_relic_holder(loser_token_id, winner_token_id)
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    else:
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    end
+
+    # Capture back if held by loser
+    # Check if loser has winners token
+    let (winners_relic_owner) = get_current_relic_holder(winner_token_id)
+
+    let (holdsRelic) = uint256_eq(winners_relic_owner, loser_token_id)
+
+    if holdsRelic == 1:
+        _set_relic_holder(winner_token_id, winner_token_id)
         return ()
     end
 
-    # If not owner
-
-    # _set_relic_holder(loser_token_id, owner_token_id)
     return ()
 end
 
