@@ -109,6 +109,8 @@ func set_relic_holder{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_ch
         return ()
     end
 
+    # TODO: Add Order capture back
+
     return ()
 end
 
