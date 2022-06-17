@@ -48,6 +48,14 @@ end
 func UnSettled(owner : felt, token_id : Uint256):
 end
 
+@event
+func VaultTime(token_id : Uint256, time_staked : felt):
+end
+
+@event
+func ClaimTime(token_id : Uint256, time_staked : felt):
+end
+
 ###########
 # STORAGE #
 ###########
@@ -205,6 +213,7 @@ func _set_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
 ):
     let (block_timestamp) = get_block_timestamp()
     time_staked.write(token_id, block_timestamp - time_left)
+    ClaimTime.emit(token_id, block_timestamp - time_left)
     return ()
 end
 
@@ -213,6 +222,7 @@ func _set_time_vault_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ra
 ):
     let (block_timestamp) = get_block_timestamp()
     time_vault_staked.write(token_id, block_timestamp - time_left)
+    VaultTime.emit(token_id, block_timestamp - time_left)
     return ()
 end
 
