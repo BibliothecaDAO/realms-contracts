@@ -17,6 +17,7 @@ from contracts.settling_game.interfaces.imodules import (
     IModuleController,
     IL02_Resources,
     IL04_Calculator,
+    IL09_Relics,
 )
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
@@ -259,8 +260,10 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
         let (resources_logic_address) = IModuleController.get_module_address(
             controller, ModuleIds.L02_Resources
         )
+        let (relic_address) = IModuleController.get_module_address(controller, ModuleIds.L09_Relics)
         let (caller) = get_caller_address()
         IL02_Resources.pillage_resources(resources_logic_address, defending_realm_id, caller)
+        IL09_Relics.set_relic_holder(relic_address, attacking_realm_id, defending_realm_id)
         tempvar syscall_ptr = syscall_ptr
         tempvar range_check_ptr = range_check_ptr
         tempvar pedersen_ptr = pedersen_ptr

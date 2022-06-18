@@ -196,3 +196,9 @@ namespace IL08_Crypts_Resources:
     func claim_resources(token_id : Uint256):
     end
 end
+
+@contract_interface
+namespace IL09_Relics:
+    func set_relic_holder(winner_token_id : Uint256, loser_token_id : Uint256):
+    end
+end

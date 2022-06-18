@@ -200,6 +200,7 @@ namespace ModuleIds:
     const L06_Combat = 11  # TODO: Refactor Combat code so this can be 6 to fit in sequence with other contracts
     const L07_Crypts = 7
     const L08_Crypts_Resources = 8
+    const L09_Relics = 12
 end
 
 namespace ExternalContractIds:
