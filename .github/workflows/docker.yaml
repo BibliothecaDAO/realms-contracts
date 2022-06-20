@@ -11,6 +11,9 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
+      - name: Set Lower Case Owner
+        run: |
+          echo "OWNER=${GITHUB_REPOSITORY_OWNER,,}" >>${GITHUB_ENV}
       - name: Checkout
         uses: actions/checkout@v3
       - name: Set up QEMU
@@ -29,4 +32,4 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/loot:latest
+          tags: ghcr.io/${{ env.OWNER }}/loot:latest
