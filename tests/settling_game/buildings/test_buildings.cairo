@@ -12,7 +12,7 @@ from contracts.settling_game.utils.game_structs import (
 from contracts.settling_game.library.library_buildings import BUILDINGS
 from starkware.cairo.common.pow import pow
 
-const time_balance = 300
+const time_balance = 500
 const decay_slope = 400
 const building_id = 1
 

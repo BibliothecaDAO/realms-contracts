@@ -11,7 +11,7 @@ from starkware.cairo.common.math import assert_not_zero
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import Uint256
-
+from contracts.settling_game.library.library_buildings import BUILDINGS
 from contracts.settling_game.utils.general import unpack_data, transform_costs_to_token_ids_values
 from contracts.settling_game.utils.game_structs import (
     RealmBuildings,
@@ -90,6 +90,10 @@ end
 func building_lords_cost(building_id : felt) -> (lords : Uint256):
 end
 
+@storage_var
+func castle_time(token_id : felt) -> (time : felt):
+end
+
 ###############
 # CONSTRUCTOR #
 ###############
@@ -146,6 +150,8 @@ func build{
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
         contract_address=realms_address, token_id=token_id
     )
+
+    # Check Area
 
     # BUILD
     build_buildings(token_id, building_id)
