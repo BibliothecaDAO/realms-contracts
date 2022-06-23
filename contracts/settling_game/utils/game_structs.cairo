@@ -115,6 +115,18 @@ namespace BuildingsTime:
     const Castle = 9000
 end
 
+namespace BuildingsDecaySlope:
+    const House = 400
+    const StoreHouse = 400
+    const Granary = 400
+    const Farm = 400
+    const FishingVillage = 400
+    const Barracks = 400
+    const MageTower = 400
+    const ArcherTower = 400
+    const Castle = 200
+end
+
 namespace ArmyCap:
     const House = 2
     const StoreHouse = 3

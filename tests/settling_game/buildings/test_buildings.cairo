@@ -57,8 +57,18 @@ end
 func test_get_decay_slope{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     alloc_locals
 
-    let (base_building_number) = BUILDINGS.get_decay_slope(1)
+    let (decay_slope) = BUILDINGS.get_decay_slope(1)
 
-    %{ print(ids.base_building_number) %}
+    %{ print(ids.decay_slope) %}
+    return ()
+end
+
+@external
+func test_get_final_time{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    alloc_locals
+
+    let (final_time) = BUILDINGS.get_final_time(1000, 1, 1)
+
+    %{ print(ids.final_time) %}
     return ()
 end

@@ -55,8 +55,6 @@ const SHIFT_NFT_3 = 2 ** 27
 const SHIFT_NFT_4 = 2 ** 52
 const SHIFT_NFT_5 = 2 ** 54
 
-
-
 const TRUE = 1
 const FALSE = 0
 
@@ -77,4 +75,7 @@ const BASE_LORDS_PER_DAY = 25
 const GENESIS_TIMESTAMP = 1645743897
 
 # COMBAT
-const PILLAGE_AMOUNT = 25
+const PILLAGE_AMOUNT = 25  # bp
+
+# BUILDINGS
+const BASE_SQM = 25

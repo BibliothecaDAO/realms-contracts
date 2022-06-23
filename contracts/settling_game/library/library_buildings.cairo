@@ -1,5 +1,5 @@
-# STAKING LIBRARY
-#   Helper functions for staking.
+# BUILDINGS LIBRARY
+#   functions for
 #
 #
 # MIT License
@@ -17,13 +17,10 @@ from contracts.settling_game.utils.game_structs import (
     RealmBuildings,
     RealmBuildingsSize,
     BuildingsTime,
+    BuildingsDecaySlope,
 )
+from contracts.settling_game.utils.constants import DAY, BASE_SQM
 from lib.cairo_math_64x61.contracts.Math64x61 import Math64x61_ln
-
-# Example Castle time
-
-# Base sqm on a Realm
-const BASE_SQM = 25
 
 namespace BUILDINGS:
     # Checks if you can build on a Realm, reverts if you cannot
@@ -101,8 +98,22 @@ namespace BUILDINGS:
     func get_final_time{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         block_timestamp : felt, building_id : felt, quantity : felt
     ) -> (time : felt):
-        let building_time = 2000
-        return (block_timestamp + building_time * quantity)
+        let idx = building_id - 1
+
+        let (type_label) = get_label_location(building_life_time)
+
+        return (block_timestamp + [type_label + idx] * quantity)
+
+        building_life_time:
+        dw BuildingsTime.House  # house
+        dw BuildingsTime.StoreHouse  # storehouse
+        dw BuildingsTime.Granary  # granary
+        dw BuildingsTime.Farm  # farm
+        dw BuildingsTime.FishingVillage  # fishing village
+        dw BuildingsTime.Barracks  # barracks
+        dw BuildingsTime.MageTower  # mage tower
+        dw BuildingsTime.ArcherTower  # archer tower
+        dw BuildingsTime.Castle  # castle
     end
 
     # Gets raw building time left of building on realm. This is only used for precalulations
@@ -128,15 +139,15 @@ namespace BUILDINGS:
         return ([type_label + idx])
 
         building_decay_slope_bp:
-        dw 400  # house
-        dw 400  # storehouse
-        dw 400  # granary
-        dw 400  # farm
-        dw 400  # fishing village
-        dw 400  # barracks
-        dw 400  # mage tower
-        dw 400  # archer tower
-        dw 200  # castle
+        dw BuildingsDecaySlope.House  # house
+        dw BuildingsDecaySlope.StoreHouse  # storehouse
+        dw BuildingsDecaySlope.Granary  # granary
+        dw BuildingsDecaySlope.Farm  # farm
+        dw BuildingsDecaySlope.FishingVillage  # fishing village
+        dw BuildingsDecaySlope.Barracks  # barracks
+        dw BuildingsDecaySlope.MageTower  # mage tower
+        dw BuildingsDecaySlope.ArcherTower  # archer tower
+        dw BuildingsDecaySlope.Castle  # castle
     end
 
     # Returns decay rate in bp
