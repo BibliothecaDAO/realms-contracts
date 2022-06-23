@@ -2,12 +2,10 @@
 protostar_version = "0.2.0"
 
 ["protostar.project"]
-libs_path = "realms marketplace"
+libs_path = "./lib"
 
+# This section is explained in the "Project compilation" guide.
 ["protostar.contracts"]
-marketplace = [
-    "./contracts/nft_marketplace/bibliotheca_marketplace.cairo",
+main = [
+  "./src/main.cairo",
 ]
-
-["protostar.shared_command_configs"]
-cairo_path = ["./contracts"]

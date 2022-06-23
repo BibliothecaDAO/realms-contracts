@@ -31,49 +31,40 @@ struct RealmData:
 end
 
 struct RealmBuildings:
-    member Fairgrounds : felt
-    member RoyalReserve : felt
-    member GrandMarket : felt
-    member Castle : felt
-    member Guild : felt
-    member OfficerAcademy : felt
+    member House : felt
+    member StoreHouse : felt
     member Granary : felt
-    member Housing : felt
-    member Amphitheater : felt
-    member ArcherTower : felt
-    member School : felt
-    member MageTower : felt
-    member TradeOffice : felt
-    member Architect : felt
-    member ParadeGrounds : felt
+    member Farm : felt
+    member FishingVillage : felt
     member Barracks : felt
-    member Dock : felt
-    member Fishmonger : felt
-    member Farms : felt
-    member Hamlet : felt
+    member MageTower : felt
+    member ArcherTower : felt
+    member Castle : felt
 end
 
 namespace RealmBuildingsIds:
-    const Fairgrounds = 1
-    const RoyalReserve = 2
-    const GrandMarket = 3
-    const Castle = 4
-    const Guild = 5
-    const OfficerAcademy = 6
-    const Granary = 7
-    const Housing = 8
-    const Amphitheater = 9
-    const ArcherTower = 10
-    const School = 11
-    const MageTower = 12
-    const TradeOffice = 13
-    const Architect = 14
-    const ParadeGrounds = 15
-    const Barracks = 16
-    const Dock = 17
-    const Fishmonger = 18
-    const Farms = 19
-    const Hamlet = 20
+    const House = 1
+    const StoreHouse = 2
+    const Granary = 3
+    const Farm = 4
+    const FishingVillage = 5
+    const Barracks = 6
+    const MageTower = 7
+    const ArcherTower = 8
+    const Castle = 9
+end
+
+# square meters
+namespace RealmBuildingsSize:
+    const House = 2
+    const StoreHouse = 3
+    const Granary = 3
+    const Farm = 3
+    const FishingVillage = 3
+    const Barracks = 6
+    const MageTower = 6
+    const ArcherTower = 6
+    const Castle = 12
 end
 
 namespace RealmBuildingLimitTraitsIds:

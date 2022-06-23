@@ -193,227 +193,106 @@ func build_buildings{
 
     let (buildings : felt*) = alloc()
 
-    if building_id == RealmBuildingsIds.Fairgrounds:
+    if building_id == RealmBuildingsIds.House:
         # CHECK SPACE
-        if current_buildings.Fairgrounds == realms_data.regions:
+        if current_buildings.House == realms_data.regions:
             assert_not_zero(0)
         end
-        local id_1 = (current_buildings.Fairgrounds + 1) * SHIFT_6_1
+        local id_1 = (current_buildings.House + 1) * SHIFT_6_1
         buildings[0] = id_1
     else:
-        buildings[0] = current_buildings.Fairgrounds * SHIFT_6_1
+        buildings[0] = current_buildings.House * SHIFT_6_1
     end
 
-    if building_id == RealmBuildingsIds.RoyalReserve:
-        if current_buildings.RoyalReserve == realms_data.regions:
+    if building_id == RealmBuildingsIds.StoreHouse:
+        if current_buildings.StoreHouse == realms_data.regions:
             assert_not_zero(0)
         end
-        local id_2 = (current_buildings.RoyalReserve + 1) * SHIFT_6_2
+        local id_2 = (current_buildings.StoreHouse + 1) * SHIFT_6_2
         buildings[1] = id_2
     else:
-        local id_2 = current_buildings.RoyalReserve * SHIFT_6_2
+        local id_2 = current_buildings.StoreHouse * SHIFT_6_2
         buildings[1] = id_2
-    end
-
-    if building_id == RealmBuildingsIds.GrandMarket:
-        if current_buildings.GrandMarket == realms_data.regions:
-            assert_not_zero(0)
-        end
-        local id_3 = (current_buildings.GrandMarket + 1) * SHIFT_6_3
-        buildings[2] = id_3
-    else:
-        local id_3 = current_buildings.GrandMarket * SHIFT_6_3
-        buildings[2] = id_3
-    end
-
-    if building_id == RealmBuildingsIds.Castle:
-        if current_buildings.Castle == realms_data.regions:
-            assert_not_zero(0)
-        end
-        local id_4 = (current_buildings.Castle + 1) * SHIFT_6_4
-        buildings[3] = id_4
-    else:
-        local id_4 = current_buildings.Castle * SHIFT_6_4
-        buildings[3] = id_4
-    end
-
-    if building_id == RealmBuildingsIds.Guild:
-        if current_buildings.Guild == realms_data.regions:
-            assert_not_zero(0)
-        end
-        local id_5 = (current_buildings.Guild + 1) * SHIFT_6_5
-        buildings[4] = id_5
-    else:
-        local id_5 = current_buildings.Guild * SHIFT_6_5
-        buildings[4] = id_5
-    end
-
-    if building_id == RealmBuildingsIds.OfficerAcademy:
-        if current_buildings.OfficerAcademy == realms_data.regions:
-            assert_not_zero(0)
-        end
-        local id_6 = (current_buildings.OfficerAcademy + 1) * SHIFT_6_6
-        buildings[5] = id_6
-    else:
-        local id_6 = current_buildings.OfficerAcademy * SHIFT_6_6
-        buildings[5] = id_6
     end
 
     if building_id == RealmBuildingsIds.Granary:
-        if current_buildings.Granary == realms_data.cities:
+        if current_buildings.Granary == realms_data.regions:
             assert_not_zero(0)
         end
-        local id_7 = (current_buildings.Granary + 1) * SHIFT_6_7
-        buildings[6] = id_7
+        local id_3 = (current_buildings.Granary + 1) * SHIFT_6_3
+        buildings[2] = id_3
     else:
-        local id_7 = current_buildings.Granary * SHIFT_6_7
-        buildings[6] = id_7
+        local id_3 = current_buildings.Granary * SHIFT_6_3
+        buildings[2] = id_3
     end
 
-    if building_id == RealmBuildingsIds.Housing:
-        if current_buildings.Housing == realms_data.cities:
+    if building_id == RealmBuildingsIds.Farm:
+        if current_buildings.Farm == realms_data.regions:
             assert_not_zero(0)
         end
-        local id_8 = (current_buildings.Housing + 1) * SHIFT_6_8
-        buildings[7] = id_8
+        local id_4 = (current_buildings.Farm + 1) * SHIFT_6_4
+        buildings[3] = id_4
     else:
-        local id_8 = current_buildings.Housing * SHIFT_6_8
-        buildings[7] = id_8
+        local id_4 = current_buildings.Farm * SHIFT_6_4
+        buildings[3] = id_4
     end
 
-    if building_id == RealmBuildingsIds.Amphitheater:
-        if current_buildings.Amphitheater == realms_data.cities:
+    if building_id == RealmBuildingsIds.FishingVillage:
+        if current_buildings.FishingVillage == realms_data.regions:
             assert_not_zero(0)
         end
-        local id_9 = (current_buildings.Amphitheater + 1) * SHIFT_6_9
-        buildings[8] = id_9
+        local id_5 = (current_buildings.FishingVillage + 1) * SHIFT_6_5
+        buildings[4] = id_5
     else:
-        local id_9 = current_buildings.Amphitheater * SHIFT_6_9
-        buildings[8] = id_9
+        local id_5 = current_buildings.FishingVillage * SHIFT_6_5
+        buildings[4] = id_5
     end
 
-    if building_id == RealmBuildingsIds.ArcherTower:
-        if current_buildings.ArcherTower == realms_data.cities:
+    if building_id == RealmBuildingsIds.Barracks:
+        if current_buildings.Barracks == realms_data.regions:
             assert_not_zero(0)
         end
-        local id_10 = (current_buildings.ArcherTower + 1) * SHIFT_6_10
-        buildings[9] = id_10
+        local id_6 = (current_buildings.Barracks + 1) * SHIFT_6_6
+        buildings[5] = id_6
     else:
-        local id_10 = current_buildings.ArcherTower * SHIFT_6_10
-        buildings[9] = id_10
-    end
-
-    if building_id == RealmBuildingsIds.School:
-        if current_buildings.School == realms_data.cities:
-            assert_not_zero(0)
-        end
-        local id_11 = (current_buildings.School + 1) * SHIFT_6_11
-        buildings[10] = id_11
-    else:
-        local id_11 = current_buildings.School * SHIFT_6_11
-        buildings[10] = id_11
+        local id_6 = current_buildings.Barracks * SHIFT_6_6
+        buildings[5] = id_6
     end
 
     if building_id == RealmBuildingsIds.MageTower:
         if current_buildings.MageTower == realms_data.cities:
             assert_not_zero(0)
         end
-        local id_12 = (current_buildings.MageTower + 1) * SHIFT_6_12
-        buildings[11] = id_12
+        local id_7 = (current_buildings.MageTower + 1) * SHIFT_6_7
+        buildings[6] = id_7
     else:
-        local id_12 = current_buildings.MageTower * SHIFT_6_12
-        buildings[11] = id_12
+        local id_7 = current_buildings.MageTower * SHIFT_6_7
+        buildings[6] = id_7
     end
 
-    if building_id == RealmBuildingsIds.TradeOffice:
-        if current_buildings.TradeOffice == realms_data.cities:
+    if building_id == RealmBuildingsIds.ArcherTower:
+        if current_buildings.ArcherTower == realms_data.cities:
             assert_not_zero(0)
         end
-        local id_13 = (current_buildings.TradeOffice + 1) * SHIFT_6_13
-        buildings[12] = id_13
+        local id_8 = (current_buildings.ArcherTower + 1) * SHIFT_6_8
+        buildings[7] = id_8
     else:
-        local id_13 = current_buildings.TradeOffice * SHIFT_6_13
-        buildings[12] = id_13
+        local id_8 = current_buildings.ArcherTower * SHIFT_6_8
+        buildings[7] = id_8
     end
 
-    if building_id == RealmBuildingsIds.Architect:
-        if current_buildings.Architect == realms_data.cities:
+    if building_id == RealmBuildingsIds.Castle:
+        if current_buildings.Castle == realms_data.cities:
             assert_not_zero(0)
         end
-        local id_14 = (current_buildings.Architect + 1) * SHIFT_6_14
-        buildings[13] = id_14
+        local id_9 = (current_buildings.Castle + 1) * SHIFT_6_9
+        buildings[8] = id_9
     else:
-        local id_14 = current_buildings.Architect * SHIFT_6_14
-        buildings[13] = id_14
+        local id_9 = current_buildings.Castle * SHIFT_6_9
+        buildings[8] = id_9
     end
 
-    if building_id == RealmBuildingsIds.ParadeGrounds:
-        if current_buildings.ParadeGrounds == realms_data.cities:
-            assert_not_zero(0)
-        end
-        local id_15 = (current_buildings.ParadeGrounds + 1) * SHIFT_6_15
-        buildings[14] = id_15
-    else:
-        local id_15 = current_buildings.ParadeGrounds * SHIFT_6_15
-        buildings[14] = id_15
-    end
-
-    if building_id == RealmBuildingsIds.Barracks:
-        if current_buildings.Barracks == realms_data.cities:
-            assert_not_zero(0)
-        end
-        local id_16 = (current_buildings.Barracks + 1) * SHIFT_6_16
-        buildings[15] = id_16
-    else:
-        local id_16 = current_buildings.Barracks * SHIFT_6_16
-        buildings[15] = id_16
-    end
-
-    if building_id == RealmBuildingsIds.Dock:
-        if current_buildings.Dock == realms_data.harbours:
-            assert_not_zero(0)
-        end
-        local id_17 = (current_buildings.Dock + 1) * SHIFT_6_17
-        buildings[16] = id_17
-    else:
-        local id_17 = current_buildings.Dock * SHIFT_6_17
-        buildings[16] = id_17
-    end
-
-    if building_id == RealmBuildingsIds.Fishmonger:
-        if current_buildings.Fishmonger == realms_data.harbours:
-            assert_not_zero(0)
-        end
-        local id_18 = (current_buildings.Fishmonger + 1) * SHIFT_6_18
-        buildings[17] = id_18
-    else:
-        local id_18 = current_buildings.Fishmonger * SHIFT_6_18
-        buildings[17] = id_18
-    end
-
-    if building_id == RealmBuildingsIds.Farms:
-        if current_buildings.Farms == realms_data.rivers:
-            assert_not_zero(0)
-        end
-        local id_19 = (current_buildings.Farms + 1) * SHIFT_6_19
-        buildings[18] = id_19
-    else:
-        local id_19 = current_buildings.Farms * SHIFT_6_19
-        buildings[18] = id_19
-    end
-
-    if building_id == RealmBuildingsIds.Hamlet:
-        if current_buildings.Hamlet == realms_data.rivers:
-            assert_not_zero(0)
-        end
-        local id_20 = (current_buildings.Hamlet + 1) * SHIFT_6_20
-        buildings[19] = id_20
-    else:
-        local id_20 = current_buildings.Hamlet * SHIFT_6_20
-        buildings[19] = id_20
-    end
-
-    tempvar value = buildings[19] + buildings[18] + buildings[17] + buildings[16] + buildings[15] + buildings[14] + buildings[13] + buildings[12] + buildings[11] + buildings[10] + buildings[9] + buildings[8] + buildings[7] + buildings[6] + buildings[5] + buildings[4] + buildings[3] + buildings[2] + buildings[1] + buildings[0]
+    tempvar value = buildings[8] + buildings[7] + buildings[6] + buildings[5] + buildings[4] + buildings[3] + buildings[2] + buildings[1] + buildings[0]
 
     realm_buildings.write(token_id, value)
     return ()
@@ -431,49 +310,27 @@ func get_buildings_unpacked{
 
     let (data) = get_realm_buildings(token_id)
 
-    let (Fairgrounds) = unpack_data(data, 0, 63)
-    let (RoyalReserve) = unpack_data(data, 6, 63)
-    let (GrandMarket) = unpack_data(data, 12, 63)
-    let (Castle) = unpack_data(data, 18, 63)
-    let (Guild) = unpack_data(data, 24, 63)
-    let (OfficerAcademy) = unpack_data(data, 30, 63)
-    let (Granary) = unpack_data(data, 36, 63)
-    let (Housing) = unpack_data(data, 42, 63)
-    let (Amphitheater) = unpack_data(data, 48, 63)
-    let (ArcherTower) = unpack_data(data, 54, 63)
-    let (School) = unpack_data(data, 60, 63)
-    let (MageTower) = unpack_data(data, 66, 63)
-    let (TradeOffice) = unpack_data(data, 72, 63)
-    let (Architect) = unpack_data(data, 78, 63)
-    let (ParadeGrounds) = unpack_data(data, 84, 63)
-    let (Barracks) = unpack_data(data, 90, 63)
-    let (Dock) = unpack_data(data, 96, 63)
-    let (Fishmonger) = unpack_data(data, 102, 63)
-    let (Farms) = unpack_data(data, 108, 63)
-    let (Hamlet) = unpack_data(data, 114, 63)
+    let (House) = unpack_data(data, 0, 63)
+    let (StoreHouse) = unpack_data(data, 6, 63)
+    let (Granary) = unpack_data(data, 12, 63)
+    let (Farm) = unpack_data(data, 18, 63)
+    let (FishingVillage) = unpack_data(data, 24, 63)
+    let (Barracks) = unpack_data(data, 30, 63)
+    let (MageTower) = unpack_data(data, 36, 63)
+    let (ArcherTower) = unpack_data(data, 42, 63)
+    let (Castle) = unpack_data(data, 48, 63)
 
     return (
         realm_buildings=RealmBuildings(
-        Fairgrounds=Fairgrounds,
-        RoyalReserve=RoyalReserve,
-        GrandMarket=GrandMarket,
-        Castle=Castle,
-        Guild=Guild,
-        OfficerAcademy=OfficerAcademy,
+        House=House,
+        StoreHouse=StoreHouse,
         Granary=Granary,
-        Housing=Housing,
-        Amphitheater=Amphitheater,
-        ArcherTower=ArcherTower,
-        School=School,
-        MageTower=MageTower,
-        TradeOffice=TradeOffice,
-        Architect=Architect,
-        ParadeGrounds=ParadeGrounds,
+        Farm=Farm,
+        FishingVillage=FishingVillage,
         Barracks=Barracks,
-        Dock=Dock,
-        Fishmonger=Fishmonger,
-        Farms=Farms,
-        Hamlet=Hamlet
+        MageTower=MageTower,
+        ArcherTower=ArcherTower,
+        Castle=Castle
         ),
     )
 end
