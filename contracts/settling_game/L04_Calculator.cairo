@@ -137,22 +137,12 @@ func calculate_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
         buildings_logic_address, token_id
     )
 
-    let House = BuildingsPopulation.House * current_buildings.House
-    let StoreHouse = BuildingsPopulation.StoreHouse * current_buildings.StoreHouse
-    let Granary = BuildingsPopulation.Granary * current_buildings.Granary
-    let Farm = BuildingsPopulation.Farm * current_buildings.Farm
-    let FishingVillage = BuildingsPopulation.FishingVillage * current_buildings.FishingVillage
-    let Barracks = BuildingsPopulation.Barracks * current_buildings.Barracks
-    let MageTower = BuildingsPopulation.MageTower * current_buildings.MageTower
-    let ArcherTower = BuildingsPopulation.ArcherTower * current_buildings.ArcherTower
-    let Castle = BuildingsPopulation.Castle * current_buildings.Castle
-
-    let population = House + StoreHouse + Granary + Farm + FishingVillage + Barracks + MageTower + ArcherTower + Castle
-
     # TROOP POPULATION
     let (troop_population) = calculate_troop_population(token_id)
 
-    return (population - troop_population)
+    let (realm_population) = CALCULATOR.calculate_food(current_buildings, troop_population)
+
+    return (realm_population)
 end
 
 @view
@@ -170,21 +160,11 @@ func calculate_food{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
         buildings_logic_address, token_id
     )
 
-    let House = BuildingsFood.House * current_buildings.House
-    let StoreHouse = BuildingsFood.StoreHouse * current_buildings.StoreHouse
-    let Granary = BuildingsFood.Granary * current_buildings.Granary
-    let Farm = BuildingsFood.Farm * current_buildings.Farm
-    let FishingVillage = BuildingsFood.FishingVillage * current_buildings.FishingVillage
-    let Barracks = BuildingsFood.Barracks * current_buildings.Barracks
-    let MageTower = BuildingsFood.MageTower * current_buildings.MageTower
-    let ArcherTower = BuildingsFood.ArcherTower * current_buildings.ArcherTower
-    let Castle = BuildingsFood.Castle * current_buildings.Castle
-
-    let food = House + StoreHouse + Granary + Farm + FishingVillage + Barracks + MageTower + ArcherTower + Castle
-
     let (troop_population) = calculate_troop_population(token_id)
 
-    return (food - troop_population)
+    let (realm_food) = CALCULATOR.calculate_food(current_buildings, troop_population)
+
+    return (realm_food)
 end
 
 # TODO: Make LORDS decrease over time...
@@ -227,8 +207,18 @@ end
 
 @view
 func calculate_troop_coefficent{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    ) -> (troop_coefficent : felt):
+    token_id : Uint256
+) -> (troop_coefficent : felt):
     alloc_locals
+    let (controller) = MODULE_controller_address()
+    let (buildings_logic_address) = IModuleController.get_module_address(
+        contract_address=controller, module_id=ModuleIds.L03_Buildings
+    )
+    let (current_buildings : RealmBuildings) = IL03_Buildings.get_effective_buildings(
+        buildings_logic_address, token_id
+    )
 
-    return (troop_coefficent=1)
+    let (troop_coefficent) = CALCULATOR.get_troop_coefficient(current_buildings)
+
+    return (troop_coefficent)
 end
