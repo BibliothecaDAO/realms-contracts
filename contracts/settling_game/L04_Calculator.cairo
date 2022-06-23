@@ -224,3 +224,11 @@ func calculate_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
         return (tax_percentage=tax)
     end
 end
+
+@view
+func calculate_troop_coefficent{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    ) -> (troop_coefficent : felt):
+    alloc_locals
+
+    return (troop_coefficent=1)
+end

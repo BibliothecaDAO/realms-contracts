@@ -16,7 +16,6 @@ from contracts.settling_game.utils.game_structs import RealmBuildings
 from lib.cairo_math_64x61.contracts.Math64x61 import Math64x61_ln
 
 # Example Castle time
-const CASTLE_RATE = 10000
 
 # Base sqm on a Realm
 const BASE_SQM = 25
