@@ -178,13 +178,15 @@ namespace BUILDINGS:
     # This takes in the actual time balance and returns a decayed time
     func get_effective_building_time{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(time_balance : felt, decay_rate : felt) -> (current_actual_time : felt):
+    }(time_balance : felt, decay_rate : felt) -> (effective_building_time : felt):
         # Calculate effective building time
 
         # TODO: Add Max decay to stop overflow
-        let (current_actual_time, _) = unsigned_div_rem((10000 - decay_rate) * time_balance, 10000)
+        let (effective_building_time, _) = unsigned_div_rem(
+            (10000 - decay_rate) * time_balance, 10000
+        )
 
-        return (current_actual_time)
+        return (effective_building_time)
     end
 
     func calculate_effective_buildings{
