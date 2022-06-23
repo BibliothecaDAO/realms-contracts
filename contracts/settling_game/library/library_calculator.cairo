@@ -13,22 +13,21 @@ from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
 
 namespace CALCULATOR:
-    func get_happiness{syscall_ptr : felt*, range_check_ptr}(
-        culture : felt, population : felt, food : felt
-    ) -> (happiness : felt):
+    func get_happiness{syscall_ptr : felt*, range_check_ptr}(population : felt, food : felt) -> (
+        happiness : felt
+    ):
         alloc_locals
         # FETCH VALUES
         let (population_calculation, _) = unsigned_div_rem(population, 10)
-        let culture_calc = culture - population_calculation
         let food_calc = food - population_calculation
 
         # SANITY FALL BACK CHECK INCASE OF OVERFLOW....
-        let (assert_check) = is_nn(100 + culture_calc + food_calc)
+        let (assert_check) = is_nn(100 + food_calc)
         if assert_check == 0:
             return (50)
         end
 
-        let happiness = 100 + culture_calc + food_calc
+        let happiness = 100 + food_calc
 
         # if happiness less than 50, cap it
         let (is_lessthan_threshold) = is_le(happiness, 50)

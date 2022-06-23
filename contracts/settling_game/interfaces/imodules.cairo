@@ -99,6 +99,8 @@ end
 namespace IL03_Buildings:
     func get_buildings_unpacked(token_id : Uint256) -> (realm_buildings : RealmBuildings):
     end
+    func get_effective_buildings(token_id : Uint256) -> (realm_buildings : RealmBuildings):
+    end
 end
 
 @contract_interface
