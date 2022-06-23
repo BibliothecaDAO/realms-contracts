@@ -103,7 +103,7 @@ namespace BuildingsPopulation:
     const Castle = 12
 end
 
-namespace BuildingsTime:
+namespace BuildingsIntegrityLength:
     const House = 1000
     const StoreHouse = 2000
     const Granary = 2000

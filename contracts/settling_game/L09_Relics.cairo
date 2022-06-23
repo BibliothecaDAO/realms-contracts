@@ -78,11 +78,11 @@ func set_relic_holder{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_ch
 
     let (current_relic_owner) = get_current_relic_holder(loser_token_id)
 
-    let (isEq) = uint256_eq(current_relic_owner, loser_token_id)
+    let (is_equal) = uint256_eq(current_relic_owner, loser_token_id)
 
     # Capture Relic if owned by loser
     # If Relic is owned by loser, send to victor
-    if isEq == TRUE:
+    if is_equal == TRUE:
         _set_relic_holder(loser_token_id, winner_token_id)
         tempvar syscall_ptr = syscall_ptr
         tempvar range_check_ptr = range_check_ptr
@@ -97,9 +97,9 @@ func set_relic_holder{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_ch
     # Check if loser has winners token
     let (winners_relic_owner) = get_current_relic_holder(winner_token_id)
 
-    let (holdsRelic) = uint256_eq(winners_relic_owner, loser_token_id)
+    let (holds_relic) = uint256_eq(winners_relic_owner, loser_token_id)
 
-    if holdsRelic == TRUE:
+    if holds_relic == TRUE:
         _set_relic_holder(winner_token_id, winner_token_id)
         return ()
     end
@@ -142,9 +142,9 @@ func get_current_relic_holder{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
 
     # If 0 the relic is still in the hands of the owner
     # else realm is in new owner
-    let (isEq) = uint256_eq(data, Uint256(0, 0))
+    let (is_equal) = uint256_eq(data, Uint256(0, 0))
 
-    if isEq == TRUE:
+    if is_equal == TRUE:
         return (relic_id)
     end
 

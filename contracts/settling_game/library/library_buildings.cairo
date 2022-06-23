@@ -16,7 +16,7 @@ from starkware.cairo.common.registers import get_label_location
 from contracts.settling_game.utils.game_structs import (
     RealmBuildings,
     RealmBuildingsSize,
-    BuildingsTime,
+    BuildingsIntegrityLength,
     BuildingsDecaySlope,
 )
 from contracts.settling_game.utils.constants import DAY, BASE_SQM
@@ -58,7 +58,7 @@ namespace BUILDINGS:
         building_id : felt
     ) -> (buildable_area : felt):
         alloc_locals
-        # TODO: Add other buildings sizes
+
         let idx = building_id - 1
 
         let (type_label) = get_label_location(building_area_sqm)
@@ -108,25 +108,25 @@ namespace BUILDINGS:
     end
 
     # returns time to add
-    func get_final_time{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    func get_integrity_length{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         block_timestamp : felt, building_id : felt, quantity : felt
     ) -> (time : felt):
         let idx = building_id - 1
 
-        let (type_label) = get_label_location(building_life_time)
+        let (type_label) = get_label_location(building_integrity_length)
 
         return (block_timestamp + [type_label + idx] * quantity)
 
-        building_life_time:
-        dw BuildingsTime.House  # house
-        dw BuildingsTime.StoreHouse  # storehouse
-        dw BuildingsTime.Granary  # granary
-        dw BuildingsTime.Farm  # farm
-        dw BuildingsTime.FishingVillage  # fishing village
-        dw BuildingsTime.Barracks  # barracks
-        dw BuildingsTime.MageTower  # mage tower
-        dw BuildingsTime.ArcherTower  # archer tower
-        dw BuildingsTime.Castle  # castle
+        building_integrity_length:
+        dw BuildingsIntegrityLength.House  # house
+        dw BuildingsIntegrityLength.StoreHouse  # storehouse
+        dw BuildingsIntegrityLength.Granary  # granary
+        dw BuildingsIntegrityLength.Farm  # farm
+        dw BuildingsIntegrityLength.FishingVillage  # fishing village
+        dw BuildingsIntegrityLength.Barracks  # barracks
+        dw BuildingsIntegrityLength.MageTower  # mage tower
+        dw BuildingsIntegrityLength.ArcherTower  # archer tower
+        dw BuildingsIntegrityLength.Castle  # castle
     end
 
     # Gets raw building time left of building on realm. This is only used for precalulations
@@ -173,9 +173,9 @@ namespace BUILDINGS:
     end
 
     # Gets effective buildings on Realm
-    func get_effective_building_left{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(time_balance : felt) -> (buildings : felt):
+    func get_effective_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        time_balance : felt
+    ) -> (buildings : felt):
         alloc_locals
 
         # TODO: log function
@@ -189,7 +189,7 @@ namespace BUILDINGS:
 
     # Effective building time calc
     # This takes in the actual time balance and returns a decayed time
-    func get_effective_building_time{
+    func get_decayed_building_time{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     }(time_balance : felt, decay_rate : felt) -> (effective_building_time : felt):
         # Calculate effective building time
@@ -215,10 +215,10 @@ namespace BUILDINGS:
         let (decay_rate) = get_decay_rate(base_building_number, decay_slope)
 
         # pass actual time balance + decay rate
-        let (effective_building_time) = get_effective_building_time(time_balance, decay_rate)
+        let (effective_building_time) = get_decayed_building_time(time_balance, decay_rate)
 
-        let (buildings_left) = get_effective_building_left(effective_building_time)
+        let (effective_buildings) = get_effective_buildings(effective_building_time)
 
-        return (buildings_left)
+        return (effective_buildings)
     end
 end

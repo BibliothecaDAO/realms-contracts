@@ -146,11 +146,11 @@ func build{
         contract_address=realms_address, token_id=token_id
     )
 
-    let (buildings_time : RealmBuildings) = get_buildings_time(token_id)
+    let (realm_buildings_integrity : RealmBuildings) = get_buildings_time(token_id)
 
     # Check Area, revert if no space available
     BUILDINGS.can_build(
-        building_id, quantity, buildings_time, realms_data.cities, realms_data.regions
+        building_id, quantity, realm_buildings_integrity, realms_data.cities, realms_data.regions
     )
 
     # Build buildings and set state
@@ -197,7 +197,7 @@ func build_buildings{
 
     let (block_timestamp) = get_block_timestamp()
 
-    let (time_to_add) = BUILDINGS.get_final_time(block_timestamp, building_id, quantity)
+    let (time_to_add) = BUILDINGS.get_integrity_length(block_timestamp, building_id, quantity)
 
     # GET CURRENT BUILDINGS
     let (current_buildings : RealmBuildings) = get_buildings_unpacked(token_id)

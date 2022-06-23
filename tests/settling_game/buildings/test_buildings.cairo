@@ -30,9 +30,9 @@ func test_get_building_left{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ra
     let (decay_rate) = BUILDINGS.get_decay_rate(base_building_number, decay_slope)
 
     # pass actual time balance + decay rate
-    let (effective_building_time) = BUILDINGS.get_effective_building_time(time_balance, decay_rate)
+    let (effective_building_time) = BUILDINGS.get_decayed_building_time(time_balance, decay_rate)
 
-    let (buildings_left) = BUILDINGS.get_effective_building_left(effective_building_time)
+    let (buildings_left) = BUILDINGS.get_effective_buildings(effective_building_time)
 
     %{ print(ids.base_building_number) %}
     %{ print(ids.decay_rate) %}
@@ -65,10 +65,10 @@ func test_get_decay_slope{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
 end
 
 @external
-func test_get_final_time{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+func test_get_integrity_length{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     alloc_locals
 
-    let (final_time) = BUILDINGS.get_final_time(1000, 1, 1)
+    let (final_time) = BUILDINGS.get_integrity_length(1000, 1, 1)
 
     %{ print(ids.final_time) %}
     return ()
