@@ -9,7 +9,7 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math import assert_not_zero
 from starkware.cairo.common.alloc import alloc
-from starkware.starknet.common.syscalls import get_caller_address
+from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
 from contracts.settling_game.library.library_buildings import BUILDINGS
 from contracts.settling_game.utils.general import unpack_data, transform_costs_to_token_ids_values
@@ -195,7 +195,9 @@ func build_buildings{
         contract_address=realms_address, token_id=token_id
     )
 
-    let (time_to_add) = BUILDINGS.get_final_time(building_id, quantity)
+    let (block_timestamp) = get_block_timestamp()
+
+    let (time_to_add) = BUILDINGS.get_final_time(block_timestamp, building_id, quantity)
 
     # GET CURRENT BUILDINGS
     let (current_buildings : RealmBuildings) = get_buildings_unpacked(token_id)

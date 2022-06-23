@@ -12,7 +12,12 @@ from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, asser
 from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.bool import TRUE, FALSE
-from contracts.settling_game.utils.game_structs import RealmBuildings
+from starkware.cairo.common.registers import get_label_location
+from contracts.settling_game.utils.game_structs import (
+    RealmBuildings,
+    RealmBuildingsSize,
+    BuildingsTime,
+)
 from lib.cairo_math_64x61.contracts.Math64x61 import Math64x61_ln
 
 # Example Castle time
@@ -71,20 +76,31 @@ namespace BUILDINGS:
     end
 
     # gets current built buildings
+    # pass building struct and return sqm
     func get_current_built_buildings_sqm{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     }(current_buildings : RealmBuildings) -> (size : felt):
         # Get buildable units
-        # TODO: Loop to calculate current built buildings, hardcoded for now
-        let size = 40
+
+        let House = current_buildings.House * RealmBuildingsSize.House
+        let StoreHouse = current_buildings.StoreHouse * RealmBuildingsSize.StoreHouse
+        let Granary = current_buildings.Granary * RealmBuildingsSize.Granary
+        let Farm = current_buildings.Farm * RealmBuildingsSize.Farm
+        let FishingVillage = current_buildings.FishingVillage * RealmBuildingsSize.FishingVillage
+        let Barracks = current_buildings.Barracks * RealmBuildingsSize.Barracks
+        let MageTower = current_buildings.MageTower * RealmBuildingsSize.MageTower
+        let ArcherTower = current_buildings.ArcherTower * RealmBuildingsSize.ArcherTower
+        let Castle = current_buildings.Castle * RealmBuildingsSize.Castle
+
+        let size = House + StoreHouse + Granary + Farm + FishingVillage + Barracks + MageTower + ArcherTower + Castle
+
         return (size)
     end
 
     # returns time to add
     func get_final_time{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        building_id : felt, quantity : felt
+        block_timestamp : felt, building_id : felt, quantity : felt
     ) -> (time : felt):
-        let (block_timestamp) = get_block_timestamp()
         let building_time = 2000
         return (block_timestamp + building_time * quantity)
     end
@@ -105,10 +121,22 @@ namespace BUILDINGS:
     ) -> (slope : felt):
         alloc_locals
 
-        # TODO: set buildings slopes
-        let slope = 400
+        let idx = building_id - 1
 
-        return (slope)
+        let (type_label) = get_label_location(building_decay_slope_bp)
+
+        return ([type_label + idx])
+
+        building_decay_slope_bp:
+        dw 400  # house
+        dw 400  # storehouse
+        dw 400  # granary
+        dw 400  # farm
+        dw 400  # fishing village
+        dw 400  # barracks
+        dw 400  # mage tower
+        dw 400  # archer tower
+        dw 200  # castle
     end
 
     # Returns decay rate in bp
@@ -155,7 +183,7 @@ namespace BUILDINGS:
 
         let (base_building_number) = get_base_building_left(time_balance)
 
-        let (decay_slope) = get_decay_slope(1)
+        let (decay_slope) = get_decay_slope(building_id)
 
         # pass slope determined by building
         let (decay_rate) = get_decay_rate(base_building_number, decay_slope)

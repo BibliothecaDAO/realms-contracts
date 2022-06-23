@@ -103,6 +103,18 @@ namespace BuildingsPopulation:
     const Castle = 12
 end
 
+namespace BuildingsTime:
+    const House = 1000
+    const StoreHouse = 2000
+    const Granary = 2000
+    const Farm = 2000
+    const FishingVillage = 2000
+    const Barracks = 3000
+    const MageTower = 3000
+    const ArcherTower = 3000
+    const Castle = 9000
+end
+
 namespace ArmyCap:
     const House = 2
     const StoreHouse = 3
