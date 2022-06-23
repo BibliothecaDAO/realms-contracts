@@ -11,7 +11,7 @@ from starkware.cairo.common.math_cmp import is_nn, is_le
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
-
+from contracts.settling_game.utils.game_structs import BuildingsTroopIndustry, RealmBuildings
 namespace CALCULATOR:
     func get_happiness{syscall_ptr : felt*, range_check_ptr}(population : felt, food : felt) -> (
         happiness : felt
@@ -41,5 +41,19 @@ namespace CALCULATOR:
             return (150)
         end
         return (happiness)
+    end
+
+    # Returns coefficient for troop production in bp
+    func get_troop_coefficient{syscall_ptr : felt*, range_check_ptr}(
+        buildings : RealmBuildings
+    ) -> (coefficient : felt):
+        alloc_locals
+
+        let barracks = buildings.Barracks * BuildingsTroopIndustry.Barracks
+        let mageTower = buildings.MageTower * BuildingsTroopIndustry.MageTower
+        let archerTower = buildings.ArcherTower * BuildingsTroopIndustry.ArcherTower
+        let castle = buildings.Castle * BuildingsTroopIndustry.Castle
+
+        return (barracks + mageTower + archerTower + castle)
     end
 end
