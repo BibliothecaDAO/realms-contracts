@@ -91,7 +91,7 @@ func building_lords_cost(building_id : felt) -> (lords : Uint256):
 end
 
 @storage_var
-func castle_time(token_id : felt) -> (time : felt):
+func castle_time(token_id : Uint256) -> (time : felt):
 end
 
 ###############
@@ -123,7 +123,7 @@ end
 @external
 func build{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-}(token_id : Uint256, building_id : felt) -> (success : felt):
+}(token_id : Uint256, building_id : felt, quantity : felt) -> (success : felt):
     alloc_locals
 
     let (caller) = get_caller_address()
@@ -136,42 +136,43 @@ func build{
     let (realms_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Realms
     )
-    let (lords_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Lords
-    )
-    let (treasury_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Treasury
-    )
+
     let (resource_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Resources
     )
 
-    # REALMS DATA
+    # Get Realm Data
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
         contract_address=realms_address, token_id=token_id
     )
 
-    # Check Area
+    let (buildings_time : RealmBuildings) = get_buildings_time(token_id)
 
-    # BUILD
-    build_buildings(token_id, building_id)
+    # Check Area, revert if no space available
+    BUILDINGS.can_build(
+        building_id, quantity, buildings_time, realms_data.cities, realms_data.regions
+    )
+
+    # Build buildings and set state
+    build_buildings(token_id, building_id, quantity)
 
     # GET BUILDING COSTS
+    # TODO: Add exponential cost function into X buildings
+    # @milan
     let (building_cost : Cost, lords : Uint256) = get_building_cost(building_id)
 
     let (costs : Cost*) = alloc()
     assert [costs] = building_cost
     let (token_ids : Uint256*) = alloc()
     let (token_values : Uint256*) = alloc()
+
     let (token_len : felt) = transform_costs_to_token_ids_values(1, costs, token_ids, token_values)
 
     # BURN RESOURCES
     IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
 
-    # TRANSFER LORDS
-    # IERC20.transfer(lords_address, treasury_address, lords)
-
     # EMIT
+    # TODO: Emit left, do calculation in client
     BuildingBuilt.emit(token_id, building_id)
 
     return (TRUE)
@@ -179,7 +180,7 @@ end
 
 func build_buildings{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-}(token_id : Uint256, building_id : felt):
+}(token_id : Uint256, building_id : felt, quantity : felt):
     alloc_locals
 
     let (controller) = MODULE_controller_address()
@@ -194,16 +195,14 @@ func build_buildings{
         contract_address=realms_address, token_id=token_id
     )
 
+    let (time_to_add) = BUILDINGS.get_final_time(building_id, quantity)
+
     # GET CURRENT BUILDINGS
     let (current_buildings : RealmBuildings) = get_buildings_unpacked(token_id)
 
     let (buildings : felt*) = alloc()
 
     if building_id == RealmBuildingsIds.House:
-        # CHECK SPACE
-        if current_buildings.House == realms_data.regions:
-            assert_not_zero(0)
-        end
         local id_1 = (current_buildings.House + 1) * SHIFT_6_1
         buildings[0] = id_1
     else:
@@ -211,9 +210,6 @@ func build_buildings{
     end
 
     if building_id == RealmBuildingsIds.StoreHouse:
-        if current_buildings.StoreHouse == realms_data.regions:
-            assert_not_zero(0)
-        end
         local id_2 = (current_buildings.StoreHouse + 1) * SHIFT_6_2
         buildings[1] = id_2
     else:
@@ -222,9 +218,6 @@ func build_buildings{
     end
 
     if building_id == RealmBuildingsIds.Granary:
-        if current_buildings.Granary == realms_data.regions:
-            assert_not_zero(0)
-        end
         local id_3 = (current_buildings.Granary + 1) * SHIFT_6_3
         buildings[2] = id_3
     else:
@@ -233,9 +226,6 @@ func build_buildings{
     end
 
     if building_id == RealmBuildingsIds.Farm:
-        if current_buildings.Farm == realms_data.regions:
-            assert_not_zero(0)
-        end
         local id_4 = (current_buildings.Farm + 1) * SHIFT_6_4
         buildings[3] = id_4
     else:
@@ -244,9 +234,6 @@ func build_buildings{
     end
 
     if building_id == RealmBuildingsIds.FishingVillage:
-        if current_buildings.FishingVillage == realms_data.regions:
-            assert_not_zero(0)
-        end
         local id_5 = (current_buildings.FishingVillage + 1) * SHIFT_6_5
         buildings[4] = id_5
     else:
@@ -255,9 +242,6 @@ func build_buildings{
     end
 
     if building_id == RealmBuildingsIds.Barracks:
-        if current_buildings.Barracks == realms_data.regions:
-            assert_not_zero(0)
-        end
         local id_6 = (current_buildings.Barracks + 1) * SHIFT_6_6
         buildings[5] = id_6
     else:
@@ -266,9 +250,6 @@ func build_buildings{
     end
 
     if building_id == RealmBuildingsIds.MageTower:
-        if current_buildings.MageTower == realms_data.cities:
-            assert_not_zero(0)
-        end
         local id_7 = (current_buildings.MageTower + 1) * SHIFT_6_7
         buildings[6] = id_7
     else:
@@ -277,9 +258,6 @@ func build_buildings{
     end
 
     if building_id == RealmBuildingsIds.ArcherTower:
-        if current_buildings.ArcherTower == realms_data.cities:
-            assert_not_zero(0)
-        end
         local id_8 = (current_buildings.ArcherTower + 1) * SHIFT_6_8
         buildings[7] = id_8
     else:
@@ -288,14 +266,19 @@ func build_buildings{
     end
 
     if building_id == RealmBuildingsIds.Castle:
-        if current_buildings.Castle == realms_data.cities:
-            assert_not_zero(0)
-        end
+        # Write time
         local id_9 = (current_buildings.Castle + 1) * SHIFT_6_9
         buildings[8] = id_9
+        castle_time.write(token_id, time_to_add)
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
     else:
         local id_9 = current_buildings.Castle * SHIFT_6_9
         buildings[8] = id_9
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
     end
 
     tempvar value = buildings[8] + buildings[7] + buildings[6] + buildings[5] + buildings[4] + buildings[3] + buildings[2] + buildings[1] + buildings[0]
@@ -314,7 +297,7 @@ func get_buildings_unpacked{
 }(token_id : Uint256) -> (realm_buildings : RealmBuildings):
     alloc_locals
 
-    let (data) = get_realm_buildings(token_id)
+    let (data) = get_storage_realm_buildings(token_id)
 
     let (House) = unpack_data(data, 0, 63)
     let (StoreHouse) = unpack_data(data, 6, 63)
@@ -342,7 +325,92 @@ func get_buildings_unpacked{
 end
 
 @view
-func get_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+func get_buildings_time{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(token_id : Uint256) -> (realm_buildings : RealmBuildings):
+    alloc_locals
+
+    # TODO: Hardcoded only castle felt for testing, pack buildings into typeof felt
+
+    let (House) = castle_time.read(token_id)
+    let (StoreHouse) = castle_time.read(token_id)
+    let (Granary) = castle_time.read(token_id)
+    let (Farm) = castle_time.read(token_id)
+    let (FishingVillage) = castle_time.read(token_id)
+    let (Barracks) = castle_time.read(token_id)
+    let (MageTower) = castle_time.read(token_id)
+    let (ArcherTower) = castle_time.read(token_id)
+    let (Castle) = castle_time.read(token_id)
+
+    return (
+        realm_buildings=RealmBuildings(
+        House=House,
+        StoreHouse=StoreHouse,
+        Granary=Granary,
+        Farm=Farm,
+        FishingVillage=FishingVillage,
+        Barracks=Barracks,
+        MageTower=MageTower,
+        ArcherTower=ArcherTower,
+        Castle=Castle
+        ),
+    )
+end
+
+@view
+func get_effective_buildings{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(token_id : Uint256) -> (realm_buildings : RealmBuildings):
+    alloc_locals
+
+    # TODO: Hardcoded only castle felt for testing, pack buildings into typeof felt
+    let (functional_buildings : RealmBuildings) = get_buildings_time(token_id)
+
+    let (House) = BUILDINGS.calculate_effective_buildings(
+        RealmBuildingsIds.House, functional_buildings.House
+    )
+    let (StoreHouse) = BUILDINGS.calculate_effective_buildings(
+        RealmBuildingsIds.House, functional_buildings.StoreHouse
+    )
+    let (Granary) = BUILDINGS.calculate_effective_buildings(
+        RealmBuildingsIds.House, functional_buildings.Granary
+    )
+    let (Farm) = BUILDINGS.calculate_effective_buildings(
+        RealmBuildingsIds.House, functional_buildings.Farm
+    )
+    let (FishingVillage) = BUILDINGS.calculate_effective_buildings(
+        RealmBuildingsIds.House, functional_buildings.FishingVillage
+    )
+    let (Barracks) = BUILDINGS.calculate_effective_buildings(
+        RealmBuildingsIds.House, functional_buildings.Barracks
+    )
+    let (MageTower) = BUILDINGS.calculate_effective_buildings(
+        RealmBuildingsIds.House, functional_buildings.MageTower
+    )
+    let (ArcherTower) = BUILDINGS.calculate_effective_buildings(
+        RealmBuildingsIds.House, functional_buildings.ArcherTower
+    )
+    let (Castle) = BUILDINGS.calculate_effective_buildings(
+        RealmBuildingsIds.House, functional_buildings.Castle
+    )
+
+    return (
+        realm_buildings=RealmBuildings(
+        House=House,
+        StoreHouse=StoreHouse,
+        Granary=Granary,
+        Farm=Farm,
+        FishingVillage=FishingVillage,
+        Barracks=Barracks,
+        MageTower=MageTower,
+        ArcherTower=ArcherTower,
+        Castle=Castle
+        ),
+    )
+end
+
+@view
+func get_storage_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
 ) -> (buildings : felt):
     let (buildings) = realm_buildings.read(token_id)

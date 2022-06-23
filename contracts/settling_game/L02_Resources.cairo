@@ -108,9 +108,6 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (controller) = MODULE_controller_address()
 
     # CONTRACT ADDRESSES
-    let (lords_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Lords
-    )
     let (realms_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Realms
     )
@@ -182,8 +179,9 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     end
 
     # GET OUTPUT FOR EACH RESOURCE
-    let (r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output,
-        r_7_output) = get_all_resource_output(
+    let (
+        r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output, r_7_output
+    ) = get_all_resource_output(
         token_id,
         realms_data.resource_1,
         realms_data.resource_2,
@@ -230,22 +228,8 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         r_7_wonder,
     )
 
-    # LORDS MINT
-    let (tribute) = IL04_Calculator.calculate_tribute(calculator_address)
-
-    let lords_bn = total_days * tribute * 10 ** 18
-
-    with_attr error_message("RESOURCES: lords value greater than 0"):
-        assert_nn(lords_bn)
-    end
-
-    let lords_available = Uint256(lords_bn, 0)
-
     # FETCH OWNER
     let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
-
-    # MINT LORDS
-    IERC20.transferFrom(lords_address, treasury_address, owner, lords_available)
 
     # MINT USERS RESOURCES
     IERC1155.mintBatch(
@@ -319,8 +303,9 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     IL01_Settling.set_time_vault_staked(settling_logic_address, token_id, pillagable_remainder)
 
     # GET OUTPUT FOR EACH RESOURCE
-    let (r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output,
-        r_7_output) = get_all_resource_output(
+    let (
+        r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output, r_7_output
+    ) = get_all_resource_output(
         token_id,
         realms_data.resource_1,
         realms_data.resource_2,
@@ -360,57 +345,57 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     return ()
 end
 
-@external
-func upgrade_resource{
-    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*, range_check_ptr
-}(token_id : Uint256, resource_id : felt) -> ():
-    alloc_locals
+# @external
+# func upgrade_resource{
+#     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*, range_check_ptr
+# }(token_id : Uint256, resource_id : felt) -> ():
+#     alloc_locals
 
-    let (can_claim) = check_if_claimable(token_id)
+# let (can_claim) = check_if_claimable(token_id)
 
-    if can_claim == TRUE:
-        claim_resources(token_id)
-        tempvar syscall_ptr = syscall_ptr
-        tempvar range_check_ptr = range_check_ptr
-        tempvar pedersen_ptr = pedersen_ptr
-    else:
-        tempvar syscall_ptr = syscall_ptr
-        tempvar range_check_ptr = range_check_ptr
-        tempvar pedersen_ptr = pedersen_ptr
-    end
+# if can_claim == TRUE:
+#         claim_resources(token_id)
+#         tempvar syscall_ptr = syscall_ptr
+#         tempvar range_check_ptr = range_check_ptr
+#         tempvar pedersen_ptr = pedersen_ptr
+#     else:
+#         tempvar syscall_ptr = syscall_ptr
+#         tempvar range_check_ptr = range_check_ptr
+#         tempvar pedersen_ptr = pedersen_ptr
+#     end
 
-    let (caller) = get_caller_address()
-    let (controller) = MODULE_controller_address()
+# let (caller) = get_caller_address()
+#     let (controller) = MODULE_controller_address()
 
-    # CONTRACT ADDRESSES
-    let (resource_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Resources
-    )
+# # CONTRACT ADDRESSES
+#     let (resource_address) = IModuleController.get_external_contract_address(
+#         controller, ExternalContractIds.Resources
+#     )
 
-    # AUTH
-    MODULE_ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
+# # AUTH
+#     MODULE_ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
 
-    # GET RESOURCE LEVEL
-    let (level) = get_resource_level(token_id, resource_id)
+# # GET RESOURCE LEVEL
+#     let (level) = get_resource_level(token_id, resource_id)
 
-    # GET UPGRADE VALUE
-    let (upgrade_cost : Cost) = get_resource_upgrade_cost(resource_id)
-    let (costs : Cost*) = alloc()
-    assert [costs] = upgrade_cost
-    let (token_ids : Uint256*) = alloc()
-    let (token_values : Uint256*) = alloc()
-    let (token_len : felt) = transform_costs_to_token_ids_values(1, costs, token_ids, token_values)
+# # GET UPGRADE VALUE
+#     let (upgrade_cost : Cost) = get_resource_upgrade_cost(resource_id)
+#     let (costs : Cost*) = alloc()
+#     assert [costs] = upgrade_cost
+#     let (token_ids : Uint256*) = alloc()
+#     let (token_values : Uint256*) = alloc()
+#     let (token_len : felt) = transform_costs_to_token_ids_values(1, costs, token_ids, token_values)
 
-    # BURN RESOURCES
-    IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
+# # BURN RESOURCES
+#     IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
 
-    # INCREASE LEVEL
-    set_resource_level(token_id, resource_id, level + 1)
+# # INCREASE LEVEL
+#     set_resource_level(token_id, resource_id, level + 1)
 
-    # EMIT
-    ResourceUpgraded.emit(token_id, resource_id, level + 1)
-    return ()
-end
+# # EMIT
+#     ResourceUpgraded.emit(token_id, resource_id, level + 1)
+#     return ()
+# end
 
 ###########
 # GETTERS #
@@ -579,8 +564,9 @@ func get_all_resource_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     let user_mint_rel_perc = 100 - wonder_tax
 
     # GET OUTPUT FOR EACH RESOURCE
-    let (r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output,
-        r_7_output) = get_all_resource_output(
+    let (
+        r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output, r_7_output
+    ) = get_all_resource_output(
         token_id,
         realms_data.resource_1,
         realms_data.resource_2,
@@ -656,8 +642,9 @@ func get_all_vault_raidable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ra
     let (total_vault_days, vault_remainder) = vault_days_accrued(token_id)
 
     # GET OUTPUT FOR EACH RESOURCE
-    let (r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output,
-        r_7_output) = get_all_resource_output(
+    let (
+        r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output, r_7_output
+    ) = get_all_resource_output(
         token_id,
         realms_data.resource_1,
         realms_data.resource_2,

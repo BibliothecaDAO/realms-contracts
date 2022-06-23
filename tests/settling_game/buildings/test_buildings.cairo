@@ -43,7 +43,9 @@ func test_get_building_left{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ra
     alloc_locals
 
     # now - timestamp = param
-    let (base_building_number) = BUILDINGS.get_base_building_left(time_balance, building_id)
+    let (base_building_number) = BUILDINGS.get_base_building_left(time_balance)
+
+    let (decay_slope) = BUILDINGS.get_decay_slope(1)
 
     # pass slope determined by building
     let (decay_rate) = BUILDINGS.get_decay_rate(base_building_number, decay_slope)

@@ -94,7 +94,6 @@ func calculate_happiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     alloc_locals
 
     # FETCH VALUES
-    let (culture) = calculate_culture(token_id)
     let (population) = calculate_population(token_id)
     let (food) = calculate_food(token_id)
 
@@ -123,44 +122,44 @@ func calculate_troop_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     return (0)
 end
 
-@view
-func calculate_culture{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    token_id : Uint256
-) -> (culture : felt):
-    # SUM TOTAL CULTURE
-    let (controller) = MODULE_controller_address()
-    let (buildings_logic_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.L03_Buildings
-    )
-    let (current_buildings : RealmBuildings) = IL03_Buildings.get_buildings_unpacked(
-        buildings_logic_address, token_id
-    )
+# @view
+# func calculate_culture{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+#     token_id : Uint256
+# ) -> (culture : felt):
+#     # SUM TOTAL CULTURE
+#     let (controller) = MODULE_controller_address()
+#     let (buildings_logic_address) = IModuleController.get_module_address(
+#         contract_address=controller, module_id=ModuleIds.L03_Buildings
+#     )
+#     let (current_buildings : RealmBuildings) = IL03_Buildings.get_buildings_unpacked(
+#         buildings_logic_address, token_id
+#     )
 
-    let CastleCulture = BuildingsCulture.Castle * current_buildings.Castle
-    let FairgroundsCulture = BuildingsCulture.Fairgrounds * current_buildings.Fairgrounds
-    let RoyalReserveCulture = BuildingsCulture.RoyalReserve * current_buildings.RoyalReserve
-    let GrandMarketCulture = BuildingsCulture.GrandMarket * current_buildings.GrandMarket
-    let GuildCulture = BuildingsCulture.Guild * current_buildings.Guild
-    let OfficerAcademyCulture = BuildingsCulture.OfficerAcademy * current_buildings.OfficerAcademy
-    let GranaryCulture = BuildingsCulture.Granary * current_buildings.Granary
-    let HousingCulture = BuildingsCulture.Housing * current_buildings.Housing
-    let AmphitheaterCulture = BuildingsCulture.Amphitheater * current_buildings.Amphitheater
-    let ArcherTowerCulture = BuildingsCulture.ArcherTower * current_buildings.ArcherTower
-    let SchoolCulture = BuildingsCulture.School * current_buildings.School
-    let MageTowerCulture = BuildingsCulture.MageTower * current_buildings.MageTower
-    let TradeOfficeCulture = BuildingsCulture.TradeOffice * current_buildings.TradeOffice
-    let ArchitectCulture = BuildingsCulture.Architect * current_buildings.Architect
-    let ParadeGroundsCulture = BuildingsCulture.ParadeGrounds * current_buildings.ParadeGrounds
-    let BarracksCulture = BuildingsCulture.Barracks * current_buildings.Barracks
-    let DockCulture = BuildingsCulture.Dock * current_buildings.Dock
-    let FishmongerCulture = BuildingsCulture.Fishmonger * current_buildings.Fishmonger
-    let FarmsCulture = BuildingsCulture.Farms * current_buildings.Farms
-    let HamletCulture = BuildingsCulture.Hamlet * current_buildings.Hamlet
+# let CastleCulture = BuildingsCulture.Castle * current_buildings.Castle
+#     let FairgroundsCulture = BuildingsCulture.Fairgrounds * current_buildings.Fairgrounds
+#     let RoyalReserveCulture = BuildingsCulture.RoyalReserve * current_buildings.RoyalReserve
+#     let GrandMarketCulture = BuildingsCulture.GrandMarket * current_buildings.GrandMarket
+#     let GuildCulture = BuildingsCulture.Guild * current_buildings.Guild
+#     let OfficerAcademyCulture = BuildingsCulture.OfficerAcademy * current_buildings.OfficerAcademy
+#     let GranaryCulture = BuildingsCulture.Granary * current_buildings.Granary
+#     let HousingCulture = BuildingsCulture.Housing * current_buildings.Housing
+#     let AmphitheaterCulture = BuildingsCulture.Amphitheater * current_buildings.Amphitheater
+#     let ArcherTowerCulture = BuildingsCulture.ArcherTower * current_buildings.ArcherTower
+#     let SchoolCulture = BuildingsCulture.School * current_buildings.School
+#     let MageTowerCulture = BuildingsCulture.MageTower * current_buildings.MageTower
+#     let TradeOfficeCulture = BuildingsCulture.TradeOffice * current_buildings.TradeOffice
+#     let ArchitectCulture = BuildingsCulture.Architect * current_buildings.Architect
+#     let ParadeGroundsCulture = BuildingsCulture.ParadeGrounds * current_buildings.ParadeGrounds
+#     let BarracksCulture = BuildingsCulture.Barracks * current_buildings.Barracks
+#     let DockCulture = BuildingsCulture.Dock * current_buildings.Dock
+#     let FishmongerCulture = BuildingsCulture.Fishmonger * current_buildings.Fishmonger
+#     let FarmsCulture = BuildingsCulture.Farms * current_buildings.Farms
+#     let HamletCulture = BuildingsCulture.Hamlet * current_buildings.Hamlet
 
-    let culture = 10 + CastleCulture + FairgroundsCulture + RoyalReserveCulture + GrandMarketCulture + GuildCulture + OfficerAcademyCulture + GranaryCulture + HousingCulture + AmphitheaterCulture + ArcherTowerCulture + SchoolCulture + MageTowerCulture + TradeOfficeCulture + ArchitectCulture + ParadeGroundsCulture + BarracksCulture + DockCulture + FishmongerCulture + FarmsCulture + HamletCulture
+# let culture = 10 + CastleCulture + FairgroundsCulture + RoyalReserveCulture + GrandMarketCulture + GuildCulture + OfficerAcademyCulture + GranaryCulture + HousingCulture + AmphitheaterCulture + ArcherTowerCulture + SchoolCulture + MageTowerCulture + TradeOfficeCulture + ArchitectCulture + ParadeGroundsCulture + BarracksCulture + DockCulture + FishmongerCulture + FarmsCulture + HamletCulture
 
-    return (culture)
-end
+# return (culture)
+# end
 
 @view
 func calculate_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -177,28 +176,17 @@ func calculate_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
         buildings_logic_address, token_id
     )
 
-    let CastlePop = BuildingsPopulation.Castle * current_buildings.Castle
-    let FairgroundsPop = BuildingsPopulation.Fairgrounds * current_buildings.Fairgrounds
-    let RoyalReservePop = BuildingsPopulation.RoyalReserve * current_buildings.RoyalReserve
-    let GrandMarketPop = BuildingsPopulation.GrandMarket * current_buildings.GrandMarket
-    let GuildPop = BuildingsPopulation.Guild * current_buildings.Guild
-    let OfficerAcademyPop = BuildingsPopulation.OfficerAcademy * current_buildings.OfficerAcademy
-    let GranaryPop = BuildingsPopulation.Granary * current_buildings.Granary
-    let HousingPop = BuildingsPopulation.Housing * current_buildings.Housing
-    let AmphitheaterPop = BuildingsPopulation.Amphitheater * current_buildings.Amphitheater
-    let ArcherTowerPop = BuildingsPopulation.ArcherTower * current_buildings.ArcherTower
-    let SchoolPop = BuildingsPopulation.School * current_buildings.School
-    let MageTowerPop = BuildingsPopulation.MageTower * current_buildings.MageTower
-    let TradeOfficePop = BuildingsPopulation.TradeOffice * current_buildings.TradeOffice
-    let ArchitectPop = BuildingsPopulation.Architect * current_buildings.Architect
-    let ParadeGroundsPop = BuildingsPopulation.ParadeGrounds * current_buildings.ParadeGrounds
-    let BarracksPop = BuildingsPopulation.Barracks * current_buildings.Barracks
-    let DockPop = BuildingsPopulation.Dock * current_buildings.Dock
-    let FishmongerPop = BuildingsPopulation.Fishmonger * current_buildings.Fishmonger
-    let FarmsPop = BuildingsPopulation.Farms * current_buildings.Farms
-    let HamletPop = BuildingsPopulation.Hamlet * current_buildings.Hamlet
+    let House = BuildingsPopulation.House * current_buildings.House
+    let StoreHouse = BuildingsPopulation.StoreHouse * current_buildings.StoreHouse
+    let Granary = BuildingsPopulation.Granary * current_buildings.Granary
+    let Farm = BuildingsPopulation.Farm * current_buildings.Farm
+    let FishingVillage = BuildingsPopulation.FishingVillage * current_buildings.FishingVillage
+    let Barracks = BuildingsPopulation.Barracks * current_buildings.Barracks
+    let MageTower = BuildingsPopulation.MageTower * current_buildings.MageTower
+    let ArcherTower = BuildingsPopulation.ArcherTower * current_buildings.ArcherTower
+    let Castle = BuildingsPopulation.Castle * current_buildings.Castle
 
-    let population = 100 + CastlePop + FairgroundsPop + RoyalReservePop + GrandMarketPop + GuildPop + OfficerAcademyPop + GranaryPop + HousingPop + AmphitheaterPop + ArcherTowerPop + SchoolPop + MageTowerPop + TradeOfficePop + ArchitectPop + ParadeGroundsPop + BarracksPop + DockPop + FishmongerPop + FarmsPop + HamletPop
+    let population = House + StoreHouse + Granary + Farm + FishingVillage + Barracks + MageTower + ArcherTower + Castle
 
     # TROOP POPULATION
     let (troop_population) = calculate_troop_population(token_id)
