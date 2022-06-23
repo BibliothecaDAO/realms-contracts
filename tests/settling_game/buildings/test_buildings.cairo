@@ -61,3 +61,16 @@ func test_get_building_left{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ra
     %{ print(ids.buildings_left) %}
     return ()
 end
+
+@external
+func test_calculate_effective_buildings{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+}():
+    alloc_locals
+
+    # now - timestamp = param
+    let (base_building_number) = BUILDINGS.calculate_effective_buildings(1, time_balance)
+
+    %{ print(ids.base_building_number) %}
+    return ()
+end

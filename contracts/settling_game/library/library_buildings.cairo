@@ -150,10 +150,7 @@ namespace BUILDINGS:
     end
 
     func calculate_effective_buildings{
-        syscall_ptr : felt*,
-        pedersen_ptr : HashBuiltin*,
-        range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*,
+        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     }(building_id : felt, time_balance : felt) -> (effective_buildings : felt):
         alloc_locals
 
