@@ -59,9 +59,22 @@ namespace BUILDINGS:
     ) -> (buildable_area : felt):
         alloc_locals
         # TODO: Add other buildings sizes
-        let castle_size = 10
-        # Get buildable units
-        return (castle_size)
+        let idx = building_id - 1
+
+        let (type_label) = get_label_location(building_area_sqm)
+
+        return ([type_label + idx])
+
+        building_area_sqm:
+        dw RealmBuildingsSize.House  # house
+        dw RealmBuildingsSize.StoreHouse  # storehouse
+        dw RealmBuildingsSize.Granary  # granary
+        dw RealmBuildingsSize.Farm  # farm
+        dw RealmBuildingsSize.FishingVillage  # fishing village
+        dw RealmBuildingsSize.Barracks  # barracks
+        dw RealmBuildingsSize.MageTower  # mage tower
+        dw RealmBuildingsSize.ArcherTower  # archer tower
+        dw RealmBuildingsSize.Castle  # castle
     end
 
     # gets buildable area for each

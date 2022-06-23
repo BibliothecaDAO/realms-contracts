@@ -8,6 +8,7 @@ from contracts.settling_game.utils.game_structs import (
     BuildingsFood,
     BuildingsPopulation,
     BuildingsCulture,
+    RealmBuildings,
 )
 from contracts.settling_game.library.library_buildings import BUILDINGS
 from starkware.cairo.common.pow import pow
@@ -70,5 +71,42 @@ func test_get_final_time{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     let (final_time) = BUILDINGS.get_final_time(1000, 1, 1)
 
     %{ print(ids.final_time) %}
+    return ()
+end
+
+@external
+func test_can_build{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    alloc_locals
+
+    let test_buildings = RealmBuildings(1, 1, 1, 1, 1, 1, 1, 1, 2)
+
+    BUILDINGS.can_build(1, 1, test_buildings, 20, 3)
+
+    return ()
+end
+
+@external
+func test_building_size{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    alloc_locals
+
+    let (building_size) = BUILDINGS.get_building_size(1)
+
+    %{ print(ids.building_size) %}
+
+    return ()
+end
+
+@external
+func test_get_current_built_buildings_sqm{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+}():
+    alloc_locals
+
+    let test_buildings = RealmBuildings(1, 2, 1, 1, 1, 1, 1, 1, 2)
+
+    let (buildings_sqm) = BUILDINGS.get_current_built_buildings_sqm(test_buildings)
+
+    %{ print(ids.buildings_sqm) %}
+
     return ()
 end
