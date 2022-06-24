@@ -12,6 +12,7 @@ from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, asser
 from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.bool import TRUE, FALSE
+from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.registers import get_label_location
 from contracts.settling_game.utils.game_structs import (
     RealmBuildings,
@@ -131,13 +132,21 @@ namespace BUILDINGS:
 
     # Gets raw building time left of building on realm. This is only used for precalulations
     func get_base_building_left{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        time_balance : felt
-    ) -> (buildings : felt):
+        time_balance : felt, time_stamp : felt
+    ) -> (buildings : felt, time_left : felt):
         alloc_locals
 
-        let (buildings_left, _) = unsigned_div_rem(time_balance, 100)
+        let time_left = time_balance - time_stamp
+        # if time is negative return 0 meaning no effective buildings
+        let (is_less_than_zero_time) = is_le(time_left, 0)
 
-        return (buildings_left)
+        if is_less_than_zero_time == TRUE:
+            return (0, 0)
+        end
+
+        let (buildings_left, _) = unsigned_div_rem(time_left, 10000)
+
+        return (buildings_left, time_left)
     end
 
     func get_decay_slope{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -182,7 +191,7 @@ namespace BUILDINGS:
         # let (effective_buildings) = Math64x61_ln(time_balance)
 
         # TODO: REMOVE this should be made redundent in favour of the log but log is not working
-        let (buildings_left) = get_base_building_left(time_balance)
+        let (buildings_left, _) = unsigned_div_rem(time_balance, 10000)
 
         return (buildings_left)
     end
@@ -204,10 +213,14 @@ namespace BUILDINGS:
 
     func calculate_effective_buildings{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(building_id : felt, time_balance : felt) -> (effective_buildings : felt):
+    }(building_id : felt, time_balance : felt, block_timestamp : felt) -> (
+        effective_buildings : felt
+    ):
         alloc_locals
 
-        let (base_building_number) = get_base_building_left(time_balance)
+        let (base_building_number, time_left) = get_base_building_left(
+            time_balance, block_timestamp
+        )
 
         let (decay_slope) = get_decay_slope(building_id)
 
@@ -215,7 +228,7 @@ namespace BUILDINGS:
         let (decay_rate) = get_decay_rate(base_building_number, decay_slope)
 
         # pass actual time balance + decay rate
-        let (effective_building_time) = get_decayed_building_time(time_balance, decay_rate)
+        let (effective_building_time) = get_decayed_building_time(time_left, decay_rate)
 
         let (effective_buildings) = get_effective_buildings(effective_building_time)
 

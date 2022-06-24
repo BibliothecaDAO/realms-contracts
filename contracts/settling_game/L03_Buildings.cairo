@@ -368,32 +368,34 @@ func get_effective_buildings{
     # TODO: Hardcoded only castle felt for testing, pack buildings into typeof felt
     let (functional_buildings : RealmBuildings) = get_buildings_time(token_id)
 
+    let (block_timestamp) = get_block_timestamp()
+
     let (House) = BUILDINGS.calculate_effective_buildings(
-        RealmBuildingsIds.House, functional_buildings.House
+        RealmBuildingsIds.House, functional_buildings.House, block_timestamp
     )
     let (StoreHouse) = BUILDINGS.calculate_effective_buildings(
-        RealmBuildingsIds.House, functional_buildings.StoreHouse
+        RealmBuildingsIds.House, functional_buildings.StoreHouse, block_timestamp
     )
     let (Granary) = BUILDINGS.calculate_effective_buildings(
-        RealmBuildingsIds.House, functional_buildings.Granary
+        RealmBuildingsIds.House, functional_buildings.Granary, block_timestamp
     )
     let (Farm) = BUILDINGS.calculate_effective_buildings(
-        RealmBuildingsIds.House, functional_buildings.Farm
+        RealmBuildingsIds.House, functional_buildings.Farm, block_timestamp
     )
     let (FishingVillage) = BUILDINGS.calculate_effective_buildings(
-        RealmBuildingsIds.House, functional_buildings.FishingVillage
+        RealmBuildingsIds.House, functional_buildings.FishingVillage, block_timestamp
     )
     let (Barracks) = BUILDINGS.calculate_effective_buildings(
-        RealmBuildingsIds.House, functional_buildings.Barracks
+        RealmBuildingsIds.House, functional_buildings.Barracks, block_timestamp
     )
     let (MageTower) = BUILDINGS.calculate_effective_buildings(
-        RealmBuildingsIds.House, functional_buildings.MageTower
+        RealmBuildingsIds.House, functional_buildings.MageTower, block_timestamp
     )
     let (ArcherTower) = BUILDINGS.calculate_effective_buildings(
-        RealmBuildingsIds.House, functional_buildings.ArcherTower
+        RealmBuildingsIds.House, functional_buildings.ArcherTower, block_timestamp
     )
     let (Castle) = BUILDINGS.calculate_effective_buildings(
-        RealmBuildingsIds.House, functional_buildings.Castle
+        RealmBuildingsIds.House, functional_buildings.Castle, block_timestamp
     )
 
     return (

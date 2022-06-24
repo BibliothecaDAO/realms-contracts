@@ -98,7 +98,7 @@ func calculate_happiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     let (food) = calculate_food(token_id)
 
     # GET HAPPINESS
-    let (happiness) = CALCULATOR.get_happiness(population, food)
+    let (happiness) = CALCULATOR.calculate_happiness(population, food)
 
     return (happiness)
 end
@@ -218,7 +218,7 @@ func calculate_troop_coefficent{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
         buildings_logic_address, token_id
     )
 
-    let (troop_coefficent) = CALCULATOR.get_troop_coefficient(current_buildings)
+    let (troop_coefficent) = CALCULATOR.calculate_troop_coefficient(current_buildings)
 
     return (troop_coefficent)
 end

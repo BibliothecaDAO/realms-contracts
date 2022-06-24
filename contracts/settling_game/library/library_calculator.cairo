@@ -18,9 +18,9 @@ from contracts.settling_game.utils.game_structs import (
     BuildingsPopulation,
 )
 namespace CALCULATOR:
-    func get_happiness{syscall_ptr : felt*, range_check_ptr}(population : felt, food : felt) -> (
-        happiness : felt
-    ):
+    func calculate_happiness{syscall_ptr : felt*, range_check_ptr}(
+        population : felt, food : felt
+    ) -> (happiness : felt):
         alloc_locals
         # FETCH VALUES
         let (population_calculation, _) = unsigned_div_rem(population, 10)
@@ -89,16 +89,16 @@ namespace CALCULATOR:
     end
 
     # Returns coefficient for troop production in bp
-    func get_troop_coefficient{syscall_ptr : felt*, range_check_ptr}(
+    func calculate_troop_coefficient{syscall_ptr : felt*, range_check_ptr}(
         buildings : RealmBuildings
     ) -> (coefficient : felt):
         alloc_locals
 
-        let barracks = buildings.Barracks * BuildingsTroopIndustry.Barracks
-        let mageTower = buildings.MageTower * BuildingsTroopIndustry.MageTower
-        let archerTower = buildings.ArcherTower * BuildingsTroopIndustry.ArcherTower
-        let castle = buildings.Castle * BuildingsTroopIndustry.Castle
+        let Barracks = buildings.Barracks * BuildingsTroopIndustry.Barracks
+        let MageTower = buildings.MageTower * BuildingsTroopIndustry.MageTower
+        let ArcherTower = buildings.ArcherTower * BuildingsTroopIndustry.ArcherTower
+        let Castle = buildings.Castle * BuildingsTroopIndustry.Castle
 
-        return (barracks + mageTower + archerTower + castle)
+        return (Barracks + MageTower + ArcherTower + Castle)
     end
 end

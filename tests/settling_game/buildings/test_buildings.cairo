@@ -9,35 +9,58 @@ from contracts.settling_game.utils.game_structs import (
     BuildingsPopulation,
     BuildingsCulture,
     RealmBuildings,
+    RealmBuildingsIds,
+    BuildingsIntegrityLength,
+    RealmBuildingsSize,
+    BuildingsDecaySlope,
 )
 from contracts.settling_game.library.library_buildings import BUILDINGS
 from starkware.cairo.common.pow import pow
 
-const time_balance = 500
-const decay_slope = 400
-const building_id = 1
+from tests.settling_game.utils.test_structs import TEST_REALM_BUILDINGS
+
+const BUILDING_QUANTITY = 1
+const TEST_REALM_REGIONS = 4
+const TEST_REALM_CITIES = 25
+
+const TEST_TIMESTAMP = 1645743897
+const TEST_TIME_BALANCE_TIMESTAMP = 1645743897 + 46400
 
 @external
 func test_get_building_left{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     alloc_locals
 
     # now - timestamp = param
-    let (base_building_number) = BUILDINGS.get_base_building_left(time_balance)
+    let (base_building_number, time_left) = BUILDINGS.get_base_building_left(
+        TEST_TIME_BALANCE_TIMESTAMP, TEST_TIMESTAMP
+    )
+    %{ print(ids.base_building_number) %}
 
-    let (decay_slope) = BUILDINGS.get_decay_slope(1)
+    let (decay_slope) = BUILDINGS.get_decay_slope(RealmBuildingsIds.Castle)
 
     # pass slope determined by building
     let (decay_rate) = BUILDINGS.get_decay_rate(base_building_number, decay_slope)
+    %{ print(ids.decay_rate) %}
 
     # pass actual time balance + decay rate
-    let (effective_building_time) = BUILDINGS.get_decayed_building_time(time_balance, decay_rate)
+    let (effective_building_time) = BUILDINGS.get_decayed_building_time(time_left, decay_rate)
+    %{ print(ids.effective_building_time) %}
 
     let (buildings_left) = BUILDINGS.get_effective_buildings(effective_building_time)
-
-    %{ print(ids.base_building_number) %}
-    %{ print(ids.decay_rate) %}
-    %{ print(ids.effective_building_time) %}
     %{ print(ids.buildings_left) %}
+    return ()
+end
+
+@external
+func test_get_base_building_left{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    ):
+    alloc_locals
+
+    let (base_building_number, time_left) = BUILDINGS.get_base_building_left(
+        TEST_TIME_BALANCE_TIMESTAMP, TEST_TIMESTAMP
+    )
+    %{ print(ids.base_building_number) %}
+    %{ print(ids.time_left) %}
     return ()
 end
 
@@ -47,8 +70,9 @@ func test_calculate_effective_buildings{
 }():
     alloc_locals
 
-    # now - timestamp = param
-    let (base_building_number) = BUILDINGS.calculate_effective_buildings(1, time_balance)
+    let (base_building_number) = BUILDINGS.calculate_effective_buildings(
+        RealmBuildingsIds.Castle, TEST_TIME_BALANCE_TIMESTAMP, TEST_TIMESTAMP
+    )
 
     %{ print(ids.base_building_number) %}
     return ()
@@ -58,9 +82,10 @@ end
 func test_get_decay_slope{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     alloc_locals
 
-    let (decay_slope) = BUILDINGS.get_decay_slope(1)
+    let (decay_slope) = BUILDINGS.get_decay_slope(RealmBuildingsIds.Castle)
 
-    %{ print(ids.decay_slope) %}
+    assert decay_slope = BuildingsDecaySlope.Castle
+
     return ()
 end
 
@@ -68,9 +93,12 @@ end
 func test_get_integrity_length{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     alloc_locals
 
-    let (final_time) = BUILDINGS.get_integrity_length(1000, 1, 1)
+    let (final_time) = BUILDINGS.get_integrity_length(
+        TEST_TIMESTAMP, RealmBuildingsIds.Castle, BUILDING_QUANTITY
+    )
 
-    %{ print(ids.final_time) %}
+    assert final_time = BuildingsIntegrityLength.Castle * BUILDING_QUANTITY + TEST_TIMESTAMP
+
     return ()
 end
 
@@ -78,9 +106,25 @@ end
 func test_can_build{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     alloc_locals
 
-    let test_buildings = RealmBuildings(1, 1, 1, 1, 1, 1, 1, 1, 2)
+    let test_buildings = RealmBuildings(
+        TEST_REALM_BUILDINGS.HOUSE,
+        TEST_REALM_BUILDINGS.STOREHOUSE,
+        TEST_REALM_BUILDINGS.GRANARY,
+        TEST_REALM_BUILDINGS.FARM,
+        TEST_REALM_BUILDINGS.FISHINGVILLAGE,
+        TEST_REALM_BUILDINGS.BARRACKS,
+        TEST_REALM_BUILDINGS.MAGETOWER,
+        TEST_REALM_BUILDINGS.ARCHERTOWER,
+        TEST_REALM_BUILDINGS.CASTLE,
+    )
 
-    BUILDINGS.can_build(1, 1, test_buildings, 20, 3)
+    BUILDINGS.can_build(
+        RealmBuildingsIds.Castle,
+        BUILDING_QUANTITY,
+        test_buildings,
+        TEST_REALM_CITIES,
+        TEST_REALM_REGIONS,
+    )
 
     return ()
 end
@@ -89,9 +133,9 @@ end
 func test_building_size{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     alloc_locals
 
-    let (building_size) = BUILDINGS.get_building_size(1)
+    let (building_size) = BUILDINGS.get_building_size(RealmBuildingsIds.Castle)
 
-    %{ print(ids.building_size) %}
+    assert building_size = RealmBuildingsSize.Castle
 
     return ()
 end
@@ -102,11 +146,31 @@ func test_get_current_built_buildings_sqm{
 }():
     alloc_locals
 
-    let test_buildings = RealmBuildings(1, 2, 1, 1, 1, 1, 1, 1, 2)
+    let test_buildings = RealmBuildings(
+        TEST_REALM_BUILDINGS.HOUSE,
+        TEST_REALM_BUILDINGS.STOREHOUSE,
+        TEST_REALM_BUILDINGS.GRANARY,
+        TEST_REALM_BUILDINGS.FARM,
+        TEST_REALM_BUILDINGS.FISHINGVILLAGE,
+        TEST_REALM_BUILDINGS.BARRACKS,
+        TEST_REALM_BUILDINGS.MAGETOWER,
+        TEST_REALM_BUILDINGS.ARCHERTOWER,
+        TEST_REALM_BUILDINGS.CASTLE,
+    )
 
     let (buildings_sqm) = BUILDINGS.get_current_built_buildings_sqm(test_buildings)
 
-    %{ print(ids.buildings_sqm) %}
+    let House = TEST_REALM_BUILDINGS.HOUSE * RealmBuildingsSize.House
+    let StoreHouse = TEST_REALM_BUILDINGS.STOREHOUSE * RealmBuildingsSize.StoreHouse
+    let Granary = TEST_REALM_BUILDINGS.GRANARY * RealmBuildingsSize.Granary
+    let Farm = TEST_REALM_BUILDINGS.FARM * RealmBuildingsSize.Farm
+    let FishingVillage = TEST_REALM_BUILDINGS.FISHINGVILLAGE * RealmBuildingsSize.FishingVillage
+    let Barracks = TEST_REALM_BUILDINGS.BARRACKS * RealmBuildingsSize.Barracks
+    let MageTower = TEST_REALM_BUILDINGS.MAGETOWER * RealmBuildingsSize.MageTower
+    let ArcherTower = TEST_REALM_BUILDINGS.ARCHERTOWER * RealmBuildingsSize.ArcherTower
+    let Castle = TEST_REALM_BUILDINGS.CASTLE * RealmBuildingsSize.Castle
+
+    assert buildings_sqm = House + StoreHouse + Granary + Farm + FishingVillage + Barracks + MageTower + ArcherTower + Castle
 
     return ()
 end

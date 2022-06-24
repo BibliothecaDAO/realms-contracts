@@ -1,5 +1,6 @@
 %lang starknet
 from starkware.cairo.common.uint256 import Uint256, uint256_add
+from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.math_cmp import is_nn, is_le
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
 from lib.cairo_math_64x61.contracts.Math64x61 import Math64x61_div
@@ -7,135 +8,135 @@ from contracts.settling_game.utils.game_structs import (
     BuildingsFood,
     BuildingsPopulation,
     BuildingsCulture,
+    RealmBuildings,
+    BuildingsTroopIndustry,
 )
 from contracts.settling_game.library.library_calculator import CALCULATOR
 
-const food = 10
-const culture = 10
-const population = 100
+from tests.settling_game.utils.test_structs import TEST_REALM_BUILDINGS
 
-const Fairgrounds = 0
-const RoyalReserve = 0
-const GrandMarket = 0
-const Castle = 0
-const Guild = 0
-const OfficerAcademy = 0
-const Granary = 0
-const Housing = 0
-const Amphitheater = 0
-const ArcherTower = 0
-const School = 0
-const MageTower = 0
-const TradeOffice = 0
-const Architect = 0
-const ParadeGrounds = 0
-const Barracks = 0
-const Dock = 0
-const Fishmonger = 0
-const Farms = 0
-const Hamlet = 0
-const troops = 50
-
-const testHappiness = 100
-const output = 100
+const TROOP_POPULATION = 10
 
 @external
-func test_production_cap{syscall_ptr : felt*, range_check_ptr}():
+func test_calculate_happiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     alloc_locals
+    let test_buildings = RealmBuildings(
+        TEST_REALM_BUILDINGS.HOUSE,
+        TEST_REALM_BUILDINGS.STOREHOUSE,
+        TEST_REALM_BUILDINGS.GRANARY,
+        TEST_REALM_BUILDINGS.FARM,
+        TEST_REALM_BUILDINGS.FISHINGVILLAGE,
+        TEST_REALM_BUILDINGS.BARRACKS,
+        TEST_REALM_BUILDINGS.MAGETOWER,
+        TEST_REALM_BUILDINGS.ARCHERTOWER,
+        TEST_REALM_BUILDINGS.CASTLE,
+    )
 
-    let (production_output, _) = unsigned_div_rem(output * testHappiness, 100)
+    let (realm_population) = CALCULATOR.calculate_food(test_buildings, TROOP_POPULATION)
 
-    assert production_output = 100
+    let (realm_food) = CALCULATOR.calculate_food(test_buildings, TROOP_POPULATION)
+
+    let (realm_happiness) = CALCULATOR.calculate_happiness(realm_population, realm_food)
+
+    %{ print('Realm Happiness:', ids.realm_happiness) %}
 
     return ()
 end
 
 @external
-func test_happiness{syscall_ptr : felt*, range_check_ptr}():
+func test_calculate_food{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     alloc_locals
+    let test_buildings = RealmBuildings(
+        TEST_REALM_BUILDINGS.HOUSE,
+        TEST_REALM_BUILDINGS.STOREHOUSE,
+        TEST_REALM_BUILDINGS.GRANARY,
+        TEST_REALM_BUILDINGS.FARM,
+        TEST_REALM_BUILDINGS.FISHINGVILLAGE,
+        TEST_REALM_BUILDINGS.BARRACKS,
+        TEST_REALM_BUILDINGS.MAGETOWER,
+        TEST_REALM_BUILDINGS.ARCHERTOWER,
+        TEST_REALM_BUILDINGS.CASTLE,
+    )
+
+    let (realm_food) = CALCULATOR.calculate_food(test_buildings, TROOP_POPULATION)
+
+    %{ print('Realm Food:', ids.realm_food) %}
+
+    let House = BuildingsFood.House * TEST_REALM_BUILDINGS.HOUSE
+    let StoreHouse = BuildingsFood.StoreHouse * TEST_REALM_BUILDINGS.STOREHOUSE
+    let Granary = BuildingsFood.Granary * TEST_REALM_BUILDINGS.GRANARY
+    let Farm = BuildingsFood.Farm * TEST_REALM_BUILDINGS.FARM
+    let FishingVillage = BuildingsFood.FishingVillage * TEST_REALM_BUILDINGS.FISHINGVILLAGE
+    let Barracks = BuildingsFood.Barracks * TEST_REALM_BUILDINGS.BARRACKS
+    let MageTower = BuildingsFood.MageTower * TEST_REALM_BUILDINGS.MAGETOWER
+    let ArcherTower = BuildingsFood.ArcherTower * TEST_REALM_BUILDINGS.ARCHERTOWER
+    let Castle = BuildingsFood.Castle * TEST_REALM_BUILDINGS.CASTLE
+
+    assert realm_food = House + StoreHouse + Granary + Farm + FishingVillage + Barracks + MageTower + ArcherTower + Castle - TROOP_POPULATION
 
     return ()
 end
 
-# @external
-# func test_happiness{syscall_ptr : felt*, range_check_ptr}():
-#     alloc_locals
+@external
+func test_calculate_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    alloc_locals
+    let test_buildings = RealmBuildings(
+        TEST_REALM_BUILDINGS.HOUSE,
+        TEST_REALM_BUILDINGS.STOREHOUSE,
+        TEST_REALM_BUILDINGS.GRANARY,
+        TEST_REALM_BUILDINGS.FARM,
+        TEST_REALM_BUILDINGS.FISHINGVILLAGE,
+        TEST_REALM_BUILDINGS.BARRACKS,
+        TEST_REALM_BUILDINGS.MAGETOWER,
+        TEST_REALM_BUILDINGS.ARCHERTOWER,
+        TEST_REALM_BUILDINGS.CASTLE,
+    )
 
-# let castleFood = BuildingsFood.Castle * Castle
-#     let FairgroundsFood = BuildingsFood.Fairgrounds * Fairgrounds
-#     let RoyalReserveFood = BuildingsFood.RoyalReserve * RoyalReserve
-#     let GrandMarketFood = BuildingsFood.GrandMarket * GrandMarket
-#     let GuildFood = BuildingsFood.Guild * Guild
-#     let OfficerAcademyFood = BuildingsFood.OfficerAcademy * OfficerAcademy
-#     let GranaryFood = BuildingsFood.Granary * Granary
-#     let HousingFood = BuildingsFood.Housing * Housing
-#     let AmphitheaterFood = BuildingsFood.Amphitheater * Amphitheater
-#     let ArcherTowerFood = BuildingsFood.ArcherTower * ArcherTower
-#     let SchoolFood = BuildingsFood.School * School
-#     let MageTowerFood = BuildingsFood.MageTower * MageTower
-#     let TradeOfficeFood = BuildingsFood.TradeOffice * TradeOffice
-#     let ArchitectFood = BuildingsFood.Architect * Architect
-#     let ParadeGroundsFood = BuildingsFood.ParadeGrounds * ParadeGrounds
-#     let BarracksFood = BuildingsFood.Barracks * Barracks
-#     let DockFood = BuildingsFood.Dock * Dock
-#     let FishmongerFood = BuildingsFood.Fishmonger * Fishmonger
-#     let FarmsFood = BuildingsFood.Farms * Farms
-#     let HamletFood = BuildingsFood.Hamlet * Hamlet
+    let (realm_population) = CALCULATOR.calculate_population(test_buildings, TROOP_POPULATION)
 
-# let castlePop= BuildingsPopulation.Castle * Castle
-#     let FairgroundsPop = BuildingsPopulation.Fairgrounds * Fairgrounds
-#     let RoyalReservePop = BuildingsPopulation.RoyalReserve * RoyalReserve
-#     let GrandMarketPop = BuildingsPopulation.GrandMarket * GrandMarket
-#     let GuildPop = BuildingsPopulation.Guild * Guild
-#     let OfficerAcademyPop = BuildingsPopulation.OfficerAcademy * OfficerAcademy
-#     let GranaryPop = BuildingsPopulation.Granary * Granary
-#     let HousingPop = BuildingsPopulation.Housing * Housing
-#     let AmphitheaterPop = BuildingsPopulation.Amphitheater * Amphitheater
-#     let ArcherTowerPop = BuildingsPopulation.ArcherTower * ArcherTower
-#     let SchoolPop = BuildingsPopulation.School * School
-#     let MageTowerPop = BuildingsPopulation.MageTower * MageTower
-#     let TradeOfficePop = BuildingsPopulation.TradeOffice * TradeOffice
-#     let ArchitectPop = BuildingsPopulation.Architect * Architect
-#     let ParadeGroundsPop = BuildingsPopulation.ParadeGrounds * ParadeGrounds
-#     let BarracksPop = BuildingsPopulation.Barracks * Barracks
-#     let DockPop = BuildingsPopulation.Dock * Dock
-#     let FishmongerPop= BuildingsPopulation.Fishmonger * Fishmonger
-#     let FarmsPop = BuildingsPopulation.Farms * Farms
-#     let HamletPop = BuildingsPopulation.Hamlet * Hamlet
+    %{ print('Realm Population:', ids.realm_population) %}
 
-# let castleCulture = BuildingsCulture.Castle * Castle
-#     let FairgroundsCulture = BuildingsCulture.Fairgrounds * Fairgrounds
-#     let RoyalReserveCulture = BuildingsCulture.RoyalReserve * RoyalReserve
-#     let GrandMarketCulture = BuildingsCulture.GrandMarket * GrandMarket
-#     let GuildCulture = BuildingsCulture.Guild * Guild
-#     let OfficerAcademyCulture = BuildingsCulture.OfficerAcademy * OfficerAcademy
-#     let GranaryCulture = BuildingsCulture.Granary * Granary
-#     let HousingCulture = BuildingsCulture.Housing * Housing
-#     let AmphitheaterCulture = BuildingsCulture.Amphitheater * Amphitheater
-#     let ArcherTowerCulture = BuildingsCulture.ArcherTower * ArcherTower
-#     let SchoolCulture = BuildingsCulture.School * School
-#     let MageTowerCulture = BuildingsCulture.MageTower * MageTower
-#     let TradeOfficeCulture = BuildingsCulture.TradeOffice * TradeOffice
-#     let ArchitectCulture = BuildingsCulture.Architect * Architect
-#     let ParadeGroundsCulture= BuildingsCulture.ParadeGrounds * ParadeGrounds
-#     let BarracksCulture = BuildingsCulture.Barracks * Barracks
-#     let DockCulture = BuildingsCulture.Dock * Dock
-#     let FishmongerCulture= BuildingsCulture.Fishmonger * Fishmonger
-#     let FarmsCulture = BuildingsCulture.Farms * Farms
-#     let HamletCulture = BuildingsCulture.Hamlet * Hamlet
+    let House = BuildingsPopulation.House * TEST_REALM_BUILDINGS.HOUSE
+    let StoreHouse = BuildingsPopulation.StoreHouse * TEST_REALM_BUILDINGS.STOREHOUSE
+    let Granary = BuildingsPopulation.Granary * TEST_REALM_BUILDINGS.GRANARY
+    let Farm = BuildingsPopulation.Farm * TEST_REALM_BUILDINGS.FARM
+    let FishingVillage = BuildingsPopulation.FishingVillage * TEST_REALM_BUILDINGS.FISHINGVILLAGE
+    let Barracks = BuildingsPopulation.Barracks * TEST_REALM_BUILDINGS.BARRACKS
+    let MageTower = BuildingsPopulation.MageTower * TEST_REALM_BUILDINGS.MAGETOWER
+    let ArcherTower = BuildingsPopulation.ArcherTower * TEST_REALM_BUILDINGS.ARCHERTOWER
+    let Castle = BuildingsPopulation.Castle * TEST_REALM_BUILDINGS.CASTLE
 
-# let troopsFood = troops * - 1
-#     let troopsPop = troops * - 1
+    assert realm_population = House + StoreHouse + Granary + Farm + FishingVillage + Barracks + MageTower + ArcherTower + Castle - TROOP_POPULATION
 
-# let food = 10 + castleFood + FairgroundsFood + RoyalReserveFood + GrandMarketFood + GuildFood + OfficerAcademyFood + GranaryFood +HousingFood + AmphitheaterFood + ArcherTowerFood + SchoolFood + MageTowerFood + TradeOfficeFood + ArchitectFood + ParadeGroundsFood + BarracksFood + DockFood + FishmongerFood + FarmsFood + HamletFood + troopsFood
+    return ()
+end
 
-# let population = 100 + castlePop + FairgroundsPop + RoyalReservePop + GrandMarketPop + GuildPop + OfficerAcademyPop + GranaryPop +HousingPop + AmphitheaterPop + ArcherTowerPop + SchoolPop + MageTowerPop + TradeOfficePop + ArchitectPop + ParadeGroundsPop + BarracksPop + DockPop + FishmongerPop + FarmsPop + HamletPop + troopsPop
+@external
+func test_calculate_troop_coefficient{syscall_ptr : felt*, range_check_ptr}():
+    alloc_locals
 
-# let culture = 10 + castleCulture + FairgroundsCulture + RoyalReserveCulture + GrandMarketCulture + GuildCulture + OfficerAcademyCulture + GranaryCulture + HousingCulture + AmphitheaterCulture + ArcherTowerCulture + SchoolCulture + MageTowerCulture + TradeOfficeCulture + ArchitectCulture + ParadeGroundsCulture + BarracksCulture + DockCulture + FishmongerCulture + FarmsCulture + HamletCulture
+    let test_buildings = RealmBuildings(
+        TEST_REALM_BUILDINGS.HOUSE,
+        TEST_REALM_BUILDINGS.STOREHOUSE,
+        TEST_REALM_BUILDINGS.GRANARY,
+        TEST_REALM_BUILDINGS.FARM,
+        TEST_REALM_BUILDINGS.FISHINGVILLAGE,
+        TEST_REALM_BUILDINGS.BARRACKS,
+        TEST_REALM_BUILDINGS.MAGETOWER,
+        TEST_REALM_BUILDINGS.ARCHERTOWER,
+        TEST_REALM_BUILDINGS.CASTLE,
+    )
 
-# let (happiness) = CALCULATOR.get_happiness(culture, population, food)
+    let (troop_coefficient) = CALCULATOR.calculate_troop_coefficient(test_buildings)
 
-# assert happiness = 60
+    %{ print('Troop coefficient:', ids.troop_coefficient) %}
 
-# return ()
-# end
+    let barracks = TEST_REALM_BUILDINGS.BARRACKS * BuildingsTroopIndustry.Barracks
+    let mageTower = TEST_REALM_BUILDINGS.MAGETOWER * BuildingsTroopIndustry.MageTower
+    let archerTower = TEST_REALM_BUILDINGS.ARCHERTOWER * BuildingsTroopIndustry.ArcherTower
+    let castle = TEST_REALM_BUILDINGS.CASTLE * BuildingsTroopIndustry.Castle
+
+    assert troop_coefficient = barracks + mageTower + archerTower + castle
+
+    return ()
+end
