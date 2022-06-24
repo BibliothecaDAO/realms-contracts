@@ -363,3 +363,10 @@ struct ResourceOutput:
     member resource_6 : felt
     member resource_7 : felt
 end
+
+# Packed Military Buildings
+struct PackedBuildings:
+    member military : felt
+    member economic : felt
+    member housing : felt
+end

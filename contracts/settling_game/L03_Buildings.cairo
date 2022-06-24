@@ -20,6 +20,7 @@ from contracts.settling_game.utils.game_structs import (
     ModuleIds,
     ExternalContractIds,
     Cost,
+    PackedBuildings,
 )
 
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
@@ -91,7 +92,7 @@ func building_lords_cost(building_id : felt) -> (lords : Uint256):
 end
 
 @storage_var
-func castle_time(token_id : Uint256) -> (time : felt):
+func buildings_integrity(token_id : Uint256) -> (integrity : PackedBuildings):
 end
 
 ###############
@@ -146,7 +147,7 @@ func build{
         contract_address=realms_address, token_id=token_id
     )
 
-    let (realm_buildings_integrity : RealmBuildings) = get_buildings_time(token_id)
+    let (realm_buildings_integrity : RealmBuildings) = get_buildings_integrity_unpacked(token_id)
 
     # Check Area, revert if no space available
     BUILDINGS.can_build(
@@ -268,19 +269,11 @@ func build_buildings{
     end
 
     if building_id == RealmBuildingsIds.Castle:
-        # Write time
         local id_9 = (current_buildings.Castle + 1) * SHIFT_6_9
         buildings[8] = id_9
-        castle_time.write(token_id, time_to_add)
-        tempvar syscall_ptr = syscall_ptr
-        tempvar range_check_ptr = range_check_ptr
-        tempvar pedersen_ptr = pedersen_ptr
     else:
         local id_9 = current_buildings.Castle * SHIFT_6_9
         buildings[8] = id_9
-        tempvar syscall_ptr = syscall_ptr
-        tempvar range_check_ptr = range_check_ptr
-        tempvar pedersen_ptr = pedersen_ptr
     end
 
     tempvar value = buildings[8] + buildings[7] + buildings[6] + buildings[5] + buildings[4] + buildings[3] + buildings[2] + buildings[1] + buildings[0]
@@ -293,6 +286,7 @@ end
 # GETTERS #
 ###########
 
+# TODO: Deprecate or keep? It is a permanent record of how many buildings have been built
 @view
 func get_buildings_unpacked{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
@@ -327,36 +321,16 @@ func get_buildings_unpacked{
 end
 
 @view
-func get_buildings_time{
+func get_buildings_integrity_unpacked{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
 }(token_id : Uint256) -> (realm_buildings : RealmBuildings):
     alloc_locals
 
-    # TODO: Hardcoded only castle felt for testing, pack buildings into typeof felt
+    let (buildings_) = buildings_integrity.read(token_id)
 
-    let (House) = castle_time.read(token_id)
-    let (StoreHouse) = castle_time.read(token_id)
-    let (Granary) = castle_time.read(token_id)
-    let (Farm) = castle_time.read(token_id)
-    let (FishingVillage) = castle_time.read(token_id)
-    let (Barracks) = castle_time.read(token_id)
-    let (MageTower) = castle_time.read(token_id)
-    let (ArcherTower) = castle_time.read(token_id)
-    let (Castle) = castle_time.read(token_id)
+    let (unpacked_buildings : RealmBuildings) = BUILDINGS.unpack_buildings(buildings_)
 
-    return (
-        realm_buildings=RealmBuildings(
-        House=House,
-        StoreHouse=StoreHouse,
-        Granary=Granary,
-        Farm=Farm,
-        FishingVillage=FishingVillage,
-        Barracks=Barracks,
-        MageTower=MageTower,
-        ArcherTower=ArcherTower,
-        Castle=Castle
-        ),
-    )
+    return (unpacked_buildings)
 end
 
 @view
@@ -366,7 +340,7 @@ func get_effective_buildings{
     alloc_locals
 
     # TODO: Hardcoded only castle felt for testing, pack buildings into typeof felt
-    let (functional_buildings : RealmBuildings) = get_buildings_time(token_id)
+    let (functional_buildings : RealmBuildings) = get_buildings_integrity_unpacked(token_id)
 
     let (block_timestamp) = get_block_timestamp()
 
@@ -417,9 +391,7 @@ end
 func get_storage_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
 ) -> (buildings : felt):
-    let (buildings) = realm_buildings.read(token_id)
-
-    return (buildings)
+    return realm_buildings.read(token_id)
 end
 
 @view

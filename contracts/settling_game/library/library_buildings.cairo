@@ -20,8 +20,14 @@ from contracts.settling_game.utils.game_structs import (
     RealmBuildingsSize,
     BuildingsIntegrityLength,
     BuildingsDecaySlope,
+    PackedBuildings,
+    RealmBuildingsIds,
 )
 from contracts.settling_game.utils.constants import DAY, BASE_SQM
+
+from contracts.settling_game.utils.general import unpack_data
+
+from contracts.settling_game.utils.constants import SHIFT_25
 
 namespace BUILDINGS:
     # Checks if you can build on a Realm, reverts if you cannot
@@ -263,5 +269,132 @@ namespace BUILDINGS:
         let (effective_buildings) = get_effective_buildings(effective_building_time)
 
         return (effective_buildings)
+    end
+
+    func unpack_buildings{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+        bitwise_ptr : BitwiseBuiltin*,
+    }(packed_buildings : PackedBuildings) -> (unpacked_buildings : RealmBuildings):
+        alloc_locals
+
+        let (House) = unpack_data(packed_buildings.housing, 0, 2199023255551)
+        let (StoreHouse) = unpack_data(packed_buildings.economic, 0, 2199023255551)
+        let (Granary) = unpack_data(packed_buildings.economic, 41, 2199023255551)
+        let (Farm) = unpack_data(packed_buildings.economic, 82, 2199023255551)
+        let (FishingVillage) = unpack_data(packed_buildings.economic, 123, 2199023255551)
+        let (Barracks) = unpack_data(packed_buildings.military, 0, 2199023255551)
+        let (MageTower) = unpack_data(packed_buildings.military, 41, 2199023255551)
+        let (ArcherTower) = unpack_data(packed_buildings.military, 82, 2199023255551)
+        let (Castle) = unpack_data(packed_buildings.military, 123, 2199023255551)
+
+        return (
+            unpacked_buildings=RealmBuildings(
+            House=House,
+            StoreHouse=StoreHouse,
+            Granary=Granary,
+            Farm=Farm,
+            FishingVillage=FishingVillage,
+            Barracks=Barracks,
+            MageTower=MageTower,
+            ArcherTower=ArcherTower,
+            Castle=Castle,
+            ),
+        )
+    end
+
+    func pack_buildings{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+        bitwise_ptr : BitwiseBuiltin*,
+    }(current_buildings : RealmBuildings, building_id : felt) -> (
+        packed_buildings : PackedBuildings
+    ):
+        alloc_locals
+
+        let (buildings : felt*) = alloc()
+
+        if building_id == RealmBuildingsIds.House:
+            local id_1 = (current_buildings.House) * SHIFT_25._1
+            buildings[0] = id_1
+        else:
+            buildings[0] = current_buildings.House * SHIFT_25._1
+        end
+
+        if building_id == RealmBuildingsIds.StoreHouse:
+            local id_2 = (current_buildings.StoreHouse) * SHIFT_25._1
+            buildings[1] = id_2
+        else:
+            local id_2 = current_buildings.StoreHouse * SHIFT_25._1
+            buildings[1] = id_2
+        end
+
+        if building_id == RealmBuildingsIds.Granary:
+            local id_3 = (current_buildings.Granary) * SHIFT_25._2
+            buildings[2] = id_3
+        else:
+            local id_3 = current_buildings.Granary * SHIFT_25._2
+            buildings[2] = id_3
+        end
+
+        if building_id == RealmBuildingsIds.Farm:
+            local id_4 = (current_buildings.Farm) * SHIFT_25._3
+            buildings[3] = id_4
+        else:
+            local id_4 = current_buildings.Farm * SHIFT_25._3
+            buildings[3] = id_4
+        end
+
+        if building_id == RealmBuildingsIds.FishingVillage:
+            local id_5 = (current_buildings.FishingVillage) * SHIFT_25._4
+            buildings[4] = id_5
+        else:
+            local id_5 = current_buildings.FishingVillage * SHIFT_25._4
+            buildings[4] = id_5
+        end
+
+        if building_id == RealmBuildingsIds.Barracks:
+            local id_6 = (current_buildings.Barracks) * SHIFT_25._1
+            buildings[5] = id_6
+        else:
+            local id_6 = current_buildings.Barracks * SHIFT_25._1
+            buildings[5] = id_6
+        end
+
+        if building_id == RealmBuildingsIds.MageTower:
+            local id_7 = (current_buildings.MageTower) * SHIFT_25._2
+            buildings[6] = id_7
+        else:
+            local id_7 = current_buildings.MageTower * SHIFT_25._2
+            buildings[6] = id_7
+        end
+
+        if building_id == RealmBuildingsIds.ArcherTower:
+            local id_8 = (current_buildings.ArcherTower) * SHIFT_25._3
+            buildings[7] = id_8
+        else:
+            local id_8 = current_buildings.ArcherTower * SHIFT_25._3
+            buildings[7] = id_8
+        end
+
+        if building_id == RealmBuildingsIds.Castle:
+            local id_9 = (current_buildings.Castle) * SHIFT_25._4
+            buildings[8] = id_9
+        else:
+            local id_9 = current_buildings.Castle * SHIFT_25._4
+            buildings[8] = id_9
+        end
+
+        tempvar housing_value = buildings[0]
+
+        tempvar economic_value = buildings[4] + buildings[3] + buildings[2] + buildings[1]
+
+        tempvar military_value = buildings[8] + buildings[7] + buildings[6] + buildings[5]
+
+        return (
+            PackedBuildings(military=military_value, economic=economic_value, housing=housing_value)
+        )
     end
 end

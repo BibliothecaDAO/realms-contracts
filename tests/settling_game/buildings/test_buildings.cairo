@@ -15,7 +15,6 @@ from contracts.settling_game.utils.game_structs import (
     BuildingsDecaySlope,
 )
 from contracts.settling_game.library.library_buildings import BUILDINGS
-from starkware.cairo.common.pow import pow
 
 from tests.settling_game.utils.test_structs import TEST_REALM_BUILDINGS
 
@@ -158,6 +157,41 @@ func test_get_current_built_buildings_sqm{
     let Castle = TEST_REALM_BUILDINGS.CASTLE * RealmBuildingsSize.Castle
 
     assert buildings_sqm = House + StoreHouse + Granary + Farm + FishingVillage + Barracks + MageTower + ArcherTower + Castle
+
+    return ()
+end
+
+@external
+func test_pack_buildings{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}():
+    alloc_locals
+
+    let test_buildings = RealmBuildings(
+        TEST_TIMESTAMP,
+        TEST_REALM_BUILDINGS.STOREHOUSE,
+        TEST_REALM_BUILDINGS.GRANARY,
+        TEST_REALM_BUILDINGS.FARM,
+        TEST_REALM_BUILDINGS.FISHINGVILLAGE,
+        TEST_REALM_BUILDINGS.BARRACKS,
+        TEST_REALM_BUILDINGS.MAGETOWER,
+        TEST_REALM_BUILDINGS.ARCHERTOWER,
+        TEST_REALM_BUILDINGS.CASTLE,
+    )
+
+    let (packed_buildings) = BUILDINGS.pack_buildings(test_buildings, RealmBuildingsIds.House)
+
+    let (unpacked_buildings) = BUILDINGS.unpack_buildings(packed_buildings)
+
+    assert TEST_TIMESTAMP = unpacked_buildings.House
+    assert TEST_REALM_BUILDINGS.STOREHOUSE = unpacked_buildings.StoreHouse
+    assert TEST_REALM_BUILDINGS.GRANARY = unpacked_buildings.Granary
+    assert TEST_REALM_BUILDINGS.FARM = unpacked_buildings.Farm
+    assert TEST_REALM_BUILDINGS.FISHINGVILLAGE = unpacked_buildings.FishingVillage
+    assert TEST_REALM_BUILDINGS.BARRACKS = unpacked_buildings.Barracks
+    assert TEST_REALM_BUILDINGS.MAGETOWER = unpacked_buildings.MageTower
+    assert TEST_REALM_BUILDINGS.ARCHERTOWER = unpacked_buildings.ArcherTower
+    assert TEST_REALM_BUILDINGS.CASTLE = unpacked_buildings.Castle
 
     return ()
 end
