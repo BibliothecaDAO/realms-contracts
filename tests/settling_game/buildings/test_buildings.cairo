@@ -24,7 +24,7 @@ const TEST_REALM_REGIONS = 4
 const TEST_REALM_CITIES = 25
 
 const TEST_TIMESTAMP = 1645743897
-const TEST_TIME_BALANCE_TIMESTAMP = 1645743897 + 46400
+const TEST_TIME_BALANCE_TIMESTAMP = 1645743897 + 56400
 
 @external
 func test_get_building_left{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
@@ -48,19 +48,6 @@ func test_get_building_left{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ra
 
     let (buildings_left) = BUILDINGS.get_effective_buildings(effective_building_time)
     %{ print(ids.buildings_left) %}
-    return ()
-end
-
-@external
-func test_get_base_building_left{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    ):
-    alloc_locals
-
-    let (base_building_number, time_left) = BUILDINGS.get_base_building_left(
-        TEST_TIME_BALANCE_TIMESTAMP, TEST_TIMESTAMP
-    )
-    %{ print(ids.base_building_number) %}
-    %{ print(ids.time_left) %}
     return ()
 end
 

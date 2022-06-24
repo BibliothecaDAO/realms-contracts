@@ -12,8 +12,9 @@ from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, asser
 from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.bool import TRUE, FALSE
-from starkware.cairo.common.math_cmp import is_le
+from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.registers import get_label_location
+from starkware.cairo.common.math import assert_250_bit
 from contracts.settling_game.utils.game_structs import (
     RealmBuildings,
     RealmBuildingsSize,
@@ -21,7 +22,6 @@ from contracts.settling_game.utils.game_structs import (
     BuildingsDecaySlope,
 )
 from contracts.settling_game.utils.constants import DAY, BASE_SQM
-from lib.cairo_math_64x61.contracts.Math64x61 import Math64x61_ln
 
 namespace BUILDINGS:
     # Checks if you can build on a Realm, reverts if you cannot
@@ -181,6 +181,36 @@ namespace BUILDINGS:
         return (decay_slope * buildings_left)
     end
 
+    func findPowLarger{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        base : felt, exp : felt, currVal : felt, target : felt
+    ) -> (exp : felt):
+        alloc_locals
+
+        # Getting the next power of the base on this iteration
+
+        local newVal = base * currVal
+
+        assert_250_bit(newVal)
+
+        # This handles flooring scenario
+
+        let (isLe) = is_le(newVal, target)
+
+        if isLe == 1:
+            return findPowLarger(base, exp + 1, newVal, target)
+        end
+
+        # This handles exact match for base ^ exponent = target
+
+        let (isNotEqual) = is_not_zero(newVal - target)
+
+        if isNotEqual == 0:
+            return (exp=exp)
+        end
+
+        return (exp=exp)
+    end
+
     # Gets effective buildings on Realm
     func get_effective_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         time_balance : felt
@@ -188,12 +218,12 @@ namespace BUILDINGS:
         alloc_locals
 
         # TODO: log function
-        # let (effective_buildings) = Math64x61_ln(time_balance)
+        let (effective_buildings) = findPowLarger(2, 0, 1, time_balance)
 
         # TODO: REMOVE this should be made redundent in favour of the log but log is not working
-        let (buildings_left, _) = unsigned_div_rem(time_balance, 10000)
+        # let (buildings_left, _) = unsigned_div_rem(time_balance, 10000)
 
-        return (buildings_left)
+        return (time_balance)
     end
 
     # Effective building time calc
