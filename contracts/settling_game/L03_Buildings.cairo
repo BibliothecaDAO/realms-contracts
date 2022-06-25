@@ -202,13 +202,24 @@ func build_buildings{
 
     let (block_timestamp) = get_block_timestamp()
 
+    # calculate time to add
     let (time_to_add) = BUILDINGS.get_integrity_length(block_timestamp, building_id, quantity)
 
+    # get unpacked buildings integrity
     let (current_buildings_integrity_unpacked) = get_buildings_integrity_unpacked(token_id)
 
-    let (updated_buildings_packed) = BUILDINGS.pack_buildings(
+    # set integrity for adjusted buildings
+    let (updated_buildings_packed) = BUILDINGS.add_time_to_buildings(
         current_buildings_integrity_unpacked, building_id, block_timestamp, time_to_add
     )
+
+    # pack buildings
+    let (updated_buildings_integrity : PackedBuildings) = BUILDINGS.pack_buildings(
+        updated_buildings_packed
+    )
+
+    # Save new packed buildings
+    buildings_integrity.write(token_id, updated_buildings_integrity)
 
     # GET HISTORICAL BUILDINGS
     # let (current_buildings : RealmBuildings) = get_buildings_unpacked(token_id)
