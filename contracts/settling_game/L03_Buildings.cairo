@@ -159,7 +159,7 @@ func build{
     end
 
     # Build buildings and set state
-    build_buildings(token_id, building_id, quantity)
+    build_buildings(token_id, building_id, quantity, realms_data)
 
     # GET BUILDING COSTS
     # TODO: Add exponential cost function into X buildings
@@ -185,20 +185,8 @@ end
 
 func build_buildings{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-}(token_id : Uint256, building_id : felt, quantity : felt):
+}(token_id : Uint256, building_id : felt, quantity : felt, realms_data : RealmData):
     alloc_locals
-
-    let (controller) = MODULE_controller_address()
-
-    # REALMS ADDRESS
-    let (realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Realms
-    )
-
-    # REALMS DATA
-    let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
-        contract_address=realms_address, token_id=token_id
-    )
 
     let (block_timestamp) = get_block_timestamp()
 

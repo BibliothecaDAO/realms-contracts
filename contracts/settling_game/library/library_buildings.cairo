@@ -120,11 +120,20 @@ namespace BUILDINGS:
     func get_integrity_length{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         block_timestamp : felt, building_id : felt, quantity : felt
     ) -> (time : felt):
+        let (length) = integrity_length(building_id)
+
+        # We add length twice so that there is more than 1 building length
+        return (block_timestamp + length * quantity + length)
+    end
+
+    func integrity_length{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        block_timestamp : felt, building_id : felt, quantity : felt
+    ) -> (time : felt):
         let idx = building_id - 1
 
         let (type_label) = get_label_location(building_integrity_length)
 
-        return (block_timestamp + [type_label + idx] * quantity)
+        return ([type_label + idx])
 
         building_integrity_length:
         dw BuildingsIntegrityLength.House  # house
