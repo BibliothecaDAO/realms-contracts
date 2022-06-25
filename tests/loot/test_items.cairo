@@ -3,11 +3,6 @@ from starkware.cairo.common.uint256 import Uint256, uint256_add, uint256_sub
 from starkware.cairo.common.math_cmp import is_nn, is_le
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
 from lib.cairo_math_64x61.contracts.Math64x61 import Math64x61_div
-from contracts.settling_game.utils.game_structs import (
-    BuildingsFood,
-    BuildingsPopulation,
-    BuildingsCulture,
-)
 from contracts.loot.library_item import LootItems
 from contracts.loot.ItemConstants import ItemIds
 from starkware.cairo.common.pow import pow
@@ -25,14 +20,34 @@ func test_base_fetch{syscall_ptr : felt*, range_check_ptr}():
 end
 
 @external
+func test_item_slot{syscall_ptr : felt*, range_check_ptr}():
+    alloc_locals
+
+    let (slot) = LootItems.item_slot(ItemIds.Pendant)
+
+    %{ print(ids.slot) %}
+    return ()
+end
+
+@external
+func test_item_class{syscall_ptr : felt*, range_check_ptr}():
+    alloc_locals
+
+    let (item_class) = LootItems.item_class(ItemIds.Pendant)
+
+    %{ print(ids.item_class) %}
+    return ()
+end
+
+@external
 func test_calculate_item_stats{syscall_ptr : felt*, range_check_ptr}():
     alloc_locals
 
-    let (item : Item) = LootItems.calculate_item_stats(ItemIds.Pendant)
+    let (Agility, Attack, Armour, Wisdom, Vitality) = LootItems.calculate_item_stats(
+        ItemIds.Pendant, 1, 1, 1, 1
+    )
 
-    let agility = item.Agility
-
-    %{ print(ids.agility) %}
+    %{ print(ids.Agility) %}
 
     return ()
 end

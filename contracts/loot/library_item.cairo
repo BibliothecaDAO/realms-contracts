@@ -15,13 +15,14 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.registers import get_label_location
 
-from contracts.loot.ItemConstants import ItemAgility, Item
+from contracts.loot.ItemConstants import ItemAgility, Item, ItemSlot, ItemClass
 
 namespace LootItems:
-    func calculate_item_stats{syscall_ptr : felt*, range_check_ptr}(item_id : felt) -> (
-        item : Item
-    ):
+    func calculate_item_stats{syscall_ptr : felt*, range_check_ptr}(
+        item_id : felt, prefix : felt, suffix : felt, origin : felt, bonus : felt
+    ) -> (Agility, Attack, Armour, Wisdom, Vitality):
         alloc_locals
+
         # computed
         let (Agility) = base_agility(item_id)
         let (Attack) = base_agility(item_id)
@@ -29,15 +30,43 @@ namespace LootItems:
         let (Wisdom) = base_agility(item_id)
         let (Vitality) = base_agility(item_id)
 
-        # State based
-        let (Prefix) = base_agility(item_id)
-        let (Suffix) = base_agility(item_id)
-        let (Order) = base_agility(item_id)
-        let (Bonus) = base_agility(item_id)
+        # TODO: ADD Dynamic
+        # let (Prefix) = base_agility(item_id)
+        # let (Suffix) = base_agility(item_id)
+        # let (Order) = base_agility(item_id)
+        # let (Bonus) = base_agility(item_id)
 
-        return (
-            item=Item(item_id, 1, Agility, Attack, Armour, Wisdom, Vitality, Prefix, Suffix, Order, Bonus, 1, 12123123),
-        )
+        return (Agility, Attack, Armour, Wisdom, Vitality)
+    end
+
+    # Get Item Class
+    func item_class{syscall_ptr : felt*, range_check_ptr}(item_id : felt) -> (class : felt):
+        alloc_locals
+
+        let (type_label) = get_label_location(item_slot)
+
+        return ([type_label + item_id - 1])
+
+        item_slot:
+        dw ItemClass.Pendant
+        dw ItemClass.Necklace
+        dw ItemClass.Amulet
+        # TODO: add
+    end
+
+    # Item location on Adventurer
+    func item_slot{syscall_ptr : felt*, range_check_ptr}(item_id : felt) -> (slot : felt):
+        alloc_locals
+
+        let (type_label) = get_label_location(item_slot)
+
+        return ([type_label + item_id - 1])
+
+        item_slot:
+        dw ItemSlot.Pendant
+        dw ItemSlot.Necklace
+        dw ItemSlot.Amulet
+        # TODO: add
     end
 
     func base_agility{syscall_ptr : felt*, range_check_ptr}(item_id : felt) -> (agility : felt):

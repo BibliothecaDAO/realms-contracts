@@ -6,9 +6,30 @@
 
 %lang starknet
 
+struct Adventurer:
+    member Class : felt
+    member Agility : felt
+    member Attack : felt
+    member Armour : felt
+    member Wisdom : felt
+    member Vitality : felt
+    member Neck : felt
+    member Weapon : felt
+    member Ring : felt
+    member Chest : felt
+    member Head : felt
+    member Waist : felt
+    member Feet : felt
+    member Hands : felt
+    member Age : felt
+    member Name : felt
+    member XP : felt
+end
+
 struct Item:
     member ItemId : felt
     member Class : felt  # location for now
+    member Slot : felt
     member Agility : felt
     member Attack : felt
     member Armour : felt
@@ -20,6 +41,48 @@ struct Item:
     member Bonus : felt
     member Level : felt
     member Age : felt
+    member XP : felt
+end
+
+namespace Class:
+    const All = 1
+    const Mage = 2
+    const Ranger = 3
+    const Warrior = 4
+end
+
+namespace ItemClass:
+    const Pendant = Class.All
+    const Necklace = Class.All
+    const Amulet = Class.All
+    const SilverRing = Class.All
+    const BronzeRing = Class.All
+    const PlatinumRing = Class.All
+    const TitaniumRing = Class.All
+    const GoldRing = Class.All
+end
+
+namespace Slot:
+    const Weapon = 1
+    const Chest = 2
+    const Head = 3
+    const Waist = 4
+    const Feet = 5
+    const Hands = 6
+    const Neck = 7
+    const Ring = 8
+end
+
+namespace ItemSlot:
+    const Pendant = Slot.Neck
+    const Necklace = Slot.Neck
+    const Amulet = Slot.Neck
+    const SilverRing = Slot.Ring
+    const BronzeRing = Slot.Ring
+    const PlatinumRing = Slot.Ring
+    const TitaniumRing = Slot.Ring
+    const GoldRing = Slot.Ring
+    # TODO: add
 end
 
 namespace ItemIds:
