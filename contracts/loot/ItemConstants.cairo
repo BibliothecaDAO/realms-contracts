@@ -60,6 +60,7 @@ namespace ItemClass:
     const PlatinumRing = Class.All
     const TitaniumRing = Class.All
     const GoldRing = Class.All
+    # TODO: add
 end
 
 namespace Slot:
