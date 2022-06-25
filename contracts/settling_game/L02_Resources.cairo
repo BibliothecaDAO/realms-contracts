@@ -27,6 +27,7 @@ from contracts.settling_game.utils.constants import (
     BASE_RESOURCES_PER_DAY,
     BASE_LORDS_PER_DAY,
     PILLAGE_AMOUNT,
+    MAX_DAYS_ACCURED,
 )
 from contracts.settling_game.library.library_module import (
     MODULE_controller_address,
@@ -406,6 +407,7 @@ end
 func days_accrued{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
 ) -> (days_accrued : felt, remainder : felt):
+    alloc_locals
     let (controller) = MODULE_controller_address()
     let (block_timestamp) = get_block_timestamp()
     let (settling_logic_address) = IModuleController.get_module_address(
@@ -416,7 +418,13 @@ func days_accrued{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     let (last_update) = IL01_Settling.get_time_staked(settling_logic_address, token_id)
     let (days_accrued, seconds_left_over) = unsigned_div_rem(block_timestamp - last_update, DAY)
 
-    return (days_accrued, seconds_left_over)
+    let (is_less_than_max) = is_le(days_accrued, MAX_DAYS_ACCURED + 1)
+
+    if is_less_than_max == TRUE:
+        return (days_accrued, seconds_left_over)
+    end
+
+    return (MAX_DAYS_ACCURED, seconds_left_over)
 end
 
 # CALCS VAULTS DAYS ACCRUED

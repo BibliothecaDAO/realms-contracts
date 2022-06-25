@@ -87,3 +87,6 @@ const PILLAGE_AMOUNT = 25  # bp
 
 # BUILDINGS
 const BASE_SQM = 25
+
+# MAX DAYS
+const MAX_DAYS_ACCURED = 2
