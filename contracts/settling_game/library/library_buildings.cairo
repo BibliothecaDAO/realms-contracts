@@ -127,7 +127,7 @@ namespace BUILDINGS:
     end
 
     func integrity_length{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        block_timestamp : felt, building_id : felt, quantity : felt
+        building_id : felt
     ) -> (time : felt):
         let idx = building_id - 1
 

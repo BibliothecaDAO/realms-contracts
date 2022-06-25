@@ -34,20 +34,17 @@ func test_get_building_left{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ra
     let (base_building_number, time_left) = BUILDINGS.get_base_building_left(
         TEST_TIME_BALANCE_TIMESTAMP, TEST_TIMESTAMP
     )
-    %{ print(ids.base_building_number) %}
 
     let (decay_slope) = BUILDINGS.get_decay_slope(RealmBuildingsIds.Castle)
 
     # pass slope determined by building
     let (decay_rate) = BUILDINGS.get_decay_rate(base_building_number, decay_slope)
-    %{ print(ids.decay_rate) %}
 
     # pass actual time balance + decay rate
     let (effective_building_time) = BUILDINGS.get_decayed_building_time(time_left, decay_rate)
-    %{ print(ids.effective_building_time) %}
 
     let (buildings_left) = BUILDINGS.get_effective_buildings(effective_building_time)
-    %{ print(ids.buildings_left) %}
+
     return ()
 end
 
@@ -60,8 +57,6 @@ func test_calculate_effective_buildings{
     let (base_building_number) = BUILDINGS.calculate_effective_buildings(
         RealmBuildingsIds.Castle, TEST_TIME_BALANCE_TIMESTAMP, TEST_TIMESTAMP
     )
-
-    %{ print(ids.base_building_number) %}
     return ()
 end
 
@@ -84,7 +79,7 @@ func test_get_integrity_length{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
         TEST_TIMESTAMP, RealmBuildingsIds.Castle, BUILDING_QUANTITY
     )
 
-    assert final_time = BuildingsIntegrityLength.Castle * BUILDING_QUANTITY + TEST_TIMESTAMP
+    assert final_time = BuildingsIntegrityLength.Castle * BUILDING_QUANTITY + TEST_TIMESTAMP + BuildingsIntegrityLength.Castle
 
     return ()
 end
@@ -218,10 +213,10 @@ func test_add_time_to_buildings{
     )
 
     let (unpacked_buildings) = BUILDINGS.add_time_to_buildings(
-        test_buildings, RealmBuildingsIds.House, TEST_TIMESTAMP, 0
+        test_buildings, RealmBuildingsIds.House, TEST_TIMESTAMP, 50
     )
 
-    assert TEST_TIME_BALANCE_TIMESTAMP + 50 = unpacked_buildings.House + 50
+    assert TEST_TIME_BALANCE_TIMESTAMP + 50 = unpacked_buildings.House
     assert TEST_TIME_BALANCE_TIMESTAMP = unpacked_buildings.StoreHouse
     assert TEST_TIME_BALANCE_TIMESTAMP = unpacked_buildings.Granary
     assert TEST_TIME_BALANCE_TIMESTAMP = unpacked_buildings.Farm
