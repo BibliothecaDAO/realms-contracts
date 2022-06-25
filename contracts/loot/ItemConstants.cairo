@@ -27,7 +27,7 @@ struct Adventurer:
 end
 
 struct Item:
-    member ItemId : felt
+    member Id : felt
     member Class : felt  # location for now
     member Slot : felt
     member Agility : felt

@@ -18,17 +18,17 @@ from starkware.cairo.common.registers import get_label_location
 from contracts.loot.ItemConstants import ItemAgility, Item, ItemSlot, ItemClass
 
 namespace LootItems:
-    func calculate_item_stats{syscall_ptr : felt*, range_check_ptr}(
-        item_id : felt, prefix : felt, suffix : felt, origin : felt, bonus : felt
-    ) -> (Agility, Attack, Armour, Wisdom, Vitality):
+    func calculate_item_stats{syscall_ptr : felt*, range_check_ptr}(item : Item) -> (
+        Agility, Attack, Armour, Wisdom, Vitality
+    ):
         alloc_locals
 
         # computed
-        let (Agility) = base_agility(item_id)
-        let (Attack) = base_agility(item_id)
-        let (Armour) = base_agility(item_id)
-        let (Wisdom) = base_agility(item_id)
-        let (Vitality) = base_agility(item_id)
+        let (Agility) = base_agility(item.Id)
+        let (Attack) = base_agility(item.Id)
+        let (Armour) = base_agility(item.Id)
+        let (Wisdom) = base_agility(item.Id)
+        let (Vitality) = base_agility(item.Id)
 
         # TODO: ADD Dynamic
         # let (Prefix) = base_agility(item_id)

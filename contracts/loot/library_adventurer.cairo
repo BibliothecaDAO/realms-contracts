@@ -21,42 +21,42 @@ from contracts.loot.library_item import LootItems
 
 namespace Adventurer:
     func calculate_adventurer_stats{syscall_ptr : felt*, range_check_ptr}(
-        weapon_item_id : felt,
-        chest_item_id : felt,
-        head_item_id : felt,
-        waist_item_id : felt,
-        feet_item_id : felt,
-        hands_item_id : felt,
-        neck_item_id : felt,
-        ring_item_id : felt,
+        weapon : Item,
+        chest : Item,
+        head : Item,
+        waist : Item,
+        feet : Item,
+        hands : Item,
+        neck : Item,
+        ring : Item,
     ) -> (Agility, Attack, Armour, Wisdom, Vitality):
         alloc_locals
 
         # computed
         let (
             weapon_agility, weapon_attack, weapon_armour, weapon_wisdom, weapon_vitality
-        ) = LootItems.calculate_item_stats(weapon_item_id, 1, 1, 1, 1)
+        ) = LootItems.calculate_item_stats(weapon)
         let (
             chest_agility, chest_attack, chest_armour, chest_wisdom, chest_vitality
-        ) = LootItems.calculate_item_stats(chest_item_id, 1, 1, 1, 1)
+        ) = LootItems.calculate_item_stats(chest)
         let (
             head_agility, head_attack, head_armour, head_wisdom, head_vitality
-        ) = LootItems.calculate_item_stats(head_item_id, 1, 1, 1, 1)
+        ) = LootItems.calculate_item_stats(head)
         let (
             waist_agility, waist_attack, waist_armour, waist_wisdom, waist_vitality
-        ) = LootItems.calculate_item_stats(waist_item_id, 1, 1, 1, 1)
+        ) = LootItems.calculate_item_stats(waist)
         let (
             feet_agility, feet_attack, feet_armour, feet_wisdom, feet_vitality
-        ) = LootItems.calculate_item_stats(feet_item_id, 1, 1, 1, 1)
+        ) = LootItems.calculate_item_stats(feet)
         let (
             hands_agility, hands_attack, hands_armour, hands_wisdom, hands_vitality
-        ) = LootItems.calculate_item_stats(hands_item_id, 1, 1, 1, 1)
+        ) = LootItems.calculate_item_stats(hands)
         let (
             neck_agility, neck_attack, neck_armour, neck_wisdom, neck_vitality
-        ) = LootItems.calculate_item_stats(neck_item_id, 1, 1, 1, 1)
+        ) = LootItems.calculate_item_stats(neck)
         let (
             ring_agility, ring_attack, ring_armour, ring_wisdom, ring_vitality
-        ) = LootItems.calculate_item_stats(ring_item_id, 1, 1, 1, 1)
+        ) = LootItems.calculate_item_stats(ring)
 
         let agility = weapon_agility + chest_agility + head_agility + waist_agility + feet_agility + hands_agility + neck_agility + ring_agility
         let attack = weapon_attack + chest_attack + head_attack + waist_attack + feet_attack + hands_attack + neck_attack + ring_attack
