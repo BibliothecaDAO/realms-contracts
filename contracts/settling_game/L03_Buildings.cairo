@@ -197,13 +197,13 @@ func build_buildings{
     let (current_buildings_integrity_unpacked) = get_buildings_integrity_unpacked(token_id)
 
     # set integrity for adjusted buildings
-    let (updated_buildings_packed) = BUILDINGS.add_time_to_buildings(
+    let (updated_buildings_unpacked) = BUILDINGS.add_time_to_buildings(
         current_buildings_integrity_unpacked, building_id, block_timestamp, time_to_add
     )
 
     # pack buildings
     let (updated_buildings_integrity : PackedBuildings) = BUILDINGS.pack_buildings(
-        updated_buildings_packed
+        updated_buildings_unpacked
     )
 
     # Save new packed buildings
