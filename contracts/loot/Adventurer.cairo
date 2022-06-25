@@ -22,22 +22,13 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
 end
 
 @external
-func equipItem{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+func get_all_statistics{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : felt, item_token_id : felt
 ):
+    let (weapon) = calculate_item_stats(item_token_id)
     # # Check user owns the item
     # # Check item is correct for the slot
     # # TODO: Set Id within slot
-
-    return ()
-end
-
-@external
-func getPower{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    token_id : felt, item_token_id : felt
-):
-    # SUM all item powers
-    # Fetch item stats
 
     return ()
 end

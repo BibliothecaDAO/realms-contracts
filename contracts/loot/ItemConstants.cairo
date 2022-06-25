@@ -19,6 +19,7 @@ struct Item:
     member Order : felt
     member Bonus : felt
     member Level : felt
+    member Age : felt
 end
 
 namespace ItemIds:

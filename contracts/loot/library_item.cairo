@@ -22,18 +22,21 @@ namespace LootItems:
         item : Item
     ):
         alloc_locals
+        # computed
         let (Agility) = base_agility(item_id)
         let (Attack) = base_agility(item_id)
         let (Armour) = base_agility(item_id)
         let (Wisdom) = base_agility(item_id)
         let (Vitality) = base_agility(item_id)
+
+        # State based
         let (Prefix) = base_agility(item_id)
         let (Suffix) = base_agility(item_id)
         let (Order) = base_agility(item_id)
         let (Bonus) = base_agility(item_id)
 
         return (
-            item=Item(item_id, 1, Agility, Attack, Armour, Wisdom, Vitality, Prefix, Suffix, Order, Bonus, 1),
+            item=Item(item_id, 1, Agility, Attack, Armour, Wisdom, Vitality, Prefix, Suffix, Order, Bonus, 1, 12123123),
         )
     end
 
