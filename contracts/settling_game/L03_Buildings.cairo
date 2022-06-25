@@ -150,9 +150,13 @@ func build{
     let (realm_buildings_integrity : RealmBuildings) = get_buildings_integrity_unpacked(token_id)
 
     # Check Area, revert if no space available
-    BUILDINGS.can_build(
+    let (can_build) = BUILDINGS.can_build(
         building_id, quantity, realm_buildings_integrity, realms_data.cities, realms_data.regions
     )
+
+    with_attr error_message("BUILDINGS: building size greater than buildable area"):
+        assert_not_zero(can_build)
+    end
 
     # Build buildings and set state
     build_buildings(token_id, building_id, quantity)
@@ -200,7 +204,9 @@ func build_buildings{
 
     let (time_to_add) = BUILDINGS.get_integrity_length(block_timestamp, building_id, quantity)
 
-    # GET CURRENT BUILDINGS
+    let (updated_buildings) = pack_buildings()
+
+    # GET HISTORICAL BUILDINGS
     let (current_buildings : RealmBuildings) = get_buildings_unpacked(token_id)
 
     let (buildings : felt*) = alloc()
@@ -339,7 +345,6 @@ func get_effective_buildings{
 }(token_id : Uint256) -> (realm_buildings : RealmBuildings):
     alloc_locals
 
-    # TODO: Hardcoded only castle felt for testing, pack buildings into typeof felt
     let (functional_buildings : RealmBuildings) = get_buildings_integrity_unpacked(token_id)
 
     let (block_timestamp) = get_block_timestamp()

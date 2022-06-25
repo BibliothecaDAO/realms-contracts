@@ -27,7 +27,7 @@ from contracts.settling_game.utils.constants import DAY, BASE_SQM
 
 from contracts.settling_game.utils.general import unpack_data
 
-from contracts.settling_game.utils.constants import SHIFT_25
+from contracts.settling_game.utils.constants import SHIFT_41
 
 namespace BUILDINGS:
     # Checks if you can build on a Realm, reverts if you cannot
@@ -37,11 +37,13 @@ namespace BUILDINGS:
         current_buildings : RealmBuildings,
         cities : felt,
         regions : felt,
-    ):
+    ) -> (can_build : felt):
         alloc_locals
 
-        with_attr error_message("BUILDINGS: Ser, you must build more than 0 buildings"):
-            assert_nn(quantity)
+        let (is_less_than_zero) = is_le(quantity, 0)
+
+        if is_less_than_zero == TRUE:
+            return (FALSE)
         end
 
         # Get total buildable units on Realm
@@ -53,11 +55,18 @@ namespace BUILDINGS:
         # Calculate requested building size
         let (building_size) = get_building_size(building_id)
 
-        with_attr error_message("BUILDINGS: building size greater than buildable area"):
-            assert_le(building_size * quantity + current_buildings_sqm, buildable_units)
-        end
+        let (is_less_than_buildable) = is_le(
+            building_size * quantity + current_buildings_sqm, buildable_units
+        )
 
-        return ()
+        if is_less_than_buildable == TRUE:
+            return (TRUE)
+        end
+        # with_attr error_message("BUILDINGS: building size greater than buildable area"):
+        #     assert_le(building_size * quantity + current_buildings_sqm, buildable_units)
+        # end
+
+        return (FALSE)
     end
 
     # gets building size for each
@@ -85,18 +94,14 @@ namespace BUILDINGS:
     end
 
     # gets buildable area for each
-    func get_realm_buildable_area{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(cities : felt, regions : felt) -> (buildable_area : felt):
+    func get_realm_buildable_area(cities : felt, regions : felt) -> (buildable_area : felt):
         # Get buildable units
         return (cities * regions + BASE_SQM)
     end
 
     # gets current built buildings
     # pass building struct and return sqm
-    func get_current_built_buildings_sqm{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(current_buildings : RealmBuildings) -> (size : felt):
+    func get_current_built_buildings_sqm(current_buildings : RealmBuildings) -> (size : felt):
         # Get buildable units
 
         let House = current_buildings.House * RealmBuildingsSize.House
@@ -316,74 +321,77 @@ namespace BUILDINGS:
 
         let (buildings : felt*) = alloc()
 
+        # check if blocktime - time > 0
+        # if less than 0 add blocktime + time
+        # else subtract blocktime and only add time
         if building_id == RealmBuildingsIds.House:
-            local id_1 = (current_buildings.House) * SHIFT_25._1
+            local id_1 = (current_buildings.House) * SHIFT_41._1
             buildings[0] = id_1
         else:
-            buildings[0] = current_buildings.House * SHIFT_25._1
+            buildings[0] = current_buildings.House * SHIFT_41._1
         end
 
         if building_id == RealmBuildingsIds.StoreHouse:
-            local id_2 = (current_buildings.StoreHouse) * SHIFT_25._1
+            local id_2 = (current_buildings.StoreHouse) * SHIFT_41._1
             buildings[1] = id_2
         else:
-            local id_2 = current_buildings.StoreHouse * SHIFT_25._1
+            local id_2 = current_buildings.StoreHouse * SHIFT_41._1
             buildings[1] = id_2
         end
 
         if building_id == RealmBuildingsIds.Granary:
-            local id_3 = (current_buildings.Granary) * SHIFT_25._2
+            local id_3 = (current_buildings.Granary) * SHIFT_41._2
             buildings[2] = id_3
         else:
-            local id_3 = current_buildings.Granary * SHIFT_25._2
+            local id_3 = current_buildings.Granary * SHIFT_41._2
             buildings[2] = id_3
         end
 
         if building_id == RealmBuildingsIds.Farm:
-            local id_4 = (current_buildings.Farm) * SHIFT_25._3
+            local id_4 = (current_buildings.Farm) * SHIFT_41._3
             buildings[3] = id_4
         else:
-            local id_4 = current_buildings.Farm * SHIFT_25._3
+            local id_4 = current_buildings.Farm * SHIFT_41._3
             buildings[3] = id_4
         end
 
         if building_id == RealmBuildingsIds.FishingVillage:
-            local id_5 = (current_buildings.FishingVillage) * SHIFT_25._4
+            local id_5 = (current_buildings.FishingVillage) * SHIFT_41._4
             buildings[4] = id_5
         else:
-            local id_5 = current_buildings.FishingVillage * SHIFT_25._4
+            local id_5 = current_buildings.FishingVillage * SHIFT_41._4
             buildings[4] = id_5
         end
 
         if building_id == RealmBuildingsIds.Barracks:
-            local id_6 = (current_buildings.Barracks) * SHIFT_25._1
+            local id_6 = (current_buildings.Barracks) * SHIFT_41._1
             buildings[5] = id_6
         else:
-            local id_6 = current_buildings.Barracks * SHIFT_25._1
+            local id_6 = current_buildings.Barracks * SHIFT_41._1
             buildings[5] = id_6
         end
 
         if building_id == RealmBuildingsIds.MageTower:
-            local id_7 = (current_buildings.MageTower) * SHIFT_25._2
+            local id_7 = (current_buildings.MageTower) * SHIFT_41._2
             buildings[6] = id_7
         else:
-            local id_7 = current_buildings.MageTower * SHIFT_25._2
+            local id_7 = current_buildings.MageTower * SHIFT_41._2
             buildings[6] = id_7
         end
 
         if building_id == RealmBuildingsIds.ArcherTower:
-            local id_8 = (current_buildings.ArcherTower) * SHIFT_25._3
+            local id_8 = (current_buildings.ArcherTower) * SHIFT_41._3
             buildings[7] = id_8
         else:
-            local id_8 = current_buildings.ArcherTower * SHIFT_25._3
+            local id_8 = current_buildings.ArcherTower * SHIFT_41._3
             buildings[7] = id_8
         end
 
         if building_id == RealmBuildingsIds.Castle:
-            local id_9 = (current_buildings.Castle) * SHIFT_25._4
+            local id_9 = (current_buildings.Castle) * SHIFT_41._4
             buildings[8] = id_9
         else:
-            local id_9 = current_buildings.Castle * SHIFT_25._4
+            local id_9 = current_buildings.Castle * SHIFT_41._4
             buildings[8] = id_9
         end
 

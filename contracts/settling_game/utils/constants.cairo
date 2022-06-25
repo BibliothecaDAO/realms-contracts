@@ -55,7 +55,7 @@ const SHIFT_NFT_3 = 2 ** 27
 const SHIFT_NFT_4 = 2 ** 52
 const SHIFT_NFT_5 = 2 ** 54
 
-namespace SHIFT_25:
+namespace SHIFT_41:
     const _1 = 2 ** 0
     const _2 = 2 ** 41
     const _3 = 2 ** 82

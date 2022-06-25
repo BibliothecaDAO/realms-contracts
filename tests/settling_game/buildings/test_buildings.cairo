@@ -2,6 +2,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_add, uint256_sub
 from starkware.cairo.common.math_cmp import is_nn, is_le
+from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
 from lib.cairo_math_64x61.contracts.Math64x61 import Math64x61_div
 from contracts.settling_game.utils.game_structs import (
@@ -104,13 +105,15 @@ func test_can_build{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
         TEST_REALM_BUILDINGS.CASTLE,
     )
 
-    BUILDINGS.can_build(
+    let (can_build) = BUILDINGS.can_build(
         RealmBuildingsIds.Castle,
         BUILDING_QUANTITY,
         test_buildings,
         TEST_REALM_CITIES,
         TEST_REALM_REGIONS,
     )
+
+    assert can_build = TRUE
 
     return ()
 end
@@ -169,14 +172,14 @@ func test_pack_buildings{
 
     let test_buildings = RealmBuildings(
         TEST_TIMESTAMP,
-        TEST_REALM_BUILDINGS.STOREHOUSE,
-        TEST_REALM_BUILDINGS.GRANARY,
-        TEST_REALM_BUILDINGS.FARM,
-        TEST_REALM_BUILDINGS.FISHINGVILLAGE,
-        TEST_REALM_BUILDINGS.BARRACKS,
-        TEST_REALM_BUILDINGS.MAGETOWER,
-        TEST_REALM_BUILDINGS.ARCHERTOWER,
-        TEST_REALM_BUILDINGS.CASTLE,
+        TEST_TIMESTAMP,
+        TEST_TIMESTAMP,
+        TEST_TIMESTAMP,
+        TEST_TIMESTAMP,
+        TEST_TIMESTAMP,
+        TEST_TIMESTAMP,
+        TEST_TIMESTAMP,
+        TEST_TIMESTAMP,
     )
 
     let (packed_buildings) = BUILDINGS.pack_buildings(test_buildings, RealmBuildingsIds.House)
@@ -184,14 +187,14 @@ func test_pack_buildings{
     let (unpacked_buildings) = BUILDINGS.unpack_buildings(packed_buildings)
 
     assert TEST_TIMESTAMP = unpacked_buildings.House
-    assert TEST_REALM_BUILDINGS.STOREHOUSE = unpacked_buildings.StoreHouse
-    assert TEST_REALM_BUILDINGS.GRANARY = unpacked_buildings.Granary
-    assert TEST_REALM_BUILDINGS.FARM = unpacked_buildings.Farm
-    assert TEST_REALM_BUILDINGS.FISHINGVILLAGE = unpacked_buildings.FishingVillage
-    assert TEST_REALM_BUILDINGS.BARRACKS = unpacked_buildings.Barracks
-    assert TEST_REALM_BUILDINGS.MAGETOWER = unpacked_buildings.MageTower
-    assert TEST_REALM_BUILDINGS.ARCHERTOWER = unpacked_buildings.ArcherTower
-    assert TEST_REALM_BUILDINGS.CASTLE = unpacked_buildings.Castle
+    assert TEST_TIMESTAMP = unpacked_buildings.StoreHouse
+    assert TEST_TIMESTAMP = unpacked_buildings.Granary
+    assert TEST_TIMESTAMP = unpacked_buildings.Farm
+    assert TEST_TIMESTAMP = unpacked_buildings.FishingVillage
+    assert TEST_TIMESTAMP = unpacked_buildings.Barracks
+    assert TEST_TIMESTAMP = unpacked_buildings.MageTower
+    assert TEST_TIMESTAMP = unpacked_buildings.ArcherTower
+    assert TEST_TIMESTAMP = unpacked_buildings.Castle
 
     return ()
 end

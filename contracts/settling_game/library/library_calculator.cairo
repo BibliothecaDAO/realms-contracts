@@ -18,10 +18,7 @@ from contracts.settling_game.utils.game_structs import (
     BuildingsPopulation,
 )
 namespace CALCULATOR:
-    func calculate_happiness{syscall_ptr : felt*, range_check_ptr}(
-        population : felt, food : felt
-    ) -> (happiness : felt):
-        alloc_locals
+    func calculate_happiness(population : felt, food : felt) -> (happiness : felt):
         # FETCH VALUES
         let (population_calculation, _) = unsigned_div_rem(population, 10)
         let food_calc = food - population_calculation
@@ -48,11 +45,7 @@ namespace CALCULATOR:
         return (happiness)
     end
 
-    func calculate_food{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        buildings : RealmBuildings, troop_population : felt
-    ) -> (food : felt):
-        alloc_locals
-
+    func calculate_food(buildings : RealmBuildings, troop_population : felt) -> (food : felt):
         let House = BuildingsFood.House * buildings.House
         let StoreHouse = BuildingsFood.StoreHouse * buildings.StoreHouse
         let Granary = BuildingsFood.Granary * buildings.Granary
@@ -68,11 +61,9 @@ namespace CALCULATOR:
         return (food - troop_population)
     end
 
-    func calculate_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        buildings : RealmBuildings, troop_population : felt
-    ) -> (food : felt):
-        alloc_locals
-
+    func calculate_population(buildings : RealmBuildings, troop_population : felt) -> (
+        population : felt
+    ):
         let House = BuildingsPopulation.House * buildings.House
         let StoreHouse = BuildingsPopulation.StoreHouse * buildings.StoreHouse
         let Granary = BuildingsPopulation.Granary * buildings.Granary
@@ -89,11 +80,7 @@ namespace CALCULATOR:
     end
 
     # Returns coefficient for troop production in bp
-    func calculate_troop_coefficient{syscall_ptr : felt*, range_check_ptr}(
-        buildings : RealmBuildings
-    ) -> (coefficient : felt):
-        alloc_locals
-
+    func calculate_troop_coefficient(buildings : RealmBuildings) -> (coefficient : felt):
         let Barracks = buildings.Barracks * BuildingsTroopIndustry.Barracks
         let MageTower = buildings.MageTower * BuildingsTroopIndustry.MageTower
         let ArcherTower = buildings.ArcherTower * BuildingsTroopIndustry.ArcherTower
