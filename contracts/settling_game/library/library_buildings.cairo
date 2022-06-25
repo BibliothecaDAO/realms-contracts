@@ -511,4 +511,29 @@ namespace BUILDINGS:
 
         return (building_integrity_length + time_to_add)
     end
+
+    func get_unpacked_value{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        unpacked_buildings : RealmBuildings, building_id : felt
+    ) -> (time : felt):
+        alloc_locals
+
+        let (buildings : felt*) = alloc()
+
+        # Housing
+        buildings[0] = unpacked_buildings.House
+
+        # Economy
+        buildings[1] = unpacked_buildings.StoreHouse
+        buildings[2] = unpacked_buildings.Granary
+        buildings[3] = unpacked_buildings.Farm
+        buildings[4] = unpacked_buildings.FishingVillage
+
+        # Military
+        buildings[5] = unpacked_buildings.Barracks
+        buildings[6] = unpacked_buildings.MageTower
+        buildings[7] = unpacked_buildings.ArcherTower
+        buildings[8] = unpacked_buildings.Castle
+
+        return (buildings[building_id - 1])
+    end
 end

@@ -228,3 +228,28 @@ func test_add_time_to_buildings{
 
     return ()
 end
+
+@external
+func test_get_packed_value{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}():
+    alloc_locals
+
+    let test_buildings = RealmBuildings(
+        TEST_TIME_BALANCE_TIMESTAMP,
+        TEST_TIME_BALANCE_TIMESTAMP,
+        TEST_TIME_BALANCE_TIMESTAMP,
+        TEST_TIME_BALANCE_TIMESTAMP,
+        TEST_TIME_BALANCE_TIMESTAMP,
+        TEST_TIME_BALANCE_TIMESTAMP,
+        TEST_TIME_BALANCE_TIMESTAMP,
+        TEST_TIME_BALANCE_TIMESTAMP,
+        TEST_TIME_BALANCE_TIMESTAMP,
+    )
+
+    let (building) = BUILDINGS.get_unpacked_value(test_buildings, RealmBuildingsIds.House)
+
+    assert TEST_TIME_BALANCE_TIMESTAMP = building
+
+    return ()
+end

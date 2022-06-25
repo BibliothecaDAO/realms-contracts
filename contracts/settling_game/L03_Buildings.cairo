@@ -75,6 +75,10 @@ from openzeppelin.upgrades.library import (
 func BuildingBuilt(token_id : Uint256, building_id : felt):
 end
 
+@event
+func BuildingIntegrity(token_id : Uint256, building_id : felt, building_integrity : felt):
+end
+
 ###########
 # STORAGE #
 ###########
@@ -202,12 +206,15 @@ func build_buildings{
     )
 
     # pack buildings
-    let (updated_buildings_integrity : PackedBuildings) = BUILDINGS.pack_buildings(
-        updated_buildings_unpacked
-    )
+    let (updated_buildings_integrity) = BUILDINGS.pack_buildings(updated_buildings_unpacked)
 
     # Save new packed buildings
     buildings_integrity.write(token_id, updated_buildings_integrity)
+
+    let (updated_time_emit) = BUILDINGS.get_unpacked_value(updated_buildings_unpacked, building_id)
+
+    # Emit Building Integrity
+    BuildingIntegrity.emit(token_id, building_id, updated_time_emit)
 
     # GET HISTORICAL BUILDINGS
     # let (current_buildings : RealmBuildings) = get_buildings_unpacked(token_id)
