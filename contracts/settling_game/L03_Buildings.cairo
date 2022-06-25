@@ -204,87 +204,91 @@ func build_buildings{
 
     let (time_to_add) = BUILDINGS.get_integrity_length(block_timestamp, building_id, quantity)
 
-    let (updated_buildings) = pack_buildings()
+    let (current_buildings_integrity_unpacked) = get_buildings_integrity_unpacked(token_id)
+
+    let (updated_buildings_packed) = BUILDINGS.pack_buildings(
+        current_buildings_integrity_unpacked, building_id, block_timestamp, time_to_add
+    )
 
     # GET HISTORICAL BUILDINGS
-    let (current_buildings : RealmBuildings) = get_buildings_unpacked(token_id)
+    # let (current_buildings : RealmBuildings) = get_buildings_unpacked(token_id)
 
-    let (buildings : felt*) = alloc()
+    # let (buildings : felt*) = alloc()
 
-    if building_id == RealmBuildingsIds.House:
-        local id_1 = (current_buildings.House + 1) * SHIFT_6_1
-        buildings[0] = id_1
-    else:
-        buildings[0] = current_buildings.House * SHIFT_6_1
-    end
+    # if building_id == RealmBuildingsIds.House:
+    #     local id_1 = (current_buildings.House + 1) * SHIFT_6_1
+    #     buildings[0] = id_1
+    # else:
+    #     buildings[0] = current_buildings.House * SHIFT_6_1
+    # end
 
-    if building_id == RealmBuildingsIds.StoreHouse:
-        local id_2 = (current_buildings.StoreHouse + 1) * SHIFT_6_2
-        buildings[1] = id_2
-    else:
-        local id_2 = current_buildings.StoreHouse * SHIFT_6_2
-        buildings[1] = id_2
-    end
+    # if building_id == RealmBuildingsIds.StoreHouse:
+    #     local id_2 = (current_buildings.StoreHouse + 1) * SHIFT_6_2
+    #     buildings[1] = id_2
+    # else:
+    #     local id_2 = current_buildings.StoreHouse * SHIFT_6_2
+    #     buildings[1] = id_2
+    # end
 
-    if building_id == RealmBuildingsIds.Granary:
-        local id_3 = (current_buildings.Granary + 1) * SHIFT_6_3
-        buildings[2] = id_3
-    else:
-        local id_3 = current_buildings.Granary * SHIFT_6_3
-        buildings[2] = id_3
-    end
+    # if building_id == RealmBuildingsIds.Granary:
+    #     local id_3 = (current_buildings.Granary + 1) * SHIFT_6_3
+    #     buildings[2] = id_3
+    # else:
+    #     local id_3 = current_buildings.Granary * SHIFT_6_3
+    #     buildings[2] = id_3
+    # end
 
-    if building_id == RealmBuildingsIds.Farm:
-        local id_4 = (current_buildings.Farm + 1) * SHIFT_6_4
-        buildings[3] = id_4
-    else:
-        local id_4 = current_buildings.Farm * SHIFT_6_4
-        buildings[3] = id_4
-    end
+    # if building_id == RealmBuildingsIds.Farm:
+    #     local id_4 = (current_buildings.Farm + 1) * SHIFT_6_4
+    #     buildings[3] = id_4
+    # else:
+    #     local id_4 = current_buildings.Farm * SHIFT_6_4
+    #     buildings[3] = id_4
+    # end
 
-    if building_id == RealmBuildingsIds.FishingVillage:
-        local id_5 = (current_buildings.FishingVillage + 1) * SHIFT_6_5
-        buildings[4] = id_5
-    else:
-        local id_5 = current_buildings.FishingVillage * SHIFT_6_5
-        buildings[4] = id_5
-    end
+    # if building_id == RealmBuildingsIds.FishingVillage:
+    #     local id_5 = (current_buildings.FishingVillage + 1) * SHIFT_6_5
+    #     buildings[4] = id_5
+    # else:
+    #     local id_5 = current_buildings.FishingVillage * SHIFT_6_5
+    #     buildings[4] = id_5
+    # end
 
-    if building_id == RealmBuildingsIds.Barracks:
-        local id_6 = (current_buildings.Barracks + 1) * SHIFT_6_6
-        buildings[5] = id_6
-    else:
-        local id_6 = current_buildings.Barracks * SHIFT_6_6
-        buildings[5] = id_6
-    end
+    # if building_id == RealmBuildingsIds.Barracks:
+    #     local id_6 = (current_buildings.Barracks + 1) * SHIFT_6_6
+    #     buildings[5] = id_6
+    # else:
+    #     local id_6 = current_buildings.Barracks * SHIFT_6_6
+    #     buildings[5] = id_6
+    # end
 
-    if building_id == RealmBuildingsIds.MageTower:
-        local id_7 = (current_buildings.MageTower + 1) * SHIFT_6_7
-        buildings[6] = id_7
-    else:
-        local id_7 = current_buildings.MageTower * SHIFT_6_7
-        buildings[6] = id_7
-    end
+    # if building_id == RealmBuildingsIds.MageTower:
+    #     local id_7 = (current_buildings.MageTower + 1) * SHIFT_6_7
+    #     buildings[6] = id_7
+    # else:
+    #     local id_7 = current_buildings.MageTower * SHIFT_6_7
+    #     buildings[6] = id_7
+    # end
 
-    if building_id == RealmBuildingsIds.ArcherTower:
-        local id_8 = (current_buildings.ArcherTower + 1) * SHIFT_6_8
-        buildings[7] = id_8
-    else:
-        local id_8 = current_buildings.ArcherTower * SHIFT_6_8
-        buildings[7] = id_8
-    end
+    # if building_id == RealmBuildingsIds.ArcherTower:
+    #     local id_8 = (current_buildings.ArcherTower + 1) * SHIFT_6_8
+    #     buildings[7] = id_8
+    # else:
+    #     local id_8 = current_buildings.ArcherTower * SHIFT_6_8
+    #     buildings[7] = id_8
+    # end
 
-    if building_id == RealmBuildingsIds.Castle:
-        local id_9 = (current_buildings.Castle + 1) * SHIFT_6_9
-        buildings[8] = id_9
-    else:
-        local id_9 = current_buildings.Castle * SHIFT_6_9
-        buildings[8] = id_9
-    end
+    # if building_id == RealmBuildingsIds.Castle:
+    #     local id_9 = (current_buildings.Castle + 1) * SHIFT_6_9
+    #     buildings[8] = id_9
+    # else:
+    #     local id_9 = current_buildings.Castle * SHIFT_6_9
+    #     buildings[8] = id_9
+    # end
 
-    tempvar value = buildings[8] + buildings[7] + buildings[6] + buildings[5] + buildings[4] + buildings[3] + buildings[2] + buildings[1] + buildings[0]
+    # tempvar value = buildings[8] + buildings[7] + buildings[6] + buildings[5] + buildings[4] + buildings[3] + buildings[2] + buildings[1] + buildings[0]
 
-    realm_buildings.write(token_id, value)
+    # realm_buildings.write(token_id, value)
     return ()
 end
 

@@ -182,7 +182,7 @@ func test_pack_buildings{
         TEST_TIMESTAMP,
     )
 
-    let (packed_buildings) = BUILDINGS.pack_buildings(test_buildings, RealmBuildingsIds.House)
+    let (packed_buildings) = BUILDINGS.pack_buildings(test_buildings)
 
     let (unpacked_buildings) = BUILDINGS.unpack_buildings(packed_buildings)
 
@@ -195,6 +195,41 @@ func test_pack_buildings{
     assert TEST_TIMESTAMP = unpacked_buildings.MageTower
     assert TEST_TIMESTAMP = unpacked_buildings.ArcherTower
     assert TEST_TIMESTAMP = unpacked_buildings.Castle
+
+    return ()
+end
+
+@external
+func test_add_time_to_buildings{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}():
+    alloc_locals
+
+    let test_buildings = RealmBuildings(
+        TEST_TIME_BALANCE_TIMESTAMP,
+        TEST_TIME_BALANCE_TIMESTAMP,
+        TEST_TIME_BALANCE_TIMESTAMP,
+        TEST_TIME_BALANCE_TIMESTAMP,
+        TEST_TIME_BALANCE_TIMESTAMP,
+        TEST_TIME_BALANCE_TIMESTAMP,
+        TEST_TIME_BALANCE_TIMESTAMP,
+        TEST_TIME_BALANCE_TIMESTAMP,
+        TEST_TIME_BALANCE_TIMESTAMP,
+    )
+
+    let (unpacked_buildings) = BUILDINGS.add_time_to_buildings(
+        test_buildings, RealmBuildingsIds.House, TEST_TIMESTAMP, 0
+    )
+
+    assert TEST_TIME_BALANCE_TIMESTAMP + 50 = unpacked_buildings.House + 50
+    assert TEST_TIME_BALANCE_TIMESTAMP = unpacked_buildings.StoreHouse
+    assert TEST_TIME_BALANCE_TIMESTAMP = unpacked_buildings.Granary
+    assert TEST_TIME_BALANCE_TIMESTAMP = unpacked_buildings.Farm
+    assert TEST_TIME_BALANCE_TIMESTAMP = unpacked_buildings.FishingVillage
+    assert TEST_TIME_BALANCE_TIMESTAMP = unpacked_buildings.Barracks
+    assert TEST_TIME_BALANCE_TIMESTAMP = unpacked_buildings.MageTower
+    assert TEST_TIME_BALANCE_TIMESTAMP = unpacked_buildings.ArcherTower
+    assert TEST_TIME_BALANCE_TIMESTAMP = unpacked_buildings.Castle
 
     return ()
 end

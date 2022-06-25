@@ -62,9 +62,6 @@ namespace BUILDINGS:
         if is_less_than_buildable == TRUE:
             return (TRUE)
         end
-        # with_attr error_message("BUILDINGS: building size greater than buildable area"):
-        #     assert_le(building_size * quantity + current_buildings_sqm, buildable_units)
-        # end
 
         return (FALSE)
     end
@@ -309,100 +306,200 @@ namespace BUILDINGS:
         )
     end
 
-    func pack_buildings{
-        syscall_ptr : felt*,
-        pedersen_ptr : HashBuiltin*,
-        range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*,
-    }(current_buildings : RealmBuildings, building_id : felt) -> (
+    func pack_buildings(unpacked_buildings : RealmBuildings) -> (
         packed_buildings : PackedBuildings
     ):
-        alloc_locals
+        # Housing
+        let House = unpacked_buildings.House * SHIFT_41._1
 
-        let (buildings : felt*) = alloc()
+        # Economy
+        let StoreHouse = unpacked_buildings.StoreHouse * SHIFT_41._1
+        let Granary = unpacked_buildings.Granary * SHIFT_41._2
+        let Farm = unpacked_buildings.Farm * SHIFT_41._3
+        let FishingVillage = unpacked_buildings.FishingVillage * SHIFT_41._4
 
-        # check if blocktime - time > 0
-        # if less than 0 add blocktime + time
-        # else subtract blocktime and only add time
-        if building_id == RealmBuildingsIds.House:
-            local id_1 = (current_buildings.House) * SHIFT_41._1
-            buildings[0] = id_1
-        else:
-            buildings[0] = current_buildings.House * SHIFT_41._1
-        end
+        # Military
+        let Barracks = unpacked_buildings.Barracks * SHIFT_41._1
+        let MageTower = unpacked_buildings.MageTower * SHIFT_41._2
+        let ArcherTower = unpacked_buildings.ArcherTower * SHIFT_41._3
+        let Castle = unpacked_buildings.Castle * SHIFT_41._4
 
-        if building_id == RealmBuildingsIds.StoreHouse:
-            local id_2 = (current_buildings.StoreHouse) * SHIFT_41._1
-            buildings[1] = id_2
-        else:
-            local id_2 = current_buildings.StoreHouse * SHIFT_41._1
-            buildings[1] = id_2
-        end
+        tempvar housing_value = House
 
-        if building_id == RealmBuildingsIds.Granary:
-            local id_3 = (current_buildings.Granary) * SHIFT_41._2
-            buildings[2] = id_3
-        else:
-            local id_3 = current_buildings.Granary * SHIFT_41._2
-            buildings[2] = id_3
-        end
+        tempvar economic_value = FishingVillage + Farm + Granary + StoreHouse
 
-        if building_id == RealmBuildingsIds.Farm:
-            local id_4 = (current_buildings.Farm) * SHIFT_41._3
-            buildings[3] = id_4
-        else:
-            local id_4 = current_buildings.Farm * SHIFT_41._3
-            buildings[3] = id_4
-        end
-
-        if building_id == RealmBuildingsIds.FishingVillage:
-            local id_5 = (current_buildings.FishingVillage) * SHIFT_41._4
-            buildings[4] = id_5
-        else:
-            local id_5 = current_buildings.FishingVillage * SHIFT_41._4
-            buildings[4] = id_5
-        end
-
-        if building_id == RealmBuildingsIds.Barracks:
-            local id_6 = (current_buildings.Barracks) * SHIFT_41._1
-            buildings[5] = id_6
-        else:
-            local id_6 = current_buildings.Barracks * SHIFT_41._1
-            buildings[5] = id_6
-        end
-
-        if building_id == RealmBuildingsIds.MageTower:
-            local id_7 = (current_buildings.MageTower) * SHIFT_41._2
-            buildings[6] = id_7
-        else:
-            local id_7 = current_buildings.MageTower * SHIFT_41._2
-            buildings[6] = id_7
-        end
-
-        if building_id == RealmBuildingsIds.ArcherTower:
-            local id_8 = (current_buildings.ArcherTower) * SHIFT_41._3
-            buildings[7] = id_8
-        else:
-            local id_8 = current_buildings.ArcherTower * SHIFT_41._3
-            buildings[7] = id_8
-        end
-
-        if building_id == RealmBuildingsIds.Castle:
-            local id_9 = (current_buildings.Castle) * SHIFT_41._4
-            buildings[8] = id_9
-        else:
-            local id_9 = current_buildings.Castle * SHIFT_41._4
-            buildings[8] = id_9
-        end
-
-        tempvar housing_value = buildings[0]
-
-        tempvar economic_value = buildings[4] + buildings[3] + buildings[2] + buildings[1]
-
-        tempvar military_value = buildings[8] + buildings[7] + buildings[6] + buildings[5]
+        tempvar military_value = Castle + ArcherTower + MageTower + Barracks
 
         return (
             PackedBuildings(military=military_value, economic=economic_value, housing=housing_value)
         )
+    end
+
+    func add_time_to_buildings{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+        bitwise_ptr : BitwiseBuiltin*,
+    }(
+        current_buildings : RealmBuildings,
+        building_id : felt,
+        time_stamp : felt,
+        time_to_add : felt,
+    ) -> (adjusted_buildings : RealmBuildings):
+        alloc_locals
+
+        let (buildings : felt*) = alloc()
+
+        if building_id == RealmBuildingsIds.House:
+            let (time) = add_building_integrity(time_stamp, current_buildings.House, time_to_add)
+            buildings[0] = time
+            tempvar range_check_ptr = range_check_ptr
+            tempvar syscall_ptr : felt* = syscall_ptr
+            tempvar pedersen_ptr = pedersen_ptr
+        else:
+            buildings[0] = current_buildings.House
+            tempvar range_check_ptr = range_check_ptr
+            tempvar syscall_ptr : felt* = syscall_ptr
+            tempvar pedersen_ptr = pedersen_ptr
+        end
+
+        if building_id == RealmBuildingsIds.StoreHouse:
+            let (time) = add_building_integrity(
+                time_stamp, current_buildings.StoreHouse, time_to_add
+            )
+            buildings[1] = time
+            tempvar range_check_ptr = range_check_ptr
+            tempvar syscall_ptr : felt* = syscall_ptr
+            tempvar pedersen_ptr = pedersen_ptr
+        else:
+            buildings[1] = current_buildings.StoreHouse
+            tempvar range_check_ptr = range_check_ptr
+            tempvar syscall_ptr : felt* = syscall_ptr
+            tempvar pedersen_ptr = pedersen_ptr
+        end
+
+        if building_id == RealmBuildingsIds.Granary:
+            let (time) = add_building_integrity(time_stamp, current_buildings.Granary, time_to_add)
+            buildings[2] = time
+            tempvar range_check_ptr = range_check_ptr
+            tempvar syscall_ptr : felt* = syscall_ptr
+            tempvar pedersen_ptr = pedersen_ptr
+        else:
+            buildings[2] = current_buildings.Granary
+            tempvar range_check_ptr = range_check_ptr
+            tempvar syscall_ptr : felt* = syscall_ptr
+            tempvar pedersen_ptr = pedersen_ptr
+        end
+
+        if building_id == RealmBuildingsIds.Farm:
+            let (time) = add_building_integrity(time_stamp, current_buildings.Farm, time_to_add)
+            buildings[3] = time
+            tempvar range_check_ptr = range_check_ptr
+            tempvar syscall_ptr : felt* = syscall_ptr
+            tempvar pedersen_ptr = pedersen_ptr
+        else:
+            buildings[3] = current_buildings.Farm
+            tempvar range_check_ptr = range_check_ptr
+            tempvar syscall_ptr : felt* = syscall_ptr
+            tempvar pedersen_ptr = pedersen_ptr
+        end
+
+        if building_id == RealmBuildingsIds.FishingVillage:
+            let (time) = add_building_integrity(
+                time_stamp, current_buildings.FishingVillage, time_to_add
+            )
+            buildings[4] = time
+            tempvar range_check_ptr = range_check_ptr
+            tempvar syscall_ptr : felt* = syscall_ptr
+            tempvar pedersen_ptr = pedersen_ptr
+        else:
+            buildings[4] = current_buildings.FishingVillage
+            tempvar range_check_ptr = range_check_ptr
+            tempvar syscall_ptr : felt* = syscall_ptr
+            tempvar pedersen_ptr = pedersen_ptr
+        end
+
+        if building_id == RealmBuildingsIds.Barracks:
+            let (time) = add_building_integrity(time_stamp, current_buildings.Barracks, time_to_add)
+            buildings[5] = time
+            tempvar range_check_ptr = range_check_ptr
+            tempvar syscall_ptr : felt* = syscall_ptr
+            tempvar pedersen_ptr = pedersen_ptr
+        else:
+            buildings[5] = current_buildings.Barracks
+            tempvar range_check_ptr = range_check_ptr
+            tempvar syscall_ptr : felt* = syscall_ptr
+            tempvar pedersen_ptr = pedersen_ptr
+        end
+
+        if building_id == RealmBuildingsIds.MageTower:
+            let (time) = add_building_integrity(
+                time_stamp, current_buildings.MageTower, time_to_add
+            )
+            buildings[6] = time
+            tempvar range_check_ptr = range_check_ptr
+            tempvar syscall_ptr : felt* = syscall_ptr
+            tempvar pedersen_ptr = pedersen_ptr
+        else:
+            buildings[6] = current_buildings.MageTower
+            tempvar range_check_ptr = range_check_ptr
+            tempvar syscall_ptr : felt* = syscall_ptr
+            tempvar pedersen_ptr = pedersen_ptr
+        end
+
+        if building_id == RealmBuildingsIds.ArcherTower:
+            let (time) = add_building_integrity(
+                time_stamp, current_buildings.ArcherTower, time_to_add
+            )
+            buildings[7] = time
+            tempvar range_check_ptr = range_check_ptr
+            tempvar syscall_ptr : felt* = syscall_ptr
+            tempvar pedersen_ptr = pedersen_ptr
+        else:
+            buildings[7] = current_buildings.ArcherTower
+            tempvar range_check_ptr = range_check_ptr
+            tempvar syscall_ptr : felt* = syscall_ptr
+            tempvar pedersen_ptr = pedersen_ptr
+        end
+
+        if building_id == RealmBuildingsIds.Castle:
+            let (time) = add_building_integrity(time_stamp, current_buildings.Castle, time_to_add)
+            buildings[8] = time
+            tempvar range_check_ptr = range_check_ptr
+            tempvar syscall_ptr : felt* = syscall_ptr
+            tempvar pedersen_ptr = pedersen_ptr
+        else:
+            buildings[8] = current_buildings.Castle
+            tempvar range_check_ptr = range_check_ptr
+            tempvar syscall_ptr : felt* = syscall_ptr
+            tempvar pedersen_ptr = pedersen_ptr
+        end
+
+        return (
+            adjusted_buildings=RealmBuildings(
+            House=buildings[0],
+            StoreHouse=buildings[1],
+            Granary=buildings[2],
+            Farm=buildings[3],
+            FishingVillage=buildings[4],
+            Barracks=buildings[5],
+            MageTower=buildings[6],
+            ArcherTower=buildings[7],
+            Castle=buildings[8],
+            ),
+        )
+    end
+
+    # adds to building integritiy time or sets newtime from now
+    func add_building_integrity{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        block_timestamp : felt, building_integrity_length : felt, time_to_add : felt
+    ) -> (new_building_integrity : felt):
+        let (is_less_than_zero) = is_le(building_integrity_length, block_timestamp)
+
+        if is_less_than_zero == 1:
+            return (block_timestamp + time_to_add)
+        end
+
+        return (building_integrity_length + time_to_add)
     end
 end
