@@ -15,12 +15,30 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.registers import get_label_location
 
-from contracts.loot.ItemConstants import ItemAgility, Item, ItemSlot, ItemClass
+from contracts.loot.ItemConstants import (
+    ItemAgility,
+    Item,
+    ItemSlot,
+    ItemClass,
+    Adventurer,
+    PackedAdventurerStats,
+    AdventurerState,
+)
 
 from contracts.loot.library_item import LootItems
+from contracts.settling_game.utils.general import unpack_data
+from contracts.settling_game.utils.constants import SHIFT_41
 
-namespace Adventurer:
-    func calculate_adventurer_stats{syscall_ptr : felt*, range_check_ptr}(
+namespace SHIFT_ADVENTURER:
+    const _1 = 2 ** 0
+    const _2 = 2 ** 4
+    const _3 = 2 ** 14
+    const _4 = 2 ** 18
+    const _5 = 2 ** 38
+end
+
+namespace CalculateAdventurer:
+    func _items{syscall_ptr : felt*, range_check_ptr}(
         weapon : Item,
         chest : Item,
         head : Item,
@@ -65,5 +83,106 @@ namespace Adventurer:
         let vitality = weapon_vitality + chest_vitality + head_vitality + waist_vitality + feet_vitality + hands_vitality + neck_vitality + ring_vitality
 
         return (agility, attack, armour, wisdom, vitality)
+    end
+
+    func compute_adventurer_stats{syscall_ptr : felt*, range_check_ptr}(
+        adventurer : Adventurer
+    ) -> (adventurer : Adventurer):
+        alloc_locals
+
+        let (agility, attack, armour, wisdom, vitality) = _items(
+            adventurer.Weapon,
+            adventurer.Chest,
+            adventurer.Head,
+            adventurer.Waist,
+            adventurer.Feet,
+            adventurer.Hands,
+            adventurer.Neck,
+            adventurer.Ring,
+        )
+
+        let adventurer = Adventurer(
+            adventurer.Class,
+            agility,
+            attack,
+            armour,
+            wisdom,
+            vitality,
+            adventurer.Neck,
+            adventurer.Weapon,
+            adventurer.Ring,
+            adventurer.Chest,
+            adventurer.Head,
+            adventurer.Waist,
+            adventurer.Feet,
+            adventurer.Hands,
+            adventurer.Age,
+            adventurer.Name,
+            adventurer.XP,
+            adventurer.Order,
+        )
+
+        return (adventurer)
+    end
+
+    func unpack_adventurer{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+        bitwise_ptr : BitwiseBuiltin*,
+    }(packed_adventurer : PackedAdventurerStats) -> (adventurer : AdventurerState):
+        alloc_locals
+
+        let (Class) = unpack_data(packed_adventurer.p1, 0, 15)  # 4
+        let (Age) = unpack_data(packed_adventurer.p1, 4, 1023)  # 10
+        let (Name) = unpack_data(packed_adventurer.p1, 14, 1023)  # 10
+        let (Order) = unpack_data(packed_adventurer.p1, 18, 15)  # 4
+        let (XP) = unpack_data(packed_adventurer.p1, 38, 2199023255551)  # 30
+
+        let (Neck) = unpack_data(packed_adventurer.p2, 0, 2199023255551)  # 41
+        let (Weapon) = unpack_data(packed_adventurer.p2, 41, 2199023255551)  # 41
+        let (Ring) = unpack_data(packed_adventurer.p2, 82, 2199023255551)  # 41
+        let (Chest) = unpack_data(packed_adventurer.p2, 123, 2199023255551)  # 41
+
+        let (Head) = unpack_data(packed_adventurer.p3, 0, 2199023255551)  # 41
+        let (Waist) = unpack_data(packed_adventurer.p3, 41, 2199023255551)  # 41
+        let (Feet) = unpack_data(packed_adventurer.p3, 82, 2199023255551)  # 41
+        let (Hands) = unpack_data(packed_adventurer.p3, 123, 2199023255551)  # 41
+
+        let adventurer = AdventurerState(
+            Class, Age, Name, XP, Order, Neck, Weapon, Ring, Chest, Head, Waist, Feet, Hands
+        )
+
+        return (adventurer)
+    end
+
+    func pack_adventurer{syscall_ptr : felt*, range_check_ptr}(
+        unpacked_adventurer : AdventurerState
+    ) -> (packed_adventurer : PackedAdventurerStats):
+        alloc_locals
+
+        let Class = unpacked_adventurer.Class * SHIFT_ADVENTURER._1  # 4
+        let Age = unpacked_adventurer.Age * SHIFT_ADVENTURER._2  # 10
+        let Name = unpacked_adventurer.Name * SHIFT_ADVENTURER._3  # 10
+        let Order = unpacked_adventurer.Order * SHIFT_ADVENTURER._4  # 4
+        let XP = unpacked_adventurer.XP * SHIFT_ADVENTURER._5  # 30
+
+        let Neck = unpacked_adventurer.NeckId * SHIFT_41._1  # 41
+        let Weapon = unpacked_adventurer.WeaponId * SHIFT_41._2  # 41
+        let Ring = unpacked_adventurer.RingId * SHIFT_41._3  # 41
+        let Chest = unpacked_adventurer.ChestId * SHIFT_41._4  # 41
+
+        let Head = unpacked_adventurer.HeadId * SHIFT_41._1  # 41
+        let Waist = unpacked_adventurer.WaistId * SHIFT_41._2  # 41
+        let Feet = unpacked_adventurer.FeetId * SHIFT_41._3  # 41
+        let Hands = unpacked_adventurer.HandsId * SHIFT_41._4  # 41
+
+        let p1 = XP + Order + Name + Age + Class
+        let p2 = Chest + Ring + Weapon + Neck
+        let p3 = Head + Waist + Feet + Hands
+
+        let packedAdventurer = PackedAdventurerStats(p1, p2, p3)
+
+        return (packedAdventurer)
     end
 end

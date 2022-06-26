@@ -139,3 +139,11 @@ namespace TestGear:
         const XP = 1
     end
 end
+
+namespace TestAdventurer:
+    const Class = 1
+    const Age = 1
+    const Name = 1  # mint time
+    const XP = 1
+    const Order = 1
+end

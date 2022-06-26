@@ -51,6 +51,34 @@ struct Adventurer:
     member Order : felt
 end
 
+struct AdventurerState:
+    # other unique state p1
+    member Class : felt
+    member Age : felt
+    member Name : felt  # mint time
+    member XP : felt
+    member Order : felt
+
+    # store item NFT id when equiped
+    # Packed Stats p2
+    member NeckId : felt
+    member WeaponId : felt
+    member RingId : felt
+    member ChestId : felt
+
+    # Packed Stats p3
+    member HeadId : felt
+    member WaistId : felt
+    member FeetId : felt
+    member HandsId : felt
+end
+
+struct PackedAdventurerStats:
+    member p1 : felt
+    member p2 : felt
+    member p3 : felt
+end
+
 namespace Class:
     const All = 1
     const Mage = 2
