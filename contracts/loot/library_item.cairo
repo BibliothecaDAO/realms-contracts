@@ -17,6 +17,8 @@ from starkware.cairo.common.registers import get_label_location
 
 from contracts.loot.ItemConstants import ItemAgility, Item, ItemSlot, ItemClass
 
+from contracts.loot.library_statistics import Statistics
+
 namespace LootItems:
     func calculate_item_stats{syscall_ptr : felt*, range_check_ptr}(item : Item) -> (
         Agility, Attack, Armour, Wisdom, Vitality
@@ -24,11 +26,11 @@ namespace LootItems:
         alloc_locals
 
         # computed
-        let (Agility) = base_agility(item.Id)
-        let (Attack) = base_agility(item.Id)
-        let (Armour) = base_agility(item.Id)
-        let (Wisdom) = base_agility(item.Id)
-        let (Vitality) = base_agility(item.Id)
+        let (Agility) = Statistics.base_agility(item.Id)
+        let (Attack) = Statistics.base_attack(item.Id)
+        let (Armour) = Statistics.base_armour(item.Id)
+        let (Wisdom) = Statistics.base_wisdom(item.Id)
+        let (Vitality) = Statistics.base_vitality(item.Id)
 
         # TODO: ADD Dynamic
         # let (Prefix) = base_agility(item_id)
@@ -37,146 +39,5 @@ namespace LootItems:
         # let (Bonus) = base_agility(item_id)
 
         return (Agility, Attack, Armour, Wisdom, Vitality)
-    end
-
-    # Get Item Class
-    func item_class{syscall_ptr : felt*, range_check_ptr}(item_id : felt) -> (class : felt):
-        alloc_locals
-
-        let (type_label) = get_label_location(item_slot)
-
-        return ([type_label + item_id - 1])
-
-        item_slot:
-        dw ItemClass.Pendant
-        dw ItemClass.Necklace
-        dw ItemClass.Amulet
-        # TODO: add
-    end
-
-    # Item location on Adventurer
-    func item_slot{syscall_ptr : felt*, range_check_ptr}(item_id : felt) -> (slot : felt):
-        alloc_locals
-
-        let (type_label) = get_label_location(item_slot)
-
-        return ([type_label + item_id - 1])
-
-        item_slot:
-        dw ItemSlot.Pendant
-        dw ItemSlot.Necklace
-        dw ItemSlot.Amulet
-        # TODO: add
-    end
-
-    func base_agility{syscall_ptr : felt*, range_check_ptr}(item_id : felt) -> (agility : felt):
-        alloc_locals
-
-        let (type_label) = get_label_location(item_agility)
-
-        return ([type_label + item_id - 1])
-
-        item_agility:
-        dw ItemAgility.Pendant
-        dw ItemAgility.Necklace
-        dw ItemAgility.Amulet
-        dw ItemAgility.SilverRing
-        dw ItemAgility.BronzeRing
-        dw ItemAgility.PlatinumRing
-        dw ItemAgility.TitaniumRing
-        dw ItemAgility.GoldRing
-        dw ItemAgility.GhostWand
-        dw ItemAgility.GraveWand
-        dw ItemAgility.BoneWand
-        dw ItemAgility.Wand
-        dw ItemAgility.Grimoire
-        dw ItemAgility.Chronicle
-        dw ItemAgility.Tome
-        dw ItemAgility.Book
-        dw ItemAgility.DivineRobe
-        dw ItemAgility.SilkRobe
-        dw ItemAgility.LinenRobe
-        dw ItemAgility.Robe
-        dw ItemAgility.Shirt
-        dw ItemAgility.Crown
-        dw ItemAgility.DivineHood
-        dw ItemAgility.SilkHood
-        dw ItemAgility.LinenHood
-        dw ItemAgility.Hood
-        dw ItemAgility.BrightsilkSash
-        dw ItemAgility.SilkSash
-        dw ItemAgility.WoolSash
-        dw ItemAgility.LinenSash
-        dw ItemAgility.Sash
-        dw ItemAgility.DivineSlippers
-        dw ItemAgility.SilkSlippers
-        dw ItemAgility.WoolShoes
-        dw ItemAgility.LinenShoes
-        dw ItemAgility.Shoes
-        dw ItemAgility.DivineGloves
-        dw ItemAgility.SilkGloves
-        dw ItemAgility.WoolGloves
-        dw ItemAgility.LinenGloves
-        dw ItemAgility.Gloves
-        dw ItemAgility.Katana
-        dw ItemAgility.Falchion
-        dw ItemAgility.Scimitar
-        dw ItemAgility.LongSword
-        dw ItemAgility.ShortSword
-        dw ItemAgility.DemonHusk
-        dw ItemAgility.DragonskinArmor
-        dw ItemAgility.StuddedLeatherArmor
-        dw ItemAgility.HardLeatherArmor
-        dw ItemAgility.LeatherArmor
-        dw ItemAgility.DemonCrown
-        dw ItemAgility.DragonsCrown
-        dw ItemAgility.WarCap
-        dw ItemAgility.LeatherCap
-        dw ItemAgility.Cap
-        dw ItemAgility.DemonhideBelt
-        dw ItemAgility.DragonskinBelt
-        dw ItemAgility.StuddedLeatherBelt
-        dw ItemAgility.HardLeatherBelt
-        dw ItemAgility.LeatherBelt
-        dw ItemAgility.DemonhideBoots
-        dw ItemAgility.DragonskinBoots
-        dw ItemAgility.StuddedLeatherBoots
-        dw ItemAgility.HardLeatherBoots
-        dw ItemAgility.LeatherBoots
-        dw ItemAgility.DemonsHands
-        dw ItemAgility.DragonskinGloves
-        dw ItemAgility.StuddedLeatherGloves
-        dw ItemAgility.HardLeatherGloves
-        dw ItemAgility.LeatherGloves
-        dw ItemAgility.Warhammer
-        dw ItemAgility.Quarterstaff
-        dw ItemAgility.Maul
-        dw ItemAgility.Mace
-        dw ItemAgility.Club
-        dw ItemAgility.HolyChestplate
-        dw ItemAgility.OrnateChestplate
-        dw ItemAgility.PlateMail
-        dw ItemAgility.ChainMail
-        dw ItemAgility.RingMail
-        dw ItemAgility.AncientHelm
-        dw ItemAgility.OrnateHelm
-        dw ItemAgility.GreatHelm
-        dw ItemAgility.FullHelm
-        dw ItemAgility.Helm
-        dw ItemAgility.OrnateBelt
-        dw ItemAgility.WarBelt
-        dw ItemAgility.PlatedBelt
-        dw ItemAgility.MeshBelt
-        dw ItemAgility.HeavyBelt
-        dw ItemAgility.HolyGreaves
-        dw ItemAgility.OrnateGreaves
-        dw ItemAgility.Greaves
-        dw ItemAgility.ChainBoots
-        dw ItemAgility.HeavyBoots
-        dw ItemAgility.HolyGauntlets
-        dw ItemAgility.OrnateGauntlets
-        dw ItemAgility.Gauntlets
-        dw ItemAgility.ChainGloves
-        dw ItemAgility.HeavyGloves
     end
 end
