@@ -8,7 +8,7 @@ dotenv.config()
 
 async function main() {
 
-  const lockboxFactory = await hardhatEthers.getContractFactory("RealmsBridgeLockbox");
+  const lockboxFactory = await hardhatEthers.getContractFactory("RealmsL1Bridge");
 
   const lockbox = await lockboxFactory.attach((process.env as any).L1_REALMS_BRIDGE_LOCKBOX)
 

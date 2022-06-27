@@ -29,8 +29,6 @@ class Config:
     def __init__(self, nile_network : str):
         self.nile_network = "127.0.0.1" if nile_network=="localhost" else nile_network
 
-        
-
         self.ADMIN_ALIAS = "STARKNET_ADMIN_PRIVATE_KEY"
         self.ADMIN_ADDRESS, _ = safe_load_deployment("account-0", self.nile_network)
 
@@ -70,6 +68,9 @@ class Config:
 
         self.Exchange_ERC20_1155_ADDRESS, _ = safe_load_deployment("Exchange_ERC20_1155", self.nile_network)
         self.Exchange_ERC20_1155_PROXY_ADDRESS, _ = safe_load_deployment("proxy_Exchange_ERC20_1155", self.nile_network)
+
+        self.Bridge_ADDRESS, _ = safe_load_deployment("proxy_Bridge", self.nile_network)
+        self.L1_BRIDGE_CONTRACT_ADDRESS_ALIAS = "L1_BRIDGE_CONTRACT_ADDRESS"
 
         self.RESOURCES = [
             "Wood",

@@ -7,13 +7,12 @@ import dotenv from "dotenv"
 dotenv.config()
 
 async function main() {
-    const lockboxFactory = await hardhatEthers.getContractFactory("RealmsBridgeLockbox");
+    const lockboxFactory = await hardhatEthers.getContractFactory("RealmsL1Bridge");
     const box = await upgrades.deployProxy(lockboxFactory, [
-        process.env[`L1_REALMS_ADDRESS_${network.name.toUpperCase()}`],
         process.env[`L1_STARKNET_CORE_ADDRESS_${network.name.toUpperCase()}`]
     ]);
     await box.deployed();
-    console.log(`RealmsBridgeLockbox ${network.name} deployed to:`, box.address);
+    console.log(`RealmsL1Bridge ${network.name} deployed to:`, box.address);
 }
 
 main();

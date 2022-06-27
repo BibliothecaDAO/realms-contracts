@@ -11,7 +11,7 @@ import { Deployment } from "hardhat-deploy/dist/types";
 
 // chai.use(solidity);
 
-describe("RealmsBridgeLockboxTest", () => {
+describe("RealmsL1BridgeTest", () => {
   let staker: SignerWithAddress;
 
   let lootRealms: Contract;
@@ -29,7 +29,7 @@ describe("RealmsBridgeLockboxTest", () => {
       const { deployments, getNamedAccounts } = hre;
 
       const realmsFactory = await ethers.getContractFactory("LootRealms")
-      const lockboxFactory = await ethers.getContractFactory("RealmsBridgeLockbox")
+      const lockboxFactory = await ethers.getContractFactory("RealmsL1Bridge")
       
       const starknetCoreMockFactory = await smock.mock("StarknetCoreMock");
       starknetCoreMock = await starknetCoreMockFactory.deploy()

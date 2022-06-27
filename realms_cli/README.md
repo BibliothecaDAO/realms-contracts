@@ -285,6 +285,9 @@ The following scripts deploy all contracts necessary to test and play realms on 
 
 `$ nile run --network goerli realms_cli/8_deploy_AMM.py`
 
+### Deploy L2 Bridge Contract
+`$ nile run --network goerli realms_cli/9_deploy_bridge.py`
+
 ### Tips
 
 If you want to check a tx hash, run either
