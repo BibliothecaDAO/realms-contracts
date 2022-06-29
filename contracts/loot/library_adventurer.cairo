@@ -85,9 +85,9 @@ namespace CalculateAdventurer:
         return (agility, attack, armour, wisdom, vitality)
     end
 
-    func compute_adventurer_stats{syscall_ptr : felt*, range_check_ptr}(
-        adventurer : Adventurer
-    ) -> (adventurer : Adventurer):
+    func _stats{syscall_ptr : felt*, range_check_ptr}(adventurer : Adventurer) -> (
+        agility, attack, armour, wisdom, vitality
+    ):
         alloc_locals
 
         let (agility, attack, armour, wisdom, vitality) = _items(
@@ -125,7 +125,7 @@ namespace CalculateAdventurer:
         return (adventurer)
     end
 
-    func unpack_adventurer{
+    func _unpack_adventurer{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
         range_check_ptr,
@@ -156,7 +156,7 @@ namespace CalculateAdventurer:
         return (adventurer)
     end
 
-    func pack_adventurer{syscall_ptr : felt*, range_check_ptr}(
+    func _pack_adventurer{syscall_ptr : felt*, range_check_ptr}(
         unpacked_adventurer : AdventurerState
     ) -> (packed_adventurer : PackedAdventurerStats):
         alloc_locals
@@ -184,5 +184,17 @@ namespace CalculateAdventurer:
         let packedAdventurer = PackedAdventurerStats(p1, p2, p3)
 
         return (packedAdventurer)
+    end
+
+    func _equip_item{syscall_ptr : felt*, range_check_ptr}(
+        item_token_id : felt, item : Item, unpacked_adventurer : AdventurerState
+    ) -> (success : felt):
+        alloc_locals
+
+        if item.Slot == Slot.Neck:
+            let Neck = item_token_id * SHIFT_41._1
+        end
+
+        return (0)
     end
 end

@@ -12,7 +12,7 @@ from contracts.loot.ItemConstants import ItemAgility, Item, Adventurer, Adventur
 from tests.loot.consts import TestGear, TestAdventurer
 
 @external
-func test_base_fetch{syscall_ptr : felt*, range_check_ptr}():
+func test_items{syscall_ptr : felt*, range_check_ptr}():
     alloc_locals
 
     let weapon = Item(
@@ -156,13 +156,6 @@ func test_base_fetch{syscall_ptr : felt*, range_check_ptr}():
     let (agility, attack, armour, wisdom, vitality) = CalculateAdventurer._items(
         weapon, chest, head, waist, feet, hands, neck, ring
     )
-
-    %{ print('agility: ', ids.agility) %}
-    %{ print('attack: ', ids.attack) %}
-    %{ print('armour: ', ids.armour) %}
-    %{ print('wisdom: ', ids.wisdom) %}
-    %{ print('vitality: ', ids.vitality) %}
-
     return ()
 end
 
