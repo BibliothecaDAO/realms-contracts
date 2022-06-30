@@ -16,7 +16,7 @@ from contracts.settling_game.library.library_module import (
     MODULE_only_approved,
     MODULE_initializer,
 )
-
+from contracts.settling_game.library.library_relic import Relics
 from openzeppelin.upgrades.library import (
     Proxy_initializer,
     Proxy_only_admin,
@@ -146,15 +146,9 @@ func get_current_relic_holder{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
 ) -> (token_id : Uint256):
     alloc_locals
 
-    let (data) = storage_relic_holder.read(relic_id)
+    let (holder_id) = storage_relic_holder.read(relic_id)
 
-    # If 0 the relic is still in the hands of the owner
-    # else realm is in new owner
-    let (is_equal) = uint256_eq(data, Uint256(0, 0))
-
-    if is_equal == TRUE:
-        return (relic_id)
-    end
+    let (data) = Relics._current_relic_holder(relic_id, holder_id)
 
     return (data)
 end
