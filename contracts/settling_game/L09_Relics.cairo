@@ -1,7 +1,9 @@
-# ____MODULE_L09___RELIC
-#   Contains Logic around Relics
+# -----------------------------------
+# ____Module.L02___RELIC
+#   Logic around Relics
 #
 # MIT License
+# -----------------------------------
 
 %lang starknet
 
@@ -37,10 +39,13 @@ end
 func storage_relic_holder(relic_id : Uint256) -> (owner_token_id : Uint256):
 end
 
-###############
-# CONSTRUCTOR #
-###############
+# -----------------------------------
+# INITIALIZER & UPGRADE
+# -----------------------------------
 
+# @notice Module initializer
+# @param address_of_controller: Controller/arbiter address
+# @proxy_admin: Proxy admin address
 @external
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     address_of_controller : felt, proxy_admin : felt
@@ -50,6 +55,9 @@ func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     return ()
 end
 
+# @notice Set new proxy implementation
+# @dev Can only be set by the arbiter
+# @param new_implementation: New implementation contract address
 @external
 func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     new_implementation : felt
@@ -59,9 +67,9 @@ func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     return ()
 end
 
-############
-# EXTERNAL #
-############
+# -----------------------------------
+# EXTERNAL
+# -----------------------------------
 
 # @notice set relic holder external function
 # @implicit syscall_ptr
@@ -109,9 +117,9 @@ func set_relic_holder{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_ch
     return ()
 end
 
-###########
-# SETTERS #
-###########
+# -----------------------------------
+# SETTERS
+# -----------------------------------
 
 func _set_relic_holder{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
     relic_id : Uint256, owner_token_id : Uint256
@@ -123,9 +131,9 @@ func _set_relic_holder{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_c
     return ()
 end
 
-###########
-# GETTERS #
-###########
+# -----------------------------------
+# GETTERS
+# -----------------------------------
 
 # @notice gets current relic holder
 # @implicit syscall_ptr
