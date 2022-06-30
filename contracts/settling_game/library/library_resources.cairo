@@ -28,7 +28,9 @@ from contracts.settling_game.utils.constants import (
     PILLAGE_AMOUNT,
     MAX_DAYS_ACCURED,
 )
+
 namespace Resources:
+    # Turns IDS into an Array
     func _calculate_realm_resource_ids{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     }(realms_data : RealmData) -> (resource_ids : Uint256*):
@@ -132,7 +134,7 @@ namespace Resources:
 
     func _calculate_resource_output{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(token_id : Uint256, resource_id : felt, happiness : felt) -> (value : felt):
+    }(happiness : felt) -> (value : felt):
         alloc_locals
 
         # HAPPINESS CHECK
@@ -144,7 +146,7 @@ namespace Resources:
     @view
     func _calculate_all_resource_output{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(token_id : Uint256, happiness : felt, realms_data : RealmData) -> (
+    }(happiness : felt, realms_data : RealmData) -> (
         resource_1 : felt,
         resource_2 : felt,
         resource_3 : felt,
@@ -155,31 +157,27 @@ namespace Resources:
     ):
         alloc_locals
 
-        let (r_1_output) = _calculate_resource_output(token_id, realms_data.resource_1, happiness)
-        let (r_2_output) = _calculate_resource_output(token_id, realms_data.resource_2, happiness)
-        let (r_3_output) = _calculate_resource_output(token_id, realms_data.resource_3, happiness)
-        let (r_4_output) = _calculate_resource_output(token_id, realms_data.resource_4, happiness)
-        let (r_5_output) = _calculate_resource_output(token_id, realms_data.resource_5, happiness)
-        let (r_6_output) = _calculate_resource_output(token_id, realms_data.resource_6, happiness)
-        let (r_7_output) = _calculate_resource_output(token_id, realms_data.resource_7, happiness)
+        let (r_1_output) = _calculate_resource_output(happiness)
+        let (r_2_output) = _calculate_resource_output(happiness)
+        let (r_3_output) = _calculate_resource_output(happiness)
+        let (r_4_output) = _calculate_resource_output(happiness)
+        let (r_5_output) = _calculate_resource_output(happiness)
+        let (r_6_output) = _calculate_resource_output(happiness)
+        let (r_7_output) = _calculate_resource_output(happiness)
 
         return (r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output, r_7_output)
     end
 
     func _calculate_total_mintable_resources{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(
-        token_id : Uint256,
-        happiness : felt,
-        realms_data : RealmData,
-        days : felt,
-        mint_percentage : felt,
-    ) -> (resource_mint : Uint256*):
+    }(happiness : felt, realms_data : RealmData, days : felt, mint_percentage : felt) -> (
+        resource_mint : Uint256*
+    ):
         alloc_locals
 
         let (
             r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output, r_7_output
-        ) = _calculate_all_resource_output(token_id, happiness, realms_data)
+        ) = _calculate_all_resource_output(happiness, realms_data)
 
         # USER CLAIM
         let (r_1_user) = _calculate_resource_claimable(days, mint_percentage, r_1_output)
