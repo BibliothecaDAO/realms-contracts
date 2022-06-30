@@ -1,7 +1,9 @@
-# ____MODULE_L02___RESOURCES_LOGIC
+# -----------------------------------
+# ____Module.L02___RESOURCES_LOGIC
 #   Logic to create and issue resources for a given Realm
 #
 # MIT License
+# -----------------------------------
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
@@ -56,17 +58,17 @@ from openzeppelin.upgrades.library import (
 
 from contracts.settling_game.library.library_resources import Resources
 
-##########
-# EVENTS #
-# ########
+# -----------------------------------
+# Events
+# -----------------------------------
 
 @event
 func ResourceUpgraded(token_id : Uint256, building_id : felt, level : felt):
 end
 
-###########
-# STORAGE #
-###########
+# -----------------------------------
+# Storage
+# -----------------------------------
 
 @storage_var
 func resource_levels(token_id : Uint256, resource_id : felt) -> (level : felt):
@@ -187,11 +189,11 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (happiness) = IL04_Calculator.calculate_happiness(calculator_address, token_id)
 
     let (resource_mint : Uint256*) = Resources._calculate_total_mintable_resources(
-        token_id, happiness, realms_data, days, user_resources_value_rel_perc
+        happiness, realms_data, days, user_resources_value_rel_perc
     )
 
     let (resource_wonder_mint : Uint256*) = Resources._calculate_total_mintable_resources(
-        token_id, happiness, realms_data, days, treasury_mint_perc
+        happiness, realms_data, days, treasury_mint_perc
     )
 
     # FETCH OWNER
@@ -273,7 +275,7 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
 
     # No happiness cap for pillaging
     let (resource_mint : Uint256*) = Resources._calculate_total_mintable_resources(
-        token_id, 100, realms_data, total_pillagable_days, PILLAGE_AMOUNT
+        100, realms_data, total_pillagable_days, PILLAGE_AMOUNT
     )
 
     # MINT PILLAGED RESOURCES TO VICTOR
@@ -424,7 +426,7 @@ func get_all_resource_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     let (happiness) = IL04_Calculator.calculate_happiness(calculator_address, token_id)
 
     let (resource_mint : Uint256*) = Resources._calculate_total_mintable_resources(
-        token_id, happiness, realms_data, days, user_mint_rel_perc
+        happiness, realms_data, days, user_mint_rel_perc
     )
 
     return (realms_data.resource_number, resource_mint)
@@ -451,7 +453,7 @@ func get_all_vault_raidable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ra
 
     # pass 100 for base happiness
     let (resource_mint : Uint256*) = Resources._calculate_total_mintable_resources(
-        token_id, 100, realms_data, total_vault_days, PILLAGE_AMOUNT
+        100, realms_data, total_vault_days, PILLAGE_AMOUNT
     )
 
     return (realms_data.resource_number, resource_mint)

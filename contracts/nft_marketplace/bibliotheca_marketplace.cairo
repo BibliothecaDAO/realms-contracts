@@ -36,7 +36,7 @@ from contracts.settling_game.utils.constants import (
     SHIFT_NFT_2,
     SHIFT_NFT_3,
     SHIFT_NFT_4,
-    SHIFT_NFT_5
+    SHIFT_NFT_5,
 )
 
 ############
@@ -59,17 +59,17 @@ struct Trade:
     member trade_id : felt
 end
 
-##########
-# EVENTS #
-##########
+# -----------------------------------
+# Events
+# -----------------------------------
 
 @event
 func TradeAction(trade : Trade):
 end
 
-###########
-# STORAGE #
-###########
+# -----------------------------------
+# Storage
+# -----------------------------------
 
 # Indexed list of all trades
 @storage_var
@@ -118,8 +118,8 @@ end
 
 @external
 func fetch_trade_data{
-    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-}(trade_data: felt, price: felt, poster: felt) -> (trade: Trade):
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(trade_data : felt, price : felt, poster : felt) -> (trade : Trade):
     alloc_locals
 
     # let (data) = get_trade(trade_data)
@@ -130,20 +130,11 @@ func fetch_trade_data{
     let (status) = unpack_data(trade_data, 52, 3)
     let (trade_id) = unpack_data(trade_data, 54, 1048575)
 
-    #token_id needs to be Uint256
-    let token_id: Uint256 = Uint256(t_id, 0)
+    # token_id needs to be Uint256
+    let token_id : Uint256 = Uint256(t_id, 0)
 
-    let trade = Trade(
-        token_contract,
-        token_id,
-        expiration,
-        price,
-        poster,
-        status,
-        trade_id
-    )
+    let trade = Trade(token_contract, token_id, expiration, price, poster, status, trade_id)
     return (trade)
-
 end
 
 @external
@@ -264,17 +255,18 @@ func cancel_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
 end
 
 @external
-func pack_trade_data{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(trade: Trade) -> (trade_data: felt):
+func pack_trade_data{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(trade : Trade) -> (trade_data : felt):
     alloc_locals
 
-    let (nft_params: felt*) = alloc()
+    let (nft_params : felt*) = alloc()
 
     local id_1 = trade.token_contract * SHIFT_NFT_1
     nft_params[0] = id_1
 
-    local t_id: Uint256 = trade.token_id
-    let (local tid: felt) = _uint_to_felt(t_id)
+    local t_id : Uint256 = trade.token_id
+    let (local tid : felt) = _uint_to_felt(t_id)
     local id_2 = tid * SHIFT_NFT_2
     nft_params[1] = id_2
 
@@ -290,7 +282,6 @@ func pack_trade_data{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     tempvar value = nft_params[4] + nft_params[3] + nft_params[2] + nft_params[1] + nft_params[0]
 
     return (value)
-
 end
 
 ###########
@@ -326,12 +317,10 @@ func assert_poster{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     return ()
 end
 
-func _uint_to_felt{
-        syscall_ptr: felt*,
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    } (value: Uint256) -> (value: felt):
-    assert_lt_felt(value.high, 2**123)
+func _uint_to_felt{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    value : Uint256
+) -> (value : felt):
+    assert_lt_felt(value.high, 2 ** 123)
     return (value.high * (2 ** 128) + value.low)
 end
 

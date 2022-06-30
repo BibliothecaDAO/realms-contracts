@@ -11,7 +11,7 @@ from starkware.cairo.common.math import assert_not_zero
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
-from contracts.settling_game.library.library_buildings import BUILDINGS
+from contracts.settling_game.library.library_buildings import Buildings
 from contracts.settling_game.utils.general import unpack_data, transform_costs_to_token_ids_values
 from contracts.settling_game.utils.game_structs import (
     RealmBuildings,
@@ -67,9 +67,9 @@ from openzeppelin.upgrades.library import (
     Proxy_set_implementation,
 )
 
-##########
-# EVENTS #
-##########
+# -----------------------------------
+# Events
+# -----------------------------------
 
 @event
 func BuildingBuilt(token_id : Uint256, building_id : felt):
@@ -79,9 +79,9 @@ end
 func BuildingIntegrity(token_id : Uint256, building_id : felt, building_integrity : felt):
 end
 
-###########
-# STORAGE #
-###########
+# -----------------------------------
+# Storage
+# -----------------------------------
 
 @storage_var
 func realm_buildings(token_id : Uint256) -> (buildings : felt):
@@ -154,11 +154,11 @@ func build{
     let (realm_buildings_integrity : RealmBuildings) = get_buildings_integrity_unpacked(token_id)
 
     # Check Area, revert if no space available
-    let (can_build) = BUILDINGS.can_build(
+    let (can_build) = Buildings.can_build(
         building_id, quantity, realm_buildings_integrity, realms_data.cities, realms_data.regions
     )
 
-    with_attr error_message("BUILDINGS: building size greater than buildable area"):
+    with_attr error_message("Buildings: building size greater than buildable area"):
         assert_not_zero(can_build)
     end
 
@@ -195,28 +195,28 @@ func build_buildings{
     let (block_timestamp) = get_block_timestamp()
 
     # calculate time to add
-    let (time_to_add) = BUILDINGS.get_integrity_length(block_timestamp, building_id, quantity)
+    let (time_to_add) = Buildings.get_integrity_length(block_timestamp, building_id, quantity)
 
     # get unpacked buildings integrity
     let (current_buildings_integrity_unpacked) = get_buildings_integrity_unpacked(token_id)
 
     # set integrity for adjusted buildings
-    let (updated_buildings_unpacked) = BUILDINGS.add_time_to_buildings(
+    let (updated_buildings_unpacked) = Buildings.add_time_to_buildings(
         current_buildings_integrity_unpacked, building_id, block_timestamp, time_to_add
     )
 
     # pack buildings
-    let (updated_buildings_integrity) = BUILDINGS.pack_buildings(updated_buildings_unpacked)
+    let (updated_buildings_integrity) = Buildings.pack_buildings(updated_buildings_unpacked)
 
     # Save new packed buildings
     buildings_integrity.write(token_id, updated_buildings_integrity)
 
-    let (updated_time_emit) = BUILDINGS.get_unpacked_value(updated_buildings_unpacked, building_id)
+    let (updated_time_emit) = Buildings.get_unpacked_value(updated_buildings_unpacked, building_id)
 
     # Emit Building Integrity
     BuildingIntegrity.emit(token_id, building_id, updated_time_emit)
 
-    # GET HISTORICAL BUILDINGS
+    # GET HISTORICAL Buildings
     # let (current_buildings : RealmBuildings) = get_buildings_unpacked(token_id)
 
     # let (buildings : felt*) = alloc()
@@ -344,7 +344,7 @@ func get_buildings_integrity_unpacked{
 
     let (buildings_) = buildings_integrity.read(token_id)
 
-    let (unpacked_buildings : RealmBuildings) = BUILDINGS.unpack_buildings(buildings_)
+    let (unpacked_buildings : RealmBuildings) = Buildings.unpack_buildings(buildings_)
 
     return (unpacked_buildings)
 end
@@ -359,31 +359,31 @@ func get_effective_buildings{
 
     let (block_timestamp) = get_block_timestamp()
 
-    let (House) = BUILDINGS.calculate_effective_buildings(
+    let (House) = Buildings.calculate_effective_buildings(
         RealmBuildingsIds.House, functional_buildings.House, block_timestamp
     )
-    let (StoreHouse) = BUILDINGS.calculate_effective_buildings(
+    let (StoreHouse) = Buildings.calculate_effective_buildings(
         RealmBuildingsIds.House, functional_buildings.StoreHouse, block_timestamp
     )
-    let (Granary) = BUILDINGS.calculate_effective_buildings(
+    let (Granary) = Buildings.calculate_effective_buildings(
         RealmBuildingsIds.House, functional_buildings.Granary, block_timestamp
     )
-    let (Farm) = BUILDINGS.calculate_effective_buildings(
+    let (Farm) = Buildings.calculate_effective_buildings(
         RealmBuildingsIds.House, functional_buildings.Farm, block_timestamp
     )
-    let (FishingVillage) = BUILDINGS.calculate_effective_buildings(
+    let (FishingVillage) = Buildings.calculate_effective_buildings(
         RealmBuildingsIds.House, functional_buildings.FishingVillage, block_timestamp
     )
-    let (Barracks) = BUILDINGS.calculate_effective_buildings(
+    let (Barracks) = Buildings.calculate_effective_buildings(
         RealmBuildingsIds.House, functional_buildings.Barracks, block_timestamp
     )
-    let (MageTower) = BUILDINGS.calculate_effective_buildings(
+    let (MageTower) = Buildings.calculate_effective_buildings(
         RealmBuildingsIds.House, functional_buildings.MageTower, block_timestamp
     )
-    let (ArcherTower) = BUILDINGS.calculate_effective_buildings(
+    let (ArcherTower) = Buildings.calculate_effective_buildings(
         RealmBuildingsIds.House, functional_buildings.ArcherTower, block_timestamp
     )
-    let (Castle) = BUILDINGS.calculate_effective_buildings(
+    let (Castle) = Buildings.calculate_effective_buildings(
         RealmBuildingsIds.House, functional_buildings.Castle, block_timestamp
     )
 

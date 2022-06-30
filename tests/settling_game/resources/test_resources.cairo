@@ -120,7 +120,7 @@ func test_calculate_resource_claimable{
 }():
     alloc_locals
 
-    let (value) = Resources._calculate_resource_claimable(2, 100, 100)
+    let (value) = Resources._calculate_resource_claimable(TEST_DAYS, TEST_MINT_PERCENTAGE, 100)
 
     let work_bn = 2 * 100 * 10 ** 18
 

@@ -21,17 +21,17 @@ from openzeppelin.upgrades.library import (
     Proxy_set_implementation,
 )
 
-##########
-# EVENTS #
-##########
+# -----------------------------------
+# Events
+# -----------------------------------
 
 @event
 func RelicUpdate(relic_id : Uint256, owner_token_id : Uint256):
 end
 
-###########
-# STORAGE #
-###########
+# -----------------------------------
+# Storage
+# -----------------------------------
 
 @storage_var
 func storage_relic_holder(relic_id : Uint256) -> (owner_token_id : Uint256):

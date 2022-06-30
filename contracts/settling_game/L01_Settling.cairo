@@ -1,9 +1,10 @@
-# ____MODULE_L01___SETTLING_LOGIC
+# -----------------------------------
+# ____Module.L01___SETTLING_LOGIC
 #   Core Settling Game logic including setting up the world
 #   and staking/unstaking a realm.
 #
 # MIT License
-
+# -----------------------------------
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
@@ -36,9 +37,9 @@ from openzeppelin.upgrades.library import (
     Proxy_set_implementation,
 )
 
-##########
-# EVENTS #
-##########
+# -----------------------------------
+# Events
+# -----------------------------------
 
 @event
 func Settled(owner : felt, token_id : Uint256):
@@ -56,9 +57,9 @@ end
 func ClaimTime(token_id : Uint256, time_staked : felt):
 end
 
-###########
-# STORAGE #
-###########
+# -----------------------------------
+# Storage
+# -----------------------------------
 
 # STAKE TIME - THIS IS USED AS THE MAIN IDENTIFIER FOR STAKING TIME
 # IT IS UPDATED ON RESOURCE CLAIM, STAKE, UNSTAKE
@@ -74,9 +75,9 @@ end
 func total_realms_settled() -> (amount : felt):
 end
 
-###############
-# CONSTRUCTOR #
-###############
+# -----------------------------------
+# Initialize & upgrade
+# -----------------------------------
 
 @external
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(

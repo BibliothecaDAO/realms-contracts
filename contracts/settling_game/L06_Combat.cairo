@@ -51,9 +51,9 @@ from openzeppelin.upgrades.library import (
     Proxy_set_implementation,
 )
 
-##########
-# EVENTS #
-##########
+# -----------------------------------
+# Events
+# -----------------------------------
 
 @event
 func CombatStart_2(
@@ -91,9 +91,9 @@ func BuildTroops_2(
 ):
 end
 
-###########
-# STORAGE #
-###########
+# -----------------------------------
+# Storage
+# -----------------------------------
 
 @storage_var
 func xoroshiro_address() -> (address : felt):

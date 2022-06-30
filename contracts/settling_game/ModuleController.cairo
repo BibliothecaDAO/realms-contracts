@@ -28,9 +28,9 @@ from contracts.settling_game.utils.constants import TRUE, FALSE
 # This way, new modules can be added to update existing systems a
 # and create new dynamics.
 
-###########
-# STORAGE #
-###########
+# -----------------------------------
+# Storage
+# -----------------------------------
 
 @storage_var
 func arbiter() -> (address : felt):

@@ -35,9 +35,9 @@ from openzeppelin.upgrades.library import (
     Proxy_set_implementation,
 )
 
-###########
-# STORAGE #
-###########
+# -----------------------------------
+# Storage
+# -----------------------------------
 
 @storage_var
 func epoch_claimed(address : felt) -> (epoch : felt):

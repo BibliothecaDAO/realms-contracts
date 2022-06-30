@@ -29,7 +29,7 @@ from contracts.settling_game.utils.general import unpack_data
 
 from contracts.settling_game.utils.constants import SHIFT_41
 
-namespace BUILDINGS:
+namespace Buildings:
     # Checks if you can build on a Realm, reverts if you cannot
     func can_build{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         building_id : felt,

@@ -31,9 +31,9 @@ from openzeppelin.upgrades.library import (
     Proxy_set_implementation,
 )
 
-##########
-# EVENTS #
-##########
+# -----------------------------------
+# Events
+# -----------------------------------
 
 # Staked = 🗝️ unlocked
 # Unstaked = 🔒 locked (because Lore ofc)
@@ -46,9 +46,9 @@ end
 func UnSettled(owner : felt, token_id : Uint256):
 end
 
-###########
-# STORAGE #
-###########
+# -----------------------------------
+# Storage
+# -----------------------------------
 
 # STAKE TIME - This is used as the main identifier for staking time
 # It is updated on Resource Claim, Stake, Unstake

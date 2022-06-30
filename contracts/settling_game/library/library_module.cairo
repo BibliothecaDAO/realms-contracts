@@ -26,9 +26,9 @@ from contracts.settling_game.interfaces.imodules import IModuleController
 
 from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
 
-###########
-# STORAGE #
-###########
+# -----------------------------------
+# Storage
+# -----------------------------------
 
 @storage_var
 func controller_address() -> (address : felt):
