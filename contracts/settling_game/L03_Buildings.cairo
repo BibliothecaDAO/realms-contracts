@@ -25,29 +25,6 @@ from contracts.settling_game.utils.game_structs import (
 
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
 
-from contracts.settling_game.utils.constants import (
-    SHIFT_6_1,
-    SHIFT_6_2,
-    SHIFT_6_3,
-    SHIFT_6_4,
-    SHIFT_6_5,
-    SHIFT_6_6,
-    SHIFT_6_7,
-    SHIFT_6_8,
-    SHIFT_6_9,
-    SHIFT_6_10,
-    SHIFT_6_11,
-    SHIFT_6_12,
-    SHIFT_6_13,
-    SHIFT_6_14,
-    SHIFT_6_15,
-    SHIFT_6_16,
-    SHIFT_6_17,
-    SHIFT_6_18,
-    SHIFT_6_19,
-    SHIFT_6_20,
-)
-
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
@@ -170,12 +147,7 @@ func build{
     # @milan
     let (building_cost : Cost, lords : Uint256) = get_building_cost(building_id)
 
-    let (costs : Cost*) = alloc()
-    assert [costs] = building_cost
-    let (token_ids : Uint256*) = alloc()
-    let (token_values : Uint256*) = alloc()
-
-    let (token_len : felt) = transform_costs_to_token_ids_values(1, costs, token_ids, token_values)
+    let (token_len, token_ids, token_values) = Buildings.calculate_building_cost(building_cost)
 
     # BURN RESOURCES
     IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)

@@ -22,10 +22,12 @@ from contracts.settling_game.utils.game_structs import (
     BuildingsDecaySlope,
     PackedBuildings,
     RealmBuildingsIds,
+    Cost,
 )
+
 from contracts.settling_game.utils.constants import DAY, BASE_SQM
 
-from contracts.settling_game.utils.general import unpack_data
+from contracts.settling_game.utils.general import unpack_data, transform_costs_to_token_ids_values
 
 from contracts.settling_game.utils.constants import SHIFT_41
 
@@ -535,5 +537,22 @@ namespace Buildings:
         buildings[8] = unpacked_buildings.Castle
 
         return (buildings[building_id - 1])
+    end
+
+    func calculate_building_cost{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+        bitwise_ptr : BitwiseBuiltin*,
+    }(building_cost : Cost) -> (token_len : felt, token_ids : Uint256*, token_values : Uint256*):
+        alloc_locals
+
+        let (costs : Cost*) = alloc()
+        assert [costs] = building_cost
+        let (token_ids : Uint256*) = alloc()
+        let (token_values : Uint256*) = alloc()
+
+        let (token_len) = transform_costs_to_token_ids_values(1, costs, token_ids, token_values)
+        return (token_len, token_ids, token_values)
     end
 end
