@@ -1,6 +1,0 @@
-#!/bin/bash
-set -eu
-
-nile compile openzeppelin/account/Account.cairo --account_contract
-nile compile contracts/desiege/*.cairo
-nile compile contracts/desiege/tokens/ERC1155/ERC1155_Mintable_Ownable.cairo
