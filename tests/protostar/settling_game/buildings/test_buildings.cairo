@@ -18,7 +18,7 @@ from contracts.settling_game.utils.game_structs import (
 )
 from contracts.settling_game.library.library_buildings import Buildings
 
-from tests.settling_game.utils.test_structs import TEST_REALM_BUILDINGS
+from tests.protostar.settling_game.test_structs import TEST_REALM_BUILDINGS
 
 const BUILDING_QUANTITY = 1
 const TEST_REALM_REGIONS = 4

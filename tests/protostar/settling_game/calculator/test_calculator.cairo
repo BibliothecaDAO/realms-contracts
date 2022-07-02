@@ -13,7 +13,7 @@ from contracts.settling_game.utils.game_structs import (
 )
 from contracts.settling_game.library.library_calculator import CALCULATOR
 
-from tests.settling_game.utils.test_structs import TEST_REALM_BUILDINGS
+from tests.protostar.settling_game.test_structs import TEST_REALM_BUILDINGS
 
 const TROOP_POPULATION = 10
 
