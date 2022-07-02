@@ -17,3 +17,7 @@ WORKDIR /loot/
 RUN git clone https://github.com/BibliothecaForAdventurers/realms-contracts.git
 WORKDIR /loot/realms-contracts/
 RUN pip3 install realms_cli/
+
+RUN curl -L https://raw.githubusercontent.com/software-mansion/protostar/master/install.sh | bash
+RUN curl -L https://foundry.paradigm.xyz | bash
+RUN /root/.foundry/bin/foundryup
