@@ -7,7 +7,7 @@ libs_path = "./lib"
 # This section is explained in the "Project compilation" guide.
 ["protostar.contracts"]
 main = [
-  "./src/utils.cairo",
+  "./contracts/settling_game/Arbiter.cairo",
 ]
 
 ["protostar.build"]
