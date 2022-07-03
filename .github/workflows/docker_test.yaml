@@ -1,0 +1,18 @@
+name: Testing via Docker
+on:
+  workflow_run:
+    workflows: ["docker"]
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      test_path:
+        default: 'tests/'
+jobs:
+  docker-run-tests:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/bibliothecaforadventurers/loot:latest
+    steps:
+      - name: Run Protostar
+        run: /bin/bash -c "(cd /loot/realms-contracts && /root/.protostar/dist/protostar/protostar test ${{ inputs.test_path || 'tests/' }})"
