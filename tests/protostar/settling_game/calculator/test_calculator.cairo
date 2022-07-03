@@ -11,7 +11,7 @@ from contracts.settling_game.utils.game_structs import (
     RealmBuildings,
     BuildingsTroopIndustry,
 )
-from contracts.settling_game.library.library_calculator import CALCULATOR
+from contracts.settling_game.library.library_calculator import Calculator
 
 from tests.protostar.settling_game.test_structs import TEST_REALM_BUILDINGS
 
@@ -32,11 +32,11 @@ func test_calculate_happiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
         TEST_REALM_BUILDINGS.CASTLE,
     )
 
-    let (realm_population) = CALCULATOR.calculate_food(test_buildings, TROOP_POPULATION)
+    let (realm_population) = Calculator.calculate_food(test_buildings, TROOP_POPULATION)
 
-    let (realm_food) = CALCULATOR.calculate_food(test_buildings, TROOP_POPULATION)
+    let (realm_food) = Calculator.calculate_food(test_buildings, TROOP_POPULATION)
 
-    let (realm_happiness) = CALCULATOR.calculate_happiness(realm_population, realm_food)
+    let (realm_happiness) = Calculator.calculate_happiness(realm_population, realm_food)
 
     %{ print('Realm Happiness:', ids.realm_happiness) %}
 
@@ -58,7 +58,7 @@ func test_calculate_food{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
         TEST_REALM_BUILDINGS.CASTLE,
     )
 
-    let (realm_food) = CALCULATOR.calculate_food(test_buildings, TROOP_POPULATION)
+    let (realm_food) = Calculator.calculate_food(test_buildings, TROOP_POPULATION)
 
     %{ print('Realm Food:', ids.realm_food) %}
 
@@ -92,7 +92,7 @@ func test_calculate_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
         TEST_REALM_BUILDINGS.CASTLE,
     )
 
-    let (realm_population) = CALCULATOR.calculate_population(test_buildings, TROOP_POPULATION)
+    let (realm_population) = Calculator.calculate_population(test_buildings, TROOP_POPULATION)
 
     %{ print('Realm Population:', ids.realm_population) %}
 
@@ -127,7 +127,7 @@ func test_calculate_troop_coefficient{syscall_ptr : felt*, range_check_ptr}():
         TEST_REALM_BUILDINGS.CASTLE,
     )
 
-    let (troop_coefficient) = CALCULATOR.calculate_troop_coefficient(test_buildings)
+    let (troop_coefficient) = Calculator.calculate_troop_coefficient(test_buildings)
 
     %{ print('Troop coefficient:', ids.troop_coefficient) %}
 
