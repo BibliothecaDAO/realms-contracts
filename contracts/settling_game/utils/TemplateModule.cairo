@@ -12,8 +12,8 @@ from starkware.starknet.common.syscalls import get_caller_address
 from contracts.settling_game.interfaces.imodules import IModuleController
 
 from contracts.settling_game.library.library_module import (
-    MODULE_controller_address,
-    MODULE_only_approved,
+    Module.controller_address(),
+    Module.only_approved(),
     MODULE_initializer,
 )
 
@@ -49,7 +49,7 @@ from openzeppelin.upgrades.library import (
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     address_of_controller : felt, proxy_admin : felt
 ):
-    MODULE_initializer(address_of_controller)
+    Module.initializer(address_of_controller)
     Proxy_initializer(proxy_admin)
     return ()
 end
@@ -71,7 +71,7 @@ end
 @external
 func update_value{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     # TODO Customise.
-    MODULE_only_approved()
+    Module.only_approved()
     return ()
 end
 

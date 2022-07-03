@@ -11,17 +11,10 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.constants import TRUE
-from contracts.settling_game.library.library_module import (
-    MODULE_controller_address,
-    MODULE_only_approved,
-    MODULE_initializer,
-)
+from contracts.settling_game.library.library_module import Module
+
 from contracts.settling_game.library.library_relic import Relics
-from openzeppelin.upgrades.library import (
-    Proxy_initializer,
-    Proxy_only_admin,
-    Proxy_set_implementation,
-)
+from openzeppelin.upgrades.library import Proxy
 
 # -----------------------------------
 # Events
@@ -50,8 +43,8 @@ end
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     address_of_controller : felt, proxy_admin : felt
 ):
-    MODULE_initializer(address_of_controller)
-    Proxy_initializer(proxy_admin)
+    Module.initializer(address_of_controller)
+    Proxy.initializer(proxy_admin)
     return ()
 end
 
@@ -62,8 +55,8 @@ end
 func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     new_implementation : felt
 ):
-    Proxy_only_admin()
-    Proxy_set_implementation(new_implementation)
+    Proxy.assert_only_admin()
+    Proxy._set_implementation_hash(new_implementation)
     return ()
 end
 
@@ -82,7 +75,7 @@ func set_relic_holder{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_ch
 ):
     alloc_locals
     # Only Combat
-    MODULE_only_approved()
+    Module.only_approved()
 
     let (current_relic_owner) = get_current_relic_holder(loser_token_id)
 

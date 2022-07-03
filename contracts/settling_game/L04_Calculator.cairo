@@ -1,3 +1,4 @@
+# -----------------------------------
 # ____MODULE_L04___CONTRACT_LOGIC
 #   This modules focus is to calculate the values of the internal
 #   multipliers so other modules can use them. The aim is to have this
@@ -5,6 +6,7 @@
 #   It is pure math.
 #
 # MIT License
+# -----------------------------------
 
 %lang starknet
 
@@ -14,6 +16,8 @@ from starkware.cairo.common.math_cmp import is_nn_le, is_nn, is_le
 from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
 
+from openzeppelin.upgrades.library import Proxy
+
 from contracts.settling_game.utils.game_structs import (
     RealmBuildings,
     ModuleIds,
@@ -22,42 +26,27 @@ from contracts.settling_game.utils.game_structs import (
     BuildingsCulture,
     RealmCombatData,
 )
-
 from contracts.settling_game.utils.constants import VAULT_LENGTH_SECONDS, BASE_LORDS_PER_DAY
-
 from contracts.settling_game.interfaces.imodules import (
     IModuleController,
     IL01_Settling,
     IL03_Buildings,
     IL06_Combat,
 )
-
-from contracts.settling_game.library.library_module import (
-    MODULE_controller_address,
-    MODULE_only_approved,
-    MODULE_initializer,
-)
-
-from contracts.settling_game.library.library_calculator import CALCULATOR
-
-from openzeppelin.upgrades.library import (
-    Proxy_initializer,
-    Proxy_only_admin,
-    Proxy_set_implementation,
-)
-
+from contracts.settling_game.library.library_module import Module
+from contracts.settling_game.library.library_calculator import Calculator
 from contracts.settling_game.library.library_combat import COMBAT
 
-###############
-# CONSTRUCTOR #
-###############
+# -----------------------------------
+# Initialize & upgrade
+# -----------------------------------
 
 @external
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     address_of_controller : felt, proxy_admin : felt
 ):
-    MODULE_initializer(address_of_controller)
-    Proxy_initializer(proxy_admin)
+    Module.initializer(address_of_controller)
+    Proxy.initializer(proxy_admin)
     return ()
 end
 
@@ -65,21 +54,21 @@ end
 func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     new_implementation : felt
 ):
-    Proxy_only_admin()
-    Proxy_set_implementation(new_implementation)
+    Proxy.assert_only_admin()
+    Proxy._set_implementation_hash(new_implementation)
     return ()
 end
 
-###############
-# CALCULATORS #
-###############
+# -----------------------------------
+# Calculators
+# -----------------------------------
 
 @view
 func calculate_epoch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
     epoch : felt
 ):
     # CALCULATE EPOCH
-    let (controller) = MODULE_controller_address()
+    let (controller) = Module.controller_address()
     let (genesis_time_stamp) = IModuleController.get_genesis(controller)
     let (block_timestamp) = get_block_timestamp()
 
@@ -98,7 +87,7 @@ func calculate_happiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     let (food) = calculate_food(token_id)
 
     # GET HAPPINESS
-    let (happiness) = CALCULATOR.calculate_happiness(population, food)
+    let (happiness) = Calculator.calculate_happiness(population, food)
 
     return (happiness)
 end
@@ -110,7 +99,7 @@ func calculate_troop_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     alloc_locals
 
     # SUM TOTAL TROOP POPULATION
-    # let (controller) = MODULE_controller_address()
+    # let (controller) = Module.controller_address()
     # let (combat_logic) = IModuleController.get_module_address(controller, ModuleIds.L06_Combat)
     # let (realm_combat_data : RealmCombatData) = IL06_Combat.get_realm_combat_data(
     #     combat_logic, token_id
@@ -129,7 +118,7 @@ func calculate_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
     alloc_locals
 
     # SUM TOTAL POPULATION
-    let (controller) = MODULE_controller_address()
+    let (controller) = Module.controller_address()
     let (buildings_logic_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.L03_Buildings
     )
@@ -140,7 +129,7 @@ func calculate_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
     # TROOP POPULATION
     let (troop_population) = calculate_troop_population(token_id)
 
-    let (realm_population) = CALCULATOR.calculate_food(current_buildings, troop_population)
+    let (realm_population) = Calculator.calculate_food(current_buildings, troop_population)
 
     return (realm_population)
 end
@@ -152,7 +141,7 @@ func calculate_food{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     alloc_locals
 
     # CALCULATE FOOD
-    let (controller) = MODULE_controller_address()
+    let (controller) = Module.controller_address()
     let (buildings_logic_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.L03_Buildings
     )
@@ -162,7 +151,7 @@ func calculate_food{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
 
     let (troop_population) = calculate_troop_population(token_id)
 
-    let (realm_food) = CALCULATOR.calculate_food(current_buildings, troop_population)
+    let (realm_food) = Calculator.calculate_food(current_buildings, troop_population)
 
     return (realm_food)
 end
@@ -185,7 +174,7 @@ func calculate_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
     alloc_locals
 
     # CALCULATE WONDER TAX
-    let (controller) = MODULE_controller_address()
+    let (controller) = Module.controller_address()
     let (settle_state_address) = IModuleController.get_module_address(
         controller, ModuleIds.L01_Settling
     )
@@ -210,7 +199,7 @@ func calculate_troop_coefficent{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     token_id : Uint256
 ) -> (troop_coefficent : felt):
     alloc_locals
-    let (controller) = MODULE_controller_address()
+    let (controller) = Module.controller_address()
     let (buildings_logic_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.L03_Buildings
     )
@@ -218,7 +207,7 @@ func calculate_troop_coefficent{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
         buildings_logic_address, token_id
     )
 
-    let (troop_coefficent) = CALCULATOR.calculate_troop_coefficient(current_buildings)
+    let (troop_coefficent) = Calculator.calculate_troop_coefficient(current_buildings)
 
     return (troop_coefficent)
 end

@@ -10,7 +10,7 @@ from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
-
+from openzeppelin.upgrades.library import Proxy
 from contracts.settling_game.utils.game_structs import (
     CryptData,
     ModuleIds,
@@ -25,22 +25,12 @@ from contracts.settling_game.utils.constants import (
     RESOURCES_PER_CRYPT,
     LEGENDARY_MULTIPLIER,
 )
-from contracts.settling_game.library.library_module import (
-    MODULE_controller_address,
-    MODULE_initializer,
-    MODULE_ERC721_owner_check,
-)
+from contracts.settling_game.library.library_module import Module
 
 from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.crypts_IERC721 import crypts_IERC721
 from contracts.settling_game.interfaces.imodules import IModuleController, IL07_Crypts
-
-from openzeppelin.upgrades.library import (
-    Proxy_initializer,
-    Proxy_only_admin,
-    Proxy_set_implementation,
-)
 
 ###############
 # CONSTRUCTOR #
@@ -50,8 +40,8 @@ from openzeppelin.upgrades.library import (
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     address_of_controller : felt, proxy_admin : felt
 ):
-    MODULE_initializer(address_of_controller)
-    Proxy_initializer(proxy_admin)
+    Module.initializer(address_of_controller)
+    Proxy.initializer(proxy_admin)
     return ()
 end
 
@@ -59,8 +49,8 @@ end
 func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     new_implementation : felt
 ):
-    Proxy_only_admin()
-    Proxy_set_implementation(new_implementation)
+    Proxy.assert_only_admin()
+    Proxy._set_implementation_hash(new_implementation)
     return ()
 end
 
@@ -74,29 +64,22 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 ):
     alloc_locals
     let (caller) = get_caller_address()
-    let (controller) = MODULE_controller_address()
 
-    # # CONTRACT ADDRESSES
+    # CONTRACT ADDRESSES
 
     # EXTERNAL CONTRACTS
     # Crypts ERC721 Token
-    let (crypts_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Crypts
-    )
+    let (crypts_address) = Module.get_external_contract_address(ExternalContractIds.Crypts)
+
     # S_Crypts ERC721 Token
-    let (s_crypts_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.S_Crypts
-    )
+    let (s_crypts_address) = Module.get_external_contract_address(ExternalContractIds.S_Crypts)
+
     # Resources 1155 Token
-    let (resources_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Resources
-    )
+    let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
 
     # # INTERNAL CONTRACTS
     # Crypts Logic Contract
-    let (crypts_logic_address) = IModuleController.get_module_address(
-        controller, ModuleIds.L07_Crypts
-    )
+    let (crypts_logic_address) = Module.get_module_address(ModuleIds.L07_Crypts)
 
     # FETCH OWNER
     let (owner) = IERC721.ownerOf(s_crypts_address, token_id)
@@ -104,7 +87,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     # ALLOW RESOURCE LOGIC ADDRESS TO CLAIM, BUT STILL RESTRICT
     if caller != crypts_logic_address:
         # Allwo users to claim directly
-        MODULE_ERC721_owner_check(token_id, ExternalContractIds.S_Crypts)
+        Module.ERC721_owner_check(token_id, ExternalContractIds.S_Crypts)
         tempvar syscall_ptr = syscall_ptr
         tempvar range_check_ptr = range_check_ptr
         tempvar pedersen_ptr = pedersen_ptr
@@ -135,9 +118,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let r_legendary = crypts_data.legendary
 
     # CHECK HOW MANY RESOURCES * DAYS WE SHOULD GIVE OUT
-    let (r_user_resources_value) = calculate_resource_output(
-        days, r_output, r_legendary
-    )
+    let (r_user_resources_value) = calculate_resource_output(days, r_output, r_legendary)
 
     # ADD VALUES TO TEMP ARRAY FOR EACH AVAILABLE RESOURCE
     assert resource_ids[0] = Uint256(r_resource_id, 0)
@@ -165,7 +146,7 @@ end
 func days_accrued{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
 ) -> (days_accrued : felt, remainder : felt):
-    let (controller) = MODULE_controller_address()
+    let (controller) = Module.controller_address()
     let (block_timestamp) = get_block_timestamp()
     let (settling_logic_address) = IModuleController.get_module_address(
         controller, ModuleIds.L07_Crypts

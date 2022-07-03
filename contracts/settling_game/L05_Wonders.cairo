@@ -1,7 +1,9 @@
+# -----------------------------------
 # ____MODULE_L05___WONDERS_LOGIC
 #   Controls all logic around the Wonder tax.
 #
 # MIT License
+# -----------------------------------
 
 %lang starknet
 
@@ -16,6 +18,7 @@ from starkware.cairo.common.math_cmp import is_nn_le
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.uint256 import Uint256
+from openzeppelin.upgrades.library import Proxy
 
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
 from contracts.settling_game.interfaces.imodules import IModuleController, IL04_Calculator
@@ -23,17 +26,7 @@ from contracts.settling_game.interfaces.imodules import IModuleController, IL04_
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
 
-from contracts.settling_game.library.library_module import (
-    MODULE_controller_address,
-    MODULE_only_approved,
-    MODULE_initializer,
-)
-
-from openzeppelin.upgrades.library import (
-    Proxy_initializer,
-    Proxy_only_admin,
-    Proxy_set_implementation,
-)
+from contracts.settling_game.library.library_module import Module
 
 # -----------------------------------
 # Storage
@@ -71,8 +64,8 @@ end
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     address_of_controller : felt, proxy_admin : felt
 ):
-    MODULE_initializer(address_of_controller)
-    Proxy_initializer(proxy_admin)
+    Module.initializer(address_of_controller)
+    Proxy.initializer(proxy_admin)
     return ()
 end
 
@@ -80,8 +73,8 @@ end
 func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     new_implementation : felt
 ):
-    Proxy_only_admin()
-    Proxy_set_implementation(new_implementation)
+    Proxy.assert_only_admin()
+    Proxy._set_implementation_hash(new_implementation)
     return ()
 end
 
@@ -94,7 +87,7 @@ func pay_wonder_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     epoch : felt, token_id : Uint256
 ):
     alloc_locals
-    let (controller) = MODULE_controller_address()
+    let (controller) = Module.controller_address()
     let (caller) = get_caller_address()
 
     # ADDRESSES
@@ -143,10 +136,10 @@ func update_wonder_settlement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     token_id : Uint256
 ):
     alloc_locals
-    MODULE_only_approved()
+    Module.only_approved()
     update_epoch_pool()
 
-    let (controller) = MODULE_controller_address()
+    let (controller) = Module.controller_address()
 
     # calculator logic contract
     let (calculator_address) = IModuleController.get_module_address(
@@ -175,7 +168,7 @@ func claim_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     alloc_locals
     update_epoch_pool()
     let (caller) = get_caller_address()
-    let (controller) = MODULE_controller_address()
+    let (controller) = Module.controller_address()
 
     let (s_realms_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.S_Realms
@@ -215,7 +208,7 @@ func loop_epochs_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
         return ()
     end
 
-    let (controller) = MODULE_controller_address()
+    let (controller) = Module.controller_address()
 
     let (epoch_upkept) = get_wonder_epoch_upkeep(claiming_epoch, token_id)
     if epoch_upkept == 1:
@@ -296,7 +289,7 @@ end
 # Recurses for every epoch that passed since last update
 func update_epoch_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     alloc_locals
-    let (controller) = MODULE_controller_address()
+    let (controller) = Module.controller_address()
 
     let (calculator_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.L04_Calculator
@@ -372,7 +365,7 @@ func batch_set_tax_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     amounts : felt*,
 ):
     alloc_locals
-    MODULE_only_approved()
+    Module.only_approved()
     # Update tax pool
     if resource_ids_len == 0:
         return ()

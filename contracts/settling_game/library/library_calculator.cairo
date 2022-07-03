@@ -17,7 +17,7 @@ from contracts.settling_game.utils.game_structs import (
     BuildingsFood,
     BuildingsPopulation,
 )
-namespace CALCULATOR:
+namespace Calculator:
     func calculate_happiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         population : felt, food : felt
     ) -> (happiness : felt):

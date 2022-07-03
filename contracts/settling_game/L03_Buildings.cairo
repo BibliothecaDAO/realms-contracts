@@ -1,7 +1,9 @@
+# -----------------------------------
 # ____MODULE_L03___BUILDING_LOGIC
 #   Manages all buildings in game. Responsible for construction of buildings.
 #
 # MIT License
+# -----------------------------------
 
 %lang starknet
 
@@ -11,6 +13,10 @@ from starkware.cairo.common.math import assert_not_zero
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
+
+from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
+from openzeppelin.upgrades.library import Proxy
+
 from contracts.settling_game.library.library_buildings import Buildings
 from contracts.settling_game.utils.general import unpack_data, transform_costs_to_token_ids_values
 from contracts.settling_game.utils.game_structs import (
@@ -23,26 +29,11 @@ from contracts.settling_game.utils.game_structs import (
     PackedBuildings,
 )
 
-from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
-
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
-from contracts.settling_game.interfaces.imodules import IModuleController
 
-from contracts.settling_game.library.library_module import (
-    MODULE_controller_address,
-    MODULE_only_approved,
-    MODULE_initializer,
-    MODULE_only_arbiter,
-    MODULE_ERC721_owner_check,
-)
-
-from openzeppelin.upgrades.library import (
-    Proxy_initializer,
-    Proxy_only_admin,
-    Proxy_set_implementation,
-)
+from contracts.settling_game.library.library_module import Module
 
 # -----------------------------------
 # Events
@@ -76,32 +67,42 @@ end
 func buildings_integrity(token_id : Uint256) -> (integrity : PackedBuildings):
 end
 
-###############
-# CONSTRUCTOR #
-###############
+# -----------------------------------
+# Initialize & upgrade
+# -----------------------------------
 
+# @notice Module initializer
+# @param address_of_controller: Controller/arbiter address
+# @return proxy_admin: Proxy admin address
 @external
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     address_of_controller : felt, proxy_admin : felt
 ):
-    MODULE_initializer(address_of_controller)
-    Proxy_initializer(proxy_admin)
+    Module.initializer(address_of_controller)
+    Proxy.initializer(proxy_admin)
     return ()
 end
 
+# @notice Set new proxy implementation
+# @dev Can only be set by the arbiter
+# @param new_implementation: New implementation contract address
 @external
 func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     new_implementation : felt
 ):
-    Proxy_only_admin()
-    Proxy_set_implementation(new_implementation)
+    Proxy.assert_only_admin()
+    Proxy._set_implementation_hash(new_implementation)
     return ()
 end
 
-############
-# EXTERNAL #
-############
+# -----------------------------------
+# External
+# -----------------------------------
 
+# @notice Build building on a realm
+# @param token_id: Staked realm token id
+# @param building_id: Building id
+# @return success: Returns TRUE when successfull
 @external
 func build{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
@@ -109,19 +110,14 @@ func build{
     alloc_locals
 
     let (caller) = get_caller_address()
-    let (controller) = MODULE_controller_address()
+    let (controller) = Module.controller_address()
 
     # AUTH
-    MODULE_ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
+    Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
 
     # EXTERNAL ADDRESSES
-    let (realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Realms
-    )
-
-    let (resource_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Resources
-    )
+    let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
+    let (resource_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
 
     # Get Realm Data
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
@@ -159,6 +155,13 @@ func build{
     return (TRUE)
 end
 
+# -----------------------------------
+# INTERNAL
+# -----------------------------------
+
+# @notice Build buildings
+# @param token_id: Staked realm token id
+# @param building_id: Building id
 func build_buildings{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
 }(token_id : Uint256, building_id : felt, quantity : felt, realms_data : RealmData):
@@ -191,9 +194,9 @@ func build_buildings{
     return ()
 end
 
-###########
-# GETTERS #
-###########
+# -----------------------------------
+# Getters
+# -----------------------------------
 
 # TODO: Deprecate or keep? It is a permanent record of how many buildings have been built
 @view
@@ -237,9 +240,7 @@ func get_buildings_integrity_unpacked{
 
     let (buildings_) = buildings_integrity.read(token_id)
 
-    let (unpacked_buildings : RealmBuildings) = Buildings.unpack_buildings(buildings_)
-
-    return (unpacked_buildings)
+    return Buildings.unpack_buildings(buildings_)
 end
 
 @view
@@ -311,16 +312,16 @@ func get_building_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : Hash
     return (cost, lords)
 end
 
-#########
-# ADMIN #
-#########
+# -----------------------------------
+# Admin
+# -----------------------------------
 
 @external
 func set_building_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     building_id : felt, cost : Cost, lords : Uint256
 ):
     # TODO: range checks on the cost struct
-    Proxy_only_admin()
+    Proxy.assert_only_admin()
     building_cost.write(building_id, cost)
     building_lords_cost.write(building_id, lords)
     return ()

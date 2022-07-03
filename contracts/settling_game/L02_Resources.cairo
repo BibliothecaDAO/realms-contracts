@@ -12,6 +12,11 @@ from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
+from starkware.cairo.common.bool import TRUE, FALSE
+
+from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
+from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
+from openzeppelin.upgrades.library import Proxy
 
 from contracts.settling_game.utils.game_structs import (
     RealmData,
@@ -19,11 +24,8 @@ from contracts.settling_game.utils.game_structs import (
     ExternalContractIds,
     Cost,
 )
-from contracts.settling_game.utils.general import transform_costs_to_token_ids_values
 
 from contracts.settling_game.utils.constants import (
-    TRUE,
-    FALSE,
     VAULT_LENGTH,
     DAY,
     BASE_RESOURCES_PER_DAY,
@@ -31,31 +33,11 @@ from contracts.settling_game.utils.constants import (
     PILLAGE_AMOUNT,
     MAX_DAYS_ACCURED,
 )
-from contracts.settling_game.library.library_module import (
-    MODULE_controller_address,
-    MODULE_only_approved,
-    MODULE_initializer,
-    MODULE_only_arbiter,
-    MODULE_ERC721_owner_check,
-)
 
-from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
-from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
+from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
-from contracts.settling_game.interfaces.imodules import (
-    IModuleController,
-    IL01_Settling,
-    IL04_Calculator,
-    IL05_Wonders,
-)
-
-from openzeppelin.upgrades.library import (
-    Proxy_initializer,
-    Proxy_only_admin,
-    Proxy_set_implementation,
-)
-
+from contracts.settling_game.interfaces.imodules import IL01_Settling, IL04_Calculator, IL05_Wonders
 from contracts.settling_game.library.library_resources import Resources
 
 # -----------------------------------
@@ -78,69 +60,62 @@ end
 func resource_upgrade_cost(resource_id : felt) -> (cost : Cost):
 end
 
-###############
-# CONSTRUCTOR #
-###############
+# -----------------------------------
+# INITIALIZER & UPGRADE
+# -----------------------------------
 
+# @notice Module initializer
+# @param address_of_controller: Controller/arbiter address
+# @proxy_admin: Proxy admin address
 @external
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     address_of_controller : felt, proxy_admin : felt
 ):
-    MODULE_initializer(address_of_controller)
-    Proxy_initializer(proxy_admin)
+    Module.initializer(address_of_controller)
+    Proxy.initializer(proxy_admin)
     return ()
 end
 
+# @notice Set new proxy implementation
+# @dev Can only be set by the arbiter
+# @param new_implementation: New implementation contract address
 @external
 func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     new_implementation : felt
 ):
-    Proxy_only_admin()
-    Proxy_set_implementation(new_implementation)
+    Proxy.assert_only_admin()
+    Proxy._set_implementation_hash(new_implementation)
     return ()
 end
 
-############
-# EXTERNAL #
-############
+# -----------------------------------
+# EXTERNAL
+# -----------------------------------
 
+# @notice Claim available resources
+# @token_id: Staked realm token id
 @external
 func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
 ):
     alloc_locals
     let (caller) = get_caller_address()
-    let (controller) = MODULE_controller_address()
 
     # CONTRACT ADDRESSES
-    let (realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Realms
-    )
-    let (s_realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.S_Realms
-    )
-    let (resources_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Resources
-    )
-    let (settling_logic_address) = IModuleController.get_module_address(
-        controller, ModuleIds.L01_Settling
-    )
-    let (calculator_address) = IModuleController.get_module_address(
-        controller, ModuleIds.L04_Calculator
-    )
-    let (treasury_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Treasury
-    )
-    let (wonders_logic_address) = IModuleController.get_module_address(
-        controller, ModuleIds.L05_Wonders
-    )
+    let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
+    let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms)
+    let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
+    let (settling_logic_address) = Module.get_module_address(ModuleIds.L01_Settling)
+    let (calculator_address) = Module.get_module_address(ModuleIds.L04_Calculator)
+    let (treasury_address) = Module.get_external_contract_address(ExternalContractIds.Treasury)
+    let (wonders_logic_address) = Module.get_module_address(ModuleIds.L05_Wonders)
 
     # FETCH OWNER
     let (owner) = IERC721.ownerOf(s_realms_address, token_id)
 
     # ALLOW RESOURCE LOGIC ADDRESS TO CLAIM, BUT STILL RESTRICT
     if caller != settling_logic_address:
-        MODULE_ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
+        Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
         tempvar syscall_ptr = syscall_ptr
         tempvar range_check_ptr = range_check_ptr
         tempvar pedersen_ptr = pedersen_ptr
@@ -225,36 +200,29 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     return ()
 end
 
+# @notice Pillage resources after a succesful raid
+# @param token_id: Staked realm id
+# @param claimer: Resource receiver address
 @external
 func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256, claimer : felt
 ):
     alloc_locals
     let (caller) = get_caller_address()
-    let (controller) = MODULE_controller_address()
 
     # ONLY COMBAT CAN CALL
-    let (combat_address) = IModuleController.get_module_address(controller, ModuleIds.L06_Combat)
+    let (combat_address) = Module.get_module_address(ModuleIds.L06_Combat)
+
     with_attr error_message("RESOURCES: ONLY COMBAT MODULE CAN CALL"):
         assert caller = combat_address
     end
 
     # EXTERNAL CONTRACTS
-    let (realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Realms
-    )
-    let (s_realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.S_Realms
-    )
-    let (resources_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Resources
-    )
-    let (settling_logic_address) = IModuleController.get_module_address(
-        controller, ModuleIds.L01_Settling
-    )
-    let (calculator_address) = IModuleController.get_module_address(
-        controller, ModuleIds.L04_Calculator
-    )
+    let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
+    let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms)
+    let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
+    let (settling_logic_address) = Module.get_module_address(ModuleIds.L01_Settling)
+    let (calculator_address) = Module.get_module_address(ModuleIds.L04_Calculator)
 
     # FETCH REALM DATA
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
@@ -291,21 +259,22 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     return ()
 end
 
-###########
-# GETTERS #
-###########
+# -----------------------------------
+# GETTERS
+# -----------------------------------
 
-# FETCHES AVAILABLE RESOURCES PER DAY
+# @notice Gets the number of accrued days
+# @param token_id: Staked realm token id
+# @return days_accrued: Number of days accrued
+# @return remainder: Time remainder after division in seconds
 @view
 func days_accrued{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
 ) -> (days_accrued : felt, remainder : felt):
     alloc_locals
-    let (controller) = MODULE_controller_address()
+
     let (block_timestamp) = get_block_timestamp()
-    let (settling_logic_address) = IModuleController.get_module_address(
-        controller, ModuleIds.L01_Settling
-    )
+    let (settling_logic_address) = Module.get_module_address(ModuleIds.L01_Settling)
 
     # GET DAYS ACCRUED
     let (last_update) = IL01_Settling.get_time_staked(settling_logic_address, token_id)
@@ -320,18 +289,18 @@ func days_accrued{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     return (MAX_DAYS_ACCURED, seconds_left_over)
 end
 
-# CALCS VAULTS DAYS ACCRUED
-# USED AS HELPER FUNCTION AND IN PILLAGING
+# @notice Gets the number of accrued days for the vault
+# @param token_id: Staked realm token id
+# @return days_accrued: Number of days accrued for the vault
+# @return remainder: Time remainder after division in seconds
 @view
 func vault_days_accrued{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
 ) -> (days_accrued : felt, remainder : felt):
     alloc_locals
-    let (controller) = MODULE_controller_address()
+
     let (block_timestamp) = get_block_timestamp()
-    let (settling_logic_address) = IModuleController.get_module_address(
-        controller, ModuleIds.L01_Settling
-    )
+    let (settling_logic_address) = Module.get_module_address(ModuleIds.L01_Settling)
 
     # GET DAYS ACCRUED
     let (last_update) = IL01_Settling.get_time_vault_staked(settling_logic_address, token_id)
@@ -340,8 +309,11 @@ func vault_days_accrued{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     return (days_accrued, seconds_left_over)
 end
 
-# FETCHES VAULT DAYS AVAILABLE FOR REALM OWNER ONLY
-# ONLY RETURNS VALUE IF DAYS ARE OVER EPOCH LENGTH - SET TO 7 DAY CYCLES
+# @notice Fetches vault days available for realm owner only
+# @dev Only returns value if days are over epoch length - set to 7 day cycles
+# @param token_id: Staked realm token id
+# @return days_accrued: Number of days accrued
+# @return remainder: Remaining seconds
 @view
 func get_available_vault_days{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
@@ -363,7 +335,9 @@ func get_available_vault_days{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     return (days_accrued, seconds_left_over)
 end
 
-# CLAIM CHECK
+# @notice check if resources are claimable
+# @param token_id: Staked realm token id
+# @return can_claim: Return if resources can be claimed
 @view
 func check_if_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
@@ -384,25 +358,21 @@ func check_if_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     return (TRUE)
 end
 
-###########
-# GETTERS #
-###########
-
+# @notice Calculate all claimable resources
+# @param token_id: Staked realms token id
+# @return user_mint_len: Lenght of user_mint
+# @return user_mint: List of users to mint to
+# @return lords_available: Available lord tokens
 @view
 func get_all_resource_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
 ) -> (user_mint_len : felt, user_mint : Uint256*):
     alloc_locals
     let (caller) = get_caller_address()
-    let (controller) = MODULE_controller_address()
 
     # CONTRACT ADDRESSES
-    let (realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Realms
-    )
-    let (calculator_address) = IModuleController.get_module_address(
-        controller, ModuleIds.L04_Calculator
-    )
+    let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
+    let (calculator_address) = Module.get_module_address(ModuleIds.L04_Calculator)
 
     # FETCH REALM DATA
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
@@ -438,12 +408,9 @@ func get_all_vault_raidable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ra
 ) -> (user_mint_len : felt, user_mint : Uint256*):
     alloc_locals
     let (caller) = get_caller_address()
-    let (controller) = MODULE_controller_address()
 
     # CONTRACT ADDRESSES
-    let (realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Realms
-    )
+    let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
 
     # FETCH REALM DATA
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
@@ -519,7 +486,7 @@ end
 #     end
 
 # let (caller) = get_caller_address()
-#     let (controller) = MODULE_controller_address()
+#     let (controller) = Module.controller_address()
 
 # # CONTRACT ADDRESSES
 #     let (resource_address) = IModuleController.get_external_contract_address(
@@ -527,7 +494,7 @@ end
 #     )
 
 # # AUTH
-#     MODULE_ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
+#     Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
 
 # # GET RESOURCE LEVEL
 #     let (level) = get_resource_level(token_id, resource_id)
