@@ -1,7 +1,9 @@
+# -----------------------------------
 # ____MODULE_L03___BUILDING_LOGIC
 #   Manages all buildings in game. Responsible for construction of buildings.
 #
 # MIT License
+# -----------------------------------
 
 %lang starknet
 
@@ -9,9 +11,13 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math import assert_not_zero
 from starkware.cairo.common.alloc import alloc
-from starkware.starknet.common.syscalls import get_caller_address
+from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
 
+from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
+from openzeppelin.upgrades.library import Proxy
+
+from contracts.settling_game.library.library_buildings import Buildings
 from contracts.settling_game.utils.general import unpack_data, transform_costs_to_token_ids_values
 from contracts.settling_game.utils.game_structs import (
     RealmBuildings,
@@ -20,63 +26,30 @@ from contracts.settling_game.utils.game_structs import (
     ModuleIds,
     ExternalContractIds,
     Cost,
-)
-
-from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
-
-from contracts.settling_game.utils.constants import (
-    SHIFT_6_1,
-    SHIFT_6_2,
-    SHIFT_6_3,
-    SHIFT_6_4,
-    SHIFT_6_5,
-    SHIFT_6_6,
-    SHIFT_6_7,
-    SHIFT_6_8,
-    SHIFT_6_9,
-    SHIFT_6_10,
-    SHIFT_6_11,
-    SHIFT_6_12,
-    SHIFT_6_13,
-    SHIFT_6_14,
-    SHIFT_6_15,
-    SHIFT_6_16,
-    SHIFT_6_17,
-    SHIFT_6_18,
-    SHIFT_6_19,
-    SHIFT_6_20,
+    PackedBuildings,
 )
 
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
-from contracts.settling_game.interfaces.imodules import IModuleController
 
-from contracts.settling_game.library.library_module import (
-    MODULE_controller_address,
-    MODULE_only_approved,
-    MODULE_initializer,
-    MODULE_only_arbiter,
-    MODULE_ERC721_owner_check,
-)
+from contracts.settling_game.library.library_module import Module
 
-from openzeppelin.upgrades.library import (
-    Proxy_initializer,
-    Proxy_only_admin,
-    Proxy_set_implementation,
-)
-
-##########
-# EVENTS #
-##########
+# -----------------------------------
+# Events
+# -----------------------------------
 
 @event
 func BuildingBuilt(token_id : Uint256, building_id : felt):
 end
 
-###########
-# STORAGE #
-###########
+@event
+func BuildingIntegrity(token_id : Uint256, building_id : felt, building_integrity : felt):
+end
+
+# -----------------------------------
+# Storage
+# -----------------------------------
 
 @storage_var
 func realm_buildings(token_id : Uint256) -> (buildings : felt):
@@ -90,401 +63,244 @@ end
 func building_lords_cost(building_id : felt) -> (lords : Uint256):
 end
 
-###############
-# CONSTRUCTOR #
-###############
+@storage_var
+func buildings_integrity(token_id : Uint256) -> (integrity : PackedBuildings):
+end
 
+# -----------------------------------
+# Initialize & upgrade
+# -----------------------------------
+
+# @notice Module initializer
+# @param address_of_controller: Controller/arbiter address
+# @return proxy_admin: Proxy admin address
 @external
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     address_of_controller : felt, proxy_admin : felt
 ):
-    MODULE_initializer(address_of_controller)
-    Proxy_initializer(proxy_admin)
+    Module.initializer(address_of_controller)
+    Proxy.initializer(proxy_admin)
     return ()
 end
 
+# @notice Set new proxy implementation
+# @dev Can only be set by the arbiter
+# @param new_implementation: New implementation contract address
 @external
 func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     new_implementation : felt
 ):
-    Proxy_only_admin()
-    Proxy_set_implementation(new_implementation)
+    Proxy.assert_only_admin()
+    Proxy._set_implementation_hash(new_implementation)
     return ()
 end
 
-############
-# EXTERNAL #
-############
+# -----------------------------------
+# External
+# -----------------------------------
 
+# @notice Build building on a realm
+# @param token_id: Staked realm token id
+# @param building_id: Building id
+# @return success: Returns TRUE when successfull
 @external
 func build{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-}(token_id : Uint256, building_id : felt) -> (success : felt):
+}(token_id : Uint256, building_id : felt, quantity : felt) -> (success : felt):
     alloc_locals
 
     let (caller) = get_caller_address()
-    let (controller) = MODULE_controller_address()
+    let (controller) = Module.controller_address()
 
     # AUTH
-    MODULE_ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
+    Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
 
     # EXTERNAL ADDRESSES
-    let (realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Realms
-    )
-    let (lords_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Lords
-    )
-    let (treasury_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Treasury
-    )
-    let (resource_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Resources
-    )
+    let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
+    let (resource_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
 
-    # REALMS DATA
+    # Get Realm Data
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
         contract_address=realms_address, token_id=token_id
     )
 
-    # BUILD
-    build_buildings(token_id, building_id)
+    let (realm_buildings_integrity : RealmBuildings) = get_buildings_integrity_unpacked(token_id)
+
+    # Check Area, revert if no space available
+    let (can_build) = Buildings.can_build(
+        building_id, quantity, realm_buildings_integrity, realms_data.cities, realms_data.regions
+    )
+
+    with_attr error_message("Buildings: building size greater than buildable area"):
+        assert_not_zero(can_build)
+    end
+
+    # Build buildings and set state
+    build_buildings(token_id, building_id, quantity, realms_data)
 
     # GET BUILDING COSTS
+    # TODO: Add exponential cost function into X buildings
+    # @milan
     let (building_cost : Cost, lords : Uint256) = get_building_cost(building_id)
 
-    let (costs : Cost*) = alloc()
-    assert [costs] = building_cost
-    let (token_ids : Uint256*) = alloc()
-    let (token_values : Uint256*) = alloc()
-    let (token_len : felt) = transform_costs_to_token_ids_values(1, costs, token_ids, token_values)
+    let (token_len, token_ids, token_values) = Buildings.calculate_building_cost(building_cost)
 
     # BURN RESOURCES
     IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
 
-    # TRANSFER LORDS
-    # IERC20.transfer(lords_address, treasury_address, lords)
-
     # EMIT
+    # TODO: Emit left, do calculation in client
     BuildingBuilt.emit(token_id, building_id)
 
     return (TRUE)
 end
 
+# -----------------------------------
+# INTERNAL
+# -----------------------------------
+
+# @notice Build buildings
+# @param token_id: Staked realm token id
+# @param building_id: Building id
 func build_buildings{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-}(token_id : Uint256, building_id : felt):
+}(token_id : Uint256, building_id : felt, quantity : felt, realms_data : RealmData):
     alloc_locals
 
-    let (controller) = MODULE_controller_address()
+    let (block_timestamp) = get_block_timestamp()
 
-    # REALMS ADDRESS
-    let (realms_address) = IModuleController.get_external_contract_address(
-        controller, ExternalContractIds.Realms
+    # calculate time to add
+    let (time_to_add) = Buildings.get_integrity_length(block_timestamp, building_id, quantity)
+
+    # get unpacked buildings integrity
+    let (current_buildings_integrity_unpacked) = get_buildings_integrity_unpacked(token_id)
+
+    # set integrity for adjusted buildings
+    let (updated_buildings_unpacked) = Buildings.add_time_to_buildings(
+        current_buildings_integrity_unpacked, building_id, block_timestamp, time_to_add
     )
 
-    # REALMS DATA
-    let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(
-        contract_address=realms_address, token_id=token_id
-    )
+    # pack buildings
+    let (updated_buildings_integrity) = Buildings.pack_buildings(updated_buildings_unpacked)
 
-    # GET CURRENT BUILDINGS
-    let (current_buildings : RealmBuildings) = get_buildings_unpacked(token_id)
+    # Save new packed buildings
+    buildings_integrity.write(token_id, updated_buildings_integrity)
 
-    let (buildings : felt*) = alloc()
+    let (updated_time_emit) = Buildings.get_unpacked_value(updated_buildings_unpacked, building_id)
 
-    if building_id == RealmBuildingsIds.Fairgrounds:
-        # CHECK SPACE
-        if current_buildings.Fairgrounds == realms_data.regions:
-            assert_not_zero(0)
-        end
-        local id_1 = (current_buildings.Fairgrounds + 1) * SHIFT_6_1
-        buildings[0] = id_1
-    else:
-        buildings[0] = current_buildings.Fairgrounds * SHIFT_6_1
-    end
+    # Emit Building Integrity
+    BuildingIntegrity.emit(token_id, building_id, updated_time_emit)
 
-    if building_id == RealmBuildingsIds.RoyalReserve:
-        if current_buildings.RoyalReserve == realms_data.regions:
-            assert_not_zero(0)
-        end
-        local id_2 = (current_buildings.RoyalReserve + 1) * SHIFT_6_2
-        buildings[1] = id_2
-    else:
-        local id_2 = current_buildings.RoyalReserve * SHIFT_6_2
-        buildings[1] = id_2
-    end
-
-    if building_id == RealmBuildingsIds.GrandMarket:
-        if current_buildings.GrandMarket == realms_data.regions:
-            assert_not_zero(0)
-        end
-        local id_3 = (current_buildings.GrandMarket + 1) * SHIFT_6_3
-        buildings[2] = id_3
-    else:
-        local id_3 = current_buildings.GrandMarket * SHIFT_6_3
-        buildings[2] = id_3
-    end
-
-    if building_id == RealmBuildingsIds.Castle:
-        if current_buildings.Castle == realms_data.regions:
-            assert_not_zero(0)
-        end
-        local id_4 = (current_buildings.Castle + 1) * SHIFT_6_4
-        buildings[3] = id_4
-    else:
-        local id_4 = current_buildings.Castle * SHIFT_6_4
-        buildings[3] = id_4
-    end
-
-    if building_id == RealmBuildingsIds.Guild:
-        if current_buildings.Guild == realms_data.regions:
-            assert_not_zero(0)
-        end
-        local id_5 = (current_buildings.Guild + 1) * SHIFT_6_5
-        buildings[4] = id_5
-    else:
-        local id_5 = current_buildings.Guild * SHIFT_6_5
-        buildings[4] = id_5
-    end
-
-    if building_id == RealmBuildingsIds.OfficerAcademy:
-        if current_buildings.OfficerAcademy == realms_data.regions:
-            assert_not_zero(0)
-        end
-        local id_6 = (current_buildings.OfficerAcademy + 1) * SHIFT_6_6
-        buildings[5] = id_6
-    else:
-        local id_6 = current_buildings.OfficerAcademy * SHIFT_6_6
-        buildings[5] = id_6
-    end
-
-    if building_id == RealmBuildingsIds.Granary:
-        if current_buildings.Granary == realms_data.cities:
-            assert_not_zero(0)
-        end
-        local id_7 = (current_buildings.Granary + 1) * SHIFT_6_7
-        buildings[6] = id_7
-    else:
-        local id_7 = current_buildings.Granary * SHIFT_6_7
-        buildings[6] = id_7
-    end
-
-    if building_id == RealmBuildingsIds.Housing:
-        if current_buildings.Housing == realms_data.cities:
-            assert_not_zero(0)
-        end
-        local id_8 = (current_buildings.Housing + 1) * SHIFT_6_8
-        buildings[7] = id_8
-    else:
-        local id_8 = current_buildings.Housing * SHIFT_6_8
-        buildings[7] = id_8
-    end
-
-    if building_id == RealmBuildingsIds.Amphitheater:
-        if current_buildings.Amphitheater == realms_data.cities:
-            assert_not_zero(0)
-        end
-        local id_9 = (current_buildings.Amphitheater + 1) * SHIFT_6_9
-        buildings[8] = id_9
-    else:
-        local id_9 = current_buildings.Amphitheater * SHIFT_6_9
-        buildings[8] = id_9
-    end
-
-    if building_id == RealmBuildingsIds.ArcherTower:
-        if current_buildings.ArcherTower == realms_data.cities:
-            assert_not_zero(0)
-        end
-        local id_10 = (current_buildings.ArcherTower + 1) * SHIFT_6_10
-        buildings[9] = id_10
-    else:
-        local id_10 = current_buildings.ArcherTower * SHIFT_6_10
-        buildings[9] = id_10
-    end
-
-    if building_id == RealmBuildingsIds.School:
-        if current_buildings.School == realms_data.cities:
-            assert_not_zero(0)
-        end
-        local id_11 = (current_buildings.School + 1) * SHIFT_6_11
-        buildings[10] = id_11
-    else:
-        local id_11 = current_buildings.School * SHIFT_6_11
-        buildings[10] = id_11
-    end
-
-    if building_id == RealmBuildingsIds.MageTower:
-        if current_buildings.MageTower == realms_data.cities:
-            assert_not_zero(0)
-        end
-        local id_12 = (current_buildings.MageTower + 1) * SHIFT_6_12
-        buildings[11] = id_12
-    else:
-        local id_12 = current_buildings.MageTower * SHIFT_6_12
-        buildings[11] = id_12
-    end
-
-    if building_id == RealmBuildingsIds.TradeOffice:
-        if current_buildings.TradeOffice == realms_data.cities:
-            assert_not_zero(0)
-        end
-        local id_13 = (current_buildings.TradeOffice + 1) * SHIFT_6_13
-        buildings[12] = id_13
-    else:
-        local id_13 = current_buildings.TradeOffice * SHIFT_6_13
-        buildings[12] = id_13
-    end
-
-    if building_id == RealmBuildingsIds.Architect:
-        if current_buildings.Architect == realms_data.cities:
-            assert_not_zero(0)
-        end
-        local id_14 = (current_buildings.Architect + 1) * SHIFT_6_14
-        buildings[13] = id_14
-    else:
-        local id_14 = current_buildings.Architect * SHIFT_6_14
-        buildings[13] = id_14
-    end
-
-    if building_id == RealmBuildingsIds.ParadeGrounds:
-        if current_buildings.ParadeGrounds == realms_data.cities:
-            assert_not_zero(0)
-        end
-        local id_15 = (current_buildings.ParadeGrounds + 1) * SHIFT_6_15
-        buildings[14] = id_15
-    else:
-        local id_15 = current_buildings.ParadeGrounds * SHIFT_6_15
-        buildings[14] = id_15
-    end
-
-    if building_id == RealmBuildingsIds.Barracks:
-        if current_buildings.Barracks == realms_data.cities:
-            assert_not_zero(0)
-        end
-        local id_16 = (current_buildings.Barracks + 1) * SHIFT_6_16
-        buildings[15] = id_16
-    else:
-        local id_16 = current_buildings.Barracks * SHIFT_6_16
-        buildings[15] = id_16
-    end
-
-    if building_id == RealmBuildingsIds.Dock:
-        if current_buildings.Dock == realms_data.harbours:
-            assert_not_zero(0)
-        end
-        local id_17 = (current_buildings.Dock + 1) * SHIFT_6_17
-        buildings[16] = id_17
-    else:
-        local id_17 = current_buildings.Dock * SHIFT_6_17
-        buildings[16] = id_17
-    end
-
-    if building_id == RealmBuildingsIds.Fishmonger:
-        if current_buildings.Fishmonger == realms_data.harbours:
-            assert_not_zero(0)
-        end
-        local id_18 = (current_buildings.Fishmonger + 1) * SHIFT_6_18
-        buildings[17] = id_18
-    else:
-        local id_18 = current_buildings.Fishmonger * SHIFT_6_18
-        buildings[17] = id_18
-    end
-
-    if building_id == RealmBuildingsIds.Farms:
-        if current_buildings.Farms == realms_data.rivers:
-            assert_not_zero(0)
-        end
-        local id_19 = (current_buildings.Farms + 1) * SHIFT_6_19
-        buildings[18] = id_19
-    else:
-        local id_19 = current_buildings.Farms * SHIFT_6_19
-        buildings[18] = id_19
-    end
-
-    if building_id == RealmBuildingsIds.Hamlet:
-        if current_buildings.Hamlet == realms_data.rivers:
-            assert_not_zero(0)
-        end
-        local id_20 = (current_buildings.Hamlet + 1) * SHIFT_6_20
-        buildings[19] = id_20
-    else:
-        local id_20 = current_buildings.Hamlet * SHIFT_6_20
-        buildings[19] = id_20
-    end
-
-    tempvar value = buildings[19] + buildings[18] + buildings[17] + buildings[16] + buildings[15] + buildings[14] + buildings[13] + buildings[12] + buildings[11] + buildings[10] + buildings[9] + buildings[8] + buildings[7] + buildings[6] + buildings[5] + buildings[4] + buildings[3] + buildings[2] + buildings[1] + buildings[0]
-
-    realm_buildings.write(token_id, value)
     return ()
 end
 
-###########
-# GETTERS #
-###########
+# -----------------------------------
+# Getters
+# -----------------------------------
 
+# TODO: Deprecate or keep? It is a permanent record of how many buildings have been built
 @view
 func get_buildings_unpacked{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
 }(token_id : Uint256) -> (realm_buildings : RealmBuildings):
     alloc_locals
 
-    let (data) = get_realm_buildings(token_id)
+    let (data) = get_storage_realm_buildings(token_id)
 
-    let (Fairgrounds) = unpack_data(data, 0, 63)
-    let (RoyalReserve) = unpack_data(data, 6, 63)
-    let (GrandMarket) = unpack_data(data, 12, 63)
-    let (Castle) = unpack_data(data, 18, 63)
-    let (Guild) = unpack_data(data, 24, 63)
-    let (OfficerAcademy) = unpack_data(data, 30, 63)
-    let (Granary) = unpack_data(data, 36, 63)
-    let (Housing) = unpack_data(data, 42, 63)
-    let (Amphitheater) = unpack_data(data, 48, 63)
-    let (ArcherTower) = unpack_data(data, 54, 63)
-    let (School) = unpack_data(data, 60, 63)
-    let (MageTower) = unpack_data(data, 66, 63)
-    let (TradeOffice) = unpack_data(data, 72, 63)
-    let (Architect) = unpack_data(data, 78, 63)
-    let (ParadeGrounds) = unpack_data(data, 84, 63)
-    let (Barracks) = unpack_data(data, 90, 63)
-    let (Dock) = unpack_data(data, 96, 63)
-    let (Fishmonger) = unpack_data(data, 102, 63)
-    let (Farms) = unpack_data(data, 108, 63)
-    let (Hamlet) = unpack_data(data, 114, 63)
+    let (House) = unpack_data(data, 0, 63)
+    let (StoreHouse) = unpack_data(data, 6, 63)
+    let (Granary) = unpack_data(data, 12, 63)
+    let (Farm) = unpack_data(data, 18, 63)
+    let (FishingVillage) = unpack_data(data, 24, 63)
+    let (Barracks) = unpack_data(data, 30, 63)
+    let (MageTower) = unpack_data(data, 36, 63)
+    let (ArcherTower) = unpack_data(data, 42, 63)
+    let (Castle) = unpack_data(data, 48, 63)
 
     return (
         realm_buildings=RealmBuildings(
-        Fairgrounds=Fairgrounds,
-        RoyalReserve=RoyalReserve,
-        GrandMarket=GrandMarket,
-        Castle=Castle,
-        Guild=Guild,
-        OfficerAcademy=OfficerAcademy,
+        House=House,
+        StoreHouse=StoreHouse,
         Granary=Granary,
-        Housing=Housing,
-        Amphitheater=Amphitheater,
-        ArcherTower=ArcherTower,
-        School=School,
-        MageTower=MageTower,
-        TradeOffice=TradeOffice,
-        Architect=Architect,
-        ParadeGrounds=ParadeGrounds,
+        Farm=Farm,
+        FishingVillage=FishingVillage,
         Barracks=Barracks,
-        Dock=Dock,
-        Fishmonger=Fishmonger,
-        Farms=Farms,
-        Hamlet=Hamlet
+        MageTower=MageTower,
+        ArcherTower=ArcherTower,
+        Castle=Castle
         ),
     )
 end
 
 @view
-func get_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+func get_buildings_integrity_unpacked{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(token_id : Uint256) -> (realm_buildings : RealmBuildings):
+    alloc_locals
+
+    let (buildings_) = buildings_integrity.read(token_id)
+
+    return Buildings.unpack_buildings(buildings_)
+end
+
+@view
+func get_effective_buildings{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(token_id : Uint256) -> (realm_buildings : RealmBuildings):
+    alloc_locals
+
+    let (functional_buildings : RealmBuildings) = get_buildings_integrity_unpacked(token_id)
+
+    let (block_timestamp) = get_block_timestamp()
+
+    let (House) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.House, functional_buildings.House, block_timestamp
+    )
+    let (StoreHouse) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.StoreHouse, functional_buildings.StoreHouse, block_timestamp
+    )
+    let (Granary) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.Granary, functional_buildings.Granary, block_timestamp
+    )
+    let (Farm) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.Farm, functional_buildings.Farm, block_timestamp
+    )
+    let (FishingVillage) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.FishingVillage, functional_buildings.FishingVillage, block_timestamp
+    )
+    let (Barracks) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.Barracks, functional_buildings.Barracks, block_timestamp
+    )
+    let (MageTower) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.MageTower, functional_buildings.MageTower, block_timestamp
+    )
+    let (ArcherTower) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.ArcherTower, functional_buildings.ArcherTower, block_timestamp
+    )
+    let (Castle) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.Castle, functional_buildings.Castle, block_timestamp
+    )
+
+    return (
+        realm_buildings=RealmBuildings(
+        House=House,
+        StoreHouse=StoreHouse,
+        Granary=Granary,
+        Farm=Farm,
+        FishingVillage=FishingVillage,
+        Barracks=Barracks,
+        MageTower=MageTower,
+        ArcherTower=ArcherTower,
+        Castle=Castle
+        ),
+    )
+end
+
+@view
+func get_storage_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
 ) -> (buildings : felt):
-    let (buildings) = realm_buildings.read(token_id)
-
-    return (buildings)
+    return realm_buildings.read(token_id)
 end
 
 @view
@@ -496,16 +312,16 @@ func get_building_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : Hash
     return (cost, lords)
 end
 
-#########
-# ADMIN #
-#########
+# -----------------------------------
+# Admin
+# -----------------------------------
 
 @external
 func set_building_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     building_id : felt, cost : Cost, lords : Uint256
 ):
     # TODO: range checks on the cost struct
-    Proxy_only_admin()
+    Proxy.assert_only_admin()
     building_cost.write(building_id, cost)
     building_lords_cost.write(building_id, lords)
     return ()

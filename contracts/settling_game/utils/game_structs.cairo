@@ -31,164 +31,124 @@ struct RealmData:
 end
 
 struct RealmBuildings:
-    member Fairgrounds : felt
-    member RoyalReserve : felt
-    member GrandMarket : felt
-    member Castle : felt
-    member Guild : felt
-    member OfficerAcademy : felt
+    member House : felt
+    member StoreHouse : felt
     member Granary : felt
-    member Housing : felt
-    member Amphitheater : felt
-    member ArcherTower : felt
-    member School : felt
-    member MageTower : felt
-    member TradeOffice : felt
-    member Architect : felt
-    member ParadeGrounds : felt
+    member Farm : felt
+    member FishingVillage : felt
     member Barracks : felt
-    member Dock : felt
-    member Fishmonger : felt
-    member Farms : felt
-    member Hamlet : felt
+    member MageTower : felt
+    member ArcherTower : felt
+    member Castle : felt
 end
 
 namespace RealmBuildingsIds:
-    const Fairgrounds = 1
-    const RoyalReserve = 2
-    const GrandMarket = 3
-    const Castle = 4
-    const Guild = 5
-    const OfficerAcademy = 6
-    const Granary = 7
-    const Housing = 8
-    const Amphitheater = 9
-    const ArcherTower = 10
-    const School = 11
-    const MageTower = 12
-    const TradeOffice = 13
-    const Architect = 14
-    const ParadeGrounds = 15
-    const Barracks = 16
-    const Dock = 17
-    const Fishmonger = 18
-    const Farms = 19
-    const Hamlet = 20
+    const House = 1
+    const StoreHouse = 2
+    const Granary = 3
+    const Farm = 4
+    const FishingVillage = 5
+    const Barracks = 6
+    const MageTower = 7
+    const ArcherTower = 8
+    const Castle = 9
 end
 
-namespace RealmBuildingLimitTraitsIds:
-    const Fairgrounds = TraitsIds.Region
-    const RoyalReserve = TraitsIds.Region
-    const GrandMarket = TraitsIds.Region
-    const Castle = TraitsIds.Region
-    const Guild = TraitsIds.Region
-    const OfficerAcademy = TraitsIds.Region
-    const Granary = TraitsIds.City
-    const Housing = TraitsIds.City
-    const Amphitheater = TraitsIds.City
-    const ArcherTower = TraitsIds.City
-    const School = TraitsIds.City
-    const MageTower = TraitsIds.City
-    const TradeOffice = TraitsIds.City
-    const Architect = TraitsIds.City
-    const ParadeGrounds = TraitsIds.City
-    const Barracks = TraitsIds.City
-    const Dock = TraitsIds.Harbour
-    const Fishmonger = TraitsIds.Harbour
-    const Farms = TraitsIds.River
-    const Hamlet = TraitsIds.River
+# square meters
+namespace RealmBuildingsSize:
+    const House = 2
+    const StoreHouse = 3
+    const Granary = 3
+    const Farm = 3
+    const FishingVillage = 3
+    const Barracks = 6
+    const MageTower = 6
+    const ArcherTower = 6
+    const Castle = 12
 end
 
 namespace BuildingsFood:
-    const Fairgrounds = 5
-    const RoyalReserve = 5
-    const GrandMarket = 5
-    const Castle = -1
-    const Guild = -1
-    const OfficerAcademy = -1
+    const House = 2
+    const StoreHouse = 3
     const Granary = 3
-    const Housing = -1
-    const Amphitheater = -1
-    const ArcherTower = -1
-    const School = -1
-    const MageTower = -1
-    const TradeOffice = -1
-    const Architect = -1
-    const ParadeGrounds = -1
-    const Barracks = -1
-    const Dock = -1
-    const Fishmonger = 2
-    const Farms = 1
-    const Hamlet = 1
+    const Farm = 3
+    const FishingVillage = 3
+    const Barracks = 6
+    const MageTower = 6
+    const ArcherTower = 6
+    const Castle = 12
 end
 
 namespace BuildingsCulture:
-    const Fairgrounds = 5
-    const RoyalReserve = 5
-    const GrandMarket = 0
-    const Castle = 5
-    const Guild = 5
-    const OfficerAcademy = 0
-    const Granary = 0
-    const Housing = 0
-    const Amphitheater = 2
-    const ArcherTower = 0
-    const School = 3
-    const MageTower = 0
-    const TradeOffice = 1
-    const Architect = 1
-    const ParadeGrounds = 1
-    const Barracks = 0
-    const Dock = 0
-    const Fishmonger = 0
-    const Farms = 0
-    const Hamlet = 0
+    const House = 2
+    const StoreHouse = 3
+    const Granary = 3
+    const Farm = 3
+    const FishingVillage = 3
+    const Barracks = 6
+    const MageTower = 6
+    const ArcherTower = 6
+    const Castle = 12
 end
 
 namespace BuildingsPopulation:
-    const Fairgrounds = -10
-    const RoyalReserve = -10
-    const GrandMarket = -10
-    const Castle = -10
-    const Guild = -10
-    const OfficerAcademy = -10
-    const Granary = -10
-    const Housing = 75
-    const Amphitheater = -10
-    const ArcherTower = -10
-    const School = -10
-    const MageTower = -10
-    const TradeOffice = -10
-    const Architect = -10
-    const ParadeGrounds = -10
-    const Barracks = -10
-    const Dock = -10
-    const Fishmonger = -10
-    const Farms = 10
-    const Hamlet = 35
+    const House = 2
+    const StoreHouse = 3
+    const Granary = 3
+    const Farm = 3
+    const FishingVillage = 3
+    const Barracks = 6
+    const MageTower = 6
+    const ArcherTower = 6
+    const Castle = 12
+end
+
+namespace BuildingsIntegrityLength:
+    const House = 1000
+    const StoreHouse = 2000
+    const Granary = 2000
+    const Farm = 2000
+    const FishingVillage = 2000
+    const Barracks = 3000
+    const MageTower = 3000
+    const ArcherTower = 3000
+    const Castle = 9000
+end
+
+namespace BuildingsTroopIndustry:
+    const House = 0
+    const StoreHouse = 0
+    const Granary = 0
+    const Farm = 0
+    const FishingVillage = 0
+    const Barracks = 2
+    const MageTower = 2
+    const ArcherTower = 2
+    const Castle = 4
+end
+
+namespace BuildingsDecaySlope:
+    const House = 400
+    const StoreHouse = 400
+    const Granary = 400
+    const Farm = 400
+    const FishingVillage = 400
+    const Barracks = 400
+    const MageTower = 400
+    const ArcherTower = 400
+    const Castle = 200
 end
 
 namespace ArmyCap:
-    const Fairgrounds = 0
-    const RoyalReserve = 5
-    const GrandMarket = 0
-    const Castle = 5
-    const Guild = 5
-    const OfficerAcademy = 5
-    const Granary = 0
-    const Housing = 0
-    const Amphitheater = 2
-    const ArcherTower = 0
-    const School = 3
-    const MageTower = 0
-    const TradeOffice = 0
-    const Architect = 1
-    const ParadeGrounds = 2
-    const Barracks = 1
-    const Dock = 0
-    const Fishmonger = 0
-    const Farms = 0
-    const Hamlet = 0
+    const House = 2
+    const StoreHouse = 3
+    const Granary = 3
+    const Farm = 3
+    const FishingVillage = 3
+    const Barracks = 6
+    const MageTower = 6
+    const ArcherTower = 6
+    const Castle = 12
 end
 
 namespace ModuleIds:
@@ -200,6 +160,7 @@ namespace ModuleIds:
     const L06_Combat = 11  # TODO: Refactor Combat code so this can be 6 to fit in sequence with other contracts
     const L07_Crypts = 7
     const L08_Crypts_Resources = 8
+    const L09_Relics = 12
 end
 
 namespace ExternalContractIds:
@@ -401,4 +362,11 @@ struct ResourceOutput:
     member resource_5 : felt
     member resource_6 : felt
     member resource_7 : felt
+end
+
+# Packed Military Buildings
+struct PackedBuildings:
+    member military : felt
+    member economic : felt
+    member housing : felt
 end

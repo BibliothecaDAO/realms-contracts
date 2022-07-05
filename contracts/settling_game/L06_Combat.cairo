@@ -12,11 +12,15 @@ from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.uint256 import Uint256
 from starkware.starknet.common.syscalls import get_block_timestamp, get_caller_address, get_tx_info
+
+from openzeppelin.upgrades.library import Proxy
+
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.imodules import (
     IModuleController,
     IL02_Resources,
     IL04_Calculator,
+    IL09_Relics,
 )
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
@@ -34,25 +38,13 @@ from contracts.settling_game.utils.game_structs import (
     ExternalContractIds,
 )
 from contracts.settling_game.utils.general import unpack_data, transform_costs_to_token_ids_values
-from contracts.settling_game.library.library_module import (
-    MODULE_controller_address,
-    MODULE_only_approved,
-    MODULE_initializer,
-    MODULE_only_arbiter,
-    MODULE_ERC721_owner_check,
-)
+from contracts.settling_game.library.library_module import Module
 
 from contracts.settling_game.utils.constants import DAY
 
-from openzeppelin.upgrades.library import (
-    Proxy_initializer,
-    Proxy_only_admin,
-    Proxy_set_implementation,
-)
-
-##########
-# EVENTS #
-##########
+# -----------------------------------
+# Events
+# -----------------------------------
 
 @event
 func CombatStart_2(
@@ -90,9 +82,9 @@ func BuildTroops_2(
 ):
 end
 
-###########
-# STORAGE #
-###########
+# -----------------------------------
+# Storage
+# -----------------------------------
 
 @storage_var
 func xoroshiro_address() -> (address : felt):
@@ -141,9 +133,9 @@ const MAX_WALL_DEFENSE_HIT_POINTS = 5
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     address_of_controller : felt, xoroshiro_addr : felt, proxy_admin : felt
 ):
-    MODULE_initializer(address_of_controller)
+    Module.initializer(address_of_controller)
     xoroshiro_address.write(xoroshiro_addr)
-    Proxy_initializer(proxy_admin)
+    Proxy.initializer(proxy_admin)
     return ()
 end
 
@@ -151,8 +143,8 @@ end
 func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     new_implementation : felt
 ):
-    Proxy_only_admin()
-    Proxy_set_implementation(new_implementation)
+    Proxy.assert_only_admin()
+    Proxy._set_implementation_hash(new_implementation)
     return ()
 end
 
@@ -169,9 +161,9 @@ func build_squad_from_troops_in_realm{
     alloc_locals
 
     let (caller) = get_caller_address()
-    let (controller) = MODULE_controller_address()
+    let (controller) = Module.controller_address()
 
-    MODULE_ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
+    Module.ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
 
     # get the Cost for every Troop to build
     let (troop_costs : Cost*) = alloc()
@@ -212,7 +204,7 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     alloc_locals
 
     with_attr error_message("COMBAT: Cannot initiate combat"):
-        MODULE_ERC721_owner_check(attacking_realm_id, ExternalContractIds.S_Realms)
+        Module.ERC721_owner_check(attacking_realm_id, ExternalContractIds.S_Realms)
         let (can_attack) = Realm_can_be_attacked(attacking_realm_id, defending_realm_id)
         assert can_attack = TRUE
     end
@@ -255,12 +247,14 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
 
     # # pillaging only if attacker wins
     if combat_outcome == COMBAT_OUTCOME_ATTACKER_WINS:
-        let (controller) = MODULE_controller_address()
+        let (controller) = Module.controller_address()
         let (resources_logic_address) = IModuleController.get_module_address(
             controller, ModuleIds.L02_Resources
         )
+        let (relic_address) = IModuleController.get_module_address(controller, ModuleIds.L09_Relics)
         let (caller) = get_caller_address()
         IL02_Resources.pillage_resources(resources_logic_address, defending_realm_id, caller)
+        IL09_Relics.set_relic_holder(relic_address, attacking_realm_id, defending_realm_id)
         tempvar syscall_ptr = syscall_ptr
         tempvar range_check_ptr = range_check_ptr
         tempvar pedersen_ptr = pedersen_ptr
@@ -289,7 +283,7 @@ func remove_troops_from_squad_in_realm{
 }(troop_idxs_len : felt, troop_idxs : felt*, realm_id : Uint256, slot : felt):
     alloc_locals
 
-    MODULE_ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
+    Module.ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
 
     let (realm_combat_data : RealmCombatData) = get_realm_combat_data(realm_id)
 
@@ -321,7 +315,7 @@ func inflict_wall_defense{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : H
 ) -> (damaged : Squad):
     alloc_locals
 
-    let (controller : felt) = MODULE_controller_address()
+    let (controller : felt) = Module.controller_address()
     let (calculator_addr : felt) = IModuleController.get_module_address(
         controller, ModuleIds.L04_Calculator
     )
@@ -572,7 +566,7 @@ func update_squad_in_realm{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : 
 ):
     alloc_locals
 
-    MODULE_ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
+    Module.ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
 
     let (realm_combat_data : RealmCombatData) = get_realm_combat_data(realm_id)
     let (packed_squad : PackedSquad) = COMBAT.pack_squad(s)
@@ -653,7 +647,7 @@ func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
 
     alloc_locals
 
-    let (controller) = MODULE_controller_address()
+    let (controller) = Module.controller_address()
 
     let (realm_combat_data : RealmCombatData) = get_realm_combat_data(defending_realm_id)
 

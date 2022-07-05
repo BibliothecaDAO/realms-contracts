@@ -99,6 +99,8 @@ end
 namespace IL03_Buildings:
     func get_buildings_unpacked(token_id : Uint256) -> (realm_buildings : RealmBuildings):
     end
+    func get_effective_buildings(token_id : Uint256) -> (realm_buildings : RealmBuildings):
+    end
 end
 
 @contract_interface
@@ -194,5 +196,11 @@ namespace IL08_Crypts_Resources:
     func check_if_claimable(token_id : Uint256) -> (can_claim : felt):
     end
     func claim_resources(token_id : Uint256):
+    end
+end
+
+@contract_interface
+namespace IL09_Relics:
+    func set_relic_holder(winner_token_id : Uint256, loser_token_id : Uint256):
     end
 end

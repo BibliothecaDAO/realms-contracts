@@ -1,43 +1,36 @@
 # Declare this file as a StarkNet contract and set the required
 # builtins.
 %lang starknet
-%builtins pedersen range_check
 
-from starkware.cairo.common.cairo_builtins import HashBuiltin
+from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.messages import send_message_to_l1
 from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
 from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem
 from starkware.cairo.common.uint256 import Uint256, uint256_le
-
-# # Storage of Items
+from contracts.loot.library_adventurer import CalculateAdventurer
+from contracts.loot.ItemConstants import (
+    ItemAgility,
+    Item,
+    ItemSlot,
+    ItemClass,
+    Adventurer,
+    PackedAdventurerStats,
+    AdventurerState,
+)
 
 @storage_var
-func weapon(token_id : felt) -> (item_token_id : felt):
-end
-
-@constructor
-func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    return ()
+func storage_adventurer(token_id : Uint256) -> (adventurer : PackedAdventurerStats):
 end
 
 @external
-func equipItem{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    token_id : felt, item_token_id : felt
-):
-    # # Check user owns the item
-    # # Check item is correct for the slot
-    # # TODO: Set Id within slot
+func get_adventurer{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(token_id : Uint256) -> (adventurer : Adventurer):
+    let (unpacked_adventurer : PackedAdventurerStats) = storage_adventurer.read(token_id)
 
-    return ()
-end
-
-@external
-func getPower{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    token_id : felt, item_token_id : felt
-):
-    # SUM all item powers
-    # Fetch item stats
+    # import and use namespace __unpack_adventurer
+    let (adventurer) = CalculateAdventurer._unpack_adventurer(unpacked_adventurer)
 
     return ()
 end

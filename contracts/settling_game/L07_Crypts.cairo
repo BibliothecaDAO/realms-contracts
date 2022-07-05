@@ -12,28 +12,18 @@ from starkware.starknet.common.syscalls import (
     get_contract_address,
 )
 from starkware.cairo.common.uint256 import Uint256
+from openzeppelin.upgrades.library import Proxy
+from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
 
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
 from contracts.settling_game.utils.constants import TRUE
-from contracts.settling_game.library.library_module import (
-    MODULE_controller_address,
-    MODULE_only_approved,
-    MODULE_initializer,
-)
-
-from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
+from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.interfaces.s_crypts_IERC721 import s_crypts_IERC721
 from contracts.settling_game.interfaces.imodules import IModuleController, IL08_Crypts_Resources
 
-from openzeppelin.upgrades.library import (
-    Proxy_initializer,
-    Proxy_only_admin,
-    Proxy_set_implementation,
-)
-
-##########
-# EVENTS #
-##########
+# -----------------------------------
+# Events
+# -----------------------------------
 
 # Staked = 🗝️ unlocked
 # Unstaked = 🔒 locked (because Lore ofc)
@@ -46,9 +36,9 @@ end
 func UnSettled(owner : felt, token_id : Uint256):
 end
 
-###########
-# STORAGE #
-###########
+# -----------------------------------
+# Storage
+# -----------------------------------
 
 # STAKE TIME - This is used as the main identifier for staking time
 # It is updated on Resource Claim, Stake, Unstake
@@ -64,8 +54,8 @@ end
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     address_of_controller : felt, proxy_admin : felt
 ):
-    MODULE_initializer(address_of_controller)
-    Proxy_initializer(proxy_admin)
+    Module.initializer(address_of_controller)
+    Proxy.initializer(proxy_admin)
     return ()
 end
 
@@ -73,8 +63,8 @@ end
 func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     new_implementation : felt
 ):
-    Proxy_only_admin()
-    Proxy_set_implementation(new_implementation)
+    Proxy.assert_only_admin()
+    Proxy._set_implementation_hash(new_implementation)
     return ()
 end
 
@@ -89,7 +79,7 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
 ) -> (success : felt):
     alloc_locals
     let (caller) = get_caller_address()
-    let (controller) = MODULE_controller_address()
+    let (controller) = Module.controller_address()
     let (contract_address) = get_contract_address()
 
     let (crypts_address) = IModuleController.get_external_contract_address(
@@ -121,7 +111,7 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
 ) -> (success : felt):
     alloc_locals
     let (caller) = get_caller_address()
-    let (controller) = MODULE_controller_address()
+    let (controller) = Module.controller_address()
     let (contract_address) = get_contract_address()
 
     # FETCH ADDRESSES
@@ -164,7 +154,7 @@ end
 func set_time_staked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256, time_left : felt
 ):
-    MODULE_only_approved()
+    Module.only_approved()
     _set_time_staked(token_id, time_left)
     return ()
 end

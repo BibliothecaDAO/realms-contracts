@@ -47,27 +47,6 @@ $ source realms_cli/.env.nile
 ```
 </details>
 
-<details><summary>Create Wallet via CLI [First time setup]</summary>
-
-### NOTE: This is the temporary solution until native ArgentX integration
-
-1. First create a new private key
-```bash
-$ nile create_pk
-```
-2. Save in printed private key in the .env.nile you created in the previous step as STARKNET_PRIVATE_KEY
-3. The run the following to save it in your enviroment:
-```
-$ source realms_cli/.env.nile
-```
-4. The setup and deploy your account with the following:
-```
-$ nile setup STARKNET_PRIVATE_KEY --network goerli
-```
-5. Now your address will be saved in the goerli.accounts.json with the account name account-1 (NOTE: If you plan to contribute to the code, please delete reference of your account before commiting. There is a current limitation with nile that does not allow the saving of this information elsewhere.)
-
-</details>
-
 ---
 
 ## Actions
@@ -227,7 +206,7 @@ Proxy contracts have some quirks which you must understand before playing with t
 </details>
 
 ---
-# Common ERrors
+# Common Errors
 
 <strong><pre>{"code": "StarknetErrorCode.UNINITIALIZED_CONTRACT", "message": "Contract with address 0x6352aa8d59cb656526162e3fd5017bcc02a8f6f1036748cb7221a8f30e89770 is not deployed."}.</pre></strong>
 
