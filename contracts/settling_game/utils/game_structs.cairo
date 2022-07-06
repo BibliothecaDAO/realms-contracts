@@ -344,7 +344,7 @@ namespace TroopProps:
     namespace Attack:
         const Skirmisher = 7
         const Longbow = 7
-        const Crossbow = 8
+        const Crossbow = 9
         const Pikeman = 4
         const Knight = 7
         const Paladin = 9

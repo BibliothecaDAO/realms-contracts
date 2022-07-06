@@ -161,10 +161,6 @@ namespace Combat:
         )
     end
 
-    # the values in the tuple this function returns don't change for a Troop,
-    # so we hardcode them in the code and use this function to retrieve them
-    # this way, we don't have to store them on-chain which allows for more efficient
-    # packing (only troop ID and vitality have to be stored)
     func get_troop_properties{range_check_ptr}(troop_id : felt) -> (
         type, tier, building, agility, attack, armor, vitality, wisdom
     ):
@@ -184,7 +180,7 @@ namespace Combat:
         return (
             [type_label + idx],
             [tier_label + idx],
-            [building + idx],
+            [building_label + idx],
             [agility_label + idx],
             [attack_label + idx],
             [armor_label + idx],
