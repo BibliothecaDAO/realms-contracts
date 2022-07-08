@@ -371,21 +371,6 @@ namespace TroopProps:
         const Arcanist = 2
     end
 
-    namespace Wisdom:
-        const Skirmisher = 2
-        const Longbow = 3
-        const Crossbow = 4
-        const Pikeman = 1
-        const Knight = 2
-        const Paladin = 3
-        const Ballista = 2
-        const Mangonel = 3
-        const Trebuchet = 4
-        const Apprentice = 8
-        const Mage = 9
-        const Arcanist = 10
-    end
-
     namespace Vitality:
         const Skirmisher = 53
         const Longbow = 53
@@ -399,6 +384,21 @@ namespace TroopProps:
         const Apprentice = 53
         const Mage = 53
         const Arcanist = 53
+    end
+
+    namespace Wisdom:
+        const Skirmisher = 2
+        const Longbow = 3
+        const Crossbow = 4
+        const Pikeman = 1
+        const Knight = 2
+        const Paladin = 3
+        const Ballista = 2
+        const Mangonel = 3
+        const Trebuchet = 4
+        const Apprentice = 8
+        const Mage = 9
+        const Arcanist = 10
     end
 end
 

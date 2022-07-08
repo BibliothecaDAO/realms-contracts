@@ -8,6 +8,7 @@ from starkware.cairo.common.math import (
     split_int,
     unsigned_div_rem,
 )
+from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.memcpy import memcpy
 from starkware.cairo.common.memset import memset
 from starkware.cairo.common.registers import get_label_location
@@ -145,6 +146,7 @@ namespace Combat:
 
     func unpack_troop{range_check_ptr}(packed : felt) -> (t : Troop):
         alloc_locals
+        let (_foo) = alloc()
         let (vitality, troop_id) = unsigned_div_rem(packed, SHIFT)
         if troop_id == 0:
             return (
@@ -476,7 +478,7 @@ namespace Combat:
         if s.t1_9.id != 0:
             tempvar p = p + 1
         end
-         if s.t2_1.id != 0:
+        if s.t2_1.id != 0:
             tempvar p = p + 1
         end
         if s.t2_2.id != 0:
@@ -496,5 +498,79 @@ namespace Combat:
         end
 
         return (p)
+    end
+
+    func hit_squad{range_check_ptr}(s : Squad, hits : felt) -> (squad : Squad):
+        alloc_locals
+
+        let (t1_1, remaining_hits) = hit_troop(s.t1_1, hits)
+        let (t1_2, remaining_hits) = hit_troop(s.t1_2, remaining_hits)
+        let (t1_3, remaining_hits) = hit_troop(s.t1_3, remaining_hits)
+        let (t1_4, remaining_hits) = hit_troop(s.t1_4, remaining_hits)
+        let (t1_5, remaining_hits) = hit_troop(s.t1_5, remaining_hits)
+        let (t1_6, remaining_hits) = hit_troop(s.t1_6, remaining_hits)
+        let (t1_7, remaining_hits) = hit_troop(s.t1_7, remaining_hits)
+        let (t1_8, remaining_hits) = hit_troop(s.t1_8, remaining_hits)
+        let (t1_9, remaining_hits) = hit_troop(s.t1_9, remaining_hits)
+
+        let (t2_1, remaining_hits) = hit_troop(s.t2_1, remaining_hits)
+        let (t2_2, remaining_hits) = hit_troop(s.t2_2, remaining_hits)
+        let (t2_3, remaining_hits) = hit_troop(s.t2_3, remaining_hits)
+        let (t2_4, remaining_hits) = hit_troop(s.t2_4, remaining_hits)
+        let (t2_5, remaining_hits) = hit_troop(s.t2_5, remaining_hits)
+
+        let (t3_1, _) = hit_troop(s.t3_1, remaining_hits)
+
+        let s = Squad(
+            t1_1=t1_1,
+            t1_2=t1_2,
+            t1_3=t1_3,
+            t1_4=t1_4,
+            t1_5=t1_5,
+            t1_6=t1_6,
+            t1_7=t1_7,
+            t1_8=t1_8,
+            t1_9=t1_9,
+            t2_1=t2_1,
+            t2_2=t2_2,
+            t2_3=t2_3,
+            t2_4=t2_4,
+            t2_5=t2_5,
+            t3_1=t3_1,
+        )
+
+        return (s)
+    end
+
+    func hit_troop{range_check_ptr}(t : Troop, hits : felt) -> (
+        hit_troop : Troop, remaining_hits : felt
+    ):
+        if hits == 0:
+            return (t, 0)
+        end
+
+        let (kills_troop) = is_le(t.vitality, hits)
+        if kills_troop == 1:
+            # t.vitality <= hits
+            let ht = Troop(
+                id=0, type=0, tier=0, building=0, agility=0, attack=0, armor=0, vitality=0, wisdom=0
+            )
+            let rem = hits - t.vitality
+            return (ht, rem)
+        else:
+            # t.vitality > hits
+            let ht = Troop(
+                id=t.id,
+                type=t.type,
+                tier=t.tier,
+                building=t.building,
+                agility=t.agility,
+                attack=t.attack,
+                armor=t.armor,
+                vitality=t.vitality - hits,
+                wisdom=t.wisdom,
+            )
+            return (ht, 0)
+        end
     end
 end

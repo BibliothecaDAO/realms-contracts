@@ -4,6 +4,9 @@ protostar_version = "0.2.0"
 ["protostar.project"]
 libs_path = "./lib"
 
+["protostar.shared_command_configs"]
+cairo-path = ["./lib/cairo_contracts/src"]
+
 # This section is explained in the "Project compilation" guide.
 ["protostar.contracts"]
 main = [

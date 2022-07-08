@@ -106,7 +106,7 @@ end
 const ATTACK_COOLDOWN_PERIOD = DAY  # 1 day unit
 
 # sets the attack type when initiating combat
-const COMBAT_TYPE_ATTACK_VS_DEFENSE = 1
+const COMBAT_TYPE_ATTACK_VS_ARMOR = 1
 const COMBAT_TYPE_WISDOM_VS_AGILITY = 2
 
 # used to signal which side won the battle
@@ -134,7 +134,7 @@ func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
 ):
     Module.initializer(address_of_controller)
     xoroshiro_address.write(xoroshiro_addr)
-    Proxy.initializer(proxy_admin)
+    Proxy.constructor(proxy_admin)
     return ()
 end
 
@@ -143,7 +143,7 @@ func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     new_implementation : felt
 ):
     Proxy.assert_only_admin()
-    Proxy._set_implementation_hash(new_implementation)
+    Proxy._set_implementation(new_implementation)
     return ()
 end
 
@@ -330,7 +330,7 @@ func inflict_wall_defense{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : H
         tempvar hit_points = MAX_WALL_DEFENSE_HIT_POINTS
     end
 
-    let (damaged : Squad) = hit_squad(attacker, hit_points)
+    let (damaged : Squad) = Combat.hit_squad(attacker, hit_points)
     return (damaged)
 end
 
@@ -379,10 +379,10 @@ func attack{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     let (a_stats) = Combat.compute_squad_stats(a)
     let (d_stats) = Combat.compute_squad_stats(d)
 
-    if attack_type == COMBAT_TYPE_ATTACK_VS_DEFENSE:
-        # attacker attacks with attack against defense,
+    if attack_type == COMBAT_TYPE_ATTACK_VS_ARMOR:
+        # attacker attacks with attack against armor,
         # has attack-times dice rolls
-        let (min_roll_to_hit) = compute_min_roll_to_hit(a_stats.attack, d_stats.defense)
+        let (min_roll_to_hit) = compute_min_roll_to_hit(a_stats.attack, d_stats.armor)
         let (hit_points) = roll_attack_dice(a_stats.attack, min_roll_to_hit, 0)
         tempvar range_check_ptr = range_check_ptr
         tempvar syscall_ptr : felt* = syscall_ptr
@@ -402,7 +402,7 @@ func attack{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     tempvar syscall_ptr = syscall_ptr
     tempvar pedersen_ptr = pedersen_ptr
 
-    let (d_after_attack) = hit_squad(d, hit_points)
+    let (d_after_attack) = Combat.hit_squad(d, hit_points)
     CombatStep_2.emit(
         attacking_realm_id, defending_realm_id, a, d_after_attack, attack_type, hit_points
     )
@@ -451,97 +451,6 @@ func roll_attack_dice{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashB
     let (_, r) = unsigned_div_rem(rnd, 12)
     let (is_successful_hit) = is_le(hit_threshold, r)
     return roll_attack_dice(dice_count - 1, hit_threshold, successful_hits_acc + is_successful_hit)
-end
-
-func hit_squad{range_check_ptr}(s : Squad, hits : felt) -> (squad : Squad):
-    alloc_locals
-
-    let (t1_1, remaining_hits) = hit_troop(s.t1_1, hits)
-    let (t1_2, remaining_hits) = hit_troop(s.t1_2, remaining_hits)
-    let (t1_3, remaining_hits) = hit_troop(s.t1_3, remaining_hits)
-    let (t1_4, remaining_hits) = hit_troop(s.t1_4, remaining_hits)
-    let (t1_5, remaining_hits) = hit_troop(s.t1_5, remaining_hits)
-    let (t1_6, remaining_hits) = hit_troop(s.t1_6, remaining_hits)
-    let (t1_7, remaining_hits) = hit_troop(s.t1_7, remaining_hits)
-    let (t1_8, remaining_hits) = hit_troop(s.t1_8, remaining_hits)
-    let (t1_9, remaining_hits) = hit_troop(s.t1_9, remaining_hits)
-    let (t1_10, remaining_hits) = hit_troop(s.t1_10, remaining_hits)
-    let (t1_11, remaining_hits) = hit_troop(s.t1_11, remaining_hits)
-    let (t1_12, remaining_hits) = hit_troop(s.t1_12, remaining_hits)
-    let (t1_13, remaining_hits) = hit_troop(s.t1_13, remaining_hits)
-    let (t1_14, remaining_hits) = hit_troop(s.t1_14, remaining_hits)
-    let (t1_15, remaining_hits) = hit_troop(s.t1_15, remaining_hits)
-    let (t1_16, remaining_hits) = hit_troop(s.t1_16, remaining_hits)
-
-    let (t2_1, remaining_hits) = hit_troop(s.t2_1, remaining_hits)
-    let (t2_2, remaining_hits) = hit_troop(s.t2_2, remaining_hits)
-    let (t2_3, remaining_hits) = hit_troop(s.t2_3, remaining_hits)
-    let (t2_4, remaining_hits) = hit_troop(s.t2_4, remaining_hits)
-    let (t2_5, remaining_hits) = hit_troop(s.t2_5, remaining_hits)
-    let (t2_6, remaining_hits) = hit_troop(s.t2_6, remaining_hits)
-    let (t2_7, remaining_hits) = hit_troop(s.t2_7, remaining_hits)
-    let (t2_8, remaining_hits) = hit_troop(s.t2_8, remaining_hits)
-
-    let (t3_1, _) = hit_troop(s.t3_1, remaining_hits)
-
-    let s = Squad(
-        t1_1=t1_1,
-        t1_2=t1_2,
-        t1_3=t1_3,
-        t1_4=t1_4,
-        t1_5=t1_5,
-        t1_6=t1_6,
-        t1_7=t1_7,
-        t1_8=t1_8,
-        t1_9=t1_9,
-        t1_10=t1_10,
-        t1_11=t1_11,
-        t1_12=t1_12,
-        t1_13=t1_13,
-        t1_14=t1_14,
-        t1_15=t1_15,
-        t1_16=t1_16,
-        t2_1=t2_1,
-        t2_2=t2_2,
-        t2_3=t2_3,
-        t2_4=t2_4,
-        t2_5=t2_5,
-        t2_6=t2_6,
-        t2_7=t2_7,
-        t2_8=t2_8,
-        t3_1=t3_1,
-    )
-
-    return (s)
-end
-
-func hit_troop{range_check_ptr}(t : Troop, hits : felt) -> (
-    hit_troop : Troop, remaining_hits : felt
-):
-    if hits == 0:
-        return (t, 0)
-    end
-
-    let (kills_troop) = is_le(t.vitality, hits)
-    if kills_troop == 1:
-        # t.vitality <= hits
-        let ht = Troop(id=0, type=0, tier=0, agility=0, attack=0, defense=0, vitality=0, wisdom=0)
-        let rem = hits - t.vitality
-        return (ht, rem)
-    else:
-        # t.vitality > hits
-        let ht = Troop(
-            id=t.id,
-            type=t.type,
-            tier=t.tier,
-            agility=t.agility,
-            attack=t.attack,
-            defense=t.defense,
-            vitality=t.vitality - hits,
-            wisdom=t.wisdom,
-        )
-        return (ht, 0)
-    end
 end
 
 func load_troop_costs{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
