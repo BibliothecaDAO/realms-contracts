@@ -2,17 +2,6 @@
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
 
-# from starkware.cairo.common.uint256 import Uint256, uint256_add
-# from starkware.cairo.common.math_cmp import is_nn, is_le
-# from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
-# from lib.cairo_math_64x61.contracts.Math64x61 import Math64x61_div
-
-# from contracts.settling_game.L06_Combat import (
-#     run_combat_loop,
-#     attack,
-#     compute_min_roll_to_hit,
-#     load_troop_costs,
-# )
 from contracts.settling_game.library.library_combat import Combat
 from contracts.settling_game.utils.game_structs import (
     RealmBuildingsIds,
@@ -22,8 +11,6 @@ from contracts.settling_game.utils.game_structs import (
     Squad,
     SquadStats,
 )
-# from contracts.settling_game.interfaces.imodules import IArbiter, IL06_Combat
-# from contracts.settling_game.utils.game_structs import RealmBuildings, RealmCombatData, Cost, Squad
 
 from protostar.asserts import assert_eq
 
@@ -36,40 +23,6 @@ func __setup__():
 
     return ()
 end
-
-# @external
-# func test_combat{syscall_ptr : felt*, range_check_ptr}():
-#     alloc_locals
-
-# let (local troop_ids : felt*) = alloc()
-
-# let (local troop_ids_2 : felt*) = alloc()
-
-# assert troop_ids[0] = 1
-
-# assert troop_ids_2[0] = 1
-#     assert troop_ids_2[1] = 2
-
-# local L06_Combat : felt
-#     local L06_Proxy_Combat : felt
-
-# %{ ids.L06_Combat = deploy_contract("./contracts/settling_game/L06_Combat.cairo", []).contract_address %}
-#     %{ ids.L06_Proxy_Combat = deploy_contract("./contracts/settling_game/proxy/PROXY_Logic.cairo", [ids.L06_Combat]).contract_address %}
-
-# IL06_Combat.set_troop_cost(L06_Proxy_Combat, 1, Cost(3, 8, 262657, 328450))
-#     IL06_Combat.set_troop_cost(L06_Proxy_Combat, 2, Cost(3, 8, 262657, 656900))
-
-# IL06_Combat.build_squad_from_troops_in_realm(L06_Proxy_Combat, 1, troop_ids, Uint256(1, 0), 1)
-#     IL06_Combat.build_squad_from_troops_in_realm(L06_Proxy_Combat, 2, troop_ids_2, Uint256(1, 0), 1)
-
-# %{ mock_call(ids.L06_Proxy_Combat, "view_troops", [1, 0]) %}
-#     let (attacking_s : Squad, defending_s : Squad) = IL06_Combat.view_troops(
-#         L06_Proxy_Combat, Uint256(1, 0)
-#     )
-
-# %{ print(ids.attacking_s) %}
-#     return ()
-# end
 
 @external
 func test_get_troop_properties{range_check_ptr}():
@@ -343,11 +296,6 @@ func test_get_troop_population{range_check_ptr}():
     return ()
 end
 
-# TODO:
-# test_run_combat_loop
-# test_attack
-# test_compute_min_roll_to_hit
-
 @external
 func test_hit_squad{range_check_ptr}():
     alloc_locals
@@ -416,19 +364,144 @@ func test_hit_troop{range_check_ptr}():
     return ()
 end
 
-# test_load_troop_costs
-# test_transform_costs_to_token_ids_values
-# test_add_troops_to_squad
-# test_remove_troops_from_squad
-# test_find_first_free_troop_slot_in_squad
-# test_get_set_troop_costs
-# test_update_squad_in_realm
+@external
+func test_add_troops_to_empty_squad{range_check_ptr}():
+    alloc_locals
+    let (__fp__, _) = get_fp_and_pc()
+
+    let (troops : felt*) = alloc()
+    assert troops[0] = TroopId.Skirmisher
+    assert troops[1] = TroopId.Skirmisher
+    assert troops[2] = TroopId.Skirmisher
+    assert troops[3] = TroopId.Skirmisher
+    assert troops[4] = TroopId.Skirmisher
+    assert troops[5] = TroopId.Skirmisher
+    assert troops[6] = TroopId.Skirmisher
+    assert troops[7] = TroopId.Skirmisher
+    assert troops[8] = TroopId.Skirmisher
+    assert troops[9] = TroopId.Longbow
+    assert troops[10] = TroopId.Longbow
+    assert troops[11] = TroopId.Longbow
+    assert troops[12] = TroopId.Longbow
+    assert troops[13] = TroopId.Longbow
+    assert troops[14] = TroopId.Crossbow
+
+    let (empty : Squad) = build_empty_squad()
+    let (built : Squad) = Combat.add_troops_to_squad(empty, 15, troops)
+    let (expected : Squad) = build_default_squad()
+
+    # putting the values to be compared into a memory segment
+    # so that assert_arrays_eq will work; for some reason,
+    # just using &built and &expected doesn't work :shrug:
+    let (memory : Squad*) = alloc()
+    assert memory[0] = built
+    assert memory[1] = expected
+    assert_arrays_eq(memory, &(memory[1]), Squad.SIZE)
+
+    return ()
+end
+
+@external
+func test_add_troops_to_partial_squad{range_check_ptr}():
+    alloc_locals
+
+    let (troops : felt*) = alloc()
+    assert troops[0] = TroopId.Skirmisher
+    assert troops[1] = TroopId.Longbow
+    assert troops[2] = TroopId.Longbow
+    let (empty_troop : Troop) = build_empty_troop()
+    let (partial : Squad) = build_partial_squad()
+    let (built : Squad) = Combat.add_troops_to_squad(partial, 3, troops)
+
+    assert_troop_eq(built.t1_5, built.t1_6)
+    assert_troop_eq(built.t1_7, empty_troop)
+    assert_troop_eq(built.t1_8, empty_troop)
+    assert_troop_eq(built.t1_9, empty_troop)
+    assert_troop_eq(built.t2_3, built.t2_4)
+    assert_troop_eq(built.t2_4, built.t2_5)
+
+    return ()
+end
+
+@external
+func test_add_troops_to_full_squad_reverts{range_check_ptr}():
+    alloc_locals
+
+    let (troops : felt*) = alloc()
+    assert troops[0] = TroopId.Skirmisher
+    let (full : Squad) = build_default_squad()
+
+    %{ expect_revert() %}
+    let (built : Squad) = Combat.add_troops_to_squad(full, 1, troops)
+
+    return ()
+end
+
+@external
+func test_remove_troops_from_squad{range_check_ptr}():
+    alloc_locals
+
+    let (full : Squad) = build_default_squad()
+    let (empty : Troop) = build_empty_troop()
+    let (memory : Troop*) = alloc()
+    assert [memory] = empty
+
+    remove_troops_from_squad_loop(full, memory, 0, Squad.SIZE / Troop.SIZE)
+
+    return ()
+end
+
+func remove_troops_from_squad_loop{range_check_ptr}(s : Squad, empty : Troop*, idx, stop_at):
+    alloc_locals
+
+    if idx == stop_at:
+        return ()
+    end
+
+    let (updated : Squad) = Combat.remove_troop_from_squad(idx, s)
+
+    let (memory : Squad*) = alloc()
+    assert [memory] = updated
+    assert_arrays_eq(memory + idx * Troop.SIZE, empty, Troop.SIZE)
+
+    return remove_troops_from_squad_loop(s, empty, idx + 1, stop_at)
+end
+
+@external
+func test_remove_troops_from_squad_reverts_idx_too_large{range_check_ptr}():
+    alloc_locals
+
+    let (full : Squad) = build_default_squad()
+    %{ expect_revert() %}
+    let (updated : Squad) = Combat.remove_troop_from_squad(44, full)
+
+    return ()
+end
+
+@external
+func test_find_first_free_troop_slot_in_squad{range_check_ptr}():
+    alloc_locals
+
+    let (partial : Squad) = build_partial_squad()
+    let (empty : Squad) = build_empty_squad()
+    let (t1_slot) = Combat.find_first_free_troop_slot_in_squad(partial, 1)
+    let (t2_slot) = Combat.find_first_free_troop_slot_in_squad(partial, 2)
+    let (t3_slot) = Combat.find_first_free_troop_slot_in_squad(empty, 3)
+
+    assert_eq(t1_slot, 5 * Troop.SIZE)
+    assert_eq(t2_slot, (9 + 3) * Troop.SIZE)
+    assert_eq(t3_slot, (9 + 5) * Troop.SIZE)
+
+    return ()
+end
+
+# TODO:
+# test_load_troop_costs???
+# test_transform_costs_to_token_ids_values???
 
 #
 # helper functions
 #
-
-# TODO: maybe return an instance of Troop, not a Troop* in the build troop fns
 
 func build_troop{range_check_ptr}(troop_id) -> (troop : Troop):
     let (
@@ -485,6 +558,32 @@ func build_partial_squad{range_check_ptr}() -> (s : Squad):
     let t2_5 : Troop = build_empty_troop()
 
     let t3_1 : Troop = build_troop(TroopId.Crossbow)
+
+    return (
+        Squad(
+        t1_1, t1_2, t1_3, t1_4, t1_5, t1_6, t1_7,
+        t1_8, t1_9, t2_1, t2_2, t2_3, t2_4, t2_5, t3_1),
+    )
+end
+
+func build_empty_squad{range_check_ptr}() -> (s : Squad):
+    let t1_1 : Troop = build_empty_troop()
+    let t1_2 : Troop = build_empty_troop()
+    let t1_3 : Troop = build_empty_troop()
+    let t1_4 : Troop = build_empty_troop()
+    let t1_5 : Troop = build_empty_troop()
+    let t1_6 : Troop = build_empty_troop()
+    let t1_7 : Troop = build_empty_troop()
+    let t1_8 : Troop = build_empty_troop()
+    let t1_9 : Troop = build_empty_troop()
+
+    let t2_1 : Troop = build_empty_troop()
+    let t2_2 : Troop = build_empty_troop()
+    let t2_3 : Troop = build_empty_troop()
+    let t2_4 : Troop = build_empty_troop()
+    let t2_5 : Troop = build_empty_troop()
+
+    let t3_1 : Troop = build_empty_troop()
 
     return (
         Squad(
