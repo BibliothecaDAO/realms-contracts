@@ -75,53 +75,77 @@ end
 func test_get_troop_properties{range_check_ptr}():
     alloc_locals
 
-    let (skirmisher : Troop*) = build_troop(TroopId.Skirmisher)
-    tempvar expected : felt* = new (TroopId.Skirmisher, TroopType.RangedNormal, 1, RealmBuildingsIds.ArcherTower, 2, 7, 2, 53, 2)
-    assert_arrays_eq(skirmisher, expected, Troop.SIZE)
+    let (skirmisher : Troop) = build_troop(TroopId.Skirmisher)
+    let expected = Troop(
+        TroopId.Skirmisher, TroopType.RangedNormal, 1, RealmBuildingsIds.ArcherTower, 2, 7, 2, 53, 2
+    )
+    assert_troop_eq(skirmisher, expected)
 
-    let (longbow : Troop*) = build_troop(TroopId.Longbow)
-    tempvar expected : felt* = new (TroopId.Longbow, TroopType.RangedNormal, 2, RealmBuildingsIds.ArcherTower, 4, 7, 3, 53, 3)
-    assert_arrays_eq(longbow, expected, Troop.SIZE)
+    let (longbow : Troop) = build_troop(TroopId.Longbow)
+    let expected = Troop(
+        TroopId.Longbow, TroopType.RangedNormal, 2, RealmBuildingsIds.ArcherTower, 4, 7, 3, 53, 3
+    )
+    assert_troop_eq(longbow, expected)
 
-    let (crossbow : Troop*) = build_troop(TroopId.Crossbow)
-    tempvar expected : felt* = new (TroopId.Crossbow, TroopType.RangedNormal, 3, RealmBuildingsIds.ArcherTower, 6, 9, 4, 53, 4)
-    assert_arrays_eq(crossbow, expected, Troop.SIZE)
+    let (crossbow : Troop) = build_troop(TroopId.Crossbow)
+    let expected = Troop(
+        TroopId.Crossbow, TroopType.RangedNormal, 3, RealmBuildingsIds.ArcherTower, 6, 9, 4, 53, 4
+    )
+    assert_troop_eq(crossbow, expected)
 
-    let (pikeman : Troop*) = build_troop(TroopId.Pikeman)
-    tempvar expected : felt* = new (TroopId.Pikeman, TroopType.Melee, 1, RealmBuildingsIds.Barracks, 7, 4, 5, 53, 1)
-    assert_arrays_eq(pikeman, expected, Troop.SIZE)
+    let (pikeman : Troop) = build_troop(TroopId.Pikeman)
+    let expected = Troop(
+        TroopId.Pikeman, TroopType.Melee, 1, RealmBuildingsIds.Barracks, 7, 4, 5, 53, 1
+    )
+    assert_troop_eq(pikeman, expected)
 
-    let (knight : Troop*) = build_troop(TroopId.Knight)
-    tempvar expected : felt* = new (TroopId.Knight, TroopType.Melee, 2, RealmBuildingsIds.Barracks, 9, 7, 8, 79, 2)
-    assert_arrays_eq(knight, expected, Troop.SIZE)
+    let (knight : Troop) = build_troop(TroopId.Knight)
+    let expected = Troop(
+        TroopId.Knight, TroopType.Melee, 2, RealmBuildingsIds.Barracks, 9, 7, 8, 79, 2
+    )
+    assert_troop_eq(knight, expected)
 
-    let (paladin : Troop*) = build_troop(TroopId.Paladin)
-    tempvar expected : felt* = new (TroopId.Paladin, TroopType.Melee, 3, RealmBuildingsIds.Barracks, 9, 9, 9, 106, 3)
-    assert_arrays_eq(paladin, expected, Troop.SIZE)
+    let (paladin : Troop) = build_troop(TroopId.Paladin)
+    let expected = Troop(
+        TroopId.Paladin, TroopType.Melee, 3, RealmBuildingsIds.Barracks, 9, 9, 9, 106, 3
+    )
+    assert_troop_eq(paladin, expected)
 
-    let (ballista : Troop*) = build_troop(TroopId.Ballista)
-    tempvar expected : felt* = new (TroopId.Ballista, TroopType.Siege, 1, RealmBuildingsIds.Castle, 4, 11, 4, 53, 2)
-    assert_arrays_eq(ballista, expected, Troop.SIZE)
+    let (ballista : Troop) = build_troop(TroopId.Ballista)
+    let expected = Troop(
+        TroopId.Ballista, TroopType.Siege, 1, RealmBuildingsIds.Castle, 4, 11, 4, 53, 2
+    )
+    assert_troop_eq(ballista, expected)
 
-    let (mangonel : Troop*) = build_troop(TroopId.Mangonel)
-    tempvar expected : felt* = new (TroopId.Mangonel, TroopType.Siege, 2, RealmBuildingsIds.Castle, 4, 10, 5, 53, 3)
-    assert_arrays_eq(mangonel, expected, Troop.SIZE)
+    let (mangonel : Troop) = build_troop(TroopId.Mangonel)
+    let expected = Troop(
+        TroopId.Mangonel, TroopType.Siege, 2, RealmBuildingsIds.Castle, 4, 10, 5, 53, 3
+    )
+    assert_troop_eq(mangonel, expected)
 
-    let (trebuchet : Troop*) = build_troop(TroopId.Trebuchet)
-    tempvar expected : felt* = new (TroopId.Trebuchet, TroopType.Siege, 3, RealmBuildingsIds.Castle, 4, 12, 6, 53, 4)
-    assert_arrays_eq(trebuchet, expected, Troop.SIZE)
+    let (trebuchet : Troop) = build_troop(TroopId.Trebuchet)
+    let expected = Troop(
+        TroopId.Trebuchet, TroopType.Siege, 3, RealmBuildingsIds.Castle, 4, 12, 6, 53, 4
+    )
+    assert_troop_eq(trebuchet, expected)
 
-    let (apprentice : Troop*) = build_troop(TroopId.Apprentice)
-    tempvar expected : felt* = new (TroopId.Apprentice, TroopType.RangedMagic, 1, RealmBuildingsIds.MageTower, 7, 7, 2, 53, 8)
-    assert_arrays_eq(apprentice, expected, Troop.SIZE)
+    let (apprentice : Troop) = build_troop(TroopId.Apprentice)
+    let expected = Troop(
+        TroopId.Apprentice, TroopType.RangedMagic, 1, RealmBuildingsIds.MageTower, 7, 7, 2, 53, 8
+    )
+    assert_troop_eq(apprentice, expected)
 
-    let (mage : Troop*) = build_troop(TroopId.Mage)
-    tempvar expected : felt* = new (TroopId.Mage, TroopType.RangedMagic, 2, RealmBuildingsIds.MageTower, 7, 9, 2, 53, 9)
-    assert_arrays_eq(mage, expected, Troop.SIZE)
+    let (mage : Troop) = build_troop(TroopId.Mage)
+    let expected = Troop(
+        TroopId.Mage, TroopType.RangedMagic, 2, RealmBuildingsIds.MageTower, 7, 9, 2, 53, 9
+    )
+    assert_troop_eq(mage, expected)
 
-    let (arcanist : Troop*) = build_troop(TroopId.Arcanist)
-    tempvar expected : felt* = new (TroopId.Arcanist, TroopType.RangedMagic, 3, RealmBuildingsIds.MageTower, 7, 11, 2, 53, 10)
-    assert_arrays_eq(arcanist, expected, Troop.SIZE)
+    let (arcanist : Troop) = build_troop(TroopId.Arcanist)
+    let expected = Troop(
+        TroopId.Arcanist, TroopType.RangedMagic, 3, RealmBuildingsIds.MageTower, 7, 11, 2, 53, 10
+    )
+    assert_troop_eq(arcanist, expected)
 
     return ()
 end
@@ -144,25 +168,27 @@ end
 func test_pack_troop{range_check_ptr}():
     alloc_locals
 
-    let (pikeman : Troop*) = build_troop(TroopId.Pikeman)
-    let (packed) = Combat.pack_troop([pikeman])
+    let (crossbow : Troop) = build_troop(TroopId.Crossbow)
+    let (packed) = Combat.pack_troop(crossbow)
     local expected_packed
     %{
-        # Pikeman ID is 4, full vitality is 53, those are the values that get packed
-        from tests.protostar.settling_game.combat.utils import pack_troop
-        # ids.expected_packed = pack_troop(4, 53)
-        ids.expected_packed = pack_troop(ids.pikeman)
+        from tests.protostar.settling_game.combat.utils import pack_troop, CROSSBOW
+        ids.expected_packed = pack_troop(CROSSBOW)
     %}
     assert_eq(packed, expected_packed)
 
-    tempvar injured_pikeman : Troop* = new Troop(TroopId.Pikeman, 0, 0, 0, 0, 0, 0, 20, 0)
-    let (packed_injured) = Combat.pack_troop([injured_pikeman])
+    let injured_pikeman : Troop = Troop(TroopId.Pikeman, 0, 0, 0, 0, 0, 0, 20, 0)
+    let (packed_injured) = Combat.pack_troop(injured_pikeman)
     local expected_packed_injured
-    %{ ids.expected_packed_injured = pack_troop(ids.injured_pikeman) %}
+    %{
+        from tests.protostar.settling_game.combat.utils import Troop, TroopId
+        injured = Troop(TroopId.Pikeman.value, 0, 0, 0, 0, 0, 0, 20, 0)
+        ids.expected_packed_injured = pack_troop(injured)
+    %}
     assert_eq(packed_injured, expected_packed_injured)
 
-    let (empty : Troop*) = build_empty_troop()
-    let (packed_empty) = Combat.pack_troop([empty])
+    let (empty : Troop) = build_empty_troop()
+    let (packed_empty) = Combat.pack_troop(empty)
     assert_eq(packed_empty, 0)
 
     return ()
@@ -193,13 +219,11 @@ func test_unpack_troop{range_check_ptr}():
     let packed_skirmisher_20 = 5121  # TroopId.Skirmisher w/ vitality 20
     let (unpacked : Troop) = Combat.unpack_troop(packed_skirmisher_20)
     tempvar expected = Troop(TroopId.Skirmisher, TroopType.RangedNormal, 1, RealmBuildingsIds.ArcherTower, 2, 7, 2, 20, 2)
-    # TODO: is there a clean way how to use assert_array_eq here as well?
     assert_troop_eq(unpacked, expected)
 
     let packed_empty = 0
     let (unpacked : Troop) = Combat.unpack_troop(packed_empty)
-    let (expected_empty) = build_empty_troop()
-    tempvar expected = [expected_empty]  # cast from Troop* to Troop
+    let (expected : Troop) = build_empty_troop()
     assert_troop_eq(unpacked, expected)
 
     return ()
@@ -212,10 +236,10 @@ func unpack_packed_all_loop{range_check_ptr}(troop_id : felt):
         return ()
     end
 
-    let (t : Troop*) = build_troop(troop_id)
-    let (packed) = Combat.pack_troop([t])
+    let (t : Troop) = build_troop(troop_id)
+    let (packed) = Combat.pack_troop(t)
     let (unpacked) = Combat.unpack_troop(packed)
-    assert_troop_eq(unpacked, [t])
+    assert_troop_eq(unpacked, t)
 
     return unpack_packed_all_loop(troop_id - 1)
 end
@@ -358,26 +382,35 @@ end
 func test_hit_troop{range_check_ptr}():
     alloc_locals
 
-    let (empty : Troop*) = build_empty_troop()
+    let (empty : Troop) = build_empty_troop()
 
     # full kill
-    let (skirmisher : Troop*) = build_troop(TroopId.Skirmisher)
-    let (hit : Troop, remaining : felt) = Combat.hit_troop([skirmisher], 80)
-    assert_troop_eq(hit, [empty])
+    let (skirmisher : Troop) = build_troop(TroopId.Skirmisher)
+    let (hit : Troop, remaining : felt) = Combat.hit_troop(skirmisher, 80)
+    assert_troop_eq(hit, empty)
     assert_eq(remaining, 80 - skirmisher.vitality)
 
     # injury
-    let (mage : Troop*) = build_troop(TroopId.Mage)
-    let (hit : Troop, remaining : felt) = Combat.hit_troop([mage], 20)
-    tempvar expected = new Troop(mage.id, mage.type, mage.tier, mage.building, mage.agility,
-        mage.attack, mage.armor, mage.vitality - 20, mage.wisdom)
-    assert_troop_eq(hit, [expected])
+    let (mage : Troop) = build_troop(TroopId.Mage)
+    let (hit : Troop, remaining : felt) = Combat.hit_troop(mage, 20)
+    let expected = Troop(
+        mage.id,
+        mage.type,
+        mage.tier,
+        mage.building,
+        mage.agility,
+        mage.attack,
+        mage.armor,
+        mage.vitality - 20,
+        mage.wisdom,
+    )
+    assert_troop_eq(hit, expected)
     assert_eq(remaining, 0)
 
     # no hit
-    let (knight : Troop*) = build_troop(TroopId.Knight)
-    let (hit : Troop, remaining : felt) = Combat.hit_troop([knight], 0)
-    assert_troop_eq(hit, [knight])
+    let (knight : Troop) = build_troop(TroopId.Knight)
+    let (hit : Troop, remaining : felt) = Combat.hit_troop(knight, 0)
+    assert_troop_eq(hit, knight)
     assert_eq(remaining, 0)
 
     return ()
@@ -397,66 +430,66 @@ end
 
 # TODO: maybe return an instance of Troop, not a Troop* in the build troop fns
 
-func build_troop{range_check_ptr}(troop_id) -> (troop : Troop*):
+func build_troop{range_check_ptr}(troop_id) -> (troop : Troop):
     let (
         type, tier, building, agility, attack, armor, vitality, wisdom
     ) = Combat.get_troop_properties(troop_id)
-    return (new Troop(troop_id, type, tier, building, agility, attack, armor, vitality, wisdom))
+    return (Troop(troop_id, type, tier, building, agility, attack, armor, vitality, wisdom))
 end
 
-func build_empty_troop() -> (troop : Troop*):
-    return (new Troop(0, 0, 0, 0, 0, 0, 0, 0, 0))
+func build_empty_troop() -> (troop : Troop):
+    return (Troop(0, 0, 0, 0, 0, 0, 0, 0, 0))
 end
 
 func build_default_squad{range_check_ptr}() -> (s : Squad):
-    let t1_1 : Troop* = build_troop(TroopId.Skirmisher)
-    let t1_2 : Troop* = build_troop(TroopId.Skirmisher)
-    let t1_3 : Troop* = build_troop(TroopId.Skirmisher)
-    let t1_4 : Troop* = build_troop(TroopId.Skirmisher)
-    let t1_5 : Troop* = build_troop(TroopId.Skirmisher)
-    let t1_6 : Troop* = build_troop(TroopId.Skirmisher)
-    let t1_7 : Troop* = build_troop(TroopId.Skirmisher)
-    let t1_8 : Troop* = build_troop(TroopId.Skirmisher)
-    let t1_9 : Troop* = build_troop(TroopId.Skirmisher)
+    let t1_1 : Troop = build_troop(TroopId.Skirmisher)
+    let t1_2 : Troop = build_troop(TroopId.Skirmisher)
+    let t1_3 : Troop = build_troop(TroopId.Skirmisher)
+    let t1_4 : Troop = build_troop(TroopId.Skirmisher)
+    let t1_5 : Troop = build_troop(TroopId.Skirmisher)
+    let t1_6 : Troop = build_troop(TroopId.Skirmisher)
+    let t1_7 : Troop = build_troop(TroopId.Skirmisher)
+    let t1_8 : Troop = build_troop(TroopId.Skirmisher)
+    let t1_9 : Troop = build_troop(TroopId.Skirmisher)
 
-    let t2_1 : Troop* = build_troop(TroopId.Longbow)
-    let t2_2 : Troop* = build_troop(TroopId.Longbow)
-    let t2_3 : Troop* = build_troop(TroopId.Longbow)
-    let t2_4 : Troop* = build_troop(TroopId.Longbow)
-    let t2_5 : Troop* = build_troop(TroopId.Longbow)
+    let t2_1 : Troop = build_troop(TroopId.Longbow)
+    let t2_2 : Troop = build_troop(TroopId.Longbow)
+    let t2_3 : Troop = build_troop(TroopId.Longbow)
+    let t2_4 : Troop = build_troop(TroopId.Longbow)
+    let t2_5 : Troop = build_troop(TroopId.Longbow)
 
-    let t3_1 : Troop* = build_troop(TroopId.Crossbow)
+    let t3_1 : Troop = build_troop(TroopId.Crossbow)
 
     return (
         Squad(
-        [t1_1], [t1_2], [t1_3], [t1_4], [t1_5], [t1_6], [t1_7],
-        [t1_8], [t1_9], [t2_1], [t2_2], [t2_3], [t2_4], [t2_5], [t3_1]),
+        t1_1, t1_2, t1_3, t1_4, t1_5, t1_6, t1_7,
+        t1_8, t1_9, t2_1, t2_2, t2_3, t2_4, t2_5, t3_1),
     )
 end
 
 func build_partial_squad{range_check_ptr}() -> (s : Squad):
-    let t1_1 : Troop* = build_troop(TroopId.Skirmisher)
-    let t1_2 : Troop* = build_troop(TroopId.Skirmisher)
-    let t1_3 : Troop* = build_troop(TroopId.Skirmisher)
-    let t1_4 : Troop* = build_troop(TroopId.Skirmisher)
-    let t1_5 : Troop* = build_troop(TroopId.Skirmisher)
-    let t1_6 : Troop* = build_empty_troop()
-    let t1_7 : Troop* = build_empty_troop()
-    let t1_8 : Troop* = build_empty_troop()
-    let t1_9 : Troop* = build_empty_troop()
+    let t1_1 : Troop = build_troop(TroopId.Skirmisher)
+    let t1_2 : Troop = build_troop(TroopId.Skirmisher)
+    let t1_3 : Troop = build_troop(TroopId.Skirmisher)
+    let t1_4 : Troop = build_troop(TroopId.Skirmisher)
+    let t1_5 : Troop = build_troop(TroopId.Skirmisher)
+    let t1_6 : Troop = build_empty_troop()
+    let t1_7 : Troop = build_empty_troop()
+    let t1_8 : Troop = build_empty_troop()
+    let t1_9 : Troop = build_empty_troop()
 
-    let t2_1 : Troop* = build_troop(TroopId.Longbow)
-    let t2_2 : Troop* = build_troop(TroopId.Longbow)
-    let t2_3 : Troop* = build_troop(TroopId.Longbow)
-    let t2_4 : Troop* = build_empty_troop()
-    let t2_5 : Troop* = build_empty_troop()
+    let t2_1 : Troop = build_troop(TroopId.Longbow)
+    let t2_2 : Troop = build_troop(TroopId.Longbow)
+    let t2_3 : Troop = build_troop(TroopId.Longbow)
+    let t2_4 : Troop = build_empty_troop()
+    let t2_5 : Troop = build_empty_troop()
 
-    let t3_1 : Troop* = build_troop(TroopId.Crossbow)
+    let t3_1 : Troop = build_troop(TroopId.Crossbow)
 
     return (
         Squad(
-        [t1_1], [t1_2], [t1_3], [t1_4], [t1_5], [t1_6], [t1_7],
-        [t1_8], [t1_9], [t2_1], [t2_2], [t2_3], [t2_4], [t2_5], [t3_1]),
+        t1_1, t1_2, t1_3, t1_4, t1_5, t1_6, t1_7,
+        t1_8, t1_9, t2_1, t2_2, t2_3, t2_4, t2_5, t3_1),
     )
 end
 
