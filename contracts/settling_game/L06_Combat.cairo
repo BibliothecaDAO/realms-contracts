@@ -134,7 +134,7 @@ func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
 ):
     Module.initializer(address_of_controller)
     xoroshiro_address.write(xoroshiro_addr)
-    Proxy.constructor(proxy_admin)
+    Proxy.initializer(proxy_admin)
     return ()
 end
 
@@ -143,7 +143,7 @@ func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     new_implementation : felt
 ):
     Proxy.assert_only_admin()
-    Proxy._set_implementation(new_implementation)
+    Proxy._set_implementation_hash(new_implementation)
     return ()
 end
 
@@ -159,9 +159,6 @@ func build_squad_from_troops_in_realm{
 }(troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt):
     alloc_locals
 
-    let (caller) = get_caller_address()
-    let (controller) = Module.controller_address()
-
     Module.ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
 
     # get the Cost for every Troop to build
@@ -176,6 +173,8 @@ func build_squad_from_troops_in_realm{
     )
 
     # pay for the squad
+    let (caller) = get_caller_address()
+    let (controller) = Module.controller_address()
     let (resource_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Resources
     )

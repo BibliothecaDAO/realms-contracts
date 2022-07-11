@@ -30,20 +30,6 @@ func test_attack{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuilti
 end
 
 @view
-func test_hit_squad{range_check_ptr}(s : Squad, hits : felt) -> (squad : Squad):
-    let (s) = hit_squad(s, hits)
-    return (s)
-end
-
-@view
-func test_hit_troop{range_check_ptr}(t : Troop, hits : felt) -> (
-    hit_troop : Troop, remaining_hits : felt
-):
-    let (t, r) = hit_troop(t, hits)
-    return (t, r)
-end
-
-@view
 func test_compute_min_roll_to_hit{range_check_ptr}(a : felt, d : felt) -> (min_roll : felt):
     let (r) = compute_min_roll_to_hit(a, d)
     return (r)

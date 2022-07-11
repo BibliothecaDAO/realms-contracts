@@ -9,9 +9,4 @@ cairo-path = ["./lib/cairo_contracts/src"]
 
 # This section is explained in the "Project compilation" guide.
 ["protostar.contracts"]
-main = [
-  "./contracts/settling_game/Arbiter.cairo",
-]
-
-["protostar.build"]
-cairo-path = ["./lib/cairo_contracts/src"]
+main = ["./contracts/settling_game/Arbiter.cairo"]
