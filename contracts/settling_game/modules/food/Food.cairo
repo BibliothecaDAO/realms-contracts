@@ -9,25 +9,44 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
+from starkware.cairo.common.bool import TRUE, FALSE
+from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 
-from contracts.settling_game.utils.constants import TRUE
 from contracts.settling_game.library.library_module import Module
-from openzeppelin.upgrades.library import Proxy
+from contracts.settling_game.utils.constants import BASE_HARVESTS
+from contracts.settling_game.utils.game_structs import (
+    RealmData,
+    ModuleIds,
+    ExternalContractIds,
+    Cost,
+)
+from contracts.settling_game.modules.food.library import Food
 
+from openzeppelin.upgrades.library import Proxy
+from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 # -----------------------------------
 # Events
 # -----------------------------------
 
-@event
-func RelicUpdate(relic_id : Uint256, owner_token_id : Uint256):
-end
+# @storage_var
+# func Food(token_id : felt) -> (farms_left : felt, last_harvest : felt):
+# end
 
 # -----------------------------------
 # Storage
 # -----------------------------------
 
 @storage_var
-func storage_relic_holder(relic_id : Uint256) -> (owner_token_id : Uint256):
+func farms(token_id : Uint256) -> (farms_left : felt):
+end
+
+# each farms build can be harvested 10 times
+@storage_var
+func harvests_left(token_id : Uint256) -> (harvests_left : felt):
+end
+
+@storage_var
+func last_harvest(token_id : Uint256) -> (last_harvest : felt):
 end
 
 # -----------------------------------
@@ -62,7 +81,26 @@ end
 # EXTERNAL
 # -----------------------------------
 
-# Plant farm
+@external
+func create_farm{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256, number_farms : felt, food_building_id : felt
+):
+    let (block_timestamp) = get_block_timestamp()
+    let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
+    let (realm_data) = realms_IERC721.fetch_realm_data(realms_address, token_id)
+
+    # Farm expirary time
+    let (time) = Food.create(number_farms, food_building_id, realm_data)
+    last_harvest.write(token_id, time)
+
+    # save number of farms
+    farms.write(token_id, number_farms)
+
+    # save harvests
+    harvests_left.write(token_id, BASE_HARVESTS)
+
+    return ()
+end
 
 # Harvest farm
 
