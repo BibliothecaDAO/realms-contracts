@@ -14,7 +14,7 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le, assert_nn
 from starkware.cairo.common.math_cmp import is_le
 
-from contracts.settling_game.utils.constants import FARM_LENGTH
+from contracts.settling_game.utils.constants import FARM_LENGTH, MAX_HARVEST_LENGTH
 from contracts.settling_game.utils.game_structs import RealmData, RealmBuildingsIds
 
 namespace Food:
@@ -42,17 +42,24 @@ namespace Food:
 
     # calculates how many available farms to harvest
     # max of 3 full harvests accure
-    # decay rate in time if you harvest later
+    # if more farms than MAX, return MAX and decayed farms. How will loose these harvests.
     func calculate_harvest{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         update_time : felt, block_timestamp : felt
-    ) -> (total_farms : felt, total_remaining : felt):
+    ) -> (total_farms : felt, total_remaining : felt, decayed_farms : felt):
         alloc_locals
 
         let time_since_update = block_timestamp - update_time
 
+        # TODO add max days can accure
         let (total_farms, remainding_crops) = unsigned_div_rem(time_since_update, FARM_LENGTH)
 
-        return (total_farms, remainding_crops)
+        let (le_max_farms) = is_le(total_farms, MAX_HARVEST_LENGTH + 1)
+
+        if le_max_farms == 1:
+            return (total_farms, remainding_crops, 0)
+        end
+
+        return (MAX_HARVEST_LENGTH, remainding_crops, le_max_farms - MAX_HARVEST_LENGTH)
     end
 
     func calculate_store_house{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(

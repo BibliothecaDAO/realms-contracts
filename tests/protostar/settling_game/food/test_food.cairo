@@ -20,7 +20,9 @@ const UPDATE_TIME = GENESIS_TIMESTAMP - (FARM_LENGTH * 10)
 func test_current_relic_holder{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     alloc_locals
 
-    let (total_farms, remainding_crops) = Food.calculate_harvest(UPDATE_TIME, GENESIS_TIMESTAMP)
+    let (total_farms, remainding_crops, decayed_farms) = Food.calculate_harvest(
+        UPDATE_TIME, GENESIS_TIMESTAMP
+    )
 
     assert total_farms = 10
 
@@ -51,11 +53,11 @@ func test_create{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     # test can build farms
     let (farm) = Food.create(TEST_REALM_DATA.RIVERS, RealmBuildingsIds.Farm, realmData)
 
-    assert farm = 1000
+    assert farm = FARM_LENGTH
 
     let (fish) = Food.create(TEST_REALM_DATA.HARBOURS, RealmBuildingsIds.FishingVillage, realmData)
 
-    assert fish = 1000
+    assert fish = FARM_LENGTH
 
     return ()
 end
