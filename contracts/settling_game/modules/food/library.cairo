@@ -62,11 +62,20 @@ namespace Food:
         return (MAX_HARVEST_LENGTH, remainding_crops, le_max_farms - MAX_HARVEST_LENGTH)
     end
 
-    func calculate_store_house{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256
-    ) -> (token_id : Uint256):
+    func calculate_food_in_store_house{
+        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+    }(current_food_supply : felt, block_timestamp : felt) -> (current : felt):
         alloc_locals
-        return ()
+
+        let current = current_food_supply - block_timestamp
+
+        let (is_empty) = is_le(current, 0)
+
+        if is_empty == TRUE:
+            return (0)
+        end
+
+        return (current)
     end
 
     func calculate_cost{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(

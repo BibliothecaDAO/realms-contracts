@@ -61,3 +61,24 @@ func test_create{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
 
     return ()
 end
+
+const STORE_HOUSE_FULL = GENESIS_TIMESTAMP + (FARM_LENGTH * 10)
+const STORE_HOUSE_EMPTY = GENESIS_TIMESTAMP - (FARM_LENGTH * 10)
+@external
+func test_calculate_food_in_store_house{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+}():
+    alloc_locals
+
+    let (full_store) = Food.calculate_food_in_store_house(STORE_HOUSE_FULL, GENESIS_TIMESTAMP)
+
+    # Assert full
+    assert full_store = STORE_HOUSE_FULL - GENESIS_TIMESTAMP
+
+    let (empty_store) = Food.calculate_food_in_store_house(STORE_HOUSE_EMPTY, GENESIS_TIMESTAMP)
+
+    # Assert empty
+    assert empty_store = 0
+
+    return ()
+end

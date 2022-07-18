@@ -51,6 +51,10 @@ end
 func last_harvest(token_id : Uint256) -> (last_harvest : felt):
 end
 
+@storage_var
+func store_house(token_id : Uint256) -> (available_food : felt):
+end
+
 # -----------------------------------
 # INITIALIZER & UPGRADE
 # -----------------------------------
@@ -125,7 +129,8 @@ func harvest_farm{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
 
     let total_food = total_harvest * BASE_FOOD_PRODUCTION * 10 ** 18
 
-    if harvest_type == HarvestType.Store:
+    # mint food
+    if harvest_type == HarvestType.Export:
         IERC1155.mint(
             resources_address, owner, Uint256(ResourceIds.wheat, 0), Uint256(total_food, 0)
         )
@@ -133,7 +138,8 @@ func harvest_farm{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
         tempvar range_check_ptr = range_check_ptr
         tempvar pedersen_ptr = pedersen_ptr
     else:
-        # send to Storehouse
+        # turn directly into useable food
+        convert_to_store(token_id, total_food)
         tempvar syscall_ptr = syscall_ptr
         tempvar range_check_ptr = range_check_ptr
         tempvar pedersen_ptr = pedersen_ptr
@@ -147,19 +153,32 @@ func harvest_farm{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     return ()
 end
 
-@external
 func convert_to_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256, quantity : felt
 ):
     alloc_locals
+    let (block_timestamp) = get_block_timestamp()
+    
+    let (current) = food_in_store(token_id)
 
-    # convert token quantity into time
-    # store timestamp in storage
+    store_house.write(token_id, current + quantity + block_timestamp)
 
     return ()
 end
 
-# Calculate food available
+@view
+func food_in_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
+) -> (available : felt):
+    alloc_locals
+    let (block_timestamp) = get_block_timestamp()
+
+    let (current_food_supply) = store_house.read(token_id)
+
+    let (available) = Food.calculate_food_in_store_house(current_food_supply, block_timestamp)
+
+    return (available)
+end
 
 # -----------------------------------
 # SETTERS
