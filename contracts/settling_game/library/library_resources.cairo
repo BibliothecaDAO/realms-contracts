@@ -11,6 +11,7 @@ from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le, assert_nn
+from starkware.cairo.common.bool import TRUE, FALSE
 
 from contracts.settling_game.utils.game_structs import (
     RealmData,
@@ -19,8 +20,6 @@ from contracts.settling_game.utils.game_structs import (
     Cost,
 )
 from contracts.settling_game.utils.constants import (
-    TRUE,
-    FALSE,
     VAULT_LENGTH,
     DAY,
     BASE_RESOURCES_PER_DAY,
@@ -175,9 +174,8 @@ namespace Resources:
     ):
         alloc_locals
 
-        let (
-            r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output, r_7_output
-        ) = _calculate_all_resource_output(happiness, realms_data)
+        let (r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output,
+            r_7_output) = _calculate_all_resource_output(happiness, realms_data)
 
         # USER CLAIM
         let (r_1_user) = _calculate_resource_claimable(days, mint_percentage, r_1_output)

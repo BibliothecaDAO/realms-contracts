@@ -11,6 +11,7 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
+from starkware.cairo.common.math_cmp import is_le
 
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.utils.constants import BASE_HARVESTS, BASE_FOOD_PRODUCTION
@@ -157,28 +158,6 @@ func harvest_farm{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     return ()
 end
 
-# This is the available food
-# Equals total food / population - each digital population consumes 1 food per second.
-@view
-func available_food_in_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    token_id : Uint256
-) -> (available : felt):
-    alloc_locals
-
-    let (calculator_address) = Module.get_module_address(ModuleIds.L04_Calculator)
-
-    # get raw amount
-    let (current) = food_in_store(token_id)
-
-    # get population
-    let (population) = IL04_Calculator.calculate_population(calculator_address, token_id)
-
-    # get actual food
-    let (available) = Food.calculate_available_food(current, population)
-
-    return (available)
-end
-
 # -----------------------------------
 # INTERNAL
 # -----------------------------------
@@ -212,9 +191,60 @@ func food_in_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
 end
 
 # -----------------------------------
-# SETTERS
-# -----------------------------------
-
-# -----------------------------------
 # GETTERS
 # -----------------------------------
+# This is the available food
+# Equals total food / population - each digital population consumes 1 food per second.
+@view
+func available_food_in_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
+) -> (available : felt):
+    alloc_locals
+
+    let (calculator_address) = Module.get_module_address(ModuleIds.L04_Calculator)
+
+    # get raw amount
+    let (current) = food_in_store(token_id)
+
+    # get population
+    let (population) = IL04_Calculator.calculate_population(calculator_address, token_id)
+
+    # get actual food
+    let (available) = Food.calculate_available_food(current, population)
+
+    return (available)
+end
+
+# -----------------------------------
+# HOOKS
+# -----------------------------------
+
+# updates food value to match computed.
+# this stops food ever returning to a greater value than what it was
+@external
+func update_food_hook{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
+):
+    alloc_locals
+    Module.only_approved()
+
+    let (block_timestamp) = get_block_timestamp()
+
+    let (current_food_supply) = available_food_in_store(token_id)
+
+    let (is_empty) = is_le(current_food_supply, 0)
+
+    if is_empty == TRUE:
+        store_house.write(token_id, 0)
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    else:
+        store_house.write(token_id, current_food_supply + block_timestamp)
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    end
+
+    return ()
+end

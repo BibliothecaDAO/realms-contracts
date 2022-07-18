@@ -27,7 +27,7 @@ from starkware.cairo.common.math import assert_not_zero
 from starkware.starknet.common.syscalls import get_caller_address
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
 from starkware.starknet.common.syscalls import get_block_timestamp
-from contracts.settling_game.utils.constants import TRUE, FALSE
+from starkware.cairo.common.bool import TRUE, FALSE
 
 # -----------------------------------
 # Storage

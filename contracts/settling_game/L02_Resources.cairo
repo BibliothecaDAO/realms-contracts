@@ -145,30 +145,11 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     IL01_Settling.set_time_staked(settling_logic_address, token_id, remainder)
     IL01_Settling.set_time_vault_staked(settling_logic_address, token_id, vault_remainder)
 
-    # GET WONDER TAX
-    let (wonder_tax) = IL04_Calculator.calculate_wonder_tax(calculator_address)
-
-    # SET MINT
-    let treasury_mint_perc = wonder_tax
-
-    with_attr error_message("RESOURCES: resource id underflowed a felt."):
-        # Make sure wonder_tax doesn't divide by zero
-        assert_le(wonder_tax, 100)
-        let user_resources_value_rel_perc = 100 - wonder_tax
-    end
-
     # resources ids
     let (resource_ids : Uint256*) = Resources._calculate_realm_resource_ids(realms_data)
 
-    # happiness
-    let (happiness) = IL04_Calculator.calculate_happiness(calculator_address, token_id)
-
     let (resource_mint : Uint256*) = Resources._calculate_total_mintable_resources(
-        happiness, realms_data, days, user_resources_value_rel_perc
-    )
-
-    let (resource_wonder_mint : Uint256*) = Resources._calculate_total_mintable_resources(
-        happiness, realms_data, days, treasury_mint_perc
+        100, realms_data, days, 100
     )
 
     # FETCH OWNER
@@ -182,19 +163,6 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         resource_ids,
         realms_data.resource_number,
         resource_mint,
-    )
-
-    # GET EPOCH
-    let (current_epoch) = IL04_Calculator.calculate_epoch(calculator_address)
-
-    # SET WONDER TAX IN POOL
-    IL05_Wonders.batch_set_tax_pool(
-        wonders_logic_address,
-        current_epoch,
-        realms_data.resource_number,
-        resource_ids,
-        realms_data.resource_number,
-        resource_wonder_mint,
     )
 
     return ()
