@@ -5,32 +5,33 @@ from tests.shared import pack_values
 
 Cost = namedtuple('Cost', 'resource_count bits packed_ids packed_amounts')
 CostWithLords = namedtuple('Cost', 'resource_count bits packed_ids packed_amounts lords')
-Troop = namedtuple('Troop', 'id type tier agility attack defense vitality wisdom')
+Troop = namedtuple('Troop', 'id type tier building agility attack defense vitality wisdom')
 Squad = namedtuple(
     'Squad',
-    't1_1 t1_2 t1_3 t1_4 t1_5 t1_6 t1_7 t1_8 t1_9 t1_10 t1_11 t1_12 t1_13 t1_14 t1_15 t1_16 '
-    + 't2_1 t2_2 t2_3 t2_4 t2_5 t2_6 t2_7 t2_8 t3_1',
+    't1_1 t1_2 t1_3 t1_4 t1_5 t1_6 t1_7 t1_8 t1_9 t2_1 t2_2 t2_3 t2_4 t2_5 t3_1',
 )
-PackedSquad = namedtuple('PackedSquad', 'p1 p2')
 
 
 class TroopId(IntEnum):
-    Watchman = 1
-    Guard = 2
-    GuardCaptain = 3
-    Squire = 4
+    Skirmisher = 1
+    Longbow = 2
+    Crossbow = 3
+    Pikeman = 4
     Knight = 5
-    KnightCommander = 6
-    Scout = 7
-    Archer = 8
-    Sniper = 9
-    Scorpio = 10
-    Ballista = 11
-    Catapult = 12
-    Apprentice = 13
-    Mage = 14
-    Arcanist = 15
-    GrandMarshal = 16
+    Paladin = 6
+    Ballista = 7
+    Mangonel = 8
+    Trebuchet = 9
+    Apprentice = 10
+    Mage = 11
+    Arcanist = 12
+
+
+class TroopType(IntEnum):
+    RangedNormal = 1
+    RangedMagic = 2
+    Melee = 3
+    Siege = 4
 
 
 class ResourceIds(IntEnum):
@@ -389,7 +390,7 @@ TROOP_COSTS = {
         4,
         8,
         pack_values([ResourceIds.Wood, ResourceIds.Stone, ResourceIds.Coal, ResourceIds.Silver]),
-        pack_values([100, 100, 100, 50])
+        pack_values([100, 100, 100, 50]),
     ),
     TroopId.Ballista: Cost(
         3,
