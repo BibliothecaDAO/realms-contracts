@@ -12,7 +12,7 @@ from starkware.cairo.common.uint256 import Uint256, uint256_eq
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 from starkware.cairo.common.math_cmp import is_le
-
+from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le, assert_nn
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.utils.constants import BASE_HARVESTS, BASE_FOOD_PRODUCTION
 from contracts.settling_game.utils.game_structs import (
@@ -22,6 +22,7 @@ from contracts.settling_game.utils.game_structs import (
     ResourceIds,
     Cost,
     HarvestType,
+    RealmBuildingsIds,
 )
 from contracts.settling_game.modules.food.library import Food
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
@@ -34,26 +35,42 @@ from contracts.settling_game.interfaces.imodules import IL04_Calculator
 # -----------------------------------
 
 # @storage_var
-# func Food(token_id : felt) -> (farms_left : felt, last_harvest : felt):
+# func Food(token_id : felt) -> (farms_left : felt, last_farm_update : felt):
 # end
 
 # -----------------------------------
 # Storage
 # -----------------------------------
 
+# -------FARMS-------#
 @storage_var
-func farms(token_id : Uint256) -> (farms_left : felt):
+func farms_built(token_id : Uint256) -> (farms_built : felt):
 end
 
-# each farms build can be harvested 10 times
+# each farms build can be harvested X times
 @storage_var
-func harvests_left(token_id : Uint256) -> (harvests_left : felt):
+func farm_harvests_left(token_id : Uint256) -> (farm_harvests_left : felt):
 end
 
 @storage_var
-func last_harvest(token_id : Uint256) -> (last_harvest : felt):
+func last_farm_update(token_id : Uint256) -> (last_farm_update : felt):
 end
 
+# -------FISHING-------#
+@storage_var
+func fishing_villages_built(token_id : Uint256) -> (fishing_villages_built : felt):
+end
+
+# each farms build can be harvested X times
+@storage_var
+func fishing_villages_harvests_left(token_id : Uint256) -> (fishing_villages_harvests_left : felt):
+end
+
+@storage_var
+func last_fishing_villages_update(token_id : Uint256) -> (last_fishing_villages_update : felt):
+end
+
+# -------STORE HOUSE-------#
 @storage_var
 func store_house(token_id : Uint256) -> (available_food : felt):
 end
@@ -91,23 +108,49 @@ end
 # -----------------------------------
 
 @external
-func create_farm{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    token_id : Uint256, number_farms : felt, food_building_id : felt
+func create{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256, qty : felt, food_building_id : felt
 ):
     alloc_locals
-    let (block_timestamp) = get_block_timestamp()
+    # check id
+    Food.assert_ids(food_building_id)
+
+    # checks
+    Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
+
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
     let (realm_data) = realms_IERC721.fetch_realm_data(realms_address, token_id)
 
-    # Farm expirary time
-    let (time) = Food.create(number_farms, food_building_id, realm_data)
-    last_harvest.write(token_id, block_timestamp)
+    # checks
+    if food_building_id == RealmBuildingsIds.Farm:
+        let (enough_rivers) = is_le(qty, realm_data.rivers + 1)
+        with_attr error_message("FOOD: Not enough Rivers"):
+            assert_not_zero(enough_rivers)
+        end
+    else:
+        let (enough_harbours) = is_le(qty, realm_data.harbours + 1)
+        with_attr error_message("FOOD: Not enough Harbours"):
+            assert_not_zero(enough_harbours)
+        end
+    end
 
-    # save number of farms
-    farms.write(token_id, number_farms)
+    # set plant time
+    let (block_timestamp) = get_block_timestamp()
 
-    # save harvests
-    harvests_left.write(token_id, BASE_HARVESTS)
+    # build required building
+    if food_building_id == RealmBuildingsIds.Farm:
+        last_farm_update.write(token_id, block_timestamp)
+        # save number of farms
+        farms_built.write(token_id, qty)
+        # save harvests
+        farm_harvests_left.write(token_id, BASE_HARVESTS)
+    else:
+        last_fishing_villages_update.write(token_id, block_timestamp)
+        # save number of fishing villages
+        fishing_villages_built.write(token_id, qty)
+        # save harvests
+        fishing_villages_harvests_left.write(token_id, BASE_HARVESTS)
+    end
 
     # TODO: Add resource cost to build farms
 
@@ -115,33 +158,73 @@ func create_farm{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
 end
 
 @external
-func harvest_farm{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    token_id : Uint256, harvest_type : felt
+func harvest{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256, harvest_type : felt, food_building_id : felt
 ):
     alloc_locals
+
+    # check id
+    Food.assert_ids(food_building_id)
+
+    # check owner
+    Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
+
+    # contracts
     let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms)
     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
     let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
 
+    # farm expirary time
     let (block_timestamp) = get_block_timestamp()
 
-    let (plant_time) = last_harvest.read(token_id)
+    tempvar total_harvest = 0
+    tempvar total_remaining = 0
+    tempvar decayed_farms = 0
 
-    # Farm expirary time
-    let (total_harvest, total_remaining, decayed_farms) = Food.calculate_harvest(
-        plant_time, block_timestamp
-    )
+    # build required building
+    if food_building_id == RealmBuildingsIds.Farm:
+        let (plant_time) = last_farm_update.read(token_id)
+        let (total_harvest, total_remaining, decayed_farms) = Food.calculate_harvest(
+            plant_time, block_timestamp
+        )
+        tempvar total_harvest = total_harvest
+        tempvar total_remaining = total_remaining
+        tempvar decayed_farms = decayed_farms
+    else:
+        let (plant_time) = last_fishing_villages_update.read(token_id)
+        let (total_harvest, total_remaining, decayed_farms) = Food.calculate_harvest(
+            plant_time, block_timestamp
+        )
+        tempvar total_harvest = total_harvest
+        tempvar total_remaining = total_remaining
+        tempvar decayed_farms = decayed_farms
+    end
 
+    # total food to harvest
     let total_food = total_harvest * BASE_FOOD_PRODUCTION * 10 ** 18
+
+    let (current_harvests) = farm_harvests_left.read(token_id)
+    farm_harvests_left.write(token_id, current_harvests - total_harvest - decayed_farms)
 
     # mint food
     if harvest_type == HarvestType.Export:
-        IERC1155.mint(
-            resources_address, owner, Uint256(ResourceIds.wheat, 0), Uint256(total_food, 0)
-        )
-        tempvar syscall_ptr = syscall_ptr
-        tempvar range_check_ptr = range_check_ptr
-        tempvar pedersen_ptr = pedersen_ptr
+        if food_building_id == RealmBuildingsIds.Farm:
+            # wheat
+            IERC1155.mint(
+                resources_address, owner, Uint256(ResourceIds.wheat, 0), Uint256(total_food, 0)
+            )
+            tempvar syscall_ptr = syscall_ptr
+            tempvar range_check_ptr = range_check_ptr
+            tempvar pedersen_ptr = pedersen_ptr
+        else:
+            # fish
+            IERC1155.mint(
+                resources_address, owner, Uint256(ResourceIds.fish, 0), Uint256(total_food, 0)
+            )
+            tempvar syscall_ptr = syscall_ptr
+            tempvar range_check_ptr = range_check_ptr
+            tempvar pedersen_ptr = pedersen_ptr
+        end
     else:
         # turn directly into useable food
         convert_to_store(token_id, total_food)
@@ -149,11 +232,6 @@ func harvest_farm{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
         tempvar range_check_ptr = range_check_ptr
         tempvar pedersen_ptr = pedersen_ptr
     end
-
-    # Deducte harvests from total
-    # TODO: Check no overflow
-    let (current_harvests) = harvests_left.read(token_id)
-    harvests_left.write(token_id, current_harvests - total_harvest - decayed_farms)
 
     return ()
 end

@@ -18,28 +18,6 @@ from contracts.settling_game.utils.constants import FARM_LENGTH, MAX_HARVEST_LEN
 from contracts.settling_game.utils.game_structs import RealmData, RealmBuildingsIds
 
 namespace Food:
-    # checks can build, maybe move to actual contract rather than lib
-    func create{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        number_to_build : felt, food_building_id : felt, realm_data : RealmData
-    ) -> (time : felt):
-        alloc_locals
-
-        # add +1 so you can build upto the amount
-        if food_building_id == RealmBuildingsIds.Farm:
-            let (enough_rivers) = is_le(number_to_build, realm_data.rivers + 1)
-            with_attr error_message("FOOD: Not enough Rivers"):
-                assert_not_zero(enough_rivers)
-            end
-        else:
-            let (enough_harbours) = is_le(number_to_build, realm_data.harbours + 1)
-            with_attr error_message("FOOD: Not enough Harbours"):
-                assert_not_zero(enough_harbours)
-            end
-        end
-
-        return (FARM_LENGTH)
-    end
-
     # calculates how many available farms to harvest
     # max of 3 full harvests accure
     # if more farms than MAX, return MAX and decayed farms. How will loose these harvests.
@@ -93,5 +71,18 @@ namespace Food:
         end
 
         return (true_food_supply)
+    end
+
+    func assert_ids{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        food_building_id : felt
+    ):
+        alloc_locals
+
+        with_attr error_message("FOOD: Incorrect Building ID"):
+            assert_le(food_building_id, 3)
+            assert_not_zero(food_building_id)
+        end
+
+        return ()
     end
 end
