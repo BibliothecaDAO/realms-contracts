@@ -26,6 +26,8 @@ from contracts.settling_game.modules.food.library import Food
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from openzeppelin.upgrades.library import Proxy
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
+from contracts.settling_game.interfaces.imodules import IL04_Calculator
+
 # -----------------------------------
 # Events
 # -----------------------------------
@@ -106,6 +108,8 @@ func create_farm{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     # save harvests
     harvests_left.write(token_id, BASE_HARVESTS)
 
+    # TODO: Add resource cost to build farms
+
     return ()
 end
 
@@ -114,6 +118,10 @@ func harvest_farm{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     token_id : Uint256, harvest_type : felt
 ):
     alloc_locals
+    let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms)
+    let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
+    let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
+
     let (block_timestamp) = get_block_timestamp()
 
     let (plant_time) = last_harvest.read(token_id)
@@ -122,10 +130,6 @@ func harvest_farm{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     let (total_harvest, total_remaining, decayed_farms) = Food.calculate_harvest(
         plant_time, block_timestamp
     )
-    let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms)
-    let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
-
-    let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
 
     let total_food = total_harvest * BASE_FOOD_PRODUCTION * 10 ** 18
 
@@ -153,12 +157,39 @@ func harvest_farm{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     return ()
 end
 
+# This is the available food
+# Equals total food / population - each digital population consumes 1 food per second.
+@view
+func available_food_in_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
+) -> (available : felt):
+    alloc_locals
+
+    let (calculator_address) = Module.get_module_address(ModuleIds.L04_Calculator)
+
+    # get raw amount
+    let (current) = food_in_store(token_id)
+
+    # get population
+    let (population) = IL04_Calculator.calculate_population(calculator_address, token_id)
+
+    # get actual food
+    let (available) = Food.calculate_available_food(current, population)
+
+    return (available)
+end
+
+# -----------------------------------
+# INTERNAL
+# -----------------------------------
+
+# Convert harvest into storehouse.
 func convert_to_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256, quantity : felt
 ):
     alloc_locals
     let (block_timestamp) = get_block_timestamp()
-    
+
     let (current) = food_in_store(token_id)
 
     store_house.write(token_id, current + quantity + block_timestamp)
@@ -166,7 +197,7 @@ func convert_to_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     return ()
 end
 
-@view
+# This is the raw available food if there was no population. This is only used for internal functions.
 func food_in_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
 ) -> (available : felt):

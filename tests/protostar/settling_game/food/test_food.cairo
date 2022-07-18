@@ -82,3 +82,20 @@ func test_calculate_food_in_store_house{
 
     return ()
 end
+
+const AVAILABLE_FOOD = 2000
+const POPULATION = 25
+
+@external
+func test_calculate_available_food{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+}():
+    alloc_locals
+
+    let (available_food) = Food.calculate_available_food(AVAILABLE_FOOD, POPULATION)
+
+    # Assert full
+    assert available_food = AVAILABLE_FOOD / POPULATION
+
+    return ()
+end

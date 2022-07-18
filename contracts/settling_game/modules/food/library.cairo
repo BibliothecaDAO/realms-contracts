@@ -55,11 +55,11 @@ namespace Food:
 
         let (le_max_farms) = is_le(total_farms, MAX_HARVEST_LENGTH + 1)
 
-        if le_max_farms == 1:
+        if le_max_farms == TRUE:
             return (total_farms, remainding_crops, 0)
         end
 
-        return (MAX_HARVEST_LENGTH, remainding_crops, le_max_farms - MAX_HARVEST_LENGTH)
+        return (MAX_HARVEST_LENGTH, remainding_crops, total_farms - MAX_HARVEST_LENGTH)
     end
 
     func calculate_food_in_store_house{
@@ -78,10 +78,20 @@ namespace Food:
         return (current)
     end
 
-    func calculate_cost{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id : Uint256
-    ) -> (token_id : Uint256):
+    # This returns the real value of food available by taking into account the population
+    func calculate_available_food{
+        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+    }(current_food_supply : felt, population : felt) -> (available_food : felt):
         alloc_locals
-        return ()
+
+        let (true_food_supply, _) = unsigned_div_rem(current_food_supply, population)
+
+        let (is_empty) = is_le(true_food_supply, 0)
+
+        if is_empty == TRUE:
+            return (0)
+        end
+
+        return (true_food_supply)
     end
 end
