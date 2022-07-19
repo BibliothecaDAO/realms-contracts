@@ -240,7 +240,9 @@ func get_buildings_integrity_unpacked{
 
     let (buildings_) = buildings_integrity.read(token_id)
 
-    return Buildings.unpack_buildings(buildings_)
+    let (unpacked) = Buildings.unpack_buildings(buildings_)
+
+    return (unpacked)
 end
 
 @view

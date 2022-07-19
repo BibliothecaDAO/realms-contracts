@@ -1,5 +1,6 @@
 from realms_cli.config import Config
 
+
 def run(nre):
     config = Config(nre.network)
 
