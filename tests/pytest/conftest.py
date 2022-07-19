@@ -245,7 +245,7 @@ async def l06_combat(starknet, xoroshiro) -> StarknetContract:
 
 @pytest.fixture(scope="module")
 async def l06_combat_tests(starknet, xoroshiro) -> StarknetContract:
-    contract = compile("tests/settling_game/L06_Combat_tests.cairo")
+    contract = compile("tests/pytest/settling_game/L06_Combat_tests.cairo")
     # a quirk of the testing framework, even though the L06_Combat_tests contract
     # doesn't have a constructor, it somehow calls (I guess) the constructor of
     # L06_Combat because it imports from it; hence when calling deploy, we need
@@ -260,14 +260,8 @@ async def s06_combat(starknet) -> StarknetContract:
 
 
 @pytest.fixture(scope="module")
-async def library_combat_tests(starknet) -> StarknetContract:
-    contract = compile("tests/settling_game/library_combat_tests.cairo")
-    return await starknet.deploy(contract_class=contract)
-
-
-@pytest.fixture(scope="module")
 async def utils_general_tests(starknet) -> StarknetContract:
-    contract = compile("tests/settling_game/utils/general_tests.cairo")
+    contract = compile("tests/pytest/settling_game/utils/general_tests.cairo")
     return await starknet.deploy(contract_class=contract)
 
 
