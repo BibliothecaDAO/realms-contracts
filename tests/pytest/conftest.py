@@ -1,6 +1,6 @@
 from starkware.starknet.business_logic.state.state import BlockInfo
 from starkware.starknet.testing.starknet import Starknet, StarknetContract
-from starkware.starknet.services.api.contract_definition import ContractDefinition
+from starkware.starknet.services.api.contract_class import ContractClass
 from starkware.starknet.compiler.compile import compile_starknet_files
 import logging
 from types import SimpleNamespace
@@ -8,9 +8,11 @@ import asyncio
 import pytest
 import dill
 import os
-from openzeppelin.tests.utils import Signer, uint, str_to_felt
 import sys
 import time
+from shared import str_to_felt, uint
+from lib.cairo_contracts.tests.signers import MockSigner
+
 
 sys.setrecursionlimit(3000)
 
@@ -36,7 +38,7 @@ initial_supply = 1000000 * (10 ** 18)
 DEFAULT_GAS_PRICE = 100
 
 
-def compile(path) -> ContractDefinition:
+def compile(path) -> ContractClass:
     here = os.path.abspath(os.path.dirname(__file__))
 
     return compile_starknet_files(
@@ -101,8 +103,7 @@ async def _build_copyable_deployment(compiled_proxy):
         ),
     )
 
-    signers = dict(admin=Signer(83745982347), arbiter=Signer(
-        7891011), user1=Signer(897654321))
+    signers = dict(admin=MockSigner(83745982347), arbiter=MockSigner(7891011), user1=MockSigner(897654321))
 
     accounts = SimpleNamespace(
         **{
@@ -212,7 +213,7 @@ async def account_factory(request, compiled_account):
 
     print(f'Deploying {num_signers} accounts...')
     for i in range(num_signers):
-        signer = Signer(DUMMY_PRIVATE + i)
+        signer = MockSigner(DUMMY_PRIVATE + i)
         signers.append(signer)
         account = await starknet.deploy(
             contract_def=compiled_account, constructor_calldata=[signer.public_key]
@@ -281,10 +282,10 @@ async def _build_copyable_deployment_desiege():
     )
 
     signers = dict(
-        admin=Signer(83745982347),
-        player1=Signer(233294204),
-        player2=Signer(233294206),
-        player3=Signer(233294208),
+        admin=MockSigner(83745982347),
+        player1=MockSigner(233294204),
+        player2=MockSigner(233294206),
+        player3=MockSigner(233294208),
     )
 
     accounts = SimpleNamespace(
