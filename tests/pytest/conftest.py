@@ -21,7 +21,8 @@ sys.stdout = sys.stderr
 # Create signers that use a private key to sign transaction objects.
 DUMMY_PRIVATE = 123456789987654321
 
-CONTRACT_SRC = os.path.join(os.path.dirname(__file__), "../..", "contracts")
+CONTRACTS_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "contracts")
+OZ_CONTRACTS_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "lib", "cairo_contracts", "src")
 INITIAL_LORDS_SUPPLY = 500000000 * (10**18)
 REALM_MINT_PRICE = 10 * (10**18)
 
@@ -45,7 +46,7 @@ def compile(path) -> ContractClass:
         files=[path],
         debug_info=True,
         disable_hint_validation=True,
-        cairo_path=[CONTRACT_SRC, here],
+        cairo_path=[CONTRACTS_PATH, OZ_CONTRACTS_PATH, here],
     )
 
 
@@ -276,8 +277,6 @@ async def utils_general_tests(starknet) -> StarknetContract:
 # deployment:
 async def _build_copyable_deployment_desiege():
     starknet = await Starknet.empty()
-
-    logging.warning(CONTRACT_SRC)
 
     defs = SimpleNamespace(
         account=compile("openzeppelin/account/Account.cairo"),
