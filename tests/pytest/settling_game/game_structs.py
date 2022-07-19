@@ -332,100 +332,78 @@ RESOURCE_UPGRADE_COST = {
 }
 
 TROOP_COSTS = {
-    TroopId.Watchman: Cost(
-        3,
+    TroopId.Skirmisher: Cost(
+        1,
         8,
-        pack_values([ResourceIds.Wood, ResourceIds.Stone, ResourceIds.Copper]),
-        pack_values([2, 3, 5]),
+        pack_values([ResourceIds.AlchemicalSilver]),
+        pack_values([1]),
     ),
-    TroopId.Guard: Cost(
-        3,
+    TroopId.Longbow: Cost(
+        1,
         8,
-        pack_values([ResourceIds.Wood, ResourceIds.Stone, ResourceIds.Copper]),
-        pack_values([4, 6, 10]),
+        pack_values([ResourceIds.Adamantine]),
+        pack_values([1]),
     ),
-    TroopId.GuardCaptain: Cost(
-        3,
+    TroopId.Crossbow: Cost(
+        4,
         8,
-        pack_values([ResourceIds.Wood, ResourceIds.Stone, ResourceIds.Diamonds]),
-        pack_values([12, 12, 2]),
+        pack_values([ResourceIds.Stone, ResourceIds.Gold, ResourceIds.Mithral, ResourceIds.Dragonhide]),
+        pack_values([20, 5, 1, 1]),
     ),
-    TroopId.Squire: Cost(
-        3,
+    TroopId.Pikeman: Cost(
+        1,
         8,
-        pack_values([ResourceIds.Wood, ResourceIds.Copper, ResourceIds.Silver]),
-        pack_values([4, 2, 3]),
+        pack_values([ResourceIds.Diamonds]),
+        pack_values([1]),
     ),
     TroopId.Knight: Cost(
-        3,
+        1,
         8,
-        pack_values([ResourceIds.Wood, ResourceIds.Stone, ResourceIds.Silver]),
-        pack_values([10, 3, 6]),
+        pack_values([ResourceIds.Sapphire]),
+        pack_values([4]),
     ),
-    TroopId.KnightCommander: Cost(
-        3,
-        8,
-        pack_values([ResourceIds.Wood, ResourceIds.Stone, ResourceIds.Silver]),
-        pack_values([10, 3, 6]),
-    ),
-    TroopId.Scout: Cost(
-        3,
-        8,
-        pack_values([ResourceIds.Wood, ResourceIds.Stone, ResourceIds.Obsidian]),
-        pack_values([3, 1, 5]),
-    ),
-    TroopId.Archer: Cost(
-        3,
-        8,
-        pack_values([ResourceIds.Wood, ResourceIds.Stone, ResourceIds.Obsidian]),
-        pack_values([7, 4, 8]),
-    ),
-    TroopId.Sniper: Cost(
-        3,
-        8,
-        pack_values([ResourceIds.Wood, ResourceIds.Stone, ResourceIds.Hartwood]),
-        pack_values([20, 12, 3]),
-    ),
-    TroopId.Scorpio: Cost(
+    TroopId.Paladin: Cost(
         4,
         8,
-        pack_values([ResourceIds.Wood, ResourceIds.Stone, ResourceIds.Coal, ResourceIds.Silver]),
-        pack_values([100, 100, 100, 50]),
+        pack_values([ResourceIds.ColdIron, ResourceIds.Diamonds, ResourceIds.Ruby, ResourceIds.DeepCrystal]),
+        pack_values([20, 2, 5, 7]),
     ),
     TroopId.Ballista: Cost(
+        2,
+        8,
+        pack_values([ResourceIds.Stone, ResourceIds.Coal]),
+        pack_values([8, 8]),
+    ),
+    TroopId.Mangonel: Cost(
         3,
         8,
-        pack_values([ResourceIds.Wood, ResourceIds.Stone, ResourceIds.Coal]),
-        pack_values([2, 8, 14]),
+        pack_values([ResourceIds.Stone, ResourceIds.Coal, ResourceIds.Silver]),
+        pack_values([10, 10, 20]),
     ),
-    TroopId.Catapult: Cost(
-        3,
-        8,
-        pack_values([ResourceIds.Wood, ResourceIds.Stone, ResourceIds.DeepCrystal]),
-        pack_values([4, 12, 2]),
-    ),
-    TroopId.Apprentice: Cost(
-        3,
-        8,
-        pack_values([ResourceIds.Wood, ResourceIds.Stone, ResourceIds.Ironwood]),
-        pack_values([3, 3, 2]),
-    ),
-    TroopId.Mage: Cost(
-        3,
-        8,
-        pack_values([ResourceIds.Wood, ResourceIds.Stone, ResourceIds.Ironwood]),
-        pack_values([4, 4, 5]),
-    ),
-    TroopId.Arcanist: Cost(
-        3,
-        8,
-        pack_values([ResourceIds.Wood, ResourceIds.Stone, ResourceIds.Sapphire]),
-        pack_values([10, 8, 2]),
-    ),
-    TroopId.GrandMarshal: Cost(
+    TroopId.Trebuchet: Cost(
         4,
         8,
-        pack_values([ResourceIds.Wood, ResourceIds.Stone, ResourceIds.ColdIron, ResourceIds.Gold]),
-        pack_values([2, 2, 1, 1]),
+        pack_values([ResourceIds.Wood, ResourceIds.Copper, ResourceIds.Obsidian, ResourceIds.Ironwood]),
+        pack_values([50, 40, 40, 43]),
+    ),
+    TroopId.Apprentice: Cost(
+        1,
+        8,
+        pack_values([ResourceIds.Ignium]),
+        pack_values([1]),
+    ),
+    TroopId.Mage: Cost(
+        1,
+        8,
+        pack_values([ResourceIds.EtherealSilica]),
+        pack_values([3]),
+    ),
+    TroopId.Arcanist: Cost(
+        5,
+        8,
+        pack_values(
+            [ResourceIds.Wood, ResourceIds.Gold, ResourceIds.Hartwood, ResourceIds.TrueIce, ResourceIds.TwilightQuartz]
+        ),
+        pack_values([50, 6, 12, 3, 2]),
     ),
 }
