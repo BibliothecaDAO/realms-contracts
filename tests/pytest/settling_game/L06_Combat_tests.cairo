@@ -7,8 +7,6 @@ from contracts.settling_game.L06_Combat import (
     run_combat_loop,
     attack,
     compute_min_roll_to_hit,
-    hit_troop,
-    hit_squad,
     load_troop_costs,
 )
 from contracts.settling_game.utils.game_structs import Troop, Squad, Cost
