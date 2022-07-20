@@ -47,10 +47,6 @@ def run(nre):
 
         declare(contract.contract_name, contract.alias)
 
-    # proxys
-    for contract in TOKEN_CONTRACT_IMPLEMENTATIONS:
-
-        # must pass in class_hash of contract
         predeclared_class = nre.get_declaration(contract.alias)
 
         logged_deploy(
