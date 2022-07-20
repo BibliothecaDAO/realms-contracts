@@ -99,6 +99,8 @@ namespace IL03_Buildings:
     end
     func get_effective_buildings(token_id : Uint256) -> (realm_buildings : RealmBuildings):
     end
+    func get_building_cost(building_id : felt) -> (cost : Cost, lords : Uint256):
+    end
 end
 
 @contract_interface

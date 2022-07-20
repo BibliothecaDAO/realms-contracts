@@ -7,7 +7,7 @@
 
 %lang starknet
 
-from starkware.cairo.common.cairo_builtins import HashBuiltin
+from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
@@ -15,6 +15,7 @@ from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le, assert_nn
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.utils.constants import BASE_HARVESTS, BASE_FOOD_PRODUCTION
+from contracts.settling_game.utils.general import calculate_cost
 from contracts.settling_game.utils.game_structs import (
     RealmData,
     ModuleIds,
@@ -28,7 +29,7 @@ from contracts.settling_game.modules.food.library import Food
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from openzeppelin.upgrades.library import Proxy
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
-from contracts.settling_game.interfaces.imodules import IL04_Calculator
+from contracts.settling_game.interfaces.imodules import IL04_Calculator, IL03_Buildings
 
 # -----------------------------------
 # Events
@@ -108,9 +109,9 @@ end
 # -----------------------------------
 
 @external
-func create{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    token_id : Uint256, qty : felt, food_building_id : felt
-):
+func create{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(token_id : Uint256, qty : felt, food_building_id : felt):
     alloc_locals
     # check id
     Food.assert_ids(food_building_id)
@@ -118,8 +119,12 @@ func create{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     # checks
     Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
 
+    # contracts
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
+    let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
     let (realm_data) = realms_IERC721.fetch_realm_data(realms_address, token_id)
+
+    let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
 
     # checks
     if food_building_id == RealmBuildingsIds.Farm:
@@ -152,7 +157,16 @@ func create{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         fishing_villages_harvests_left.write(token_id, BASE_HARVESTS)
     end
 
-    # TODO: Add resource cost to build farms
+    let (buildings_address) = Module.get_module_address(ModuleIds.L03_Buildings)
+
+    # Costs
+    let (cost, _) = IL03_Buildings.get_building_cost(buildings_address, food_building_id)
+    let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
+
+    let (token_len, token_ids, token_values) = calculate_cost(cost)
+
+    # BURN RESOURCES
+    IERC1155.burnBatch(resources_address, owner, token_len, token_ids, token_len, token_values)
 
     return ()
 end
