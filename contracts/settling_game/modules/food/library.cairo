@@ -15,7 +15,7 @@ from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, asser
 from starkware.cairo.common.math_cmp import is_le
 
 from contracts.settling_game.utils.constants import FARM_LENGTH, MAX_HARVEST_LENGTH
-from contracts.settling_game.utils.game_structs import RealmData, RealmBuildingsIds
+from contracts.settling_game.utils.game_structs import RealmData, RealmBuildingsIds, HarvestType
 
 namespace Food:
     # calculates how many available farms to harvest
@@ -78,9 +78,38 @@ namespace Food:
     ):
         alloc_locals
 
+        # check
+        if food_building_id == RealmBuildingsIds.Farm:
+            return ()
+        end
+        if food_building_id == RealmBuildingsIds.FishingVillage:
+            return ()
+        end
+
+        # fail
         with_attr error_message("FOOD: Incorrect Building ID"):
-            assert_le(food_building_id, 3)
-            assert_not_zero(food_building_id)
+            assert_not_zero(0)
+        end
+
+        return ()
+    end
+
+    func assert_harvest_type{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        harvest_type : felt
+    ):
+        alloc_locals
+
+        # check
+        if harvest_type == HarvestType.Export:
+            return ()
+        end
+        if harvest_type == HarvestType.Store:
+            return ()
+        end
+
+        # fail
+        with_attr error_message("FOOD: Incorrect Building ID"):
+            assert_not_zero(0)
         end
 
         return ()

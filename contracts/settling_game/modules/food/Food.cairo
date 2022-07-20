@@ -1,6 +1,6 @@
 # -----------------------------------
-# ____Module.L02___RELIC
-#   Logic around Relics
+# ____Module.Food
+#   Logic around Food system
 #
 # MIT License
 # -----------------------------------
@@ -125,12 +125,12 @@ func create{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     if food_building_id == RealmBuildingsIds.Farm:
         let (enough_rivers) = is_le(qty, realm_data.rivers + 1)
         with_attr error_message("FOOD: Not enough Rivers"):
-            assert_not_zero(enough_rivers)
+            assert enough_rivers = TRUE
         end
     else:
         let (enough_harbours) = is_le(qty, realm_data.harbours + 1)
         with_attr error_message("FOOD: Not enough Harbours"):
-            assert_not_zero(enough_harbours)
+            assert enough_harbours = TRUE
         end
     end
 
@@ -163,8 +163,9 @@ func harvest{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
 ):
     alloc_locals
 
-    # check id
+    # check id and harvest type
     Food.assert_ids(food_building_id)
+    Food.assert_harvest_type(harvest_type)
 
     # check owner
     Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms)

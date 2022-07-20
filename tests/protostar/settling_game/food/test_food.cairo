@@ -29,39 +29,6 @@ func test_current_relic_holder{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     return ()
 end
 
-@external
-func test_create{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    alloc_locals
-
-    let realmData = RealmData(
-        TEST_REALM_DATA.REGIONS,
-        TEST_REALM_DATA.CITIES,
-        TEST_REALM_DATA.HARBOURS,
-        TEST_REALM_DATA.RIVERS,
-        TEST_REALM_DATA.RESOURCE_NUMBER,
-        TEST_REALM_DATA.RESOURCE_1,
-        TEST_REALM_DATA.RESOURCE_2,
-        TEST_REALM_DATA.RESOURCE_3,
-        TEST_REALM_DATA.RESOURCE_4,
-        TEST_REALM_DATA.RESOURCE_5,
-        TEST_REALM_DATA.RESOURCE_6,
-        TEST_REALM_DATA.RESOURCE_7,
-        TEST_REALM_DATA.WONDER,
-        TEST_REALM_DATA.ORDER,
-    )
-
-    # test can build farms
-    let (farm) = Food.create(TEST_REALM_DATA.RIVERS, RealmBuildingsIds.Farm, realmData)
-
-    assert farm = FARM_LENGTH
-
-    let (fish) = Food.create(TEST_REALM_DATA.HARBOURS, RealmBuildingsIds.FishingVillage, realmData)
-
-    assert fish = FARM_LENGTH
-
-    return ()
-end
-
 const STORE_HOUSE_FULL = GENESIS_TIMESTAMP + (FARM_LENGTH * 10)
 const STORE_HOUSE_EMPTY = GENESIS_TIMESTAMP - (FARM_LENGTH * 10)
 @external
