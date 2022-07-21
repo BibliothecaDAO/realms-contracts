@@ -7,6 +7,8 @@ from realms_cli.realms_cli.config import Config
 ... = Config.NILE_NETWORK
 """
 from nile import deployments
+from nile.core.declare import alias_exists
+import os
 
 
 def safe_load_deployment(alias: str, network: str):
@@ -18,6 +20,13 @@ def safe_load_deployment(alias: str, network: str):
     except StopIteration:
         print(f"Deployment for alias {alias} not found.")
         return None, None
+
+
+def safe_load_declarations(alias: str, network: str):
+    """Safely loads address from deployments file"""
+    address, _ = next(deployments.load_class(alias, network), None)
+    print(f"Found deployment for alias {alias}.")
+    return address
 
 
 def strhex_as_strfelt(strhex: str):

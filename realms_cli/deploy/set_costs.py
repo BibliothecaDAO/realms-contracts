@@ -1,6 +1,5 @@
 from realms_cli.caller_invoker import wrapped_send
-from realms_cli.config import Config, strhex_as_strfelt
-
+from realms_cli.config import Config
 from realms_cli.game_structs import BUILDING_COSTS, TROOP_COSTS
 
 
@@ -22,11 +21,11 @@ def run(nre):
         arguments=building_calldata
     )
 
-    # --------- BUILDING COSTS ------- #
+    # --------- TROOP COSTS ------- #
     troop_calldata = [
         [troop_id.value, troop_cost.resource_count, troop_cost.bits,
             troop_cost.packed_ids, troop_cost.packed_amounts]
-        for troop_id, troop_cost in BUILDING_COSTS.items()
+        for troop_id, troop_cost in TROOP_COSTS.items()
     ]
     wrapped_send(
         network=config.nile_network,

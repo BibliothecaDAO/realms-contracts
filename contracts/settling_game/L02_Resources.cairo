@@ -155,6 +155,9 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     # FETCH OWNER
     let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
 
+    let (local data : felt*) = alloc()
+    assert data[0] = 0
+
     # MINT USERS RESOURCES
     IERC1155.mintBatch(
         resources_address,
@@ -163,6 +166,8 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         resource_ids,
         realms_data.resource_number,
         resource_mint,
+        1,
+        data,
     )
 
     return ()
@@ -214,6 +219,9 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
         100, realms_data, total_pillagable_days, PILLAGE_AMOUNT
     )
 
+    let (local data : felt*) = alloc()
+    assert data[0] = 0
+
     # MINT PILLAGED RESOURCES TO VICTOR
     IERC1155.mintBatch(
         resources_address,
@@ -222,6 +230,8 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
         resource_ids,
         realms_data.resource_number,
         resource_mint,
+        1,
+        data,
     )
 
     return ()

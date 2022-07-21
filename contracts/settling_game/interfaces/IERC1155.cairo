@@ -32,6 +32,8 @@ namespace IERC1155:
         ids : Uint256*,
         amounts_len : felt,
         amounts : Uint256*,
+        data_len : felt,
+        data : felt*,
     ):
     end
 
@@ -39,7 +41,13 @@ namespace IERC1155:
     end
 
     func mintBatch(
-        to : felt, ids_len : felt, ids : Uint256*, amounts_len : felt, amounts : Uint256*
+        to : felt,
+        ids_len : felt,
+        ids : Uint256*,
+        amounts_len : felt,
+        amounts : Uint256*,
+        data_len : felt,
+        data : felt*,
     ) -> ():
     end
 
@@ -47,7 +55,13 @@ namespace IERC1155:
     end
 
     func burnBatch(
-        _from : felt, ids_len : felt, ids : Uint256*, amounts_len : felt, amounts : Uint256*
+        _from : felt,
+        ids_len : felt,
+        ids : Uint256*,
+        amounts_len : felt,
+        amounts : Uint256*,
+        data_len : felt,
+        data : felt*,
     ):
     end
 end

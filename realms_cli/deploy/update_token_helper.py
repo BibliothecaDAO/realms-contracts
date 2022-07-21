@@ -15,8 +15,8 @@ Contracts = namedtuple('Contracts', 'alias contract_name')
 # 6. Set token contract approval if needed - Resources etc
 
 NEW_MODULES = [
-    Contracts("realms", "Realms_ERC721_Mintable"),
-    Contracts("s_realms", "S_Realms_ERC721_Mintable"),
+    # Contracts("realms", "Realms_ERC721_Mintable"),
+    # Contracts("s_realms", "S_Realms_ERC721_Mintable"),
     Contracts("resources", "Resources_ERC1155_Mintable_Burnable"),
 ]
 
