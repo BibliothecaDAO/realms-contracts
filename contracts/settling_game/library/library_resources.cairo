@@ -26,6 +26,7 @@ from contracts.settling_game.utils.constants import (
     BASE_LORDS_PER_DAY,
     PILLAGE_AMOUNT,
     MAX_DAYS_ACCURED,
+    WORK_HUT_COST,
 )
 
 namespace Resources:
@@ -65,6 +66,54 @@ namespace Resources:
         end
 
         return (resource_ids)
+    end
+
+    # gets the cost to build a workhut on a Realm
+    func workhut_costs{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        realms_data : RealmData, quantity : felt
+    ) -> (resource_ids : Uint256*, resource_values : Uint256*):
+        alloc_locals
+
+        let (local resource_ids : Uint256*) = alloc()
+        let (local resource_values : Uint256*) = alloc()
+
+        let cost = (WORK_HUT_COST * 10 ** 18) * quantity
+
+        # ADD VALUES TO TEMP ARRAY FOR EACH AVAILABLE RESOURCE
+        assert resource_ids[0] = Uint256(realms_data.resource_1, 0)
+        assert resource_values[0] = Uint256(cost, 0)
+
+        if realms_data.resource_2 != 0:
+            assert resource_ids[1] = Uint256(realms_data.resource_2, 0)
+            assert resource_values[1] = Uint256(cost, 0)
+        end
+
+        if realms_data.resource_3 != 0:
+            assert resource_ids[2] = Uint256(realms_data.resource_3, 0)
+            assert resource_values[2] = Uint256(cost, 0)
+        end
+
+        if realms_data.resource_4 != 0:
+            assert resource_ids[3] = Uint256(realms_data.resource_4, 0)
+            assert resource_values[3] = Uint256(cost, 0)
+        end
+
+        if realms_data.resource_5 != 0:
+            assert resource_ids[4] = Uint256(realms_data.resource_5, 0)
+            assert resource_values[4] = Uint256(cost, 0)
+        end
+
+        if realms_data.resource_6 != 0:
+            assert resource_ids[5] = Uint256(realms_data.resource_6, 0)
+            assert resource_values[5] = Uint256(cost, 0)
+        end
+
+        if realms_data.resource_7 != 0:
+            assert resource_ids[6] = Uint256(realms_data.resource_7, 0)
+            assert resource_values[6] = Uint256(cost, 0)
+        end
+
+        return (resource_ids, resource_values)
     end
 
     func _calculate_mintable_resources{
@@ -174,8 +223,9 @@ namespace Resources:
     ):
         alloc_locals
 
-        let (r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output,
-            r_7_output) = _calculate_all_resource_output(happiness, realms_data)
+        let (
+            r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output, r_7_output
+        ) = _calculate_all_resource_output(happiness, realms_data)
 
         # USER CLAIM
         let (r_1_user) = _calculate_resource_claimable(days, mint_percentage, r_1_output)

@@ -40,7 +40,7 @@ def build(realm_token_id, building_id, qty, network):
 @click.command()
 @click.argument("realm_token_id", nargs=1)
 @click.option("--network", default="goerli")
-def get_buildings(realm_token_id, network):
+def buildings(realm_token_id, network):
     """
     Get buildings on a Realm
     """
@@ -55,4 +55,39 @@ def get_buildings(realm_token_id, network):
             0
         ],
     )
-    print(out)
+    out = out.split(" ")
+    pretty_out = []
+    for i, building in enumerate(config.BUILDINGS):
+        pretty_out.append(
+            f"{building} : {int(out[i])}")
+    print("+------------------ BUILDINGS ON REALM ID: " +
+          realm_token_id + " ---------------------+")
+    print_over_colums(pretty_out)
+
+
+@click.command()
+@click.argument("realm_token_id", nargs=1)
+@click.option("--network", default="goerli")
+def buildings_integrity(realm_token_id, network):
+    """
+    Get buildings on a Realm
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_L03_Buildings",
+        function="get_buildings_integrity_unpacked",
+        arguments=[
+            realm_token_id,                 # uint 1
+            0
+        ],
+    )
+    out = out.split(" ")
+    pretty_out = []
+    for i, building in enumerate(config.BUILDINGS):
+        pretty_out.append(
+            f"{building} : {int(out[i])}")
+    print("+------------------ BUILDINGS INTEGRETIY ON REALM ID: " +
+          realm_token_id + " ---------------------+")
+    print_over_colums(pretty_out)

@@ -146,3 +146,15 @@ class Config:
             "SunkenShekel",
             "Demonhide"
         ]
+
+        self.BUILDINGS = [
+            "House",
+            "StoreHouse",
+            "Granary",
+            "Farm",
+            "FishingVillage",
+            "Barracks",
+            "MageTower",
+            "ArcherTower",
+            "Castle",
+        ]
