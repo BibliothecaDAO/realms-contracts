@@ -15,8 +15,9 @@ from realms_cli.shared import uint
 @click.command()
 @click.argument("realm_token_id", nargs=1)
 @click.argument("building_id", nargs=1)
+@click.argument("qty", nargs=1)
 @click.option("--network", default="goerli")
-def build(realm_token_id, building_id, network):
+def build(realm_token_id, building_id, qty, network):
     """
     Build a building
     """
@@ -30,26 +31,28 @@ def build(realm_token_id, building_id, network):
         arguments=[
             realm_token_id,                 # uint 1
             0,                              # uint 2
-            building_id
+            building_id,
+            qty
         ],
     )
+
 
 @click.command()
 @click.argument("realm_token_id", nargs=1)
 @click.option("--network", default="goerli")
 def get_buildings(realm_token_id, network):
     """
-    Fetch happiness of a Realm
+    Get buildings on a Realm
     """
     config = Config(nile_network=network)
 
     out = wrapped_call(
         network=config.nile_network,
         contract_alias="proxy_L03_Buildings",
-        function="get_buildings_unpacked",
+        function="get_effective_buildings",
         arguments=[
             realm_token_id,                 # uint 1
-            0,
+            0
         ],
     )
     print(out)

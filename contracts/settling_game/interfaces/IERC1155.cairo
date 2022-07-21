@@ -55,13 +55,7 @@ namespace IERC1155:
     end
 
     func burnBatch(
-        _from : felt,
-        ids_len : felt,
-        ids : Uint256*,
-        amounts_len : felt,
-        amounts : Uint256*,
-        data_len : felt,
-        data : felt*,
+        _from : felt, ids_len : felt, ids : Uint256*, amounts_len : felt, amounts : Uint256*
     ):
     end
 end

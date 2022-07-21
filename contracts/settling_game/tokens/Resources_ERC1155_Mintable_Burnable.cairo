@@ -164,7 +164,8 @@ end
 func burnBatch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     from_ : felt, ids_len : felt, ids : Uint256*, amounts_len : felt, amounts : Uint256*
 ):
-    ERC1155.assert_owner_or_approved(owner=from_)
+    # TODO: Module based approach
+    # ERC1155.assert_owner_or_approved(owner=from_)
     let (caller) = get_caller_address()
     with_attr error_message("ERC1155: called from zero address"):
         assert_not_zero(caller)

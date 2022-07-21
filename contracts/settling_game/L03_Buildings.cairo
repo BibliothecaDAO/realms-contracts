@@ -135,6 +135,10 @@ func build{
         assert_not_zero(can_build)
     end
 
+    with_attr error_message("Buildings: QTY must be greater than 0"):
+        assert_not_zero(quantity)
+    end
+
     # Build buildings and set state
     build_buildings(token_id, building_id, quantity, realms_data)
 
@@ -146,6 +150,7 @@ func build{
     let (token_len, token_ids, token_values) = Buildings.calculate_building_cost(building_cost)
 
     # BURN RESOURCES
+
     IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
 
     # EMIT
@@ -243,6 +248,23 @@ func get_buildings_integrity_unpacked{
     let (unpacked) = Buildings.unpack_buildings(buildings_)
 
     return (unpacked)
+end
+
+@view
+func get_effective_building_by_id{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(token_id : Uint256, building_id : felt) -> (realm_buildings : felt):
+    alloc_locals
+
+    let (functional_buildings : RealmBuildings) = get_buildings_integrity_unpacked(token_id)
+
+    let (block_timestamp) = get_block_timestamp()
+
+    let (building) = Buildings.calculate_effective_buildings(
+        building_id, functional_buildings.House, block_timestamp
+    )
+
+    return (building)
 end
 
 @view
