@@ -254,23 +254,6 @@ func get_buildings_integrity_unpacked{
 end
 
 @view
-func get_effective_building_by_id{
-    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-}(token_id : Uint256, building_id : felt) -> (realm_buildings : felt):
-    alloc_locals
-
-    let (functional_buildings : RealmBuildings) = get_buildings_integrity_unpacked(token_id)
-
-    let (block_timestamp) = get_block_timestamp()
-
-    let (building) = Buildings.calculate_effective_buildings(
-        building_id, functional_buildings.House, block_timestamp
-    )
-
-    return (building)
-end
-
-@view
 func get_effective_buildings{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
 }(token_id : Uint256) -> (realm_buildings : RealmBuildings):

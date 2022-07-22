@@ -27,6 +27,7 @@ from contracts.settling_game.utils.constants import (
     PILLAGE_AMOUNT,
     MAX_DAYS_ACCURED,
     WORK_HUT_COST,
+    WORK_HUT_OUTPUT,
 )
 
 namespace Resources:
@@ -182,19 +183,21 @@ namespace Resources:
 
     func _calculate_resource_output{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(happiness : felt) -> (value : felt):
+    }(workhuts : felt, happiness : felt) -> (value : felt):
         alloc_locals
+
+        # Add workhut boost
+        let extra_output = workhuts * WORK_HUT_OUTPUT
 
         # HAPPINESS CHECK
         let (production_output, _) = unsigned_div_rem(BASE_RESOURCES_PER_DAY * happiness, 100)
 
-        return (production_output)
+        return (production_output + extra_output)
     end
 
-    @view
     func _calculate_all_resource_output{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(happiness : felt, realms_data : RealmData) -> (
+    }(workhuts : felt, happiness : felt, realms_data : RealmData) -> (
         resource_1 : felt,
         resource_2 : felt,
         resource_3 : felt,
@@ -205,27 +208,31 @@ namespace Resources:
     ):
         alloc_locals
 
-        let (r_1_output) = _calculate_resource_output(happiness)
-        let (r_2_output) = _calculate_resource_output(happiness)
-        let (r_3_output) = _calculate_resource_output(happiness)
-        let (r_4_output) = _calculate_resource_output(happiness)
-        let (r_5_output) = _calculate_resource_output(happiness)
-        let (r_6_output) = _calculate_resource_output(happiness)
-        let (r_7_output) = _calculate_resource_output(happiness)
+        let (r_1_output) = _calculate_resource_output(workhuts, happiness)
+        let (r_2_output) = _calculate_resource_output(workhuts, happiness)
+        let (r_3_output) = _calculate_resource_output(workhuts, happiness)
+        let (r_4_output) = _calculate_resource_output(workhuts, happiness)
+        let (r_5_output) = _calculate_resource_output(workhuts, happiness)
+        let (r_6_output) = _calculate_resource_output(workhuts, happiness)
+        let (r_7_output) = _calculate_resource_output(workhuts, happiness)
 
         return (r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output, r_7_output)
     end
 
     func _calculate_total_mintable_resources{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(happiness : felt, realms_data : RealmData, days : felt, mint_percentage : felt) -> (
-        resource_mint : Uint256*
-    ):
+    }(
+        workhuts : felt,
+        happiness : felt,
+        realms_data : RealmData,
+        days : felt,
+        mint_percentage : felt,
+    ) -> (resource_mint : Uint256*):
         alloc_locals
 
         let (
             r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output, r_7_output
-        ) = _calculate_all_resource_output(happiness, realms_data)
+        ) = _calculate_all_resource_output(workhuts, happiness, realms_data)
 
         # USER CLAIM
         let (r_1_user) = _calculate_resource_claimable(days, mint_percentage, r_1_output)

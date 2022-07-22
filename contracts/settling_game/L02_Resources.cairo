@@ -23,6 +23,7 @@ from contracts.settling_game.utils.game_structs import (
     ModuleIds,
     ExternalContractIds,
     Cost,
+    RealmBuildings,
 )
 
 from contracts.settling_game.utils.constants import (
@@ -37,7 +38,12 @@ from contracts.settling_game.utils.constants import (
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
-from contracts.settling_game.interfaces.imodules import IL01_Settling, IL04_Calculator, IL05_Wonders
+from contracts.settling_game.interfaces.imodules import (
+    IL01_Settling,
+    IL04_Calculator,
+    IL05_Wonders,
+    IL03_Buildings,
+)
 from contracts.settling_game.library.library_resources import Resources
 
 # -----------------------------------
@@ -105,10 +111,11 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
     let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms)
     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
+    let (treasury_address) = Module.get_external_contract_address(ExternalContractIds.Treasury)
+
+    # modules
     let (settling_logic_address) = Module.get_module_address(ModuleIds.L01_Settling)
     let (calculator_address) = Module.get_module_address(ModuleIds.L04_Calculator)
-    let (treasury_address) = Module.get_external_contract_address(ExternalContractIds.Treasury)
-    let (wonders_logic_address) = Module.get_module_address(ModuleIds.L05_Wonders)
 
     # FETCH OWNER
     let (owner) = IERC721.ownerOf(s_realms_address, token_id)
@@ -145,11 +152,17 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     IL01_Settling.set_time_staked(settling_logic_address, token_id, remainder)
     IL01_Settling.set_time_vault_staked(settling_logic_address, token_id, vault_remainder)
 
-    # resources ids
-    let (resource_ids : Uint256*) = Resources._calculate_realm_resource_ids(realms_data)
+    # get current buildings on realm
+    let (buildings_address) = Module.get_module_address(ModuleIds.L03_Buildings)
+    let (current_buildings : RealmBuildings) = IL03_Buildings.get_effective_buildings(
+        buildings_address, token_id
+    )
 
-    let (resource_mint : Uint256*) = Resources._calculate_total_mintable_resources(
-        100, realms_data, days, 100
+    # resources ids
+    let (resource_ids) = Resources._calculate_realm_resource_ids(realms_data)
+
+    let (resource_mint) = Resources._calculate_total_mintable_resources(
+        current_buildings.House, 100, realms_data, days, 100
     )
 
     # FETCH OWNER
@@ -214,9 +227,15 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     # SET VAULT TIME = REMAINDER - CURRENT_TIME
     IL01_Settling.set_time_vault_staked(settling_logic_address, token_id, pillagable_remainder)
 
+    # get current buildings on realm
+    let (buildings_address) = Module.get_module_address(ModuleIds.L03_Buildings)
+    let (current_buildings : RealmBuildings) = IL03_Buildings.get_effective_buildings(
+        buildings_address, token_id
+    )
+
     # No happiness cap for pillaging
     let (resource_mint : Uint256*) = Resources._calculate_total_mintable_resources(
-        100, realms_data, total_pillagable_days, PILLAGE_AMOUNT
+        current_buildings.House, 100, realms_data, total_pillagable_days, PILLAGE_AMOUNT
     )
 
     let (local data : felt*) = alloc()
@@ -373,8 +392,14 @@ func get_all_resource_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
 
     let (happiness) = IL04_Calculator.calculate_happiness(calculator_address, token_id)
 
+    # get current buildings on realm
+    let (buildings_address) = Module.get_module_address(ModuleIds.L03_Buildings)
+    let (current_buildings : RealmBuildings) = IL03_Buildings.get_effective_buildings(
+        buildings_address, token_id
+    )
+
     let (resource_mint : Uint256*) = Resources._calculate_total_mintable_resources(
-        happiness, realms_data, days, user_mint_rel_perc
+        current_buildings.House, happiness, realms_data, days, user_mint_rel_perc
     )
 
     return (realms_data.resource_number, resource_mint)
@@ -396,9 +421,14 @@ func get_all_vault_raidable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ra
     # CALC VAULT DAYS
     let (total_vault_days, vault_remainder) = vault_days_accrued(token_id)
 
+    let (buildings_address) = Module.get_module_address(ModuleIds.L03_Buildings)
+    let (current_buildings : RealmBuildings) = IL03_Buildings.get_effective_buildings(
+        buildings_address, token_id
+    )
+
     # pass 100 for base happiness
     let (resource_mint : Uint256*) = Resources._calculate_total_mintable_resources(
-        100, realms_data, total_vault_days, PILLAGE_AMOUNT
+        current_buildings.House, 100, realms_data, total_vault_days, PILLAGE_AMOUNT
     )
 
     return (realms_data.resource_number, resource_mint)
