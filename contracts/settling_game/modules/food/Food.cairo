@@ -1,7 +1,15 @@
 # -----------------------------------
 # ____Module.Food
 #   Logic around Food system
-#
+
+# ELI5:
+#   Players can build (n) number of farms or fishing villages according to number
+#   of rivers or harbours on the Realm. Once built, players can harvest these farms
+#   at a set interval for $WHEAT or $FISH. The player has the option at harvest time to
+#   either claim or store directly into the store_house. Once the food is in the
+#   store_house it is depleted according to the population on the Realm. If the player choosing to export the food, 
+#   the tokens are minted to the players wallet.
+
 # MIT License
 # -----------------------------------
 
@@ -92,6 +100,10 @@ end
 # EXTERNAL
 # -----------------------------------
 
+# @notice Creates either farms or fishing villages
+# @param token_id: Staked Realm id (S_Realm)
+# @param qty: qty to build on realm
+# @param food_building_id: food building id
 @external
 func create{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
@@ -156,6 +168,10 @@ func create{
     return ()
 end
 
+# @notice Harvests either farms or fishing villages
+# @param token_id: Staked Realm id (S_Realm)
+# @param harvest_type: this is either export or store. Export mints tokens, store keeps on the realm as food
+# @param food_building_id: food building id
 @external
 func harvest{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
@@ -272,11 +288,11 @@ end
 # -----------------------------------
 
 # @notice Updates values after harvest
-# @param current_harvests: Staked realm id
+# @param current_harvests: Staked Realm id (S_Realm)
 # @param number_built: farms built - this is just unpacked data from above
 # @param total_harvest: total qty harvested
 # @param decayed_farms: decayed farms
-# @param token_id: Staked realm id
+# @param token_id: Staked Realm id (S_Realm)
 # @param food_building_id: food building id
 func update{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
@@ -324,7 +340,7 @@ func update{
 end
 
 # @notice Converts harvest directly into food store
-# @param token_id: Staked realm id
+# @param token_id: Staked Realm id (S_Realm)
 # @param quantity: quantity of food to store
 func convert_to_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256, quantity : felt
@@ -340,7 +356,7 @@ func convert_to_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
 end
 
 # @notice Available food in store
-# @param token_id: Staked realm id
+# @param token_id: Staked Realm id (S_Realm)
 # @return total_harvest: Total food in storehouse
 func food_in_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
@@ -360,7 +376,7 @@ end
 # -----------------------------------
 
 # @notice Available food in store
-# @param token_id: Staked realm id
+# @param token_id: Staked Realm id (S_Realm)
 # @return total_harvest: Total food in storehouse
 @view
 func available_food_in_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -383,7 +399,7 @@ func available_food_in_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, r
 end
 
 # @notice harvests left
-# @param token_id: Staked realm id
+# @param token_id: Staked Realm id (S_Realm)
 # @return farm_harvests_left: Harvests left
 @view
 func get_farm_harvests_left{
@@ -398,7 +414,7 @@ func get_farm_harvests_left{
 end
 
 # @notice gets base fishing villages data
-# @param token_id: Staked realm id
+# @param token_id: Staked Realm id (S_Realm)
 # @return total_harvest: Total harvestable
 # @return total_remaining: Total remaining
 # @return decayed_farms: Decayed
@@ -421,7 +437,7 @@ func get_farms_to_harvest{
 end
 
 # @notice harvests left
-# @param token_id: Staked realm id
+# @param token_id: Staked Realm id (S_Realm)
 # @return farm_harvests_left: Harvests left
 @view
 func get_fishing_villages_harvests_left{
@@ -436,7 +452,7 @@ func get_fishing_villages_harvests_left{
 end
 
 # @notice gets base fishing villages data
-# @param token_id: Staked realm id
+# @param token_id: Staked Realm id (S_Realm)
 # @return total_harvest: Total harvestable
 # @return total_remaining: Total remaining
 # @return decayed_farms: Decayed
@@ -464,7 +480,7 @@ end
 
 # @notice updates food value to match computed.
 # this stops food ever returning to a greater value than what it was
-# @param token_id: Staked realm id
+# @param token_id: Staked Realm id (S_Realm)
 @external
 func update_food_hook{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
