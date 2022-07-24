@@ -14,32 +14,45 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le, assert_nn
 from starkware.cairo.common.math_cmp import is_le
 
-from contracts.settling_game.utils.constants import FARM_LENGTH, MAX_HARVEST_LENGTH
-from contracts.settling_game.utils.game_structs import RealmData, RealmBuildingsIds, HarvestType
+from contracts.settling_game.utils.constants import FARM_LENGTH, MAX_HARVESTS, HARVEST_LENGTH
+from contracts.settling_game.utils.game_structs import (
+    RealmData,
+    RealmBuildingsIds,
+    HarvestType,
+    FoodBuildings,
+)
+from contracts.settling_game.utils.constants import SHIFT_41
+from contracts.settling_game.utils.general import unpack_data
 
 namespace Food:
-    # calculates how many available farms to harvest
+    # @notice Calculates how many available farms to harvest
     # max of 3 full harvests accure
     # if more farms than MAX, return MAX and decayed farms. How will loose these harvests.
-    func calculate_harvest{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        update_time : felt, block_timestamp : felt
-    ) -> (total_farms : felt, total_remaining : felt, decayed_farms : felt):
+    func calculate_harvest{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+        bitwise_ptr : BitwiseBuiltin*,
+    }(update_time : felt, block_timestamp : felt) -> (
+        total_farms : felt, total_remaining : felt, decayed_farms : felt
+    ):
         alloc_locals
 
         let time_since_update = block_timestamp - update_time
 
         # TODO add max days can accure
-        let (total_farms, remainding_crops) = unsigned_div_rem(time_since_update, FARM_LENGTH)
+        let (total_farms, remainding_crops) = unsigned_div_rem(time_since_update, HARVEST_LENGTH)
 
-        let (le_max_farms) = is_le(total_farms, MAX_HARVEST_LENGTH + 1)
+        let (le_max_farms) = is_le(total_farms, MAX_HARVESTS + 1)
 
         if le_max_farms == TRUE:
             return (total_farms, remainding_crops, 0)
         end
 
-        return (MAX_HARVEST_LENGTH, remainding_crops, total_farms - MAX_HARVEST_LENGTH)
+        return (MAX_HARVESTS, remainding_crops, total_farms - MAX_HARVESTS)
     end
 
+    # @notice Calculates base food in the storehouse
     func calculate_food_in_store_house{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     }(current_food_supply : felt, block_timestamp : felt) -> (current : felt):
@@ -56,13 +69,13 @@ namespace Food:
         return (current)
     end
 
-    # This returns the real value of food available by taking into account the population
+    # @notice This returns the real value of food available by taking into account the population
     func calculate_available_food{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     }(current_food_supply : felt, population : felt) -> (available_food : felt):
         alloc_locals
 
-        let (true_food_supply, _) = unsigned_div_rem(current_food_supply, population)
+        let (true_food_supply, _) = unsigned_div_rem(current_food_supply, population + 1)
 
         let (is_empty) = is_le(true_food_supply, 0)
 
@@ -73,45 +86,81 @@ namespace Food:
         return (true_food_supply)
     end
 
+    # @notice asserts correct building ids
     func assert_ids{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         food_building_id : felt
-    ):
+    ) -> (success : felt):
         alloc_locals
 
         # check
         if food_building_id == RealmBuildingsIds.Farm:
-            return ()
+            return (TRUE)
         end
         if food_building_id == RealmBuildingsIds.FishingVillage:
-            return ()
+            return (TRUE)
         end
 
-        # fail
-        with_attr error_message("FOOD: Incorrect Building ID"):
-            assert_not_zero(0)
-        end
-
-        return ()
+        return (FALSE)
     end
 
+    # @notice asserts correct harvest type
     func assert_harvest_type{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         harvest_type : felt
-    ):
+    ) -> (success : felt):
         alloc_locals
 
         # check
         if harvest_type == HarvestType.Export:
-            return ()
+            return (TRUE)
         end
         if harvest_type == HarvestType.Store:
-            return ()
+            return (TRUE)
         end
 
-        # fail
-        with_attr error_message("FOOD: Incorrect Building ID"):
-            assert_not_zero(0)
-        end
+        return (FALSE)
+    end
 
-        return ()
+    # @notice packs buildings
+    # @param food_buildings_unpacked: unpacked buildings
+    # @return food_buildings_packed: packed buildings
+    func pack_food_buildings{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+        bitwise_ptr : BitwiseBuiltin*,
+    }(food_buildings_unpacked : FoodBuildings) -> (food_buildings_packed : felt):
+        alloc_locals
+
+        let NumberBuilt = food_buildings_unpacked.NumberBuilt * SHIFT_41._1
+        let CollectionsLeft = food_buildings_unpacked.CollectionsLeft * SHIFT_41._2
+        let UpdateTime = food_buildings_unpacked.UpdateTime * SHIFT_41._3
+
+        tempvar packed_value = UpdateTime + CollectionsLeft + NumberBuilt
+
+        return (packed_value)
+    end
+
+    # @notice unpacks buildings
+    # @param packed_food_buildings: packed buildings
+    # @return unpacked_food_buildings: unpacked buildings
+    func unpack_food_buildings{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+        bitwise_ptr : BitwiseBuiltin*,
+    }(packed_food_buildings : felt) -> (unpacked_food_buildings : FoodBuildings):
+        alloc_locals
+
+        let (NumberBuilt) = unpack_data(packed_food_buildings, 0, 2199023255551)
+        let (CollectionsLeft) = unpack_data(packed_food_buildings, 41, 2199023255551)
+        let (UpdateTime) = unpack_data(packed_food_buildings, 82, 2199023255551)
+
+        return (
+            unpacked_food_buildings=FoodBuildings(
+            NumberBuilt,
+            CollectionsLeft,
+            UpdateTime
+            ),
+        )
     end
 end

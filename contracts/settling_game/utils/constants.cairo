@@ -94,11 +94,11 @@ const BASE_SQM = 25  # base sqm of base
 # Food
 # -----------------------------------
 const BASE_HARVESTS = 24
-const MAX_HARVEST_LENGTH = BASE_HARVESTS / 4  # 4 full crops per farm to harvest per cycle
+const MAX_HARVESTS = BASE_HARVESTS / 4  # 4 full crops per farm to harvest per cycle
+const HARVEST_LENGTH = DAY / 10
 
 const FARM_LENGTH = (DAY / 3) * BASE_HARVESTS
 const FISHING_TRAPS = (DAY / 3) * BASE_HARVESTS
-
 const BASE_FOOD_PRODUCTION = 2000  # food production per unit
 
 # -----------------------------------

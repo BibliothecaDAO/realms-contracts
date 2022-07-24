@@ -379,3 +379,9 @@ namespace HarvestType:
     const Export = 1
     const Store = 2
 end
+
+struct FoodBuildings:
+    member NumberBuilt : felt
+    member CollectionsLeft : felt
+    member UpdateTime : felt
+end

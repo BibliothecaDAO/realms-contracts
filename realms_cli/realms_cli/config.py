@@ -144,7 +144,9 @@ class Config:
             "CuriousSpre",
             "UnrefinedOre",
             "SunkenShekel",
-            "Demonhide"
+            "Demonhide",
+            "Wheat",
+            "Fish"
         ]
 
         self.BUILDINGS = [

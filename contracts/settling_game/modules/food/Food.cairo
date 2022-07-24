@@ -10,6 +10,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 from starkware.cairo.common.bool import TRUE, FALSE
+from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le, assert_nn
@@ -24,6 +25,7 @@ from contracts.settling_game.utils.game_structs import (
     Cost,
     HarvestType,
     RealmBuildingsIds,
+    FoodBuildings,
 )
 from contracts.settling_game.modules.food.library import Food
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
@@ -45,30 +47,12 @@ from contracts.settling_game.interfaces.imodules import IL04_Calculator, IL03_Bu
 
 # -------FARMS-------#
 @storage_var
-func farms_built(token_id : Uint256) -> (farms_built : felt):
-end
-
-# each farms build can be harvested X times
-@storage_var
-func farm_harvests_left(token_id : Uint256) -> (farm_harvests_left : felt):
-end
-
-@storage_var
-func last_farm_update(token_id : Uint256) -> (last_farm_update : felt):
+func farms(token_id : Uint256) -> (farms : felt):
 end
 
 # -------FISHING-------#
 @storage_var
-func fishing_villages_built(token_id : Uint256) -> (fishing_villages_built : felt):
-end
-
-# each farms build can be harvested X times
-@storage_var
-func fishing_villages_harvests_left(token_id : Uint256) -> (fishing_villages_harvests_left : felt):
-end
-
-@storage_var
-func last_fishing_villages_update(token_id : Uint256) -> (last_fishing_villages_update : felt):
+func fishing_villages(token_id : Uint256) -> (fishing_villages : felt):
 end
 
 # -------STORE HOUSE-------#
@@ -114,7 +98,11 @@ func create{
 }(token_id : Uint256, qty : felt, food_building_id : felt):
     alloc_locals
     # check id
-    Food.assert_ids(food_building_id)
+    let (is_correct_id) = Food.assert_ids(food_building_id)
+
+    with_attr error_message("FOOD: Incorrect Building ID"):
+        assert_not_zero(is_correct_id)
+    end
 
     # checks
     Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
@@ -125,6 +113,7 @@ func create{
     let (realm_data) = realms_IERC721.fetch_realm_data(realms_address, token_id)
 
     let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
+    let (caller) = get_caller_address()
 
     # checks
     if food_building_id == RealmBuildingsIds.Farm:
@@ -142,19 +131,15 @@ func create{
     # set plant time
     let (block_timestamp) = get_block_timestamp()
 
+    let (packed) = Food.pack_food_buildings(
+        food_buildings_unpacked=FoodBuildings(qty, BASE_HARVESTS, block_timestamp)
+    )
+
     # build required building
     if food_building_id == RealmBuildingsIds.Farm:
-        last_farm_update.write(token_id, block_timestamp)
-        # save number of farms
-        farms_built.write(token_id, qty)
-        # save harvests
-        farm_harvests_left.write(token_id, BASE_HARVESTS)
+        farms.write(token_id, packed)
     else:
-        last_fishing_villages_update.write(token_id, block_timestamp)
-        # save number of fishing villages
-        fishing_villages_built.write(token_id, qty)
-        # save harvests
-        fishing_villages_harvests_left.write(token_id, BASE_HARVESTS)
+        fishing_villages.write(token_id, packed)
     end
 
     let (buildings_address) = Module.get_module_address(ModuleIds.L03_Buildings)
@@ -166,20 +151,27 @@ func create{
     let (token_len, token_ids, token_values) = calculate_cost(cost)
 
     # BURN RESOURCES
-    IERC1155.burnBatch(resources_address, owner, token_len, token_ids, token_len, token_values)
+    IERC1155.burnBatch(resources_address, caller, token_len, token_ids, token_len, token_values)
 
     return ()
 end
 
 @external
-func harvest{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    token_id : Uint256, harvest_type : felt, food_building_id : felt
-):
+func harvest{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(token_id : Uint256, harvest_type : felt, food_building_id : felt):
     alloc_locals
 
     # check id and harvest type
-    Food.assert_ids(food_building_id)
-    Food.assert_harvest_type(harvest_type)
+    let (is_correct_id) = Food.assert_ids(food_building_id)
+    with_attr error_message("FOOD: Incorrect Building ID"):
+        assert_not_zero(is_correct_id)
+    end
+
+    let (is_correct_harvest_type) = Food.assert_harvest_type(harvest_type)
+    with_attr error_message("FOOD: Incorrect Harvest ID"):
+        assert_not_zero(is_correct_harvest_type)
+    end
 
     # check owner
     Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
@@ -189,57 +181,81 @@ func harvest{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
     let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
 
-    # farm expirary time
     let (block_timestamp) = get_block_timestamp()
-
-    tempvar total_harvest = 0
-    tempvar total_remaining = 0
-    tempvar decayed_farms = 0
 
     # build required building
     if food_building_id == RealmBuildingsIds.Farm:
-        let (plant_time) = last_farm_update.read(token_id)
+        let (packed) = farms.read(token_id)
+        # unpack
+        let (unpacked_food_buildings : FoodBuildings) = Food.unpack_food_buildings(packed)
+        # calculate harvests
         let (total_harvest, total_remaining, decayed_farms) = Food.calculate_harvest(
-            plant_time, block_timestamp
+            unpacked_food_buildings.UpdateTime, block_timestamp
         )
-        tempvar total_harvest = total_harvest
-        tempvar total_remaining = total_remaining
-        tempvar decayed_farms = decayed_farms
+        # save tempvar of unpacked number
+        tempvar number_built = unpacked_food_buildings.NumberBuilt
+        tempvar current_harvests = unpacked_food_buildings.CollectionsLeft
+
+        # builtins
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+        tempvar bitwise_ptr = bitwise_ptr
     else:
-        let (plant_time) = last_fishing_villages_update.read(token_id)
+        let (packed) = fishing_villages.read(token_id)
+        # unpack
+        let (unpacked_food_buildings : FoodBuildings) = Food.unpack_food_buildings(packed)
+        # calculate harvests
         let (total_harvest, total_remaining, decayed_farms) = Food.calculate_harvest(
-            plant_time, block_timestamp
+            unpacked_food_buildings.UpdateTime, block_timestamp
         )
-        tempvar total_harvest = total_harvest
-        tempvar total_remaining = total_remaining
-        tempvar decayed_farms = decayed_farms
+        # save tempvar of unpacked number
+        tempvar number_built = unpacked_food_buildings.NumberBuilt
+        tempvar current_harvests = unpacked_food_buildings.CollectionsLeft
+
+        # builtins
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+        tempvar bitwise_ptr = bitwise_ptr
     end
 
     # total food to harvest
-    let total_food = total_harvest * BASE_FOOD_PRODUCTION * 10 ** 18
+    let total_food = total_harvest * BASE_FOOD_PRODUCTION
 
-    let (current_harvests) = farm_harvests_left.read(token_id)
-    farm_harvests_left.write(token_id, current_harvests - total_harvest - decayed_farms)
+    # update storage
+    update(current_harvests, number_built, total_harvest, decayed_farms, token_id, food_building_id)
+
+    # set default data in mint call
+    let (local data : felt*) = alloc()
+    assert data[0] = 0
 
     # mint food
     if harvest_type == HarvestType.Export:
         if food_building_id == RealmBuildingsIds.Farm:
             # wheat
             IERC1155.mint(
-                resources_address, owner, Uint256(ResourceIds.wheat, 0), Uint256(total_food, 0)
+                resources_address,
+                owner,
+                Uint256(ResourceIds.wheat, 0),
+                Uint256(total_food * 10 ** 18, 0),
+                1,
+                data,
             )
-            tempvar syscall_ptr = syscall_ptr
-            tempvar range_check_ptr = range_check_ptr
-            tempvar pedersen_ptr = pedersen_ptr
         else:
             # fish
             IERC1155.mint(
-                resources_address, owner, Uint256(ResourceIds.fish, 0), Uint256(total_food, 0)
+                resources_address,
+                owner,
+                Uint256(ResourceIds.fish, 0),
+                Uint256(total_food * 10 ** 18, 0),
+                1,
+                data,
             )
-            tempvar syscall_ptr = syscall_ptr
-            tempvar range_check_ptr = range_check_ptr
-            tempvar pedersen_ptr = pedersen_ptr
         end
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
     else:
         # turn directly into useable food
         convert_to_store(token_id, total_food)
@@ -255,7 +271,61 @@ end
 # INTERNAL
 # -----------------------------------
 
-# Convert harvest into storehouse.
+# @notice Updates values after harvest
+# @param current_harvests: Staked realm id
+# @param number_built: farms built - this is just unpacked data from above
+# @param total_harvest: total qty harvested
+# @param decayed_farms: decayed farms
+# @param token_id: Staked realm id
+# @param food_building_id: food building id
+func update{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(
+    current_harvests : felt,
+    number_built : felt,
+    total_harvest : felt,
+    decayed_farms : felt,
+    token_id : Uint256,
+    food_building_id : felt,
+):
+    alloc_locals
+    let (block_timestamp) = get_block_timestamp()
+
+    # check harvests left
+
+    with_attr error_message("FOOD: No Harvests available"):
+        assert_not_zero(current_harvests)
+    end
+
+    # calculated harvests to save
+    let harvests_to_save = current_harvests - total_harvest - decayed_farms
+
+    # # if 0 harvests left: Some can decay if you do not harvest.
+    let (is_zero_harvests) = is_le(harvests_to_save, 0)
+
+    if is_zero_harvests == TRUE:
+        tempvar harvests_to_save = 0
+    else:
+        tempvar harvests_to_save = harvests_to_save
+    end
+
+    let (packed) = Food.pack_food_buildings(
+        food_buildings_unpacked=FoodBuildings(number_built, harvests_to_save, block_timestamp)
+    )
+
+    # save packed
+    if food_building_id == RealmBuildingsIds.Farm:
+        farms.write(token_id, packed)
+    else:
+        fishing_villages.write(token_id, packed)
+    end
+
+    return ()
+end
+
+# @notice Converts harvest directly into food store
+# @param token_id: Staked realm id
+# @param quantity: quantity of food to store
 func convert_to_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256, quantity : felt
 ):
@@ -269,7 +339,9 @@ func convert_to_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     return ()
 end
 
-# This is the raw available food if there was no population. This is only used for internal functions.
+# @notice Available food in store
+# @param token_id: Staked realm id
+# @return total_harvest: Total food in storehouse
 func food_in_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
 ) -> (available : felt):
@@ -286,8 +358,10 @@ end
 # -----------------------------------
 # GETTERS
 # -----------------------------------
-# This is the available food
-# Equals total food / population - each digital population consumes 1 food per second.
+
+# @notice Available food in store
+# @param token_id: Staked realm id
+# @return total_harvest: Total food in storehouse
 @view
 func available_food_in_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
@@ -308,12 +382,89 @@ func available_food_in_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, r
     return (available)
 end
 
+# @notice harvests left
+# @param token_id: Staked realm id
+# @return farm_harvests_left: Harvests left
+@view
+func get_farm_harvests_left{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(token_id : Uint256) -> (farm_harvests_left : felt):
+    alloc_locals
+    let (packed) = farms.read(token_id)
+    # unpack
+    let (unpacked_food_buildings : FoodBuildings) = Food.unpack_food_buildings(packed)
+
+    return (unpacked_food_buildings.CollectionsLeft)
+end
+
+# @notice gets base fishing villages data
+# @param token_id: Staked realm id
+# @return total_harvest: Total harvestable
+# @return total_remaining: Total remaining
+# @return decayed_farms: Decayed
+@view
+func get_farms_to_harvest{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(token_id : Uint256) -> (total_harvest, total_remaining, decayed_farms):
+    alloc_locals
+    # farm expirary time
+    let (block_timestamp) = get_block_timestamp()
+
+    let (packed) = farms.read(token_id)
+    # unpack
+    let (unpacked_food_buildings : FoodBuildings) = Food.unpack_food_buildings(packed)
+
+    let (total_harvest, total_remaining, decayed_farms) = Food.calculate_harvest(
+        unpacked_food_buildings.UpdateTime, block_timestamp
+    )
+    return (total_harvest, total_remaining, decayed_farms)
+end
+
+# @notice harvests left
+# @param token_id: Staked realm id
+# @return farm_harvests_left: Harvests left
+@view
+func get_fishing_villages_harvests_left{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(token_id : Uint256) -> (farm_harvests_left : felt):
+    alloc_locals
+    let (packed) = fishing_villages.read(token_id)
+    # unpack
+    let (unpacked_food_buildings : FoodBuildings) = Food.unpack_food_buildings(packed)
+
+    return (unpacked_food_buildings.CollectionsLeft)
+end
+
+# @notice gets base fishing villages data
+# @param token_id: Staked realm id
+# @return total_harvest: Total harvestable
+# @return total_remaining: Total remaining
+# @return decayed_farms: Decayed
+@view
+func get_fishing_villages_to_harvest{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(token_id : Uint256) -> (total_harvest, total_remaining, decayed_farms):
+    alloc_locals
+    # farm expirary time
+    let (block_timestamp) = get_block_timestamp()
+
+    let (packed) = fishing_villages.read(token_id)
+    # unpack
+    let (unpacked_food_buildings : FoodBuildings) = Food.unpack_food_buildings(packed)
+
+    let (total_harvest, total_remaining, decayed_farms) = Food.calculate_harvest(
+        unpacked_food_buildings.UpdateTime, block_timestamp
+    )
+    return (total_harvest, total_remaining, decayed_farms)
+end
+
 # -----------------------------------
 # HOOKS
 # -----------------------------------
 
-# updates food value to match computed.
+# @notice updates food value to match computed.
 # this stops food ever returning to a greater value than what it was
+# @param token_id: Staked realm id
 @external
 func update_food_hook{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
@@ -329,15 +480,23 @@ func update_food_hook{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
 
     if is_empty == TRUE:
         store_house.write(token_id, 0)
-        tempvar syscall_ptr = syscall_ptr
-        tempvar range_check_ptr = range_check_ptr
-        tempvar pedersen_ptr = pedersen_ptr
     else:
         store_house.write(token_id, current_food_supply + block_timestamp)
-        tempvar syscall_ptr = syscall_ptr
-        tempvar range_check_ptr = range_check_ptr
-        tempvar pedersen_ptr = pedersen_ptr
     end
+
+    return ()
+end
+
+# -----------------------------------
+# ADMIN
+# -----------------------------------
+@external
+func reset{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(token_id : Uint256):
+    alloc_locals
+
+    fishing_villages.write(token_id, 0)
+    farms.write(token_id, 0)
+    store_house.write(token_id, 0)
 
     return ()
 end

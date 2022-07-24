@@ -27,9 +27,17 @@ def check_resources(address, network):
     n_resources = len(config.RESOURCES)
 
     uints = []
-    for i in range(n_resources):
+    for i in range(n_resources - 2):
         uints.append(str(i+1))
         uints.append("0")
+
+    # WHEAT
+    uints.append("10000")
+    uints.append("0")
+
+    # FISH
+    uints.append("10001")
+    uints.append("0")
 
     out = wrapped_call(
         network=config.nile_network,

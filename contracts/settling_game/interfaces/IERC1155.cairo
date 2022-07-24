@@ -37,7 +37,7 @@ namespace IERC1155:
     ):
     end
 
-    func mint(to : felt, id : Uint256, amount : Uint256) -> ():
+    func mint(to : felt, id : Uint256, amount : Uint256, data_len : felt, data : felt*) -> ():
     end
 
     func mintBatch(

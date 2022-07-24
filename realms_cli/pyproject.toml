@@ -122,3 +122,12 @@ cairo-nile = "^0.5.0"
 "get_all_rates" = "realms_cli.exchange.trade.get_all_rates"
 
 "transfer_lords" = "realms_cli.player.lords.transfer_lords"
+
+
+#-----------FOOD
+"build_food" = "realms_cli.player.food.build_food"
+"harvest" = "realms_cli.player.food.harvest"
+"harvests_left" = "realms_cli.player.food.harvests_left"
+"harvests" = "realms_cli.player.food.harvests"
+"store_house" = "realms_cli.player.food.store_house"
+"reset" = "realms_cli.player.food.reset"

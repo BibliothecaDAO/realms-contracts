@@ -119,7 +119,8 @@ end
 func mint{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     to : felt, id : Uint256, amount : Uint256, data_len : felt, data : felt*
 ):
-    check_can_action()
+    # TODO: Module based approach
+    # check_can_action()
     let (caller) = get_caller_address()
     with_attr error_message("ERC1155: called from zero address"):
         assert_not_zero(caller)
@@ -138,7 +139,8 @@ func mintBatch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     data_len : felt,
     data : felt*,
 ):
-    check_can_action()
+    # TODO: Module based approach
+    # check_can_action()
     let (caller) = get_caller_address()
     with_attr error_message("ERC1155: called from zero address"):
         assert_not_zero(caller)
