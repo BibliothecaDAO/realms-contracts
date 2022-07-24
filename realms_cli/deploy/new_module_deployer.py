@@ -46,9 +46,11 @@ def run(nre):
         )
 
     #---------------- INIT MODULES  ----------------#
+
     for contract in NEW_MODULES:
 
-        module, _ = safe_load_deployment(contract.alias, nre.network)
+        module, _ = safe_load_deployment(
+            "proxy_" + contract.alias, nre.network)
 
         wrapped_send(
             network=config.nile_network,

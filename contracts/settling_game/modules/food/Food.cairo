@@ -7,7 +7,7 @@
 #   of rivers or harbours on the Realm. Once built, players can harvest these farms
 #   at a set interval for $WHEAT or $FISH. The player has the option at harvest time to
 #   either claim or store directly into the store_house. Once the food is in the
-#   store_house it is depleted according to the population on the Realm. If the player choosing to export the food, 
+#   store_house it is depleted according to the population on the Realm. If the player choosing to export the food,
 #   the tokens are minted to the players wallet.
 
 # MIT License
@@ -23,7 +23,11 @@ from starkware.starknet.common.syscalls import get_caller_address, get_block_tim
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le, assert_nn
 from contracts.settling_game.library.library_module import Module
-from contracts.settling_game.utils.constants import BASE_HARVESTS, BASE_FOOD_PRODUCTION
+from contracts.settling_game.utils.constants import (
+    BASE_HARVESTS,
+    BASE_FOOD_PRODUCTION,
+    STORE_HOUSE_SIZE,
+)
 from contracts.settling_game.utils.general import calculate_cost
 from contracts.settling_game.utils.game_structs import (
     RealmData,
@@ -358,6 +362,7 @@ end
 # @notice Available food in store
 # @param token_id: Staked Realm id (S_Realm)
 # @return total_harvest: Total food in storehouse
+@view
 func food_in_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
 ) -> (available : felt):
@@ -393,6 +398,7 @@ func available_food_in_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, r
     let (population) = IL04_Calculator.calculate_population(calculator_address, token_id)
 
     # get actual food
+    # TODO: Get Population
     let (available) = Food.calculate_available_food(current, population)
 
     return (available)
@@ -472,6 +478,22 @@ func get_fishing_villages_to_harvest{
         unpacked_food_buildings.UpdateTime, block_timestamp
     )
     return (total_harvest, total_remaining, decayed_farms)
+end
+
+# @notice Computes value of store houses. Store houses take up variable space on the Realm according to STORE_HOUSE_SIZE
+# @param token_id: Staked Realm id (S_Realm)
+# @return full_store_houses: A full decimal value of storehouses
+@view
+func get_full_store_houses{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(token_id : Uint256) -> (full_store_houses : felt):
+    alloc_locals
+
+    let (food_in_store) = available_food_in_store(token_id)
+
+    let (total_store_house) = Food.get_full_store_houses(food_in_store)
+
+    return (total_store_house)
 end
 
 # -----------------------------------

@@ -186,3 +186,24 @@ def reset(realm_token_id, network):
             0,
         ],
     )
+
+
+@click.command()
+@click.argument("realm_token_id", nargs=1)
+@click.option("--network", default="goerli")
+def full_store_houses(realm_token_id, network):
+    """
+    Get harvests_left on a Realm
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_Food",
+        function="get_full_store_houses",
+        arguments=[
+            realm_token_id,                 # uint 1
+            0
+        ],
+    )
+    print(int(out))

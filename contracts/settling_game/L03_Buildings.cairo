@@ -12,6 +12,7 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math import assert_not_zero
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
+from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.uint256 import Uint256
 
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
@@ -19,6 +20,7 @@ from openzeppelin.upgrades.library import Proxy
 
 from contracts.settling_game.library.library_buildings import Buildings
 from contracts.settling_game.library.library_resources import Resources
+from contracts.settling_game.utils.constants import STORE_HOUSE_SIZE
 
 from contracts.settling_game.utils.general import unpack_data, transform_costs_to_token_ids_values
 from contracts.settling_game.utils.game_structs import (
@@ -34,7 +36,7 @@ from contracts.settling_game.utils.game_structs import (
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
-
+from contracts.settling_game.interfaces.imodules import IFood
 from contracts.settling_game.library.library_module import Module
 
 # -----------------------------------
@@ -266,9 +268,65 @@ func get_effective_buildings{
     let (House) = Buildings.calculate_effective_buildings(
         RealmBuildingsIds.House, functional_buildings.House, block_timestamp
     )
-    let (StoreHouse) = Buildings.calculate_effective_buildings(
-        RealmBuildingsIds.StoreHouse, functional_buildings.StoreHouse, block_timestamp
+
+    # storehouse is computed from food. TODO: deprecate struct
+    let (food_address) = Module.get_module_address(ModuleIds.L10_Food)
+    let (StoreHouse) = IFood.get_full_store_houses(food_address, token_id)
+
+    let (Granary) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.Granary, functional_buildings.Granary, block_timestamp
     )
+    let (Farm) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.Farm, functional_buildings.Farm, block_timestamp
+    )
+    let (FishingVillage) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.FishingVillage, functional_buildings.FishingVillage, block_timestamp
+    )
+    let (Barracks) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.Barracks, functional_buildings.Barracks, block_timestamp
+    )
+    let (MageTower) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.MageTower, functional_buildings.MageTower, block_timestamp
+    )
+    let (ArcherTower) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.ArcherTower, functional_buildings.ArcherTower, block_timestamp
+    )
+    let (Castle) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.Castle, functional_buildings.Castle, block_timestamp
+    )
+
+    return (
+        realm_buildings=RealmBuildings(
+        House=House,
+        StoreHouse=StoreHouse,
+        Granary=Granary,
+        Farm=Farm,
+        FishingVillage=FishingVillage,
+        Barracks=Barracks,
+        MageTower=MageTower,
+        ArcherTower=ArcherTower,
+        Castle=Castle
+        ),
+    )
+end
+
+# helper function otherwise infinite loop happens. TODO: could be better solution
+@view
+func get_effective_population_buildings{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(token_id : Uint256) -> (realm_buildings : RealmBuildings):
+    alloc_locals
+
+    let (functional_buildings : RealmBuildings) = get_buildings_integrity_unpacked(token_id)
+
+    let (block_timestamp) = get_block_timestamp()
+
+    let (House) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.House, functional_buildings.House, block_timestamp
+    )
+
+    let StoreHouse = 0
+
     let (Granary) = Buildings.calculate_effective_buildings(
         RealmBuildingsIds.Granary, functional_buildings.Granary, block_timestamp
     )

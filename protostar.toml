@@ -12,3 +12,6 @@ main = [
 
 ["protostar.build"]
 cairo-path = ["./lib/cairo_contracts/src"]
+
+["protostar.shared_command_configs"]
+stdout-on-success = true

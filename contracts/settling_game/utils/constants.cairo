@@ -89,6 +89,7 @@ const PILLAGE_AMOUNT = 25  # bp of successful pillage
 # Buildings
 # -----------------------------------
 const BASE_SQM = 25  # base sqm of base
+const STORE_HOUSE_SIZE = 1000  # divisor to get sq of storehouse food
 
 # -----------------------------------
 # Food

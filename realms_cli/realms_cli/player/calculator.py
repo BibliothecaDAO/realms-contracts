@@ -32,6 +32,7 @@ def happiness(realm_token_id, network):
     )
     print(out)
 
+
 @click.command()
 @click.argument("realm_token_id", nargs=1)
 @click.option("--network", default="goerli")
@@ -51,6 +52,7 @@ def troop_population(realm_token_id, network):
         ],
     )
     print(out)
+
 
 @click.command()
 @click.argument("realm_token_id", nargs=1)
@@ -72,6 +74,7 @@ def culture(realm_token_id, network):
     )
     print(out)
 
+
 @click.command()
 @click.argument("realm_token_id", nargs=1)
 @click.option("--network", default="goerli")
@@ -90,7 +93,8 @@ def food(realm_token_id, network):
             0,
         ],
     )
-    print(out)    
+    print(out)
+
 
 @click.command()
 @click.argument("realm_token_id", nargs=1)
@@ -110,4 +114,4 @@ def population(realm_token_id, network):
             0,
         ],
     )
-    print(out)        
+    print(out)

@@ -14,7 +14,12 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le, assert_nn
 from starkware.cairo.common.math_cmp import is_le
 
-from contracts.settling_game.utils.constants import FARM_LENGTH, MAX_HARVESTS, HARVEST_LENGTH
+from contracts.settling_game.utils.constants import (
+    FARM_LENGTH,
+    MAX_HARVESTS,
+    HARVEST_LENGTH,
+    STORE_HOUSE_SIZE,
+)
 from contracts.settling_game.utils.game_structs import (
     RealmData,
     RealmBuildingsIds,
@@ -162,5 +167,28 @@ namespace Food:
             UpdateTime
             ),
         )
+    end
+
+    # @notice Computes value of store houses. Store houses take up variable space on the Realm according to STORE_HOUSE_SIZE
+    # @param token_id: Staked Realm id (S_Realm)
+    # @return full_store_houses: A full decimal value of storehouses
+
+    func get_full_store_houses{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+        bitwise_ptr : BitwiseBuiltin*,
+    }(food_in_store : felt) -> (full_store_houses : felt):
+        alloc_locals
+
+        let (total_store_house, _) = unsigned_div_rem(food_in_store, STORE_HOUSE_SIZE)
+
+        let (zero_store_houses) = is_le(total_store_house, 0)
+
+        if zero_store_houses == TRUE:
+            return (0)
+        end
+
+        return (total_store_house)
     end
 end
