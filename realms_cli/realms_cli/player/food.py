@@ -112,7 +112,7 @@ def harvests_left(realm_token_id, food_type, network):
             0
         ],
     )
-    print(int(out, 16) / 1000000000000000000)
+    print(out)
     # print(out)
 
 

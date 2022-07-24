@@ -429,10 +429,12 @@ func get_farms_to_harvest{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
 }(token_id : Uint256) -> (total_harvest, total_remaining, decayed_farms):
     alloc_locals
+
     # farm expirary time
     let (block_timestamp) = get_block_timestamp()
 
     let (packed) = farms.read(token_id)
+
     # unpack
     let (unpacked_food_buildings : FoodBuildings) = Food.unpack_food_buildings(packed)
 
