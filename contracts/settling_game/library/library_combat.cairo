@@ -1,6 +1,7 @@
 %lang starknet
 
 from starkware.cairo.common.alloc import alloc
+from starkware.cairo.common.bool import TRUE
 from starkware.cairo.common.math import (
     assert_not_zero,
     assert_le,
@@ -8,7 +9,7 @@ from starkware.cairo.common.math import (
     split_int,
     unsigned_div_rem,
 )
-from starkware.cairo.common.math_cmp import is_le
+from starkware.cairo.common.math_cmp import is_le, is_nn
 from starkware.cairo.common.memcpy import memcpy
 from starkware.cairo.common.memset import memset
 from starkware.cairo.common.registers import get_label_location
@@ -28,37 +29,6 @@ from contracts.settling_game.utils.game_structs import (
 const SHIFT = 0x100
 
 namespace Combat:
-    func compute_squad_stats(s : Squad) -> (stats : SquadStats):
-        let agility = s.t1_1.agility + s.t1_2.agility + s.t1_3.agility + s.t1_4.agility +
-            s.t1_5.agility + s.t1_6.agility + s.t1_7.agility + s.t1_8.agility + s.t1_9.agility +
-            s.t2_1.agility + s.t2_2.agility + s.t2_3.agility + s.t2_4.agility + s.t2_5.agility +
-            s.t3_1.agility
-
-        let attack = s.t1_1.attack + s.t1_2.attack + s.t1_3.attack + s.t1_4.attack +
-            s.t1_5.attack + s.t1_6.attack + s.t1_7.attack + s.t1_8.attack + s.t1_9.attack +
-            s.t2_1.attack + s.t2_2.attack + s.t2_3.attack + s.t2_4.attack + s.t2_5.attack +
-            s.t3_1.attack
-
-        let armor = s.t1_1.armor + s.t1_2.armor + s.t1_3.armor + s.t1_4.armor +
-            s.t1_5.armor + s.t1_6.armor + s.t1_7.armor + s.t1_8.armor + s.t1_9.armor +
-            s.t2_1.armor + s.t2_2.armor + s.t2_3.armor + s.t2_4.armor + s.t2_5.armor +
-            s.t3_1.armor
-
-        let vitality = s.t1_1.vitality + s.t1_2.vitality + s.t1_3.vitality + s.t1_4.vitality +
-            s.t1_5.vitality + s.t1_6.vitality + s.t1_7.vitality + s.t1_8.vitality + s.t1_9.vitality +
-            s.t2_1.vitality + s.t2_2.vitality + s.t2_3.vitality + s.t2_4.vitality + s.t2_5.vitality +
-            s.t3_1.vitality
-
-        let wisdom = s.t1_1.wisdom + s.t1_2.wisdom + s.t1_3.wisdom + s.t1_4.wisdom +
-            s.t1_5.wisdom + s.t1_6.wisdom + s.t1_7.wisdom + s.t1_8.wisdom + s.t1_9.wisdom +
-            s.t2_1.wisdom + s.t2_2.wisdom + s.t2_3.wisdom + s.t2_4.wisdom + s.t2_5.wisdom +
-            s.t3_1.wisdom
-
-        return (
-            SquadStats(agility=agility, attack=attack, armor=armor, vitality=vitality, wisdom=wisdom),
-        )
-    end
-
     func compute_squad_vitality(s : Squad) -> (vitality : felt):
         let vitality = s.t1_1.vitality + s.t1_2.vitality + s.t1_3.vitality + s.t1_4.vitality +
             s.t1_5.vitality + s.t1_6.vitality + s.t1_7.vitality + s.t1_8.vitality + s.t1_9.vitality +
@@ -146,7 +116,6 @@ namespace Combat:
 
     func unpack_troop{range_check_ptr}(packed : felt) -> (t : Troop):
         alloc_locals
-        let (_foo) = alloc()
         let (vitality, troop_id) = unsigned_div_rem(packed, SHIFT)
         if troop_id == 0:
             return (
@@ -418,6 +387,69 @@ namespace Combat:
         return (0)
     end
 
+    func get_first_vital_troop(s : Squad) -> (t : Troop, idx : felt):
+        if s.t1_1.vitality != 0:
+            return (s.t1_1, 0)
+        end
+        if s.t1_2.vitality != 0:
+            return (s.t1_2, 1)
+        end
+        if s.t1_3.vitality != 0:
+            return (s.t1_3, 2)
+        end
+        if s.t1_4.vitality != 0:
+            return (s.t1_4, 3)
+        end
+        if s.t1_5.vitality != 0:
+            return (s.t1_5, 4)
+        end
+        if s.t1_6.vitality != 0:
+            return (s.t1_6, 5)
+        end
+        if s.t1_7.vitality != 0:
+            return (s.t1_7, 6)
+        end
+        if s.t1_8.vitality != 0:
+            return (s.t1_8, 7)
+        end
+        if s.t1_9.vitality != 0:
+            return (s.t1_9, 8)
+        end
+        if s.t2_1.vitality != 0:
+            return (s.t2_1, 9)
+        end
+        if s.t2_2.vitality != 0:
+            return (s.t2_2, 10)
+        end
+        if s.t2_3.vitality != 0:
+            return (s.t2_3, 11)
+        end
+        if s.t2_4.vitality != 0:
+            return (s.t2_4, 12)
+        end
+        if s.t2_5.vitality != 0:
+            return (s.t2_5, 13)
+        end
+        if s.t3_1.vitality != 0:
+            return (s.t3_1, 14)
+        end
+        return (Troop(0, 0, 0, 0, 0, 0, 0, 0, 0), 0)
+    end
+
+    func calculate_hit_points{range_check_ptr}(a : Troop, d : Troop, dice_roll : felt) -> (
+        hit_points : felt
+    ):
+        alloc_locals
+        let h = ((a.agility - d.agility) + a.attack * (dice_roll - d.armor) - (d.wisdom - a.wisdom))
+        let (is_valid) = is_nn(h)
+
+        if is_valid == TRUE:
+            return (h)
+        else:
+            return (0)
+        end
+    end
+
     func add_troops_to_squad{range_check_ptr}(
         current : Squad, troop_ids_len : felt, troop_ids : felt*
     ) -> (squad : Squad):
@@ -500,53 +532,28 @@ namespace Combat:
         return (p)
     end
 
-    func hit_squad{range_check_ptr}(s : Squad, hits : felt) -> (squad : Squad):
+    func hit_troop_in_squad{range_check_ptr}(s : Squad, troop_idx : felt, hit_points : felt) -> (
+        squad : Squad
+    ):
         alloc_locals
+        assert_lt(troop_idx, Squad.SIZE / Troop.SIZE)
 
-        let (t1_1, remaining_hits) = hit_troop(s.t1_1, hits)
-        let (t1_2, remaining_hits) = hit_troop(s.t1_2, remaining_hits)
-        let (t1_3, remaining_hits) = hit_troop(s.t1_3, remaining_hits)
-        let (t1_4, remaining_hits) = hit_troop(s.t1_4, remaining_hits)
-        let (t1_5, remaining_hits) = hit_troop(s.t1_5, remaining_hits)
-        let (t1_6, remaining_hits) = hit_troop(s.t1_6, remaining_hits)
-        let (t1_7, remaining_hits) = hit_troop(s.t1_7, remaining_hits)
-        let (t1_8, remaining_hits) = hit_troop(s.t1_8, remaining_hits)
-        let (t1_9, remaining_hits) = hit_troop(s.t1_9, remaining_hits)
+        let (__fp__, _) = get_fp_and_pc()
+        let slot = troop_idx * Troop.SIZE
+        let tp : Troop* = cast(&s + slot, Troop*)
+        let (t) = hit_troop([tp], hit_points)
 
-        let (t2_1, remaining_hits) = hit_troop(s.t2_1, remaining_hits)
-        let (t2_2, remaining_hits) = hit_troop(s.t2_2, remaining_hits)
-        let (t2_3, remaining_hits) = hit_troop(s.t2_3, remaining_hits)
-        let (t2_4, remaining_hits) = hit_troop(s.t2_4, remaining_hits)
-        let (t2_5, remaining_hits) = hit_troop(s.t2_5, remaining_hits)
-
-        let (t3_1, _) = hit_troop(s.t3_1, remaining_hits)
-
-        let s = Squad(
-            t1_1=t1_1,
-            t1_2=t1_2,
-            t1_3=t1_3,
-            t1_4=t1_4,
-            t1_5=t1_5,
-            t1_6=t1_6,
-            t1_7=t1_7,
-            t1_8=t1_8,
-            t1_9=t1_9,
-            t2_1=t2_1,
-            t2_2=t2_2,
-            t2_3=t2_3,
-            t2_4=t2_4,
-            t2_5=t2_5,
-            t3_1=t3_1,
-        )
-
-        return (s)
+        let (a) = alloc()
+        memcpy(a, &s, slot)
+        memcpy(a + slot, &t, Troop.SIZE)
+        memcpy(a + slot + Troop.SIZE, &s + slot + Troop.SIZE, Squad.SIZE - slot - Troop.SIZE)
+        let updated = cast(a, Squad*)
+        return ([updated])
     end
 
-    func hit_troop{range_check_ptr}(t : Troop, hits : felt) -> (
-        hit_troop : Troop, remaining_hits : felt
-    ):
+    func hit_troop{range_check_ptr}(t : Troop, hits : felt) -> (hit_troop : Troop):
         if hits == 0:
-            return (t, 0)
+            return (t)
         end
 
         let (kills_troop) = is_le(t.vitality, hits)
@@ -555,8 +562,7 @@ namespace Combat:
             let ht = Troop(
                 id=0, type=0, tier=0, building=0, agility=0, attack=0, armor=0, vitality=0, wisdom=0
             )
-            let rem = hits - t.vitality
-            return (ht, rem)
+            return (ht)
         else:
             # t.vitality > hits
             let ht = Troop(
@@ -570,7 +576,77 @@ namespace Combat:
                 vitality=t.vitality - hits,
                 wisdom=t.wisdom,
             )
-            return (ht, 0)
+            return (ht)
         end
+    end
+
+    func apply_hunger_penalty{range_check_ptr}(s : Squad) -> (hungry : Squad):
+        alloc_locals
+        let (v, _) = unsigned_div_rem(s.t1_1.vitality, 2)
+        let (t1_1) = troop_copy_with_vitality(s.t1_1, v)
+
+        let (v, _) = unsigned_div_rem(s.t1_2.vitality, 2)
+        let (t1_2) = troop_copy_with_vitality(s.t1_2, v)
+
+        let (v, _) = unsigned_div_rem(s.t1_3.vitality, 2)
+        let (t1_3) = troop_copy_with_vitality(s.t1_3, v)
+
+        let (v, _) = unsigned_div_rem(s.t1_4.vitality, 2)
+        let (t1_4) = troop_copy_with_vitality(s.t1_4, v)
+
+        let (v, _) = unsigned_div_rem(s.t1_5.vitality, 2)
+        let (t1_5) = troop_copy_with_vitality(s.t1_5, v)
+
+        let (v, _) = unsigned_div_rem(s.t1_6.vitality, 2)
+        let (t1_6) = troop_copy_with_vitality(s.t1_6, v)
+
+        let (v, _) = unsigned_div_rem(s.t1_7.vitality, 2)
+        let (t1_7) = troop_copy_with_vitality(s.t1_7, v)
+
+        let (v, _) = unsigned_div_rem(s.t1_8.vitality, 2)
+        let (t1_8) = troop_copy_with_vitality(s.t1_8, v)
+
+        let (v, _) = unsigned_div_rem(s.t1_9.vitality, 2)
+        let (t1_9) = troop_copy_with_vitality(s.t1_9, v)
+
+        let (v, _) = unsigned_div_rem(s.t2_1.vitality, 2)
+        let (t2_1) = troop_copy_with_vitality(s.t2_1, v)
+
+        let (v, _) = unsigned_div_rem(s.t2_2.vitality, 2)
+        let (t2_2) = troop_copy_with_vitality(s.t2_2, v)
+
+        let (v, _) = unsigned_div_rem(s.t2_3.vitality, 2)
+        let (t2_3) = troop_copy_with_vitality(s.t2_3, v)
+
+        let (v, _) = unsigned_div_rem(s.t2_4.vitality, 2)
+        let (t2_4) = troop_copy_with_vitality(s.t2_4, v)
+
+        let (v, _) = unsigned_div_rem(s.t2_5.vitality, 2)
+        let (t2_5) = troop_copy_with_vitality(s.t2_5, v)
+
+        let (v, _) = unsigned_div_rem(s.t3_1.vitality, 2)
+        let (t3_1) = troop_copy_with_vitality(s.t3_1, v)
+
+        return (
+            Squad(t1_1=t1_1, t1_2=t1_2, t1_3=t1_3, t1_4=t1_4, t1_5=t1_5,
+            t1_6=t1_6, t1_7=t1_7, t1_8=t1_8, t1_9=t1_9, t2_1=t2_1, t2_2=t2_2,
+            t2_3=t2_3, t2_4=t2_4, t2_5=t2_5, t3_1=t3_1),
+        )
+    end
+
+    func troop_copy_with_vitality(t : Troop, v : felt) -> (t : Troop):
+        return (
+            Troop(
+            id=t.id,
+            type=t.type,
+            tier=t.tier,
+            building=t.building,
+            agility=t.agility,
+            attack=t.attack,
+            armor=t.armor,
+            vitality=v,
+            wisdom=t.wisdom,
+            ),
+        )
     end
 end

@@ -101,7 +101,9 @@ async def test_run_combat_loop(l06_combat_tests):
     attacker = build_default_squad()
     defender = build_partial_squad(7)
 
-    tx = await l06_combat_tests.test_run_combat_loop(attacker, defender, 1).invoke()
+    tx = await l06_combat_tests.test_run_combat_loop(attacker, defender).invoke()
+
+    print(tx.call_info.execution_resources)
 
     res = tx.result
     assert len(res) == 3
@@ -110,15 +112,11 @@ async def test_run_combat_loop(l06_combat_tests):
 
 @pytest.mark.asyncio
 async def test_attack(l06_combat_tests):
-    attack_vs_defense = 1
-    wisdom_vs_agility = 2
-    for attack_type in [attack_vs_defense, wisdom_vs_agility]:
-        a = build_default_squad()
-        d = build_default_squad()
-        tx = await l06_combat_tests.test_attack(a, d, attack_type).invoke()
-
-        # assuming at least one hit
-        assert tx.result.d_after_attack.t1_1.vitality < d.t1_1.vitality
+    a = build_default_squad()
+    d = build_default_squad()
+    tx = await l06_combat_tests.test_attack(a, d).invoke()
+    # assuming at least one hit
+    assert tx.result.d_after_attack.t1_1.vitality < d.t1_1.vitality
 
 
 @pytest.mark.asyncio
@@ -137,44 +135,44 @@ async def test_compute_min_roll_to_hit(l06_combat_tests):
 
 
 @pytest.mark.asyncio
-async def test_update_squad_in_realm(s06_combat):
+async def test_update_squad_in_realm(l06_combat):
     realm_id = (1, 0)
     packed_empty_squad = 0
     default_squad = build_default_squad()
     packed_default_squad = pack_squad(default_squad)
 
-    tx = await s06_combat.get_realm_combat_data(realm_id).invoke()
+    tx = await l06_combat.get_realm_combat_data(realm_id).invoke()
 
     assert tx.result.combat_data.attacking_squad == packed_empty_squad
     assert tx.result.combat_data.defending_squad == packed_empty_squad
 
     # set attack slot
-    await s06_combat.update_squad_in_realm(default_squad, realm_id, 1).invoke()
+    await l06_combat.update_squad_in_realm(default_squad, realm_id, 1).invoke()
 
-    tx = await s06_combat.get_realm_combat_data(realm_id).invoke()
+    tx = await l06_combat.get_realm_combat_data(realm_id).invoke()
     assert tx.result.combat_data.attacking_squad == packed_default_squad
     assert tx.result.combat_data.defending_squad == packed_empty_squad
 
     # set defend slot
-    await s06_combat.update_squad_in_realm(default_squad, realm_id, 2).invoke()
+    await l06_combat.update_squad_in_realm(default_squad, realm_id, 2).invoke()
 
-    tx = await s06_combat.get_realm_combat_data(realm_id).invoke()
+    tx = await l06_combat.get_realm_combat_data(realm_id).invoke()
     assert tx.result.combat_data.attacking_squad == packed_default_squad
     assert tx.result.combat_data.defending_squad == packed_default_squad
 
     # try setting wrong slot, noop
-    await s06_combat.update_squad_in_realm(default_squad, realm_id, 9).invoke()
+    await l06_combat.update_squad_in_realm(default_squad, realm_id, 9).invoke()
 
-    tx = await s06_combat.get_realm_combat_data(realm_id).invoke()
+    tx = await l06_combat.get_realm_combat_data(realm_id).invoke()
     assert tx.result.combat_data.attacking_squad == packed_default_squad
     assert tx.result.combat_data.defending_squad == packed_default_squad
 
 
 @pytest.mark.asyncio
-async def test_get_set_troop_cost(s06_combat):
+async def test_get_set_troop_cost(l06_combat):
     for troop_id, troop_cost in TROOP_COSTS.items():
-        await s06_combat.set_troop_cost(troop_id, troop_cost).invoke()
-        tx = await s06_combat.get_troop_cost(troop_id).invoke()
+        await l06_combat.set_troop_cost(troop_id, troop_cost).invoke()
+        tx = await l06_combat.get_troop_cost(troop_id).invoke()
         assert tx.result.cost == troop_cost
 
 

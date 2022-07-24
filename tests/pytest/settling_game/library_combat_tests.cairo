@@ -18,12 +18,6 @@ func test_remove_troop_from_squad{range_check_ptr}(troop_idx : felt, s : Squad) 
 end
 
 @view
-func test_compute_squad_stats(s : Squad) -> (stats : SquadStats):
-    let (stats) = Combat.compute_squad_stats(s)
-    return (stats)
-end
-
-@view
 func test_compute_squad_vitality(s : Squad) -> (vitality : felt):
     let (vitality) = Combat.compute_squad_vitality(s)
     return (vitality)

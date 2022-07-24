@@ -241,7 +241,8 @@ async def account_factory(request, compiled_account):
 @pytest.fixture(scope="module")
 async def l06_combat(starknet, xoroshiro) -> StarknetContract:
     contract = compile("contracts/settling_game/L06_Combat.cairo")
-    return await starknet.deploy(contract_class=contract)
+    combat_module = await starknet.deploy(contract_class=contract)
+    return combat_module
 
 
 @pytest.fixture(scope="module")
@@ -252,12 +253,6 @@ async def l06_combat_tests(starknet, xoroshiro) -> StarknetContract:
     # L06_Combat because it imports from it; hence when calling deploy, we need
     # to pass proper constructor_calldata
     return await starknet.deploy(contract_class=contract, constructor_calldata=[])
-
-
-@pytest.fixture(scope="module")
-async def s06_combat(starknet) -> StarknetContract:
-    contract = compile("contracts/settling_game/L06_Combat.cairo")
-    return await starknet.deploy(contract_class=contract)
 
 
 @pytest.fixture(scope="module")

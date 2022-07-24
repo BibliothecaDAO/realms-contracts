@@ -239,31 +239,6 @@ func test_unpack_squad{range_check_ptr}():
 end
 
 @external
-func test_compute_squad_stats{range_check_ptr}():
-    alloc_locals
-
-    let squad : Squad = build_default_squad()
-    let stats : SquadStats = Combat.compute_squad_stats(squad)
-
-    assert_eq(stats.agility, 44)
-    assert_eq(stats.attack, 107)
-    assert_eq(stats.armor, 37)
-    assert_eq(stats.vitality, 795)
-    assert_eq(stats.wisdom, 37)
-
-    let squad : Squad = build_partial_squad()
-    let stats : SquadStats = Combat.compute_squad_stats(squad)
-
-    assert_eq(stats.agility, 28)
-    assert_eq(stats.attack, 65)
-    assert_eq(stats.armor, 23)
-    assert_eq(stats.vitality, 477)
-    assert_eq(stats.wisdom, 23)
-
-    return ()
-end
-
-@external
 func test_compute_squad_vitality{range_check_ptr}():
     alloc_locals
 
@@ -297,31 +272,42 @@ func test_get_troop_population{range_check_ptr}():
 end
 
 @external
-func test_hit_squad{range_check_ptr}():
+func test_get_first_vital_troop{range_check_ptr}():
     alloc_locals
 
-    let (full : Squad) = build_default_squad()
+    # full
+    let (full) = build_default_squad()
+    let (troop, idx) = Combat.get_first_vital_troop(full)
 
-    # full kill
-    let (hit : Squad) = Combat.hit_squad(full, 15 * 53 + 1)
-    let (vitality) = Combat.compute_squad_vitality(hit)
-    assert_eq(vitality, 0)
+    assert_eq(troop.vitality, full.t1_1.vitality)
+    assert_eq(idx, 0)
 
-    # partial kill
-    let (hit : Squad) = Combat.hit_squad(full, 8 * 53 + 20)
-    let (vitality) = Combat.compute_squad_vitality(hit)
-    assert_eq(vitality, (15 * 53) - (8 * 53 + 20))
-    assert_eq(hit.t1_9.vitality, 53 - 20)
-    assert_eq(hit.t2_1.vitality, 53)
+    # empty
+    let (empty) = build_empty_squad()
+    let (troop, idx) = Combat.get_first_vital_troop(empty)
 
-    # partial kill of partial squad
-    let (partial : Squad) = build_partial_squad()
-    let (hit : Squad) = Combat.hit_squad(partial, 6 * 53 + 30)
-    let (vitality) = Combat.compute_squad_vitality(hit)
-    assert_eq(vitality, (9 * 53) - (6 * 53 + 30))
-    assert_eq(hit.t1_5.vitality, 0)
-    assert_eq(hit.t2_1.vitality, 0)
-    assert_eq(hit.t2_2.vitality, 53 - 30)
+    assert_eq(troop.vitality, 0)
+    assert_eq(idx, 0)
+
+    return ()
+end
+
+@external
+func test_calculate_hit_points{range_check_ptr}():
+    alloc_locals
+
+    let (k : Troop) = build_troop(TroopId.Knight)
+
+    # normal
+    let (points) = Combat.calculate_hit_points(k, k, 11)
+    assert_eq(points, 21)
+
+    # underflow
+    let (points) = Combat.calculate_hit_points(k, k, 8)
+    assert_eq(points, 0)
+
+    let (points) = Combat.calculate_hit_points(k, k, 5)
+    assert_eq(points, 0)
 
     return ()
 end
@@ -334,13 +320,12 @@ func test_hit_troop{range_check_ptr}():
 
     # full kill
     let (skirmisher : Troop) = build_troop(TroopId.Skirmisher)
-    let (hit : Troop, remaining : felt) = Combat.hit_troop(skirmisher, 80)
+    let (hit : Troop) = Combat.hit_troop(skirmisher, 80)
     assert_troop_eq(hit, empty)
-    assert_eq(remaining, 80 - skirmisher.vitality)
 
     # injury
     let (mage : Troop) = build_troop(TroopId.Mage)
-    let (hit : Troop, remaining : felt) = Combat.hit_troop(mage, 20)
+    let (hit : Troop) = Combat.hit_troop(mage, 20)
     let expected = Troop(
         mage.id,
         mage.type,
@@ -353,13 +338,11 @@ func test_hit_troop{range_check_ptr}():
         mage.wisdom,
     )
     assert_troop_eq(hit, expected)
-    assert_eq(remaining, 0)
 
     # no hit
     let (knight : Troop) = build_troop(TroopId.Knight)
-    let (hit : Troop, remaining : felt) = Combat.hit_troop(knight, 0)
+    let (hit : Troop) = Combat.hit_troop(knight, 0)
     assert_troop_eq(hit, knight)
-    assert_eq(remaining, 0)
 
     return ()
 end
@@ -495,9 +478,65 @@ func test_find_first_free_troop_slot_in_squad{range_check_ptr}():
     return ()
 end
 
-# TODO:
-# test_load_troop_costs???
-# test_transform_costs_to_token_ids_values???
+@external
+func test_hit_troop_in_squad{range_check_ptr}():
+    alloc_locals
+
+    let (full : Squad) = build_default_squad()
+    let (hit : Squad) = Combat.hit_troop_in_squad(full, 0, 200)
+
+    assert_eq(hit.t1_1.vitality, 0)
+    assert_eq(hit.t1_2.vitality, full.t1_2.vitality)
+
+    let (hit : Squad) = Combat.hit_troop_in_squad(full, 9, 200)
+    assert_eq(hit.t2_1.vitality, 0)
+    assert_eq(hit.t1_1.vitality, full.t1_1.vitality)
+
+    return ()
+end
+
+@external
+func test_apply_hunger_penalty{range_check_ptr}():
+    let (full) = build_default_squad()
+    let (h) = Combat.apply_hunger_penalty(full)
+
+    assert_eq(h.t1_1.vitality, 26)
+    assert_eq(h.t1_2.vitality, 26)
+    assert_eq(h.t1_3.vitality, 26)
+    assert_eq(h.t1_4.vitality, 26)
+    assert_eq(h.t1_5.vitality, 26)
+    assert_eq(h.t1_6.vitality, 26)
+    assert_eq(h.t1_7.vitality, 26)
+    assert_eq(h.t1_8.vitality, 26)
+    assert_eq(h.t1_9.vitality, 26)
+    assert_eq(h.t2_1.vitality, 26)
+    assert_eq(h.t2_2.vitality, 26)
+    assert_eq(h.t2_3.vitality, 26)
+    assert_eq(h.t2_4.vitality, 26)
+    assert_eq(h.t2_5.vitality, 26)
+    assert_eq(h.t3_1.vitality, 26)
+
+    let (empty) = build_empty_squad()
+    let (h) = Combat.apply_hunger_penalty(empty)
+
+    assert_eq(h.t1_1.vitality, 0)
+    assert_eq(h.t1_2.vitality, 0)
+    assert_eq(h.t1_3.vitality, 0)
+    assert_eq(h.t1_4.vitality, 0)
+    assert_eq(h.t1_5.vitality, 0)
+    assert_eq(h.t1_6.vitality, 0)
+    assert_eq(h.t1_7.vitality, 0)
+    assert_eq(h.t1_8.vitality, 0)
+    assert_eq(h.t1_9.vitality, 0)
+    assert_eq(h.t2_1.vitality, 0)
+    assert_eq(h.t2_2.vitality, 0)
+    assert_eq(h.t2_3.vitality, 0)
+    assert_eq(h.t2_4.vitality, 0)
+    assert_eq(h.t2_5.vitality, 0)
+    assert_eq(h.t3_1.vitality, 0)
+
+    return ()
+end
 
 #
 # helper functions
