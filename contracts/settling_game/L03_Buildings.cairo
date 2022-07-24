@@ -104,7 +104,7 @@ end
 # -----------------------------------
 
 # @notice Build building on a realm
-# @param token_id: Staked realm token id
+# @param token_id: Staked Realm id (S_Realm)
 # @param building_id: Building id
 # @return success: Returns TRUE when successfull
 @external
@@ -186,7 +186,7 @@ end
 # -----------------------------------
 
 # @notice Build buildings
-# @param token_id: Staked realm token id
+# @param token_id: Staked Realm id (S_Realm)
 # @param building_id: Building id
 func build_buildings{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
@@ -225,7 +225,7 @@ end
 # -----------------------------------
 
 # @notice Get Workhut costs
-# @param token_id: Staked realm token id
+# @param token_id: Staked Realm id (S_Realm)
 @view
 func get_workhut_costs{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
@@ -242,6 +242,9 @@ func get_workhut_costs{
     return (realms_data.resource_number, ids, realms_data.resource_number, values)
 end
 
+# @notice Gets integrity of buildings unpacked
+# @param token_id: Staked Realm id (S_Realm)
+# @return : unpacked buildings
 @view
 func get_buildings_integrity_unpacked{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
@@ -255,6 +258,9 @@ func get_buildings_integrity_unpacked{
     return (unpacked)
 end
 
+# @notice Gets all effective buildings on a Realm. This is a computed value.
+# @param token_id: Staked Realm id (S_Realm)
+# @return : unpacked buildings
 @view
 func get_effective_buildings{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
@@ -310,7 +316,9 @@ func get_effective_buildings{
     )
 end
 
-# helper function otherwise infinite loop happens. TODO: could be better solution
+# @notice Gets all effective buildings on a Realm. This is a computed value. helper function otherwise infinite loop happens. TODO: could be better solution
+# @param token_id: Staked Realm id (S_Realm)
+# @return : unpacked buildings
 @view
 func get_effective_population_buildings{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
@@ -364,6 +372,9 @@ func get_effective_population_buildings{
     )
 end
 
+# @notice Gets storage on realm. TODO: Deprecate
+# @param token_id: Staked Realm id (S_Realm)
+# @return : buildings
 @view
 func get_storage_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
@@ -371,6 +382,10 @@ func get_storage_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin
     return realm_buildings.read(token_id)
 end
 
+# @notice Gets building cost according to Cost tuple
+# @param building_id: Building ID
+# @return : building cost in resources
+# @return : lords cost
 @view
 func get_building_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     building_id : felt
@@ -384,6 +399,10 @@ end
 # Admin
 # -----------------------------------
 
+# @notice Sets cost of the buildings
+# @param building_id: Staked Realm id (S_Realm)
+# @param : building cost in resources
+# @param : lords cost
 @external
 func set_building_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     building_id : felt, cost : Cost, lords : Uint256
