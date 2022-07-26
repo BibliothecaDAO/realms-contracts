@@ -117,12 +117,11 @@ cairo-nile = "^0.5.0"
 
 "get_lp_pos" = "realms_cli.exchange.trade.get_lp_pos"
 
-"get_all_sell_price" = "realms_cli.exchange.trade.get_all_sell_price"
-"get_all_buy_price" = "realms_cli.exchange.trade.get_all_buy_price"
+"get_market" = "realms_cli.exchange.trade.get_market"
 "get_all_rates" = "realms_cli.exchange.trade.get_all_rates"
 
 "transfer_lords" = "realms_cli.player.lords.transfer_lords"
-
+"market_approval" = "realms_cli.exchange.trade.market_approval"
 
 #-----------FOOD
 "build_food" = "realms_cli.player.food.build_food"

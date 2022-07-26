@@ -113,7 +113,7 @@ def sell_tokens(resource_ids, resource_values, min_currency, network):
 
 @click.command()
 @click.option("--network", default="goerli")
-def get_all_sell_price(network):
+def get_market(network):
     """
     Get all sell price
     """
@@ -123,7 +123,7 @@ def get_all_sell_price(network):
     values = get_values()
     n_resources = 24
 
-    out = wrapped_call(
+    out_sell = wrapped_call(
         network=config.nile_network,
         contract_alias="proxy_Exchange_ERC20_1155",
         function="get_all_sell_price",
@@ -135,29 +135,7 @@ def get_all_sell_price(network):
         ],
     )
 
-    out = out.split(" ")
-    pretty_out = []
-    for i, resource in enumerate(config.RESOURCES):
-        pretty_out.append(f"1 {resource} sells {from_bn(out[i*2+1])}  $LORDS")
-    print('MARKET SELL PRICES PER LORDS')
-    print_over_colums(pretty_out)
-
-
-@click.command()
-@click.option("--network", default="goerli")
-def get_all_buy_price(network):
-    """
-    Get all buy price
-    """
-
-    config = Config(nile_network=network)
-
-    uints = get_ids()
-    values = get_values()
-
-    n_resources = 24
-
-    out = wrapped_call(
+    out_buy = wrapped_call(
         network=config.nile_network,
         contract_alias="proxy_Exchange_ERC20_1155",
         function="get_all_buy_price",
@@ -168,14 +146,22 @@ def get_all_buy_price(network):
             *values,
         ],
     )
-    # print(out)
 
-    out = out.split(" ")
-    pretty_out = []
+    out_sell = out_sell.split(" ")
+    pretty_out_sell = []
     for i, resource in enumerate(config.RESOURCES):
-        pretty_out.append(f"1 {resource} buys {from_bn(out[i*2+1])} $LORDS")
-    print('MARKET BUY PRICES PER LORDS')
-    print_over_colums(pretty_out)
+        pretty_out_sell.append(
+            f"1 {resource} sells {from_bn(out_sell[i*2+1])}  $LORDS")
+    print('------------------MARKET SELL PRICES PER LORDS------------------')
+    print_over_colums(pretty_out_sell)
+
+    out_buy = out_buy.split(" ")
+    pretty_out_buy = []
+    for i, resource in enumerate(config.RESOURCES):
+        pretty_out_buy.append(
+            f"1 {resource} sells {from_bn(out_buy[i*2+1])}  $LORDS")
+    print('------------------MARKET BUY PRICES PER LORDS------------------')
+    print_over_colums(pretty_out_buy)
 
 
 @click.command()
@@ -209,13 +195,6 @@ def get_buy_price(resource_ids, resource_values, network):
         ],
     )
     print(out)
-
-    # out = out.split(" ")
-    # pretty_out = []
-    # for i, resource in enumerate(config.RESOURCES):
-    #     pretty_out.append(f"1 {resource} buys {from_bn(out[i*2+1])} $LORDS")
-    # print('MARKET BUY PRICES PER LORDS')
-    # print_over_colums(pretty_out)
 
 
 @click.command()
@@ -373,3 +352,30 @@ def get_all_rates(network):
         pretty_out.append(f"1 {resource} sells {from_bn(out[i*2+1])}  $LORDS")
     print('MARKET SELL PRICES PER LORDS')
     print_over_colums(pretty_out)
+
+
+@click.command()
+@click.option("--network", default="goerli")
+def market_approval(network):
+    """
+    Set resource & lords approval for AMM
+    """
+    config = Config(nile_network=network)
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_resources",
+        function="setApprovalForAll",
+        arguments=[strhex_as_strfelt(
+            config.Exchange_ERC20_1155_PROXY_ADDRESS), 1],
+    )
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_lords",
+        function="increaseAllowance",
+        arguments=[strhex_as_strfelt(
+            config.Exchange_ERC20_1155_PROXY_ADDRESS), *uint(50000 * (10 ** 18))],
+    )
