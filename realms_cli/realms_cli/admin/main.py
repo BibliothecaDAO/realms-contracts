@@ -19,13 +19,34 @@ def mint_resources(network):
     """
     config = Config(nile_network=network)
 
+    uints = []
+    amounts = []
+
+    n_resources = len(config.RESOURCES)
+
+    for i in range(n_resources - 2):
+        uints.append(str(i+1))
+        uints.append("0")
+
+    # WHEAT
+    uints.append("10000")
+    uints.append("0")
+
+    # FISH
+    uints.append("10001")
+    uints.append("0")
+
+    for i in range(n_resources):
+        amounts.append(100000000 * 10 ** 18)
+        amounts.append(0)
+
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_resources",
         function="mintBatch",
-        arguments=[int(config.ADMIN_ADDRESS, 16), 22, *uint(1), *uint(2), *uint(3), *uint(4), *uint(5), *uint(6), *uint(7), *uint(8), *uint(9), *uint(10), *uint(11), *uint(12), *uint(13), *uint(14), *uint(15), *uint(16), *uint(17), *uint(18), *uint(19), *uint(20), *uint(21), *uint(22), 22, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources
-                   ],
+        arguments=[int(config.ADMIN_ADDRESS, 16), n_resources,
+                   *uints, n_resources, *amounts, 1, 1],
     )
 
 

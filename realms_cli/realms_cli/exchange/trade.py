@@ -9,6 +9,38 @@ from realms_cli.utils import print_over_colums
 import time
 import sys
 
+# TODO: make this more dynamic, too hardcoded...
+
+
+def get_values():
+    n_resources = 24
+
+    values = []
+    for i in range(n_resources):
+        values.append(1 * 10 ** 18)
+        values.append("0")
+    return values
+
+
+def get_ids():
+    n_resources = 24
+
+    uints = []
+
+    for i in range(n_resources - 2):
+        uints.append(str(i+1))
+        uints.append("0")
+
+    # WHEAT
+    uints.append("10000")
+    uints.append("0")
+
+    # FISH
+    uints.append("10001")
+    uints.append("0")
+    return uints
+
+
 @click.command()
 @click.option('--max_currency', type=click.STRING, help='Maximum to sell', prompt=True)
 @click.option('--resource_ids', is_flag=False,
@@ -27,14 +59,14 @@ def buy_tokens(resource_ids, resource_values, max_currency, network):
 
     if len(resource_ids) != len(resource_values):
         raise Exception('you must pass equal length ids and values')
-        
+
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Exchange_ERC20_1155",
         function="buy_tokens",
         arguments=[
-            *uint_decimal(max_currency), #computed
+            *uint_decimal(max_currency),  # computed
             len(resource_ids),
             *expanded_uint_list(resource_ids),
             len(resource_ids),
@@ -69,7 +101,7 @@ def sell_tokens(resource_ids, resource_values, min_currency, network):
         contract_alias="proxy_Exchange_ERC20_1155",
         function="sell_tokens",
         arguments=[
-            *uint_decimal(min_currency), #computed
+            *uint_decimal(min_currency),  # computed
             len(resource_ids),
             *expanded_uint_list(resource_ids),
             len(resource_ids),
@@ -78,6 +110,7 @@ def sell_tokens(resource_ids, resource_values, min_currency, network):
         ],
     )
 
+
 @click.command()
 @click.option("--network", default="goerli")
 def get_all_sell_price(network):
@@ -85,15 +118,10 @@ def get_all_sell_price(network):
     Get all sell price
     """
     config = Config(nile_network=network)
-    n_resources = len(config.RESOURCES)
 
-    uints = []
-    values = []
-    for i in range(n_resources):
-        uints.append(str(i+1))
-        uints.append("0")
-        values.append(1 * 10 ** 18)
-        values.append("0")
+    uints = get_ids()
+    values = get_values()
+    n_resources = 24
 
     out = wrapped_call(
         network=config.nile_network,
@@ -106,7 +134,7 @@ def get_all_sell_price(network):
             *values,
         ],
     )
-    
+
     out = out.split(" ")
     pretty_out = []
     for i, resource in enumerate(config.RESOURCES):
@@ -114,24 +142,20 @@ def get_all_sell_price(network):
     print('MARKET SELL PRICES PER LORDS')
     print_over_colums(pretty_out)
 
+
 @click.command()
 @click.option("--network", default="goerli")
 def get_all_buy_price(network):
     """
     Get all buy price
     """
-    # split columns by ',' and remove whitespace
 
     config = Config(nile_network=network)
-    n_resources = len(config.RESOURCES)
-    
-    uints = []
-    values = []
-    for i in range(22):
-        uints.append(str(i+1))
-        uints.append("0")
-        values.append(1 * 10 ** 18)
-        values.append("0")
+
+    uints = get_ids()
+    values = get_values()
+
+    n_resources = 24
 
     out = wrapped_call(
         network=config.nile_network,
@@ -145,13 +169,14 @@ def get_all_buy_price(network):
         ],
     )
     # print(out)
-    
+
     out = out.split(" ")
     pretty_out = []
     for i, resource in enumerate(config.RESOURCES):
         pretty_out.append(f"1 {resource} buys {from_bn(out[i*2+1])} $LORDS")
     print('MARKET BUY PRICES PER LORDS')
     print_over_colums(pretty_out)
+
 
 @click.command()
 @click.option('--resource_ids', is_flag=False, metavar='<columns>', type=click.STRING, help='Resource Ids', prompt=True)
@@ -184,7 +209,7 @@ def get_buy_price(resource_ids, resource_values, network):
         ],
     )
     print(out)
-    
+
     # out = out.split(" ")
     # pretty_out = []
     # for i, resource in enumerate(config.RESOURCES):
@@ -226,6 +251,7 @@ def add_liq(resource_ids, resource_values, max_currency, network):
         ],
     )
 
+
 @click.command()
 @click.option("--address", default="", help="Account address in hex format 0x...")
 @click.option("--network", default="goerli")
@@ -266,6 +292,7 @@ def get_lp_pos(address, network):
 
     print_over_colums(pretty_out)
 
+
 @click.command()
 @click.argument("token_id", nargs=1)
 @click.option("--network", default="goerli")
@@ -280,12 +307,13 @@ def get_currency_r(token_id, network):
         contract_alias="proxy_Exchange_ERC20_1155",
         function="get_currency_reserves",
         arguments=[
-                *uint(token_id)
+            *uint(token_id)
         ],
     )
     out = out.split(" ")
     print(from_bn(out[0]))
     # print(int(out[0]))
+
 
 @click.command()
 @click.argument("token_id", nargs=1)
@@ -307,7 +335,8 @@ def get_token_r(token_id, network):
     )
     out = out.split(" ")
     print(from_bn(out[0]))
-    # print(int(out[0]))    
+    # print(int(out[0]))
+
 
 @click.command()
 @click.option("--network", default="goerli")
@@ -337,7 +366,7 @@ def get_all_rates(network):
             *values,
         ],
     )
-    
+
     out = out.split(" ")
     pretty_out = []
     for i, resource in enumerate(config.RESOURCES):

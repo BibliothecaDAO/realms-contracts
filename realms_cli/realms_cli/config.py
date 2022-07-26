@@ -139,12 +139,12 @@ class Config:
             "Adamantine",
             "Mithral",
             "Dragonhide",
-            "DesertGlass",
-            "DivineCloth",
-            "CuriousSpre",
-            "UnrefinedOre",
-            "SunkenShekel",
-            "Demonhide",
+            # "DesertGlass",
+            # "DivineCloth",
+            # "CuriousSpre",
+            # "UnrefinedOre",
+            # "SunkenShekel",
+            # "Demonhide",
             "Wheat",
             "Fish"
         ]

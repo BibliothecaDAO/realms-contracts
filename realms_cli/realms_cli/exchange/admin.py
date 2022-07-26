@@ -14,7 +14,7 @@ def set_initial_liq(network):
     Claim available resources
     """
     config = Config(nile_network=network)
-    n_resources = len(config.RESOURCES)
+    n_resources = 24
     price = [37.356,
              29.356,
              28.551,
@@ -36,12 +36,20 @@ def set_initial_liq(network):
              0.693,
              0.410,
              0.276,
-             0.171]
+             0.171, 2000, 2000]
 
     resource_ids = []
-    for i in range(n_resources):
+    for i in range(n_resources - 2):
         resource_ids.append(str(i+1))
         resource_ids.append("0")
+
+    # WHEAT
+    resource_ids.append("10000")
+    resource_ids.append("0")
+
+    # FISH
+    resource_ids.append("10001")
+    resource_ids.append("0")
 
     resource_values = []
     for i, resource in enumerate(price):
