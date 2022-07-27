@@ -111,10 +111,6 @@ end
 # be attacked again during cooldown
 const ATTACK_COOLDOWN_PERIOD = DAY  # 1 day unit
 
-# sets the attack type when initiating combat
-const COMBAT_TYPE_ATTACK_VS_ARMOR = 1
-const COMBAT_TYPE_WISDOM_VS_AGILITY = 2
-
 # used to signal which side won the battle
 const COMBAT_OUTCOME_ATTACKER_WINS = 1
 const COMBAT_OUTCOME_DEFENDER_WINS = 2
