@@ -102,8 +102,6 @@ cairo-nile = "^0.5.0"
 
 #-----------MARKET
 "set_initial_liq" = "realms_cli.exchange.admin.set_initial_liq"
-"set_lords_approval" =  "realms_cli.exchange.admin.set_lords_approval"
-"set_resources_approval" =  "realms_cli.exchange.admin.set_resources_approval"
 
 "get_currency_r" =  "realms_cli.exchange.trade.get_currency_r"
 "get_token_r" =  "realms_cli.exchange.trade.get_token_r"
@@ -122,6 +120,10 @@ cairo-nile = "^0.5.0"
 
 "transfer_lords" = "realms_cli.player.lords.transfer_lords"
 "market_approval" = "realms_cli.exchange.trade.market_approval"
+
+"get_all_currency_reserves" = "realms_cli.exchange.trade.get_all_currency_reserves"
+
+"get_owed_currency_tokens" ="realms_cli.exchange.trade.get_owed_currency_tokens"
 
 #-----------FOOD
 "build_food" = "realms_cli.player.food.build_food"

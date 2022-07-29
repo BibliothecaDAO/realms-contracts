@@ -45,7 +45,7 @@ def mint_resources(network):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_resources",
         function="mintBatch",
-        arguments=[int(config.ADMIN_ADDRESS, 16), n_resources,
+        arguments=[int(config.USER_ADDRESS, 16), n_resources,
                    *uints, n_resources, *amounts, 1, 1],
     )
 
@@ -116,4 +116,22 @@ def transfer_to(to_address, network, token_id):
         function="transferFrom",
         arguments=[int(config.ADMIN_ADDRESS, 16),
                    int(to_address, 16), token_id],
+    )
+
+
+@click.command()
+@click.option("--network", default="goerli")
+def mint_lords(network):
+    """
+    Mint batch resources
+    """
+    config = Config(nile_network=network)
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_lords",
+        function="mint",
+        arguments=[int('0x037c6B561B367a85B68668e8663041B9e2F4199C346FBDA97dC0C2167F7A6016',
+                       16), 100000000 * 10 ** 18, 0],
     )

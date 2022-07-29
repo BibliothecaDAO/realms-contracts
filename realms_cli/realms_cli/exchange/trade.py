@@ -17,7 +17,7 @@ def get_values():
 
     values = []
     for i in range(n_resources):
-        values.append(1 * 10 ** 18)
+        values.append(100 * 10 ** 18)
         values.append("0")
     return values
 
@@ -379,3 +379,67 @@ def market_approval(network):
         arguments=[strhex_as_strfelt(
             config.Exchange_ERC20_1155_PROXY_ADDRESS), *uint(50000 * (10 ** 18))],
     )
+
+
+@click.command()
+@click.option("--network", default="goerli")
+def get_all_currency_reserves(network):
+    """
+    Get all rates excluding any fees
+    """
+    config = Config(nile_network=network)
+
+    uints = get_ids()
+    values = get_values()
+    n_resources = 24
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_Exchange_ERC20_1155",
+        function="get_all_currency_reserves",
+        arguments=[
+            n_resources,
+            *uints
+        ],
+    )
+
+    out = out.split(" ")
+    pretty_out = []
+    for i, resource in enumerate(config.RESOURCES):
+        pretty_out.append(
+            f"{resource} {from_bn(out[i*2+1])}  {from_bn(out[((i)*2 + 1) + (n_resources * 2) + 1 ])}")
+    print(out)
+    print_over_colums(pretty_out)
+
+
+@click.command()
+@click.option("--network", default="goerli")
+def get_owed_currency_tokens(network):
+    """
+    Get all rates excluding any fees
+    """
+    config = Config(nile_network=network)
+
+    uints = get_ids()
+    values = get_values()
+    n_resources = 24
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_Exchange_ERC20_1155",
+        function="get_owed_currency_tokens",
+        arguments=[
+            n_resources,
+            *uints,
+            n_resources,
+            *values
+        ],
+    )
+
+    out = out.split(" ")
+    pretty_out = []
+    for i, resource in enumerate(config.RESOURCES):
+        pretty_out.append(
+            f"{resource} {from_bn(out[i*2+1])}  {from_bn(out[((i)*2 + 1) + (n_resources * 2) + 1 ])}")
+    print(out)
+    print_over_colums(pretty_out)

@@ -11,6 +11,7 @@ from realms_cli.utils import print_over_colums
 from realms_cli.binary_converter import map_realm
 from realms_cli.shared import uint
 
+
 @click.command()
 @click.option("--address", default="", help="Account address in hex format 0x...")
 @click.option("--network", default="goerli")
@@ -31,7 +32,8 @@ def check_lords(address, network):
         arguments=[address],
     )
 
-    print(out)   
+    print(out)
+
 
 @click.command()
 @click.option("--address", default="2391140167327979619938051357136306508268704638528932947906243138584057924271", help="Account address in hex format 0x...")
@@ -43,12 +45,12 @@ def transfer_lords(address, network):
     config = Config(nile_network=network)
     wrapped_send(
         network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
+        signer_alias=config.ADMIN_ALIAS,
         contract_alias="proxy_lords",
         function="transfer",
         arguments=[
-            address,
-            1000 * 10 ** 18,   # uint 1
+            int(config.USER_ADDRESS, 16),
+            100000 * 10 ** 18,   # uint 1
             0,                # uint 2
         ],
     )

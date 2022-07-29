@@ -916,12 +916,8 @@ func get_all_buy_price_loop{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ra
     end
 
     let (contract) = get_contract_address()
-
     let (token_address_) = token_address.read()
-    let (currency_address_) = currency_address.read()
-
     let (royalty_fee_thousands_) = royalty_fee_thousands.read()
-    let (royalty_fee_address_) = royalty_fee_address.read()
 
     # # Read current reserve levels
     let (currency_reserves_ : Uint256) = currency_reserves.read([token_ids])
@@ -980,12 +976,8 @@ func get_all_rates_loop{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     end
 
     let (contract) = get_contract_address()
-
     let (token_address_) = token_address.read()
-    let (currency_address_) = currency_address.read()
-
     let (royalty_fee_thousands_) = royalty_fee_thousands.read()
-    let (royalty_fee_address_) = royalty_fee_address.read()
 
     # # Read current reserve levels
     let (currency_reserves_ : Uint256) = currency_reserves.read([token_ids])
@@ -1010,6 +1002,72 @@ func get_all_rates_loop{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         token_amounts + Uint256.SIZE,
         prices_len - 1,
         prices + Uint256.SIZE,
+    )
+end
+
+@view
+func get_all_currency_reserves{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_ids_len : felt, token_ids : Uint256*
+) -> (
+    currency_reserves_len : felt,
+    currency_reserves : Uint256*,
+    token_reserves_len : felt,
+    token_reserves : Uint256*,
+):
+    alloc_locals
+
+    # Loop
+    let (local c_reserves : Uint256*) = alloc()
+    let (local t_reserves : Uint256*) = alloc()
+    let (sell_prices : Uint256*) = get_all_currency_reserves_loop(
+        token_ids_len, token_ids, token_ids_len, c_reserves, token_ids_len, t_reserves
+    )
+
+    return (token_ids_len, c_reserves, token_ids_len, t_reserves)
+end
+
+func get_all_currency_reserves_loop{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+}(
+    token_ids_len : felt,
+    token_ids : Uint256*,
+    _currency_reserves_len : felt,
+    _currency_reserves : Uint256*,
+    _token_reserves_len : felt,
+    _token_reserves : Uint256*,
+) -> (total_token_value : Uint256*):
+    alloc_locals
+
+    # Recursive break
+    if token_ids_len == 0:
+        return (_currency_reserves)
+    end
+
+    let (contract) = get_contract_address()
+    let (token_address_) = token_address.read()
+    let (royalty_fee_thousands_) = royalty_fee_thousands.read()
+
+    # # Read current reserve levels
+    let (currency_reserves_ : Uint256) = currency_reserves.read([token_ids])
+    let (token_reserves : Uint256) = IERC1155.balanceOf(token_address_, contract, [token_ids])
+
+    # FOR TESTS
+    # let currency_reserves_ = Uint256(10000, 0)
+    # let token_reserves = Uint256(1000, 0)
+
+    _currency_reserves.high = currency_reserves_.high
+    _currency_reserves.low = currency_reserves_.low
+
+    _token_reserves.high = token_reserves.high
+    _token_reserves.low = token_reserves.low
+
+    return get_all_currency_reserves_loop(
+        token_ids_len - 1,
+        token_ids + Uint256.SIZE,
+        _currency_reserves_len - 1,
+        _currency_reserves + Uint256.SIZE,
+        _token_reserves_len - 1,
+        _token_reserves + Uint256.SIZE,
     )
 end
 
@@ -1099,4 +1157,87 @@ func set_royalty_info{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     royalty_fee_thousands.write(royalty_fee_thousands_)
     royalty_fee_address.write(royalty_fee_address_)
     return ()
+end
+
+@view
+func get_owed_currency_tokens{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_ids_len : felt, token_ids : Uint256*, lp_amounts_len : felt, lp_amounts : Uint256*
+) -> (
+    currency_reserves_len : felt,
+    currency_reserves : Uint256*,
+    token_reserves_len : felt,
+    token_reserves : Uint256*,
+):
+    alloc_locals
+
+    # Loop
+    let (local c_tokens_owed : Uint256*) = alloc()
+    let (local t_tokens_owed : Uint256*) = alloc()
+    let (sell_prices : Uint256*) = get_owed_currency_tokens_loop(
+        token_ids_len,
+        token_ids,
+        lp_amounts_len,
+        lp_amounts,
+        token_ids_len,
+        c_tokens_owed,
+        token_ids_len,
+        t_tokens_owed,
+    )
+
+    return (token_ids_len, c_tokens_owed, token_ids_len, t_tokens_owed)
+end
+
+func get_owed_currency_tokens_loop{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+}(
+    token_ids_len : felt,
+    token_ids : Uint256*,
+    lp_amounts_len : felt,
+    lp_amounts : Uint256*,
+    c_reserves_len : felt,
+    c_reserves : Uint256*,
+    t_reserves_len : felt,
+    t_reserves : Uint256*,
+) -> (token_amount : felt):
+    alloc_locals
+
+    # Recursive break
+    if token_ids_len == 0:
+        return (token_ids_len)
+    end
+
+    let (contract) = get_contract_address()
+
+    let (token_address_) = token_address.read()
+    let (currency_address_) = currency_address.read()
+
+    # Read current reserve levels
+    let (lp_reserves_ : Uint256) = lp_reserves.read([token_ids])
+    let (currency_reserves_ : Uint256) = currency_reserves.read([token_ids])
+    let (token_reserves : Uint256) = IERC1155.balanceOf(token_address_, contract, [token_ids])
+
+    # Calculate percentage of reserves this LP amount is worth
+    let (numerator, mul_overflow) = uint256_mul(currency_reserves_, [lp_amounts])
+    let (currency_owed, _) = uint256_unsigned_div_rem(numerator, lp_reserves_)
+
+    let (numerator, mul_overflow) = uint256_mul(token_reserves, [lp_amounts])
+    # Ignore remainder as it favours LP holders
+    let (tokens_owed, _) = uint256_unsigned_div_rem(numerator, lp_reserves_)
+
+    c_reserves.high = currency_owed.high
+    c_reserves.low = currency_owed.low
+
+    t_reserves.high = tokens_owed.high
+    t_reserves.low = tokens_owed.low
+
+    return get_owed_currency_tokens_loop(
+        token_ids_len - 1,
+        token_ids + Uint256.SIZE,
+        lp_amounts_len - 1,
+        lp_amounts + Uint256.SIZE,
+        c_reserves_len - 1,
+        c_reserves + Uint256.SIZE,
+        t_reserves_len - 1,
+        t_reserves + Uint256.SIZE,
+    )
 end

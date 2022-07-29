@@ -79,7 +79,7 @@ def set_initial_liq(network):
 
 @click.command()
 @click.option("--network", default="goerli")
-def set_lords_approval(network):
+def set_approval(network):
     """
     Set Lords approval for AMM
     """
@@ -93,15 +93,6 @@ def set_lords_approval(network):
         arguments=[strhex_as_strfelt(
             config.Exchange_ERC20_1155_PROXY_ADDRESS), *uint(50000 * (10 ** 18))],
     )
-
-
-@click.command()
-@click.option("--network", default="goerli")
-def set_resources_approval(network):
-    """
-    Set resource approval for AMM
-    """
-    config = Config(nile_network=network)
 
     wrapped_send(
         network=config.nile_network,
