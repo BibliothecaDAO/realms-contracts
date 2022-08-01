@@ -25,6 +25,18 @@ func __setup__():
 end
 
 @external
+func test_assert_slot{range_check_ptr}():
+    # TODO: use constatns once refactored
+    Combat.assert_slot(1)
+    Combat.assert_slot(2)
+
+    %{ expect_revert() %}
+    Combat.assert_slot(3)
+
+    return ()
+end
+
+@external
 func test_get_troop_properties{range_check_ptr}():
     alloc_locals
 

@@ -29,6 +29,16 @@ from contracts.settling_game.utils.game_structs import (
 const SHIFT = 0x100
 
 namespace Combat:
+
+    func assert_slot{range_check_ptr}(slot : felt):
+        with_attr error_message("Combat: slot not valid"):
+            # TODO: use value from constants instead of magic "2"
+            let (is_valid_slot) = is_le(slot, 2)
+            assert is_valid_slot = TRUE
+        end
+        return ()
+    end
+
     func compute_squad_vitality(s : Squad) -> (vitality : felt):
         let vitality = s.t1_1.vitality + s.t1_2.vitality + s.t1_3.vitality + s.t1_4.vitality +
             s.t1_5.vitality + s.t1_6.vitality + s.t1_7.vitality + s.t1_8.vitality + s.t1_9.vitality +
