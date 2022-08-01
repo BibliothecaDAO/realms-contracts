@@ -132,6 +132,6 @@ def mint_lords(network):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_lords",
         function="mint",
-        arguments=[int('0x037c6B561B367a85B68668e8663041B9e2F4199C346FBDA97dC0C2167F7A6016',
+        arguments=[int(config.USER_ADDRESS,
                        16), 100000000 * 10 ** 18, 0],
     )

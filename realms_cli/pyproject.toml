@@ -125,6 +125,8 @@ cairo-nile = "^0.5.0"
 
 "get_owed_currency_tokens" ="realms_cli.exchange.trade.get_owed_currency_tokens"
 
+"update_treasury" = "realms_cli.exchange.admin.update_treasury"
+
 #-----------FOOD
 "build_food" = "realms_cli.player.food.build_food"
 "harvest" = "realms_cli.player.food.harvest"
@@ -133,3 +135,10 @@ cairo-nile = "^0.5.0"
 "store_house" = "realms_cli.player.food.store_house"
 "reset" = "realms_cli.player.food.reset"
 "full_store_houses" = "realms_cli.player.food.full_store_houses"
+
+#-----------NEXUS
+"check_splitter_lords" = "realms_cli.nexus.admin.check_splitter_lords"
+"split" = "realms_cli.nexus.admin.split"
+"deposit" = "realms_cli.nexus.admin.deposit"
+
+"increase_allowance_nexus" =  "realms_cli.nexus.admin.increase_allowance_nexus"

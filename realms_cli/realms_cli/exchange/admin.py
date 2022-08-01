@@ -102,3 +102,21 @@ def set_approval(network):
         arguments=[strhex_as_strfelt(
             config.Exchange_ERC20_1155_PROXY_ADDRESS), 1],
     )
+
+
+@click.command()
+@click.option("--network", default="goerli")
+def update_treasury(network):
+    """
+    Update royalty info
+    """
+    config = Config(nile_network=network)
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="proxy_Exchange_ERC20_1155",
+        function="set_royalty_info",
+        arguments=[*uint(30), strhex_as_strfelt(
+            config.PROXY_NEXUS)],
+    )
