@@ -130,6 +130,10 @@ const MAX_WALL_DEFENSE_HIT_POINTS = 5
 # CONSTRUCTOR #
 ###############
 
+# @notice Module initializer
+# @param address_of_controller: Controller/arbiter address
+# @param xoroshiro_addr: Address of a PRNG contract conforming to IXoroshiro
+# @proxy_admin: Proxy admin address
 @external
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     address_of_controller : felt, xoroshiro_addr : felt, proxy_admin : felt
@@ -140,6 +144,9 @@ func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     return ()
 end
 
+# @notice Set new proxy implementation
+# @dev Can only be set by the arbiter
+# @param new_implementation: New implementation contract address
 @external
 func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     new_implementation : felt
@@ -153,11 +160,18 @@ end
 # EXTERNAL #
 ############
 
+# @notice Create a new attacking or defending Squad from Troops in Realm
+# @param troop_ids: array of TroopId values of the troops to be built/bought
+# @param realm_id: Staked Realm id (S_Realm)
+# @param slot: one of ATTACKING_SQUAD_SLOT or DEFENDING_SQUAD_SLOT values, designating
+#              where the Squad should be assigned to in the Realm
 @external
 func build_squad_from_troops_in_realm{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
 }(troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt):
     alloc_locals
+
+    Combat.assert_slot(slot)
 
     Module.ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
 
@@ -197,6 +211,11 @@ func build_squad_from_troops_in_realm{
     return ()
 end
 
+# @notice Commence the raid
+# @param attacking_realm_id: Staked Realm id (S_Realm)
+# @param defending_realm_id: Staked Realm id (S_Realm)
+# @return: combat_outcome: Which side won - either the attacker (COMBAT_OUTCOME_ATTACKER_WINS)
+#                          or the defender (COMBAT_OUTCOME_DEFENDER_WINS)
 @external
 func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     attacking_realm_id : Uint256, defending_realm_id : Uint256
@@ -278,13 +297,18 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     return (combat_outcome)
 end
 
-# remove one or more troops from a particular squad
-# troops to be removed are identified the their index in a Squad (0-based indexing)
+# @notice Remove one or more troops from a particular Squad
+# @param troop_idxs: Array of indexes of Troops to be removed form a Squad (0-based indexing)
+# @param realm_id: Staked Realm id (S_Realm)
+# @param slot: one of ATTACKING_SQUAD_SLOT or DEFENDING_SQUAD_SLOT values, designating
+#              which Squad to remove the troops from
 @external
 func remove_troops_from_squad_in_realm{
     range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
 }(troop_idxs_len : felt, troop_idxs : felt*, realm_id : Uint256, slot : felt):
     alloc_locals
+
+    Combat.assert_slot(slot)
 
     Module.ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
 

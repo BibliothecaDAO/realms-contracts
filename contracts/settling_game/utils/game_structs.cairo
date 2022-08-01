@@ -272,7 +272,7 @@ struct Troop:
     member id : felt  # TroopId
     member type : felt  # TroopType
     member tier : felt
-    member building : felt  # RealmBuildingsIds
+    member building : felt  # RealmBuildingsIds, the troop's production building
     member agility : felt
     member attack : felt
     member armor : felt
