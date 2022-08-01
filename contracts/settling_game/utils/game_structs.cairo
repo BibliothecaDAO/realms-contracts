@@ -381,7 +381,7 @@ namespace HarvestType:
 end
 
 struct FoodBuildings:
-    member NumberBuilt : felt
-    member CollectionsLeft : felt
-    member UpdateTime : felt
+    member number_built : felt
+    member collections_left : felt
+    member update_time : felt
 end

@@ -49,10 +49,6 @@ from contracts.settling_game.interfaces.imodules import IL04_Calculator, IL03_Bu
 # Events
 # -----------------------------------
 
-# @storage_var
-# func Food(token_id : felt) -> (farms_left : felt, last_farm_update : felt):
-# end
-
 # -----------------------------------
 # Storage
 # -----------------------------------
@@ -113,12 +109,9 @@ func create{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
 }(token_id : Uint256, qty : felt, food_building_id : felt):
     alloc_locals
-    # check id
-    let (is_correct_id) = Food.assert_ids(food_building_id)
 
-    with_attr error_message("FOOD: Incorrect Building ID"):
-        assert_not_zero(is_correct_id)
-    end
+    # check id
+    Food.assert_ids(food_building_id)
 
     # checks
     Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
@@ -128,8 +121,7 @@ func create{
     let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
     let (realm_data) = realms_IERC721.fetch_realm_data(realms_address, token_id)
 
-    let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
-    let (caller) = get_caller_address()
+    let (owner) = get_caller_address()
 
     # checks
     if food_building_id == RealmBuildingsIds.Farm:
@@ -167,7 +159,7 @@ func create{
     let (token_len, token_ids, token_values) = calculate_cost(cost)
 
     # BURN RESOURCES
-    IERC1155.burnBatch(resources_address, caller, token_len, token_ids, token_len, token_values)
+    IERC1155.burnBatch(resources_address, owner, token_len, token_ids, token_len, token_values)
 
     return ()
 end
@@ -183,15 +175,8 @@ func harvest{
     alloc_locals
 
     # check id and harvest type
-    let (is_correct_id) = Food.assert_ids(food_building_id)
-    with_attr error_message("FOOD: Incorrect Building ID"):
-        assert_not_zero(is_correct_id)
-    end
-
-    let (is_correct_harvest_type) = Food.assert_harvest_type(harvest_type)
-    with_attr error_message("FOOD: Incorrect Harvest ID"):
-        assert_not_zero(is_correct_harvest_type)
-    end
+    Food.assert_ids(food_building_id)
+    Food.assert_harvest_type(harvest_type)
 
     # check owner
     Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
@@ -201,50 +186,36 @@ func harvest{
     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
     let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
 
-    let (block_timestamp) = get_block_timestamp()
-
-    # build required building
+    # get packed building info from storage
     if food_building_id == RealmBuildingsIds.Farm:
         let (packed) = farms.read(token_id)
-        # unpack
-        let (unpacked_food_buildings : FoodBuildings) = Food.unpack_food_buildings(packed)
-        # calculate harvests
-        let (total_harvest, total_remaining, decayed_farms) = Food.calculate_harvest(
-            unpacked_food_buildings.UpdateTime, block_timestamp
-        )
-        # save tempvar of unpacked number
-        tempvar number_built = unpacked_food_buildings.NumberBuilt
-        tempvar current_harvests = unpacked_food_buildings.CollectionsLeft
-
-        # builtins
-        tempvar syscall_ptr = syscall_ptr
-        tempvar range_check_ptr = range_check_ptr
-        tempvar pedersen_ptr = pedersen_ptr
-        tempvar bitwise_ptr = bitwise_ptr
+        tempvar packed = packed
     else:
         let (packed) = fishing_villages.read(token_id)
-        # unpack
-        let (unpacked_food_buildings : FoodBuildings) = Food.unpack_food_buildings(packed)
-        # calculate harvests
-        let (total_harvest, total_remaining, decayed_farms) = Food.calculate_harvest(
-            unpacked_food_buildings.UpdateTime, block_timestamp
-        )
-        # save tempvar of unpacked number
-        tempvar number_built = unpacked_food_buildings.NumberBuilt
-        tempvar current_harvests = unpacked_food_buildings.CollectionsLeft
-
-        # builtins
-        tempvar syscall_ptr = syscall_ptr
-        tempvar range_check_ptr = range_check_ptr
-        tempvar pedersen_ptr = pedersen_ptr
-        tempvar bitwise_ptr = bitwise_ptr
+        tempvar packed = packed
     end
 
-    # total food to harvest
-    let total_food = total_harvest * BASE_FOOD_PRODUCTION
+    # unpack and calculate
+    let (unpacked_food_buildings : FoodBuildings) = Food.unpack_food_buildings(packed)
+
+    let (block_timestamp) = get_block_timestamp()
+
+    let (total_harvest, total_remaining, decayed_farms) = Food.calculate_harvest(
+        block_timestamp - unpacked_food_buildings.update_time
+    )
 
     # update storage
-    update(current_harvests, number_built, total_harvest, decayed_farms, token_id, food_building_id)
+    update(
+        unpacked_food_buildings.collections_left,
+        unpacked_food_buildings.number_built,
+        total_harvest,
+        decayed_farms,
+        token_id,
+        food_building_id,
+    )
+
+    # total food to harvest - either sent to export or sent to store
+    let total_food = total_harvest * BASE_FOOD_PRODUCTION
 
     # set default data in mint call
     let (local data : felt*) = alloc()
@@ -292,7 +263,7 @@ end
 # -----------------------------------
 
 # @notice Updates values after harvest
-# @param current_harvests: Staked Realm id (S_Realm)
+# @param current_harvests: current harvests on Realm
 # @param number_built: farms built - this is just unpacked data from above
 # @param total_harvest: total qty harvested
 # @param decayed_farms: decayed farms
@@ -416,7 +387,7 @@ func get_farm_harvests_left{
     # unpack
     let (unpacked_food_buildings : FoodBuildings) = Food.unpack_food_buildings(packed)
 
-    return (unpacked_food_buildings.CollectionsLeft)
+    return (unpacked_food_buildings.collections_left)
 end
 
 # @notice gets base fishing villages data
@@ -439,7 +410,7 @@ func get_farms_to_harvest{
     let (unpacked_food_buildings : FoodBuildings) = Food.unpack_food_buildings(packed)
 
     let (total_harvest, total_remaining, decayed_farms) = Food.calculate_harvest(
-        unpacked_food_buildings.UpdateTime, block_timestamp
+        block_timestamp - unpacked_food_buildings.update_time
     )
     return (total_harvest, total_remaining, decayed_farms)
 end
@@ -456,7 +427,7 @@ func get_fishing_villages_harvests_left{
     # unpack
     let (unpacked_food_buildings : FoodBuildings) = Food.unpack_food_buildings(packed)
 
-    return (unpacked_food_buildings.CollectionsLeft)
+    return (unpacked_food_buildings.collections_left)
 end
 
 # @notice gets base fishing villages data
@@ -477,7 +448,7 @@ func get_fishing_villages_to_harvest{
     let (unpacked_food_buildings : FoodBuildings) = Food.unpack_food_buildings(packed)
 
     let (total_harvest, total_remaining, decayed_farms) = Food.calculate_harvest(
-        unpacked_food_buildings.UpdateTime, block_timestamp
+        block_timestamp - unpacked_food_buildings.update_time
     )
     return (total_harvest, total_remaining, decayed_farms)
 end
@@ -530,13 +501,13 @@ end
 # -----------------------------------
 # ADMIN
 # -----------------------------------
-@external
-func reset{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(token_id : Uint256):
-    alloc_locals
+# @external
+# func reset{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(token_id : Uint256):
+#     alloc_locals
 
-    fishing_villages.write(token_id, 0)
-    farms.write(token_id, 0)
-    store_house.write(token_id, 0)
+# fishing_villages.write(token_id, 0)
+#     farms.write(token_id, 0)
+#     store_house.write(token_id, 0)
 
-    return ()
-end
+# return ()
+# end

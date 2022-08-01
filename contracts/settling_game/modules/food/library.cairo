@@ -31,30 +31,23 @@ from contracts.settling_game.utils.general import unpack_data
 
 namespace Food:
     # @notice Calculates how many available farms to harvest
-    # max of 3 full harvests accure
+    # MAX_HARVESTS = max amount you can harvest at once.
     # if more farms than MAX, return MAX and decayed farms. How will loose these harvests.
-    func calculate_harvest{
-        syscall_ptr : felt*,
-        pedersen_ptr : HashBuiltin*,
-        range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*,
-    }(update_time : felt, block_timestamp : felt) -> (
-        total_farms : felt, total_remaining : felt, decayed_farms : felt
-    ):
+    func calculate_harvest{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        time_since_update : felt
+    ) -> (total_farms : felt, total_remaining : felt, decayed_farms : felt):
         alloc_locals
 
-        let time_since_update = block_timestamp - update_time
-
         # TODO add max days can accure
-        let (total_farms, remainding_crops) = unsigned_div_rem(time_since_update, HARVEST_LENGTH)
+        let (total_farms, remaining_crops) = unsigned_div_rem(time_since_update, HARVEST_LENGTH)
 
         let (le_max_farms) = is_le(total_farms, MAX_HARVESTS + 1)
 
         if le_max_farms == TRUE:
-            return (total_farms, remainding_crops, 0)
+            return (total_farms, remaining_crops, 0)
         end
 
-        return (MAX_HARVESTS, remainding_crops, total_farms - MAX_HARVESTS)
+        return (MAX_HARVESTS, remaining_crops, total_farms - MAX_HARVESTS)
     end
 
     # @notice Calculates base food in the storehouse
@@ -94,53 +87,58 @@ namespace Food:
     # @notice asserts correct building ids
     func assert_ids{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         food_building_id : felt
-    ) -> (success : felt):
+    ):
         alloc_locals
 
         # check
         if food_building_id == RealmBuildingsIds.Farm:
-            return (TRUE)
+            return ()
         end
         if food_building_id == RealmBuildingsIds.FishingVillage:
-            return (TRUE)
+            return ()
         end
 
-        return (FALSE)
+        with_attr error_message("FOOD: Incorrect Building ID"):
+            assert_not_zero(0)
+        end
+
+        return ()
     end
 
     # @notice asserts correct harvest type
     func assert_harvest_type{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         harvest_type : felt
-    ) -> (success : felt):
+    ):
         alloc_locals
 
         # check
         if harvest_type == HarvestType.Export:
-            return (TRUE)
+            return ()
         end
         if harvest_type == HarvestType.Store:
-            return (TRUE)
+            return ()
         end
 
-        return (FALSE)
+        with_attr error_message("FOOD: Incorrect Harvest ID"):
+            assert_not_zero(0)
+        end
+
+        return ()
     end
 
     # @notice packs buildings
     # @param food_buildings_unpacked: unpacked buildings
     # @return food_buildings_packed: packed buildings
-    func pack_food_buildings{
-        syscall_ptr : felt*,
-        pedersen_ptr : HashBuiltin*,
-        range_check_ptr,
-        bitwise_ptr : BitwiseBuiltin*,
-    }(food_buildings_unpacked : FoodBuildings) -> (food_buildings_packed : felt):
+    func pack_food_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        food_buildings_unpacked : FoodBuildings
+    ) -> (food_buildings_packed : felt):
         alloc_locals
 
-        let NumberBuilt = food_buildings_unpacked.NumberBuilt * SHIFT_41._1
-        let CollectionsLeft = food_buildings_unpacked.CollectionsLeft * SHIFT_41._2
-        let UpdateTime = food_buildings_unpacked.UpdateTime * SHIFT_41._3
+        let number_built = food_buildings_unpacked.number_built * SHIFT_41._1
+        let collections_left = food_buildings_unpacked.collections_left * SHIFT_41._2
+        let update_time = food_buildings_unpacked.update_time * SHIFT_41._3
 
-        tempvar packed_value = UpdateTime + CollectionsLeft + NumberBuilt
+        tempvar packed_value = update_time + collections_left + number_built
 
         return (packed_value)
     end
@@ -156,15 +154,15 @@ namespace Food:
     }(packed_food_buildings : felt) -> (unpacked_food_buildings : FoodBuildings):
         alloc_locals
 
-        let (NumberBuilt) = unpack_data(packed_food_buildings, 0, 2199023255551)
-        let (CollectionsLeft) = unpack_data(packed_food_buildings, 41, 2199023255551)
-        let (UpdateTime) = unpack_data(packed_food_buildings, 82, 2199023255551)
+        let (number_built) = unpack_data(packed_food_buildings, 0, 2199023255551)
+        let (collections_left) = unpack_data(packed_food_buildings, 41, 2199023255551)
+        let (update_time) = unpack_data(packed_food_buildings, 82, 2199023255551)
 
         return (
             unpacked_food_buildings=FoodBuildings(
-            NumberBuilt,
-            CollectionsLeft,
-            UpdateTime
+            number_built,
+            collections_left,
+            update_time
             ),
         )
     end
