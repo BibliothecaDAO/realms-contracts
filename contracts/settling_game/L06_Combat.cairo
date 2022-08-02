@@ -16,7 +16,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import BitwiseBuiltin, HashBuiltin
 from starkware.cairo.common.math import unsigned_div_rem
-from starkware.cairo.common.math_cmp import is_le
+from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.uint256 import Uint256
 from starkware.starknet.common.syscalls import get_block_timestamp, get_caller_address, get_tx_info
 
@@ -29,6 +29,7 @@ from contracts.settling_game.interfaces.imodules import (
     IL03_Buildings,
     IL04_Calculator,
     IL09_Relics,
+    IFood,
 )
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
@@ -241,8 +242,33 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     let (attacker : Squad) = Combat.unpack_squad(attacking_realm_data.attacking_squad)
     let (defender : Squad) = Combat.unpack_squad(defending_realm_data.defending_squad)
 
-    # TODO: check if attacking and defending realms have enough food, otherwise
-    #       decrease whole squad vitality by 50% - use Combat.apply_hunger_penalty
+    # check if the fighting realms have enough food, otherwise
+    # decrease whole squad vitality by 50%
+    let (food_module) = Module.get_module_address(ModuleIds.L10_Food)
+    let (attacker_food_store) = IFood.available_food_in_store(
+        food_module, attacking_realm_id
+    )
+    let (defender_food_store) = IFood.available_food_in_store(
+        food_module, defending_realm_id
+    )
+
+    if attacker_food_store == 0:
+        let (attacker) = Combat.apply_hunger_penalty(attacker)
+        tempvar range_check_ptr = range_check_ptr
+    else:
+        tempvar attacker = attacker
+        tempvar range_check_ptr = range_check_ptr
+    end
+    tempvar attacker = attacker
+
+    if defender_food_store == 0:
+        let (defender) = Combat.apply_hunger_penalty(defender)
+        tempvar range_check_ptr = range_check_ptr
+    else:
+        tempvar defender = defender
+        tempvar range_check_ptr = range_check_ptr
+    end
+    tempvar defender = defender
 
     # EMIT FIRST
     CombatStart_2.emit(attacking_realm_id, defending_realm_id, attacker, defender)
