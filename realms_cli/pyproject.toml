@@ -102,8 +102,6 @@ cairo-nile = "^0.5.0"
 
 #-----------MARKET
 "set_initial_liq" = "realms_cli.exchange.admin.set_initial_liq"
-"set_lords_approval" =  "realms_cli.exchange.admin.set_lords_approval"
-"set_resources_approval" =  "realms_cli.exchange.admin.set_resources_approval"
 
 "get_currency_r" =  "realms_cli.exchange.trade.get_currency_r"
 "get_token_r" =  "realms_cli.exchange.trade.get_token_r"
@@ -117,12 +115,17 @@ cairo-nile = "^0.5.0"
 
 "get_lp_pos" = "realms_cli.exchange.trade.get_lp_pos"
 
-"get_all_sell_price" = "realms_cli.exchange.trade.get_all_sell_price"
-"get_all_buy_price" = "realms_cli.exchange.trade.get_all_buy_price"
+"get_market" = "realms_cli.exchange.trade.get_market"
 "get_all_rates" = "realms_cli.exchange.trade.get_all_rates"
 
 "transfer_lords" = "realms_cli.player.lords.transfer_lords"
+"market_approval" = "realms_cli.exchange.trade.market_approval"
 
+"get_all_currency_reserves" = "realms_cli.exchange.trade.get_all_currency_reserves"
+
+"get_owed_currency_tokens" ="realms_cli.exchange.trade.get_owed_currency_tokens"
+
+"update_treasury" = "realms_cli.exchange.admin.update_treasury"
 
 #-----------FOOD
 "build_food" = "realms_cli.player.food.build_food"
@@ -132,3 +135,10 @@ cairo-nile = "^0.5.0"
 "store_house" = "realms_cli.player.food.store_house"
 "reset" = "realms_cli.player.food.reset"
 "full_store_houses" = "realms_cli.player.food.full_store_houses"
+
+#-----------NEXUS
+"check_splitter_lords" = "realms_cli.nexus.admin.check_splitter_lords"
+"split" = "realms_cli.nexus.admin.split"
+"deposit" = "realms_cli.nexus.admin.deposit"
+
+"increase_allowance_nexus" =  "realms_cli.nexus.admin.increase_allowance_nexus"

@@ -1,3 +1,1 @@
-# Deployments
-
-`$ nile run --network goerli realms_cli/amm/Deploy.py`
+https://documentation.bibliothecadao.xyz/docs/amm/overview

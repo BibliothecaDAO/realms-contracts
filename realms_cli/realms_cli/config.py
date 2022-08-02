@@ -116,6 +116,12 @@ class Config:
         self.Exchange_ERC20_1155_PROXY_ADDRESS, _ = safe_load_deployment(
             "proxy_Exchange_ERC20_1155", self.nile_network)
 
+        self.PROXY_NEXUS, _ = safe_load_deployment(
+            "proxy_SingleSidedStaking", self.nile_network)
+
+        self.PROXY_SPLITTER, _ = safe_load_deployment(
+            "proxy_Splitter", self.nile_network)
+
         self.RESOURCES = [
             "Wood",
             "Stone",
@@ -139,12 +145,12 @@ class Config:
             "Adamantine",
             "Mithral",
             "Dragonhide",
-            "DesertGlass",
-            "DivineCloth",
-            "CuriousSpre",
-            "UnrefinedOre",
-            "SunkenShekel",
-            "Demonhide",
+            # "DesertGlass",
+            # "DivineCloth",
+            # "CuriousSpre",
+            # "UnrefinedOre",
+            # "SunkenShekel",
+            # "Demonhide",
             "Wheat",
             "Fish"
         ]
