@@ -5,10 +5,11 @@
 # ELI5:
 #   Players can build (n) number of farms or fishing villages according to number
 #   of rivers or harbours on the Realm. Once built, players can harvest these farms
-#   at a set interval for $WHEAT or $FISH. The player has the option at harvest time to
-#   either claim or store directly into the store_house. Once the food is in the
-#   store_house it is depleted according to the population on the Realm. If the player choosing to export the food,
-#   the tokens are minted to the players wallet.
+#   at a set interval for $WHEAT or $FISH. The player has the option at harvest 
+#   time to either claim or store directly into the store_house. Once the food 
+#   is in the store_house it is depleted according to the population on the 
+#   Realm. If the player chooses to export the food, the tokens are minted 
+#   to the players wallet.
 
 # MIT License
 # -----------------------------------
@@ -342,7 +343,7 @@ func food_in_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
 
     let (current_food_supply) = store_house.read(token_id)
 
-    let (available) = Food.calculate_food_in_store_house(current_food_supply, block_timestamp)
+    let (available) = Food.calculate_food_in_store_house(current_food_supply - block_timestamp)
 
     return (available)
 end

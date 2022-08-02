@@ -208,15 +208,9 @@ namespace Resources:
     ):
         alloc_locals
 
-        let (r_1_output) = _calculate_resource_output(workhuts, happiness)
-        let (r_2_output) = _calculate_resource_output(workhuts, happiness)
-        let (r_3_output) = _calculate_resource_output(workhuts, happiness)
-        let (r_4_output) = _calculate_resource_output(workhuts, happiness)
-        let (r_5_output) = _calculate_resource_output(workhuts, happiness)
-        let (r_6_output) = _calculate_resource_output(workhuts, happiness)
-        let (r_7_output) = _calculate_resource_output(workhuts, happiness)
+        let (output) = _calculate_resource_output(workhuts, happiness)
 
-        return (r_1_output, r_2_output, r_3_output, r_4_output, r_5_output, r_6_output, r_7_output)
+        return (output, output, output, output, output, output, output)
     end
 
     func _calculate_total_mintable_resources{

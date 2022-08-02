@@ -2,6 +2,8 @@
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.bool import TRUE, FALSE
+from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le, assert_nn
+
 from contracts.settling_game.modules.food.library import Food
 
 from contracts.settling_game.utils.constants import FARM_LENGTH, GENESIS_TIMESTAMP
@@ -64,8 +66,10 @@ func test_calculate_available_food{
 
     let (available_food) = Food.calculate_available_food(AVAILABLE_FOOD, POPULATION)
 
+    let (true_food_supply, _) = unsigned_div_rem(AVAILABLE_FOOD, POPULATION + 1)
+
     # Assert full
-    # assert available_food = AVAILABLE_FOOD / POPULATION
+    assert available_food = true_food_supply
 
     return ()
 end

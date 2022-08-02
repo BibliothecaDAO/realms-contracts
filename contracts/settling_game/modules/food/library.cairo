@@ -35,36 +35,33 @@ namespace Food:
     # if more farms than MAX, return MAX and decayed farms. How will loose these harvests.
     func calculate_harvest{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         time_since_update : felt
-    ) -> (total_farms : felt, total_remaining : felt, decayed_farms : felt):
+    ) -> (total_harvests : felt, total_remaining : felt, decayed_farms : felt):
         alloc_locals
 
-        # TODO add max days can accure
-        let (total_farms, remaining_crops) = unsigned_div_rem(time_since_update, HARVEST_LENGTH)
+        let (total_harvests, remaining_crops) = unsigned_div_rem(time_since_update, HARVEST_LENGTH)
 
-        let (le_max_farms) = is_le(total_farms, MAX_HARVESTS + 1)
+        let (le_max_harvests) = is_le(total_harvests, MAX_HARVESTS + 1)
 
-        if le_max_farms == TRUE:
-            return (total_farms, remaining_crops, 0)
+        if le_max_harvests == TRUE:
+            return (total_harvests, remaining_crops, 0)
         end
 
-        return (MAX_HARVESTS, remaining_crops, total_farms - MAX_HARVESTS)
+        return (MAX_HARVESTS, remaining_crops, total_harvests - MAX_HARVESTS)
     end
 
     # @notice Calculates base food in the storehouse
     func calculate_food_in_store_house{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(current_food_supply : felt, block_timestamp : felt) -> (current : felt):
+    }(current_food_supply : felt) -> (current : felt):
         alloc_locals
 
-        let current = current_food_supply - block_timestamp
-
-        let (is_empty) = is_le(current, 0)
+        let (is_empty) = is_le(current_food_supply, 0)
 
         if is_empty == TRUE:
             return (0)
         end
 
-        return (current)
+        return (current_food_supply)
     end
 
     # @notice This returns the real value of food available by taking into account the population
