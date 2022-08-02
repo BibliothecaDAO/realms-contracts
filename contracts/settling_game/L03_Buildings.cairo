@@ -35,7 +35,6 @@ from contracts.settling_game.utils.game_structs import (
 
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
-from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
 from contracts.settling_game.interfaces.imodules import IFood
 from contracts.settling_game.library.library_module import Module
 
@@ -149,15 +148,15 @@ func build{
     # Workhuts have a fixed cost according to the Realms resources
     if building_id == RealmBuildingsIds.House:
         let (
-            resource_id_len, resource_ids, resource_values_len, resource_values
+            resource_ids_len, resource_ids, resource_values_len, resource_values
         ) = get_workhut_costs(realms_data, quantity)
 
         IERC1155.burnBatch(
             resource_address,
             caller,
-            resource_id_len,
+            resource_ids_len,
             resource_ids,
-            resource_id_len,
+            resource_values_len,
             resource_values,
         )
         tempvar syscall_ptr = syscall_ptr
@@ -165,7 +164,7 @@ func build{
         tempvar pedersen_ptr = pedersen_ptr
         tempvar bitwise_ptr = bitwise_ptr
     else:
-        let (building_cost : Cost, lords : Uint256) = get_building_cost(building_id)
+        let (building_cost : Cost, _) = get_building_cost(building_id)
         let (token_len, token_ids, token_values) = Buildings.calculate_building_cost(building_cost)
         IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
         tempvar syscall_ptr = syscall_ptr
