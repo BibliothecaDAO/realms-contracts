@@ -8,10 +8,8 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from starkware.starknet.common.syscalls import get_block_timestamp
-from starkware.cairo.common.uint256 import Uint256, uint256_eq
-from starkware.cairo.common.bool import TRUE, FALSE
-from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le, assert_nn
+from starkware.cairo.common.bool import TRUE
+from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le
 
 from contracts.settling_game.utils.constants import (
@@ -96,7 +94,7 @@ namespace Food:
         end
 
         with_attr error_message("FOOD: Incorrect Building ID"):
-            assert_not_zero(0)
+            assert 1 = 0
         end
 
         return ()
@@ -116,8 +114,8 @@ namespace Food:
             return ()
         end
 
-        with_attr error_message("FOOD: Incorrect Harvest ID"):
-            assert_not_zero(0)
+        with_attr error_message("FOOD: Incorrect Harvest type"):
+            assert 1 = 0
         end
 
         return ()

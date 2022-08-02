@@ -5,10 +5,10 @@
 # ELI5:
 #   Players can build (n) number of farms or fishing villages according to number
 #   of rivers or harbours on the Realm. Once built, players can harvest these farms
-#   at a set interval for $WHEAT or $FISH. The player has the option at harvest 
-#   time to either claim or store directly into the store_house. Once the food 
-#   is in the store_house it is depleted according to the population on the 
-#   Realm. If the player chooses to export the food, the tokens are minted 
+#   at a set interval for $WHEAT or $FISH. The player has the option at harvest
+#   time to either claim or store directly into the store_house. Once the food
+#   is in the store_house it is depleted according to the population on the
+#   Realm. If the player chooses to export the food, the tokens are minted
 #   to the players wallet.
 
 # MIT License
@@ -17,12 +17,12 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from starkware.cairo.common.uint256 import Uint256, uint256_eq
+from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 from starkware.cairo.common.math_cmp import is_le
-from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le, assert_nn
+from starkware.cairo.common.math import assert_not_zero
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.utils.constants import (
     BASE_HARVESTS,
