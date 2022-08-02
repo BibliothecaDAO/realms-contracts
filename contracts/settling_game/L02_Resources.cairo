@@ -7,7 +7,7 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le, assert_nn
+from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
@@ -41,7 +41,6 @@ from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.imodules import (
     IL01_Settling,
     IL04_Calculator,
-    IL05_Wonders,
     IL03_Buildings,
 )
 from contracts.settling_game.library.library_resources import Resources
@@ -111,11 +110,9 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
     let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms)
     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
-    let (treasury_address) = Module.get_external_contract_address(ExternalContractIds.Treasury)
 
     # modules
     let (settling_logic_address) = Module.get_module_address(ModuleIds.L01_Settling)
-    let (calculator_address) = Module.get_module_address(ModuleIds.L04_Calculator)
 
     # FETCH OWNER
     let (owner) = IERC721.ownerOf(s_realms_address, token_id)
@@ -208,7 +205,6 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms)
     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
     let (settling_logic_address) = Module.get_module_address(ModuleIds.L01_Settling)
-    let (calculator_address) = Module.get_module_address(ModuleIds.L04_Calculator)
 
     # FETCH REALM DATA
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
@@ -419,7 +415,7 @@ func get_all_vault_raidable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ra
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
 
     # CALC VAULT DAYS
-    let (total_vault_days, vault_remainder) = vault_days_accrued(token_id)
+    let (total_vault_days, _) = vault_days_accrued(token_id)
 
     let (buildings_address) = Module.get_module_address(ModuleIds.L03_Buildings)
     let (current_buildings : RealmBuildings) = IL03_Buildings.get_effective_buildings(
