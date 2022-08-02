@@ -60,6 +60,28 @@ func test_assert_can_build_troops{range_check_ptr}():
 end
 
 @external
+func test_assert_can_build_troops{range_check_ptr}():
+    alloc_locals
+
+    let (troop_ids : felt*) = alloc()
+    assert [troop_ids] = TroopId.Skirmisher # needs ArcherTower
+    assert [troop_ids+1] = TroopId.Pikeman  # needs Barracks
+    assert [troop_ids+2] = TroopId.Ballista # needs Castle
+    assert [troop_ids+3] = TroopId.Mage     # needs MageTower
+
+    let buildings = RealmBuildings(House=0, StoreHouse=0, Granary=0, Farm=0, FishingVillage=0, Barracks=1, MageTower=1, ArcherTower=1, Castle=1)
+
+    # should pass, no check necessary
+    Combat.assert_can_build_troops(4, troop_ids, buildings)
+
+    %{ expect_revert() %}
+    let buildings = RealmBuildings(House=0, StoreHouse=0, Granary=0, Farm=0, FishingVillage=0, Barracks=0, MageTower=0, ArcherTower=0, Castle=0)
+    Combat.assert_can_build_troops(4, troop_ids, buildings)
+
+    return ()
+end
+
+@external
 func test_get_troop_properties{range_check_ptr}():
     alloc_locals
 
