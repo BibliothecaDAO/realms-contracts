@@ -10,22 +10,11 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.alloc import alloc
-from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le, assert_nn
-from starkware.cairo.common.bool import TRUE, FALSE
+from starkware.cairo.common.math import unsigned_div_rem, assert_nn
 
-from contracts.settling_game.utils.game_structs import (
-    RealmData,
-    ModuleIds,
-    ExternalContractIds,
-    Cost,
-)
+from contracts.settling_game.utils.game_structs import RealmData
 from contracts.settling_game.utils.constants import (
-    VAULT_LENGTH,
-    DAY,
     BASE_RESOURCES_PER_DAY,
-    BASE_LORDS_PER_DAY,
-    PILLAGE_AMOUNT,
-    MAX_DAYS_ACCURED,
     WORK_HUT_COST,
     WORK_HUT_OUTPUT,
 )
