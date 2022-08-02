@@ -120,16 +120,16 @@ func calculate_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
     # SUM TOTAL POPULATION
     let (controller) = Module.controller_address()
     let (buildings_logic_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.L03_Buildings
+        controller, ModuleIds.L03_Buildings
     )
-    let (current_buildings : RealmBuildings) = IL03_Buildings.get_effective_buildings(
+    let (current_buildings : RealmBuildings) = IL03_Buildings.get_effective_population_buildings(
         buildings_logic_address, token_id
     )
 
     # TROOP POPULATION
     let (troop_population) = calculate_troop_population(token_id)
 
-    let (realm_population) = Calculator.calculate_food(current_buildings, troop_population)
+    let (realm_population) = Calculator.calculate_population(current_buildings, troop_population)
 
     return (realm_population)
 end

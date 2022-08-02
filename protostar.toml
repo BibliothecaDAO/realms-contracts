@@ -11,5 +11,11 @@ cairo-path = ["./lib/cairo_contracts/src"]
 ["protostar.contracts"]
 main = ["./contracts/settling_game/Arbiter.cairo"]
 
+["protostar.build"]
+cairo-path = ["./lib/cairo_contracts/src"]
+
+["protostar.shared_command_configs"]
+stdout-on-success = true
+
 ["protostar.test"]
 disable-hint-validation = true

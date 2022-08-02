@@ -61,8 +61,6 @@ namespace IModuleController:
         module_04_addr : felt,
         module_05_addr : felt,
         module_06_addr : felt,
-        module_07_addr : felt,
-        module_08_addr : felt,
     ):
     end
 end
@@ -100,6 +98,12 @@ namespace IL03_Buildings:
     func get_buildings_unpacked(token_id : Uint256) -> (realm_buildings : RealmBuildings):
     end
     func get_effective_buildings(token_id : Uint256) -> (realm_buildings : RealmBuildings):
+    end
+    func get_building_cost(building_id : felt) -> (cost : Cost, lords : Uint256):
+    end
+    func get_effective_population_buildings(token_id : Uint256) -> (
+        realm_buildings : RealmBuildings
+    ):
     end
 end
 
@@ -202,5 +206,13 @@ end
 @contract_interface
 namespace IL09_Relics:
     func set_relic_holder(winner_token_id : Uint256, loser_token_id : Uint256):
+    end
+end
+
+@contract_interface
+namespace IFood:
+    func available_food_in_store(token_id : Uint256) -> (available : felt):
+    end
+    func get_full_store_houses(token_id : Uint256) -> (full_store_houses : felt):
     end
 end

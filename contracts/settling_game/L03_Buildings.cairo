@@ -12,12 +12,16 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math import assert_not_zero
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
+from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.uint256 import Uint256
 
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
 from openzeppelin.upgrades.library import Proxy
 
 from contracts.settling_game.library.library_buildings import Buildings
+from contracts.settling_game.library.library_resources import Resources
+from contracts.settling_game.utils.constants import STORE_HOUSE_SIZE
+
 from contracts.settling_game.utils.general import unpack_data, transform_costs_to_token_ids_values
 from contracts.settling_game.utils.game_structs import (
     RealmBuildings,
@@ -31,8 +35,7 @@ from contracts.settling_game.utils.game_structs import (
 
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
-from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
-
+from contracts.settling_game.interfaces.imodules import IFood
 from contracts.settling_game.library.library_module import Module
 
 # -----------------------------------
@@ -100,7 +103,7 @@ end
 # -----------------------------------
 
 # @notice Build building on a realm
-# @param token_id: Staked realm token id
+# @param token_id: Staked Realm id (S_Realm)
 # @param building_id: Building id
 # @return success: Returns TRUE when successfull
 @external
@@ -124,7 +127,7 @@ func build{
         contract_address=realms_address, token_id=token_id
     )
 
-    let (realm_buildings_integrity : RealmBuildings) = get_buildings_integrity_unpacked(token_id)
+    let (realm_buildings_integrity : RealmBuildings) = get_effective_buildings(token_id)
 
     # Check Area, revert if no space available
     let (can_build) = Buildings.can_build(
@@ -135,18 +138,40 @@ func build{
         assert_not_zero(can_build)
     end
 
+    with_attr error_message("Buildings: QTY must be greater than 0"):
+        assert_not_zero(quantity)
+    end
+
     # Build buildings and set state
     build_buildings(token_id, building_id, quantity, realms_data)
 
-    # GET BUILDING COSTS
-    # TODO: Add exponential cost function into X buildings
-    # @milan
-    let (building_cost : Cost, lords : Uint256) = get_building_cost(building_id)
+    # Workhuts have a fixed cost according to the Realms resources
+    if building_id == RealmBuildingsIds.House:
+        let (
+            resource_ids_len, resource_ids, resource_values_len, resource_values
+        ) = get_workhut_costs(realms_data, quantity)
 
-    let (token_len, token_ids, token_values) = Buildings.calculate_building_cost(building_cost)
-
-    # BURN RESOURCES
-    IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
+        IERC1155.burnBatch(
+            resource_address,
+            caller,
+            resource_ids_len,
+            resource_ids,
+            resource_values_len,
+            resource_values,
+        )
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+        tempvar bitwise_ptr = bitwise_ptr
+    else:
+        let (building_cost : Cost, _) = get_building_cost(building_id)
+        let (token_len, token_ids, token_values) = Buildings.calculate_building_cost(building_cost)
+        IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+        tempvar bitwise_ptr = bitwise_ptr
+    end
 
     # EMIT
     # TODO: Emit left, do calculation in client
@@ -160,7 +185,7 @@ end
 # -----------------------------------
 
 # @notice Build buildings
-# @param token_id: Staked realm token id
+# @param token_id: Staked Realm id (S_Realm)
 # @param building_id: Building id
 func build_buildings{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
@@ -198,40 +223,27 @@ end
 # Getters
 # -----------------------------------
 
-# TODO: Deprecate or keep? It is a permanent record of how many buildings have been built
+# @notice Get Workhut costs
+# @param token_id: Staked Realm id (S_Realm)
 @view
-func get_buildings_unpacked{
+func get_workhut_costs{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-}(token_id : Uint256) -> (realm_buildings : RealmBuildings):
+}(realms_data : RealmData, quantity : felt) -> (
+    resource_ids_len : felt,
+    resource_ids : Uint256*,
+    resource_values_len : felt,
+    resource_values : Uint256*,
+):
     alloc_locals
 
-    let (data) = get_storage_realm_buildings(token_id)
+    let (ids, values) = Resources.workhut_costs(realms_data, quantity)
 
-    let (House) = unpack_data(data, 0, 63)
-    let (StoreHouse) = unpack_data(data, 6, 63)
-    let (Granary) = unpack_data(data, 12, 63)
-    let (Farm) = unpack_data(data, 18, 63)
-    let (FishingVillage) = unpack_data(data, 24, 63)
-    let (Barracks) = unpack_data(data, 30, 63)
-    let (MageTower) = unpack_data(data, 36, 63)
-    let (ArcherTower) = unpack_data(data, 42, 63)
-    let (Castle) = unpack_data(data, 48, 63)
-
-    return (
-        realm_buildings=RealmBuildings(
-        House=House,
-        StoreHouse=StoreHouse,
-        Granary=Granary,
-        Farm=Farm,
-        FishingVillage=FishingVillage,
-        Barracks=Barracks,
-        MageTower=MageTower,
-        ArcherTower=ArcherTower,
-        Castle=Castle
-        ),
-    )
+    return (realms_data.resource_number, ids, realms_data.resource_number, values)
 end
 
+# @notice Gets integrity of buildings unpacked
+# @param token_id: Staked Realm id (S_Realm)
+# @return : unpacked buildings
 @view
 func get_buildings_integrity_unpacked{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
@@ -240,9 +252,14 @@ func get_buildings_integrity_unpacked{
 
     let (buildings_) = buildings_integrity.read(token_id)
 
-    return Buildings.unpack_buildings(buildings_)
+    let (unpacked) = Buildings.unpack_buildings(buildings_)
+
+    return (unpacked)
 end
 
+# @notice Gets all effective buildings on a Realm. This is a computed value.
+# @param token_id: Staked Realm id (S_Realm)
+# @return : unpacked buildings
 @view
 func get_effective_buildings{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
@@ -256,9 +273,11 @@ func get_effective_buildings{
     let (House) = Buildings.calculate_effective_buildings(
         RealmBuildingsIds.House, functional_buildings.House, block_timestamp
     )
-    let (StoreHouse) = Buildings.calculate_effective_buildings(
-        RealmBuildingsIds.StoreHouse, functional_buildings.StoreHouse, block_timestamp
-    )
+
+    # storehouse is computed from food. TODO: deprecate struct
+    let (food_address) = Module.get_module_address(ModuleIds.L10_Food)
+    let (StoreHouse) = IFood.get_full_store_houses(food_address, token_id)
+
     let (Granary) = Buildings.calculate_effective_buildings(
         RealmBuildingsIds.Granary, functional_buildings.Granary, block_timestamp
     )
@@ -296,6 +315,65 @@ func get_effective_buildings{
     )
 end
 
+# @notice Gets all effective buildings on a Realm. This is a computed value. helper function otherwise infinite loop happens. TODO: could be better solution
+# @param token_id: Staked Realm id (S_Realm)
+# @return : unpacked buildings
+@view
+func get_effective_population_buildings{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(token_id : Uint256) -> (realm_buildings : RealmBuildings):
+    alloc_locals
+
+    let (functional_buildings : RealmBuildings) = get_buildings_integrity_unpacked(token_id)
+
+    let (block_timestamp) = get_block_timestamp()
+
+    let (House) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.House, functional_buildings.House, block_timestamp
+    )
+
+    let StoreHouse = 0
+
+    let (Granary) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.Granary, functional_buildings.Granary, block_timestamp
+    )
+    let (Farm) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.Farm, functional_buildings.Farm, block_timestamp
+    )
+    let (FishingVillage) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.FishingVillage, functional_buildings.FishingVillage, block_timestamp
+    )
+    let (Barracks) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.Barracks, functional_buildings.Barracks, block_timestamp
+    )
+    let (MageTower) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.MageTower, functional_buildings.MageTower, block_timestamp
+    )
+    let (ArcherTower) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.ArcherTower, functional_buildings.ArcherTower, block_timestamp
+    )
+    let (Castle) = Buildings.calculate_effective_buildings(
+        RealmBuildingsIds.Castle, functional_buildings.Castle, block_timestamp
+    )
+
+    return (
+        realm_buildings=RealmBuildings(
+        House=House,
+        StoreHouse=StoreHouse,
+        Granary=Granary,
+        Farm=Farm,
+        FishingVillage=FishingVillage,
+        Barracks=Barracks,
+        MageTower=MageTower,
+        ArcherTower=ArcherTower,
+        Castle=Castle
+        ),
+    )
+end
+
+# @notice Gets storage on realm. TODO: Deprecate
+# @param token_id: Staked Realm id (S_Realm)
+# @return : buildings
 @view
 func get_storage_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
@@ -303,6 +381,10 @@ func get_storage_realm_buildings{syscall_ptr : felt*, pedersen_ptr : HashBuiltin
     return realm_buildings.read(token_id)
 end
 
+# @notice Gets building cost according to Cost tuple
+# @param building_id: Building ID
+# @return : building cost in resources
+# @return : lords cost
 @view
 func get_building_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     building_id : felt
@@ -316,6 +398,10 @@ end
 # Admin
 # -----------------------------------
 
+# @notice Sets cost of the buildings
+# @param building_id: Staked Realm id (S_Realm)
+# @param : building cost in resources
+# @param : lords cost
 @external
 func set_building_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     building_id : felt, cost : Cost, lords : Uint256
@@ -325,4 +411,38 @@ func set_building_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : Hash
     building_cost.write(building_id, cost)
     building_lords_cost.write(building_id, lords)
     return ()
+end
+
+# TODO: Deprecate or keep? It is a permanent record of how many buildings have been built
+@view
+func get_buildings_unpacked{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(token_id : Uint256) -> (realm_buildings : RealmBuildings):
+    alloc_locals
+
+    let (data) = get_storage_realm_buildings(token_id)
+
+    let (House) = unpack_data(data, 0, 63)
+    let (StoreHouse) = unpack_data(data, 6, 63)
+    let (Granary) = unpack_data(data, 12, 63)
+    let (Farm) = unpack_data(data, 18, 63)
+    let (FishingVillage) = unpack_data(data, 24, 63)
+    let (Barracks) = unpack_data(data, 30, 63)
+    let (MageTower) = unpack_data(data, 36, 63)
+    let (ArcherTower) = unpack_data(data, 42, 63)
+    let (Castle) = unpack_data(data, 48, 63)
+
+    return (
+        realm_buildings=RealmBuildings(
+        House=House,
+        StoreHouse=StoreHouse,
+        Granary=Granary,
+        Farm=Farm,
+        FishingVillage=FishingVillage,
+        Barracks=Barracks,
+        MageTower=MageTower,
+        ArcherTower=ArcherTower,
+        Castle=Castle
+        ),
+    )
 end
