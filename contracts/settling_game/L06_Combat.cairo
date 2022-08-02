@@ -26,6 +26,7 @@ from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.imodules import (
     IModuleController,
     IL02_Resources,
+    IL03_Buildings,
     IL04_Calculator,
     IL09_Relics,
 )
@@ -37,6 +38,7 @@ from contracts.settling_game.utils.game_structs import (
     ModuleIds,
     RealmData,
     RealmCombatData,
+    RealmBuildings,
     Troop,
     Squad,
     SquadStats,
@@ -136,9 +138,10 @@ const MAX_WALL_DEFENSE_HIT_POINTS = 5
 # @proxy_admin: Proxy admin address
 @external
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    address_of_controller : felt, proxy_admin : felt
+    address_of_controller : felt, xoroshiro_addr : felt, proxy_admin : felt
 ):
     Module.initializer(address_of_controller)
+    xoroshiro_address.write(xoroshiro_addr)
     Proxy.initializer(proxy_admin)
     return ()
 end
@@ -174,7 +177,12 @@ func build_squad_from_troops_in_realm{
 
     Module.ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
 
-    # TODO: check if realm has the right buildings to build the desired troops
+    # check if Realm has the buildings to build the requested troops
+    let (buildings_module) = Module.get_module_address(ModuleIds.L03_Buildings)
+    let (realm_buildings : RealmBuildings) = IL03_Buildings.get_effective_buildings(
+        buildings_module, realm_id
+    )
+    Combat.assert_can_build_troops(troop_ids_len, troop_ids, realm_buildings)
 
     # get the Cost for every Troop to build
     let (troop_costs : Cost*) = alloc()

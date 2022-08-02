@@ -17,6 +17,7 @@ from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
 
 from contracts.settling_game.utils.game_structs import (
     RealmBuildingsIds,
+    RealmBuildings,
     Squad,
     SquadStats,
     Troop,
@@ -29,7 +30,6 @@ from contracts.settling_game.utils.game_structs import (
 const SHIFT = 0x100
 
 namespace Combat:
-
     func assert_slot{range_check_ptr}(slot : felt):
         with_attr error_message("Combat: slot not valid"):
             # TODO: use value from constants instead of magic "2"
@@ -37,6 +37,27 @@ namespace Combat:
             assert is_valid_slot = TRUE
         end
         return ()
+    end
+
+    func assert_can_build_troops{range_check_ptr}(
+        troop_ids_len : felt, troop_ids : felt*, realm_buildings : RealmBuildings
+    ):
+        alloc_locals
+        let (__fp__, _) = get_fp_and_pc()
+
+        if troop_ids_len == 0:
+            return ()
+        end
+
+        let (troop : Troop) = get_troop_internal([troop_ids])
+        let buildings = cast(&realm_buildings, felt*)
+        let buildings_in_realm : felt = [buildings + troop.building - 1]
+        with_attr error_message(
+                "Combat: missing building {troop.building} to build troop {troop.id}"):
+            assert_not_zero(buildings_in_realm)
+        end
+
+        return assert_can_build_troops(troop_ids_len - 1, troop_ids + 1, realm_buildings)
     end
 
     func compute_squad_vitality(s : Squad) -> (vitality : felt):
