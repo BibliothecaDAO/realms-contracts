@@ -3,13 +3,6 @@
 #
 # MIT License
 
-# TODO:
-#   see TODOs inline
-#   bump event versions when code is finished
-#   goblin town
-#     spawn ~daily, variable strength based on rarest resources
-#     on succes, attacker gets LORDS
-
 %lang starknet
 
 from starkware.cairo.common.alloc import alloc
@@ -56,7 +49,7 @@ from contracts.settling_game.utils.constants import DAY
 # -----------------------------------
 
 @event
-func CombatStart_2(
+func CombatStart_3(
     attacking_realm_id : Uint256,
     defending_realm_id : Uint256,
     attacking_squad : Squad,
@@ -65,7 +58,7 @@ func CombatStart_2(
 end
 
 @event
-func CombatOutcome_2(
+func CombatOutcome_3(
     attacking_realm_id : Uint256,
     defending_realm_id : Uint256,
     attacking_squad : Squad,
@@ -75,7 +68,7 @@ func CombatOutcome_2(
 end
 
 @event
-func CombatStep_2(
+func CombatStep_3(
     attacking_realm_id : Uint256,
     defending_realm_id : Uint256,
     attacking_squad : Squad,
@@ -85,7 +78,7 @@ func CombatStep_2(
 end
 
 @event
-func BuildTroops_2(
+func BuildTroops_3(
     squad : Squad, troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt
 ):
 end
@@ -214,7 +207,7 @@ func build_squad_from_troops_in_realm{
     let (squad) = Combat.add_troops_to_squad(current_squad, troop_ids_len, troop_ids)
     update_squad_in_realm(squad, realm_id, slot)
 
-    BuildTroops_2.emit(squad, troop_ids_len, troop_ids, realm_id, slot)
+    BuildTroops_3.emit(squad, troop_ids_len, troop_ids, realm_id, slot)
 
     return ()
 end
@@ -245,12 +238,8 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     # check if the fighting realms have enough food, otherwise
     # decrease whole squad vitality by 50%
     let (food_module) = Module.get_module_address(ModuleIds.L10_Food)
-    let (attacker_food_store) = IFood.available_food_in_store(
-        food_module, attacking_realm_id
-    )
-    let (defender_food_store) = IFood.available_food_in_store(
-        food_module, defending_realm_id
-    )
+    let (attacker_food_store) = IFood.available_food_in_store(food_module, attacking_realm_id)
+    let (defender_food_store) = IFood.available_food_in_store(food_module, defending_realm_id)
 
     if attacker_food_store == 0:
         let (attacker) = Combat.apply_hunger_penalty(attacker)
@@ -271,7 +260,7 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     tempvar defender = defender
 
     # EMIT FIRST
-    CombatStart_2.emit(attacking_realm_id, defending_realm_id, attacker, defender)
+    CombatStart_3.emit(attacking_realm_id, defending_realm_id, attacker, defender)
 
     let (attacker_breached_wall : Squad) = inflict_wall_defense(attacker, defending_realm_id)
 
@@ -319,7 +308,7 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
         tempvar pedersen_ptr = pedersen_ptr
     end
 
-    CombatOutcome_2.emit(
+    CombatOutcome_3.emit(
         attacking_realm_id,
         defending_realm_id,
         attacker_after_combat,
@@ -431,7 +420,7 @@ func attack{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     let (hit_points) = Combat.calculate_hit_points(attacker, defender, dice_roll)
 
     let (d_after_attack : Squad) = Combat.hit_troop_in_squad(d, d_index, hit_points)
-    CombatStep_2.emit(attacking_realm_id, defending_realm_id, a, d_after_attack, hit_points)
+    CombatStep_3.emit(attacking_realm_id, defending_realm_id, a, d_after_attack, hit_points)
     return (d_after_attack)
 end
 
@@ -549,8 +538,6 @@ end
 func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     attacking_realm_id : Uint256, defending_realm_id : Uint256
 ) -> (yesno : felt):
-    # TODO: write tests for this
-
     alloc_locals
 
     let (controller) = Module.controller_address()
