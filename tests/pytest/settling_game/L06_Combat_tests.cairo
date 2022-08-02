@@ -7,40 +7,24 @@ from contracts.settling_game.L06_Combat import (
     run_combat_loop,
     attack,
     compute_min_roll_to_hit,
-    hit_troop,
-    hit_squad,
     load_troop_costs,
 )
 from contracts.settling_game.utils.game_structs import Troop, Squad, Cost
 
 @view
 func test_run_combat_loop{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
-    attacker : Squad, defender : Squad, attack_type : felt
+    attacker : Squad, defender : Squad
 ) -> (attacker : Squad, defender : Squad, outcome : felt):
-    let (a, d, o) = run_combat_loop(Uint256(1, 0), Uint256(2, 0), attacker, defender, attack_type)
+    let (a, d, o) = run_combat_loop(Uint256(1, 0), Uint256(2, 0), attacker, defender)
     return (a, d, o)
 end
 
 @view
 func test_attack{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
-    a : Squad, d : Squad, attack_type : felt
+    a : Squad, d : Squad
 ) -> (d_after_attack : Squad):
-    let (d_after_attack) = attack(Uint256(1, 0), Uint256(2, 0), a, d, attack_type)
+    let (d_after_attack) = attack(Uint256(1, 0), Uint256(2, 0), a, d)
     return (d_after_attack)
-end
-
-@view
-func test_hit_squad{range_check_ptr}(s : Squad, hits : felt) -> (squad : Squad):
-    let (s) = hit_squad(s, hits)
-    return (s)
-end
-
-@view
-func test_hit_troop{range_check_ptr}(t : Troop, hits : felt) -> (
-    hit_troop : Troop, remaining_hits : felt
-):
-    let (t, r) = hit_troop(t, hits)
-    return (t, r)
 end
 
 @view
