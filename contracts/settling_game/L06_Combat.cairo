@@ -180,7 +180,7 @@ func build_squad_from_troops_in_realm{
 
     # get the Cost for every Troop to build
     let (troop_costs : Cost*) = alloc()
-    load_troop_costs(troop_ids_len, troop_ids, 0, troop_costs)
+    load_troop_costs(troop_ids_len, troop_ids, troop_costs)
 
     # transform costs into tokens
     let (token_ids : Uint256*) = alloc()
@@ -468,7 +468,7 @@ end
 # @param troop_ids: An array of troops for which we need to load the costs
 # @param costs: A pointer to a Cost memory segment that gets populated
 func load_troop_costs{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    troop_ids_len : felt, troop_ids : felt*, costs_idx : felt, costs : Cost*
+    troop_ids_len : felt, troop_ids : felt*, costs : Cost*
 ):
     alloc_locals
 
@@ -477,9 +477,9 @@ func load_troop_costs{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     end
 
     let (cost : Cost) = get_troop_cost([troop_ids])
-    assert costs[costs_idx] = cost
+    assert [costs] = cost
 
-    return load_troop_costs(troop_ids_len - 1, troop_ids + 1, costs_idx + 1, costs)
+    return load_troop_costs(troop_ids_len - 1, troop_ids + 1, costs + Cost.SIZE)
 end
 
 # @notice Modify (overwrite) a Squad in a Realm
