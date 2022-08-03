@@ -9,7 +9,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import BitwiseBuiltin, HashBuiltin
 from starkware.cairo.common.math import unsigned_div_rem
-from starkware.cairo.common.math_cmp import is_le, is_not_zero
+from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.uint256 import Uint256
 from starkware.starknet.common.syscalls import get_block_timestamp, get_caller_address, get_tx_info
 
@@ -158,7 +158,7 @@ end
 
 # @notice Create a new attacking or defending Squad from Troops in Realm
 # @param troop_ids: array of TroopId values of the troops to be built/bought
-# @param realm_id: Staked Realm id (S_Realm)
+# @param realm_id: Staked Realm ID (S_Realm)
 # @param slot: one of ATTACKING_SQUAD_SLOT or DEFENDING_SQUAD_SLOT values, designating
 #              where the Squad should be assigned to in the Realm
 @external
@@ -359,6 +359,11 @@ func set_realm_combat_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     return ()
 end
 
+# @notice Function simulating an attacking Squad breaching a Realm's wall and
+#         catching some damage as a result
+# @param attacker: The attacking Squad
+# @param defending_realm_id: Staked Realm ID of the defending Realm
+# @return damaged: Attacking squad after breaching the wall
 func inflict_wall_defense{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     attacker : Squad, defending_realm_id : Uint256
 ) -> (damaged : Squad):
@@ -385,6 +390,16 @@ func inflict_wall_defense{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : H
     return (damaged)
 end
 
+# @notice The core combat logic. Alternates attacks between two squads until
+#         one of them is at 0 total vitality.
+# @param attacking_realm_id: Staked Realm ID of the attacking Realm
+# @param defending_realm_id: Staked Realm ID of the defending Realm
+# @param attacker: Attacking squad entering the combat
+# @param defender: Defending squad entering the combat
+# @return attacker: Attacking squad after the combat has finished
+# @return defender: Defending squad after the combat has finished
+# @return outcome: One of COMBAT_OUTCOME_ATTACKER_WINS, COMBAT_OUTCOME_DEFENDER_WINS consts
+#                  specifying which side won
 func run_combat_loop{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     attacking_realm_id : Uint256, defending_realm_id : Uint256, attacker : Squad, defender : Squad
 ) -> (attacker : Squad, defender : Squad, outcome : felt):
@@ -408,6 +423,12 @@ func run_combat_loop{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     return run_combat_loop(attacking_realm_id, defending_realm_id, step_attacker, step_defender)
 end
 
+# @notice Function performing a single step of the combat, a one-sided attack
+# @param attacking_realm_id: Staked Realm ID of the attacking Realm
+# @param defending_realm_id: Staked Realm ID of the defending Realm
+# @param a: Attacking squad entering the attack step
+# @param d: Defending squad entering the attack step
+# @return d_after_attack: Defending squad after the attack step
 func attack{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     attacking_realm_id : Uint256, defending_realm_id : Uint256, a : Squad, d : Squad
 ) -> (d_after_attack : Squad):
@@ -424,6 +445,8 @@ func attack{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     return (d_after_attack)
 end
 
+# @notice Perform a 12 sided dice roll
+# @return Dice roll value, from 1 to 12 (inclusive)
 func roll_dice{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}() -> (
     dice_roll : felt
 ):
@@ -441,6 +464,9 @@ func roll_dice{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     return (r + 1)  # values from 1 to 12 inclusive
 end
 
+# @notice Populate an array of Cost structs with the proper values
+# @param troop_ids: An array of troops for which we need to load the costs
+# @param costs: A pointer to a Cost memory segment that gets populated
 func load_troop_costs{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     troop_ids_len : felt, troop_ids : felt*, costs_idx : felt, costs : Cost*
 ):
@@ -456,7 +482,10 @@ func load_troop_costs{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     return load_troop_costs(troop_ids_len - 1, troop_ids + 1, costs_idx + 1, costs)
 end
 
-# can be used to add, overwrite or remove a Squad from a Realm
+# @notice Modify (overwrite) a Squad in a Realm
+# @param s: New squad
+# @param realm_id: Staked Realm ID in which to modify the squad
+# @param slot: Which squad to modify. One of ATTACKING_SQUAD_SLOT or DEFENDING_SQUAD_SLOT
 func update_squad_in_realm{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     s : Squad, realm_id : Uint256, slot : felt
 ):
