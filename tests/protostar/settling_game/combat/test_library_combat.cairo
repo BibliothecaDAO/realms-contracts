@@ -3,6 +3,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
 
 from contracts.settling_game.library.library_combat import Combat
+from contracts.settling_game.utils.constants import ATTACKING_SQUAD_SLOT, DEFENDING_SQUAD_SLOT
 from contracts.settling_game.utils.game_structs import (
     RealmBuildingsIds,
     RealmBuildings,
@@ -27,12 +28,11 @@ end
 
 @external
 func test_assert_slot{range_check_ptr}():
-    # TODO: use constatns once refactored
-    Combat.assert_slot(1)
-    Combat.assert_slot(2)
+    Combat.assert_slot(ATTACKING_SQUAD_SLOT)
+    Combat.assert_slot(DEFENDING_SQUAD_SLOT)
 
     %{ expect_revert() %}
-    Combat.assert_slot(3)
+    Combat.assert_slot(DEFENDING_SQUAD_SLOT+1)
 
     return ()
 end
