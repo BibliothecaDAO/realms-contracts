@@ -28,6 +28,15 @@ from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library.library_combat import Combat
 
+from contracts.settling_game.utils.constants import (
+    ATTACK_COOLDOWN_PERIOD,
+    COMBAT_OUTCOME_ATTACKER_WINS,
+    COMBAT_OUTCOME_DEFENDER_WINS,
+    ATTACKING_SQUAD_SLOT,
+    DEFENDING_SQUAD_SLOT,
+    POPULATION_PER_HIT_POINT,
+    MAX_WALL_DEFENSE_HIT_POINTS,
+)
 from contracts.settling_game.utils.game_structs import (
     ModuleIds,
     RealmData,
@@ -98,29 +107,6 @@ end
 @storage_var
 func troop_cost(troop_id : felt) -> (cost : Cost):
 end
-
-##########
-# CONSTS #
-##########
-
-# a min delay between attacks on a Realm; it can't
-# be attacked again during cooldown
-const ATTACK_COOLDOWN_PERIOD = DAY  # 1 day unit
-
-# used to signal which side won the battle
-const COMBAT_OUTCOME_ATTACKER_WINS = 1
-const COMBAT_OUTCOME_DEFENDER_WINS = 2
-
-# used when adding or removing squads to Realms
-const ATTACKING_SQUAD_SLOT = 1
-const DEFENDING_SQUAD_SLOT = 2
-
-# when defending, how many population does it take
-# to inflict a single hit point on the attacker
-const POPULATION_PER_HIT_POINT = 50
-# upper limit (inclusive) of how many hit points
-# can a defense wall inflict on the attacker
-const MAX_WALL_DEFENSE_HIT_POINTS = 5
 
 ###############
 # CONSTRUCTOR #
