@@ -122,6 +122,8 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     let (realms_settled) = get_total_realms_settled()
     _set_total_realms_settled(realms_settled + 1)
 
+    # TODO: spawn_goblin_welcomparty? maybe use a hook? if so, how to approve the module in GT?
+
     # EMIT
     Settled.emit(caller, token_id)
 

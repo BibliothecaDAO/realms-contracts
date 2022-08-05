@@ -42,6 +42,7 @@ from contracts.settling_game.interfaces.imodules import (
     IL01_Settling,
     IL04_Calculator,
     IL03_Buildings,
+    IGoblinTown,
 )
 from contracts.settling_game.library.library_resources import Resources
 
@@ -113,6 +114,15 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # modules
     let (settling_logic_address) = Module.get_module_address(ModuleIds.L01_Settling)
+    let (goblin_town_address) = Module.get_module_address(ModuleIds.GoblinTown)
+
+    # check if there's no goblin town on realm
+    with_attr error_message("RESOURCES: Goblin Town present"):
+        let (_, spawn_ts) = IGoblinTown.get_strength_and_timestamp(goblin_town_address, token_id)
+        let (now) = get_block_timestamp
+        let (has_spawned) = is_le(spawn_ts, now)
+        assert has_spawned = FALSE
+    end
 
     # FETCH OWNER
     let (owner) = IERC721.ownerOf(s_realms_address, token_id)

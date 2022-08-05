@@ -152,6 +152,7 @@ namespace ArmyCap:
 end
 
 namespace ModuleIds:
+    # TODO: refactor the code to drop the Lnn_ prefix
     const L01_Settling = 1
     const L02_Resources = 2
     const L03_Buildings = 3
@@ -162,6 +163,7 @@ namespace ModuleIds:
     const L08_Crypts_Resources = 8
     const L09_Relics = 12
     const L10_Food = 13
+    const GoblinTown = 14
 end
 
 namespace ExternalContractIds:

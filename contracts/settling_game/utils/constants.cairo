@@ -136,3 +136,8 @@ const LEGENDARY_MULTIPLIER = 10  # Legendary maps generate 10x resources as non-
 # Misc
 # -----------------------------------
 const GENESIS_TIMESTAMP = 1645743897
+
+# -----------------------------------
+# Goblin Town
+# -----------------------------------
+const GOBLIN_WELCOME_PARTY_STRENGTH = 1
