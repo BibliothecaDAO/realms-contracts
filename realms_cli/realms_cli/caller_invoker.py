@@ -121,10 +121,10 @@ def wrapped_call(network, contract_alias, function, arguments) -> str:
 def send(network, signer_alias, contract_alias, function, arguments) -> str:
     """Nile send function."""
     account = Account(signer_alias, network)
-    # if isinstance(arguments[0], list):
-    #     return account.send_multi(contract_alias, function, arguments)
-    if not arguments:
-        return account.send_multi(contract_alias, function, [])
+    if isinstance(arguments[0], list):
+        return account.send_multi(contract_alias, function, arguments)
+    # if not arguments:
+    #     return account.send_multi(contract_alias, function, [])
     return account.send_multi(contract_alias, function, [arguments])
 
 
