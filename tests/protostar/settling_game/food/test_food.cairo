@@ -36,6 +36,12 @@ func test_calculate_harvest{
 
     assert total_farms = 6
 
+    let (total_farms, remainding_crops, decayed_farms) = Food.calculate_harvest(
+        GENESIS_TIMESTAMP - 0
+    )
+
+    assert decayed_farms = 0
+
     return ()
 end
 
@@ -45,12 +51,12 @@ func test_calculate_food_in_store_house{
 }():
     alloc_locals
 
-    let (full_store) = Food.calculate_food_in_store_house(STORE_HOUSE_FULL, GENESIS_TIMESTAMP)
+    let (full_store) = Food.calculate_food_in_store_house(STORE_HOUSE_FULL - GENESIS_TIMESTAMP)
 
     # Assert full
     assert full_store = STORE_HOUSE_FULL - GENESIS_TIMESTAMP
 
-    let (empty_store) = Food.calculate_food_in_store_house(STORE_HOUSE_EMPTY, GENESIS_TIMESTAMP)
+    let (empty_store) = Food.calculate_food_in_store_house(STORE_HOUSE_EMPTY - GENESIS_TIMESTAMP)
 
     # Assert empty
     assert empty_store = 0

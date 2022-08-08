@@ -56,15 +56,15 @@ end
 
 # square meters
 namespace RealmBuildingsSize:
-    const House = 2
-    const StoreHouse = 3
+    const House = 4
+    const StoreHouse = 2
     const Granary = 3
     const Farm = 3
     const FishingVillage = 3
-    const Barracks = 6
-    const MageTower = 6
-    const ArcherTower = 6
-    const Castle = 12
+    const Barracks = 16
+    const MageTower = 16
+    const ArcherTower = 16
+    const Castle = 16
 end
 
 namespace BuildingsFood:
@@ -92,27 +92,27 @@ namespace BuildingsCulture:
 end
 
 namespace BuildingsPopulation:
-    const House = 2
+    const House = 12
     const StoreHouse = 3
     const Granary = 3
     const Farm = 3
     const FishingVillage = 3
-    const Barracks = 6
-    const MageTower = 6
-    const ArcherTower = 6
-    const Castle = 12
+    const Barracks = 5
+    const MageTower = 5
+    const ArcherTower = 5
+    const Castle = 5
 end
 
 namespace BuildingsIntegrityLength:
-    const House = 1000
+    const House = 3600
     const StoreHouse = 2000
     const Granary = 2000
     const Farm = 2000
     const FishingVillage = 2000
-    const Barracks = 3000
-    const MageTower = 3000
-    const ArcherTower = 3000
-    const Castle = 9000
+    const Barracks = 37319
+    const MageTower = 37319
+    const ArcherTower = 37319
+    const Castle = 37319
 end
 
 namespace BuildingsTroopIndustry:

@@ -44,6 +44,13 @@ namespace Food:
             return (total_harvests, remaining_crops, 0)
         end
 
+        # this could be done better... This just stops returning when no farms have been built
+        let (no_harvests) = is_le(1000000, total_harvests)
+
+        if no_harvests == TRUE:
+            return (0, 0, 0)
+        end
+
         return (MAX_HARVESTS, remaining_crops, total_harvests - MAX_HARVESTS)
     end
 

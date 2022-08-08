@@ -95,7 +95,8 @@ namespace Buildings:
     # gets buildable area for each
     func get_realm_buildable_area(cities : felt, regions : felt) -> (buildable_area : felt):
         # Get buildable units
-        return (cities * regions + BASE_SQM)
+        let (div, _) = unsigned_div_rem(regions, 2)
+        return (cities * div + BASE_SQM)
     end
 
     # gets current built buildings
