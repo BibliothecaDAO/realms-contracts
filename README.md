@@ -37,7 +37,7 @@ This monorepo contains all of the Contracts (StarkNet/Cairo Ethereum/Solidity) f
 
 First, visit the [Bibliotheca DAO Site](https://bibliothecadao.xyz/) for an overview of our ecosystem.
 
-Next, read the [Master Scroll](https://docs.bibliothecadao.xyz/lootverse-master-scroll/). This is our deep dive into everything about the game. The Master Scroll is the source of truth before this readme.
+Next, read the [Master Scroll](https://scroll.bibliothecadao.xyz/lootverse-master-scroll/). This is our deep dive into everything about the game. The Master Scroll is the source of truth before this readme.
 
 Finally, visit [The Atlas](https://atlas.bibliothecadao.xyz/) to see the Settling game in action.
 
