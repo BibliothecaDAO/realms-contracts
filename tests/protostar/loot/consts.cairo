@@ -1,5 +1,5 @@
 %lang starknet
-from contracts.loot.ItemConstants import ItemIds
+from contracts.loot.item.constants import ItemIds
 
 namespace TestGear:
     namespace Weapon:

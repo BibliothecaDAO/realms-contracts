@@ -15,7 +15,7 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.registers import get_label_location
 
-from contracts.loot.ItemConstants import (
+from contracts.loot.item.constants import (
     ItemAgility,
     Item,
     ItemSlot,
@@ -25,7 +25,7 @@ from contracts.loot.ItemConstants import (
     AdventurerState,
 )
 
-from contracts.loot.library_item import LootItems
+from contracts.loot.item.library_item import LootItems
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.constants import SHIFT_41
 
@@ -135,8 +135,8 @@ namespace CalculateAdventurer:
 
         let (Class) = unpack_data(packed_adventurer.p1, 0, 15)  # 4
         let (Age) = unpack_data(packed_adventurer.p1, 4, 1023)  # 10
-        let (Name) = unpack_data(packed_adventurer.p1, 14, 1023)  # 10
-        let (Order) = unpack_data(packed_adventurer.p1, 18, 15)  # 4
+        let (Name) = unpack_data(packed_adventurer.p1, 14, 15)  # 4
+        let (Order) = unpack_data(packed_adventurer.p1, 18, 15)  # 4 TODO: fix
         let (XP) = unpack_data(packed_adventurer.p1, 38, 2199023255551)  # 30
 
         let (Neck) = unpack_data(packed_adventurer.p2, 0, 2199023255551)  # 41

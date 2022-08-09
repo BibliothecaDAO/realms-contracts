@@ -2,14 +2,11 @@
 from starkware.cairo.common.uint256 import Uint256, uint256_add, uint256_sub
 from starkware.cairo.common.math_cmp import is_nn, is_le
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
-from lib.cairo_math_64x61.contracts.Math64x61 import Math64x61_div
-from contracts.loot.library_item import LootItems
-from contracts.loot.ItemConstants import ItemIds
+from contracts.loot.item.library_item import LootItems
+from contracts.loot.item.constants import ItemIds, ItemAgility, Item
 from starkware.cairo.common.pow import pow
 
-from contracts.loot.ItemConstants import ItemAgility, Item
-
-from contracts.loot.library_statistics import Statistics
+from contracts.loot.item.library_statistics import Statistics
 
 namespace TEST_ITEM:
     const Id = 1

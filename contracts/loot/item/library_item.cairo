@@ -15,9 +15,9 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.registers import get_label_location
 
-from contracts.loot.ItemConstants import ItemAgility, Item, ItemSlot, ItemClass
+from contracts.loot.item.constants import ItemAgility, Item, ItemSlot, ItemClass
 
-from contracts.loot.library_statistics import Statistics
+from contracts.loot.item.library_statistics import Statistics
 
 namespace LootItems:
     func calculate_item_stats{syscall_ptr : felt*, range_check_ptr}(item : Item) -> (

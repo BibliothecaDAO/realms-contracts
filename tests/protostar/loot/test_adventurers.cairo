@@ -3,13 +3,12 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_add, uint256_sub
 from starkware.cairo.common.math_cmp import is_nn, is_le
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
-from lib.cairo_math_64x61.contracts.Math64x61 import Math64x61_div
-from contracts.loot.library_adventurer import CalculateAdventurer
-from contracts.loot.ItemConstants import ItemIds
 from starkware.cairo.common.pow import pow
 
-from contracts.loot.ItemConstants import ItemAgility, Item, Adventurer, AdventurerState
-from tests.loot.consts import TestGear, TestAdventurer
+from contracts.loot.item.constants import ItemIds
+from contracts.loot.adventurer.library import CalculateAdventurer
+from contracts.loot.item.constants import ItemAgility, Item, Adventurer, AdventurerState
+from tests.protostar.loot.consts import TestGear, TestAdventurer
 
 @external
 func test_items{syscall_ptr : felt*, range_check_ptr}():
@@ -310,28 +309,40 @@ func test_compute_adventurer_stats{
         TestAdventurer.Name,
         TestAdventurer.XP,
         TestAdventurer.Order,
+        1,
         2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
     )
 
     # Pack state
-    let (packed_adventurer) = CalculateAdventurer.pack_adventurer(adventurer_state)
+    let (packed_adventurer) = CalculateAdventurer._pack_adventurer(adventurer_state)
 
     # unpack state
-    let (unpacked) = CalculateAdventurer.unpack_adventurer(packed_adventurer)
+    let (unpacked) = CalculateAdventurer._unpack_adventurer(packed_adventurer)
 
-    let unpacked_class = unpacked.Class
+    let unpacked_class : AdventurerState = unpacked
 
-    %{ print('attack: ', ids.unpacked_class) %}
-    # %{ print('armour: ', ids.armour) %}
-    # %{ print('wisdom: ', ids.wisdom) %}
-    # %{ print('vitality: ', ids.vitality) %}
+    assert unpacked.Class = 0
+
+    %{ print('Class: ', ids.unpacked.Class) %}
+    %{ print('Age: ', ids.unpacked.Age) %}
+    %{ print('Name: ', ids.unpacked.Name) %}
+    %{ print('XP: ', ids.unpacked.XP) %}
+    %{ print('Order: ', ids.unpacked.Order) %}
+
+    %{ print('NeckId: ', ids.unpacked.NeckId) %}
+    %{ print('WeaponId: ', ids.unpacked.WeaponId) %}
+    %{ print('RingId: ', ids.unpacked.RingId) %}
+    %{ print('ChestId: ', ids.unpacked.ChestId) %}
+    %{ print('HeadId: ', ids.unpacked.HeadId) %}
+    %{ print('WaistId: ', ids.unpacked.WaistId) %}
+    %{ print('FeetId: ', ids.unpacked.FeetId) %}
+    %{ print('HandsId: ', ids.unpacked.HandsId) %}
 
     return ()
 end

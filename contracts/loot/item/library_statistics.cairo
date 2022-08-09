@@ -15,7 +15,7 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.registers import get_label_location
 
-from contracts.loot.ItemConstants import (
+from contracts.loot.item.constants import (
     ItemAgility,
     Item,
     ItemSlot,

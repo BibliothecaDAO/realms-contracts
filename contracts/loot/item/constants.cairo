@@ -1,11 +1,12 @@
 # Item Structs
-#   A struct that holds the Realm statistics.
-#   Each module will need to add a struct with their metadata.
+#   A struct that holds the Loot item statistics
+#
 #
 # MIT License
 
 %lang starknet
 
+# Loot item shape. This is the on-chain metadata of each item.
 struct Item:
     member Id : felt  # item id 1 - 100
     member Class : felt  # loot item class
@@ -22,6 +23,11 @@ struct Item:
     member Level : felt  # Stored value if item has a Level
     member Age : felt  # Timestamp of when item was created
     member XP : felt  # accured XP
+    # weight
+    # material
+    # protection
+    # magic
+    #
 end
 
 struct Adventurer:
