@@ -141,3 +141,4 @@ const GENESIS_TIMESTAMP = 1645743897
 # Goblin Town
 # -----------------------------------
 const GOBLIN_WELCOME_PARTY_STRENGTH = 1
+const MAX_GOBLIN_TOWN_STRENGTH = 12

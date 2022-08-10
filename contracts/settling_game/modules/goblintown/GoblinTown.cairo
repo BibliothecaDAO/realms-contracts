@@ -109,11 +109,11 @@ func spawn_next{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
     let next_spawn_ts = now + ((24 + spawn_delay_hours) * 3600)
 
     # calculate the strength
-    # TODO: not sure if this will work, the realm_id func arg is the staked Realm,
-    #       but doesn't the func expect the non-staked Realm ID?
+    # normal and staked Realms have the same ID, so the following will work
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
     let (realm_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, realm_id)
-    let (strength) = GoblinTown.calculate_strength(realm_data, rnd)
+    let (_, extras) = unsigned_div_rem(rnd, 5) # [0,4]
+    let (strength) = GoblinTown.calculate_strength(realm_data, extras)
 
     # pack & store the data
     let (packed) = GoblinTown.pack(strength, next_spawn_ts)
