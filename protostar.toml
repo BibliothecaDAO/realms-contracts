@@ -6,6 +6,7 @@ libs_path = "./lib"
 
 ["protostar.shared_command_configs"]
 cairo-path = ["./lib/cairo_contracts/src"]
+stdout-on-success = true
 
 # This section is explained in the "Project compilation" guide.
 ["protostar.contracts"]

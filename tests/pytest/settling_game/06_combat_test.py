@@ -199,7 +199,7 @@ async def test_transform_costs_to_token_ids_values(utils_general_tests):
 
 @pytest.mark.asyncio
 async def test_load_troop_costs(l06_combat_tests):
-    troops = [TroopId.Watchman, TroopId.Guard, TroopId.Scorpio]
+    troops = [TroopId.Skirmisher, TroopId.Knight, TroopId.Mage]
 
     # set_troop_cost is automatically imported/exposed in the contract
     # due to the way how the compiler works, so we can call it directly

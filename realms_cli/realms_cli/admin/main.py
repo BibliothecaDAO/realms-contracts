@@ -121,17 +121,16 @@ def transfer_to(to_address, network, token_id):
 
 @click.command()
 @click.option("--network", default="goerli")
-def mint_lords(network):
+def set_xoroshiro(network):
     """
-    Mint batch resources
+    Sets Xoroshiro
     """
     config = Config(nile_network=network)
 
     wrapped_send(
         network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_lords",
-        function="mint",
-        arguments=[int(config.USER_ADDRESS,
-                       16), 100000000 * 10 ** 18, 0],
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="L06_Combat",
+        function="set_xoroshiro",
+        arguments=[int(config.XOROSHIRO_ADDRESS, 16)],
     )
