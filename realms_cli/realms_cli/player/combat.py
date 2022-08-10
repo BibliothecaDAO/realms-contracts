@@ -45,6 +45,7 @@ def build_squad(network, troops, realm_token_id):
                    *uint(realm_token_id), 1],
     )
 
+
 @click.command()
 @click.argument("attacking_realm", nargs=1)
 @click.argument("defending_realm", nargs=1)
@@ -79,7 +80,7 @@ def attack_realm(attacking_realm, defending_realm, network):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_L06_Combat",
         function="initiate_combat",
-        arguments=[*uint(attacking_realm), *uint(defending_realm), 1],
+        arguments=[*uint(attacking_realm), *uint(defending_realm)],
     )
 
 
