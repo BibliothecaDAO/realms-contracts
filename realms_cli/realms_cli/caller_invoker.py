@@ -18,16 +18,25 @@ def send_multi(self, to, method, calldata, nonce=None):
             call_or_invoke(self.address, "call", "get_nonce", [], self.network)
         )
 
-    (call_array, calldata, sig_r, sig_s) = self.signer.sign_transaction(
-        sender=self.address,
-        calls=[[target_address, method, c] for c in calldata],
-        nonce=nonce,
-        max_fee='8989832783197500',
-    )
+    if len(calldata) > 0:
+        (call_array, calldata, sig_r, sig_s) = self.signer.sign_transaction(
+            sender=self.address,
+            calls=[[target_address, method, c] for c in calldata],
+            nonce=nonce,
+            max_fee='8989832783197500',
+        )
+    else:
+        (call_array, calldata, sig_r, sig_s) = self.signer.sign_transaction(
+            sender=self.address,
+            calls=[[target_address, method, calldata]],
+            nonce=nonce,
+            max_fee='8989832783197500',
+        )
 
     params = []
     params.append(str(len(call_array)))
-    params.extend([str(elem) for sublist in call_array for elem in sublist])
+    params.extend([str(elem)
+                   for sublist in call_array for elem in sublist])
     params.append(str(len(calldata)))
     params.extend([str(param) for param in calldata])
     params.append(str(nonce))
