@@ -595,7 +595,7 @@ func leave{
             assert check = FALSE
     end
 
-    IGuildCertificate.burn(
+    IGuildCertificate.guild_burn(
         contract_address=guild_certificate,
         account=caller_address,
         guild=contract_address
