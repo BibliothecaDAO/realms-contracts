@@ -1,6 +1,8 @@
 import struct
 from typing import List
 
+from starkware.starknet.public.abi import get_selector_from_name
+
 
 def print_over_colums(array_of_strings, cols=2, width=40):
     """Takes in an array of strings and prints the content over a
@@ -74,3 +76,15 @@ def from_bn(a):
     Convert 18 decimals into 4 decimals
     """
     return round(int(a, 16) / 1000000000000000000, 4)
+
+
+def from_call_to_call_array(calls):
+    call_array = []
+    calldata = []
+    for i, call in enumerate(calls):
+        assert len(call) == 3, "Invalid call parameters"
+        entry = (call[0], get_selector_from_name(
+            call[1]), len(calldata), len(call[2]))
+        call_array.append(entry)
+        calldata.extend(call[2])
+    return (call_array, calldata)
