@@ -14,16 +14,16 @@ from starkware.cairo.common.uint256 import (
     uint256_eq
 )
 
-from contracts.guilds.utils.constants import FALSE, TRUE
-from contracts.guilds.interfaces.IGuildManager import IGuildManager
+from contracts.utils.constants import FALSE, TRUE
+from contracts.interfaces.IGuildManager import IGuildManager
 
 from openzeppelin.token.erc721.library import ERC721
 from openzeppelin.introspection.ERC165 import ERC165
 
 from openzeppelin.access.ownable import Ownable
 
-from contracts.guilds.lib.math_utils import uint256_array_sum
-from contracts.guilds.utils.helpers import find_uint256_value
+from contracts.lib.math_utils import uint256_array_sum, array_product
+from contracts.utils.helpers import find_value, find_uint256_value
 
 #
 # Structs
@@ -100,7 +100,12 @@ func assert_only_owner{
     }():
     let (caller) = get_caller_address()
     let (guild_manager) = _guild_manager.read()
-    IGuildManager.check_valid_contract(guild_manager, caller)
+    let (check_guild) = IGuildManager.check_valid_contract(guild_manager, caller)
+    let check_manager = guild_manager - caller
+    let check_product = check_guild * check_manager
+    with_attr error_message("Guild Manager: Contract is not valid"):
+        assert check_product = 0
+    end
     return ()
 end
 
@@ -547,7 +552,7 @@ func get_tokens_data_index{
         token_id: Uint256
     ) -> (index: felt):
     alloc_locals
-    let (checks: Uint256*) = alloc()
+    let (checks: felt*) = alloc()
     let (tokens_data_len) = _certificate_tokens_data_len.read(certificate_id)
 
     _get_tokens_data_index(
@@ -560,11 +565,18 @@ func get_tokens_data_index{
         checks=checks
     )
 
-    let (index) = find_uint256_value(
+    # let (index) = find_uint256_value(
+    #     arr_index=0,
+    #     arr_len=tokens_data_len,
+    #     arr=checks,
+    #     value=Uint256(0,0)
+    # )
+
+    let (index) = find_value(
         arr_index=0,
         arr_len=tokens_data_len,
         arr=checks,
-        value=Uint256(0,0)
+        value=0
     )
 
     return (index=index)
@@ -581,7 +593,7 @@ func _get_tokens_data_index{
         token_standard: felt,
         token: felt,
         token_id: Uint256,
-        checks: Uint256*
+        checks: felt*
     ):
     if tokens_data_index == tokens_data_len:
         return ()
@@ -597,7 +609,8 @@ func _get_tokens_data_index{
     let (check_token_id) = uint256_sub(token_data.token_id, token_id)
 
     let add_1 = check_token_standard + check_token
-    let (check_token_data, _) = uint256_add(Uint256(add_1,0), check_token_id)
+    let check_token_data = add_1 + check_token_id.low
+    # let (check_token_data, _) = uint256_add(Uint256(add_1,0), check_token_id)
 
     assert checks[tokens_data_index] = check_token_data
 
@@ -613,4 +626,3 @@ func _get_tokens_data_index{
 
     return ()
 end
-        

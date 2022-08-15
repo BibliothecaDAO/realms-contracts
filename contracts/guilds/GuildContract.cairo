@@ -19,12 +19,12 @@ from contracts.utils.constants import FALSE, TRUE
 
 from openzeppelin.introspection.ERC165 import ERC165
 from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
-from contracts.guilds.interfaces.IERC1155 import IERC1155
-from contracts.guilds.interfaces.IGuildCertificate import IGuildCertificate
+from contracts.interfaces.IERC1155 import IERC1155
+from contracts.interfaces.IGuildCertificate import IGuildCertificate
 
-from contracts.guilds.lib.role import Role
-from contracts.guilds.lib.token_standard import TokenStandard
-from contracts.guilds.lib.math_utils import array_sum, array_product
+from contracts.lib.role_new import Role
+from contracts.lib.token_standard import TokenStandard
+from contracts.lib.math_utils import array_sum, array_product
 
 from starkware.cairo.common.uint256 import (
     Uint256, 
@@ -197,30 +197,6 @@ func require_master{
     return ()
 end
 
-func require_owner{
-        syscall_ptr : felt*,
-        pedersen_ptr : HashBuiltin*,
-        range_check_ptr
-    }():
-    alloc_locals
-    let (caller_address) = get_caller_address()
-    let (contract_address) = get_contract_address()
-    let (guild_certificate) = _guild_certificate.read()
-
-    let (certificate_id: Uint256) = IGuildCertificate.get_certificate_id(
-        contract_address=guild_certificate,
-        owner=caller_address,
-        guild=contract_address
-    )
-
-    let (_role) = IGuildCertificate.get_role(contract_address=guild_certificate, certificate_id=certificate_id)
-
-    with_attr error_message("Caller is not owner"):
-        assert _role = Role.OWNER
-    end
-    return ()
-end
-
 func require_admin{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
@@ -242,7 +218,7 @@ func require_admin{
         certificate_id=certificate_id
     )
 
-    with_attr error_message("Caller is not owner"):
+    with_attr error_message("Caller is not admin"):
         assert _role = Role.ADMIN
     end
     return ()
@@ -269,6 +245,34 @@ func require_owner_or_member{
     with_attr error_mesage("Caller must have access"):
         assert check = TRUE
     end
+    return ()
+end
+
+func require_admin_or_owner{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }():
+    alloc_locals
+    let (caller_address) = get_caller_address()
+    let (contract_address) = get_contract_address()
+    let (guild_certificate) = _guild_certificate.read()
+
+    let (certificate_id: Uint256) = IGuildCertificate.get_certificate_id(
+        contract_address=guild_certificate,
+        owner=caller_address,
+        guild=contract_address
+    )
+
+    let (_role) = IGuildCertificate.get_role(
+        contract_address=guild_certificate, 
+        certificate_id=certificate_id
+    )
+
+    with_attr error_message("Caller is not admin or owner"):
+        assert_lt(1, _role)
+    end
+
     return ()
 end
 
@@ -702,7 +706,7 @@ func deposit{
     local pedersen_ptr: HashBuiltin* = pedersen_ptr
     local range_check_ptr = range_check_ptr
 
-    require_owner()
+    require_admin_or_owner()
 
     let (check_not_zero) = uint256_lt(Uint256(0,0), amount)
 
@@ -850,7 +854,7 @@ func withdraw{
     local pedersen_ptr: HashBuiltin* = pedersen_ptr
     local range_check_ptr = range_check_ptr
 
-    require_owner()
+    require_admin_or_owner()
 
     if token_standard == TokenStandard.ERC721:
         let (check_one) = uint256_eq(amount, Uint256(1,0))

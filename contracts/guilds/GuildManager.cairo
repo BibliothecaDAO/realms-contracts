@@ -3,9 +3,12 @@
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import deploy, get_caller_address
-from contracts.guilds.lib.math_utils import array_product
+from contracts.lib.math_utils import array_product
 
 from starkware.cairo.common.bool import TRUE, FALSE
+from contracts.lib.role_new import Role
+
+from contracts.interfaces.IGuildCertificate import IGuildCertificate
 
 #
 # Constants
@@ -96,6 +99,13 @@ func deploy_guild_proxy_contract{syscall_ptr : felt*, pedersen_ptr : HashBuiltin
     guild_contracts.write(contract_count, contract_address)
     guild_contract_count.write(contract_count + 1)
 
+    IGuildCertificate.mint(
+        contract_address=guild_certificate,
+        to=caller_address,
+        guild=contract_address,
+        role=Role.ADMIN,
+    )
+
     return ()
 end
 
@@ -111,10 +121,7 @@ func check_valid_contract{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
 
     let (check_product) = array_product(guilds_len, checks)
 
-    with_attr error_message("Guild Manager: Contract is not valid"):
-        assert check_product = 0
-    end
-    return (value=TRUE)
+    return (value=check_product)
 end
 
 func _check_valid_contract{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
