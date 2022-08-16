@@ -96,3 +96,20 @@ def transfer_to(to_address, network, token_id):
         arguments=[int(config.ADMIN_ADDRESS, 16),
                    int(to_address, 16), token_id],
     )
+
+
+@click.command()
+@click.option("--network", default="goerli")
+def set_xoroshiro(network):
+    """
+    Sets Xoroshiro
+    """
+    config = Config(nile_network=network)
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="L06_Combat",
+        function="set_xoroshiro",
+        arguments=[int(config.XOROSHIRO_ADDRESS, 16)],
+    )
