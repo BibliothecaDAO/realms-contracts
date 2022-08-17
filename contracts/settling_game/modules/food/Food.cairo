@@ -259,6 +259,39 @@ func harvest{
     return ()
 end
 
+# @notice Converts harvest directly into food store on a Realm
+# @param token_id: Staked Realm id (S_Realm)
+# @param quantity: quantity of food to store
+# @param resource_id: id of food to be stored (FISH or WHEAT)
+@external
+func convert_food_tokens_to_store{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+}(token_id : Uint256, quantity : felt, resource_id : felt):
+    alloc_locals
+    let (caller) = get_caller_address()
+
+    # check id and harvest type
+    Food.assert_food_type(resource_id)
+
+    # check owner
+    Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
+
+    # contracts
+    let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
+
+    # set default data in burn call
+    let (local data : felt*) = alloc()
+    assert data[0] = 0
+
+    # burn resources
+    IERC1155.burn(
+        resources_address, caller, Uint256(resource_id, 0), Uint256(quantity * 10 ** 18, 0)
+    )
+
+    convert_to_store(token_id, quantity)
+    return ()
+end
+
 # -----------------------------------
 # INTERNAL
 # -----------------------------------
@@ -462,16 +495,21 @@ func get_all_food_information{
     total_farm_remaining,
     decayed_farms,
     farms_built,
+    get_farm_harvests_left,
     total_village_harvest,
     total_village_remaining,
     decayed_villages,
     villages_built,
+    fishing_collections_left,
 ):
     alloc_locals
     # farm expirary time
+    let (_get_farm_harvests_left) = get_farm_harvests_left(token_id)
     let (
         total_farm_harvest, total_farm_remaining, decayed_farms, farms_built
     ) = get_farms_to_harvest(token_id)
+
+    let (_fishing_collections_left) = get_fishing_villages_harvests_left(token_id)
     let (
         total_village_harvest, total_village_remaining, decayed_villages, villages_built
     ) = get_fishing_villages_to_harvest(token_id)
@@ -481,10 +519,12 @@ func get_all_food_information{
         total_farm_remaining,
         decayed_farms,
         farms_built,
+        _get_farm_harvests_left,
         total_village_harvest,
         total_village_remaining,
         decayed_villages,
         villages_built,
+        _fishing_collections_left,
     )
 end
 

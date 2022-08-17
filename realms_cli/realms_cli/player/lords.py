@@ -49,7 +49,7 @@ def transfer_lords(address, network):
         contract_alias="proxy_lords",
         function="transfer",
         arguments=[
-            int(config.USER_ADDRESS, 16),
+            int('0x07Deb0dA237EE37276489278FE16EFF3E6A3d62F830446104D93C892df771cA2', 16),
             100000 * 10 ** 18,   # uint 1
             0,                # uint 2
         ],

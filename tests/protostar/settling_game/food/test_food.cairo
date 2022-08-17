@@ -87,6 +87,7 @@ func test_assert_ids{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     # check IDS
     Food.assert_ids(4)
     Food.assert_harvest_type(2)
+    Food.assert_food_type(1)
 
     return ()
 end

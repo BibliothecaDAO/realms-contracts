@@ -45,7 +45,7 @@ def mint_resources(network):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_resources",
         function="mintBatch",
-        arguments=[int(config.USER_ADDRESS, 16), n_resources,
+        arguments=[int('0x07Deb0dA237EE37276489278FE16EFF3E6A3d62F830446104D93C892df771cA2', 16), n_resources,
                    *uints, n_resources, *amounts, 1, 1],
     )
 
@@ -77,7 +77,8 @@ def upgrade_module(module_name, network):
                 f.write(line)
         f.truncate()
 
-    compile(contract_alias="contracts/settling_game/" + module_name + ".cairo")
+    compile(contract_alias="contracts/settling_game/" +
+            module_name + ".cairo")
 
     deploy(
         network=network,
@@ -130,7 +131,7 @@ def set_xoroshiro(network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
-        contract_alias="L06_Combat",
+        contract_alias="proxy_L06_Combat",
         function="set_xoroshiro",
         arguments=[int(config.XOROSHIRO_ADDRESS, 16)],
     )

@@ -23,14 +23,15 @@ from contracts.settling_game.utils.game_structs import (
     RealmBuildingsIds,
     HarvestType,
     FoodBuildings,
+    ResourceIds,
 )
 from contracts.settling_game.utils.constants import SHIFT_41
 from contracts.settling_game.utils.general import unpack_data
 
 namespace Food:
-    # @notice Calculates how many available farms to harvest
-    # MAX_HARVESTS = max amount you can harvest at once.
-    # if more farms than MAX, return MAX and decayed farms. How will loose these harvests.
+    # @notice Calculates how many available farms/fishing villages to harvest
+    #   MAX_HARVESTS = max amount you can harvest at once.
+    #   if more farms than MAX, return MAX and decayed farms. How will loose these harvests.
     func calculate_harvest{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         time_since_update : felt
     ) -> (total_harvests : felt, total_remaining : felt, decayed_farms : felt):
@@ -122,6 +123,27 @@ namespace Food:
         end
 
         with_attr error_message("FOOD: Incorrect Harvest type"):
+            assert 1 = 0
+        end
+
+        return ()
+    end
+
+    # @notice asserts correct harvest type
+    func assert_food_type{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        harvest_type : felt
+    ):
+        alloc_locals
+
+        # check
+        if harvest_type == ResourceIds.fish:
+            return ()
+        end
+        if harvest_type == ResourceIds.wheat:
+            return ()
+        end
+
+        with_attr error_message("FOOD: Incorrect Food type"):
             assert 1 = 0
         end
 
