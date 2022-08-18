@@ -9,7 +9,6 @@
 
 # TODO:
 #   goblin town
-#     spawn ~daily, variable strength based on rarest resources
 #     on succes, attacker gets LORDS
 
 %lang starknet
@@ -104,7 +103,7 @@ func spawn_next{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
     let (rnd) = IXoroshiro.next(xoroshiro_addr)
 
     # calculate the next spawn timestamp
-    let (_, spawn_delay_hours) = unsigned_div_rem(rnd, 25) # [0,24]
+    let (_, spawn_delay_hours) = unsigned_div_rem(rnd, 25)  # [0,24]
     let (now) = get_block_timestamp()
     let next_spawn_ts = now + ((24 + spawn_delay_hours) * 3600)
 
@@ -112,7 +111,7 @@ func spawn_next{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
     # normal and staked Realms have the same ID, so the following will work
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
     let (realm_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, realm_id)
-    let (_, extras) = unsigned_div_rem(rnd, 5) # [0,4]
+    let (_, extras) = unsigned_div_rem(rnd, 5)  # [0,4]
     let (strength) = GoblinTown.calculate_strength(realm_data, extras)
 
     # pack & store the data

@@ -221,4 +221,7 @@ end
 namespace IGoblinTown:
     func get_strength_and_timestamp(token_id : Uint256) -> (strength : felt, spawn_ts : felt):
     end
+
+    func spawn_next(realm_id : Uint256):
+    end
 end
