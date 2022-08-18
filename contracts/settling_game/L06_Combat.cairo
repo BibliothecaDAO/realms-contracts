@@ -15,12 +15,12 @@ from starkware.starknet.common.syscalls import get_block_timestamp, get_caller_a
 
 from openzeppelin.upgrades.library import Proxy
 
+from contracts.settling_game.interfaces.IMintable import IMintable
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.imodules import (
     IModuleController,
     IL02_Resources,
     IL03_Buildings,
-    IL04_Calculator,
     IL09_Relics,
     IFood,
     IGoblinTown,
@@ -36,6 +36,7 @@ from contracts.settling_game.utils.constants import (
     ATTACKING_SQUAD_SLOT,
     POPULATION_PER_HIT_POINT,
     MAX_WALL_DEFENSE_HIT_POINTS,
+    GOBLINDOWN_REWARD,
 )
 from contracts.settling_game.utils.game_structs import (
     ModuleIds,
@@ -384,8 +385,9 @@ func attack_goblin_town{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         # attack was successful, goblin town defeated
 
         # Lord earns $LORDS
-        # TODO: how to do this?
-        # let (lords_address) = Module.get_external_contract_address(ExternalContractIds.Lords)
+        let (caller) = get_caller_address()
+        let (lords_address) = Module.get_external_contract_address(ExternalContractIds.Lords)
+        IMintable.mint(lords_address, caller, Uint256(GOBLINDOWN_REWARD, 0))
 
         # new goblin town is spawned
         let (goblin_town_address) = Module.get_module_address(ModuleIds.GoblinTown)

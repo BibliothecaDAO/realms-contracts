@@ -126,6 +126,9 @@ const POPULATION_PER_HIT_POINT = 50
 # can a defense wall inflict on the attacker
 const MAX_WALL_DEFENSE_HIT_POINTS = 5
 
+# amount of $LORDS as a reward for tearing down a goblin town
+const GOBLINDOWN_REWARD = 20
+
 # -----------------------------------
 # Crypts
 # -----------------------------------
