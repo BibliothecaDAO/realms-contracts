@@ -152,6 +152,7 @@ namespace ArmyCap:
 end
 
 namespace ModuleIds:
+    # TODO: refactor the code to drop the Lnn_ prefix
     const L01_Settling = 1
     const L02_Resources = 2
     const L03_Buildings = 3
@@ -162,6 +163,7 @@ namespace ModuleIds:
     const L08_Crypts_Resources = 8
     const L09_Relics = 12
     const L10_Food = 13
+    const GoblinTown = 14
 end
 
 namespace ExternalContractIds:
@@ -258,10 +260,11 @@ namespace TroopId:
     const Apprentice = 10
     const Mage = 11
     const Arcanist = 12
+    const Goblin = 13
     # IMPORTANT: if you're adding to this enum
     # make sure the SIZE is one greater than the
     # maximal value; certain algorithms depend on that
-    const SIZE = 13
+    const SIZE = 14
 end
 
 namespace TroopType:
@@ -297,6 +300,7 @@ namespace TroopProps:
         const Apprentice = TroopType.RangedMagic
         const Mage = TroopType.RangedMagic
         const Arcanist = TroopType.RangedMagic
+        const Goblin = TroopType.Melee
     end
 
     namespace Tier:
@@ -312,6 +316,7 @@ namespace TroopProps:
         const Apprentice = 1
         const Mage = 2
         const Arcanist = 3
+        const Goblin = 1
     end
 
     namespace Building:
@@ -327,6 +332,7 @@ namespace TroopProps:
         const Apprentice = RealmBuildingsIds.MageTower
         const Mage = RealmBuildingsIds.MageTower
         const Arcanist = RealmBuildingsIds.MageTower
+        const Goblin = 0
     end
 
     namespace Agility:
@@ -342,6 +348,7 @@ namespace TroopProps:
         const Apprentice = 7
         const Mage = 7
         const Arcanist = 7
+        const Goblin = 2
     end
 
     namespace Attack:
@@ -357,6 +364,7 @@ namespace TroopProps:
         const Apprentice = 7
         const Mage = 9
         const Arcanist = 11
+        const Goblin = 3
     end
 
     namespace Armor:
@@ -372,6 +380,7 @@ namespace TroopProps:
         const Apprentice = 2
         const Mage = 2
         const Arcanist = 2
+        const Goblin = 1
     end
 
     namespace Vitality:
@@ -387,6 +396,7 @@ namespace TroopProps:
         const Apprentice = 53
         const Mage = 53
         const Arcanist = 53
+        const Goblin = 30
     end
 
     namespace Wisdom:
@@ -402,6 +412,7 @@ namespace TroopProps:
         const Apprentice = 8
         const Mage = 9
         const Arcanist = 10
+        const Goblin = 1
     end
 end
 

@@ -17,6 +17,7 @@ from contracts.settling_game.utils.constants import (
     MAX_HARVESTS,
     HARVEST_LENGTH,
     STORE_HOUSE_SIZE,
+    SHIFT_41
 )
 from contracts.settling_game.utils.game_structs import (
     RealmData,
@@ -25,7 +26,6 @@ from contracts.settling_game.utils.game_structs import (
     FoodBuildings,
     ResourceIds,
 )
-from contracts.settling_game.utils.constants import SHIFT_41
 from contracts.settling_game.utils.general import unpack_data
 
 namespace Food:

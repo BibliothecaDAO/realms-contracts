@@ -131,3 +131,13 @@ func decreaseAllowance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     ERC20.decrease_allowance(spender, subtracted_value)
     return (TRUE)
 end
+
+@external
+func mint{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    to : felt, amount : Uint256
+):
+    # TODO: better access control, not just Ownable, but ACL based
+    # Ownable.assert_only_owner()
+    ERC20._mint(to, amount)
+    return ()
+end

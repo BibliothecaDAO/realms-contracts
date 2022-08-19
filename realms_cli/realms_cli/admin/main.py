@@ -130,7 +130,7 @@ def set_xoroshiro(network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_L06_Combat",
+        contract_alias="L06_Combat",
         function="set_xoroshiro",
         arguments=[int(config.XOROSHIRO_ADDRESS, 16)],
     )

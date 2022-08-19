@@ -32,7 +32,7 @@ func test_assert_slot{range_check_ptr}():
     Combat.assert_slot(DEFENDING_SQUAD_SLOT)
 
     %{ expect_revert() %}
-    Combat.assert_slot(DEFENDING_SQUAD_SLOT+1)
+    Combat.assert_slot(DEFENDING_SQUAD_SLOT + 1)
 
     return ()
 end
@@ -42,18 +42,38 @@ func test_assert_can_build_troops{range_check_ptr}():
     alloc_locals
 
     let (troop_ids : felt*) = alloc()
-    assert [troop_ids] = TroopId.Skirmisher # needs ArcherTower
-    assert [troop_ids+1] = TroopId.Pikeman  # needs Barracks
-    assert [troop_ids+2] = TroopId.Ballista # needs Castle
-    assert [troop_ids+3] = TroopId.Mage     # needs MageTower
+    assert [troop_ids] = TroopId.Skirmisher  # needs ArcherTower
+    assert [troop_ids + 1] = TroopId.Pikeman  # needs Barracks
+    assert [troop_ids + 2] = TroopId.Ballista  # needs Castle
+    assert [troop_ids + 3] = TroopId.Mage  # needs MageTower
 
-    let buildings = RealmBuildings(House=0, StoreHouse=0, Granary=0, Farm=0, FishingVillage=0, Barracks=1, MageTower=1, ArcherTower=1, Castle=1)
+    let buildings = RealmBuildings(
+        House=0,
+        StoreHouse=0,
+        Granary=0,
+        Farm=0,
+        FishingVillage=0,
+        Barracks=1,
+        MageTower=1,
+        ArcherTower=1,
+        Castle=1,
+    )
 
     # should pass, no check necessary
     Combat.assert_can_build_troops(4, troop_ids, buildings)
 
     %{ expect_revert() %}
-    let buildings = RealmBuildings(House=0, StoreHouse=0, Granary=0, Farm=0, FishingVillage=0, Barracks=0, MageTower=0, ArcherTower=0, Castle=0)
+    let buildings = RealmBuildings(
+        House=0,
+        StoreHouse=0,
+        Granary=0,
+        Farm=0,
+        FishingVillage=0,
+        Barracks=0,
+        MageTower=0,
+        ArcherTower=0,
+        Castle=0,
+    )
     Combat.assert_can_build_troops(4, troop_ids, buildings)
 
     return ()
@@ -569,6 +589,33 @@ func test_apply_hunger_penalty{range_check_ptr}():
     assert_eq(h.t2_4.vitality, 0)
     assert_eq(h.t2_5.vitality, 0)
     assert_eq(h.t3_1.vitality, 0)
+
+    return ()
+end
+
+@external
+func test_build_goblin_squad{range_check_ptr}():
+    alloc_locals
+
+    let (empty) = build_empty_troop()
+    let (goblin) = build_troop(TroopId.Goblin)
+
+    let (s) = Combat.build_goblin_squad(7)
+    assert_troop_eq(s.t1_1, goblin)
+    assert_troop_eq(s.t1_2, goblin)
+    assert_troop_eq(s.t1_3, goblin)
+    assert_troop_eq(s.t1_4, goblin)
+    assert_troop_eq(s.t1_5, goblin)
+    assert_troop_eq(s.t1_6, goblin)
+    assert_troop_eq(s.t1_7, goblin)
+    assert_troop_eq(s.t1_8, empty)
+    assert_troop_eq(s.t1_9, empty)
+    assert_troop_eq(s.t2_1, empty)
+    assert_troop_eq(s.t2_2, empty)
+    assert_troop_eq(s.t2_3, empty)
+    assert_troop_eq(s.t2_4, empty)
+    assert_troop_eq(s.t2_5, empty)
+    assert_troop_eq(s.t3_1, empty)
 
     return ()
 end
