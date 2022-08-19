@@ -59,7 +59,7 @@ namespace AMM:
         with_attr error_message("Price cannot be 0"):
             let (is_zero) = uint256_le(price, Uint256(0, 0))
             assert_not_equal(is_zero, 1)
-        end    
+        end
 
         # Rounding errors favour the contract
         return (price)
