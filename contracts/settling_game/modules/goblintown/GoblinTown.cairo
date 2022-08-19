@@ -7,10 +7,6 @@
 # MIT License
 # -----------------------------------
 
-# TODO:
-#   goblin town
-#     on succes, attacker gets LORDS
-
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
