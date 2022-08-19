@@ -126,30 +126,6 @@ const POPULATION_PER_HIT_POINT = 50
 # can a defense wall inflict on the attacker
 const MAX_WALL_DEFENSE_HIT_POINTS = 5
 
-# -----------------------------------
-# Combat
-# -----------------------------------
-
-# a min delay between attacks on a Realm; it can't
-# be attacked again during cooldown
-const ATTACK_COOLDOWN_PERIOD = DAY  # 1 day unit
-
-# used to signal which side won the battle
-const COMBAT_OUTCOME_ATTACKER_WINS = 1
-const COMBAT_OUTCOME_DEFENDER_WINS = 2
-
-# used when adding or removing squads to Realms
-const ATTACKING_SQUAD_SLOT = 1
-const DEFENDING_SQUAD_SLOT = 2
-
-# when defending, how many population does it take
-# to inflict a single hit point on the attacker
-const POPULATION_PER_HIT_POINT = 50
-
-# upper limit (inclusive) of how many hit points
-# can a defense wall inflict on the attacker
-const MAX_WALL_DEFENSE_HIT_POINTS = 5
-
 # amount of $LORDS as a reward for tearing down a goblin town
 const GOBLINDOWN_REWARD = 20
 
