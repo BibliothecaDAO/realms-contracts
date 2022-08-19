@@ -218,22 +218,24 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
 
     let (last_update) = IL01_Settling.get_time_vault_staked(settling_logic_address, token_id)
 
-    # get 25% of the time and return it
-    # we only mint 25% of the resources, so we should only take 25% of the time
+    # Get 25% of the time and return it
+    # We only mint 25% of the resources, so we should only take 25% of the time
     # TODO: could this overflow?
-    let (time_over, _) = unsigned_div_rem(block_timestamp - last_update * PILLAGE_AMOUNT, 100)
+    # let (time_over, _) = unsigned_div_rem(block_timestamp - last_update * PILLAGE_AMOUNT, 100)
 
-    # Set vault time
-    IL01_Settling.set_time_vault_staked(settling_logic_address, token_id, time_over)
+    # SET VAULT TIME = REMAINDER - CURRENT_TIME
+    IL01_Settling.set_time_vault_staked(
+        settling_logic_address, token_id, total_vault_days_remaining
+    )
 
-    # get resources ids
+    # resources ids
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
     let (resource_ids : Uint256*) = Resources._calculate_realm_resource_ids(realms_data)
 
     let (local data : felt*) = alloc()
     assert data[0] = 0
 
-    # mint pillage resources to victor
+    # MINT PILLAGED RESOURCES TO VICTOR
     IERC1155.mintBatch(
         resources_address,
         claimer,

@@ -50,6 +50,14 @@ from contracts.settling_game.interfaces.imodules import IL04_Calculator, IL03_Bu
 # Events
 # -----------------------------------
 
+@event
+func Created(token_id : Uint256, building_id : felt, qty : felt, harvests : felt, timestamp : felt):
+end
+
+@event
+func Harvest(token_id : Uint256, building_id : felt, harvests : felt):
+end
+
 # -----------------------------------
 # Storage
 # -----------------------------------
@@ -161,6 +169,8 @@ func create{
 
     # BURN RESOURCES
     IERC1155.burnBatch(resources_address, owner, token_len, token_ids, token_len, token_values)
+
+    Created.emit(token_id, food_building_id, qty, BASE_HARVESTS, block_timestamp)
 
     return ()
 end
@@ -345,6 +355,8 @@ func update{
         fishing_villages.write(token_id, packed)
     end
 
+    Harvest.emit(token_id, food_building_id, harvests_to_save)
+
     return ()
 end
 
@@ -495,21 +507,21 @@ func get_all_food_information{
     total_farm_remaining,
     decayed_farms,
     farms_built,
-    get_farm_harvests_left,
+    farm_harvests_left,
     total_village_harvest,
     total_village_remaining,
     decayed_villages,
     villages_built,
-    fishing_collections_left,
+    fishing_villages_harvests_left,
 ):
     alloc_locals
     # farm expirary time
-    let (_get_farm_harvests_left) = get_farm_harvests_left(token_id)
+    let (farm_harvests_left) = get_farm_harvests_left(token_id)
     let (
         total_farm_harvest, total_farm_remaining, decayed_farms, farms_built
     ) = get_farms_to_harvest(token_id)
 
-    let (_fishing_collections_left) = get_fishing_villages_harvests_left(token_id)
+    let (fishing_villages_harvests_left) = get_fishing_villages_harvests_left(token_id)
     let (
         total_village_harvest, total_village_remaining, decayed_villages, villages_built
     ) = get_fishing_villages_to_harvest(token_id)
@@ -519,12 +531,12 @@ func get_all_food_information{
         total_farm_remaining,
         decayed_farms,
         farms_built,
-        _get_farm_harvests_left,
+        farm_harvests_left,
         total_village_harvest,
         total_village_remaining,
         decayed_villages,
         villages_built,
-        _fishing_collections_left,
+        fishing_villages_harvests_left,
     )
 end
 
