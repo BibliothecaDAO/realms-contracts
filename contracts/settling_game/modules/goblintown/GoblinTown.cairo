@@ -14,16 +14,18 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
-from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
+from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.uint256 import Uint256
+from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 
 from openzeppelin.upgrades.library import Proxy
 
+from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library.library_module import Module
+from contracts.settling_game.modules.goblintown.library import GoblinTown
 from contracts.settling_game.utils.constants import GOBLIN_WELCOME_PARTY_STRENGTH
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds, RealmData
-from contracts.settling_game.modules.goblintown.library import GoblinTown
 
 # -----------------------------------
 # Events
@@ -100,7 +102,7 @@ func spawn_next{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
 
     Module.only_approved()
 
-    let (xoroshiro_addr) = get_xoroshiro()
+    let (xoroshiro_addr) = xoroshiro_address.read()
     let (rnd) = IXoroshiro.next(xoroshiro_addr)
 
     # calculate the next spawn timestamp
@@ -150,12 +152,4 @@ func set_xoroshiro{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     Proxy.assert_only_admin()
     xoroshiro_address.write(xoroshiro)
     return ()
-end
-
-@external
-func get_xoroshiro{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    xoroshiro_address : felt
-):
-    xoroshiro_address.read(xoroshiro)
-    return xoroshiro_address.read(xoroshiro)
 end
