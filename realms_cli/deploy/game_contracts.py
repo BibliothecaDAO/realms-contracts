@@ -1,7 +1,6 @@
 from collections import namedtuple
 from realms_cli.deployer import logged_deploy
 from realms_cli.caller_invoker import wrapped_send, declare
-from realms_cli.shared import str_to_felt
 from realms_cli.config import Config, strhex_as_strfelt, safe_load_deployment
 import time
 
@@ -9,7 +8,7 @@ Contracts = namedtuple('Contracts', 'alias contract_name')
 
 # token tuples
 MODULE_CONTRACT_IMPLEMENTATIONS = [
-    Contracts("L01_Settling", "L01_Settling"),
+    Contracts("Settling", "Settling"),
     Contracts("L02_Resources", "L02_Resources"),
     Contracts("L03_Buildings", "L03_Buildings"),
     Contracts("L04_Calculator", "L04_Calculator"),

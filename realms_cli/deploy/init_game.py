@@ -14,7 +14,7 @@ def run(nre):
         contract_alias="arbiter",
         function="batch_set_controller_addresses",
         arguments=[
-            strhex_as_strfelt(config.L01_SETTLING_PROXY_ADDRESS),
+            strhex_as_strfelt(config.SETTLING_PROXY_ADDRESS),
             strhex_as_strfelt(config.L02_RESOURCES_PROXY_ADDRESS),
             strhex_as_strfelt(config.L03_BUILDINGS_PROXY_ADDRESS),
             strhex_as_strfelt(config.L04_CALCULATOR_PROXY_ADDRESS),
@@ -23,7 +23,7 @@ def run(nre):
         ],
     )
 
-    # --------- L01_SETTLING_PROXY_ADDRESS Approvals ------- #
+    # --------- SETTLING_PROXY_ADDRESS Approvals ------- #
 
     wrapped_send(
         network=config.nile_network,
@@ -31,7 +31,7 @@ def run(nre):
         contract_alias="proxy_s_realms",
         function="Set_module_access",
         arguments=[
-            strhex_as_strfelt(config.L01_SETTLING_PROXY_ADDRESS),
+            strhex_as_strfelt(config.SETTLING_PROXY_ADDRESS),
         ]
     )
 
@@ -41,7 +41,7 @@ def run(nre):
         contract_alias="proxy_realms",
         function="setApprovalForAll",
         arguments=[
-            strhex_as_strfelt(config.L01_SETTLING_PROXY_ADDRESS),
+            strhex_as_strfelt(config.SETTLING_PROXY_ADDRESS),
             "1",
         ]
     )
@@ -52,7 +52,7 @@ def run(nre):
         contract_alias="proxy_lords",
         function="approve",
         arguments=[
-            strhex_as_strfelt(config.L01_SETTLING_PROXY_ADDRESS),
+            strhex_as_strfelt(config.SETTLING_PROXY_ADDRESS),
             str(config.INITIAL_LORDS_SUPPLY), 0
         ]
     )

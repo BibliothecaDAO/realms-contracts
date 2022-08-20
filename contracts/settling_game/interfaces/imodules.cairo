@@ -66,7 +66,7 @@ namespace IModuleController:
 end
 
 @contract_interface
-namespace IL01_Settling:
+namespace Settling:
     func set_time_staked(token_id : Uint256, time_left : felt):
     end
     func set_time_vault_staked(token_id : Uint256, time_left : felt):

@@ -29,7 +29,7 @@ from contracts.settling_game.utils.game_structs import (
 from contracts.settling_game.utils.constants import VAULT_LENGTH_SECONDS, BASE_LORDS_PER_DAY
 from contracts.settling_game.interfaces.imodules import (
     IModuleController,
-    IL01_Settling,
+    Settling,
     IL03_Buildings,
     IL06_Combat,
 )
@@ -176,10 +176,10 @@ func calculate_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
     # CALCULATE WONDER TAX
     let (controller) = Module.controller_address()
     let (settle_state_address) = IModuleController.get_module_address(
-        controller, ModuleIds.L01_Settling
+        controller, ModuleIds.Settling
     )
 
-    let (realms_settled) = IL01_Settling.get_total_realms_settled(settle_state_address)
+    let (realms_settled) = Settling.get_total_realms_settled(settle_state_address)
 
     let (less_than_tenth_settled) = is_nn_le(realms_settled, 1600)
 

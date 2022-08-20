@@ -152,7 +152,7 @@ namespace ArmyCap:
 end
 
 namespace ModuleIds:
-    const L01_Settling = 1
+    const Settling = 1
     const L02_Resources = 2
     const L03_Buildings = 3
     const L04_Calculator = 4
