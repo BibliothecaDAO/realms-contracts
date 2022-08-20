@@ -574,7 +574,6 @@ func buy_tokens_loop{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     return (currency_sold)
 end
 
-
 ###############
 # SELL TOKENS #
 ###############
@@ -709,7 +708,6 @@ func get_royalty_for_price{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
 
     return (royalty_fee)
 end
-
 
 # input arguments are:
 # 1) exact amount of token to buy
@@ -867,7 +865,7 @@ end
 @view
 func get_all_buy_price{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_ids_len : felt, token_ids : Uint256*, token_amounts_len : felt, token_amounts : Uint256*
-) -> (prices_len: felt, prices : Uint256*):
+) -> (prices_len : felt, prices : Uint256*):
     alloc_locals
 
     # Loop
@@ -931,7 +929,7 @@ end
 @view
 func get_all_rates{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_ids_len : felt, token_ids : Uint256*, token_amounts_len : felt, token_amounts : Uint256*
-) -> (prices_len: felt, prices : Uint256*):
+) -> (prices_len : felt, prices : Uint256*):
     alloc_locals
 
     # Loop
@@ -1053,7 +1051,6 @@ func safeBatchTransferFrom{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     ERC1155_safeBatchTransferFrom(_from, to, ids_len, ids, amounts_len, amounts)
     return ()
 end
-
 
 #########
 # ADMIN #
