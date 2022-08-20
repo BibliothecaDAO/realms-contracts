@@ -24,14 +24,17 @@ from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.modules.goblintown.library import GoblinTown
-from contracts.settling_game.utils.constants import GOBLIN_WELCOME_PARTY_STRENGTH
+from contracts.settling_game.utils.constants import GOBLIN_WELCOME_PARTY_STRENGTH, DAY
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds, RealmData
-
+from contracts.settling_game.utils.game_structs import Squad
+from contracts.settling_game.library.library_combat import Combat
 # -----------------------------------
 # Events
 # -----------------------------------
 
-# TODO? what events do we need?
+@event
+func GoblinSpawn(realm_id : Uint256, goblin_squad : Squad, time_stamp : felt):
+end
 
 # -----------------------------------
 # Storage
@@ -91,6 +94,10 @@ func spawn_goblin_welcomparty{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     let (packed) = GoblinTown.pack(GOBLIN_WELCOME_PARTY_STRENGTH, ts)
     goblin_town_data.write(packed)
 
+    let (goblins : Squad) = Combat.build_goblin_squad(GOBLIN_WELCOME_PARTY_STRENGTH)
+
+    # emit goblin spawn
+    GoblinSpawn.emit(realm_id, goblins, ts)
     return ()
 end
 
@@ -108,7 +115,10 @@ func spawn_next{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
     # calculate the next spawn timestamp
     let (_, spawn_delay_hours) = unsigned_div_rem(rnd, 25)  # [0,24]
     let (now) = get_block_timestamp()
-    let next_spawn_ts = now + ((24 + spawn_delay_hours) * 3600)
+
+    # get DAY / 24
+    let (day_cycle_hour, _) = unsigned_div_rem(DAY, 24)
+    let next_spawn_ts = now + (DAY + spawn_delay_hours * day_cycle_hour)
 
     # calculate the strength
     # normal and staked Realms have the same ID, so the following will work
@@ -120,6 +130,11 @@ func spawn_next{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
     # pack & store the data
     let (packed) = GoblinTown.pack(strength, next_spawn_ts)
     goblin_town_data.write(packed)
+
+    # emit goblin spawn
+    let (ts) = get_block_timestamp()
+    let (goblins : Squad) = Combat.build_goblin_squad(GOBLIN_WELCOME_PARTY_STRENGTH)
+    GoblinSpawn.emit(realm_id, goblins, next_spawn_ts)
 
     return ()
 end
