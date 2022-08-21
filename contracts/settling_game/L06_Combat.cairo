@@ -21,7 +21,6 @@ from starkware.starknet.common.syscalls import (
 from openzeppelin.upgrades.library import Proxy
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
 
-from contracts.settling_game.interfaces.IMintable import IMintable
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.imodules import (
     IModuleController,

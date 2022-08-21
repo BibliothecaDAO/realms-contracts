@@ -124,7 +124,7 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
 
     # TODO: maybe use a hook? if so, how to approve the module in GT?
     let (goblin_town_address) = Module.get_module_address(ModuleIds.GoblinTown)
-    IGoblinTown.spawn_goblin_welcomeparty(goblin_town_address)
+    IGoblinTown.spawn_goblin_welcomparty(goblin_town_address, token_id)
 
     # EMIT
     Settled.emit(caller, token_id)

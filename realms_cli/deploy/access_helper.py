@@ -8,12 +8,13 @@ def run(nre):
 
     config = Config(nre.network)
 
+    # params: module_writing, module_writing_to
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
         contract_alias="arbiter",
         function="approve_module_to_module_write_access",
-        arguments=[6, 12]
+        arguments=[6, 14]
     )
 
     # wrapped_send(
