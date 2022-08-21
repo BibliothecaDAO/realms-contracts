@@ -730,7 +730,9 @@ namespace Combat:
         return build_goblin_squad_loop(0, strength, squad)
     end
 
-    func build_goblin_squad_loop{range_check_ptr}(idx : felt, count : felt, s : Squad) -> (s : Squad):
+    func build_goblin_squad_loop{range_check_ptr}(idx : felt, count : felt, s : Squad) -> (
+        s : Squad
+    ):
         alloc_locals
 
         if idx == count:
