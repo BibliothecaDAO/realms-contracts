@@ -7,10 +7,6 @@
 # MIT License
 # -----------------------------------
 
-# TODO:
-#   goblin town
-#     on succes, attacker gets LORDS
-
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
@@ -94,10 +90,10 @@ func spawn_goblin_welcomparty{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     let (packed) = GoblinTown.pack(GOBLIN_WELCOME_PARTY_STRENGTH, ts)
     goblin_town_data.write(packed)
 
-    let (goblins : Squad) = Combat.build_goblin_squad(GOBLIN_WELCOME_PARTY_STRENGTH)
-
     # emit goblin spawn
+    let (goblins : Squad) = Combat.build_goblin_squad(GOBLIN_WELCOME_PARTY_STRENGTH)
     GoblinSpawn.emit(realm_id, goblins, ts)
+
     return ()
 end
 
@@ -132,8 +128,7 @@ func spawn_next{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
     goblin_town_data.write(packed)
 
     # emit goblin spawn
-    let (ts) = get_block_timestamp()
-    let (goblins : Squad) = Combat.build_goblin_squad(GOBLIN_WELCOME_PARTY_STRENGTH)
+    let (goblins : Squad) = Combat.build_goblin_squad(strength)
     GoblinSpawn.emit(realm_id, goblins, next_spawn_ts)
 
     return ()
