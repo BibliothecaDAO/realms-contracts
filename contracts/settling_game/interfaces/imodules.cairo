@@ -219,7 +219,10 @@ end
 
 @contract_interface
 namespace IGoblinTown:
-    func get_strength_and_timestamp(token_id : Uint256) -> (strength : felt, spawn_ts : felt):
+    func spawn_goblin_welcomparty(realm_id : Uint256):
+    end
+
+    func get_strength_and_timestamp(realm_id : Uint256) -> (strength : felt, spawn_ts : felt):
     end
 
     func spawn_next(realm_id : Uint256):
