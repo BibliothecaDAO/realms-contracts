@@ -29,7 +29,7 @@ from contracts.settling_game.utils.constants import (
     BASE_FOOD_PRODUCTION,
     STORE_HOUSE_SIZE,
 )
-from contracts.settling_game.utils.general import calculate_cost
+from contracts.settling_game.utils.general import transform_costs_to_tokens
 from contracts.settling_game.utils.game_structs import (
     RealmData,
     ModuleIds,
@@ -151,15 +151,15 @@ func create{
         fishing_villages.write(token_id, packed)
     end
 
-    let (buildings_address) = Module.get_module_address(ModuleIds.L03_Buildings)
-
     # Costs
+    let (buildings_address) = Module.get_module_address(ModuleIds.L03_Buildings)
     let (cost, _) = IL03_Buildings.get_building_cost(buildings_address, food_building_id)
-    let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
-
-    let (token_len, token_ids, token_values) = calculate_cost(cost)
+    let (costs : Cost*) = alloc()
+    assert [costs] = cost
+    let (token_len, token_ids, token_values) = transform_costs_to_tokens(1, costs, qty)
 
     # BURN RESOURCES
+    let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
     IERC1155.burnBatch(resources_address, owner, token_len, token_ids, token_len, token_values)
 
     return ()
