@@ -1,5 +1,5 @@
 # -----------------------------------
-# ____Module.L01___SETTLING_LOGIC
+#   Module.SETTLING_LOGIC
 #   Core Settling Game logic including setting up the world
 #   and staking/unstaking a realm.
 #

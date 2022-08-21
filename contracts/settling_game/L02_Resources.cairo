@@ -39,7 +39,7 @@ from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.imodules import (
-    IL01_Settling,
+    Settling,
     IL04_Calculator,
     IL03_Buildings,
 )
@@ -112,7 +112,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
 
     # modules
-    let (settling_logic_address) = Module.get_module_address(ModuleIds.L01_Settling)
+    let (settling_logic_address) = Module.get_module_address(ModuleIds.Settling)
 
     # FETCH OWNER
     let (owner) = IERC721.ownerOf(s_realms_address, token_id)
@@ -146,8 +146,8 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     end
 
     # SET VAULT TIME = REMAINDER - CURRENT_TIME
-    IL01_Settling.set_time_staked(settling_logic_address, token_id, remainder)
-    IL01_Settling.set_time_vault_staked(settling_logic_address, token_id, vault_remainder)
+    Settling.set_time_staked(settling_logic_address, token_id, remainder)
+    Settling.set_time_vault_staked(settling_logic_address, token_id, vault_remainder)
 
     # get current buildings on realm
     let (buildings_address) = Module.get_module_address(ModuleIds.L03_Buildings)
@@ -204,7 +204,7 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
     let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms)
     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
-    let (settling_logic_address) = Module.get_module_address(ModuleIds.L01_Settling)
+    let (settling_logic_address) = Module.get_module_address(ModuleIds.Settling)
 
     # FETCH REALM DATA
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
@@ -221,7 +221,7 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     end
 
     # SET VAULT TIME = REMAINDER - CURRENT_TIME
-    IL01_Settling.set_time_vault_staked(settling_logic_address, token_id, pillagable_remainder)
+    Settling.set_time_vault_staked(settling_logic_address, token_id, pillagable_remainder)
 
     # get current buildings on realm
     let (buildings_address) = Module.get_module_address(ModuleIds.L03_Buildings)
@@ -267,10 +267,10 @@ func days_accrued{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     alloc_locals
 
     let (block_timestamp) = get_block_timestamp()
-    let (settling_logic_address) = Module.get_module_address(ModuleIds.L01_Settling)
+    let (settling_logic_address) = Module.get_module_address(ModuleIds.Settling)
 
     # GET DAYS ACCRUED
-    let (last_update) = IL01_Settling.get_time_staked(settling_logic_address, token_id)
+    let (last_update) = Settling.get_time_staked(settling_logic_address, token_id)
     let (days_accrued, seconds_left_over) = unsigned_div_rem(block_timestamp - last_update, DAY)
 
     let (is_less_than_max) = is_le(days_accrued, MAX_DAYS_ACCURED + 1)
@@ -293,10 +293,10 @@ func vault_days_accrued{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     alloc_locals
 
     let (block_timestamp) = get_block_timestamp()
-    let (settling_logic_address) = Module.get_module_address(ModuleIds.L01_Settling)
+    let (settling_logic_address) = Module.get_module_address(ModuleIds.Settling)
 
     # GET DAYS ACCRUED
-    let (last_update) = IL01_Settling.get_time_vault_staked(settling_logic_address, token_id)
+    let (last_update) = Settling.get_time_vault_staked(settling_logic_address, token_id)
     let (days_accrued, seconds_left_over) = unsigned_div_rem(block_timestamp - last_update, DAY)
 
     return (days_accrued, seconds_left_over)

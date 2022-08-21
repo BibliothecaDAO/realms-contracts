@@ -2,9 +2,9 @@
 import { deployContract, getOwnerAccountInt, setupDeploymentDir, getDeployedAddressInt, getSigner, getAccountContract } from '../../helpers'
 
 async function main() {
-    const proxyLogicContractName = 'PROXY_L01_Settling'
-    const logicContractName = 'L01_Settling'
-    const stateContractName = 'S01_Settling'
+    const proxyLogicContractName = 'PROXY_Settling'
+    const logicContractName = 'Settling'
+    const stateContractName = 'Settling'
 
     setupDeploymentDir()
     const ownerAccount = getOwnerAccountInt()
@@ -12,7 +12,7 @@ async function main() {
     // Collect params
     const moduleControllerAddress = getDeployedAddressInt("ModuleController");
 
-    // Magically deploy + write all files and stuff 
+    // Magically deploy + write all files and stuff
     // Implementation
     // await deployContract(logicContractName, logicContractName, [])
 
