@@ -11,9 +11,15 @@ from starkware.cairo.common.cairo_builtins import BitwiseBuiltin, HashBuiltin
 from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.uint256 import Uint256
-from starkware.starknet.common.syscalls import get_block_timestamp, get_caller_address, get_tx_info
+from starkware.starknet.common.syscalls import (
+    get_block_timestamp,
+    get_caller_address,
+    get_tx_info,
+    get_contract_address,
+)
 
 from openzeppelin.upgrades.library import Proxy
+from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
 
 from contracts.settling_game.interfaces.IMintable import IMintable
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
@@ -383,11 +389,11 @@ func attack_goblin_town{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
 
     if outcome == COMBAT_OUTCOME_ATTACKER_WINS:
         # attack was successful, goblin town defeated
-
+        let (this) = get_contract_address()
         # Lord earns $LORDS
         let (caller) = get_caller_address()
         let (lords_address) = Module.get_external_contract_address(ExternalContractIds.Lords)
-        IMintable.mint(lords_address, caller, Uint256(GOBLINDOWN_REWARD, 0))
+        IERC20.transferFrom(lords_address, this, caller, Uint256(GOBLINDOWN_REWARD, 0))
 
         # new goblin town is spawned
         let (goblin_town_address) = Module.get_module_address(ModuleIds.GoblinTown)
