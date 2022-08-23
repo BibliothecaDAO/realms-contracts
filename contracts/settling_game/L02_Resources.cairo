@@ -154,9 +154,20 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         assert_not_zero(days)
     end
 
+    # set vault time only if actually claiming vault
+    if total_vault_days != 0:
+        IL01_Settling.set_time_vault_staked(settling_logic_address, token_id, vault_remainder)
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    else:
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    end
+
     # SET VAULT TIME = REMAINDER - CURRENT_TIME
     IL01_Settling.set_time_staked(settling_logic_address, token_id, remainder)
-    IL01_Settling.set_time_vault_staked(settling_logic_address, token_id, vault_remainder)
 
     # get current buildings on realm
     let (buildings_address) = Module.get_module_address(ModuleIds.L03_Buildings)
@@ -216,9 +227,7 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     let (settling_logic_address) = Module.get_module_address(ModuleIds.L01_Settling)
 
     # Get all vault raidable
-    let (_, resource_mint, total_vault_days, _) = get_all_vault_raidable(
-        token_id
-    )
+    let (_, resource_mint, total_vault_days, _) = get_all_vault_raidable(token_id)
 
     # CHECK IS RAIDABLE
     with_attr error_message("RESOURCES: NOTHING TO RAID!"):

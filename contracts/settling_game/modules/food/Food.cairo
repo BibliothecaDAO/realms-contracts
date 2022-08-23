@@ -55,7 +55,7 @@ func Created(token_id : Uint256, building_id : felt, qty : felt, harvests : felt
 end
 
 @event
-func Harvest(token_id : Uint256, building_id : felt, harvests : felt):
+func Harvest(token_id : Uint256, building_id : felt, harvests : felt, timestamp : felt):
 end
 
 # -----------------------------------
@@ -355,7 +355,7 @@ func update{
         fishing_villages.write(token_id, packed)
     end
 
-    Harvest.emit(token_id, food_building_id, harvests_to_save)
+    Harvest.emit(token_id, food_building_id, harvests_to_save, block_timestamp)
 
     return ()
 end
