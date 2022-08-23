@@ -17,6 +17,8 @@ from openzeppelin.upgrades.library import Proxy
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.game_structs import RealmData
 
+from contracts.settling_game.library.library_module import Module
+
 #
 # Initializer
 #
@@ -175,14 +177,14 @@ end
 func mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
     to : felt, tokenId : Uint256
 ):
-    Ownable.assert_only_owner()
+    Module.only_approved()
     ERC721_Enumerable._mint(to, tokenId)
     return ()
 end
 
 @external
 func burn{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(tokenId : Uint256):
-    ERC721.assert_only_token_owner(tokenId)
+    Module.only_approved()
     ERC721_Enumerable._burn(tokenId)
     return ()
 end
@@ -207,58 +209,5 @@ end
 @external
 func renounceOwnership{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     Ownable.renounce_ownership()
-    return ()
-end
-
-#
-# Bibliotheca added methods
-#
-
-@storage_var
-func Module_access() -> (address : felt):
-end
-
-@external
-func Set_module_access{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-    address : felt
-):
-    Ownable.assert_only_owner()
-    Module_access.write(address)
-    return ()
-end
-
-# ONLY ALLOWS MODULE TO MINT S_REALM
-
-func check_caller{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}() -> (
-    value : felt
-):
-    let (address) = Module_access.read()
-    let (caller) = get_caller_address()
-
-    if address == caller:
-        return (1)
-    end
-
-    return (0)
-end
-
-func check_owner{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}() -> (
-    value : felt
-):
-    let (caller) = get_caller_address()
-    let (owner) = Ownable.owner()
-
-    if caller == owner:
-        return (1)
-    end
-
-    return (0)
-end
-
-func check_can_action{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}():
-    let (caller) = check_caller()
-    let (owner) = check_owner()
-
-    assert_not_zero(owner + caller)
     return ()
 end
