@@ -55,7 +55,7 @@ from contracts.settling_game.utils.game_structs import (
     Cost,
     ExternalContractIds,
 )
-from contracts.settling_game.utils.general import unpack_data, transform_costs_to_token_ids_values
+from contracts.settling_game.utils.general import unpack_data, transform_costs_to_tokens
 from contracts.settling_game.library.library_module import Module
 
 from contracts.settling_game.utils.constants import DAY
@@ -176,10 +176,8 @@ func build_squad_from_troops_in_realm{
     load_troop_costs(troop_ids_len, troop_ids, troop_costs)
 
     # transform costs into tokens
-    let (token_ids : Uint256*) = alloc()
-    let (token_values : Uint256*) = alloc()
-    let (token_len : felt) = transform_costs_to_token_ids_values(
-        troop_ids_len, troop_costs, token_ids, token_values
+    let (token_len : felt, token_ids : Uint256*, token_values : Uint256*) = transform_costs_to_tokens(
+        troop_ids_len, troop_costs, 1
     )
 
     # pay for the squad
