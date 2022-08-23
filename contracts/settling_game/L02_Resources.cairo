@@ -38,8 +38,8 @@ from contracts.settling_game.utils.constants import (
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
+from contracts.settling_game.modules.settling.interface import ISettling
 from contracts.settling_game.interfaces.imodules import (
-    Settling,
     IL04_Calculator,
     IL03_Buildings,
 )
@@ -146,8 +146,8 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     end
 
     # SET VAULT TIME = REMAINDER - CURRENT_TIME
-    Settling.set_time_staked(settling_logic_address, token_id, remainder)
-    Settling.set_time_vault_staked(settling_logic_address, token_id, vault_remainder)
+    ISettling.set_time_staked(settling_logic_address, token_id, remainder)
+    ISettling.set_time_vault_staked(settling_logic_address, token_id, vault_remainder)
 
     # get current buildings on realm
     let (buildings_address) = Module.get_module_address(ModuleIds.L03_Buildings)
@@ -221,7 +221,7 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     end
 
     # SET VAULT TIME = REMAINDER - CURRENT_TIME
-    Settling.set_time_vault_staked(settling_logic_address, token_id, pillagable_remainder)
+    ISettling.set_time_vault_staked(settling_logic_address, token_id, pillagable_remainder)
 
     # get current buildings on realm
     let (buildings_address) = Module.get_module_address(ModuleIds.L03_Buildings)
@@ -270,7 +270,7 @@ func days_accrued{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     let (settling_logic_address) = Module.get_module_address(ModuleIds.Settling)
 
     # GET DAYS ACCRUED
-    let (last_update) = Settling.get_time_staked(settling_logic_address, token_id)
+    let (last_update) = ISettling.get_time_staked(settling_logic_address, token_id)
     let (days_accrued, seconds_left_over) = unsigned_div_rem(block_timestamp - last_update, DAY)
 
     let (is_less_than_max) = is_le(days_accrued, MAX_DAYS_ACCURED + 1)
@@ -296,7 +296,7 @@ func vault_days_accrued{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     let (settling_logic_address) = Module.get_module_address(ModuleIds.Settling)
 
     # GET DAYS ACCRUED
-    let (last_update) = Settling.get_time_vault_staked(settling_logic_address, token_id)
+    let (last_update) = ISettling.get_time_vault_staked(settling_logic_address, token_id)
     let (days_accrued, seconds_left_over) = unsigned_div_rem(block_timestamp - last_update, DAY)
 
     return (days_accrued, seconds_left_over)
