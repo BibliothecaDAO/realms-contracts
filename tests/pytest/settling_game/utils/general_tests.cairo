@@ -9,7 +9,7 @@ from contracts.settling_game.utils.game_structs import Cost
 
 from contracts.settling_game.utils.general import (
     unpack_data,
-    transform_costs_to_token_ids_values,
+    transform_costs_to_tokens,
     load_resource_ids_and_values_from_costs,
     sum_values_by_key,
 )
@@ -23,16 +23,12 @@ func test_unpack_data{
 end
 
 @view
-func test_transform_costs_to_token_ids_values{
+func test_transform_costs_to_tokens{
     syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*
-}(costs_len : felt, costs : Cost*) -> (
+}(costs_len : felt, costs : Cost*, qty : felt) -> (
     ids_len : felt, ids : Uint256*, values_len : felt, values : Uint256*
 ):
-    alloc_locals
-
-    let (ids : Uint256*) = alloc()
-    let (values : Uint256*) = alloc()
-    let (len : felt) = transform_costs_to_token_ids_values(costs_len, costs, ids, values)
+    let (len : felt, ids : Uint256*, values : Uint256*) = transform_costs_to_tokens(costs_len, costs, qty)
 
     return (len, ids, len, values)
 end
