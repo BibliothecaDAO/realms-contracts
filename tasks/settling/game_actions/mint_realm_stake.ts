@@ -7,7 +7,7 @@ async function main() {
     // const arbiter = getDeployedAddressInt('Arbiter');
     const ownerAccount = getOwnerAccountInt()
     // Collect params
-    // const L01_Settling = getDeployedAddressInt("L01_Settling"); // module id 1
+    // const Settling = getDeployedAddressInt("Settling"); // module id 1
     const Realms_ERC721_Mintable = getDeployedAddressInt("Realms_ERC721_Mintable"); // module id 1
 
     const realm: Uint256 = bnToUint256("3")
@@ -22,7 +22,7 @@ async function main() {
 
     // const res = await getSigner().execute(
     //     {
-    //         contractAddress: L01_Settling,
+    //         contractAddress: Settling,
     //         entrypoint: "settle",
     //         calldata: [realm.low.toString(), realm.high.toString()]
     //     }

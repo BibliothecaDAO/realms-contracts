@@ -48,7 +48,7 @@ def approve_realm(network):
         contract_alias="proxy_realms",
         function="setApprovalForAll",
         arguments=[
-            int(config.L01_SETTLING_PROXY_ADDRESS, 16),  # uint1
+            int(config.SETTLING_PROXY_ADDRESS, 16),  # uint1
             "1",               # true
         ],
     )
@@ -72,7 +72,7 @@ def settle(realm_token_id, network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_L01_Settling",
+        contract_alias="proxy_Settling",
         function="settle",
         arguments=calldata
     )
@@ -96,7 +96,7 @@ def unsettle(realm_token_id, network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_L01_Settling",
+        contract_alias="proxy_Settling",
         function="unsettle",
         arguments=calldata,
     )

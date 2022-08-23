@@ -80,8 +80,8 @@ class Config:
         # self.CRYPTS_PROXY_ADDRESS, _ = safe_load_deployment("proxy_crypts", self.nile_network)
         # self.S_CRYPTS_PROXY_ADDRESS, _ = safe_load_deployment("proxy_s_crypts", self.nile_network)
 
-        self.L01_SETTLING_ADDRESS, _ = safe_load_deployment(
-            "L01_Settling", self.nile_network)
+        self.SETTLING_ADDRESS, _ = safe_load_deployment(
+            "Settling", self.nile_network)
         self.L02_RESOURCES_ADDRESS, _ = safe_load_deployment(
             "L02_Resources", self.nile_network)
         self.L03_BUILDINGS_ADDRESS, _ = safe_load_deployment(
@@ -94,8 +94,8 @@ class Config:
             "L06_Combat", self.nile_network)
         # self.L07_CRYPTS_ADDRESS, _ = safe_load_deployment("L07_Crypts", self.nile_network)
 
-        self.L01_SETTLING_PROXY_ADDRESS, _ = safe_load_deployment(
-            "proxy_L01_Settling", self.nile_network)
+        self.SETTLING_PROXY_ADDRESS, _ = safe_load_deployment(
+            "proxy_Settling", self.nile_network)
         self.L02_RESOURCES_PROXY_ADDRESS, _ = safe_load_deployment(
             "proxy_L02_Resources", self.nile_network)
         self.L03_BUILDINGS_PROXY_ADDRESS, _ = safe_load_deployment(
