@@ -43,6 +43,7 @@ from contracts.settling_game.utils.constants import (
     POPULATION_PER_HIT_POINT,
     MAX_WALL_DEFENSE_HIT_POINTS,
     GOBLINDOWN_REWARD,
+    DEFENDING_SQUAD_SLOT,
 )
 from contracts.settling_game.utils.game_structs import (
     ModuleIds,
@@ -176,9 +177,9 @@ func build_squad_from_troops_in_realm{
     load_troop_costs(troop_ids_len, troop_ids, troop_costs)
 
     # transform costs into tokens
-    let (token_len : felt, token_ids : Uint256*, token_values : Uint256*) = transform_costs_to_tokens(
-        troop_ids_len, troop_costs, 1
-    )
+    let (
+        token_len : felt, token_ids : Uint256*, token_values : Uint256*
+    ) = transform_costs_to_tokens(troop_ids_len, troop_costs, 1)
 
     # pay for the squad
     let (caller) = get_caller_address()
@@ -694,5 +695,27 @@ func set_xoroshiro{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     # TODO:
     # Proxy.assert_only_admin()
     xoroshiro_address.write(xoroshiro)
+    return ()
+end
+
+@external
+func zero_dead_squads{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    realm_id : Uint256
+):
+    alloc_locals
+    # Proxy.assert_only_admin()
+    let (now) = get_block_timestamp()
+    let new_realm_combat_data = RealmCombatData(
+        attacking_squad=0, defending_squad=0, last_attacked_at=now
+    )
+    set_realm_combat_data(realm_id, new_realm_combat_data)
+
+    let new_squad : Squad = Combat.unpack_squad(0)
+
+    let (troop : felt*) = alloc()
+    assert troop[0] = 1
+
+    BuildTroops_3.emit(new_squad, 1, troop, realm_id, ATTACKING_SQUAD_SLOT)
+    BuildTroops_3.emit(new_squad, 1, troop, realm_id, DEFENDING_SQUAD_SLOT)
     return ()
 end

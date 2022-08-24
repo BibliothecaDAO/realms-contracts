@@ -77,7 +77,7 @@ def upgrade_module(module_name, network):
                 f.write(line)
         f.truncate()
 
-    compile(contract_alias="contracts/settling_game/modules/food/Food.cairo")
+    compile(contract_alias="contracts/settling_game/" + module_name + ".cairo")
 
     deploy(
         network=network,
@@ -133,4 +133,22 @@ def set_xoroshiro(network):
         contract_alias="L06_Combat",
         function="set_xoroshiro",
         arguments=[int(config.XOROSHIRO_ADDRESS, 16)],
+    )
+
+
+@click.command()
+@click.argument("token_id", nargs=1)
+@click.option("--network", default="goerli")
+def zero_dead_squads(network, token_id):
+    """
+    Sets Xoroshiro
+    """
+    config = Config(nile_network=network)
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="L06_Combat",
+        function="zero_dead_squads",
+        arguments=[token_id, 0],
     )
