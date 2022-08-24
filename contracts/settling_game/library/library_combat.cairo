@@ -710,19 +710,35 @@ namespace Combat:
     end
 
     func troop_copy_with_vitality(t : Troop, v : felt) -> (t : Troop):
-        return (
-            Troop(
-            id=t.id,
-            type=t.type,
-            tier=t.tier,
-            building=t.building,
-            agility=t.agility,
-            attack=t.attack,
-            armor=t.armor,
-            vitality=v,
-            wisdom=t.wisdom,
-            ),
-        )
+        if v == 0:
+            return (
+                Troop(
+                id=0,
+                type=0,
+                tier=0,
+                building=0,
+                agility=0,
+                attack=0,
+                armor=0,
+                vitality=0,
+                wisdom=0,
+                ),
+            )
+        else:
+            return (
+                Troop(
+                id=t.id,
+                type=t.type,
+                tier=t.tier,
+                building=t.building,
+                agility=t.agility,
+                attack=t.attack,
+                armor=t.armor,
+                vitality=v,
+                wisdom=t.wisdom,
+                ),
+            )
+        end
     end
 
     func build_goblin_squad{range_check_ptr}(strength : felt) -> (s : Squad):
