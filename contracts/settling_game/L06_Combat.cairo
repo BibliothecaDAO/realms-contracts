@@ -703,7 +703,7 @@ func zero_dead_squads{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     realm_id : Uint256
 ):
     alloc_locals
-    # Proxy.assert_only_admin()
+    Proxy.assert_only_admin()
     let (now) = get_block_timestamp()
     let new_realm_combat_data = RealmCombatData(
         attacking_squad=0, defending_squad=0, last_attacked_at=now

@@ -141,14 +141,14 @@ def set_xoroshiro(network):
 @click.option("--network", default="goerli")
 def zero_dead_squads(network, token_id):
     """
-    Sets Xoroshiro
+    Zeros dead squads
     """
     config = Config(nile_network=network)
 
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
-        contract_alias="L06_Combat",
+        contract_alias="proxy_L06_Combat",
         function="zero_dead_squads",
         arguments=[token_id, 0],
     )
