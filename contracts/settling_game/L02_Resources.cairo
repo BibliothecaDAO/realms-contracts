@@ -39,8 +39,8 @@ from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.modules.settling.interface import ISettling
+from contracts.settling_game.modules.calculator.interface import ICalculator
 from contracts.settling_game.interfaces.imodules import (
-    IL04_Calculator,
     IL03_Buildings,
 )
 from contracts.settling_game.library.library_resources import Resources
@@ -365,7 +365,7 @@ func get_all_resource_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
 
     # CONTRACT ADDRESSES
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
-    let (calculator_address) = Module.get_module_address(ModuleIds.L04_Calculator)
+    let (calculator_address) = Module.get_module_address(ModuleIds.Calculator)
 
     # FETCH REALM DATA
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
@@ -380,13 +380,13 @@ func get_all_resource_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     let days = total_days + total_vault_days
 
     # GET WONDER TAX
-    let (wonder_tax) = IL04_Calculator.calculate_wonder_tax(calculator_address)
+    let (wonder_tax) = ICalculator.calculate_wonder_tax(calculator_address)
 
     # TODO: No wonder tax yet
     # SET MINT
     let user_mint_rel_perc = 100
 
-    let (happiness) = IL04_Calculator.calculate_happiness(calculator_address, token_id)
+    let (happiness) = ICalculator.calculate_happiness(calculator_address, token_id)
 
     # get current buildings on realm
     let (buildings_address) = Module.get_module_address(ModuleIds.L03_Buildings)

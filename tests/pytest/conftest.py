@@ -530,7 +530,7 @@ async def game_factory(token_factory, compiled_proxy):
         starknet,
         admin_key,
         admin_account,
-        "contracts/settling_game/L01_Settling.cairo",
+        "contracts/settling_game/modules/settling/Settling.cairo",
         [controller.contract_address, admin_account.contract_address],
     )
 
@@ -557,7 +557,7 @@ async def game_factory(token_factory, compiled_proxy):
         starknet,
         admin_key,
         admin_account,
-        "contracts/settling_game/L04_Calculator.cairo",
+        "contracts/settling_game/modules/calculator/Calculator.cairo",
         [controller.contract_address, admin_account.contract_address],
     )
 
@@ -717,7 +717,7 @@ async def resource_factory(token_factory, compiled_proxy):
         starknet,
         admin_key,
         admin_account,
-        "contracts/settling_game/L01_Settling.cairo",
+        "contracts/settling_game/modules/settling/Settling.cairo",
         [controller.contract_address, admin_account.contract_address],
     )
 
@@ -738,7 +738,7 @@ async def resource_factory(token_factory, compiled_proxy):
         starknet,
         admin_key,
         admin_account,
-        "contracts/settling_game/L04_Calculator.cairo",
+        "contracts/settling_game/modules/calculator/Calculator.cairo",
         [controller.contract_address, admin_account.contract_address],
     )
 
