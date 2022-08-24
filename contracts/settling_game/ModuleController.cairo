@@ -92,10 +92,10 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     # write patterns known at deployment. E.g., 1->2, 1->3, 5->6.
 
     # settling to wonders logic
-    can_write_to.write(ModuleIds.L01_Settling, ModuleIds.L05_Wonders, TRUE)
+    can_write_to.write(ModuleIds.Settling, ModuleIds.L05_Wonders, TRUE)
 
     # resources logic to settling state
-    can_write_to.write(ModuleIds.L02_Resources, ModuleIds.L01_Settling, TRUE)
+    can_write_to.write(ModuleIds.L02_Resources, ModuleIds.Settling, TRUE)
 
     # resources logic to wonders state
     can_write_to.write(ModuleIds.L02_Resources, ModuleIds.L05_Wonders, TRUE)
@@ -104,10 +104,10 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     can_write_to.write(ModuleIds.L06_Combat, ModuleIds.L02_Resources, TRUE)
 
     # # combat can write to settling
-    can_write_to.write(ModuleIds.L06_Combat, ModuleIds.L01_Settling, TRUE)
+    can_write_to.write(ModuleIds.L06_Combat, ModuleIds.Settling, TRUE)
 
     # settling can write to s realms tokens
-    can_write_to.write(ModuleIds.L01_Settling, ModuleIds.S_Realms_Token, TRUE)
+    can_write_to.write(ModuleIds.Settling, ModuleIds.S_Realms_Token, TRUE)
 
     # resources can write to resources token
     can_write_to.write(ModuleIds.L02_Resources, ModuleIds.Resources_Token, TRUE)
@@ -189,7 +189,7 @@ end
 func set_initial_module_addresses{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
 }(
-    module_01_addr : felt,
+    settling_module_addr : felt,
     module_02_addr : felt,
     module_03_addr : felt,
     module_04_addr : felt,
@@ -199,8 +199,8 @@ func set_initial_module_addresses{
     only_arbiter()
 
     # Settling Logic
-    address_of_module_id.write(ModuleIds.L01_Settling, module_01_addr)
-    module_id_of_address.write(module_01_addr, ModuleIds.L01_Settling)
+    address_of_module_id.write(ModuleIds.Settling, settling_module_addr)
+    module_id_of_address.write(settling_module_addr, ModuleIds.Settling)
 
     # Resources Logic
     address_of_module_id.write(ModuleIds.L02_Resources, module_02_addr)

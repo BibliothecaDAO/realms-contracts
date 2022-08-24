@@ -5,8 +5,6 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256
-from starkware.starknet.common.syscalls import get_caller_address
-from starkware.cairo.common.math import assert_not_zero, assert_not_equal
 from openzeppelin.token.erc721.library import ERC721
 from openzeppelin.token.erc721_enumerable.library import ERC721_Enumerable
 from openzeppelin.introspection.ERC165 import ERC165
@@ -15,7 +13,6 @@ from openzeppelin.access.ownable import Ownable
 from openzeppelin.upgrades.library import Proxy
 
 from contracts.settling_game.utils.general import unpack_data
-from contracts.settling_game.utils.game_structs import RealmData
 
 from contracts.settling_game.library.library_module import Module
 
