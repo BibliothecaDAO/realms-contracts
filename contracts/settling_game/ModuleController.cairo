@@ -106,6 +106,24 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     # # combat can write to settling
     can_write_to.write(ModuleIds.L06_Combat, ModuleIds.Settling, TRUE)
 
+    # settling can write to s realms tokens
+    can_write_to.write(ModuleIds.Settling, ModuleIds.S_Realms_Token, TRUE)
+
+    # resources can write to resources token
+    can_write_to.write(ModuleIds.L02_Resources, ModuleIds.Resources_Token, TRUE)
+
+    # buildings can write to resources token
+    can_write_to.write(ModuleIds.L03_Buildings, ModuleIds.Resources_Token, TRUE)
+
+    # combat can write to resources token
+    can_write_to.write(ModuleIds.L06_Combat, ModuleIds.Resources_Token, TRUE)
+
+    # crypts can write to crypts token
+    can_write_to.write(ModuleIds.L07_Crypts, ModuleIds.S_Crypts_Token, TRUE)
+
+    # crypts resources can write to resources token
+    can_write_to.write(ModuleIds.L08_Crypts_Resources, ModuleIds.Resources_Token, TRUE)
+
     # # crypts logic to resources
     # can_write_to.write(ModuleIds.L07_Crypts, ModuleIds.L08_Crypts_Resources, TRUE)
 
