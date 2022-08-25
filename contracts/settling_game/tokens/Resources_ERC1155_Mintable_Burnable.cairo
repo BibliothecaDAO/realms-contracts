@@ -53,8 +53,11 @@ func supportsInterface{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
 end
 
 @view
-func uri{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (uri : felt):
-    return ERC1155.uri()
+func tokenURI{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    tokenId : Uint256
+) -> (tokenURI : felt):
+    let (tokenURI : felt) = ERC1155.token_uri(tokenId)
+    return (tokenURI)
 end
 
 @view
@@ -173,6 +176,15 @@ func burnBatch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
         assert_not_zero(caller)
     end
     ERC1155._burn_batch(from_, ids_len, ids, amounts_len, amounts)
+    return ()
+end
+
+@external
+func setTokenUri{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    tokenId : Uint256, tokenURI : felt
+):
+    Ownable.assert_only_owner()
+    ERC1155._set_token_uri(tokenId, tokenURI)
     return ()
 end
 #
