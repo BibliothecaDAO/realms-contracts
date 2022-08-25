@@ -33,6 +33,7 @@ from contracts.settling_game.utils.constants import (
     BASE_LORDS_PER_DAY,
     PILLAGE_AMOUNT,
     MAX_DAYS_ACCURED,
+    WONDER_RATE,
 )
 
 from contracts.settling_game.library.library_module import Module
@@ -40,9 +41,7 @@ from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.modules.settling.interface import ISettling
 from contracts.settling_game.modules.calculator.interface import ICalculator
-from contracts.settling_game.interfaces.imodules import (
-    IL03_Buildings,
-)
+from contracts.settling_game.interfaces.imodules import IL03_Buildings, IL05_Wonders
 from contracts.settling_game.library.library_resources import Resources
 
 # -----------------------------------
@@ -252,6 +251,66 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     return ()
 end
 
+# @notice Mint resources from wonder
+# @param token_id: Staked realm id
+@external
+func wonder_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
+):
+    alloc_locals
+    let (caller) = get_caller_address()
+
+    # CONTRACT ADDRESSES
+    let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
+    let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms)
+    let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
+    let (wonder_address) = Module.get_module_address(ModuleIds.L05_Wonders)
+
+    # FETCH OWNER
+    let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
+
+    with_attr error_message("RESOURCES: ONLY S_REALM OWNER CAN CALL"):
+        assert caller = owner
+    end
+
+    # CALC DAYS
+    let (total_days, remainder) = days_accrued(token_id)
+
+    with_attr error_message("RESOURCES: Nothing Claimable."):
+        assert_not_zero(total_days)
+    end
+
+    # FETCH REALM DATA
+    let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
+
+    # resources ids
+    let (resource_ids : Uint256*) = Resources._calculate_realm_resource_ids(realms_data)
+
+    # Check that wonder is staked (this also checks if token_id a wonder at all)
+    let (staked_epoch) = IL05_Wonders.get_wonder_id_staked(wonder_address, token_id)
+    assert_not_zero(staked_epoch)
+
+    let (wonder_resource_amounts : Uint256*) = alloc()
+    loop_wonder_resource_amount(0, realms_data.resource_number, total_days, wonder_resource_amounts)
+
+    let (local data : felt*) = alloc()
+    assert data[0] = 0
+
+    # MINT WONDER RESOURCES TO HOLDER
+    IERC1155.mintBatch(
+        resources_address,
+        owner,
+        realms_data.resource_number,
+        resource_ids,
+        realms_data.resource_number,
+        wonder_resource_amounts,
+        1,
+        data,
+    )
+
+    return ()
+end
+
 # -----------------------------------
 # GETTERS
 # -----------------------------------
@@ -428,6 +487,23 @@ func get_all_vault_raidable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ra
     )
 
     return (realms_data.resource_number, resource_mint)
+end
+
+# -----------------------------------
+# INTERNALS
+# -----------------------------------
+
+func loop_wonder_resource_amount{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    resources_index, resources_len, days, wonder_resource_amounts : Uint256*
+):
+    if resources_index == resources_len:
+        return ()
+    end
+
+    assert wonder_resource_amounts[resources_index] = Uint256(WONDER_RATE * days, 0)
+
+    loop_wonder_resource_amount(resources_index + 1, resources_len, days, wonder_resource_amounts)
+    return ()
 end
 
 #########

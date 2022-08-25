@@ -73,6 +73,8 @@ namespace IL02_Resources:
     end
     func pillage_resources(token_id : Uint256, claimer : felt):
     end
+    func wonder_claim(token_id : Uint256):
+    end
 end
 
 @contract_interface
