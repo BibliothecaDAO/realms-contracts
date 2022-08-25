@@ -8,10 +8,10 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero
-from starkware.cairo.common.math_cmp import is_le
+from starkware.cairo.common.math_cmp import is_le, is_lt
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
-from starkware.cairo.common.uint256 import Uint256
+from starkware.cairo.common.uint256 import Uint256, uint256_lt
 from starkware.cairo.common.bool import TRUE, FALSE
 
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
@@ -181,29 +181,31 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     )
 
     # Check that wonder is staked (this also checks if token_id a wonder at all)
-    let (staked_epoch) = IL05_Wonders.get_wonder_id_staked(wonder_address, token_id)
-    assert_not_zero(staked_epoch)
+    let (wonder_id) = IL05_Wonders.get_wonder_id_staked(wonder_address, token_id)
+    let (check_wonder) = is_lt(0, wonder_id)
+    if check_wonder == 1:
+        let (wonder_resources_claim_ids : Uint256*) = alloc()
+        let (wonder_resources_claim_amounts : Uint256*) = alloc()
+        loop_wonder_resources_claim(
+            0, 22, days, wonder_resources_claim_ids, wonder_resources_claim_amounts
+        )
 
-    let (wonder_resources_claim_ids : Uint256*) = alloc()
-    let (wonder_resources_claim_amounts : Uint256*) = alloc()
-    loop_wonder_resources_claim(
-        0, 22, days, wonder_resources_claim_ids, wonder_resources_claim_amounts
-    )
+        let (local data : felt*) = alloc()
+        assert data[0] = 0
 
-    let (local data : felt*) = alloc()
-    assert data[0] = 0
-
-    # MINT WONDER RESOURCES TO HOLDER
-    IERC1155.mintBatch(
-        resources_address,
-        owner,
-        22,
-        wonder_resources_claim_ids,
-        22,
-        wonder_resources_claim_amounts,
-        1,
-        data,
-    )
+        # MINT WONDER RESOURCES TO HOLDER
+        IERC1155.mintBatch(
+            resources_address,
+            owner,
+            22,
+            wonder_resources_claim_ids,
+            22,
+            wonder_resources_claim_amounts,
+            1,
+            data,
+        )
+        return ()
+    end
 
     return ()
 end
