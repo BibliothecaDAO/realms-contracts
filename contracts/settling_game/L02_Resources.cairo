@@ -109,6 +109,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
     let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms)
     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
+    let (wonder_address) = Module.get_module_address(ModuleIds.L05_Wonders)
 
     # modules
     let (settling_logic_address) = Module.get_module_address(ModuleIds.Settling)
@@ -179,6 +180,31 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         data,
     )
 
+    # Check that wonder is staked (this also checks if token_id a wonder at all)
+    let (staked_epoch) = IL05_Wonders.get_wonder_id_staked(wonder_address, token_id)
+    assert_not_zero(staked_epoch)
+
+    let (wonder_resources_claim_ids : Uint256*) = alloc()
+    let (wonder_resources_claim_amounts : Uint256*) = alloc()
+    loop_wonder_resources_claim(
+        0, 22, days, wonder_resources_claim_ids, wonder_resources_claim_amounts
+    )
+
+    let (local data : felt*) = alloc()
+    assert data[0] = 0
+
+    # MINT WONDER RESOURCES TO HOLDER
+    IERC1155.mintBatch(
+        resources_address,
+        owner,
+        22,
+        wonder_resources_claim_ids,
+        22,
+        wonder_resources_claim_amounts,
+        1,
+        data,
+    )
+
     return ()
 end
 
@@ -244,66 +270,6 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
         resource_ids,
         realms_data.resource_number,
         resource_mint,
-        1,
-        data,
-    )
-
-    return ()
-end
-
-# @notice Mint resources from wonder
-# @param token_id: Staked realm id
-@external
-func wonder_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    token_id : Uint256
-):
-    alloc_locals
-    let (caller) = get_caller_address()
-
-    # CONTRACT ADDRESSES
-    let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
-    let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms)
-    let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
-    let (wonder_address) = Module.get_module_address(ModuleIds.L05_Wonders)
-
-    # FETCH OWNER
-    let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id)
-
-    with_attr error_message("RESOURCES: ONLY S_REALM OWNER CAN CALL"):
-        assert caller = owner
-    end
-
-    # CALC DAYS
-    let (total_days, remainder) = days_accrued(token_id)
-
-    with_attr error_message("RESOURCES: Nothing Claimable."):
-        assert_not_zero(total_days)
-    end
-
-    # FETCH REALM DATA
-    let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
-
-    # resources ids
-    let (resource_ids : Uint256*) = Resources._calculate_realm_resource_ids(realms_data)
-
-    # Check that wonder is staked (this also checks if token_id a wonder at all)
-    let (staked_epoch) = IL05_Wonders.get_wonder_id_staked(wonder_address, token_id)
-    assert_not_zero(staked_epoch)
-
-    let (wonder_resource_amounts : Uint256*) = alloc()
-    loop_wonder_resource_amount(0, realms_data.resource_number, total_days, wonder_resource_amounts)
-
-    let (local data : felt*) = alloc()
-    assert data[0] = 0
-
-    # MINT WONDER RESOURCES TO HOLDER
-    IERC1155.mintBatch(
-        resources_address,
-        owner,
-        realms_data.resource_number,
-        resource_ids,
-        realms_data.resource_number,
-        wonder_resource_amounts,
         1,
         data,
     )
@@ -493,16 +459,27 @@ end
 # INTERNALS
 # -----------------------------------
 
-func loop_wonder_resource_amount{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    resources_index, resources_len, days, wonder_resource_amounts : Uint256*
+func loop_wonder_resources_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    resources_index,
+    resources_len,
+    days,
+    wonder_resources_claim_ids : felt*,
+    wonder_resources_claim_amounts : Uint256*,
 ):
     if resources_index == resources_len:
         return ()
     end
 
-    assert wonder_resource_amounts[resources_index] = Uint256(WONDER_RATE * days, 0)
+    assert wonder_resources_claim_ids[resources_index] = resources_index + 1
+    assert wonder_resources_claim_amounts[resources_index] = Uint256(WONDER_RATE * days, 0)
 
-    loop_wonder_resource_amount(resources_index + 1, resources_len, days, wonder_resource_amounts)
+    loop_wonder_resources_claim(
+        resources_index + 1,
+        resources_len,
+        days,
+        wonder_resources_claim_ids,
+        wonder_resources_claim_amounts,
+    )
     return ()
 end
 
