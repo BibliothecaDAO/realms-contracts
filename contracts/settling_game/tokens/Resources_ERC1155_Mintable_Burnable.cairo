@@ -15,6 +15,8 @@ from openzeppelin.upgrades.library import Proxy
 
 from openzeppelin.introspection.ERC165 import ERC165
 
+from contracts.settling_game.library.library_module import Module
+
 # move to OZ lib once live
 from contracts.token.library import ERC1155
 
@@ -119,8 +121,7 @@ end
 func mint{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     to : felt, id : Uint256, amount : Uint256, data_len : felt, data : felt*
 ):
-    # TODO: Module based approach
-    # check_can_action()
+    Module.only_approved()
     let (caller) = get_caller_address()
     with_attr error_message("ERC1155: called from zero address"):
         assert_not_zero(caller)
@@ -139,8 +140,7 @@ func mintBatch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     data_len : felt,
     data : felt*,
 ):
-    # TODO: Module based approach
-    # check_can_action()
+    Module.only_approved()
     let (caller) = get_caller_address()
     with_attr error_message("ERC1155: called from zero address"):
         assert_not_zero(caller)
@@ -166,62 +166,11 @@ end
 func burnBatch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     from_ : felt, ids_len : felt, ids : Uint256*, amounts_len : felt, amounts : Uint256*
 ):
-    # TODO: Module based approach
-    # ERC1155.assert_owner_or_approved(owner=from_)
+    Module.only_approved()
     let (caller) = get_caller_address()
     with_attr error_message("ERC1155: called from zero address"):
         assert_not_zero(caller)
     end
     ERC1155._burn_batch(from_, ids_len, ids, amounts_len, amounts)
-    return ()
-end
-#
-# Bibliotheca added methods
-#
-
-@storage_var
-func Module_access() -> (address : felt):
-end
-
-@external
-func Set_module_access{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-    address : felt
-):
-    Ownable.assert_only_owner()
-    Module_access.write(address)
-    return ()
-end
-
-func check_caller{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}() -> (
-    value : felt
-):
-    let (address) = Module_access.read()
-    let (caller) = get_caller_address()
-
-    if address == caller:
-        return (1)
-    end
-
-    return (0)
-end
-
-func check_owner{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}() -> (
-    value : felt
-):
-    let (caller) = get_caller_address()
-    let (owner) = Ownable.owner()
-
-    if caller == owner:
-        return (1)
-    end
-
-    return (0)
-end
-
-func check_can_action{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}():
-    let (caller) = check_caller()
-    let (owner) = check_owner()
-
-    assert_not_zero(owner + caller)
     return ()
 end

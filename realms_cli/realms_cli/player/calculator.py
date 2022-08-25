@@ -23,7 +23,7 @@ def happiness(realm_token_id, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_L04_Calculator",
+        contract_alias="proxy_Calculator",
         function="calculate_happiness",
         arguments=[
             realm_token_id,                 # uint 1
@@ -44,7 +44,7 @@ def troop_population(realm_token_id, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_L04_Calculator",
+        contract_alias="proxy_Calculator",
         function="calculate_troop_population",
         arguments=[
             realm_token_id,                 # uint 1
@@ -65,7 +65,7 @@ def culture(realm_token_id, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_L04_Calculator",
+        contract_alias="proxy_Calculator",
         function="calculate_culture",
         arguments=[
             realm_token_id,                 # uint 1
@@ -86,7 +86,7 @@ def food(realm_token_id, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_L04_Calculator",
+        contract_alias="proxy_Calculator",
         function="calculate_food",
         arguments=[
             realm_token_id,                 # uint 1
@@ -107,7 +107,7 @@ def population(realm_token_id, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_L04_Calculator",
+        contract_alias="proxy_Calculator",
         function="calculate_population",
         arguments=[
             realm_token_id,                 # uint 1

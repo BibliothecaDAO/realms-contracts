@@ -22,11 +22,11 @@ from openzeppelin.upgrades.library import Proxy
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
 
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
+from contracts.settling_game.modules.calculator.interface import ICalculator
 from contracts.settling_game.interfaces.imodules import (
     IModuleController,
     IL02_Resources,
     IL03_Buildings,
-    IL04_Calculator,
     IL09_Relics,
     IFood,
     IGoblinTown,
@@ -435,9 +435,9 @@ func inflict_wall_defense{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : H
 
     let (controller : felt) = Module.controller_address()
     let (calculator_addr : felt) = IModuleController.get_module_address(
-        controller, ModuleIds.L04_Calculator
+        controller, ModuleIds.Calculator
     )
-    # let (defending_population : felt) = IL04_Calculator.calculate_population(
+    # let (defending_population : felt) = ICalculator.calculate_population(
     #     calculator_addr, defending_realm_id
     # )
 

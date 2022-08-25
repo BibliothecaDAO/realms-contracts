@@ -155,7 +155,7 @@ namespace ModuleIds:
     const Settling = 1
     const L02_Resources = 2
     const L03_Buildings = 3
-    const L04_Calculator = 4
+    const Calculator = 4
     const L05_Wonders = 5
     const L06_Combat = 6
     const L07_Crypts = 7
@@ -163,6 +163,12 @@ namespace ModuleIds:
     const L09_Relics = 12
     const L10_Food = 13
     const GoblinTown = 14
+    const Crypts_Token = 1001
+    const Lords_Token = 1002
+    const Realms_Token = 1003
+    const Resources_Token = 1004
+    const S_Crypts_Token = 1005
+    const S_Realms_Token = 1006
 end
 
 namespace ExternalContractIds:

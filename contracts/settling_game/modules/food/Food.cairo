@@ -44,7 +44,8 @@ from contracts.settling_game.modules.food.library import Food
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from openzeppelin.upgrades.library import Proxy
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
-from contracts.settling_game.interfaces.imodules import IL04_Calculator, IL03_Buildings
+from contracts.settling_game.modules.calculator.interface import ICalculator
+from contracts.settling_game.interfaces.imodules import IL03_Buildings
 
 # -----------------------------------
 # Events
@@ -406,13 +407,13 @@ func available_food_in_store{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, r
 ) -> (available : felt):
     alloc_locals
 
-    let (calculator_address) = Module.get_module_address(ModuleIds.L04_Calculator)
+    let (calculator_address) = Module.get_module_address(ModuleIds.Calculator)
 
     # get raw amount
     let (current) = food_in_store(token_id)
 
     # get population
-    let (population) = IL04_Calculator.calculate_population(calculator_address, token_id)
+    let (population) = ICalculator.calculate_population(calculator_address, token_id)
 
     # get actual food
     # TODO: Get Population
