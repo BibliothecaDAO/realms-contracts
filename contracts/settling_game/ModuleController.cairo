@@ -174,7 +174,7 @@ func set_initial_module_addresses{
     settling_module_addr : felt,
     module_02_addr : felt,
     module_03_addr : felt,
-    module_04_addr : felt,
+    calculator_module_addr : felt,
     module_05_addr : felt,
     module_06_addr : felt,
 ):
@@ -193,8 +193,8 @@ func set_initial_module_addresses{
     module_id_of_address.write(module_03_addr, ModuleIds.L03_Buildings)
 
     # Calculator Logic
-    address_of_module_id.write(ModuleIds.L04_Calculator, module_04_addr)
-    module_id_of_address.write(module_04_addr, ModuleIds.L04_Calculator)
+    address_of_module_id.write(ModuleIds.Calculator, calculator_module_addr)
+    module_id_of_address.write(calculator_module_addr, ModuleIds.Calculator)
 
     # Wonders Logic
     address_of_module_id.write(ModuleIds.L05_Wonders, module_05_addr)
