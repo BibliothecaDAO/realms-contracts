@@ -552,6 +552,9 @@ end
 
 @external
 func test_apply_hunger_penalty{range_check_ptr}():
+    alloc_locals
+
+    # test normal case
     let (full) = build_default_squad()
     let (h) = Combat.apply_hunger_penalty(full)
 
@@ -570,6 +573,18 @@ func test_apply_hunger_penalty{range_check_ptr}():
     assert_eq(h.t2_4.vitality, 26)
     assert_eq(h.t2_5.vitality, 26)
     assert_eq(h.t3_1.vitality, 26)
+
+    # test applying hunger penalty multiple times
+    # until the whole squad dies
+    let (h12) = Combat.apply_hunger_penalty(h)
+    let (h6) = Combat.apply_hunger_penalty(h12)
+    let (h3) = Combat.apply_hunger_penalty(h6)
+    let (h1) = Combat.apply_hunger_penalty(h3)
+    let (h0) = Combat.apply_hunger_penalty(h1)
+
+    let (empty_troop) = build_empty_troop()
+    assert_troop_eq(h0.t1_1, empty_troop)
+    assert_troop_eq(h0.t3_1, empty_troop)
 
     let (empty) = build_empty_squad()
     let (h) = Combat.apply_hunger_penalty(empty)
