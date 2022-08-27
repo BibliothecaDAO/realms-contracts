@@ -43,7 +43,7 @@ func xoroshiro_address() -> (address : felt):
 end
 
 @storage_var
-func goblin_town_data() -> (packed : felt):
+func goblin_town_data(realm_id : Uint256) -> (packed : felt):
 end
 
 # -----------------------------------
@@ -88,7 +88,7 @@ func spawn_goblin_welcomparty{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
 
     let (ts) = get_block_timestamp()
     let (packed) = GoblinTown.pack(GOBLIN_WELCOME_PARTY_STRENGTH, ts)
-    goblin_town_data.write(packed)
+    goblin_town_data.write(realm_id, packed)
 
     # emit goblin spawn
     let (goblins : Squad) = Combat.build_goblin_squad(GOBLIN_WELCOME_PARTY_STRENGTH)
@@ -103,7 +103,8 @@ func spawn_next{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
 ):
     alloc_locals
 
-    Module.only_approved()
+    # TODO: turn on NOT working for some reason.
+    # Module.only_approved()
 
     let (xoroshiro_addr) = xoroshiro_address.read()
     let (rnd) = IXoroshiro.next(xoroshiro_addr)
@@ -125,7 +126,7 @@ func spawn_next{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
 
     # pack & store the data
     let (packed) = GoblinTown.pack(strength, next_spawn_ts)
-    goblin_town_data.write(packed)
+    goblin_town_data.write(realm_id, packed)
 
     # emit goblin spawn
     let (goblins : Squad) = Combat.build_goblin_squad(strength)
@@ -146,9 +147,20 @@ end
 func get_strength_and_timestamp{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     realm_id : Uint256
 ) -> (strength : felt, timestamp : felt):
-    let (packed) = goblin_town_data.read()
+    let (packed) = goblin_town_data.read(realm_id)
     let (strength, ts) = GoblinTown.unpack(packed)
     return (strength, ts)
+end
+
+@view
+func get_goblin_squad{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    realm_id : Uint256
+) -> (goblins : Squad):
+    alloc_locals
+    let (packed) = goblin_town_data.read(realm_id)
+    let (strength, ts) = GoblinTown.unpack(packed)
+    let (goblins : Squad) = Combat.build_goblin_squad(strength)
+    return (goblins)
 end
 
 # -----------------------------------

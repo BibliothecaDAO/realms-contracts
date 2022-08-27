@@ -95,6 +95,10 @@ cairo-nile = "^0.5.0"
 "get_combat_data" = "realms_cli.player.combat.get_realm_combat_data"
 "get_xoroshiro" = "realms_cli.player.combat.get_xoroshiro"
 
+"get_goblins" = "realms_cli.player.combat.get_goblins"
+"get_goblin_squad" = "realms_cli.player.combat.get_goblin_squad"
+"attack_goblins" = "realms_cli.player.combat.attack_goblins"
+
 #-----------ADMIN
 "mint_resources" = "realms_cli.admin.main.mint_resources"
 "upgrade_module" = "realms_cli.admin.main.upgrade_module"

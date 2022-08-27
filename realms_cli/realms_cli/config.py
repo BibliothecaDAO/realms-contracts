@@ -122,6 +122,9 @@ class Config:
         self.PROXY_SPLITTER, _ = safe_load_deployment(
             "proxy_Splitter", self.nile_network)
 
+        self.GOBLIN_TOWN_PROXY_ADDRESS, _ = safe_load_deployment(
+            "proxy_GoblinTown", self.nile_network)
+
         self.RESOURCES = [
             "Wood",
             "Stone",

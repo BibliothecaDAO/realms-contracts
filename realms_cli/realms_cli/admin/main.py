@@ -77,7 +77,7 @@ def upgrade_module(module_name, network):
                 f.write(line)
         f.truncate()
 
-    compile(contract_alias="contracts/settling_game/" + module_name + ".cairo")
+    compile(contract_alias="contracts/settling_game/modules/goblintown/GoblinTown.cairo")
 
     deploy(
         network=network,
@@ -130,7 +130,15 @@ def set_xoroshiro(network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
-        contract_alias="L06_Combat",
+        contract_alias="proxy_L06_Combat",
+        function="set_xoroshiro",
+        arguments=[int(config.XOROSHIRO_ADDRESS, 16)],
+    )
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="proxy_GoblinTown",
         function="set_xoroshiro",
         arguments=[int(config.XOROSHIRO_ADDRESS, 16)],
     )

@@ -362,13 +362,10 @@ func attack_goblin_town{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     let (food_module) = Module.get_module_address(ModuleIds.L10_Food)
     let (food_store) = IFood.available_food_in_store(food_module, realm_id)
     if food_store == 0:
-        let (attacker : Squad) = Combat.apply_hunger_penalty(attacker)
-        tempvar range_check_ptr = range_check_ptr
-    else:
-        tempvar attacker = attacker
-        tempvar range_check_ptr = range_check_ptr
+        with_attr error_message("GOBLINTOWN: You can't attack without food!!"):
+            assert 1 = 0
+        end
     end
-    tempvar attacker = attacker
 
     # using 0 for the defending realm ID; it's only being used to emit events in the combat loop
     let zero_id = Uint256(0, 0)
@@ -392,7 +389,8 @@ func attack_goblin_town{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         # Lord earns $LORDS
         let (caller) = get_caller_address()
         let (lords_address) = Module.get_external_contract_address(ExternalContractIds.Lords)
-        IERC20.transferFrom(lords_address, this, caller, Uint256(GOBLINDOWN_REWARD, 0))
+        IERC20.approve(lords_address, caller, Uint256(GOBLINDOWN_REWARD * 10 ** 18, 0))
+        IERC20.transfer(lords_address, caller, Uint256(GOBLINDOWN_REWARD * 10 ** 18, 0))
 
         # new goblin town is spawned
         let (goblin_town_address) = Module.get_module_address(ModuleIds.GoblinTown)
