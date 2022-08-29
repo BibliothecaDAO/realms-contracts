@@ -20,7 +20,9 @@ func test_full_sell_price{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
 
     let (price) = AMM.get_sell_price(token_amount, currency_reserves, token_reserves, lp_fee)
 
-    %{ print(ids.price.low / 1 * 10 ** 18) %}
+    # %{ print(ids.price.low / 1 * 10 ** 18) %}
+
+    # TODO: missing assert
 
     return ()
 end
@@ -36,7 +38,9 @@ func test_full_buy_price{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
 
     let (price) = AMM.get_buy_price(token_amount, currency_reserves, token_reserves, lp_fee)
 
-    %{ print(ids.price.low / 1 * 10 ** 18) %}
+    # %{ print(ids.price.low / 1 * 10 ** 18) %}
+
+    # TODO: missing assert
 
     return ()
 end
