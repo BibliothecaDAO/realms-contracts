@@ -45,12 +45,12 @@ func test_calculate_food_in_store_house{
 }():
     alloc_locals
 
-    let (full_store) = Food.calculate_food_in_store_house(STORE_HOUSE_FULL, GENESIS_TIMESTAMP)
+    let (full_store) = Food.calculate_food_in_store_house(STORE_HOUSE_FULL)
 
     # Assert full
     assert full_store = STORE_HOUSE_FULL - GENESIS_TIMESTAMP
 
-    let (empty_store) = Food.calculate_food_in_store_house(STORE_HOUSE_EMPTY, GENESIS_TIMESTAMP)
+    let (empty_store) = Food.calculate_food_in_store_house(STORE_HOUSE_EMPTY)
 
     # Assert empty
     assert empty_store = 0
