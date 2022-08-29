@@ -22,7 +22,7 @@ from openzeppelin.upgrades.library import Proxy
 
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
 from contracts.settling_game.modules.calculator.interface import ICalculator
-from contracts.settling_game.interfaces.imodules import IModuleController,
+from contracts.settling_game.interfaces.imodules import IModuleController
 
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
@@ -124,8 +124,19 @@ func pay_wonder_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     assert upkeep_token_amounts[2] = Uint256(14, 0)
     assert upkeep_token_amounts[3] = Uint256(7, 0)
 
+    let (local data : felt*) = alloc()
+    assert data[0] = 0
+
     IERC1155.safeBatchTransferFrom(
-        resources_address, caller, treasury_address, 4, upkeep_token_ids, 4, upkeep_token_amounts
+        resources_address,
+        caller,
+        treasury_address,
+        4,
+        upkeep_token_ids,
+        4,
+        upkeep_token_amounts,
+        1,
+        data,
     )
 
     return ()
@@ -232,9 +243,12 @@ func loop_epochs_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
             token_id, current_epoch, epoch_total_wonders, 1, ids_arr, 1, amounts_arr
         )
 
+        let (local data : felt*) = alloc()
+        assert data[0] = 0
+
         # Transfer claimable resources
         IERC1155.safeBatchTransferFrom(
-            resources_address, caller, treasury_address, 22, ids_arr, 22, amounts_arr
+            resources_address, caller, treasury_address, 22, ids_arr, 22, amounts_arr, 1, data
         )
 
         return loop_epochs_claim(caller, token_id, current_epoch, claiming_epoch + 1)
