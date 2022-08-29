@@ -11,15 +11,15 @@ from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
 from openzeppelin.upgrades.library import Proxy
 
 @storage_var
-func nexus() -> (address : felt):
+func splitter_nexus_address() -> (address : felt):
 end
 
 @storage_var
-func treasury() -> (address : felt):
+func splitter_treasury_address() -> (address : felt):
 end
 
 @storage_var
-func asset() -> (address : felt):
+func splitter_asset_address() -> (address : felt):
 end
 
 # -----------------------------------
@@ -31,13 +31,13 @@ end
 # @return proxy_admin: Proxy admin address
 @external
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    proxy_admin : felt, nexus_ : felt, treasury_ : felt, asset_ : felt
+    proxy_admin : felt, nexus_address : felt, treasury_address : felt, asset_address : felt
 ):
     Proxy.initializer(proxy_admin)
 
-    nexus.write(nexus_)
-    treasury.write(treasury_)
-    asset.write(asset_)
+    splitter_nexus_address.write(nexus_address)
+    splitter_treasury_address.write(treasury_address)
+    splitter_asset_address.write(asset_address)
     return ()
 end
 
@@ -58,24 +58,23 @@ func split{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
     alloc_locals
 
     let (contract_address) = get_contract_address()
+    let (nexus_address) = splitter_nexus_address.read()
+    let (treasury_address) = splitter_treasury_address.read()
+    let (asset_address) = splitter_asset_address.read()
 
-    let (nexus_) = nexus.read()
-    let (treasury_) = treasury.read()
-    let (asset_) = asset.read()
-
-    let (splitter_balance) = IERC20.balanceOf(contract_address=asset_, account=contract_address)
+    let (splitter_balance) = IERC20.balanceOf(contract_address=asset_address, account=contract_address)
 
     # ignore remainder 50/50 for now
     let (split_amount, _) = SafeUint256.div_rem(splitter_balance, Uint256(2, 0))
 
     # tranfer to nexus
     IERC20.transferFrom(
-        contract_address=asset_, sender=contract_address, recipient=nexus_, amount=split_amount
+        contract_address=asset_address, sender=contract_address, recipient=nexus_address, amount=split_amount
     )
 
     # transfer to treasury
     IERC20.transferFrom(
-        contract_address=asset_, sender=contract_address, recipient=treasury_, amount=split_amount
+        contract_address=asset_address, sender=contract_address, recipient=treasury_address, amount=split_amount
     )
 
     return ()
@@ -83,14 +82,15 @@ end
 
 @external
 func update{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    nexus_ : felt, treasury_ : felt, asset_ : felt
+    nexus_address : felt, treasury_address : felt, asset_address : felt
 ):
     Proxy.assert_only_admin()
     # call split
     split()
     # update values
-    nexus.write(nexus_)
-    treasury.write(treasury_)
-    asset.write(asset_)
+    nexus.write(nexus_address)
+    treasury.write(treasury_address)
+    asset.write(asset_address)
+
     return ()
 end
