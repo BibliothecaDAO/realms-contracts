@@ -7,7 +7,7 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero
+from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
@@ -201,8 +201,8 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     )
 
     # Check that wonder is staked (this also checks if token_id a wonder at all)
-    let (wonder_id) = IL05_Wonders.get_wonder_id_staked(wonder_address, token_id)
-    let (check_wonder) = is_le(0, wonder_id)
+
+    let (check_wonder) = is_le(0, realms_data.wonder)
     if check_wonder == 1:
         let (wonder_resources_claim_ids : Uint256*) = alloc()
         let (wonder_resources_claim_amounts : Uint256*) = alloc()
