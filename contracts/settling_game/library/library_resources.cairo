@@ -17,6 +17,7 @@ from contracts.settling_game.utils.constants import (
     BASE_RESOURCES_PER_DAY,
     WORK_HUT_COST,
     WORK_HUT_OUTPUT,
+    PILLAGE_AMOUNT,
 )
 
 namespace Resources:
@@ -231,5 +232,15 @@ namespace Resources:
         )
 
         return (resource_mint)
+    end
+
+    func _calculate_vault_time_remaining{
+        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+    }(total_time : felt) -> (resource_1 : felt):
+        alloc_locals
+
+        let (time_over, _) = unsigned_div_rem(total_time * PILLAGE_AMOUNT, 100)
+
+        return (time_over)
     end
 end

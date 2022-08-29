@@ -229,6 +229,7 @@ namespace Combat:
         dw TroopProps.Type.Apprentice
         dw TroopProps.Type.Mage
         dw TroopProps.Type.Arcanist
+        dw TroopProps.Type.Goblin
 
         troop_tier_per_id:
         dw TroopProps.Tier.Skirmisher
@@ -243,6 +244,7 @@ namespace Combat:
         dw TroopProps.Tier.Apprentice
         dw TroopProps.Tier.Mage
         dw TroopProps.Tier.Arcanist
+        dw TroopProps.Tier.Goblin
 
         troop_building_per_id:
         dw TroopProps.Building.Skirmisher
@@ -257,6 +259,7 @@ namespace Combat:
         dw TroopProps.Building.Apprentice
         dw TroopProps.Building.Mage
         dw TroopProps.Building.Arcanist
+        dw TroopProps.Building.Goblin
 
         troop_agility_per_id:
         dw TroopProps.Agility.Skirmisher
@@ -271,6 +274,7 @@ namespace Combat:
         dw TroopProps.Agility.Apprentice
         dw TroopProps.Agility.Mage
         dw TroopProps.Agility.Arcanist
+        dw TroopProps.Agility.Goblin
 
         troop_attack_per_id:
         dw TroopProps.Attack.Skirmisher
@@ -285,6 +289,7 @@ namespace Combat:
         dw TroopProps.Attack.Apprentice
         dw TroopProps.Attack.Mage
         dw TroopProps.Attack.Arcanist
+        dw TroopProps.Attack.Goblin
 
         troop_armor_per_id:
         dw TroopProps.Armor.Skirmisher
@@ -299,6 +304,7 @@ namespace Combat:
         dw TroopProps.Armor.Apprentice
         dw TroopProps.Armor.Mage
         dw TroopProps.Armor.Arcanist
+        dw TroopProps.Armor.Goblin
 
         troop_vitality_per_id:
         dw TroopProps.Vitality.Skirmisher
@@ -313,6 +319,7 @@ namespace Combat:
         dw TroopProps.Vitality.Apprentice
         dw TroopProps.Vitality.Mage
         dw TroopProps.Vitality.Arcanist
+        dw TroopProps.Vitality.Goblin
 
         troop_wisdom_per_id:
         dw TroopProps.Wisdom.Skirmisher
@@ -327,6 +334,7 @@ namespace Combat:
         dw TroopProps.Wisdom.Apprentice
         dw TroopProps.Wisdom.Mage
         dw TroopProps.Wisdom.Arcanist
+        dw TroopProps.Wisdom.Goblin
     end
 
     # @notice Create a full Troop struct based on Troop ID
@@ -702,18 +710,53 @@ namespace Combat:
     end
 
     func troop_copy_with_vitality(t : Troop, v : felt) -> (t : Troop):
-        return (
-            Troop(
-            id=t.id,
-            type=t.type,
-            tier=t.tier,
-            building=t.building,
-            agility=t.agility,
-            attack=t.attack,
-            armor=t.armor,
-            vitality=v,
-            wisdom=t.wisdom,
-            ),
-        )
+        if v == 0:
+            return (
+                Troop(
+                id=0,
+                type=0,
+                tier=0,
+                building=0,
+                agility=0,
+                attack=0,
+                armor=0,
+                vitality=0,
+                wisdom=0,
+                ),
+            )
+        else:
+            return (
+                Troop(
+                id=t.id,
+                type=t.type,
+                tier=t.tier,
+                building=t.building,
+                agility=t.agility,
+                attack=t.attack,
+                armor=t.armor,
+                vitality=v,
+                wisdom=t.wisdom,
+                ),
+            )
+        end
+    end
+
+    func build_goblin_squad{range_check_ptr}(strength : felt) -> (s : Squad):
+        let (squad : Squad) = unpack_squad(0)
+        return build_goblin_squad_loop(0, strength, squad)
+    end
+
+    func build_goblin_squad_loop{range_check_ptr}(idx : felt, count : felt, s : Squad) -> (
+        s : Squad
+    ):
+        alloc_locals
+
+        if idx == count:
+            return (s)
+        end
+
+        let (goblin : Troop) = get_troop_internal(TroopId.Goblin)
+        let (updated : Squad) = add_troop_to_squad(goblin, s)
+        return build_goblin_squad_loop(idx + 1, count, updated)
     end
 end

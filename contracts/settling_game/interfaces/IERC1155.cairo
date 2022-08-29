@@ -22,7 +22,9 @@ namespace IERC1155:
     func setApprovalForAll(operator : felt, approved : felt):
     end
 
-    func safeTransferFrom(_from : felt, to : felt, id : Uint256, amount : Uint256):
+    func safeTransferFrom(
+        _from : felt, to : felt, id : Uint256, amount : Uint256, data_len : felt, data : felt*
+    ):
     end
 
     func safeBatchTransferFrom(

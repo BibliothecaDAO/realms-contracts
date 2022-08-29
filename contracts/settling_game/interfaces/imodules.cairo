@@ -178,3 +178,15 @@ namespace IFood:
     func get_full_store_houses(token_id : Uint256) -> (full_store_houses : felt):
     end
 end
+
+@contract_interface
+namespace IGoblinTown:
+    func spawn_goblin_welcomparty(realm_id : Uint256):
+    end
+
+    func get_strength_and_timestamp(realm_id : Uint256) -> (strength : felt, spawn_ts : felt):
+    end
+
+    func spawn_next(realm_id : Uint256):
+    end
+end

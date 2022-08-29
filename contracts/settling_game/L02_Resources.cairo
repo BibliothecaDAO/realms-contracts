@@ -7,7 +7,7 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero
+from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
@@ -39,8 +39,8 @@ from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.modules.settling.interface import ISettling
+from contracts.settling_game.interfaces.imodules import IL03_Buildings, IGoblinTown
 from contracts.settling_game.modules.calculator.interface import ICalculator
-from contracts.settling_game.interfaces.imodules import IL03_Buildings
 from contracts.settling_game.library.library_resources import Resources
 
 # -----------------------------------
@@ -111,6 +111,14 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # modules
     let (settling_logic_address) = Module.get_module_address(ModuleIds.Settling)
+    let (goblin_town_address) = Module.get_module_address(ModuleIds.GoblinTown)
+
+    # check if there's no goblin town on realm
+    with_attr error_message("RESOURCES: Goblin Town present"):
+        let (_, spawn_ts) = IGoblinTown.get_strength_and_timestamp(goblin_town_address, token_id)
+        let (now) = get_block_timestamp()
+        assert_le(spawn_ts, now)
+    end
 
     # FETCH OWNER
     let (owner) = IERC721.ownerOf(s_realms_address, token_id)
@@ -143,7 +151,19 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         assert_not_zero(days)
     end
 
-    # SET VAULT TIME = REMAINDER - CURRENT_TIME
+    # set vault time only if actually claiming vault
+    if total_vault_days != 0:
+        # TODO: why is this here? same is called below, outside the if
+        ISettling.set_time_vault_staked(settling_logic_address, token_id, vault_remainder)
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    else:
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    end
+
     ISettling.set_time_staked(settling_logic_address, token_id, remainder)
     ISettling.set_time_vault_staked(settling_logic_address, token_id, vault_remainder)
 
@@ -190,47 +210,41 @@ func pillage_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
 ):
     alloc_locals
     let (caller) = get_caller_address()
-
+    let (block_timestamp) = get_block_timestamp()
     # ONLY COMBAT CAN CALL
-    let (combat_address) = Module.get_module_address(ModuleIds.L06_Combat)
+    # TODO: Fix this to allow only combat to call.
+    # let (combat_address) = Module.get_module_address(ModuleIds.L06_Combat)
 
-    with_attr error_message("RESOURCES: ONLY COMBAT MODULE CAN CALL"):
-        assert caller = combat_address
-    end
+    # with_attr error_message("RESOURCES: ONLY COMBAT MODULE CAN CALL"):
+    #     assert caller = combat_address
+    # end
 
     # EXTERNAL CONTRACTS
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
-    let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms)
     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
     let (settling_logic_address) = Module.get_module_address(ModuleIds.Settling)
 
-    # FETCH REALM DATA
-    let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
-
-    # resources ids
-    let (resource_ids : Uint256*) = Resources._calculate_realm_resource_ids(realms_data)
-
-    # CALC PILLAGABLE DAYS
-    let (total_pillagable_days, pillagable_remainder) = vault_days_accrued(token_id)
+    # Get all vault raidable
+    let (_, resource_mint, total_vault_days, _) = get_all_vault_raidable(token_id)
 
     # CHECK IS RAIDABLE
     with_attr error_message("RESOURCES: NOTHING TO RAID!"):
-        assert_not_zero(total_pillagable_days)
+        assert_not_zero(total_vault_days)
     end
 
+    let (last_update) = ISettling.get_time_vault_staked(settling_logic_address, token_id)
+
+    # Get 25% of the time and return it
+    # We only mint 25% of the resources, so we should only take 25% of the time
+    # TODO: could this overflow?
+    let (time_over) = Resources._calculate_vault_time_remaining(block_timestamp - last_update)
+
     # SET VAULT TIME = REMAINDER - CURRENT_TIME
-    ISettling.set_time_vault_staked(settling_logic_address, token_id, pillagable_remainder)
+    ISettling.set_time_vault_staked(settling_logic_address, token_id, time_over)
 
-    # get current buildings on realm
-    let (buildings_address) = Module.get_module_address(ModuleIds.L03_Buildings)
-    let (current_buildings : RealmBuildings) = IL03_Buildings.get_effective_buildings(
-        buildings_address, token_id
-    )
-
-    # No happiness cap for pillaging
-    let (resource_mint : Uint256*) = Resources._calculate_total_mintable_resources(
-        current_buildings.House, 100, realms_data, total_pillagable_days, PILLAGE_AMOUNT
-    )
+    # resources ids
+    let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
+    let (resource_ids : Uint256*) = Resources._calculate_realm_resource_ids(realms_data)
 
     let (local data : felt*) = alloc()
     assert data[0] = 0
@@ -359,7 +373,6 @@ func get_all_resource_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     token_id : Uint256
 ) -> (user_mint_len : felt, user_mint : Uint256*):
     alloc_locals
-    let (caller) = get_caller_address()
 
     # CONTRACT ADDRESSES
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
@@ -402,9 +415,13 @@ end
 @view
 func get_all_vault_raidable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
-) -> (user_mint_len : felt, user_mint : Uint256*):
+) -> (
+    vault_mint_len : felt,
+    vault_mint : Uint256*,
+    total_vault_days : felt,
+    total_vault_days_remaining : felt,
+):
     alloc_locals
-    let (caller) = get_caller_address()
 
     # CONTRACT ADDRESSES
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
@@ -413,7 +430,7 @@ func get_all_vault_raidable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ra
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
 
     # CALC VAULT DAYS
-    let (total_vault_days, _) = vault_days_accrued(token_id)
+    let (total_vault_days, total_vault_days_remaining) = vault_days_accrued(token_id)
 
     let (buildings_address) = Module.get_module_address(ModuleIds.L03_Buildings)
     let (current_buildings : RealmBuildings) = IL03_Buildings.get_effective_buildings(
@@ -421,101 +438,14 @@ func get_all_vault_raidable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ra
     )
 
     # pass 100 for base happiness
-    let (resource_mint : Uint256*) = Resources._calculate_total_mintable_resources(
+    let (vault_resource_mint : Uint256*) = Resources._calculate_total_mintable_resources(
         current_buildings.House, 100, realms_data, total_vault_days, PILLAGE_AMOUNT
     )
 
-    return (realms_data.resource_number, resource_mint)
+    return (
+        realms_data.resource_number,
+        vault_resource_mint,
+        total_vault_days,
+        total_vault_days_remaining,
+    )
 end
-
-#########
-# deprecated #
-#########
-
-# @external
-# func set_resource_upgrade_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
-#     resource_id : felt, cost : Cost
-# ):
-#     Proxy_only_admin()
-#     resource_upgrade_cost.write(resource_id, cost)
-#     return ()
-# end
-
-#
-# # SET LEVEL
-# func set_resource_level{
-#     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-# }(token_id : Uint256, resource_id : felt, level : felt) -> ():
-#     resource_levels.write(token_id, resource_id, level)
-#     return ()
-# end
-# GET RESOURCE LEVEL
-
-# @view
-# func get_resource_level{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-#     token_id : Uint256, resource : felt
-# ) -> (level : felt):
-#     let (level) = resource_levels.read(token_id, resource)
-#     return (level=level)
-# end
-
-# # GET COSTS
-# @view
-# func get_resource_upgrade_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
-#     resource_id : felt
-# ) -> (cost : Cost):
-#     let (cost) = resource_upgrade_cost.read(resource_id)
-#     return (cost)
-# end
-
-# @external
-# func upgrade_resource{
-#     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*, range_check_ptr
-# }(token_id : Uint256, resource_id : felt) -> ():
-#     alloc_locals
-
-# let (can_claim) = check_if_claimable(token_id)
-
-# if can_claim == TRUE:
-#         claim_resources(token_id)
-#         tempvar syscall_ptr = syscall_ptr
-#         tempvar range_check_ptr = range_check_ptr
-#         tempvar pedersen_ptr = pedersen_ptr
-#     else:
-#         tempvar syscall_ptr = syscall_ptr
-#         tempvar range_check_ptr = range_check_ptr
-#         tempvar pedersen_ptr = pedersen_ptr
-#     end
-
-# let (caller) = get_caller_address()
-#     let (controller) = Module.controller_address()
-
-# # CONTRACT ADDRESSES
-#     let (resource_address) = IModuleController.get_external_contract_address(
-#         controller, ExternalContractIds.Resources
-#     )
-
-# # AUTH
-#     Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
-
-# # GET RESOURCE LEVEL
-#     let (level) = get_resource_level(token_id, resource_id)
-
-# # GET UPGRADE VALUE
-#     let (upgrade_cost : Cost) = get_resource_upgrade_cost(resource_id)
-#     let (costs : Cost*) = alloc()
-#     assert [costs] = upgrade_cost
-#     let (token_ids : Uint256*) = alloc()
-#     let (token_values : Uint256*) = alloc()
-#     let (token_len : felt) = transform_costs_to_token_ids_values(1, costs, token_ids, token_values)
-
-# # BURN RESOURCES
-#     IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
-
-# # INCREASE LEVEL
-#     set_resource_level(token_id, resource_id, level + 1)
-
-# # EMIT
-#     ResourceUpgraded.emit(token_id, resource_id, level + 1)
-#     return ()
-# end

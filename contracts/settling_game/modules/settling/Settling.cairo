@@ -23,7 +23,7 @@ from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContra
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
-from contracts.settling_game.interfaces.imodules import IL05_Wonders, IL02_Resources
+from contracts.settling_game.interfaces.imodules import IL05_Wonders, IL02_Resources, IGoblinTown
 
 # -----------------------------------
 # Events
@@ -121,6 +121,10 @@ func settle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     # CHECK REALMS STATE
     let (realms_settled) = get_total_realms_settled()
     _set_total_realms_settled(realms_settled + 1)
+
+    # TODO: maybe use a hook? if so, how to approve the module in GT?
+    let (goblin_town_address) = Module.get_module_address(ModuleIds.GoblinTown)
+    IGoblinTown.spawn_goblin_welcomparty(goblin_town_address, token_id)
 
     # EMIT
     Settled.emit(caller, token_id)

@@ -82,6 +82,38 @@ namespace IAMM:
 end
 
 @external
+func __setup__{syscall_ptr : felt*, range_check_ptr}():
+    alloc_locals
+    local lords : felt
+    local resources : felt
+
+    local proxy_lords : felt
+    local proxy_resources : felt
+
+    local Account : felt
+
+    local ERC1155_AMM : felt
+    local proxy_ERC1155_AMM : felt
+
+    # %{ ids.Account = deploy_contract("./lib/cairo_contracts/src/openzeppelin/account/Account.cairo", [123456]).contract_address %}
+
+    %{ print("lords") %}
+    %{ ids.lords = deploy_contract("./contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo", []).contract_address %}
+    %{ ids.proxy_lords = deploy_contract("./contracts/settling_game/proxy/PROXY_Logic.cairo", [ids.lords]).contract_address %}
+
+    %{ print("resources") %}
+    %{ ids.resources = deploy_contract("./contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo", []).contract_address %}
+    %{ ids.proxy_resources = deploy_contract("./contracts/settling_game/proxy/PROXY_Logic.cairo", [ids.resources]).contract_address %}
+    IResources.initializer(proxy_resources, 1234, 123)
+
+    %{ print("AMM") %}
+    %{ ids.ERC1155_AMM = deploy_contract("./contracts/exchange/Exchange_ERC20_1155.cairo", []).contract_address %}
+    %{ ids.proxy_ERC1155_AMM = deploy_contract("./contracts/settling_game/proxy/PROXY_Logic.cairo", [ids.ERC1155_AMM]).contract_address %}
+
+    return ()
+end
+
+@external
 func test_full_deploy{syscall_ptr : felt*, range_check_ptr}():
     alloc_locals
 
