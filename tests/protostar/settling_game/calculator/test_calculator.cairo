@@ -38,7 +38,9 @@ func test_calculate_happiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
 
     let (realm_happiness) = Calculator.calculate_happiness(realm_population, realm_food)
 
-    %{ print('Realm Happiness:', ids.realm_happiness) %}
+    # %{ print('Realm Happiness:', ids.realm_happiness) %}
+
+    # TODO: missing assert
 
     return ()
 end
@@ -60,7 +62,7 @@ func test_calculate_food{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
 
     let (realm_food) = Calculator.calculate_food(test_buildings, TROOP_POPULATION)
 
-    %{ print('Realm Food:', ids.realm_food) %}
+    # %{ print('Realm Food:', ids.realm_food) %}
 
     let House = BuildingsFood.House * TEST_REALM_BUILDINGS.HOUSE
     let StoreHouse = BuildingsFood.StoreHouse * TEST_REALM_BUILDINGS.STOREHOUSE
@@ -94,7 +96,7 @@ func test_calculate_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
 
     let (realm_population) = Calculator.calculate_population(test_buildings, TROOP_POPULATION)
 
-    %{ print('Realm Population:', ids.realm_population) %}
+    # %{ print('Realm Population:', ids.realm_population) %}
 
     let House = BuildingsPopulation.House * TEST_REALM_BUILDINGS.HOUSE
     let StoreHouse = BuildingsPopulation.StoreHouse * TEST_REALM_BUILDINGS.STOREHOUSE
@@ -129,7 +131,7 @@ func test_calculate_troop_coefficient{syscall_ptr : felt*, range_check_ptr}():
 
     let (troop_coefficient) = Calculator.calculate_troop_coefficient(test_buildings)
 
-    %{ print('Troop coefficient:', ids.troop_coefficient) %}
+    # %{ print('Troop coefficient:', ids.troop_coefficient) %}
 
     let barracks = TEST_REALM_BUILDINGS.BARRACKS * BuildingsTroopIndustry.Barracks
     let mageTower = TEST_REALM_BUILDINGS.MAGETOWER * BuildingsTroopIndustry.MageTower
