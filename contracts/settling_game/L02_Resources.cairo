@@ -7,11 +7,11 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le
-from starkware.cairo.common.math_cmp import is_le
+from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero
+from starkware.cairo.common.math_cmp import is_le, is_lt
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
-from starkware.cairo.common.uint256 import Uint256
+from starkware.cairo.common.uint256 import Uint256, uint256_lt
 from starkware.cairo.common.bool import TRUE, FALSE
 
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
@@ -33,6 +33,7 @@ from contracts.settling_game.utils.constants import (
     BASE_LORDS_PER_DAY,
     PILLAGE_AMOUNT,
     MAX_DAYS_ACCURED,
+    WONDER_RATE,
 )
 
 from contracts.settling_game.library.library_module import Module
@@ -108,6 +109,7 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
     let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms)
     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
+    let (wonder_address) = Module.get_module_address(ModuleIds.L05_Wonders)
 
     # modules
     let (settling_logic_address) = Module.get_module_address(ModuleIds.Settling)
@@ -197,6 +199,33 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         1,
         data,
     )
+
+    # Check that wonder is staked (this also checks if token_id a wonder at all)
+    let (wonder_id) = IL05_Wonders.get_wonder_id_staked(wonder_address, token_id)
+    let (check_wonder) = is_lt(0, wonder_id)
+    if check_wonder == 1:
+        let (wonder_resources_claim_ids : Uint256*) = alloc()
+        let (wonder_resources_claim_amounts : Uint256*) = alloc()
+        loop_wonder_resources_claim(
+            0, 22, total_days, wonder_resources_claim_ids, wonder_resources_claim_amounts
+        )
+
+        let (local data : felt*) = alloc()
+        assert data[0] = 0
+
+        # MINT WONDER RESOURCES TO HOLDER
+        IERC1155.mintBatch(
+            resources_address,
+            owner,
+            22,
+            wonder_resources_claim_ids,
+            22,
+            wonder_resources_claim_amounts,
+            1,
+            data,
+        )
+        return ()
+    end
 
     return ()
 end
@@ -449,3 +478,123 @@ func get_all_vault_raidable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ra
         total_vault_days_remaining,
     )
 end
+
+# -----------------------------------
+# INTERNALS
+# -----------------------------------
+
+func loop_wonder_resources_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    resources_index,
+    resources_len,
+    days,
+    wonder_resources_claim_ids : felt*,
+    wonder_resources_claim_amounts : Uint256*,
+):
+    if resources_index == resources_len:
+        return ()
+    end
+
+    assert wonder_resources_claim_ids[resources_index] = resources_index + 1
+    assert wonder_resources_claim_amounts[resources_index] = Uint256(WONDER_RATE * days, 0)
+
+    loop_wonder_resources_claim(
+        resources_index + 1,
+        resources_len,
+        days,
+        wonder_resources_claim_ids,
+        wonder_resources_claim_amounts,
+    )
+    return ()
+end
+
+#########
+# deprecated #
+#########
+
+# @external
+# func set_resource_upgrade_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+#     resource_id : felt, cost : Cost
+# ):
+#     Proxy_only_admin()
+#     resource_upgrade_cost.write(resource_id, cost)
+#     return ()
+# end
+
+#
+# # SET LEVEL
+# func set_resource_level{
+#     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+# }(token_id : Uint256, resource_id : felt, level : felt) -> ():
+#     resource_levels.write(token_id, resource_id, level)
+#     return ()
+# end
+# GET RESOURCE LEVEL
+
+# @view
+# func get_resource_level{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+#     token_id : Uint256, resource : felt
+# ) -> (level : felt):
+#     let (level) = resource_levels.read(token_id, resource)
+#     return (level=level)
+# end
+
+# # GET COSTS
+# @view
+# func get_resource_upgrade_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+#     resource_id : felt
+# ) -> (cost : Cost):
+#     let (cost) = resource_upgrade_cost.read(resource_id)
+#     return (cost)
+# end
+
+# @external
+# func upgrade_resource{
+#     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*, range_check_ptr
+# }(token_id : Uint256, resource_id : felt) -> ():
+#     alloc_locals
+
+# let (can_claim) = check_if_claimable(token_id)
+
+# if can_claim == TRUE:
+#         claim_resources(token_id)
+#         tempvar syscall_ptr = syscall_ptr
+#         tempvar range_check_ptr = range_check_ptr
+#         tempvar pedersen_ptr = pedersen_ptr
+#     else:
+#         tempvar syscall_ptr = syscall_ptr
+#         tempvar range_check_ptr = range_check_ptr
+#         tempvar pedersen_ptr = pedersen_ptr
+#     end
+
+# let (caller) = get_caller_address()
+#     let (controller) = Module.controller_address()
+
+# # CONTRACT ADDRESSES
+#     let (resource_address) = IModuleController.get_external_contract_address(
+#         controller, ExternalContractIds.Resources
+#     )
+
+# # AUTH
+#     Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
+
+# # GET RESOURCE LEVEL
+#     let (level) = get_resource_level(token_id, resource_id)
+
+# # GET UPGRADE VALUE
+#     let (upgrade_cost : Cost) = get_resource_upgrade_cost(resource_id)
+#     let (costs : Cost*) = alloc()
+#     assert [costs] = upgrade_cost
+#     let (token_ids : Uint256*) = alloc()
+#     let (token_values : Uint256*) = alloc()
+#     let (token_len : felt) = transform_costs_to_token_ids_values(1, costs, token_ids, token_values)
+
+# # BURN RESOURCES
+#     IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
+
+# # INCREASE LEVEL
+#     set_resource_level(token_id, resource_id, level + 1)
+
+# # EMIT
+#     ResourceUpgraded.emit(token_id, resource_id, level + 1)
+#     return ()
+# end
