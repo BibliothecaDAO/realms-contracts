@@ -175,9 +175,7 @@ func test_calculate_total_mintable_resources{
         TEST_WORK_HUTS, TEST_HAPPINESS, realmData, TEST_DAYS, TEST_MINT_PERCENTAGE
     )
 
-    let resource_1 = resource_mint[0].low
-
-    %{ print('Resource Mint:', ids.resource_1) %}
+    # TODO: missing assert ?!
 
     return ()
 end
