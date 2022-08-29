@@ -2,7 +2,6 @@
 
 from starkware.cairo.common.bool import TRUE
 from starkware.cairo.common.cairo_builtins import HashBuiltin
-from starkware.cairo.common.math import assert_not_zero
 from starkware.cairo.common.uint256 import Uint256, uint256_add, uint256_eq, uint256_sub
 from openzeppelin.security.safemath import SafeUint256
 
@@ -17,7 +16,7 @@ func mul_div_down{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     alloc_locals
 
     # set prod = x * y
-    let (local prod) = SafeUint256.mul(x, y)
+    let (prod) = SafeUint256.mul(x, y)
 
     # compute (x * y) / denominator
     let (q2, _) = SafeUint256.div_rem(prod, denominator)
@@ -32,19 +31,19 @@ func mul_div_up{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
     let ONE = Uint256(1, 0)
 
     # set prod = x * y
-    let (local prod) = SafeUint256.mul(x, y)
+    let (prod) = SafeUint256.mul(x, y)
 
     # if prod = 0, just return 0
-    let (local prod_iszero) = uint256_eq(prod, ZERO)
+    let (prod_iszero) = uint256_eq(prod, ZERO)
     if prod_iszero == TRUE:
         return (ZERO)
     end
 
     # compute prod - 1
-    let (local dec_prod) = uint256_sub(prod, ONE)
+    let (dec_prod) = uint256_sub(prod, ONE)
 
     # compute ((x * y - 1) / denominator) + 1
     let (q2, _) = SafeUint256.div_rem(dec_prod, denominator)
-    let (local inc_q2, _) = uint256_add(q2, ONE)
+    let (inc_q2, _) = uint256_add(q2, ONE)
     return (inc_q2)
 end

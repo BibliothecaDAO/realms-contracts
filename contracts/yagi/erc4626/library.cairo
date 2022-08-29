@@ -3,15 +3,11 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
-from starkware.cairo.common.math import assert_not_zero
-from starkware.cairo.common.uint256 import ALL_ONES, Uint256, uint256_check, uint256_eq
-from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
+from starkware.cairo.common.uint256 import ALL_ONES, Uint256, uint256_check
 
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
 from openzeppelin.token.erc20.library import ERC20, ERC20_allowances
 from openzeppelin.security.safemath import SafeUint256
-
-from contracts.yagi.utils.fixedpointmathlib import mul_div_up, mul_div_down
 
 # # @title Generic ERC4626 vault
 # # @description An ERC4626-style vault implementation.
@@ -19,7 +15,7 @@ from contracts.yagi.utils.fixedpointmathlib import mul_div_up, mul_div_down
 # # @author Peteris <github.com/Pet3ris>
 
 #############################################
-# #                 EVENTS                  ##
+# #                 EVENTS                # #
 #############################################
 
 @event
@@ -31,7 +27,7 @@ func Withdraw(from_ : felt, to : felt, amount : Uint256, shares : Uint256):
 end
 
 #############################################
-# #                STORAGE                  ##
+# #                STORAGE                # #
 #############################################
 
 @storage_var
@@ -40,7 +36,7 @@ end
 
 namespace ERC4626:
     #############################################
-    # #               CONSTRUCTOR               ##
+    # #               CONSTRUCTOR             # #
     #############################################
 
     func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -54,7 +50,7 @@ namespace ERC4626:
     end
 
     #############################################
-    # #              MAX ACTIONS                ##
+    # #              MAX ACTIONS              # #
     #############################################
 
     func max_deposit(to : felt) -> (max_assets : Uint256):
@@ -73,7 +69,7 @@ namespace ERC4626:
     end
 
     #############################################
-    # #                INTERNAL                 ##
+    # #                INTERNAL               # #
     #############################################
 
     func ERC20_decrease_allowance_manual{

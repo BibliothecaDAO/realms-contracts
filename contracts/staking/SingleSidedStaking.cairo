@@ -5,9 +5,8 @@
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
-from starkware.cairo.common.uint256 import ALL_ONES, Uint256, uint256_check, uint256_eq
+from starkware.cairo.common.uint256 import Uint256, uint256_check, uint256_eq, uint256_le
 
-from openzeppelin.security.safemath import SafeUint256
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
 from openzeppelin.token.erc20.library import ERC20
 from openzeppelin.upgrades.library import Proxy
@@ -15,9 +14,7 @@ from openzeppelin.upgrades.library import Proxy
 from contracts.yagi.erc4626.library import ERC4626, ERC4626_asset, Deposit, Withdraw
 from contracts.yagi.utils.fixedpointmathlib import mul_div_down, mul_div_up
 
-from starkware.cairo.common.uint256 import uint256_le
-
-from contracts.staking.interfaces.ISplitter import ISplitter
+from contracts.staking.interface import ISplitter
 
 # @title Single sided staking vault template with separate accrual contract.
 # @description An ERC4626-style vault implementation that allows users to stake a token and receive proportional rewards in that token.
