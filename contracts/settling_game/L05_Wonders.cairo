@@ -22,7 +22,7 @@ from openzeppelin.upgrades.library import Proxy
 
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
 from contracts.settling_game.modules.calculator.interface import ICalculator
-from contracts.settling_game.interfaces.imodules import IModuleController,
+from contracts.settling_game.interfaces.imodules import IModuleController
 
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721

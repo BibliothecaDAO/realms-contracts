@@ -40,9 +40,7 @@ from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.modules.settling.interface import ISettling
 from contracts.settling_game.modules.calculator.interface import ICalculator
-from contracts.settling_game.interfaces.imodules import (
-    IL03_Buildings,
-)
+from contracts.settling_game.interfaces.imodules import IL03_Buildings
 from contracts.settling_game.library.library_resources import Resources
 
 # -----------------------------------
