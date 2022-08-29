@@ -22,7 +22,7 @@ from contracts.settling_game.library.library_buildings import Buildings
 from contracts.settling_game.library.library_resources import Resources
 from contracts.settling_game.utils.constants import STORE_HOUSE_SIZE
 
-from contracts.settling_game.utils.general import unpack_data, transform_costs_to_token_ids_values
+from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.game_structs import (
     RealmBuildings,
     RealmData,

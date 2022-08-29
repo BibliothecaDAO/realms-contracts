@@ -27,7 +27,7 @@ from contracts.settling_game.utils.game_structs import (
 
 from contracts.settling_game.utils.constants import DAY, BASE_SQM
 
-from contracts.settling_game.utils.general import unpack_data, transform_costs_to_token_ids_values
+from contracts.settling_game.utils.general import unpack_data, transform_costs_to_tokens
 
 from contracts.settling_game.utils.constants import SHIFT_41
 
@@ -554,12 +554,8 @@ namespace Buildings:
     }(building_cost : Cost) -> (token_len : felt, token_ids : Uint256*, token_values : Uint256*):
         alloc_locals
 
-        let (costs : Cost*) = alloc()
-        assert [costs] = building_cost
-        let (token_ids : Uint256*) = alloc()
-        let (token_values : Uint256*) = alloc()
-
-        let (token_len) = transform_costs_to_token_ids_values(1, costs, token_ids, token_values)
+        tempvar costs = new (building_cost)
+        let (token_len, token_ids, token_values) = transform_costs_to_tokens(1, costs, 1)
         return (token_len, token_ids, token_values)
     end
 end
