@@ -153,7 +153,8 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
 
     # set vault time only if actually claiming vault
     if total_vault_days != 0:
-        Settling.set_time_vault_staked(settling_logic_address, token_id, vault_remainder)
+        # TODO: why is this here? same is called below, outside the if
+        ISettling.set_time_vault_staked(settling_logic_address, token_id, vault_remainder)
         tempvar syscall_ptr = syscall_ptr
         tempvar range_check_ptr = range_check_ptr
         tempvar pedersen_ptr = pedersen_ptr
