@@ -11,9 +11,15 @@ from starkware.cairo.common.cairo_builtins import BitwiseBuiltin, HashBuiltin
 from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.uint256 import Uint256
-from starkware.starknet.common.syscalls import get_block_timestamp, get_caller_address, get_tx_info
+from starkware.starknet.common.syscalls import (
+    get_block_timestamp,
+    get_caller_address,
+    get_tx_info,
+    get_contract_address,
+)
 
 from openzeppelin.upgrades.library import Proxy
+from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
 
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.modules.calculator.interface import ICalculator
@@ -23,6 +29,7 @@ from contracts.settling_game.interfaces.imodules import (
     IL03_Buildings,
     IL09_Relics,
     IFood,
+    IGoblinTown,
 )
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
@@ -35,6 +42,8 @@ from contracts.settling_game.utils.constants import (
     ATTACKING_SQUAD_SLOT,
     POPULATION_PER_HIT_POINT,
     MAX_WALL_DEFENSE_HIT_POINTS,
+    GOBLINDOWN_REWARD,
+    DEFENDING_SQUAD_SLOT,
 )
 from contracts.settling_game.utils.game_structs import (
     ModuleIds,
@@ -168,9 +177,9 @@ func build_squad_from_troops_in_realm{
     load_troop_costs(troop_ids_len, troop_ids, troop_costs)
 
     # transform costs into tokens
-    let (token_len : felt, token_ids : Uint256*, token_values : Uint256*) = transform_costs_to_tokens(
-        troop_ids_len, troop_costs, 1
-    )
+    let (
+        token_len : felt, token_ids : Uint256*, token_values : Uint256*
+    ) = transform_costs_to_tokens(troop_ids_len, troop_costs, 1)
 
     # pay for the squad
     let (caller) = get_caller_address()
@@ -269,9 +278,6 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     )
     set_realm_combat_data(defending_realm_id, new_defending_realm_data)
 
-    let (attacker_after_combat : Squad) = Combat.unpack_squad(new_attacker)
-    let (defender_after_combat : Squad) = Combat.unpack_squad(new_defender)
-
     # # pillaging only if attacker wins
     if combat_outcome == COMBAT_OUTCOME_ATTACKER_WINS:
         let (controller) = Module.controller_address()
@@ -292,11 +298,7 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     end
 
     CombatOutcome_3.emit(
-        attacking_realm_id,
-        defending_realm_id,
-        attacker_after_combat,
-        defender_after_combat,
-        combat_outcome,
+        attacking_realm_id, defending_realm_id, attacker_end, defender_end, combat_outcome
     )
 
     return (combat_outcome)
@@ -329,6 +331,83 @@ func remove_troops_from_squad_in_realm{
     update_squad_in_realm(updated_squad, realm_id, slot)
 
     return ()
+end
+
+@external
+func attack_goblin_town{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    realm_id : Uint256
+) -> (outcome : felt):
+    alloc_locals
+
+    Module.ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
+
+    let (goblin_town_address) = Module.get_module_address(ModuleIds.GoblinTown)
+    let (strength, spawn_ts) = IGoblinTown.get_strength_and_timestamp(goblin_town_address, realm_id)
+
+    # check if there are goblins and if not, silently succeed
+    let (now) = get_block_timestamp()
+    let (has_goblins) = is_le(spawn_ts, now)
+    if has_goblins == FALSE:
+        return (TRUE)
+    end
+
+    # get goblin squad
+    let (goblins : Squad) = Combat.build_goblin_squad(strength)
+
+    # get attacking squad
+    let (realm_data : RealmCombatData) = get_realm_combat_data(realm_id)
+    let (attacker : Squad) = Combat.unpack_squad(realm_data.attacking_squad)
+
+    # apply hunger penalty if there's not enough food
+    let (food_module) = Module.get_module_address(ModuleIds.L10_Food)
+    let (food_store) = IFood.available_food_in_store(food_module, realm_id)
+    if food_store == 0:
+        with_attr error_message("GOBLINTOWN: You can't attack without food!!"):
+            assert 1 = 0
+        end
+    end
+
+    # using 0 for the defending realm ID; it's only being used to emit events in the combat loop
+    let zero_id = Uint256(0, 0)
+    # fight
+    CombatStart_3.emit(realm_id, zero_id, attacker, goblins)
+    let (attacker_end, goblins_end, outcome) = run_combat_loop(realm_id, zero_id, attacker, goblins)
+
+    let (new_attacker : felt) = Combat.pack_squad(attacker_end)
+    let new_realm_data = RealmCombatData(
+        attacking_squad=new_attacker,
+        defending_squad=realm_data.defending_squad,
+        last_attacked_at=realm_data.last_attacked_at,
+    )
+    set_realm_combat_data(realm_id, new_realm_data)
+
+    # if successful, earn $lords
+
+    if outcome == COMBAT_OUTCOME_ATTACKER_WINS:
+        # attack was successful, goblin town defeated
+        let (this) = get_contract_address()
+        # Lord earns $LORDS
+        let (caller) = get_caller_address()
+        let (lords_address) = Module.get_external_contract_address(ExternalContractIds.Lords)
+        IERC20.approve(lords_address, caller, Uint256(GOBLINDOWN_REWARD * 10 ** 18, 0))
+        IERC20.transfer(lords_address, caller, Uint256(GOBLINDOWN_REWARD * 10 ** 18, 0))
+
+        # new goblin town is spawned
+        let (goblin_town_address) = Module.get_module_address(ModuleIds.GoblinTown)
+        IGoblinTown.spawn_next(goblin_town_address, realm_id)
+
+        tempvar syscall_ptr = syscall_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+        tempvar range_check_ptr = range_check_ptr
+    else:
+        tempvar syscall_ptr = syscall_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+        tempvar range_check_ptr = range_check_ptr
+    end
+
+    CombatOutcome_3.emit(realm_id, zero_id, attacker_end, goblins_end, outcome)
+
+    return (outcome)
 end
 
 ############
@@ -614,5 +693,27 @@ func set_xoroshiro{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     # TODO:
     # Proxy.assert_only_admin()
     xoroshiro_address.write(xoroshiro)
+    return ()
+end
+
+@external
+func zero_dead_squads{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    realm_id : Uint256
+):
+    alloc_locals
+    Proxy.assert_only_admin()
+    let (now) = get_block_timestamp()
+    let new_realm_combat_data = RealmCombatData(
+        attacking_squad=0, defending_squad=0, last_attacked_at=now
+    )
+    set_realm_combat_data(realm_id, new_realm_combat_data)
+
+    let new_squad : Squad = Combat.unpack_squad(0)
+
+    let (troop : felt*) = alloc()
+    assert troop[0] = 1
+
+    BuildTroops_3.emit(new_squad, 1, troop, realm_id, ATTACKING_SQUAD_SLOT)
+    BuildTroops_3.emit(new_squad, 1, troop, realm_id, DEFENDING_SQUAD_SLOT)
     return ()
 end

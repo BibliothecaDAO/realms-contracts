@@ -25,11 +25,7 @@ from openzeppelin.security.pausable import (
     Pausable_unpause,
     Pausable_when_not_paused,
 )
-from contracts.settling_game.utils.general import (
-    scale,
-    unpack_data,
-    transform_costs_to_token_ids_values,
-)
+from contracts.settling_game.utils.general import scale, unpack_data
 
 from contracts.settling_game.utils.constants import (
     SHIFT_NFT_1,

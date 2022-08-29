@@ -78,6 +78,7 @@ namespace ERC1155:
         _set_uri(uri_)
         ERC165.register_interface(IERC1155_ID)
         ERC165.register_interface(IERC1155_METADATA_ID)
+        ERC165.register_interface(IERC1155_RECEIVER_ID)
         return ()
     end
 

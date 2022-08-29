@@ -27,7 +27,7 @@ from contracts.settling_game.utils.game_structs import (
 
 from contracts.settling_game.utils.constants import DAY, BASE_SQM
 
-from contracts.settling_game.utils.general import unpack_data, transform_costs_to_token_ids_values
+from contracts.settling_game.utils.general import unpack_data, transform_costs_to_tokens
 
 from contracts.settling_game.utils.constants import SHIFT_41
 
@@ -93,9 +93,12 @@ namespace Buildings:
     end
 
     # gets buildable area for each
-    func get_realm_buildable_area(cities : felt, regions : felt) -> (buildable_area : felt):
+    func get_realm_buildable_area{
+        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+    }(cities : felt, regions : felt) -> (buildable_area : felt):
         # Get buildable units
-        return (cities * regions + BASE_SQM)
+        let (div, _) = unsigned_div_rem(regions, 2)
+        return (cities * div + BASE_SQM)
     end
 
     # gets current built buildings
@@ -104,7 +107,8 @@ namespace Buildings:
         # Get buildable units
 
         let House = current_buildings.House * RealmBuildingsSize.House
-        let StoreHouse = current_buildings.StoreHouse * RealmBuildingsSize.StoreHouse
+        # let StoreHouse = current_buildings.StoreHouse * RealmBuildingsSize.StoreHouse
+        let StoreHouse = 0  # setting as no space for now
         let Granary = current_buildings.Granary * RealmBuildingsSize.Granary
         let Farm = current_buildings.Farm * RealmBuildingsSize.Farm
         let FishingVillage = current_buildings.FishingVillage * RealmBuildingsSize.FishingVillage
@@ -559,7 +563,7 @@ namespace Buildings:
         let (token_ids : Uint256*) = alloc()
         let (token_values : Uint256*) = alloc()
 
-        let (token_len) = transform_costs_to_token_ids_values(1, costs, token_ids, token_values)
+        let (token_len) = transform_costs_to_tokens(1, costs, token_ids, token_values)
         return (token_len, token_ids, token_values)
     end
 end

@@ -4,7 +4,6 @@ from starkware.cairo.common.uint256 import Uint256, uint256_add, uint256_sub, ui
 from starkware.cairo.common.math_cmp import is_nn, is_le
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
-from lib.cairo_math_64x61.contracts.Math64x61 import Math64x61_div
 from contracts.settling_game.utils.game_structs import (
     BuildingsFood,
     BuildingsPopulation,
@@ -35,6 +34,7 @@ from tests.protostar.settling_game.test_structs import (
     TEST_DAYS,
     TEST_MINT_PERCENTAGE,
     TEST_WORK_HUTS,
+    TEST_TIMESTAMP,
 )
 
 @external
@@ -178,6 +178,19 @@ func test_calculate_total_mintable_resources{
     let resource_1 = resource_mint[0].low
 
     %{ print('Resource Mint:', ids.resource_1) %}
+
+    return ()
+end
+
+@external
+func test_calculate_vault_time_remaining{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+}():
+    alloc_locals
+
+    let (resource_mint) = Resources._calculate_vault_time_remaining(200)
+
+    %{ print('Resource Mint:', ids.resource_mint) %}
 
     return ()
 end

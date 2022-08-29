@@ -51,6 +51,14 @@ from contracts.settling_game.interfaces.imodules import IL03_Buildings
 # Events
 # -----------------------------------
 
+@event
+func Created(token_id : Uint256, building_id : felt, qty : felt, harvests : felt, timestamp : felt):
+end
+
+@event
+func Harvest_2(token_id : Uint256, building_id : felt, harvests : felt, timestamp : felt):
+end
+
 # -----------------------------------
 # Storage
 # -----------------------------------
@@ -163,6 +171,8 @@ func create{
     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
     IERC1155.burnBatch(resources_address, owner, token_len, token_ids, token_len, token_values)
 
+    Created.emit(token_id, food_building_id, qty, BASE_HARVESTS, block_timestamp)
+
     return ()
 end
 
@@ -260,6 +270,39 @@ func harvest{
     return ()
 end
 
+# @notice Converts harvest directly into food store on a Realm
+# @param token_id: Staked Realm id (S_Realm)
+# @param quantity: quantity of food to store
+# @param resource_id: id of food to be stored (FISH or WHEAT)
+@external
+func convert_food_tokens_to_store{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+}(token_id : Uint256, quantity : felt, resource_id : felt):
+    alloc_locals
+    let (caller) = get_caller_address()
+
+    # check id and harvest type
+    Food.assert_food_type(resource_id)
+
+    # check owner
+    Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms)
+
+    # contracts
+    let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources)
+
+    # set default data in burn call
+    let (local data : felt*) = alloc()
+    assert data[0] = 0
+
+    # burn resources
+    IERC1155.burn(
+        resources_address, caller, Uint256(resource_id, 0), Uint256(quantity * 10 ** 18, 0)
+    )
+
+    convert_to_store(token_id, quantity)
+    return ()
+end
+
 # -----------------------------------
 # INTERNAL
 # -----------------------------------
@@ -312,6 +355,8 @@ func update{
     else:
         fishing_villages.write(token_id, packed)
     end
+
+    Harvest_2.emit(token_id, food_building_id, harvests_to_save, block_timestamp)
 
     return ()
 end
@@ -400,7 +445,7 @@ end
 @view
 func get_farms_to_harvest{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-}(token_id : Uint256) -> (total_harvest, total_remaining, decayed_farms):
+}(token_id : Uint256) -> (total_harvest, total_remaining, decayed_farms, farms_built):
     alloc_locals
 
     # farm expirary time
@@ -414,7 +459,7 @@ func get_farms_to_harvest{
     let (total_harvest, total_remaining, decayed_farms) = Food.calculate_harvest(
         block_timestamp - unpacked_food_buildings.update_time
     )
-    return (total_harvest, total_remaining, decayed_farms)
+    return (total_harvest, total_remaining, decayed_farms, unpacked_food_buildings.number_built)
 end
 
 # @notice harvests left
@@ -440,7 +485,7 @@ end
 @view
 func get_fishing_villages_to_harvest{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-}(token_id : Uint256) -> (total_harvest, total_remaining, decayed_farms):
+}(token_id : Uint256) -> (total_harvest, total_remaining, decayed_farms, villages_built):
     alloc_locals
     # farm expirary time
     let (block_timestamp) = get_block_timestamp()
@@ -452,7 +497,48 @@ func get_fishing_villages_to_harvest{
     let (total_harvest, total_remaining, decayed_farms) = Food.calculate_harvest(
         block_timestamp - unpacked_food_buildings.update_time
     )
-    return (total_harvest, total_remaining, decayed_farms)
+    return (total_harvest, total_remaining, decayed_farms, unpacked_food_buildings.number_built)
+end
+
+@view
+func get_all_food_information{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(token_id : Uint256) -> (
+    total_farm_harvest,
+    total_farm_remaining,
+    decayed_farms,
+    farms_built,
+    farm_harvests_left,
+    total_village_harvest,
+    total_village_remaining,
+    decayed_villages,
+    villages_built,
+    fishing_villages_harvests_left,
+):
+    alloc_locals
+    # farm expirary time
+    let (farm_harvests_left) = get_farm_harvests_left(token_id)
+    let (
+        total_farm_harvest, total_farm_remaining, decayed_farms, farms_built
+    ) = get_farms_to_harvest(token_id)
+
+    let (fishing_villages_harvests_left) = get_fishing_villages_harvests_left(token_id)
+    let (
+        total_village_harvest, total_village_remaining, decayed_villages, villages_built
+    ) = get_fishing_villages_to_harvest(token_id)
+
+    return (
+        total_farm_harvest,
+        total_farm_remaining,
+        decayed_farms,
+        farms_built,
+        farm_harvests_left,
+        total_village_harvest,
+        total_village_remaining,
+        decayed_villages,
+        villages_built,
+        fishing_villages_harvests_left,
+    )
 end
 
 # @notice Computes value of store houses. Store houses take up variable space on the Realm according to STORE_HOUSE_SIZE

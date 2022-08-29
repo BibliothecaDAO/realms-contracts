@@ -14,7 +14,7 @@ def set_initial_liq(network):
     Claim available resources
     """
     config = Config(nile_network=network)
-    n_resources = len(config.RESOURCES)
+    n_resources = 24
     price = [37.356,
              29.356,
              28.551,
@@ -36,12 +36,20 @@ def set_initial_liq(network):
              0.693,
              0.410,
              0.276,
-             0.171]
+             0.171, 2000, 2000]
 
     resource_ids = []
-    for i in range(n_resources):
+    for i in range(n_resources - 2):
         resource_ids.append(str(i+1))
         resource_ids.append("0")
+
+    # WHEAT
+    resource_ids.append("10000")
+    resource_ids.append("0")
+
+    # FISH
+    resource_ids.append("10001")
+    resource_ids.append("0")
 
     resource_values = []
     for i, resource in enumerate(price):
@@ -71,7 +79,7 @@ def set_initial_liq(network):
 
 @click.command()
 @click.option("--network", default="goerli")
-def set_lords_approval(network):
+def set_approval(network):
     """
     Set Lords approval for AMM
     """
@@ -86,15 +94,6 @@ def set_lords_approval(network):
             config.Exchange_ERC20_1155_PROXY_ADDRESS), *uint(50000 * (10 ** 18))],
     )
 
-
-@click.command()
-@click.option("--network", default="goerli")
-def set_resources_approval(network):
-    """
-    Set resource approval for AMM
-    """
-    config = Config(nile_network=network)
-
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
@@ -102,4 +101,22 @@ def set_resources_approval(network):
         function="setApprovalForAll",
         arguments=[strhex_as_strfelt(
             config.Exchange_ERC20_1155_PROXY_ADDRESS), 1],
+    )
+
+
+@click.command()
+@click.option("--network", default="goerli")
+def update_treasury(network):
+    """
+    Update royalty info
+    """
+    config = Config(nile_network=network)
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="proxy_Exchange_ERC20_1155",
+        function="set_royalty_info",
+        arguments=[*uint(30), strhex_as_strfelt(
+            config.PROXY_NEXUS)],
     )
