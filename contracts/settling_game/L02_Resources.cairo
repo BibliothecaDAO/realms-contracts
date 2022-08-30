@@ -419,10 +419,6 @@ func get_all_resource_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     # CHECK DAYS + VAULT > 1
     let days = total_days + total_vault_days
 
-    # GET WONDER TAX
-    let (wonder_tax) = ICalculator.calculate_wonder_tax(calculator_address)
-
-    # TODO: No wonder tax yet
     # SET MINT
     let user_mint_rel_perc = 100
 
