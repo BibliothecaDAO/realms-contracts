@@ -142,3 +142,10 @@ cairo-nile = "^0.5.0"
 "deposit_s_realm_to_guild" = "realms_cli.player.guilds.deposit_s_realm_to_guild"
 "settle_realm_from_guild" = "realms_cli.player.guilds.settle_realm_from_guild"
 "claim_resources_from_guild" = "realms_cli.player.guilds.claim_resources_from_guild"
+
+#-----------NEXUS
+"check_splitter_lords" = "realms_cli.nexus.admin.check_splitter_lords"
+"split" = "realms_cli.nexus.admin.split"
+"deposit" = "realms_cli.nexus.admin.deposit"
+
+"increase_allowance_nexus" =  "realms_cli.nexus.admin.increase_allowance_nexus"

@@ -2,10 +2,8 @@ from collections import namedtuple
 
 from nile.core.declare import declare
 
-from starkware.starknet.public.abi import get_selector_from_name
-
 from realms_cli.deployer import logged_deploy
-from realms_cli.config import Config, strhex_as_strfelt, safe_load_deployment
+from realms_cli.config import Config, strhex_as_strfelt
 from realms_cli.shared import str_to_felt
 from realms_cli.caller_invoker import wrapped_send, wrapped_call
 import time

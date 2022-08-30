@@ -1,18 +1,12 @@
 # First, import click dependency
-import json
 import click
 
-from nile.core.account import Account
-from ecdsa import SigningKey, SECP256k1
+from nile.signer import from_call_to_call_array
 
 from starkware.starknet.public.abi import get_selector_from_name
 
 from realms_cli.caller_invoker import wrapped_call, wrapped_send
 from realms_cli.config import Config, strhex_as_strfelt
-from realms_cli.utils import print_over_colums, from_call_to_call_array
-from realms_cli.binary_converter import map_realm
-from realms_cli.shared import uint, str_to_felt
-
 
 @click.command()
 @click.argument("role", nargs=1)
