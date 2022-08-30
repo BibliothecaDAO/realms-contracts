@@ -200,8 +200,6 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         data,
     )
 
-    # Check that wonder is staked (this also checks if token_id a wonder at all)
-
     let (check_wonder) = is_le(0, realms_data.wonder)
     if check_wonder == 1:
         let (wonder_resources_claim_ids : Uint256*) = alloc()
