@@ -5,3 +5,6 @@
 [submodule "lib/cairo_erc4626"]
 	path = lib/cairo_erc4626
 	url = git@github.com:auditless/cairo-erc4626.git
+[submodule "contracts/guild"]
+	path = contracts/guild
+	url = https://github.com/Guildly/contracts.git
