@@ -35,7 +35,7 @@ func test_base_fetch{syscall_ptr : felt*, range_check_ptr}():
 
     let (agility) = Statistics.base_agility(ItemIds.Pendant)
 
-    %{ print(ids.agility) %}
+    # %{ print(ids.agility) %}
     return ()
 end
 
@@ -45,7 +45,7 @@ func test_item_slot{syscall_ptr : felt*, range_check_ptr}():
 
     let (slot) = Statistics.item_slot(ItemIds.Pendant)
 
-    %{ print(ids.slot) %}
+    # %{ print(ids.slot) %}
     return ()
 end
 
@@ -55,7 +55,7 @@ func test_item_class{syscall_ptr : felt*, range_check_ptr}():
 
     let (item_class) = Statistics.item_class(ItemIds.Pendant)
 
-    %{ print(ids.item_class) %}
+    # %{ print(ids.item_class) %}
     return ()
 end
 
@@ -83,7 +83,7 @@ func test_calculate_item_stats{syscall_ptr : felt*, range_check_ptr}():
 
     let (Agility, Attack, Armour, Wisdom, Vitality) = LootItems.calculate_item_stats(weapon)
 
-    %{ print(ids.Agility) %}
+    # %{ print(ids.Agility) %}
 
     return ()
 end

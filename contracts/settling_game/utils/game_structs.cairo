@@ -56,15 +56,15 @@ end
 
 # square meters
 namespace RealmBuildingsSize:
-    const House = 2
-    const StoreHouse = 3
+    const House = 4
+    const StoreHouse = 2
     const Granary = 3
     const Farm = 3
     const FishingVillage = 3
-    const Barracks = 6
-    const MageTower = 6
-    const ArcherTower = 6
-    const Castle = 12
+    const Barracks = 16
+    const MageTower = 16
+    const ArcherTower = 16
+    const Castle = 16
 end
 
 namespace BuildingsFood:
@@ -92,27 +92,27 @@ namespace BuildingsCulture:
 end
 
 namespace BuildingsPopulation:
-    const House = 2
+    const House = 12
     const StoreHouse = 3
     const Granary = 3
     const Farm = 3
     const FishingVillage = 3
-    const Barracks = 6
-    const MageTower = 6
-    const ArcherTower = 6
-    const Castle = 12
+    const Barracks = 5
+    const MageTower = 5
+    const ArcherTower = 5
+    const Castle = 5
 end
 
 namespace BuildingsIntegrityLength:
-    const House = 1000
+    const House = 3600
     const StoreHouse = 2000
     const Granary = 2000
     const Farm = 2000
     const FishingVillage = 2000
-    const Barracks = 3000
-    const MageTower = 3000
-    const ArcherTower = 3000
-    const Castle = 9000
+    const Barracks = 37319
+    const MageTower = 37319
+    const ArcherTower = 37319
+    const Castle = 37319
 end
 
 namespace BuildingsTroopIndustry:
@@ -152,16 +152,23 @@ namespace ArmyCap:
 end
 
 namespace ModuleIds:
-    const L01_Settling = 1
+    const Settling = 1
     const L02_Resources = 2
     const L03_Buildings = 3
-    const L04_Calculator = 4
+    const Calculator = 4
     const L05_Wonders = 5
     const L06_Combat = 6
     const L07_Crypts = 7
     const L08_Crypts_Resources = 8
     const L09_Relics = 12
     const L10_Food = 13
+    const GoblinTown = 14
+    const Crypts_Token = 1001
+    const Lords_Token = 1002
+    const Realms_Token = 1003
+    const Resources_Token = 1004
+    const S_Crypts_Token = 1005
+    const S_Realms_Token = 1006
 end
 
 namespace ExternalContractIds:
@@ -258,10 +265,11 @@ namespace TroopId:
     const Apprentice = 10
     const Mage = 11
     const Arcanist = 12
+    const Goblin = 13
     # IMPORTANT: if you're adding to this enum
     # make sure the SIZE is one greater than the
     # maximal value; certain algorithms depend on that
-    const SIZE = 13
+    const SIZE = 14
 end
 
 namespace TroopType:
@@ -297,6 +305,7 @@ namespace TroopProps:
         const Apprentice = TroopType.RangedMagic
         const Mage = TroopType.RangedMagic
         const Arcanist = TroopType.RangedMagic
+        const Goblin = TroopType.Melee
     end
 
     namespace Tier:
@@ -312,6 +321,7 @@ namespace TroopProps:
         const Apprentice = 1
         const Mage = 2
         const Arcanist = 3
+        const Goblin = 1
     end
 
     namespace Building:
@@ -327,81 +337,87 @@ namespace TroopProps:
         const Apprentice = RealmBuildingsIds.MageTower
         const Mage = RealmBuildingsIds.MageTower
         const Arcanist = RealmBuildingsIds.MageTower
+        const Goblin = 0
     end
 
     namespace Agility:
-        const Skirmisher = 2
-        const Longbow = 4
-        const Crossbow = 6
-        const Pikeman = 7
-        const Knight = 9
-        const Paladin = 9
-        const Ballista = 4
-        const Mangonel = 4
+        const Skirmisher = 8
+        const Longbow = 10
+        const Crossbow = 12
+        const Pikeman = 2
+        const Knight = 3
+        const Paladin = 4
+        const Ballista = 5
+        const Mangonel = 3
         const Trebuchet = 4
-        const Apprentice = 7
-        const Mage = 7
-        const Arcanist = 7
+        const Apprentice = 6
+        const Mage = 8
+        const Arcanist = 10
+        const Goblin = 3
     end
 
     namespace Attack:
-        const Skirmisher = 7
-        const Longbow = 7
-        const Crossbow = 9
-        const Pikeman = 4
-        const Knight = 7
-        const Paladin = 9
-        const Ballista = 11
+        const Skirmisher = 6
+        const Longbow = 8
+        const Crossbow = 10
+        const Pikeman = 6
+        const Knight = 8
+        const Paladin = 10
+        const Ballista = 8
         const Mangonel = 10
         const Trebuchet = 12
-        const Apprentice = 7
-        const Mage = 9
-        const Arcanist = 11
+        const Apprentice = 6
+        const Mage = 8
+        const Arcanist = 10
+        const Goblin = 8
     end
 
     namespace Armor:
         const Skirmisher = 2
         const Longbow = 3
         const Crossbow = 4
-        const Pikeman = 5
-        const Knight = 8
-        const Paladin = 9
-        const Ballista = 4
-        const Mangonel = 5
-        const Trebuchet = 6
-        const Apprentice = 2
-        const Mage = 2
-        const Arcanist = 2
-    end
-
-    namespace Vitality:
-        const Skirmisher = 53
-        const Longbow = 53
-        const Crossbow = 53
-        const Pikeman = 53
-        const Knight = 79
-        const Paladin = 106
-        const Ballista = 53
-        const Mangonel = 53
-        const Trebuchet = 53
-        const Apprentice = 53
-        const Mage = 53
-        const Arcanist = 53
-    end
-
-    namespace Wisdom:
-        const Skirmisher = 2
-        const Longbow = 3
-        const Crossbow = 4
-        const Pikeman = 1
-        const Knight = 2
-        const Paladin = 3
+        const Pikeman = 4
+        const Knight = 6
+        const Paladin = 8
         const Ballista = 2
         const Mangonel = 3
         const Trebuchet = 4
-        const Apprentice = 8
-        const Mage = 9
+        const Apprentice = 2
+        const Mage = 3
+        const Arcanist = 4
+        const Goblin = 2
+    end
+
+    namespace Vitality:
+        const Skirmisher = 30
+        const Longbow = 40
+        const Crossbow = 60
+        const Pikeman = 30
+        const Knight = 60
+        const Paladin = 80
+        const Ballista = 30
+        const Mangonel = 50
+        const Trebuchet = 70
+        const Apprentice = 40
+        const Mage = 50
+        const Arcanist = 80
+        const Goblin = 20
+    end
+
+    namespace Wisdom:
+        const Skirmisher = 3
+        const Longbow = 4
+        const Crossbow = 4
+        const Pikeman = 4
+        const Knight = 6
+        const Paladin = 8
+        const Ballista = 2
+        const Mangonel = 3
+        const Trebuchet = 4
+        const Apprentice = 6
+        const Mage = 8
         const Arcanist = 10
+        const Goblin = 1
     end
 end
 

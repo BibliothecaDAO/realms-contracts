@@ -15,8 +15,10 @@ from starkware.cairo.common.memset import memset
 from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
 
+from contracts.settling_game.utils.constants import DEFENDING_SQUAD_SLOT
 from contracts.settling_game.utils.game_structs import (
     RealmBuildingsIds,
+    RealmBuildings,
     Squad,
     SquadStats,
     Troop,
@@ -29,16 +31,45 @@ from contracts.settling_game.utils.game_structs import (
 const SHIFT = 0x100
 
 namespace Combat:
-
+    # @notice Checks if Squad slot is valid. Throws if not.
+    # @param slot: An value of squad slot. Valid values are ATTACKING_SQUAD_SLOT and DEFENDING_SQUAD_SLOT
     func assert_slot{range_check_ptr}(slot : felt):
         with_attr error_message("Combat: slot not valid"):
-            # TODO: use value from constants instead of magic "2"
-            let (is_valid_slot) = is_le(slot, 2)
+            let (is_valid_slot) = is_le(slot, DEFENDING_SQUAD_SLOT)
+            assert is_valid_slot = TRUE
+            let (is_valid_slot) = is_nn(slot)
             assert is_valid_slot = TRUE
         end
         return ()
     end
 
+    # @notice Checks if desired troops can be built in a Realm that has certain buildings. Throws if not.
+    # @param troop_ids: Array of Troop IDs that you want to build
+    # @param realm_buildings: A RealmBuildings struct specifying which buildings does a Realm have
+    func assert_can_build_troops{range_check_ptr}(
+        troop_ids_len : felt, troop_ids : felt*, realm_buildings : RealmBuildings
+    ):
+        alloc_locals
+        let (__fp__, _) = get_fp_and_pc()
+
+        if troop_ids_len == 0:
+            return ()
+        end
+
+        let (troop : Troop) = get_troop_internal([troop_ids])
+        let buildings = cast(&realm_buildings, felt*)
+        let buildings_in_realm : felt = [buildings + troop.building - 1]
+        with_attr error_message(
+                "Combat: missing building {troop.building} to build troop {troop.id}"):
+            assert_not_zero(buildings_in_realm)
+        end
+
+        return assert_can_build_troops(troop_ids_len - 1, troop_ids + 1, realm_buildings)
+    end
+
+    # @notice Calculate the vitality of a squad. It's the sum of the vitality of all troops
+    # @param s: Squad whos vitality to calcualte
+    # @return vitality: Vitality of the squad
     func compute_squad_vitality(s : Squad) -> (vitality : felt):
         let vitality = s.t1_1.vitality + s.t1_2.vitality + s.t1_3.vitality + s.t1_4.vitality +
             s.t1_5.vitality + s.t1_6.vitality + s.t1_7.vitality + s.t1_8.vitality + s.t1_9.vitality +
@@ -47,6 +78,9 @@ namespace Combat:
         return (vitality)
     end
 
+    # @notice Create a bit-packed representation of a squad that fits into a single felt
+    # @param s: Squad which to pack
+    # @return p: A packed representation of the squad
     func pack_squad{range_check_ptr}(s : Squad) -> (p : felt):
         alloc_locals
 
@@ -88,6 +122,9 @@ namespace Combat:
         return (packed)
     end
 
+    # @notice Create a full squad from its bit-packed representation
+    # @param p: A felt representing a bit-packed squad
+    # @return s: An expanded version of the squad
     func unpack_squad{range_check_ptr}(p : felt) -> (s : Squad):
         alloc_locals
 
@@ -117,6 +154,10 @@ namespace Combat:
         )
     end
 
+    # @notice Bit pack a single troop. Troops vary only in IDs and vitality,
+    #         other properties are constant, so the function only packs these two values
+    # @param t: Troop to bit-pack
+    # @return packed: A bit-packed representation of a troop
     func pack_troop{range_check_ptr}(t : Troop) -> (packed : felt):
         assert_lt(t.id, TroopId.SIZE)
         assert_le(t.vitality, 255)
@@ -124,6 +165,9 @@ namespace Combat:
         return (packed)
     end
 
+    # @notice Create a full troop from its bit-packed representation
+    # @param packed: A felt representing a bit-packed troop
+    # @return t: An expanded version of the Troop
     func unpack_troop{range_check_ptr}(packed : felt) -> (t : Troop):
         alloc_locals
         let (vitality, troop_id) = unsigned_div_rem(packed, SHIFT)
@@ -142,6 +186,9 @@ namespace Combat:
         )
     end
 
+    # @notice Returns properties of a troop based on a Troop ID
+    # @param troop_id: Troop ID
+    # @return A tuple of type, tier, building, agility, attack, armor, vitality and wisdom properites
     func get_troop_properties{range_check_ptr}(troop_id : felt) -> (
         type, tier, building, agility, attack, armor, vitality, wisdom
     ):
@@ -182,6 +229,7 @@ namespace Combat:
         dw TroopProps.Type.Apprentice
         dw TroopProps.Type.Mage
         dw TroopProps.Type.Arcanist
+        dw TroopProps.Type.Goblin
 
         troop_tier_per_id:
         dw TroopProps.Tier.Skirmisher
@@ -196,6 +244,7 @@ namespace Combat:
         dw TroopProps.Tier.Apprentice
         dw TroopProps.Tier.Mage
         dw TroopProps.Tier.Arcanist
+        dw TroopProps.Tier.Goblin
 
         troop_building_per_id:
         dw TroopProps.Building.Skirmisher
@@ -210,6 +259,7 @@ namespace Combat:
         dw TroopProps.Building.Apprentice
         dw TroopProps.Building.Mage
         dw TroopProps.Building.Arcanist
+        dw TroopProps.Building.Goblin
 
         troop_agility_per_id:
         dw TroopProps.Agility.Skirmisher
@@ -224,6 +274,7 @@ namespace Combat:
         dw TroopProps.Agility.Apprentice
         dw TroopProps.Agility.Mage
         dw TroopProps.Agility.Arcanist
+        dw TroopProps.Agility.Goblin
 
         troop_attack_per_id:
         dw TroopProps.Attack.Skirmisher
@@ -238,6 +289,7 @@ namespace Combat:
         dw TroopProps.Attack.Apprentice
         dw TroopProps.Attack.Mage
         dw TroopProps.Attack.Arcanist
+        dw TroopProps.Attack.Goblin
 
         troop_armor_per_id:
         dw TroopProps.Armor.Skirmisher
@@ -252,6 +304,7 @@ namespace Combat:
         dw TroopProps.Armor.Apprentice
         dw TroopProps.Armor.Mage
         dw TroopProps.Armor.Arcanist
+        dw TroopProps.Armor.Goblin
 
         troop_vitality_per_id:
         dw TroopProps.Vitality.Skirmisher
@@ -266,6 +319,7 @@ namespace Combat:
         dw TroopProps.Vitality.Apprentice
         dw TroopProps.Vitality.Mage
         dw TroopProps.Vitality.Arcanist
+        dw TroopProps.Vitality.Goblin
 
         troop_wisdom_per_id:
         dw TroopProps.Wisdom.Skirmisher
@@ -280,8 +334,10 @@ namespace Combat:
         dw TroopProps.Wisdom.Apprentice
         dw TroopProps.Wisdom.Mage
         dw TroopProps.Wisdom.Arcanist
+        dw TroopProps.Wisdom.Goblin
     end
 
+    # @notice Create a full Troop struct based on Troop ID
     func get_troop_internal{range_check_ptr}(troop_id : felt) -> (t : Troop):
         with_attr error_message("Combat: unknown troop ID"):
             assert_not_zero(troop_id)
@@ -297,6 +353,11 @@ namespace Combat:
         )
     end
 
+    # @notice Insert a troop into a squad, into the first free slot based on the
+    #         troop's tier. If there's no free slot the function throws.
+    # @param t: Troop to add
+    # @param s: Squad to add the troop to
+    # @return updated: The updated squad with the troop added to it
     func add_troop_to_squad(t : Troop, s : Squad) -> (updated : Squad):
         alloc_locals
         let (__fp__, _) = get_fp_and_pc()
@@ -315,6 +376,10 @@ namespace Combat:
         return ([updated])
     end
 
+    # @notice Remove a specific troop (as indicated by an index) from a squad
+    # @param troop_idx: 0-based index into the Squad struct indicating which troop to remove
+    # @param s: Squad to remove the troop from
+    # @return updated: The updated squad with the troop removed
     func remove_troop_from_squad{range_check_ptr}(troop_idx : felt, s : Squad) -> (updated : Squad):
         alloc_locals
         assert_lt(troop_idx, Squad.SIZE / Troop.SIZE)
@@ -645,18 +710,53 @@ namespace Combat:
     end
 
     func troop_copy_with_vitality(t : Troop, v : felt) -> (t : Troop):
-        return (
-            Troop(
-            id=t.id,
-            type=t.type,
-            tier=t.tier,
-            building=t.building,
-            agility=t.agility,
-            attack=t.attack,
-            armor=t.armor,
-            vitality=v,
-            wisdom=t.wisdom,
-            ),
-        )
+        if v == 0:
+            return (
+                Troop(
+                id=0,
+                type=0,
+                tier=0,
+                building=0,
+                agility=0,
+                attack=0,
+                armor=0,
+                vitality=0,
+                wisdom=0,
+                ),
+            )
+        else:
+            return (
+                Troop(
+                id=t.id,
+                type=t.type,
+                tier=t.tier,
+                building=t.building,
+                agility=t.agility,
+                attack=t.attack,
+                armor=t.armor,
+                vitality=v,
+                wisdom=t.wisdom,
+                ),
+            )
+        end
+    end
+
+    func build_goblin_squad{range_check_ptr}(strength : felt) -> (s : Squad):
+        let (squad : Squad) = unpack_squad(0)
+        return build_goblin_squad_loop(0, strength, squad)
+    end
+
+    func build_goblin_squad_loop{range_check_ptr}(idx : felt, count : felt, s : Squad) -> (
+        s : Squad
+    ):
+        alloc_locals
+
+        if idx == count:
+            return (s)
+        end
+
+        let (goblin : Troop) = get_troop_internal(TroopId.Goblin)
+        let (updated : Squad) = add_troop_to_squad(goblin, s)
+        return build_goblin_squad_loop(idx + 1, count, updated)
     end
 end

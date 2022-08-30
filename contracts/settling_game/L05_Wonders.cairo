@@ -21,7 +21,8 @@ from starkware.cairo.common.uint256 import Uint256
 from openzeppelin.upgrades.library import Proxy
 
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
-from contracts.settling_game.interfaces.imodules import IModuleController, IL04_Calculator
+from contracts.settling_game.modules.calculator.interface import ICalculator
+from contracts.settling_game.interfaces.imodules import IModuleController
 
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
@@ -98,10 +99,10 @@ func pay_wonder_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
         controller, ExternalContractIds.Resources
     )
     let (calculator_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.L04_Calculator
+        contract_address=controller, module_id=ModuleIds.Calculator
     )
 
-    let (current_epoch) = IL04_Calculator.calculate_epoch(calculator_address)
+    let (current_epoch) = ICalculator.calculate_epoch(calculator_address)
 
     assert_nn_le(current_epoch, epoch)
 
@@ -123,8 +124,19 @@ func pay_wonder_upkeep{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     assert upkeep_token_amounts[2] = Uint256(14, 0)
     assert upkeep_token_amounts[3] = Uint256(7, 0)
 
+    let (local data : felt*) = alloc()
+    assert data[0] = 0
+
     IERC1155.safeBatchTransferFrom(
-        resources_address, caller, treasury_address, 4, upkeep_token_ids, 4, upkeep_token_amounts
+        resources_address,
+        caller,
+        treasury_address,
+        4,
+        upkeep_token_ids,
+        4,
+        upkeep_token_amounts,
+        1,
+        data,
     )
 
     return ()
@@ -143,10 +155,10 @@ func update_wonder_settlement{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
 
     # calculator logic contract
     let (calculator_address) = IModuleController.get_module_address(
-        controller, ModuleIds.L04_Calculator
+        controller, ModuleIds.Calculator
     )
 
-    let (current_epoch) = IL04_Calculator.calculate_epoch(calculator_address)
+    let (current_epoch) = ICalculator.calculate_epoch(calculator_address)
     let (total_wonders_staked) = get_total_wonders_staked(current_epoch)
 
     let (wonder_id_staked) = get_wonder_id_staked(token_id)
@@ -175,7 +187,7 @@ func claim_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     )
 
     let (calculator_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.L04_Calculator
+        contract_address=controller, module_id=ModuleIds.Calculator
     )
 
     # Check that wonder is staked (this also checks if token_id a wonder at all)
@@ -183,7 +195,7 @@ func claim_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     assert_not_zero(staked_epoch)
 
     let claiming_epoch_start = staked_epoch + 1
-    let (current_epoch) = IL04_Calculator.calculate_epoch(calculator_address)
+    let (current_epoch) = ICalculator.calculate_epoch(calculator_address)
     # assert that claim loop starts at a past epoch
     assert_nn_le(claiming_epoch_start, current_epoch - 1)
 
@@ -231,9 +243,12 @@ func loop_epochs_claim{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
             token_id, current_epoch, epoch_total_wonders, 1, ids_arr, 1, amounts_arr
         )
 
+        let (local data : felt*) = alloc()
+        assert data[0] = 0
+
         # Transfer claimable resources
         IERC1155.safeBatchTransferFrom(
-            resources_address, caller, treasury_address, 22, ids_arr, 22, amounts_arr
+            resources_address, caller, treasury_address, 22, ids_arr, 22, amounts_arr, 1, data
         )
 
         return loop_epochs_claim(caller, token_id, current_epoch, claiming_epoch + 1)
@@ -292,10 +307,10 @@ func update_epoch_pool{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     let (controller) = Module.controller_address()
 
     let (calculator_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.L04_Calculator
+        contract_address=controller, module_id=ModuleIds.Calculator
     )
 
-    let (current_epoch) = IL04_Calculator.calculate_epoch(calculator_address)
+    let (current_epoch) = ICalculator.calculate_epoch(calculator_address)
     let (last_updated_epoch) = get_last_updated_epoch()
 
     # Epochs that havent been updated since last update or recursion

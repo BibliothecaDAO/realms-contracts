@@ -15,8 +15,7 @@ Contracts = namedtuple('Contracts', 'alias contract_name id')
 # 6. Set token contract approval if needed - Resources etc
 
 NEW_MODULES = [
-    Contracts("Relics", "Relics", "12"),
-    Contracts("Food", "Food", "13"),
+    Contracts("GoblinTown", "GoblinTown", "14"),
 ]
 
 
@@ -27,6 +26,7 @@ def run(nre):
     #---------------- SET MODULES  ----------------#
 
     for contract in NEW_MODULES:
+
         logged_deploy(
             nre,
             contract.contract_name,

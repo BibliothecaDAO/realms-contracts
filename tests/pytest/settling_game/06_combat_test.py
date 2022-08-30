@@ -182,24 +182,30 @@ async def test_get_set_troop_cost(l06_combat):
 # of load_resource_ids_and_values_from_cost, convert_cost_dict_to_tokens_and_values
 # and sum_values_by_key in general.cairo file, as it calls them all
 @pytest.mark.asyncio
-async def test_transform_costs_to_token_ids_values(utils_general_tests):
-    costs = [TROOP_COSTS[TroopId.Watchman], TROOP_COSTS[TroopId.Guard]]
-    tx = await utils_general_tests.test_transform_costs_to_token_ids_values(costs).invoke()
+async def test_transform_costs_to_tokens(utils_general_tests):
+    costs = [TROOP_COSTS[TroopId.Crossbow], TROOP_COSTS[TroopId.Ballista]]
+    tx = await utils_general_tests.test_transform_costs_to_tokens(costs, 1).invoke()
 
-    expected_ids = [
-        ResourceIds.Wood,
-        ResourceIds.Stone,
-        ResourceIds.Copper,
-    ]
-    expected_values = [6, 9, 15]
+    expected_ids = [ResourceIds.Stone, ResourceIds.Coal, ResourceIds.Gold, ResourceIds.Mithral, ResourceIds.Dragonhide]
+    expected_values = [28, 8, 5, 1, 1]
 
     assert tx.result.ids == [utils_general_tests.Uint256(low=v, high=0) for v in expected_ids]
-    assert tx.result.values == [utils_general_tests.Uint256(low=v, high=0) for v in expected_values]
+    assert tx.result.values == [utils_general_tests.Uint256(low=v * 10**18, high=0) for v in expected_values]
+
+    # buying 20 Pikemen
+    costs = [TROOP_COSTS[TroopId.Pikeman]]
+    tx = await utils_general_tests.test_transform_costs_to_tokens(costs, 20).invoke()
+
+    expected_ids = [ResourceIds.Diamonds]
+    expected_values = [20]
+
+    assert tx.result.ids == [utils_general_tests.Uint256(low=v, high=0) for v in expected_ids]
+    assert tx.result.values == [utils_general_tests.Uint256(low=v * 10**18, high=0) for v in expected_values]
 
 
 @pytest.mark.asyncio
 async def test_load_troop_costs(l06_combat_tests):
-    troops = [TroopId.Watchman, TroopId.Guard, TroopId.Scorpio]
+    troops = [TroopId.Skirmisher, TroopId.Knight, TroopId.Mage]
 
     # set_troop_cost is automatically imported/exposed in the contract
     # due to the way how the compiler works, so we can call it directly

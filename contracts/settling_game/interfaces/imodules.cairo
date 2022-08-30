@@ -66,30 +66,14 @@ namespace IModuleController:
 end
 
 @contract_interface
-namespace IL01_Settling:
-    func set_time_staked(token_id : Uint256, time_left : felt):
-    end
-    func set_time_vault_staked(token_id : Uint256, time_left : felt):
-    end
-    func set_total_realms_settled(amount : felt):
-    end
-    func get_time_staked(token_id : Uint256) -> (time : felt):
-    end
-    func get_time_vault_staked(token_id : Uint256) -> (time : felt):
-    end
-    func get_total_realms_settled() -> (amount : felt):
-    end
-    func return_approved():
-    end
-end
-
-@contract_interface
 namespace IL02_Resources:
     func check_if_claimable(token_id : Uint256) -> (can_claim : felt):
     end
     func claim_resources(token_id : Uint256):
     end
     func pillage_resources(token_id : Uint256, claimer : felt):
+    end
+    func wonder_claim(token_id : Uint256):
     end
 end
 
@@ -104,26 +88,6 @@ namespace IL03_Buildings:
     func get_effective_population_buildings(token_id : Uint256) -> (
         realm_buildings : RealmBuildings
     ):
-    end
-end
-
-@contract_interface
-namespace IL04_Calculator:
-    func calculate_epoch() -> (epoch : felt):
-    end
-    func calculate_happiness(token_id : Uint256) -> (happiness : felt):
-    end
-    func calculate_troop_population(token_id : Uint256) -> (troop_population : felt):
-    end
-    func calculate_culture(token_id : Uint256) -> (culture : felt):
-    end
-    func calculate_population(token_id : Uint256) -> (population : felt):
-    end
-    func calculate_food(token_id : Uint256) -> (food : felt):
-    end
-    func calculate_tribute() -> (tribute : felt):
-    end
-    func calculate_wonder_tax() -> (tax_percentage : felt):
     end
 end
 
@@ -214,5 +178,17 @@ namespace IFood:
     func available_food_in_store(token_id : Uint256) -> (available : felt):
     end
     func get_full_store_houses(token_id : Uint256) -> (full_store_houses : felt):
+    end
+end
+
+@contract_interface
+namespace IGoblinTown:
+    func spawn_goblin_welcomparty(realm_id : Uint256):
+    end
+
+    func get_strength_and_timestamp(realm_id : Uint256) -> (strength : felt, spawn_ts : felt):
+    end
+
+    func spawn_next(realm_id : Uint256):
     end
 end

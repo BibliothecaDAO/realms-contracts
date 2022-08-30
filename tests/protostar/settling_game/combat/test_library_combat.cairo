@@ -3,8 +3,10 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
 
 from contracts.settling_game.library.library_combat import Combat
+from contracts.settling_game.utils.constants import ATTACKING_SQUAD_SLOT, DEFENDING_SQUAD_SLOT
 from contracts.settling_game.utils.game_structs import (
     RealmBuildingsIds,
+    RealmBuildings,
     Troop,
     TroopId,
     TroopType,
@@ -26,12 +28,53 @@ end
 
 @external
 func test_assert_slot{range_check_ptr}():
-    # TODO: use constatns once refactored
-    Combat.assert_slot(1)
-    Combat.assert_slot(2)
+    Combat.assert_slot(ATTACKING_SQUAD_SLOT)
+    Combat.assert_slot(DEFENDING_SQUAD_SLOT)
 
     %{ expect_revert() %}
-    Combat.assert_slot(3)
+    Combat.assert_slot(DEFENDING_SQUAD_SLOT + 1)
+
+    return ()
+end
+
+@external
+func test_assert_can_build_troops{range_check_ptr}():
+    alloc_locals
+
+    let (troop_ids : felt*) = alloc()
+    assert [troop_ids] = TroopId.Skirmisher  # needs ArcherTower
+    assert [troop_ids + 1] = TroopId.Pikeman  # needs Barracks
+    assert [troop_ids + 2] = TroopId.Ballista  # needs Castle
+    assert [troop_ids + 3] = TroopId.Mage  # needs MageTower
+
+    let buildings = RealmBuildings(
+        House=0,
+        StoreHouse=0,
+        Granary=0,
+        Farm=0,
+        FishingVillage=0,
+        Barracks=1,
+        MageTower=1,
+        ArcherTower=1,
+        Castle=1,
+    )
+
+    # should pass, no check necessary
+    Combat.assert_can_build_troops(4, troop_ids, buildings)
+
+    %{ expect_revert() %}
+    let buildings = RealmBuildings(
+        House=0,
+        StoreHouse=0,
+        Granary=0,
+        Farm=0,
+        FishingVillage=0,
+        Barracks=0,
+        MageTower=0,
+        ArcherTower=0,
+        Castle=0,
+    )
+    Combat.assert_can_build_troops(4, troop_ids, buildings)
 
     return ()
 end
@@ -509,6 +552,9 @@ end
 
 @external
 func test_apply_hunger_penalty{range_check_ptr}():
+    alloc_locals
+
+    # test normal case
     let (full) = build_default_squad()
     let (h) = Combat.apply_hunger_penalty(full)
 
@@ -528,6 +574,18 @@ func test_apply_hunger_penalty{range_check_ptr}():
     assert_eq(h.t2_5.vitality, 26)
     assert_eq(h.t3_1.vitality, 26)
 
+    # test applying hunger penalty multiple times
+    # until the whole squad dies
+    let (h12) = Combat.apply_hunger_penalty(h)
+    let (h6) = Combat.apply_hunger_penalty(h12)
+    let (h3) = Combat.apply_hunger_penalty(h6)
+    let (h1) = Combat.apply_hunger_penalty(h3)
+    let (h0) = Combat.apply_hunger_penalty(h1)
+
+    let (empty_troop) = build_empty_troop()
+    assert_troop_eq(h0.t1_1, empty_troop)
+    assert_troop_eq(h0.t3_1, empty_troop)
+
     let (empty) = build_empty_squad()
     let (h) = Combat.apply_hunger_penalty(empty)
 
@@ -546,6 +604,33 @@ func test_apply_hunger_penalty{range_check_ptr}():
     assert_eq(h.t2_4.vitality, 0)
     assert_eq(h.t2_5.vitality, 0)
     assert_eq(h.t3_1.vitality, 0)
+
+    return ()
+end
+
+@external
+func test_build_goblin_squad{range_check_ptr}():
+    alloc_locals
+
+    let (empty) = build_empty_troop()
+    let (goblin) = build_troop(TroopId.Goblin)
+
+    let (s) = Combat.build_goblin_squad(7)
+    assert_troop_eq(s.t1_1, goblin)
+    assert_troop_eq(s.t1_2, goblin)
+    assert_troop_eq(s.t1_3, goblin)
+    assert_troop_eq(s.t1_4, goblin)
+    assert_troop_eq(s.t1_5, goblin)
+    assert_troop_eq(s.t1_6, goblin)
+    assert_troop_eq(s.t1_7, goblin)
+    assert_troop_eq(s.t1_8, empty)
+    assert_troop_eq(s.t1_9, empty)
+    assert_troop_eq(s.t2_1, empty)
+    assert_troop_eq(s.t2_2, empty)
+    assert_troop_eq(s.t2_3, empty)
+    assert_troop_eq(s.t2_4, empty)
+    assert_troop_eq(s.t2_5, empty)
+    assert_troop_eq(s.t3_1, empty)
 
     return ()
 end

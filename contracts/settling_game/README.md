@@ -15,10 +15,10 @@ A modular game engine architecture for the StarkNet L2 roll-up - Forked & heavil
 
 | Module          | Function                             | Current Status |
 | --------------- | ------------------------------------ | -------------- |
-| [Settling](./L01_Settling.cairo)        | Manages Settling (staking functions) | In review      |
+| [Settling](./modules/settling/Settling.cairo)        | Manages Settling (staking functions) | In review      |
 | [Resources](./L02_Resources.cairo)       | Resource management                  | In review      |
 | [Buildings](./L03_Buildings.cairo)       | Buildings management                 | In review      |
-| [Calculator](./L04_Calculator.cairo)      | Calculator management                | In review      |
+| [Calculator](./modules/settling/Calculator.cairo)      | Calculator management                | In review      |
 | [Combat](./L06_Combat.cairo)          | Combat simulator                     | In review      |
 | Crafting        | Crafting                             | Draft          |
 | Barbarian Horde | Characters can summon                | Planned        |
@@ -37,4 +37,3 @@ A modular game engine architecture for the StarkNet L2 roll-up - Forked & heavil
 - [] Guilds
 
 </details>
-

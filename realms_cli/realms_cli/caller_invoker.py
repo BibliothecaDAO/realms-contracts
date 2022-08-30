@@ -124,6 +124,8 @@ def wrapped_call(network, contract_alias, function, arguments) -> str:
     # return out such that it can be prettified at a higher level
     return out
 
+# TODO: Add in no args
+
 
 def send(network, signer_alias, contract_alias, function, arguments) -> str:
     """Nile send function."""

@@ -15,6 +15,8 @@ from openzeppelin.upgrades.library import Proxy
 
 from openzeppelin.introspection.ERC165 import ERC165
 
+from contracts.settling_game.library.library_module import Module
+
 # move to OZ lib once live
 from contracts.token.library import ERC1155
 
@@ -26,7 +28,7 @@ from contracts.token.library import ERC1155
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     uri : felt, proxy_admin : felt
 ):
-    ERC1155.initializer(uri)
+    ERC1155.initializer()
     Ownable.initializer(proxy_admin)
     Proxy.initializer(proxy_admin)
     return ()
@@ -53,8 +55,11 @@ func supportsInterface{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
 end
 
 @view
-func uri{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (uri : felt):
-    return ERC1155.uri()
+func tokenURI{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    tokenId : Uint256
+) -> (tokenURI : felt):
+    let (tokenURI : felt) = ERC1155.token_uri(tokenId)
+    return (tokenURI)
 end
 
 @view
@@ -119,8 +124,7 @@ end
 func mint{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     to : felt, id : Uint256, amount : Uint256, data_len : felt, data : felt*
 ):
-    # TODO: Module based approach
-    # check_can_action()
+    Module.only_approved()
     let (caller) = get_caller_address()
     with_attr error_message("ERC1155: called from zero address"):
         assert_not_zero(caller)
@@ -139,8 +143,7 @@ func mintBatch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     data_len : felt,
     data : felt*,
 ):
-    # TODO: Module based approach
-    # check_can_action()
+    Module.only_approved()
     let (caller) = get_caller_address()
     with_attr error_message("ERC1155: called from zero address"):
         assert_not_zero(caller)
@@ -166,8 +169,7 @@ end
 func burnBatch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     from_ : felt, ids_len : felt, ids : Uint256*, amounts_len : felt, amounts : Uint256*
 ):
-    # TODO: Module based approach
-    # ERC1155.assert_owner_or_approved(owner=from_)
+    Module.only_approved()
     let (caller) = get_caller_address()
     with_attr error_message("ERC1155: called from zero address"):
         assert_not_zero(caller)
@@ -175,53 +177,12 @@ func burnBatch{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     ERC1155._burn_batch(from_, ids_len, ids, amounts_len, amounts)
     return ()
 end
-#
-# Bibliotheca added methods
-#
-
-@storage_var
-func Module_access() -> (address : felt):
-end
 
 @external
-func Set_module_access{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-    address : felt
+func setTokenUri{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    tokenId : Uint256, tokenURI : felt
 ):
     Ownable.assert_only_owner()
-    Module_access.write(address)
-    return ()
-end
-
-func check_caller{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}() -> (
-    value : felt
-):
-    let (address) = Module_access.read()
-    let (caller) = get_caller_address()
-
-    if address == caller:
-        return (1)
-    end
-
-    return (0)
-end
-
-func check_owner{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}() -> (
-    value : felt
-):
-    let (caller) = get_caller_address()
-    let (owner) = Ownable.owner()
-
-    if caller == owner:
-        return (1)
-    end
-
-    return (0)
-end
-
-func check_can_action{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}():
-    let (caller) = check_caller()
-    let (owner) = check_owner()
-
-    assert_not_zero(owner + caller)
+    ERC1155._set_token_uri(tokenId, tokenURI)
     return ()
 end

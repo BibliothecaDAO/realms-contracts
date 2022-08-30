@@ -19,13 +19,34 @@ def mint_resources(network):
     """
     config = Config(nile_network=network)
 
+    uints = []
+    amounts = []
+
+    n_resources = len(config.RESOURCES)
+
+    for i in range(n_resources - 2):
+        uints.append(str(i+1))
+        uints.append("0")
+
+    # WHEAT
+    uints.append("10000")
+    uints.append("0")
+
+    # FISH
+    uints.append("10001")
+    uints.append("0")
+
+    for i in range(n_resources):
+        amounts.append(100000000 * 10 ** 18)
+        amounts.append(0)
+
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_resources",
         function="mintBatch",
-        arguments=[int(config.ADMIN_ADDRESS, 16), 22, *uint(1), *uint(2), *uint(3), *uint(4), *uint(5), *uint(6), *uint(7), *uint(8), *uint(9), *uint(10), *uint(11), *uint(12), *uint(13), *uint(14), *uint(15), *uint(16), *uint(17), *uint(18), *uint(19), *uint(20), *uint(21), *uint(22), 22, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources, *resources
-                   ],
+        arguments=[int('0x07Deb0dA237EE37276489278FE16EFF3E6A3d62F830446104D93C892df771cA2', 16), n_resources,
+                   *uints, n_resources, *amounts, 1, 1],
     )
 
 
@@ -56,7 +77,7 @@ def upgrade_module(module_name, network):
                 f.write(line)
         f.truncate()
 
-    compile(contract_alias="contracts/settling_game/" + module_name + ".cairo")
+    compile(contract_alias="contracts/settling_game/modules/goblintown/GoblinTown.cairo")
 
     deploy(
         network=network,
@@ -95,4 +116,47 @@ def transfer_to(to_address, network, token_id):
         function="transferFrom",
         arguments=[int(config.ADMIN_ADDRESS, 16),
                    int(to_address, 16), token_id],
+    )
+
+
+@click.command()
+@click.option("--network", default="goerli")
+def set_xoroshiro(network):
+    """
+    Sets Xoroshiro
+    """
+    config = Config(nile_network=network)
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="proxy_L06_Combat",
+        function="set_xoroshiro",
+        arguments=[int(config.XOROSHIRO_ADDRESS, 16)],
+    )
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="proxy_GoblinTown",
+        function="set_xoroshiro",
+        arguments=[int(config.XOROSHIRO_ADDRESS, 16)],
+    )
+
+
+@click.command()
+@click.argument("token_id", nargs=1)
+@click.option("--network", default="goerli")
+def zero_dead_squads(network, token_id):
+    """
+    Zeros dead squads
+    """
+    config = Config(nile_network=network)
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="proxy_L06_Combat",
+        function="zero_dead_squads",
+        arguments=[token_id, 0],
     )

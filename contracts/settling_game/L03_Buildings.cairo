@@ -22,7 +22,7 @@ from contracts.settling_game.library.library_buildings import Buildings
 from contracts.settling_game.library.library_resources import Resources
 from contracts.settling_game.utils.constants import STORE_HOUSE_SIZE
 
-from contracts.settling_game.utils.general import unpack_data, transform_costs_to_token_ids_values
+from contracts.settling_game.utils.general import unpack_data, transform_costs_to_tokens
 from contracts.settling_game.utils.game_structs import (
     RealmBuildings,
     RealmData,
@@ -165,7 +165,11 @@ func build{
         tempvar bitwise_ptr = bitwise_ptr
     else:
         let (building_cost : Cost, _) = get_building_cost(building_id)
-        let (token_len, token_ids, token_values) = Buildings.calculate_building_cost(building_cost)
+
+        let (local data : Cost*) = alloc()
+        assert data[0] = building_cost
+
+        let (token_len, token_ids, token_values) = transform_costs_to_tokens(1, data, quantity)
         IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values)
         tempvar syscall_ptr = syscall_ptr
         tempvar range_check_ptr = range_check_ptr

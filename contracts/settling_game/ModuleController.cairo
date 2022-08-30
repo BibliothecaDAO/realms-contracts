@@ -92,10 +92,10 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     # write patterns known at deployment. E.g., 1->2, 1->3, 5->6.
 
     # settling to wonders logic
-    can_write_to.write(ModuleIds.L01_Settling, ModuleIds.L05_Wonders, TRUE)
+    can_write_to.write(ModuleIds.Settling, ModuleIds.L05_Wonders, TRUE)
 
     # resources logic to settling state
-    can_write_to.write(ModuleIds.L02_Resources, ModuleIds.L01_Settling, TRUE)
+    can_write_to.write(ModuleIds.L02_Resources, ModuleIds.Settling, TRUE)
 
     # resources logic to wonders state
     can_write_to.write(ModuleIds.L02_Resources, ModuleIds.L05_Wonders, TRUE)
@@ -104,7 +104,25 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     can_write_to.write(ModuleIds.L06_Combat, ModuleIds.L02_Resources, TRUE)
 
     # # combat can write to settling
-    can_write_to.write(ModuleIds.L06_Combat, ModuleIds.L01_Settling, TRUE)
+    can_write_to.write(ModuleIds.L06_Combat, ModuleIds.Settling, TRUE)
+
+    # settling can write to s realms tokens
+    can_write_to.write(ModuleIds.Settling, ModuleIds.S_Realms_Token, TRUE)
+
+    # resources can write to resources token
+    can_write_to.write(ModuleIds.L02_Resources, ModuleIds.Resources_Token, TRUE)
+
+    # buildings can write to resources token
+    can_write_to.write(ModuleIds.L03_Buildings, ModuleIds.Resources_Token, TRUE)
+
+    # combat can write to resources token
+    can_write_to.write(ModuleIds.L06_Combat, ModuleIds.Resources_Token, TRUE)
+
+    # crypts can write to crypts token
+    can_write_to.write(ModuleIds.L07_Crypts, ModuleIds.S_Crypts_Token, TRUE)
+
+    # crypts resources can write to resources token
+    can_write_to.write(ModuleIds.L08_Crypts_Resources, ModuleIds.Resources_Token, TRUE)
 
     # # crypts logic to resources
     # can_write_to.write(ModuleIds.L07_Crypts, ModuleIds.L08_Crypts_Resources, TRUE)
@@ -171,18 +189,18 @@ end
 func set_initial_module_addresses{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
 }(
-    module_01_addr : felt,
+    settling_module_addr : felt,
     module_02_addr : felt,
     module_03_addr : felt,
-    module_04_addr : felt,
+    calculator_module_addr : felt,
     module_05_addr : felt,
     module_06_addr : felt,
 ):
     only_arbiter()
 
     # Settling Logic
-    address_of_module_id.write(ModuleIds.L01_Settling, module_01_addr)
-    module_id_of_address.write(module_01_addr, ModuleIds.L01_Settling)
+    address_of_module_id.write(ModuleIds.Settling, settling_module_addr)
+    module_id_of_address.write(settling_module_addr, ModuleIds.Settling)
 
     # Resources Logic
     address_of_module_id.write(ModuleIds.L02_Resources, module_02_addr)
@@ -193,8 +211,8 @@ func set_initial_module_addresses{
     module_id_of_address.write(module_03_addr, ModuleIds.L03_Buildings)
 
     # Calculator Logic
-    address_of_module_id.write(ModuleIds.L04_Calculator, module_04_addr)
-    module_id_of_address.write(module_04_addr, ModuleIds.L04_Calculator)
+    address_of_module_id.write(ModuleIds.Calculator, calculator_module_addr)
+    module_id_of_address.write(calculator_module_addr, ModuleIds.Calculator)
 
     # Wonders Logic
     address_of_module_id.write(ModuleIds.L05_Wonders, module_05_addr)
