@@ -64,7 +64,7 @@ func ERC1155_operator_approvals(account : felt, operator : felt) -> (approved : 
 end
 
 @storage_var
-func ERC1155_uri() -> (uri : felt):
+func ERC1155_token_uri(token_id : Uint256) -> (token_uri : felt):
 end
 
 namespace ERC1155:
@@ -72,10 +72,7 @@ namespace ERC1155:
     # Constructor
     #
 
-    func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        uri_ : felt
-    ):
-        _set_uri(uri_)
+    func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
         ERC165.register_interface(IERC1155_ID)
         ERC165.register_interface(IERC1155_METADATA_ID)
         ERC165.register_interface(IERC1155_RECEIVER_ID)
@@ -86,9 +83,11 @@ namespace ERC1155:
     # Getters
     #
 
-    func uri{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (uri : felt):
-        let (uri) = ERC1155_uri.read()
-        return (uri)
+    func token_uri{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        token_id: Uint256
+    ) -> (token_uri : felt):
+        let (token_uri) = ERC1155_token_uri.read(token_id)
+        return (token_uri)
     end
 
     func balance_of{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -393,8 +392,11 @@ namespace ERC1155:
         return ()
     end
 
-    func _set_uri{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(newuri : felt):
-        ERC1155_uri.write(newuri)
+    func _set_token_uri{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        token_id : Uint256, token_uri : felt
+    ):
+        uint256_check(token_id)
+        ERC1155_token_uri.write(token_id, token_uri)
         return ()
     end
 
