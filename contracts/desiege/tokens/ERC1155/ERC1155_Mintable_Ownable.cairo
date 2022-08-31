@@ -7,12 +7,7 @@ from starkware.cairo.common.alloc import alloc
 
 from contracts.desiege.tokens.ERC1155.structs import TokenUri
 
-from openzeppelin.access.ownable import (
-    Ownable_initializer,
-    Ownable_get_owner,
-    Ownable_transfer_ownership,
-    Ownable_only_owner,
-)
+from openzeppelin.access.ownable.library import Ownable
 
 from contracts.desiege.tokens.ERC1155.ERC1155_base import (
     ERC1155_initializer,
@@ -36,7 +31,7 @@ from contracts.desiege.tokens.ERC1155.ERC1155_base import (
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(owner : felt):
-    Ownable_initializer(owner)
+    Ownable.initializer(owner)
     return ()
 end
 
@@ -86,7 +81,7 @@ end
 func mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
     recipient : felt, token_id : felt, amount : felt
 ) -> ():
-    Ownable_only_owner()
+    Ownable.assert_only_owner()
     ERC1155_mint(recipient, token_id, amount)
 
     return ()
@@ -96,7 +91,7 @@ end
 func mintBatch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
     recipient : felt, token_ids_len : felt, token_ids : felt*, amounts_len : felt, amounts : felt*
 ) -> ():
-    Ownable_only_owner()
+    Ownable.assert_only_owner()
     ERC1155_mint_batch(recipient, token_ids_len, token_ids, amounts_len, amounts)
 
     return ()
@@ -106,7 +101,7 @@ end
 func burn{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
     account : felt, token_id : felt, amount : felt
 ):
-    Ownable_only_owner()
+    Ownable.assert_only_owner()
     ERC1155_burn(account, token_id, amount)
 
     return ()
@@ -116,7 +111,7 @@ end
 func burnBatch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
     account : felt, token_ids_len : felt, token_ids : felt*, amounts_len : felt, amounts : felt*
 ):
-    Ownable_only_owner()
+    Ownable.assert_only_owner()
     ERC1155_burn_batch(account, token_ids_len, token_ids, amounts_len, amounts)
 
     return ()
@@ -129,7 +124,7 @@ end
 func getOwner{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}() -> (
     owner : felt
 ):
-    let (o) = Ownable_get_owner()
+    let (o) = Ownable.owner()
     return (owner=o)
 end
 
@@ -137,6 +132,6 @@ end
 func transferOwnership{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
     next_owner : felt
 ):
-    Ownable_transfer_ownership(next_owner)
+    Ownable.transfer_ownership(next_owner)
     return ()
 end

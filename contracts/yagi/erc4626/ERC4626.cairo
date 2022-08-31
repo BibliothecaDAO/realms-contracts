@@ -7,7 +7,7 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
 from starkware.cairo.common.uint256 import ALL_ONES, Uint256, uint256_check, uint256_eq
 
-from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
+from openzeppelin.token.erc20.IERC20 import IERC20
 from openzeppelin.token.erc20.library import ERC20
 
 from contracts.yagi.erc4626.library import ERC4626, ERC4626_asset, Deposit, Withdraw

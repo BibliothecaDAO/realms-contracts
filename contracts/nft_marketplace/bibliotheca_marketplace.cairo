@@ -14,17 +14,12 @@ from starkware.starknet.common.syscalls import (
 from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem, assert_lt_felt
 from starkware.cairo.common.uint256 import Uint256, uint256_le
 
-from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
-from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
+from openzeppelin.token.erc20.IERC20 import IERC20
+from openzeppelin.token.erc721.IERC721 import IERC721
 
-from openzeppelin.access.ownable import Ownable_initializer, Ownable_only_owner
+from openzeppelin.access.ownable.library import Ownable
 
-from openzeppelin.security.pausable import (
-    Pausable_paused,
-    Pausable_pause,
-    Pausable_unpause,
-    Pausable_when_not_paused,
-)
+from openzeppelin.security.pausable.library import Pausable
 from contracts.settling_game.utils.general import scale, unpack_data
 
 from contracts.settling_game.utils.constants import (
@@ -104,7 +99,7 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     trade_counter.write(1)
     protocol_fee_bips.write(500)
     treasury_address.write(_treasury_address)
-    Ownable_initializer(owner)
+    Ownable.initializer(owner)
     return ()
 end
 
@@ -138,7 +133,7 @@ func open_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_pt
     _token_contract : felt, _token_id : Uint256, _price : felt, _expiration : felt
 ):
     alloc_locals
-    Pausable_when_not_paused()
+    Pausable.assert_not_paused()
     let (caller) = get_caller_address()
     let (contract_address) = get_contract_address()
     let (owner_of) = IERC721.ownerOf(_token_contract, _token_id)
@@ -164,7 +159,7 @@ func execute_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
     _trade : felt
 ):
     alloc_locals
-    Pausable_when_not_paused()
+    Pausable.assert_not_paused()
     let (currency) = currency_token_address.read()
 
     let (caller) = get_caller_address()
@@ -209,7 +204,7 @@ func update_price{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_
     _trade : felt, _price : felt
 ):
     alloc_locals
-    Pausable_when_not_paused()
+    Pausable.assert_not_paused()
     let (trade) = _trades.read(_trade)
 
     assert trade.status = TradeStatus.Open
@@ -227,7 +222,7 @@ end
 @external
 func cancel_trade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(_trade : felt):
     alloc_locals
-    Pausable_when_not_paused()
+    Pausable.assert_not_paused()
     let (trade) = _trades.read(_trade)
 
     assert trade.status = TradeStatus.Open
@@ -358,7 +353,7 @@ end
 
 @view
 func paused{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (paused : felt):
-    let (paused) = Pausable_paused.read()
+    let (paused) = Pausable.is_paused()
     return (paused)
 end
 
@@ -371,7 +366,7 @@ end
 func set_basis_points{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     basis_points : felt
 ) -> (success : felt):
-    Ownable_only_owner()
+    Ownable.assert_only_owner()
     protocol_fee_bips.write(basis_points)
     return (1)
 end
@@ -380,7 +375,7 @@ end
 func set_treasury_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     address : felt
 ) -> (success : felt):
-    Ownable_only_owner()
+    Ownable.assert_only_owner()
     treasury_address.write(address)
     return (1)
 end
@@ -389,21 +384,21 @@ end
 func set_currency_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     address : felt
 ) -> (success : felt):
-    Ownable_only_owner()
+    Ownable.assert_only_owner()
     currency_token_address.write(address)
     return (1)
 end
 
 @external
 func pause{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    Ownable_only_owner()
-    Pausable_pause()
+    Ownable.assert_only_owner()
+    Pausable._pause()
     return ()
 end
 
 @external
 func unpause{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    Ownable_only_owner()
-    Pausable_unpause()
+    Ownable.assert_only_owner()
+    Pausable._unpause()
     return ()
 end

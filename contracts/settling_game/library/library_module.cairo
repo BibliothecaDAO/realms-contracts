@@ -25,7 +25,7 @@ from starkware.cairo.common.uint256 import (
 )
 from starkware.cairo.common.bool import TRUE, FALSE
 
-from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
+from openzeppelin.token.erc721.IERC721 import IERC721
 
 from contracts.settling_game.interfaces.imodules import IModuleController
 

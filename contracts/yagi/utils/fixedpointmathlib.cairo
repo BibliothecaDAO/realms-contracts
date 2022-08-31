@@ -4,7 +4,7 @@ from starkware.cairo.common.bool import TRUE
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_not_zero
 from starkware.cairo.common.uint256 import Uint256, uint256_add, uint256_eq, uint256_sub
-from openzeppelin.security.safemath import SafeUint256
+from openzeppelin.security.safemath.library import SafeUint256
 
 # # @title Fixed point math library
 # # @description A fixed point math library
