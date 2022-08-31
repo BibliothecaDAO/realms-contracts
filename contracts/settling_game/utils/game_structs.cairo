@@ -153,7 +153,7 @@ end
 
 namespace ModuleIds:
     const Settling = 1
-    const L02_Resources = 2
+    const Resources = 2
     const L03_Buildings = 3
     const Calculator = 4
     const L05_Wonders = 5

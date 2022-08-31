@@ -66,18 +66,6 @@ namespace IModuleController:
 end
 
 @contract_interface
-namespace IL02_Resources:
-    func check_if_claimable(token_id : Uint256) -> (can_claim : felt):
-    end
-    func claim_resources(token_id : Uint256):
-    end
-    func pillage_resources(token_id : Uint256, claimer : felt):
-    end
-    func wonder_claim(token_id : Uint256):
-    end
-end
-
-@contract_interface
 namespace IL03_Buildings:
     func get_buildings_unpacked(token_id : Uint256) -> (realm_buildings : RealmBuildings):
     end

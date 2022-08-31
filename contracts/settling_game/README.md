@@ -16,7 +16,7 @@ A modular game engine architecture for the StarkNet L2 roll-up - Forked & heavil
 | Module          | Function                             | Current Status |
 | --------------- | ------------------------------------ | -------------- |
 | [Settling](./modules/settling/Settling.cairo)        | Manages Settling (staking functions) | In review      |
-| [Resources](./L02_Resources.cairo)       | Resource management                  | In review      |
+| [Resources](./modules/resources/Resources.cairo)       | Resource management                  | In review      |
 | [Buildings](./L03_Buildings.cairo)       | Buildings management                 | In review      |
 | [Calculator](./modules/settling/Calculator.cairo)      | Calculator management                | In review      |
 | [Combat](./L06_Combat.cairo)          | Combat simulator                     | In review      |
