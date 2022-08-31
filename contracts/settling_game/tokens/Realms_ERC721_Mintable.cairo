@@ -17,7 +17,7 @@ from openzeppelin.access.ownable import Ownable
 from openzeppelin.upgrades.library import Proxy
 
 from contracts.settling_game.utils.general import unpack_data
-from contracts.settling_game.utils.game_structs import RealmData
+from contracts.settling_game.utils.game_structs import RealmData, Point
 
 #
 # Initializer
@@ -224,6 +224,10 @@ end
 func realm_data(token_id : Uint256) -> (data : felt):
 end
 
+@storage_var
+func realm_coordinates(token_id : Uint256) -> (point : Point):
+end
+
 @external
 func set_realm_data{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
     tokenId : Uint256, _realm_data : felt
@@ -281,4 +285,19 @@ func fetch_realm_data{
         order=order,
     )
     return (realm_stats=realm_stats)
+end
+
+@external
+func get_realm_coordinates{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    token_id : Uint256
+) -> (point : Point):
+    return realm_coordinates.read(token_id)
+end
+
+@external
+func set_realm_coordinates{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    realm_id : Uint256, point : Point
+):
+    realm_coordinates.write(realm_id, point)
+    return ()
 end

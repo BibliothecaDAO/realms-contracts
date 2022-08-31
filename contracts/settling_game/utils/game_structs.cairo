@@ -504,3 +504,8 @@ struct FoodBuildings:
     member collections_left : felt
     member update_time : felt
 end
+
+struct Point:
+    member x : felt
+    member y : felt
+end
