@@ -21,6 +21,8 @@ def run(nre):
     config = Config(nre.network)
 
     declare(guild_contract.contract_name, nre.network, guild_contract.alias)
+    declare(guild_manager.contract_name, nre.network, guild_manager.alias)
+    declare(guild_certificate.contract_name, nre.network, guild_certificate.alias)
     declare(proxy.contract_name, nre.network, proxy.alias)
 
     predeclared_guild_contract_class = nre.get_declaration(

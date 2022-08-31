@@ -42,6 +42,6 @@
 	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode",
 	"remoteEnv": {
-		"CAIRO_PATH": "${containerEnv:PATH}:/workspaces/realms-contracts/lib/cairo_contracts/src"
+		"CAIRO_PATH": "${containerEnv:PATH}:/workspaces/realms-contracts/lib/cairo_contracts/src:/workspaces/realms-contracts/contracts/guild"
 	}
 }
