@@ -1,9 +1,9 @@
 # -----------------------------------
-#   CALCULATOR LOGIC
-#   This modules focus is to calculate the values of the internal
-#   multipliers so other modules can use them. The aim is to have this
-#   as the core calculator controller that contains no state.
-#   It is pure math.
+#   COORDINATES
+#   Logic around calculating distance between two points in Euclidean space.
+#
+#
+#
 #
 # MIT License
 # -----------------------------------
