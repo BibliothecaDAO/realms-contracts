@@ -113,7 +113,7 @@ async def test_mint_realm(resource_factory):
     set_block_timestamp(starknet.state, round(time.time()) + STAKE_TIME)
 
     await get_resource_lords_claimable(resources_logic)
-    
+
     ############
     # 😊 STATS #
     ############
@@ -129,10 +129,6 @@ async def test_mint_realm(resource_factory):
     food = await calculator_logic.calculate_food(FIRST_TOKEN_ID).invoke()
     # assert culture.result.culture == 25
     print(f'\033[1;31;40m😊 Culture level is {food.result.food}\n')
-
-    tax_percentage_info = await calculator_logic.calculate_wonder_tax().call()
-    print(
-        f'\033[1;31;40m😊 Wonder Tax {tax_percentage_info.result.tax_percentage}\n')
 
     #####################
     # RESOURCES & LORDS #
@@ -162,7 +158,6 @@ async def test_mint_realm(resource_factory):
     await claim_resources(admin_account, resources_logic, FIRST_TOKEN_ID)
 
     await show_resource_balance(admin_account, resources)
-
 
     ##################
     # UNSETTLE REALM #
@@ -210,18 +205,20 @@ async def checks_realms_balance(account, realms, assert_value):
     print(
         f'🏰 | Realms Balance: {balance_of.result.balance[0]}\n')
 
+
 async def get_resource_lords_claimable(resource_logic):
     """check realms balance"""
     balance_of = await resource_logic.get_all_resource_claimable(FIRST_TOKEN_ID).invoke()
     print(
         f'Claimable resources: {balance_of.result}\n')
 
+
 async def set_realm_meta(account, realms, token):
     """set realm metadata"""
     await signer.send_transaction(
         account, realms.contract_address, 'set_realm_data', [
             *token, map_realm(
-        realms_data[str(from_uint(token))], resources, wonders, orders)]
+                realms_data[str(from_uint(token))], resources, wonders, orders)]
     )
 
 

@@ -200,8 +200,6 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         data,
     )
 
-    # Check that wonder is staked (this also checks if token_id a wonder at all)
-
     let (check_wonder) = is_le(0, realms_data.wonder)
     if check_wonder == 1:
         let (wonder_resources_claim_ids : Uint256*) = alloc()
@@ -419,10 +417,6 @@ func get_all_resource_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     # CHECK DAYS + VAULT > 1
     let days = total_days + total_vault_days
 
-    # GET WONDER TAX
-    let (wonder_tax) = ICalculator.calculate_wonder_tax(calculator_address)
-
-    # TODO: No wonder tax yet
     # SET MINT
     let user_mint_rel_perc = 100
 

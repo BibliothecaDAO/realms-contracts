@@ -23,7 +23,7 @@ from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContra
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
-from contracts.settling_game.interfaces.imodules import IL05_Wonders, IL02_Resources, IGoblinTown
+from contracts.settling_game.interfaces.imodules import IL02_Resources, IGoblinTown
 
 # -----------------------------------
 # Events
@@ -238,12 +238,6 @@ func _set_world_state{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     # GET REALM DATA
     let (realms_data : RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id)
 
-    # UPDATE WONDERS
-    if realms_data.wonder != FALSE:
-        let (wonders_logic_address) = Module.get_module_address(ModuleIds.L05_Wonders)
-        IL05_Wonders.update_wonder_settlement(wonders_logic_address, token_id)
-        return ()
-    end
     return ()
 end
 

@@ -62,7 +62,7 @@ async def test_mint_realm(game_factory):
     await signer.send_transaction(
         account=admin_account, to=lords.contract_address, selector_name='approve', calldata=[buildings_logic.contract_address, *uint(INITIAL_SUPPLY)]
     )
-    
+
     await signers[1].send_transaction(
         account=treasury_account, to=lords.contract_address, selector_name='approve', calldata=[settling_logic.contract_address, *uint(INITIAL_SUPPLY)]
     )
@@ -121,7 +121,7 @@ async def test_mint_realm(game_factory):
     set_block_timestamp(starknet.state, round(time.time()) + STAKE_TIME)
 
     await get_resource_lords_claimable(resources_logic)
-    
+
     ############
     # 😊 STATS #
     ############
@@ -137,10 +137,6 @@ async def test_mint_realm(game_factory):
     food = await calculator_logic.calculate_food(FIRST_TOKEN_ID).invoke()
     # assert culture.result.culture == 25
     print(f'\033[1;31;40m😊 Culture level is {food.result.food}\n')
-
-    tax_percentage_info = await calculator_logic.calculate_wonder_tax().call()
-    print(
-        f'\033[1;31;40m😊 Wonder Tax {tax_percentage_info.result.tax_percentage}\n')
 
     #####################
     # RESOURCES & LORDS #
@@ -216,7 +212,8 @@ async def show_lords_balance(account, lords):
     player_lords_value = await lords.balanceOf(account.contract_address).invoke()
     print(
         f'\n \033[1;33;40m👛 | $LORDS {player_lords_value.result.balance[0]}\n')
-    assert player_lords_value.result.balance[0] == STAKED_DAYS * LORDS_RATE * (10 ** 18)
+    assert player_lords_value.result.balance[0] == STAKED_DAYS * \
+        LORDS_RATE * (10 ** 18)
 
 
 async def claim_resources(account, resources_logic, token):
@@ -233,18 +230,20 @@ async def checks_realms_balance(account, realms, assert_value):
     print(
         f'🏰 | Realms Balance: {balance_of.result.balance[0]}\n')
 
+
 async def get_resource_lords_claimable(resource_logic):
     """check realms balance"""
     balance_of = await resource_logic.get_all_resource_claimable(FIRST_TOKEN_ID).invoke()
     print(
         f'Claimable resources: {balance_of.result}\n')
 
+
 async def set_realm_meta(account, realms, token):
     """set realm metadata"""
     await signer.send_transaction(
         account, realms.contract_address, 'set_realm_data', [
             *token, map_realm(
-        realms_data[str(from_uint(token))], resources, wonders, orders)]
+                realms_data[str(from_uint(token))], resources, wonders, orders)]
     )
 
 
