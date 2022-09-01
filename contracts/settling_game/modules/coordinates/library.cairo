@@ -17,8 +17,8 @@ from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.pow import pow
 from contracts.settling_game.utils.game_structs import Point
+from contracts.settling_game.utils.constants import SECONDS_PER_KM
 
-const SECONDS_PER_KM = 120
 const PRECISION = 10000
 
 namespace Coordinates:

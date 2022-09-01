@@ -145,3 +145,8 @@ const GENESIS_TIMESTAMP = 1645743897
 # -----------------------------------
 const GOBLIN_WELCOME_PARTY_STRENGTH = 1
 const MAX_GOBLIN_TOWN_STRENGTH = 12
+
+# -----------------------------------
+# Coordinates
+# -----------------------------------
+const SECONDS_PER_KM = 120

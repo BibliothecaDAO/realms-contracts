@@ -232,7 +232,7 @@ end
 func set_realm_data{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
     tokenId : Uint256, _realm_data : felt
 ):
-    # # ONLY OWNER TODO
+    Ownable.assert_only_owner()
     realm_data.write(tokenId, _realm_data)
     return ()
 end
@@ -287,7 +287,7 @@ func fetch_realm_data{
     return (realm_stats=realm_stats)
 end
 
-@external
+@view
 func get_realm_coordinates{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
 ) -> (point : Point):
@@ -298,6 +298,7 @@ end
 func set_realm_coordinates{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     realm_id : Uint256, point : Point
 ):
+    Ownable.assert_only_owner()
     realm_coordinates.write(realm_id, point)
     return ()
 end
