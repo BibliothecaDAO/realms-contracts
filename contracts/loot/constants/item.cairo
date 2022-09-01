@@ -15,128 +15,153 @@ end
 # Loot item shape. This is the on-chain metadata of each item.
 struct Item:
     member Id : felt  # item id 1 - 100
+    member Slot : felt
     member Type : felt # weapon.blade, armor.foot, jewlery.ring
     member Material : felt # the material of the item
     member Rank : felt # 1 is best (Divine Robe = 1, Silk Robe = 2, Linen Robe = 3, Robe = 4, Shirt = 5)
     member Prefix_1 : felt  # First part of the name prefix (i.e Demon)
     member Prefix_2 : felt  # Second part of the name prefix (i.e Grasp)
     member Suffix : felt  # Stored value if item has a Suffix (i.e of Power)
-    member Greatness : felt  # Stored value if item has a Greatness
-    member Age : felt  # Timestamp of when item was created
-    member XP : felt  # accured XP
-    member State : State # the state of the item: {bagged, equipped, cooldown, etc}
+    member Greatness : felt  # Item greatness
+    member CreatedBlock : felt  # Timestamp of when item was created
+    member XP : felt  # Experience of the item
+    member State : State # the state of the item: {bagged, equipped, loose}
 end
 
-#TODO: Need to renumber these to be all unique
+# To provide cleaner numbering with the expectation we'll add more materials
+#    we give each material type it's own number space 
 namespace Material:
     const generic = 0
 
+    # Metal gets 1000 number space 
     namespace Metal:
-        const generic = 0
-        const ancient = 1
-        const holy = 2
-        const ornate = 3
-        const gold = 4
-        const silver = 5
-        const bronze = 6
-        const platinum = 7
-        const titanium = 8
-        const steel = 9
+        const generic = 1000
+        const ancient = 1001
+        const holy = 1002
+        const ornate = 1003
+        const gold = 1004
+        const silver = 1005
+        const bronze = 1006
+        const platinum = 1007
+        const titanium = 1008
+        const steel = 1009
     end
+
+    # Cloth gets 2000 number space
     namespace Cloth:
-        const generic = 0
-        const royal = 1
-        const divine = 2
-        const brightsilk = 3 
-        const silk = 4
-        const wool = 5
-        const linen = 6
+        const generic = 2000
+        const royal = 2001
+        const divine = 2002
+        const brightsilk = 2003
+        const silk = 2004
+        const wool = 2005
+        const linen = 2006
     end
+
+    # Biotic gets 3000 number space with separate spaces for each sub-type
     namespace Biotic:
+        const generic = 3000
+
+        # demon biotic materials get 3100
         namespace Demon:
-            const generic = 0
-            const blood = 1
-            const bones = 2
-            const brain = 3
-            const eyes = 4
-            const hide = 5
-            const flesh = 6
-            const hair = 7
-            const heart = 8
-            const entrails = 9
-            const hands = 10
-            const feet = 11
+            const generic = 3100
+            const blood = 3101
+            const bones = 3102
+            const brain = 3103
+            const eyes = 3104
+            const hide = 3105
+            const flesh = 3106
+            const hair = 3107
+            const heart = 3108
+            const entrails = 3109
+            const hands = 3110
+            const feet = 3111
         end
+
+        #dragon biotic materials get 3200
         namespace Dragon:
-            const generic = 0
-            const blood = 1
-            const bones = 2
-            const brain = 3
-            const eyes = 4
-            const skin = 5
-            const flesh = 6
-            const hair = 7
-            const heart = 8
-            const entrails = 9
-            const hands = 10
-            const feet = 11
+            const generic = 3200
+            const blood = 3201
+            const bones = 3202
+            const brain = 3203
+            const eyes = 3204
+            const skin = 3205
+            const flesh = 3206
+            const hair = 3207
+            const heart = 3208
+            const entrails = 3209
+            const hands = 3210
+            const feet = 3211
         end
+
+        #animal biotic materials get 3300
         namespace Animal:
-            const generic = 0
-            const blood = 1
-            const bones = 2
-            const brain = 3
-            const eyes = 4
-            const hide = 5
-            const flesh = 6
-            const hair = 7
-            const heart = 8
-            const entrails = 9
-            const hands = 10
-            const feet = 11
+            const generic = 3300
+            const blood = 3301
+            const bones = 3302
+            const brain = 3303
+            const eyes = 3304
+            const hide = 3305
+            const flesh = 3306
+            const hair = 3307
+            const heart = 3308
+            const entrails = 3309
+            const hands = 3310
+            const feet = 3311
         end
+
+        #human biotic materials get 3400
         namespace Human:
-            const generic = 0
-            const blood = 1
-            const bones = 2
-            const brain = 3
-            const eyes = 4
-            const hide = 5
-            const flesh = 6
-            const hair = 7
-            const heart = 8
-            const entrails = 9
-            const hands = 10
-            const feet = 11
+            const generic = 3400
+            const blood = 3401
+            const bones = 3402
+            const brain = 3403
+            const eyes = 3404
+            const hide = 3405
+            const flesh = 3406
+            const hair = 3407
+            const heart = 3408
+            const entrails = 3409
+            const hands = 3410
+            const feet = 3411
         end
     end
+
+    #paper gets 4000
     namespace Paper:
-        const generic = 0
-        const magical = 1
+        const generic = 4000
+        const magical = 4001
     end
+
+    #wood gets 5000
     namespace Wood:
-        const generic = 0
+
+        const generic = 5000
+
+        # hard woods get 5100
         namespace Hard:
-            const generic = 0
-            const walnut = 1
-            const mahogany = 2
-            const maple = 3
-            const oak = 4
-            const rosewood = 5
-            const cherry = 6
-            const balsa = 7
-            const birch = 8
-            const holly = 9
+            const generic = 5101
+            const walnut = 5102
+            const mahogany = 5102
+            const maple = 5103
+            const oak = 5104
+            const rosewood = 5105
+            const cherry = 5106
+            const balsa = 5107
+            const birch = 5108
+            const holly = 5109
         end
+
+        # soft woods get 5200
         namespace Soft:
-            const generic = 0
-            const cedar = 1
-            const pine = 2
-            const fir = 3
-            const hemlock = 4
-            const spruce = 5
-            const elder = 6
-            const yew = 7
+            const generic = 5200
+            const cedar = 5201
+            const pine = 5202
+            const fir = 5203
+            const hemlock = 5204
+            const spruce = 5205
+            const elder = 5206
+            const yew = 5207
         end
     end
 end
