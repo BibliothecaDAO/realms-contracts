@@ -7,9 +7,9 @@ from starkware.cairo.common.math import assert_not_zero
 from starkware.cairo.common.uint256 import ALL_ONES, Uint256, uint256_check, uint256_eq
 from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
 
-from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
+from openzeppelin.token.erc20.IERC20 import IERC20
 from openzeppelin.token.erc20.library import ERC20, ERC20_allowances
-from openzeppelin.security.safemath import SafeUint256
+from openzeppelin.security.safemath.library import SafeUint256
 
 from contracts.yagi.utils.fixedpointmathlib import mul_div_up, mul_div_down
 

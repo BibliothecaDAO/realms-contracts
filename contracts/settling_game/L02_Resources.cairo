@@ -14,8 +14,8 @@ from starkware.starknet.common.syscalls import get_caller_address, get_block_tim
 from starkware.cairo.common.uint256 import Uint256, uint256_lt
 from starkware.cairo.common.bool import TRUE, FALSE
 
-from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
-from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
+from openzeppelin.token.erc20.IERC20 import IERC20
+from openzeppelin.token.erc721.IERC721 import IERC721
 from openzeppelin.upgrades.library import Proxy
 
 from contracts.settling_game.utils.game_structs import (
@@ -199,8 +199,6 @@ func claim_resources{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_che
         1,
         data,
     )
-
-    # Check that wonder is staked (this also checks if token_id a wonder at all)
 
     let (check_wonder) = is_le(0, realms_data.wonder)
     if check_wonder == 1:
@@ -419,10 +417,6 @@ func get_all_resource_claimable{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     # CHECK DAYS + VAULT > 1
     let days = total_days + total_vault_days
 
-    # GET WONDER TAX
-    let (wonder_tax) = ICalculator.calculate_wonder_tax(calculator_address)
-
-    # TODO: No wonder tax yet
     # SET MINT
     let user_mint_rel_perc = 100
 

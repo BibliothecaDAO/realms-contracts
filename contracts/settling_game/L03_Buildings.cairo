@@ -15,7 +15,7 @@ from starkware.starknet.common.syscalls import get_caller_address, get_block_tim
 from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.uint256 import Uint256
 
-from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
+from openzeppelin.token.erc20.IERC20 import IERC20
 from openzeppelin.upgrades.library import Proxy
 
 from contracts.settling_game.library.library_buildings import Buildings

@@ -20,7 +20,7 @@ from starkware.cairo.common.uint256 import (
     uint256_eq,
 )
 
-from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
+from openzeppelin.token.erc20.IERC20 import IERC20
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 
 from contracts.token.constants import (
@@ -32,11 +32,11 @@ from contracts.token.constants import (
     ON_ERC1155_BATCH_RECEIVED_SELECTOR,
 )
 
-from openzeppelin.access.ownable import Ownable
+from openzeppelin.access.ownable.library import Ownable
 
 from openzeppelin.upgrades.library import Proxy
 
-from openzeppelin.introspection.ERC165 import ERC165
+from openzeppelin.introspection.erc165.library import ERC165
 
 # move to OZ lib once live
 from contracts.token.library import ERC1155

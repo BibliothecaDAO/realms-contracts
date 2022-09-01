@@ -168,33 +168,6 @@ func calculate_tribute{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
 end
 
 @view
-func calculate_wonder_tax{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-    tax_percentage : felt
-):
-    alloc_locals
-
-    # CALCULATE WONDER TAX
-    let (controller) = Module.controller_address()
-    let (settle_state_address) = IModuleController.get_module_address(
-        controller, ModuleIds.Settling
-    )
-
-    let (realms_settled) = ISettling.get_total_realms_settled(settle_state_address)
-
-    let (less_than_tenth_settled) = is_nn_le(realms_settled, 1600)
-
-    if less_than_tenth_settled == 1:
-        return (tax_percentage=25)
-    else:
-        # TODO:
-        # hardcode a max %
-        # use basis points
-        let (tax, _) = unsigned_div_rem(8000 * 5, realms_settled)
-        return (tax_percentage=tax)
-    end
-end
-
-@view
 func calculate_troop_coefficent{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     token_id : Uint256
 ) -> (troop_coefficent : felt):

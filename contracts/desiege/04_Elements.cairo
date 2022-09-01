@@ -3,12 +3,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
 
-from openzeppelin.access.ownable import (
-    Ownable_initializer,
-    Ownable_only_owner,
-    Ownable_transfer_ownership,
-    Ownable_get_owner,
-)
+from openzeppelin.access.ownable.library import Ownable
 
 from contracts.desiege.utils.interfaces import (
     IModuleController,
@@ -46,7 +41,7 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     elements_token_address.write(address_of_elements_token)
 
     # Minting is controlled by an account
-    Ownable_initializer(address_of_minting_middleware)
+    Ownable.initializer(address_of_minting_middleware)
 
     return ()
 end
@@ -59,7 +54,7 @@ func mint_elements{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check
 ):
     alloc_locals
 
-    Ownable_only_owner()
+    Ownable.assert_only_owner()
 
     # Ensure user hasn't minted for the next game
     let (local controller) = controller_address.read()
@@ -109,7 +104,7 @@ func transfer_ownership{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
 ):
     alloc_locals
     # Transfer ownership of this contract
-    Ownable_transfer_ownership(next_owner)
+    Ownable.transfer_ownership(next_owner)
 
     # Transfer ownership of the 1155 token contract
     let (local element_token) = elements_token_address.read()
