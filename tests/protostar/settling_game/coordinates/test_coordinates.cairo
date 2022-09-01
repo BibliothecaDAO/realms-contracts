@@ -48,3 +48,14 @@ func test_time{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
 
     return ()
 end
+
+@external
+func test_radial{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
+    alloc_locals
+
+    let (distance) = Coordinates.to_radial(TEST_X1)
+
+    %{ print('Realm Happiness:', ids.distance) %}
+
+    return ()
+end

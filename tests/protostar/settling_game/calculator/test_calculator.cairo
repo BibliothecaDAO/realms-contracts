@@ -3,7 +3,6 @@ from starkware.cairo.common.uint256 import Uint256, uint256_add
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.math_cmp import is_nn, is_le
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
-from lib.cairo_math_64x61.contracts.Math64x61 import Math64x61_div
 from contracts.settling_game.utils.game_structs import (
     BuildingsFood,
     BuildingsPopulation,
