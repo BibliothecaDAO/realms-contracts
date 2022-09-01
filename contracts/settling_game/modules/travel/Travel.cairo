@@ -116,11 +116,43 @@ func travel{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     return ()
 end
 
+###########
+# GETTERS #
+###########
+
 @view
 func get_coordinates{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     asset_id : felt, token_id : Uint256
 ) -> (point : Point):
     return coordinates.read(asset_id, token_id)
+end
+
+@view
+func get_travel_information{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    asset_id : felt, token_id : Uint256
+) -> (travel_information : TravelInformation):
+    return travel_information.read(asset_id, token_id)
+end
+
+@view
+func assert_arrived{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    asset_id : felt, token_id : Uint256
+):
+    alloc_locals
+    let (now) = get_block_timestamp()
+    let (travel_information : TravelInformation) = get_travel_information(asset_id, token_id)
+
+    let (arrived) = is_le(travel_information.travel_time, now)
+
+    if arrived == TRUE:
+        return ()
+    end
+
+    with_attr error_message("TRAVEL: You have not arrived"):
+        assert 0 = TRUE
+    end
+
+    return ()
 end
 
 #########
