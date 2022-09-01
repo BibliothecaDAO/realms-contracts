@@ -16,7 +16,7 @@ from starkware.cairo.common.math import assert_not_zero
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.bool import TRUE, FALSE
 
-from openzeppelin.access.ownable import Ownable
+from openzeppelin.access.ownable.library import Ownable
 
 from contracts.settling_game.interfaces.imodules import IModuleController
 
