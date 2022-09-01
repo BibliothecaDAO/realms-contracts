@@ -35,6 +35,8 @@ namespace MaterialDensity:
         const platinum = 21450
         const titanium = 4500
         const steel = 7900
+
+        ### TODO: This isn't valid right now, need another way to handle these
         const ancient = cast((steel * (WeightModifier.Metal.ancient / 100)), felt) # steel * ancient modifier
         const holy = cast((steel * (WeightModifier.Metal.holy / 100)), felt) # steel * holy modifier
         const ornate = cast((steel * (WeightModifier.Metal.ornate / 100)), felt) # steel * ornate modifier

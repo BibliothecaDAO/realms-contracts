@@ -6,17 +6,17 @@
 
 %lang starknet
 
-struct State:
-    member Bagged : felt # protected in a loot bag
-    member Equipped : felt # equipped on an adventurer
-    member Loose : felt # not in loot bag or equipped (i.e on a table at a market)
+namespace State:
+    const Bagged = 0 # protected in a loot bag
+    const Equipped = 1  # equipped on an adventurer
+    const Loose  = 2 # not in loot bag or equipped (i.e on a table at a market)
 end
 
 # Loot item shape. This is the on-chain metadata of each item.
 struct Item:
     member Id : felt  # item id 1 - 100
-    member Slot : felt
-    member Type : felt # weapon.blade, armor.foot, jewlery.ring
+    member Slot : felt # weapon, head, chest, etc
+    member Type : felt # weapon.blade, armor.metal, jewlery.ring
     member Material : felt # the material of the item
     member Rank : felt # 1 is best (Divine Robe = 1, Silk Robe = 2, Linen Robe = 3, Robe = 4, Shirt = 5)
     member Prefix_1 : felt  # First part of the name prefix (i.e Demon)
@@ -25,7 +25,7 @@ struct Item:
     member Greatness : felt  # Item greatness
     member CreatedBlock : felt  # Timestamp of when item was created
     member XP : felt  # Experience of the item
-    member State : State # the state of the item: {bagged, equipped, loose}
+    member State : felt # the state of the item: {bagged, equipped, loose}
 end
 
 # To provide cleaner numbering with the expectation we'll add more materials
@@ -487,4 +487,134 @@ namespace ItemMaterial:
     const Gauntlets = Material.Metal.steel
     const ChainGloves = Material.Metal.steel
     const HeavyGloves = Material.Metal.generic
+end
+
+
+# number space the types to provide room for future work
+namespace Type:
+    const generic = 0
+
+    # Weapons get 100s
+    namespace Weapon:
+        const generic = 100
+        const bludgeon = 101
+        const blade = 102
+        const magic = 103
+    end
+
+    # Armor gets 200s
+    namespace Armor:
+        const generic = 200
+        const metal = 201
+        const hide = 202
+        const cloth = 203
+    end
+
+
+    const ring = 300
+    const neckalce = 400
+end
+
+namespace ItemType:
+    const Pendant = Type.neckalce
+    const Necklace = Type.neckalce
+    const Amulet = Type.neckalce
+    const SilverRing = Type.ring
+    const BronzeRing = Type.ring
+    const PlatinumRing = Type.ring
+    const TitaniumRing = Type.ring
+    const GoldRing = Type.ring
+    const GhostWand = Type.Weapon.magic
+    const GraveWand = Type.Weapon.magic
+    const BoneWand = Type.Weapon.magic
+    const Wand = Type.Weapon.magic
+    const Grimoire = Type.Weapon.magic
+    const Chronicle = Type.Weapon.magic
+    const Tome = Type.Weapon.magic
+    const Book = Type.Weapon.magic
+    const DivineRobe = Type.Armor.cloth
+    const SilkRobe = Type.Armor.cloth
+    const LinenRobe = Type.Armor.cloth
+    const Robe = Type.Armor.cloth
+    const Shirt = Type.Armor.cloth
+    const Crown = Type.Armor.cloth
+    const DivineHood = Type.Armor.cloth
+    const SilkHood = Type.Armor.cloth
+    const LinenHood = Type.Armor.cloth
+    const Hood = Type.Armor.cloth
+    const BrightsilkSash = Type.Armor.cloth
+    const SilkSash = Type.Armor.cloth
+    const WoolSash = Type.Armor.cloth
+    const LinenSash = Type.Armor.cloth
+    const Sash = Type.Armor.cloth
+    const DivineSlippers = Type.Armor.cloth
+    const SilkSlippers = Type.Armor.cloth
+    const WoolShoes = Type.Armor.cloth
+    const LinenShoes = Type.Armor.cloth
+    const Shoes = Type.Armor.cloth
+    const DivineGloves = Type.Armor.cloth
+    const SilkGloves = Type.Armor.cloth
+    const WoolGloves = Type.Armor.cloth
+    const LinenGloves = Type.Armor.cloth
+    const Gloves = Type.Armor.cloth
+    const Katana = Type.Weapon.blade
+    const Falchion = Type.Weapon.blade
+    const Scimitar = Type.Weapon.blade
+    const LongSword = Type.Weapon.blade
+    const ShortSword = Type.Weapon.blade
+    const DemonHusk = Type.Armor.hide
+    const DragonskinArmor = Type.Armor.hide
+    const StuddedLeatherArmor =  Type.Armor.hide
+    const HardLeatherArmor = Type.Armor.hide
+    const LeatherArmor = Type.Armor.hide
+    const DemonCrown = Type.Armor.hide
+    const DragonsCrown = Type.Armor.hide
+    const WarCap = Type.Armor.hide
+    const LeatherCap = Type.Armor.hide
+    const Cap = Type.Armor.hide
+    const DemonhideBelt = Type.Armor.hide
+    const DragonskinBelt = Type.Armor.hide
+    const StuddedLeatherBelt = Type.Armor.hide
+    const HardLeatherBelt = Type.Armor.hide
+    const LeatherBelt = Type.Armor.hide
+    const DemonhideBoots = Type.Armor.hide
+    const DragonskinBoots = Type.Armor.hide
+    const StuddedLeatherBoots = Type.Armor.hide
+    const HardLeatherBoots = Type.Armor.hide
+    const LeatherBoots = Type.Armor.hide
+    const DemonsHands = Type.Armor.hide
+    const DragonskinGloves = Type.Armor.hide
+    const StuddedLeatherGloves = Type.Armor.hide
+    const HardLeatherGloves = Type.Armor.hide
+    const LeatherGloves = Type.Armor.hide
+    const Warhammer = Type.Weapon.bludgeon
+    const Quarterstaff = Type.Weapon.bludgeon
+    const Maul = Type.Weapon.bludgeon
+    const Mace = Type.Weapon.bludgeon
+    const Club = Type.Weapon.bludgeon
+    const HolyChestplate = Type.Armor.metal
+    const OrnateChestplate = Type.Armor.metal
+    const PlateMail = Type.Armor.metal
+    const ChainMail = Type.Armor.metal
+    const RingMail = Type.Armor.metal
+    const AncientHelm = Type.Armor.metal
+    const OrnateHelm = Type.Armor.metal
+    const GreatHelm = Type.Armor.metal
+    const FullHelm = Type.Armor.metal
+    const Helm = Type.Armor.metal
+    const OrnateBelt = Type.Armor.metal
+    const WarBelt = Type.Armor.metal
+    const PlatedBelt = Type.Armor.metal
+    const MeshBelt = Type.Armor.metal
+    const HeavyBelt = Type.Armor.metal
+    const HolyGreaves = Type.Armor.metal
+    const OrnateGreaves = Type.Armor.metal
+    const Greaves = Type.Armor.metal
+    const ChainBoots = Type.Armor.metal
+    const HeavyBoots = Type.Armor.metal
+    const HolyGauntlets = Type.Armor.metal
+    const OrnateGauntlets = Type.Armor.metal
+    const Gauntlets = Type.Armor.metal
+    const ChainGloves = Type.Armor.metal
+    const HeavyGloves = Type.Armor.metal
 end
