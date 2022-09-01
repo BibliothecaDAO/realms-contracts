@@ -19,13 +19,61 @@ from starkware.starknet.common.syscalls import (
     get_contract_address,
 )
 
-from contracts.settling_game.utils.game_structs import TravelInformation
+from openzeppelin.upgrades.library import Proxy
+
+from contracts.settling_game.utils.game_structs import TravelInformation, ExternalContractIds, Point
+from contracts.settling_game.library.library_module import Module
+
+from contracts.settling_game.modules.travel.library import Travel
+
+###########
+# STORAGE #
+###########
+
+# @asset_id: ContractId
+# @token_id: ContractId
+@storage_var
+func coordinates(asset_id : felt, token_id : Uint256) -> (point : Point):
+end
 
 @storage_var
 func travel_information(traveller_asset_id : felt, traveller : Uint256) -> (
     travel_information : TravelInformation
 ):
 end
+
+###############
+# CONSTRUCTOR #
+###############
+
+# @notice Module initializer
+# @param address_of_controller: Controller/arbiter address
+# @param xoroshiro_addr: Address of a PRNG contract conforming to IXoroshiro
+# @proxy_admin: Proxy admin address
+@external
+func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    address_of_controller : felt, xoroshiro_addr : felt, proxy_admin : felt
+):
+    Module.initializer(address_of_controller)
+    Proxy.initializer(proxy_admin)
+    return ()
+end
+
+# @notice Set new proxy implementation
+# @dev Can only be set by the arbiter
+# @param new_implementation: New implementation contract address
+@external
+func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    new_implementation : felt
+):
+    Proxy.assert_only_admin()
+    Proxy._set_implementation_hash(new_implementation)
+    return ()
+end
+
+############
+# EXTERNAL #
+############
 
 # @traveller_asset_id: ContractId
 # @traveller: Asset moving (Realm, Adventurer)
@@ -34,22 +82,56 @@ end
 @external
 func travel{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     traveller_asset_id : felt,
-    traveller : Uint256,
+    traveller_token_id : Uint256,
     destination_asset_id : felt,
-    destination : Uint256,
+    destination_token_id : Uint256,
 ):
     alloc_locals
 
-    let (now) = get_block_timestamp()
+    Module.ERC721_owner_check(traveller_token_id, ExternalContractIds.S_Realms)
 
-    # check owner of asset calling the traveller_asset_id
+    # get travel coordinates
+    let (traveller_coordinates : Point) = get_coordinates(traveller_asset_id, traveller_token_id)
+
+    # get destination coordinates
+    let (destination_coordinates : Point) = get_coordinates(
+        destination_asset_id, destination_token_id
+    )
 
     # get distance between two points
+    let (distance) = Travel.calculate_distance(traveller_coordinates, destination_coordinates)
+
+    # calculate time
+    let (time) = Travel.calculate_time(distance)
+
+    let (now) = get_block_timestamp()
 
     # set travel_information
     travel_information.write(
-        traveller_asset_id, traveller, TravelInformation(destination, destination_asset_id, now)
+        traveller_asset_id,
+        traveller_token_id,
+        TravelInformation(destination_asset_id, destination_token_id, now + time),
     )
 
+    return ()
+end
+
+@view
+func get_coordinates{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    asset_id : felt, token_id : Uint256
+) -> (point : Point):
+    return coordinates.read(asset_id, token_id)
+end
+
+#########
+# ADMIN #
+#########
+
+@external
+func set_coordinates{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    asset_id : felt, token_id : Uint256, point : Point
+):
+    Proxy.assert_only_admin()
+    coordinates.write(asset_id, token_id, point)
     return ()
 end
