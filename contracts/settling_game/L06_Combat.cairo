@@ -177,9 +177,8 @@ func build_squad_from_troops_in_realm{
     load_troop_costs(troop_ids_len, troop_ids, troop_costs)
 
     # transform costs into tokens
-    let (
-        token_len : felt, token_ids : Uint256*, token_values : Uint256*
-    ) = transform_costs_to_tokens(troop_ids_len, troop_costs, 1)
+    let (token_len : felt, token_ids : Uint256*,
+        token_values : Uint256*) = transform_costs_to_tokens(troop_ids_len, troop_costs, 1)
 
     # pay for the squad
     let (caller) = get_caller_address()

@@ -21,7 +21,7 @@ from contracts.settling_game.utils.constants import SECONDS_PER_KM
 
 const PRECISION = 10000
 
-namespace Coordinates:
+namespace Travel:
     func calculate_distance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         Point_1 : Point, Point_2 : Point
     ) -> (distance : felt):

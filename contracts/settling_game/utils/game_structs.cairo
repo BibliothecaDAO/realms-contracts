@@ -3,8 +3,8 @@
 #   Each module will need to add a struct with their metadata.
 #
 # MIT License
-
 %lang starknet
+from starkware.cairo.common.uint256 import Uint256
 
 namespace TraitsIds:
     const Region = 1
@@ -508,4 +508,10 @@ end
 struct Point:
     member x : felt
     member y : felt
+end
+
+struct TravelInformation:
+    member destination : Uint256  # id of destination
+    member destination_asset_id : felt
+    member travel_time : felt  # timestamp in the future
 end
