@@ -48,7 +48,7 @@ def run(nre):
 
     wrapped_send(
         network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
+        signer_alias=config.USER_ALIAS,
         contract_alias="proxy_" + guild_manager.contract_name,
         function="initializer",
         arguments=[
@@ -60,13 +60,13 @@ def run(nre):
 
     wrapped_send(
         network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_" + guild_manager.contract_name,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_" + guild_certificate.contract_name,
         function="initializer",
         arguments=[
             str(str_to_felt("Guild certificate")),
             str(str_to_felt("GC")),
-            guild_manager_proxy_address,
+            strhex_as_strfelt(guild_manager_proxy_address),
             strhex_as_strfelt(config.ADMIN_ADDRESS)
         ],
     )
@@ -83,6 +83,6 @@ def run(nre):
         function="deploy_guild_proxy_contract",
         arguments=[
             str_to_felt("Test Guild"),
-            int(guild_certificate_proxy_address, 16)
+            strhex_as_strfelt(guild_certificate_proxy_address)
         ]
     )
