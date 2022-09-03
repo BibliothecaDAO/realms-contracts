@@ -71,7 +71,7 @@ def travel(travelling_token_id, destination_token_id, network):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Travel",
         function="travel",
-        arguments=[1, *uint(travelling_token_id), 1, *
+        arguments=[S_Realms, *uint(travelling_token_id), S_Realms, *
                    uint(destination_token_id)],
     )
 
@@ -90,10 +90,33 @@ def get_travel(realm_token_id, network):
         contract_alias="proxy_Travel",
         function="get_travel_information",
         arguments=[
-            1,
+            S_Realms,
             realm_token_id,                 # uint 1
             0
         ],
     )
     out = out.split(" ")
-    print(str(out[3], 16))
+    print(str(out))
+
+
+@click.command()
+@click.argument("traveller", nargs=1)
+@click.argument("destination", nargs=1)
+@click.option("--network", default="goerli")
+def travel_time(traveller, destination, network):
+    """
+    Gets travel information
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_Travel",
+        function="get_travel_time",
+        arguments=[
+            *coordinates_by_id(int(traveller)),
+            *coordinates_by_id(int(destination)),
+        ],
+    )
+    out = out.split(" ")
+    print(str(out))

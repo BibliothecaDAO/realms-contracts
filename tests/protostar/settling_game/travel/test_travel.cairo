@@ -11,10 +11,13 @@ from contracts.settling_game.utils.game_structs import Point
 
 const offset = 1800000
 
-const TEST_X1 = (55217025726257)
-const TEST_Y1 = (12720491499499568)
-const TEST_X2 = (13846374075413299)
-const TEST_Y2 = (892482614)
+const TEST_X1 = (307471) + offset
+
+const TEST_Y1 = (-96200) + offset
+
+const TEST_X2 = (685471) + offset
+
+const TEST_Y2 = (419800) + offset
 
 @external
 func test_calculate_distance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
@@ -30,7 +33,7 @@ func test_calculate_distance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, r
     let (d, _) = unsigned_div_rem(sqr_distance, PRECISION)
 
     assert d = distance
-    %{ print('Realm Happiness:', ids.distance) %}
+    %{ print('Distance:', ids.distance) %}
     return ()
 end
 
@@ -43,6 +46,6 @@ func test_time{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     let (time) = Travel.calculate_time(distance)
 
     assert time = distance * SECONDS_PER_KM
-
+    %{ print('Time:', ids.time) %}
     return ()
 end
