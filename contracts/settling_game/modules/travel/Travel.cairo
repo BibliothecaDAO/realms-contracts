@@ -26,9 +26,23 @@ from contracts.settling_game.library.library_module import Module
 
 from contracts.settling_game.modules.travel.library import Travel
 
-###########
-# STORAGE #
-###########
+# -----------------------------------
+# Events
+# -----------------------------------
+
+@event
+func TravelAction(
+    traveller_asset_id : felt,
+    traveller_token_id : Uint256,
+    destination_asset_id : felt,
+    destination_token_id : Uint256,
+    arrival_time : felt,
+):
+end
+
+# -----------------------------------
+# Storage
+# -----------------------------------
 
 # @asset_id: ContractId
 # @token_id: ContractId
@@ -37,14 +51,14 @@ func coordinates(asset_id : felt, token_id : Uint256) -> (point : Point):
 end
 
 @storage_var
-func travel_information(traveller_asset_id : felt, traveller : Uint256) -> (
+func travel_information(traveller_contract_id : felt, traveller : Uint256) -> (
     travel_information : TravelInformation
 ):
 end
 
-###############
-# CONSTRUCTOR #
-###############
+# -----------------------------------
+# Initialize & upgrade
+# -----------------------------------
 
 # @notice Module initializer
 # @param address_of_controller: Controller/arbiter address
@@ -52,7 +66,7 @@ end
 # @proxy_admin: Proxy admin address
 @external
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    address_of_controller : felt, xoroshiro_addr : felt, proxy_admin : felt
+    address_of_controller : felt, proxy_admin : felt
 ):
     Module.initializer(address_of_controller)
     Proxy.initializer(proxy_admin)
@@ -71,99 +85,129 @@ func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     return ()
 end
 
-############
-# EXTERNAL #
-############
+# -----------------------------------
+# External
+# -----------------------------------
 
-# @traveller_asset_id: ContractId
-# @traveller: Asset moving (Realm, Adventurer)
-# @destination_asset_id: ContractId
-# @destination: Destination
+# @traveller_contract_id: External contract ID -> keeping the same for consistency
+# @traveller_token_id: Asset token ID moving (Realm, Adventurer)
+# @destination_contract_id: ContractId
+# @destination_token_id: Destination token ID
 @external
 func travel{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    traveller_asset_id : felt,
+    traveller_contract_id : felt,
     traveller_token_id : Uint256,
-    destination_asset_id : felt,
+    destination_contract_id : felt,
     destination_token_id : Uint256,
 ):
     alloc_locals
 
-    Module.ERC721_owner_check(traveller_token_id, ExternalContractIds.S_Realms)
+    # TODO: assert is correct ID (can't try move unmoveable assets)
+
+    Module.ERC721_owner_check(traveller_token_id, traveller_contract_id)
+
+    # check has arrived
+    assert_arrived(traveller_contract_id, traveller_token_id)
 
     # get travel coordinates
-    let (traveller_coordinates : Point) = get_coordinates(traveller_asset_id, traveller_token_id)
+    let (traveller_coordinates : Point) = get_coordinates(traveller_contract_id, traveller_token_id)
 
     # get destination coordinates
     let (destination_coordinates : Point) = get_coordinates(
-        destination_asset_id, destination_token_id
+        destination_contract_id, destination_token_id
     )
 
+    # calculate time
+    let (time) = get_travel_time(traveller_coordinates, destination_coordinates)
+
+    # set travel_information
+    travel_information.write(
+        traveller_contract_id,
+        traveller_token_id,
+        TravelInformation(destination_contract_id, destination_token_id, time),
+    )
+
+    # emit event
+    TravelAction.emit(
+        traveller_contract_id,
+        traveller_token_id,
+        destination_contract_id,
+        destination_token_id,
+        time,
+    )
+
+    return ()
+end
+
+# -----------------------------------
+# Getters
+# -----------------------------------
+
+@view
+func get_coordinates{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    contract_id : felt, token_id : Uint256
+) -> (point : Point):
+    return coordinates.read(contract_id, token_id)
+end
+
+@view
+func get_travel_information{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    contract_id : felt, token_id : Uint256
+) -> (travel_information : TravelInformation):
+    return travel_information.read(contract_id, token_id)
+end
+
+@view
+func get_travel_time{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    traveller_coordinates : Point, destination_coordinates : Point
+) -> (time : felt):
     # get distance between two points
-    let (distance) = Travel.calculate_distance(traveller_coordinates, destination_coordinates)
+    let (distance) = get_travel_distance(traveller_coordinates, destination_coordinates)
 
     # calculate time
     let (time) = Travel.calculate_time(distance)
 
     let (now) = get_block_timestamp()
 
-    # set travel_information
-    travel_information.write(
-        traveller_asset_id,
-        traveller_token_id,
-        TravelInformation(destination_asset_id, destination_token_id, now + time),
-    )
-
-    return ()
-end
-
-###########
-# GETTERS #
-###########
-
-@view
-func get_coordinates{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    asset_id : felt, token_id : Uint256
-) -> (point : Point):
-    return coordinates.read(asset_id, token_id)
+    return (time + now)
 end
 
 @view
-func get_travel_information{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    asset_id : felt, token_id : Uint256
-) -> (travel_information : TravelInformation):
-    return travel_information.read(asset_id, token_id)
+func get_travel_distance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    traveller_coordinates : Point, destination_coordinates : Point
+) -> (distance : felt):
+    # get distance between two points
+    let (distance) = Travel.calculate_distance(traveller_coordinates, destination_coordinates)
+
+    return (distance)
 end
 
 @view
 func assert_arrived{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    asset_id : felt, token_id : Uint256
+    contract_id : felt, token_id : Uint256
 ):
     alloc_locals
     let (now) = get_block_timestamp()
-    let (travel_information : TravelInformation) = get_travel_information(asset_id, token_id)
+    let (travel_information : TravelInformation) = get_travel_information(contract_id, token_id)
 
     let (arrived) = is_le(travel_information.travel_time, now)
 
-    if arrived == TRUE:
-        return ()
-    end
-
-    with_attr error_message("TRAVEL: You have not arrived"):
-        assert 0 = TRUE
+    with_attr error_message("TRAVEL: You are mid travel. You cannot change course!"):
+        assert arrived = TRUE
     end
 
     return ()
 end
 
-#########
-# ADMIN #
-#########
+# -----------------------------------
+# Admin
+# -----------------------------------
 
 @external
 func set_coordinates{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    asset_id : felt, token_id : Uint256, point : Point
+    contract_id : felt, token_id : Uint256, point : Point
 ):
     Proxy.assert_only_admin()
-    coordinates.write(asset_id, token_id, point)
+    coordinates.write(contract_id, token_id, point)
     return ()
 end
