@@ -47,4 +47,15 @@ namespace Travel:
 
         return (distance * SECONDS_PER_KM)
     end
+
+    @view
+    func assert_same_points{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        traveller_coordinates : Point, destination_coordinates : Point
+    ):
+        with_attr error_message("TRAVEL: You are not at this destination"):
+            assert traveller_coordinates.x = destination_coordinates.x
+            assert traveller_coordinates.y = destination_coordinates.y
+        end
+        return ()
+    end
 end

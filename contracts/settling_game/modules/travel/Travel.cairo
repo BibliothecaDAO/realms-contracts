@@ -199,6 +199,39 @@ func assert_arrived{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     return ()
 end
 
+@view
+func assert_traveller_is_at_location{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+}(
+    traveller_contract_id : felt,
+    traveller_token_id : Uint256,
+    destination_contract_id : felt,
+    destination_token_id : Uint256,
+):
+    alloc_locals
+
+    # check traveller has arrived
+    assert_arrived(destination_contract_id, destination_token_id)
+
+    # get traveller information
+    let (traveller_information : TravelInformation) = get_travel_information(
+        traveller_contract_id, traveller_token_id
+    )
+
+    # get coordinates of travellers destination
+    let (traveller_destination) = get_coordinates(
+        traveller_information.destination_asset_id, traveller_information.destination_token_id
+    )
+
+    # get requested destination coordinates
+    let (destination) = get_coordinates(destination_contract_id, destination_token_id)
+
+    # assert travellers destination and requested information is the same
+    Travel.assert_same_points(traveller_destination, destination)
+
+    return ()
+end
+
 # -----------------------------------
 # Admin
 # -----------------------------------

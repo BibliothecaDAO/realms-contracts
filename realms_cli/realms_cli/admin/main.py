@@ -77,7 +77,8 @@ def upgrade_module(module_name, network):
                 f.write(line)
         f.truncate()
 
-    compile(contract_alias="contracts/settling_game/modules/travel/Travel.cairo")
+    compile(contract_alias="contracts/settling_game/" +
+            module_name + ".cairo")
 
     deploy(
         network=network,
