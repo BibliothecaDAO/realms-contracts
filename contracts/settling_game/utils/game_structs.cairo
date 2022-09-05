@@ -156,7 +156,6 @@ namespace ModuleIds:
     const Resources = 2
     const Buildings = 3
     const Calculator = 4
-    const L05_Wonders = 5
     const L06_Combat = 6
     const L07_Crypts = 7
     const L08_Crypts_Resources = 8

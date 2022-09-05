@@ -561,15 +561,6 @@ async def game_factory(token_factory, compiled_proxy):
         [controller.contract_address, admin_account.contract_address],
     )
 
-    wonders_logic = await proxy_builder(
-        compiled_proxy,
-        starknet,
-        admin_key,
-        admin_account,
-        "contracts/settling_game/L05_Wonders.cairo",
-        [controller.contract_address, admin_account.contract_address],
-    )
-
     xoroshiro128 = await starknet.deploy(
         source="contracts/utils/xoroshiro128_starstar.cairo",
         constructor_calldata=[controller.contract_address],
@@ -613,10 +604,7 @@ async def game_factory(token_factory, compiled_proxy):
             resources_logic.contract_address,
             buildings_logic.contract_address,
             calculator_logic.contract_address,
-            wonders_logic.contract_address,
             combat_logic.contract_address,
-            crypts_logic.contract_address,
-            crypts_resources_logic.contract_address,
         ],
     )
 
@@ -742,15 +730,6 @@ async def resource_factory(token_factory, compiled_proxy):
         [controller.contract_address, admin_account.contract_address],
     )
 
-    wonders_logic = await proxy_builder(
-        compiled_proxy,
-        starknet,
-        admin_key,
-        admin_account,
-        "contracts/settling_game/L05_Wonders.cairo",
-        [controller.contract_address, admin_account.contract_address],
-    )
-
     # xoroshiro128 = await starknet.deploy(
     #     source="contracts/utils/xoroshiro128_starstar.cairo",
     #     constructor_calldata=[controller.contract_address],
@@ -771,7 +750,6 @@ async def resource_factory(token_factory, compiled_proxy):
             resources_logic.contract_address,
             123,
             calculator_logic.contract_address,
-            wonders_logic.contract_address,
             123,
         ],
     )

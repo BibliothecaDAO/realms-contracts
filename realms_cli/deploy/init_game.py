@@ -18,7 +18,6 @@ def run(nre):
             strhex_as_strfelt(config.RESOURCES_PROXY_ADDRESS),
             strhex_as_strfelt(config.BUILDINGS_PROXY_ADDRESS),
             strhex_as_strfelt(config.CALCULATOR_PROXY_ADDRESS),
-            strhex_as_strfelt(config.L05_WONDERS_PROXY_ADDRESS),
             strhex_as_strfelt(config.L06_COMBAT_PROXY_ADDRESS),
         ],
     )

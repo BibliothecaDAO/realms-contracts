@@ -88,8 +88,6 @@ class Config:
             "Buildings", self.nile_network)
         self.CALCULATOR_ADDRESS, _ = safe_load_deployment(
             "Calculator", self.nile_network)
-        self.L05_WONDERS_ADDRESS, _ = safe_load_deployment(
-            "L05_Wonders", self.nile_network)
         self.L06_COMBAT_ADDRESS, _ = safe_load_deployment(
             "L06_Combat", self.nile_network)
         # self.L07_CRYPTS_ADDRESS, _ = safe_load_deployment("L07_Crypts", self.nile_network)
@@ -102,8 +100,6 @@ class Config:
             "proxy_Buildings", self.nile_network)
         self.CALCULATOR_PROXY_ADDRESS, _ = safe_load_deployment(
             "proxy_Calculator", self.nile_network)
-        self.L05_WONDERS_PROXY_ADDRESS, _ = safe_load_deployment(
-            "proxy_L05_Wonders", self.nile_network)
         self.L06_COMBAT_PROXY_ADDRESS, _ = safe_load_deployment(
             "proxy_L06_Combat", self.nile_network)
         # self.L07_CRYPTS_PROXY_ADDRESS, _ = safe_load_deployment("proxy_L07_Crypts", self.nile_network)
