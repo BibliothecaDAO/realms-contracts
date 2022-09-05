@@ -9,7 +9,7 @@ Contracts = namedtuple('Contracts', 'alias contract_name')
 # token tuples
 MODULE_CONTRACT_IMPLEMENTATIONS = [
     Contracts("Settling", "Settling"),
-    Contracts("L02_Resources", "L02_Resources"),
+    Contracts("Resources", "Resources"),
     Contracts("L03_Buildings", "L03_Buildings"),
     Contracts("Calculator", "Calculator"),
     Contracts("L05_Wonders", "L05_Wonders"),

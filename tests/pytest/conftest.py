@@ -539,7 +539,7 @@ async def game_factory(token_factory, compiled_proxy):
         starknet,
         admin_key,
         admin_account,
-        "contracts/settling_game/L02_Resources.cairo",
+        "contracts/settling_game/modules/resources/Resources.cairo",
         [controller.contract_address, admin_account.contract_address],
     )
 
@@ -726,7 +726,7 @@ async def resource_factory(token_factory, compiled_proxy):
         starknet,
         admin_key,
         admin_account,
-        "contracts/settling_game/L02_Resources.cairo",
+        "contracts/settling_game/modules/resources/Resources.cairo",
         [controller.contract_address, admin_account.contract_address],
     )
 

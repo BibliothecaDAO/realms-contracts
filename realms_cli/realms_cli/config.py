@@ -82,8 +82,8 @@ class Config:
 
         self.SETTLING_ADDRESS, _ = safe_load_deployment(
             "Settling", self.nile_network)
-        self.L02_RESOURCES_ADDRESS, _ = safe_load_deployment(
-            "L02_Resources", self.nile_network)
+        self.RESOURCES_ADDRESS, _ = safe_load_deployment(
+            "Resources", self.nile_network)
         self.L03_BUILDINGS_ADDRESS, _ = safe_load_deployment(
             "L03_Buildings", self.nile_network)
         self.CALCULATOR_ADDRESS, _ = safe_load_deployment(
@@ -96,8 +96,8 @@ class Config:
 
         self.SETTLING_PROXY_ADDRESS, _ = safe_load_deployment(
             "proxy_Settling", self.nile_network)
-        self.L02_RESOURCES_PROXY_ADDRESS, _ = safe_load_deployment(
-            "proxy_L02_Resources", self.nile_network)
+        self.RESOURCES_PROXY_ADDRESS, _ = safe_load_deployment(
+            "proxy_Resources", self.nile_network)
         self.L03_BUILDINGS_PROXY_ADDRESS, _ = safe_load_deployment(
             "proxy_L03_Buildings", self.nile_network)
         self.CALCULATOR_PROXY_ADDRESS, _ = safe_load_deployment(
