@@ -275,12 +275,23 @@ namespace Combat:
         return (cavalry_defence, archer_defence, magic_defence, infantry_defence)
     end
 
+    # luck -> 75-125 random number
+    func calculate_luck_outcome{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        luck : felt, attacking_statistics : felt, defending_statistics : felt
+    ) -> (outcome : felt):
+        alloc_locals
+
+        let (luck, _) = unsigned_div_rem(attacking_statistics * luck, 100)
+
+        return (luck - defending_statistics)
+    end
+
     func calculate_winner{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
         range_check_ptr,
         bitwise_ptr : BitwiseBuiltin*,
-    }(attack_army_packed : felt, defending_army_packed : felt) -> (outcome : felt):
+    }(luck : felt, attack_army_packed : felt, defending_army_packed : felt) -> (outcome : felt):
         alloc_locals
 
         let (attack_army_statistics : ArmyStatistics) = calculate_army_statistics(
@@ -290,10 +301,18 @@ namespace Combat:
             defending_army_packed
         )
 
-        let cavalry_outcome = (attack_army_statistics.CavalryAttack - defending_army_statistics.CavalryDefence)
-        let archery_outcome = (attack_army_statistics.ArcheryAttack - defending_army_statistics.ArcheryDefence)
-        let magic_outcome = (attack_army_statistics.MagicAttack - defending_army_statistics.MagicDefence)
-        let infantry_outcome = (attack_army_statistics.InfantryAttack - defending_army_statistics.InfantryDefence)
+        let (cavalry_outcome) = calculate_luck_outcome(
+            luck, attack_army_statistics.CavalryAttack, defending_army_statistics.CavalryDefence
+        )
+        let (archery_outcome) = calculate_luck_outcome(
+            luck, attack_army_statistics.ArcheryAttack, defending_army_statistics.ArcheryDefence
+        )
+        let (magic_outcome) = calculate_luck_outcome(
+            luck, attack_army_statistics.MagicAttack, defending_army_statistics.MagicDefence
+        )
+        let (infantry_outcome) = calculate_luck_outcome(
+            luck, attack_army_statistics.InfantryAttack, defending_army_statistics.InfantryDefence
+        )
 
         let final_outcome = cavalry_outcome + archery_outcome + magic_outcome + infantry_outcome
 

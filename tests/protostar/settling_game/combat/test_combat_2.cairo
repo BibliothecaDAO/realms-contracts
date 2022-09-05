@@ -192,7 +192,9 @@ func test_winner{
 
     let (defending_army_packed) = Combat.pack_army(defending_army)
 
-    let (outcome) = Combat.calculate_winner(attacking_army_packed, defending_army_packed)
+    let luck = 85
+
+    let (outcome) = Combat.calculate_winner(luck, attacking_army_packed, defending_army_packed)
 
     %{ print('wins:', ids.outcome) %}
 
