@@ -108,7 +108,7 @@ const BASE_FOOD_PRODUCTION = 14000  # food production per unit
 
 # a min delay between attacks on a Realm; it can't
 # be attacked again during cooldown
-const ATTACK_COOLDOWN_PERIOD = DAY  # 1 day unit
+const ATTACK_COOLDOWN_PERIOD = DAY / 10  # 1 day unit
 
 # used to signal which side won the battle
 const COMBAT_OUTCOME_ATTACKER_WINS = 1
