@@ -10,7 +10,7 @@ Contracts = namedtuple('Contracts', 'alias contract_name')
 MODULE_CONTRACT_IMPLEMENTATIONS = [
     Contracts("Settling", "Settling"),
     Contracts("Resources", "Resources"),
-    Contracts("L03_Buildings", "L03_Buildings"),
+    Contracts("Buildings", "Buildings"),
     Contracts("Calculator", "Calculator"),
     Contracts("L05_Wonders", "L05_Wonders"),
     Contracts("L06_Combat", "L06_Combat")

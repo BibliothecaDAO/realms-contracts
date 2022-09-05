@@ -66,20 +66,6 @@ namespace IModuleController:
 end
 
 @contract_interface
-namespace IL03_Buildings:
-    func get_buildings_unpacked(token_id : Uint256) -> (realm_buildings : RealmBuildings):
-    end
-    func get_effective_buildings(token_id : Uint256) -> (realm_buildings : RealmBuildings):
-    end
-    func get_building_cost(building_id : felt) -> (cost : Cost, lords : Uint256):
-    end
-    func get_effective_population_buildings(token_id : Uint256) -> (
-        realm_buildings : RealmBuildings
-    ):
-    end
-end
-
-@contract_interface
 namespace IL05_Wonders:
     func update_wonder_settlement(token_id : Uint256):
     end

@@ -548,7 +548,7 @@ async def game_factory(token_factory, compiled_proxy):
         starknet,
         admin_key,
         admin_account,
-        "contracts/settling_game/L03_Buildings.cairo",
+        "contracts/settling_game/modules/buildings/Buildings.cairo",
         [controller.contract_address, admin_account.contract_address],
     )
 
@@ -730,7 +730,7 @@ async def resource_factory(token_factory, compiled_proxy):
         [controller.contract_address, admin_account.contract_address],
     )
 
-    # buildings_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/L03_Buildings.cairo", [
+    # buildings_logic = await proxy_builder(compiled_proxy, starknet, admin_key, admin_account, "contracts/settling_game/modules/buildings/Buildings.cairo", [
     #     controller.contract_address, admin_account.contract_address])
 
     calculator_logic = await proxy_builder(
