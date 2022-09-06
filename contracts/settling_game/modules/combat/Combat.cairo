@@ -187,18 +187,6 @@ end
 # EXTERNAL #
 ############
 
-# initiate combat between armies
-# - inputs: attacking_army_id, attacking_realm_id, defending_army_id, defending_realm_id
-# - checks: check are armies are at same location
-# - simulate battle + update troops
-# - save armies back into slots
-# - capture relic
-# - steal resources
-
-############
-# EXTERNAL #
-############
-
 # @notice Create a new attacking or defending Squad from Troops in Realm
 # @param troop_ids: array of TroopId values of the troops to be built/bought
 # @param realm_id: Staked Realm ID (S_Realm)
@@ -245,7 +233,7 @@ func build_army_from_battalions{
 
     let (army_unpacked : Army) = Combat.unpack_army(army_packed.ArmyPacked)
 
-    # TODO: add battalions to army and return and emit @milan
+    # TODO: add battalions to army and return and
 
     # let (squad) = Combat.add_troops_to_squad(current_squad, troop_ids_len, troop_ids)
 

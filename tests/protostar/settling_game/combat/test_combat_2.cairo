@@ -286,3 +286,43 @@ func test_health_remaining{
 
     return ()
 end
+
+@external
+func test_add_battalions_to_army{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}():
+    alloc_locals
+
+    let attacking_army : Army = Army(
+        Battalion(TestAttackingArmy.LightCavalry.quantity,
+        TestAttackingArmy.LightCavalry.health),
+        Battalion(TestAttackingArmy.HeavyCavalry.quantity,
+        TestAttackingArmy.HeavyCavalry.health),
+        Battalion(TestAttackingArmy.Archer.quantity,
+        TestAttackingArmy.Archer.health),
+        Battalion(TestAttackingArmy.Longbow.quantity,
+        TestAttackingArmy.Longbow.health),
+        Battalion(TestAttackingArmy.Mage.quantity,
+        TestAttackingArmy.Mage.health),
+        Battalion(TestAttackingArmy.Arcanist.quantity,
+        TestAttackingArmy.Arcanist.health),
+        Battalion(TestAttackingArmy.LightInfantry.quantity,
+        TestAttackingArmy.LightInfantry.health),
+        Battalion(TestAttackingArmy.HeavyInfantry.quantity,
+        TestAttackingArmy.HeavyInfantry.health),
+    )
+
+    let (packed_army) = Combat.pack_army(attacking_army)
+
+    let (unpacked_army) = Combat.unpack_army(packed_army)
+
+    let (troops : felt*) = alloc()
+    assert troops[0] = 1
+    assert troops[1] = 2
+
+    let (total_battalions) = Combat.add_battalions_to_army(attacking_army, 2, troops, 2, troops)
+
+    %{ print('health:', ids.total_battalions) %}
+
+    return ()
+end

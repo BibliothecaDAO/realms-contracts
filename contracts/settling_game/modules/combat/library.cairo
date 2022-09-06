@@ -10,10 +10,12 @@
 
 %lang starknet
 
+from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_nn_le, is_nn, is_le
+from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
 from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.bool import TRUE, FALSE
@@ -28,6 +30,62 @@ from contracts.settling_game.modules.combat.constants import (
 )
 
 namespace Combat:
+    func add_battalions_to_army{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        current : Army,
+        troop_ids_len : felt,
+        troop_ids : felt*,
+        troop_qty_len : felt,
+        troop_qty : felt*,
+    ) -> (army : Army):
+        alloc_locals
+
+        if troop_ids_len == 0:
+            return (current)
+        end
+
+        let (updated) = add_battalion_to_battalion(current, [troop_ids], [troop_qty])
+
+        return add_battalions_to_army(
+            updated, troop_ids_len - 1, troop_ids + 1, troop_qty_len - 1, troop_qty + 1
+        )
+    end
+
+    func add_battalion_to_battalion{
+        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+    }(current : Army, battalion_id : felt, quantity : felt) -> (army : Army):
+        alloc_locals
+
+        if battalion_id == BattlionIds.LightCavalry:
+            let casted_army = cast_battalin(current, battalion_id, quantity)
+            return (current)
+        end
+
+        if battalion_id == BattlionIds.HeavyCavalry:
+            let casted_army = cast_battalin(current, battalion_id, quantity)
+            return (current)
+        end
+
+        return (current)
+    end
+
+    func cast_battalin{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        current : Army, battalion_id : felt, quantity : felt
+    ) -> (army : Army):
+        alloc_locals
+        let (__fp__, _) = get_fp_and_pc()
+
+        tempvar st = cast(&current, felt*)
+
+        let (n) = alloc()
+        assert n[0] = st[battalion_id] + quantity
+
+        assert st[battalion_id] = n[0]
+
+        let a = cast(st, Army*)
+
+        return ([a])
+    end
+
     func unpack_army{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
