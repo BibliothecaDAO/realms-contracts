@@ -26,15 +26,6 @@ namespace IResources:
 end
 
 @contract_interface
-namespace IL05:
-    func initializer(address_of_controller : felt, proxy_admin : felt):
-    end
-
-    func get_wonder_id_staked(token_id : Uint256):
-    end
-end
-
-@contract_interface
 namespace Realms:
     func initializer(name : felt, symbol : felt, proxy_admin : felt):
     end
@@ -63,7 +54,6 @@ func __setup__{syscall_ptr : felt*, range_check_ptr}():
     local Realms_token_address
     local S_Realms_token_address
     local Settling_address
-    local L05_Wonder_address
     %{
         context.Resources_address = deploy_contract("./contracts/settling_game/modules/resources/Resources.cairo", []).contract_address
         ids.Resources_address = context.Resources_address
@@ -73,11 +63,8 @@ func __setup__{syscall_ptr : felt*, range_check_ptr}():
         ids.S_Realms_token_address = context.S_Realms_token_address
         context.Settling_address = deploy_contract("./contracts/settling_game/modules/settling/Settling.cairo", []).contract_address
         ids.Settling_address = context.Settling_address
-        context.L05_Wonder_address = deploy_contract("./contracts/settling_game/L05_Wonders.cairo", []).contract_address
-        ids.L05_Wonder_address = context.L05_Wonder_address
     %}
     IResources.initializer(Resources_address, MODULE_CONTROLLER_ADDR, 1)
-    IL05.initializer(L05_Wonder_address, MODULE_CONTROLLER_ADDR, 1)
     Realms.initializer(Realms_token_address, 1, 1, 1)
     Settling.initializer(Settling_address, MODULE_CONTROLLER_ADDR, 1)
 
@@ -96,24 +83,7 @@ func __setup__{syscall_ptr : felt*, range_check_ptr}():
     return ()
 end
 
-@external
-func test_wonder_claim{syscall_ptr : felt*, range_check_ptr}():
-    alloc_locals
-
-    local Resources : felt
-    local L05_Wonder : felt
-    %{
-        ids.Resources = context.Resources_address
-        ids.L05_Wonder = context.L05_Wonder_address
-    %}
-
-    let staked_epoch = IL05.get_wonder_id_staked(L05_Wonder, Uint256(1, 0))
-
-    %{ print(ids.staked_epoch) %}
-
-    return ()
-end
-
 # TODO:
 # test_claim_resources
 # test_pillage_resources
+# test_wonder_claim
