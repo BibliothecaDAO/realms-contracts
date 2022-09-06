@@ -192,7 +192,7 @@ func test_winner{
 
     let (defending_army_packed) = Combat.pack_army(defending_army)
 
-    let luck = 85
+    let luck = 125
 
     let (outcome) = Combat.calculate_winner(luck, attacking_army_packed, defending_army_packed)
 
@@ -243,6 +243,42 @@ func test_calculate_total_battalions{
     )
 
     %{ print('wins:', ids.cavalry_defence) %}
+
+    return ()
+end
+
+@external
+func test_health_remaining{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}():
+    alloc_locals
+
+    let attacking_army : Army = Army(
+        Battalion(TestAttackingArmy.LightCavalry.quantity,
+        TestAttackingArmy.LightCavalry.health),
+        Battalion(TestAttackingArmy.HeavyCavalry.quantity,
+        TestAttackingArmy.HeavyCavalry.health),
+        Battalion(TestAttackingArmy.Archer.quantity,
+        TestAttackingArmy.Archer.health),
+        Battalion(TestAttackingArmy.Longbow.quantity,
+        TestAttackingArmy.Longbow.health),
+        Battalion(TestAttackingArmy.Mage.quantity,
+        TestAttackingArmy.Mage.health),
+        Battalion(TestAttackingArmy.Arcanist.quantity,
+        TestAttackingArmy.Arcanist.health),
+        Battalion(TestAttackingArmy.LightInfantry.quantity,
+        TestAttackingArmy.LightInfantry.health),
+        Battalion(TestAttackingArmy.HeavyInfantry.quantity,
+        TestAttackingArmy.HeavyInfantry.health),
+    )
+
+    let (packed_army) = Combat.pack_army(attacking_army)
+
+    let (unpacked_army) = Combat.unpack_army(packed_army)
+
+    let (total_battalions) = Combat.calculate_attacker_health_remaining(100, 4, 12, 100, 70)
+
+    %{ print('health:', ids.total_battalions) %}
 
     return ()
 end

@@ -324,4 +324,101 @@ namespace Combat:
 
         return (FALSE)
     end
+
+    # ((Number of Attacking Light Cav Battalions/Number of Attacking Cav Battalions)*((Attacking Cavalry Starting HP*(Infantry Attack/Infantry Defence))*0.9))
+    func calculate_health_remaining{
+        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+    }(
+        starting_health : felt,
+        battalions : felt,
+        total_battalions : felt,
+        counter_attack : felt,
+        counter_defence : felt,
+    ) -> (new_health : felt):
+        alloc_locals
+
+        let (battlion_div, _) = unsigned_div_rem(battalions * 100, total_battalions)
+
+        let (counter_div, _) = unsigned_div_rem(counter_attack * 100, counter_defence)
+
+        let health = battlion_div * (starting_health * counter_div) * 90  # multiple by % then divide
+
+        let (final_health, _) = unsigned_div_rem(health, 100000)
+
+        return (final_health)
+    end
+
+    # returns updated packed armies ready for storage
+    func updated_packed_armies{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        attack_army_statistics : ArmyStatistics,
+        defending_army_statistics : ArmyStatistics,
+        attack_army_packed : felt,
+        defending_army_packed : felt,
+    ) -> (attack_army_packed : felt, defending_army_packed : felt):
+        alloc_locals
+
+        let (attack_army_unpacked : Army) = unpack_army(attack_army_packed)
+        let (defending_army_unpacked : Army) = unpack_army(defending_army_packed)
+
+        let (attack_army_packed) = update_and_pack_army(
+            attack_army_statistics,
+            defending_army_statistics,
+            attack_army_unpacked,
+            defending_army_unpacked,
+        )
+
+        let (defence_army_packed) = update_and_pack_army(
+            defending_army_statistics,
+            attack_army_statistics,
+            defending_army_unpacked,
+            attack_army_unpacked,
+        )
+
+        return (attack_army_packed, defence_army_packed)
+    end
+
+    # helper to calculate health of armies and then pack
+    func update_and_pack_army{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        attack_army_statistics : ArmyStatistics,
+        defending_army_statistics : ArmyStatistics,
+        attack_army_unpacked : Army,
+        defending_army_unpacked : Army,
+    ) -> (packed_army : felt):
+        alloc_locals
+
+        let (total_attacking_battalions) = calculate_total_battalions(attack_army_unpacked)
+        let (total_defending_battalions) = calculate_total_battalions(attack_army_unpacked)
+
+        # todo add rest
+        let (attack_health_cavalry_remaining) = calculate_health_remaining(
+            attack_army_unpacked.LightCavalry.health,
+            attack_army_unpacked.LightCavalry.quantity,
+            total_attacking_battalions,
+            attack_army_statistics.InfantryAttack,
+            defending_army_statistics.InfantryDefence,
+        )
+
+        let updated_attacking_army = Army(
+            Battalion(attack_army_unpacked.LightCavalry.quantity,
+            attack_army_unpacked.LightCavalry.health),
+            Battalion(attack_army_unpacked.HeavyCavalry.quantity,
+            attack_army_unpacked.HeavyCavalry.health),
+            Battalion(attack_army_unpacked.Archer.quantity,
+            attack_army_unpacked.Archer.health),
+            Battalion(attack_army_unpacked.Longbow.quantity,
+            attack_army_unpacked.Longbow.health),
+            Battalion(attack_army_unpacked.Mage.quantity,
+            attack_army_unpacked.Mage.health),
+            Battalion(attack_army_unpacked.Arcanist.quantity,
+            attack_army_unpacked.Arcanist.health),
+            Battalion(attack_army_unpacked.LightInfantry.quantity,
+            attack_army_unpacked.LightInfantry.health),
+            Battalion(attack_army_unpacked.HeavyInfantry.quantity,
+            attack_army_unpacked.HeavyInfantry.health),
+        )
+
+        let (packed_army) = pack_army(updated_attacking_army)
+
+        return (packed_army)
+    end
 end
