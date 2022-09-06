@@ -18,66 +18,14 @@ from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.bool import TRUE, FALSE
 from contracts.settling_game.utils.general import unpack_data
-from contracts.settling_game.modules.combat.constants import BattalionDefence
-
-namespace SHIFT_ARMY:
-    const _1 = 2 ** 0
-    const _2 = 2 ** 5
-    const _3 = 2 ** 10
-    const _4 = 2 ** 15
-    const _5 = 2 ** 20
-    const _6 = 2 ** 25
-    const _7 = 2 ** 30
-    const _8 = 2 ** 35
-
-    const _9 = 2 ** 42
-    const _10 = 2 ** 49
-    const _11 = 2 ** 56
-    const _12 = 2 ** 63
-    const _13 = 2 ** 70
-    const _14 = 2 ** 77
-    const _15 = 2 ** 84
-    const _16 = 2 ** 91
-end
-
-struct Battalion:
-    member quantity : felt  # 1-23
-    member health : felt  # 1-100
-end
-
-struct Army:
-    member LightCavalry : Battalion
-    member HeavyCavalry : Battalion
-    member Archer : Battalion
-    member Longbow : Battalion
-    member Mage : Battalion
-    member Arcanist : Battalion
-    member LightInfantry : Battalion
-    member HeavyInfantry : Battalion
-end
-
-struct ArmyStatistics:
-    member CavalryAttack : felt  # (Light Cav Base Attack*Number of Attacking Light Cav Battalions)+(Heavy Cav Base Attack*Number of Attacking Heavy Cav Battalions)
-    member ArcheryAttack : felt  # (Archer Base Attack*Number of Attacking Archer Battalions)+(Longbow Base Attack*Number of Attacking Longbow Battalions)
-    member MagicAttack : felt  # (Mage Base Attack*Number of Attacking Mage Battalions)+(Arcanist Base Attack*Number of Attacking Arcanist Battalions)
-    member InfantryAttack : felt  # (Light Inf Base Attack*Number of Attacking Light Inf Battalions)+(Heavy Inf Base Attack*Number of Attacking Heavy Inf Battalions)
-
-    member CavalryDefence : felt  # (Sum of all units Cavalry Defence*Percentage of Attacking Cav Battalions)
-    member ArcheryDefence : felt  # (Sum of all units Archery Defence*Percentage of Attacking Archery Battalions)
-    member MagicDefence : felt  # (Sum of all units Magic Cav Defence*Percentage of Attacking Magic Battalions)
-    member InfantryDefence : felt  # (Sum of all units Infantry Defence*Percentage of Attacking Infantry Battalions)
-end
-
-namespace BattlionIds:
-    const LightCavalry = 1
-    const HeavyCavalry = 2
-    const Archer = 3
-    const Longbow = 4
-    const Mage = 5
-    const Arcanist = 6
-    const LightInfantry = 7
-    const HeavyInfantry = 8
-end
+from contracts.settling_game.modules.combat.constants import (
+    BattalionDefence,
+    SHIFT_ARMY,
+    Battalion,
+    Army,
+    ArmyStatistics,
+    BattlionIds,
+)
 
 namespace Combat:
     func unpack_army{
@@ -320,7 +268,7 @@ namespace Combat:
 
         let (successful) = is_nn(final_outcome)
 
-        let (updated_attack_army_packed, updated_defence_army_packed) = updated_packed_armies(
+        let (updated_attack_army_packed, updated_defence_army_packed) = get_updated_packed_armies(
             attack_army_statistics,
             defending_army_statistics,
             attack_army_packed,
@@ -328,7 +276,7 @@ namespace Combat:
         )
 
         if successful == TRUE:
-            return (final_outcome, updated_attack_army_packed, updated_defence_army_packed)
+            return (TRUE, updated_attack_army_packed, updated_defence_army_packed)
         end
 
         return (FALSE, updated_attack_army_packed, updated_defence_army_packed)
@@ -350,15 +298,19 @@ namespace Combat:
 
         let (counter_div, _) = unsigned_div_rem(counter_attack * 100, counter_defence)
 
-        let health = battlion_div * (starting_health * counter_div) * 90  # multiple by % then divide
+        let (h, _) = unsigned_div_rem(((starting_health * counter_div) * 90), 100)
 
-        let (final_health, _) = unsigned_div_rem(health, 100000)
+        let (actual, _) = unsigned_div_rem(h, 100)
+
+        let health = battlion_div * actual
+
+        let (final_health, _) = unsigned_div_rem(health, 100)
 
         return (final_health)
     end
 
     # returns updated packed armies ready for storage
-    func updated_packed_armies{
+    func get_updated_packed_armies{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
         range_check_ptr,
@@ -405,61 +357,59 @@ namespace Combat:
     ) -> (packed_army : felt):
         alloc_locals
 
-        let (total_battalions) = calculate_total_battalions(attack_army_unpacked)
-
         let (light_cavalry_health) = calculate_health_remaining(
             attack_army_unpacked.LightCavalry.health,
             attack_army_unpacked.LightCavalry.quantity,
-            total_battalions,
+            attack_army_unpacked.LightCavalry.quantity + attack_army_unpacked.HeavyCavalry.quantity,
             attack_army_statistics.InfantryAttack,
             defending_army_statistics.InfantryDefence,
         )
         let (heavy_cavalry_health) = calculate_health_remaining(
             attack_army_unpacked.HeavyCavalry.health,
             attack_army_unpacked.HeavyCavalry.quantity,
-            total_battalions,
+            attack_army_unpacked.LightCavalry.quantity + attack_army_unpacked.HeavyCavalry.quantity,
             attack_army_statistics.InfantryAttack,
             defending_army_statistics.InfantryDefence,
         )
         let (archer_health) = calculate_health_remaining(
             attack_army_unpacked.Archer.health,
             attack_army_unpacked.Archer.quantity,
-            total_battalions,
+            attack_army_unpacked.Archer.quantity + attack_army_unpacked.Longbow.quantity,
             attack_army_statistics.CavalryAttack,
             defending_army_statistics.CavalryDefence,
         )
         let (longbow_health) = calculate_health_remaining(
             attack_army_unpacked.Longbow.health,
             attack_army_unpacked.Longbow.quantity,
-            total_battalions,
+            attack_army_unpacked.Archer.quantity + attack_army_unpacked.Longbow.quantity,
             attack_army_statistics.CavalryAttack,
             defending_army_statistics.CavalryDefence,
         )
         let (mage_health) = calculate_health_remaining(
             attack_army_unpacked.Mage.health,
             attack_army_unpacked.Mage.quantity,
-            total_battalions,
+            attack_army_unpacked.Mage.quantity + attack_army_unpacked.Arcanist.quantity,
             attack_army_statistics.ArcheryAttack,
             defending_army_statistics.ArcheryDefence,
         )
         let (archanist_health) = calculate_health_remaining(
             attack_army_unpacked.Arcanist.health,
             attack_army_unpacked.Arcanist.quantity,
-            total_battalions,
+            attack_army_unpacked.Mage.quantity + attack_army_unpacked.Arcanist.quantity,
             attack_army_statistics.ArcheryAttack,
             defending_army_statistics.ArcheryDefence,
         )
         let (light_infantry_health) = calculate_health_remaining(
             attack_army_unpacked.LightInfantry.health,
             attack_army_unpacked.LightInfantry.quantity,
-            total_battalions,
+            attack_army_unpacked.LightInfantry.quantity + attack_army_unpacked.LightInfantry.quantity,
             attack_army_statistics.InfantryAttack,
             defending_army_statistics.InfantryDefence,
         )
         let (heavy_infantry_health) = calculate_health_remaining(
             attack_army_unpacked.HeavyInfantry.health,
             attack_army_unpacked.HeavyInfantry.quantity,
-            total_battalions,
+            attack_army_unpacked.HeavyInfantry.quantity + attack_army_unpacked.HeavyInfantry.quantity,
             attack_army_statistics.MagicAttack,
             defending_army_statistics.MagicDefence,
         )

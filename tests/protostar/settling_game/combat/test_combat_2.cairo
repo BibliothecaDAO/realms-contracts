@@ -280,7 +280,7 @@ func test_health_remaining{
 
     let (unpacked_army) = Combat.unpack_army(packed_army)
 
-    let (total_battalions) = Combat.calculate_health_remaining(100, 4, 12, 100, 70)
+    let (total_battalions) = Combat.calculate_health_remaining(100 * 10, 2, 8, 100, 200)
 
     %{ print('health:', ids.total_battalions) %}
 
