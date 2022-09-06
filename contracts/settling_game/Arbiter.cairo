@@ -132,10 +132,7 @@ end
 # @param module_02_addr: Second module adddress
 # @param module_03_addr: Third module address
 # @param module_04_addr: Fourth module address
-# @param module_05_addr: Fifth module address
 # @param module_06_addr: Sixth module address
-# @param module_07_addr: Seventh module address
-# @param module_08_addr: Eight module address
 @external
 func batch_set_controller_addresses{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
@@ -144,7 +141,6 @@ func batch_set_controller_addresses{
     module_02_addr : felt,
     module_03_addr : felt,
     module_04_addr : felt,
-    module_05_addr : felt,
     module_06_addr : felt,
 ):
     Ownable.assert_only_owner()
@@ -155,7 +151,6 @@ func batch_set_controller_addresses{
         module_02_addr,
         module_03_addr,
         module_04_addr,
-        module_05_addr,
         module_06_addr,
     )
     return ()

@@ -12,7 +12,6 @@ MODULE_CONTRACT_IMPLEMENTATIONS = [
     Contracts("Resources", "Resources"),
     Contracts("Buildings", "Buildings"),
     Contracts("Calculator", "Calculator"),
-    Contracts("L05_Wonders", "L05_Wonders"),
     Contracts("L06_Combat", "L06_Combat")
 ]
 
