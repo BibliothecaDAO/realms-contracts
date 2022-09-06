@@ -192,11 +192,15 @@ func test_winner{
 
     let (defending_army_packed) = Combat.pack_army(defending_army)
 
-    let luck = 125
+    let luck = 100
 
-    let (outcome) = Combat.calculate_winner(luck, attacking_army_packed, defending_army_packed)
+    let (
+        outcome, updated_attack_army_packed, updated_defence_army_packed
+    ) = Combat.calculate_winner(luck, attacking_army_packed, defending_army_packed)
 
-    %{ print('wins:', ids.outcome) %}
+    %{ print('outcome:', ids.outcome) %}
+    %{ print('attacker:', ids.updated_attack_army_packed) %}
+    %{ print('defender:', ids.updated_defence_army_packed) %}
 
     return ()
 end
@@ -276,7 +280,7 @@ func test_health_remaining{
 
     let (unpacked_army) = Combat.unpack_army(packed_army)
 
-    let (total_battalions) = Combat.calculate_attacker_health_remaining(100, 4, 12, 100, 70)
+    let (total_battalions) = Combat.calculate_health_remaining(100, 4, 12, 100, 70)
 
     %{ print('health:', ids.total_battalions) %}
 
