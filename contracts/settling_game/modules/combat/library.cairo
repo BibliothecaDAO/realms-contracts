@@ -52,21 +52,41 @@ namespace Combat:
 
     func add_battalion_to_battalion{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(current : Army, battalion_id : felt, quantity : felt) -> (army : Army):
+    }(current : Army, battalion_id : felt, battalion : Battalion) -> (army : Army):
         alloc_locals
 
-        if battalion_id == BattlionIds.LightCavalry:
-            let casted_army = cast_battalin(current, battalion_id, quantity)
-            return (current)
-        end
+        let (__fp__, _) = get_fp_and_pc()
+        # let old = cast(&current, felt*)
+        let (updated : felt*) = alloc()
 
-        if battalion_id == BattlionIds.HeavyCavalry:
-            let casted_army = cast_battalin(current, battalion_id, quantity)
-            return (current)
-        end
+        let battalion_idx = (battalion_id - 1) * Battalion.SIZE
+        let old_battalion = [&current + battalion_idx] # [&old + battalion_idx]
 
-        return (current)
+        memcpy(updated, &current, battalion_idx)
+        memcpy(updated + battalion_idx, &battalion, Battalion.SIZE)
+        memcpy(updated + battalion_idx + Battalion.SIZE, &current + battalion_idx + Battalion.SIZE, Army.SIZE - battalion_idx - Battalion.SIZE)
+
+        let army = cast(updated, Army*)
+        return ([army])
     end
+
+    // func add_battalion_to_battalion{
+    //     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+    // }(current : Army, battalion_id : felt, quantity : felt) -> (army : Army):
+    //     alloc_locals
+
+    //     if battalion_id == BattlionIds.LightCavalry:
+    //         let casted_army = cast_battalin(current, battalion_id, quantity)
+    //         return (current)
+    //     end
+
+    //     if battalion_id == BattlionIds.HeavyCavalry:
+    //         let casted_army = cast_battalin(current, battalion_id, quantity)
+    //         return (current)
+    //     end
+
+    //     return (current)
+    // end
 
     func cast_battalin{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         current : Army, battalion_id : felt, quantity : felt
