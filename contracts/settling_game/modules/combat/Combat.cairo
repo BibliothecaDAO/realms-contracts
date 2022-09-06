@@ -77,16 +77,16 @@ from contracts.settling_game.modules.combat.constants import (
 # Events
 # -----------------------------------
 
-@event
-func CombatStart_4(
-    attacking_realm_id : Uint256,
-    defending_realm_id : Uint256,
-    attacking_army : Army,
-    defending_army : Army,
-    attacking_army_id : felt,
-    defending_army_id : felt,
-):
-end
+# @event
+# func CombatStart_4(
+#     attacking_realm_id : Uint256,
+#     defending_realm_id : Uint256,
+#     attacking_army : Army,
+#     defending_army : Army,
+#     attacking_army_id : felt,
+#     defending_army_id : felt,
+# ):
+# end
 
 @event
 func CombatEnd_4(
@@ -211,6 +211,7 @@ func build_army_from_battalions{
     alloc_locals
 
     # TODO: assert can build army -> # max regions
+    # TODO: can only add to the army if you are at homebase or friendly Realm
     # Combat.assert_slot(army_id)
 
     Module.ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)

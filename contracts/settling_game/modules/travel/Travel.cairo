@@ -32,9 +32,9 @@ from contracts.settling_game.modules.travel.library import Travel
 
 @event
 func TravelAction(
-    traveller_asset_id : felt,
+    traveller_contract_id : felt,
     traveller_token_id : Uint256,
-    destination_asset_id : felt,
+    destination_contract_id : felt,
     destination_token_id : Uint256,
     arrival_time : felt,
 ):
