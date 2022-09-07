@@ -10,60 +10,34 @@ from contracts.loot.constants.item import (
     ItemMaterial,
     Material,
     ItemType,
+    Type,
 )
 
-func item_vs_damage{syscall_ptr : felt*, range_check_ptr}(
-        item_attacking_id : felt, item_defending_id : felt
+namespace WeaponEfficacy:
+    const Low = 0
+    const Medium = 1
+    const High = 2
+end
+
+func weapon_vs_armor_efficacy{syscall_ptr : felt*, range_check_ptr}(
+        weapon_id : felt, armor_id : felt
     ) -> (class : felt):
         alloc_locals
 
-        let (a_slot) = get_label_location(item_a_slot)
-
-        let (d_slot) = get_label_location(item_d_slot)
-
-        return ([a_slot + item_attacking_id - 1] + [a_slot + item_defending_id - 1])
-
-        item_a_slot:
-        dw ItemType.GhostWand
-        dw ItemType.GraveWand
-        dw ItemType.BoneWand
-        dw ItemType.Wand
-
-        dw ItemType.Grimoire
-        dw ItemType.Chronicle
-        dw ItemType.Tome
-        dw ItemType.Book
-
-        dw ItemType.Warhammer
-        dw ItemType.Quarterstaff
-        dw ItemType.Maul
-        dw ItemType.Mace
-        dw ItemType.Club
-
-        dw ItemType.Katana
-        dw ItemType.Falchion
-        dw ItemType.Scimitar
-        dw ItemType.LongSword
-        dw ItemType.ShortSword
-        # TODO: add
+        # Get weapon_type (see Type and ItemType from item.cairo) from passed in itemId
+        # Get armor type (see Type and ItemType from item.cairo) from passed in item
         
-        item_d_slot:
-        dw ItemType.HolyChestplate
-        dw ItemType.OrnateChestplate
-        dw ItemType.PlateMail
-        dw ItemType.ChainMail
-        dw ItemType.RingMail
-        # TODO: add
-    end
-## Todo: Figure out ideal data structure for communicate the following basic combat rules:
-    ## Blade vs Cloth = Critical Damage
-    ## Blade vs Hide == Normal Damage
-    ## Blade vs Metal == Minimal Damage
-
-    ## Bludgeon vs Metal == Critical Damage
-    ## Bludgeon vs Hide == Normal Damage
-    ## Bludgeon vs Cloth == Minimal Damage
-
-    ## Magic vs Metal == Critical Damage
-    ## Magic vs Hide == Normal Damage
-    ## Magic vs Cloth == Minimal Damage
+        if weapon_type == blade {
+            if armor_type == cloth { return WeaponEfficacy.High}
+            if armor_type == hide {return WeaponEfficacy.Medium}
+            if armor_type == metal {return WeaponEfficacy.Low}
+        } else if weapon_type == bludgeon {
+            if armor_type == cloth { return WeaponEfficacy.Low}
+            if armor_type == hide {return WeaponEfficacy.High}
+            if armor_type == metal {return WeaponEfficacy.Medium}
+        } else if weapon_type == magic {
+            if armor_type == cloth { return WeaponEfficacy.Medium}
+            if armor_type == hide {return WeaponEfficacy.Low}
+            if armor_type == metal {return WeaponEfficacy.High}
+        }
+}
