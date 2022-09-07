@@ -27,7 +27,7 @@ def mint_loot(network):
 @click.option("--network", default="goerli")
 def get_loot(loot_token_id, network):
     """
-    Mint Loot Item
+    Get Loot Item metadata
     """
     config = Config(nile_network=network)
 
