@@ -25,12 +25,12 @@ from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.modules.calculator.interface import ICalculator
 from contracts.settling_game.interfaces.imodules import (
     IModuleController,
-    IL02_Resources,
-    IL03_Buildings,
     IL09_Relics,
     IFood,
     IGoblinTown,
 )
+from contracts.settling_game.modules.resources.interface import IResources
+from contracts.settling_game.modules.buildings.interface import Buildings
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.modules.combat.library import Combat
@@ -190,8 +190,8 @@ func build_army_from_battalions{
     Module.ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
 
     # check if Realm has the buildings to build the requested troops
-    let (buildings_module) = Module.get_module_address(ModuleIds.L03_Buildings)
-    let (realm_buildings : RealmBuildings) = IL03_Buildings.get_effective_buildings(
+    let (buildings_module) = Module.get_module_address(ModuleIds.Buildings)
+    let (realm_buildings : RealmBuildings) = Buildings.get_effective_buildings(
         buildings_module, realm_id
     )
 
@@ -204,9 +204,8 @@ func build_army_from_battalions{
     load_troop_costs(battalion_ids_len, battalion_ids, troop_costs)
 
     # transform costs into tokens
-    let (
-        token_len : felt, token_ids : Uint256*, token_values : Uint256*
-    ) = transform_costs_to_tokens(battalion_ids_len, troop_costs, 1)
+    let (token_len : felt, token_ids : Uint256*,
+        token_values : Uint256*) = transform_costs_to_tokens(battalion_ids_len, troop_costs, 1)
 
     # pay for the battalions
     let (caller) = get_caller_address()
@@ -286,6 +285,7 @@ func initiate_combat{
     let (travel_module) = Module.get_module_address(ModuleIds.Travel)
     ITravel.assert_traveller_is_at_location(
         travel_module,
+        attacking_army_id,
         ExternalContractIds.S_Realms,
         attacking_realm_id,
         ExternalContractIds.S_Realms,
@@ -298,9 +298,6 @@ func initiate_combat{
     let (defending_realm_data : ArmyData) = get_realm_army_combat_data(
         defending_army_id, defending_realm_id
     )
-
-    let (attacker : Army) = Combat.unpack_army(attacking_realm_data.ArmyPacked)
-    let (defender : Army) = Combat.unpack_army(defending_realm_data.ArmyPacked)
 
     # check if the fighting realms have enough food, otherwise
     # decrease whole squad vitality by 50%
@@ -329,61 +326,84 @@ func initiate_combat{
     # end
     # tempvar defender = defender
 
-    # TODO: Add in random number generator between 75-125 as the 'luck' - set at 75 below  @NEW @MILAN
-    let (combat_outcome, attacking_army, defending_army) = Combat.calculate_winner(
-        75, attacking_realm_data.ArmyPacked, defending_realm_data.ArmyPacked
-    )
+    let (starting_attack_army : Army) = Combat.unpack_army(attacking_realm_data.ArmyPacked)
+    let (starting_defend_army : Army) = Combat.unpack_army(defending_realm_data.ArmyPacked)
 
     # EMIT FIRST
-    # CombatStart_3.emit(attacking_realm_id, defending_realm_id, attacker, defender)
+    CombatStart_4.emit(
+        attacking_realm_id,
+        defending_realm_id,
+        starting_attack_army,
+        starting_defend_army,
+        attacking_army_id,
+        defending_army_id,
+    )
 
-    # let (attacker_breached_wall : Squad) = inflict_wall_defense(attacker, defending_realm_id)
+    # get outcome
+    let (luck) = roll_dice()
+    let (combat_outcome, ending_attacking_army_packed,
+        ending_defending_army_packed) = Combat.calculate_winner(
+        luck, attacking_realm_data.ArmyPacked, defending_realm_data.ArmyPacked
+    )
 
-    # let (attacker_end, defender_end, combat_outcome) = run_combat_loop(
-    #     attacking_realm_id, defending_realm_id, attacker_breached_wall, defender
-    # )
+    # unpack
+    let (ending_attacking_army : Army) = Combat.unpack_army(ending_attacking_army_packed)
+    let (ending_defending_army : Army) = Combat.unpack_army(ending_defending_army_packed)
 
-    # let (new_attacker : felt) = Combat.pack_squad(attacker_end)
-    # let (new_defender : felt) = Combat.pack_squad(defender_end)
+    # emit end
+    CombatEnd_4.emit(
+        attacking_realm_id,
+        defending_realm_id,
+        ending_attacking_army,
+        ending_defending_army,
+        attacking_army_id,
+        defending_army_id,
+    )
 
-    # let new_attacking_realm_data = RealmCombatData(
-    #     attacking_squad=new_attacker,
-    #     defending_squad=attacking_realm_data.defending_squad,
-    #     last_attacked_at=attacking_realm_data.last_attacked_at,
-    # )
-    # set_realm_combat_data(attacking_realm_id, new_attacking_realm_data)
+    # pillaging only if attacker wins
+    let (now) = get_block_timestamp()
 
-    # let (now) = get_block_timestamp()
-
-    # let new_defending_realm_data = RealmCombatData(
-    #     attacking_squad=defending_realm_data.attacking_squad,
-    #     defending_squad=new_defender,
-    #     last_attacked_at=now,
-    # )
-    # set_realm_combat_data(defending_realm_id, new_defending_realm_data)
-
-    # # pillaging only if attacker wins
     if combat_outcome == COMBAT_OUTCOME_ATTACKER_WINS:
         let (controller) = Module.controller_address()
         let (resources_logic_address) = IModuleController.get_module_address(
-            controller, ModuleIds.L02_Resources
+            controller, ModuleIds.Resources
         )
         let (relic_address) = IModuleController.get_module_address(controller, ModuleIds.L09_Relics)
         let (caller) = get_caller_address()
-        IL02_Resources.pillage_resources(resources_logic_address, defending_realm_id, caller)
+        IResources.pillage_resources(resources_logic_address, defending_realm_id, caller)
         IL09_Relics.set_relic_holder(relic_address, attacking_realm_id, defending_realm_id)
+
+        army_data_by_id.write(
+            attacking_army_id,
+            attacking_realm_id,
+            ArmyData(ending_attacking_army, now, starting_attack_army.XP + 100, starting_attack_army.Level, starting_attack_army.CallSign),
+        )
+
+        army_data_by_id.write(
+            defending_army_id,
+            defending_realm_id,
+            ArmyData(ending_defending_army, now, starting_defend_army.XP + 30, starting_defend_army.Level, starting_defend_army.CallSign),
+        )
+
         tempvar syscall_ptr = syscall_ptr
         tempvar range_check_ptr = range_check_ptr
         tempvar pedersen_ptr = pedersen_ptr
     else:
+        army_data_by_id.write(
+            attacking_army_id,
+            attacking_realm_id,
+            ArmyData(ending_attacking_army, now, starting_attack_army.XP + 30, starting_attack_army.Level, starting_attack_army.CallSign),
+        )
+
+        army_data_by_id.write(
+            defending_army_id,
+            defending_realm_id,
+            ArmyData(ending_defending_army, now, starting_defend_army.XP + 100, starting_defend_army.Level, starting_defend_army.CallSign),
+        )
         tempvar syscall_ptr = syscall_ptr
         tempvar range_check_ptr = range_check_ptr
         tempvar pedersen_ptr = pedersen_ptr
     end
-
-    # CombatOutcome_3.emit(
-    #     attacking_realm_id, defending_realm_id, attacker_end, defender_end, combat_outcome
-    # )
 
     return (combat_outcome)
 end
@@ -477,4 +497,46 @@ func get_realm_army_combat_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     army_id : felt, realm_id : Uint256
 ) -> (army_data : ArmyData):
     return army_data_by_id.read(army_id, realm_id)
+end
+
+# @notice Perform a 12 sided dice roll
+# @return Dice roll value, from 1 to 12 (inclusive)
+func roll_dice{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}() -> (
+    dice_roll : felt
+):
+    alloc_locals
+    let (xoroshiro_address_) = xoroshiro_address.read()
+    let (rnd) = IXoroshiro.next(xoroshiro_address_)
+
+    # useful for testing:
+    # local rnd
+    # %{
+    #     import random
+    #     ids.rnd = random.randint(0, 5000)
+    # %}
+    let (_, r) = unsigned_div_rem(rnd, 50)
+    return (r + 1 + 75)  # values from 1 to 12 inclusive
+end
+
+#########
+# ADMIN #
+#########
+
+@external
+func set_troop_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
+    troop_id : felt, cost : Cost
+):
+    Proxy.assert_only_admin()
+    troop_cost.write(troop_id, cost)
+    return ()
+end
+
+@external
+func set_xoroshiro{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    xoroshiro : felt
+):
+    # TODO:
+    Proxy.assert_only_admin()
+    xoroshiro_address.write(xoroshiro)
+    return ()
 end
