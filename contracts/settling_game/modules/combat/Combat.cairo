@@ -434,8 +434,7 @@ end
 func get_troop_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     troop_id : felt
 ) -> (cost : Cost):
-    let (cost) = troop_cost.read(troop_id)
-    return (cost)
+    return troop_cost.read(troop_id)
 end
 
 @view
