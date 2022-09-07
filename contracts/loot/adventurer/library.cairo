@@ -15,10 +15,7 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.registers import get_label_location
 
-from contracts.loot.item.constants import (
-    Item
-)
-
+from contracts.loot.constants import Item
 from contracts.loot.item.library_item import LootItems
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.constants import SHIFT_41
