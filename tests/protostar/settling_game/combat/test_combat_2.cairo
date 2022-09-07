@@ -2,16 +2,22 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.alloc import alloc
-from starkware.cairo.common.uint256 import Uint256
-from starkware.starknet.common.syscalls import get_caller_address
+
 
 from contracts.settling_game.modules.combat.library import Combat, Army, Battalion, ArmyStatistics
 from contracts.settling_game.modules.combat.constants import BattalionDefence
 
-from tests.protostar.settling_game.combat.combat_test_constants import (
-    TestAttackingArmy,
-    TestDefendingArmy,
-)
+func build_attacking_army() -> (a : Army):
+    tempvar values = new (2, 100, 2, 100, 2, 100, 2, 100, 2, 100, 2, 100, 2, 100, 2, 100,)
+    let a = cast(values, Army*)
+    return ([a])
+end
+
+func build_defending_army() -> (a : Army):
+    tempvar values = new (1, 100, 1, 100, 10, 100, 2, 100, 2, 100, 2, 100, 2, 100, 1, 100,)
+    let a = cast(values, Army*)
+    return ([a])
+end
 
 @external
 func test_squad{
@@ -19,27 +25,8 @@ func test_squad{
 }():
     alloc_locals
 
-    let attacking_army = Army(
-        Battalion(TestAttackingArmy.LightCavalry.quantity,
-        TestAttackingArmy.LightCavalry.health),
-        Battalion(TestAttackingArmy.HeavyCavalry.quantity,
-        TestAttackingArmy.HeavyCavalry.health),
-        Battalion(TestAttackingArmy.Archer.quantity,
-        TestAttackingArmy.Archer.health),
-        Battalion(TestAttackingArmy.Longbow.quantity,
-        TestAttackingArmy.Longbow.health),
-        Battalion(TestAttackingArmy.Mage.quantity,
-        TestAttackingArmy.Mage.health),
-        Battalion(TestAttackingArmy.Arcanist.quantity,
-        TestAttackingArmy.Arcanist.health),
-        Battalion(TestAttackingArmy.LightInfantry.quantity,
-        TestAttackingArmy.LightInfantry.health),
-        Battalion(TestAttackingArmy.HeavyInfantry.quantity,
-        TestAttackingArmy.HeavyInfantry.health),
-    )
-
+    let (attacking_army) = build_attacking_army()
     let (packed_army) = Combat.pack_army(attacking_army)
-
     let (unpacked_army : Army) = Combat.unpack_army(packed_army)
 
     assert TestAttackingArmy.LightCavalry.quantity = unpacked_army.LightCavalry.quantity
@@ -54,27 +41,8 @@ func test_statistics{
 }():
     alloc_locals
 
-    let attacking_army = Army(
-        Battalion(TestAttackingArmy.LightCavalry.quantity,
-        TestAttackingArmy.LightCavalry.health),
-        Battalion(TestAttackingArmy.HeavyCavalry.quantity,
-        TestAttackingArmy.HeavyCavalry.health),
-        Battalion(TestAttackingArmy.Archer.quantity,
-        TestAttackingArmy.Archer.health),
-        Battalion(TestAttackingArmy.Longbow.quantity,
-        TestAttackingArmy.Longbow.health),
-        Battalion(TestAttackingArmy.Mage.quantity,
-        TestAttackingArmy.Mage.health),
-        Battalion(TestAttackingArmy.Arcanist.quantity,
-        TestAttackingArmy.Arcanist.health),
-        Battalion(TestAttackingArmy.LightInfantry.quantity,
-        TestAttackingArmy.LightInfantry.health),
-        Battalion(TestAttackingArmy.HeavyInfantry.quantity,
-        TestAttackingArmy.HeavyInfantry.health),
-    )
-
+    let (attacking_army) = build_attacking_army()
     let (packed_army) = Combat.pack_army(attacking_army)
-
     let (unpacked_army : ArmyStatistics) = Combat.calculate_army_statistics(packed_army)
 
     return ()
@@ -86,46 +54,10 @@ func test_winner{
 }():
     alloc_locals
 
-    let attacking_army = Army(
-        Battalion(TestAttackingArmy.LightCavalry.quantity,
-        TestAttackingArmy.LightCavalry.health),
-        Battalion(TestAttackingArmy.HeavyCavalry.quantity,
-        TestAttackingArmy.HeavyCavalry.health),
-        Battalion(TestAttackingArmy.Archer.quantity,
-        TestAttackingArmy.Archer.health),
-        Battalion(TestAttackingArmy.Longbow.quantity,
-        TestAttackingArmy.Longbow.health),
-        Battalion(TestAttackingArmy.Mage.quantity,
-        TestAttackingArmy.Mage.health),
-        Battalion(TestAttackingArmy.Arcanist.quantity,
-        TestAttackingArmy.Arcanist.health),
-        Battalion(TestAttackingArmy.LightInfantry.quantity,
-        TestAttackingArmy.LightInfantry.health),
-        Battalion(TestAttackingArmy.HeavyInfantry.quantity,
-        TestAttackingArmy.HeavyInfantry.health),
-    )
-
+    let (attacking_army) = build_attacking_army()
     let (attacking_army_packed) = Combat.pack_army(attacking_army)
 
-    let defending_army = Army(
-        Battalion(TestDefendingArmy.LightCavalry.quantity,
-        TestDefendingArmy.LightCavalry.health),
-        Battalion(TestDefendingArmy.HeavyCavalry.quantity,
-        TestDefendingArmy.HeavyCavalry.health),
-        Battalion(TestDefendingArmy.Archer.quantity,
-        TestDefendingArmy.Archer.health),
-        Battalion(TestDefendingArmy.Longbow.quantity,
-        TestDefendingArmy.Longbow.health),
-        Battalion(TestDefendingArmy.Mage.quantity,
-        TestDefendingArmy.Mage.health),
-        Battalion(TestDefendingArmy.Arcanist.quantity,
-        TestDefendingArmy.Arcanist.health),
-        Battalion(TestDefendingArmy.LightInfantry.quantity,
-        TestDefendingArmy.LightInfantry.health),
-        Battalion(TestDefendingArmy.HeavyInfantry.quantity,
-        TestDefendingArmy.HeavyInfantry.health),
-    )
-
+    let (defending_army) = build_defending_army()
     let (defending_army_packed) = Combat.pack_army(defending_army)
 
     let luck = 100
@@ -147,29 +79,9 @@ func test_calculate_total_battalions{
 }():
     alloc_locals
 
-    let attacking_army : Army = Army(
-        Battalion(TestAttackingArmy.LightCavalry.quantity,
-        TestAttackingArmy.LightCavalry.health),
-        Battalion(TestAttackingArmy.HeavyCavalry.quantity,
-        TestAttackingArmy.HeavyCavalry.health),
-        Battalion(TestAttackingArmy.Archer.quantity,
-        TestAttackingArmy.Archer.health),
-        Battalion(TestAttackingArmy.Longbow.quantity,
-        TestAttackingArmy.Longbow.health),
-        Battalion(TestAttackingArmy.Mage.quantity,
-        TestAttackingArmy.Mage.health),
-        Battalion(TestAttackingArmy.Arcanist.quantity,
-        TestAttackingArmy.Arcanist.health),
-        Battalion(TestAttackingArmy.LightInfantry.quantity,
-        TestAttackingArmy.LightInfantry.health),
-        Battalion(TestAttackingArmy.HeavyInfantry.quantity,
-        TestAttackingArmy.HeavyInfantry.health),
-    )
-
+    let (attacking_army) = build_attacking_army()
     let (packed_army) = Combat.pack_army(attacking_army)
-
     let (unpacked_army) = Combat.unpack_army(packed_army)
-
     let (total_battalions) = Combat.calculate_total_battalions(attacking_army)
 
     %{ print('battalions:', ids.total_battalions) %}
@@ -193,27 +105,8 @@ func test_health_remaining{
 }():
     alloc_locals
 
-    let attacking_army : Army = Army(
-        Battalion(TestAttackingArmy.LightCavalry.quantity,
-        TestAttackingArmy.LightCavalry.health),
-        Battalion(TestAttackingArmy.HeavyCavalry.quantity,
-        TestAttackingArmy.HeavyCavalry.health),
-        Battalion(TestAttackingArmy.Archer.quantity,
-        TestAttackingArmy.Archer.health),
-        Battalion(TestAttackingArmy.Longbow.quantity,
-        TestAttackingArmy.Longbow.health),
-        Battalion(TestAttackingArmy.Mage.quantity,
-        TestAttackingArmy.Mage.health),
-        Battalion(TestAttackingArmy.Arcanist.quantity,
-        TestAttackingArmy.Arcanist.health),
-        Battalion(TestAttackingArmy.LightInfantry.quantity,
-        TestAttackingArmy.LightInfantry.health),
-        Battalion(TestAttackingArmy.HeavyInfantry.quantity,
-        TestAttackingArmy.HeavyInfantry.health),
-    )
-
+    let (attacking_army) = build_attacking_army()
     let (packed_army) = Combat.pack_army(attacking_army)
-
     let (unpacked_army) = Combat.unpack_army(packed_army)
 
     let (total_battalions) = Combat.calculate_health_remaining(100 * 10, 2, 8, 100, 200)
@@ -229,27 +122,8 @@ func test_add_battalions_to_army{
 }():
     alloc_locals
 
-    let attacking_army : Army = Army(
-        Battalion(TestAttackingArmy.LightCavalry.quantity,
-        TestAttackingArmy.LightCavalry.health),
-        Battalion(TestAttackingArmy.HeavyCavalry.quantity,
-        TestAttackingArmy.HeavyCavalry.health),
-        Battalion(TestAttackingArmy.Archer.quantity,
-        TestAttackingArmy.Archer.health),
-        Battalion(TestAttackingArmy.Longbow.quantity,
-        TestAttackingArmy.Longbow.health),
-        Battalion(TestAttackingArmy.Mage.quantity,
-        TestAttackingArmy.Mage.health),
-        Battalion(TestAttackingArmy.Arcanist.quantity,
-        TestAttackingArmy.Arcanist.health),
-        Battalion(TestAttackingArmy.LightInfantry.quantity,
-        TestAttackingArmy.LightInfantry.health),
-        Battalion(TestAttackingArmy.HeavyInfantry.quantity,
-        TestAttackingArmy.HeavyInfantry.health),
-    )
-
+    let (attacking_army) = build_attacking_army()
     let (packed_army) = Combat.pack_army(attacking_army)
-
     let (unpacked_army) = Combat.unpack_army(packed_army)
 
     let (battalion_ids : felt*) = alloc()
