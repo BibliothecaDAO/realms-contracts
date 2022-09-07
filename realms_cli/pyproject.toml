@@ -148,3 +148,8 @@ cairo-nile = "^0.5.0"
 "deposit" = "realms_cli.nexus.admin.deposit"
 
 "increase_allowance_nexus" =  "realms_cli.nexus.admin.increase_allowance_nexus"
+
+
+#-----------LOOT
+"mint_loot"  =  "realms_cli.loot.loot.mint_loot"
+"get_loot"  =  "realms_cli.loot.loot.get_loot"
