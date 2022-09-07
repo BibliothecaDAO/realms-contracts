@@ -28,7 +28,7 @@ from contracts.settling_game.modules.combat.constants import (
     Battalion,
     Army,
     ArmyStatistics,
-    BattlionIds,
+    BattalionIds,
 )
 
 namespace Combat:
@@ -79,24 +79,6 @@ namespace Combat:
         let army = cast(updated, Army*)
         return ([army])
     end
-
-    # // func add_battalion_to_battalion{
-    # //     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    # // }(current : Army, battalion_id : felt, quantity : felt) -> (army : Army):
-    # //     alloc_locals
-
-    # //     if battalion_id == BattlionIds.LightCavalry:
-    # //         let casted_army = cast_battalin(current, battalion_id, quantity)
-    # //         return (current)
-    # //     end
-
-    # //     if battalion_id == BattlionIds.HeavyCavalry:
-    # //         let casted_army = cast_battalin(current, battalion_id, quantity)
-    # //         return (current)
-    # //     end
-
-    # //     return (current)
-    # // end
 
     func cast_battalin{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         current : Army, battalion_id : felt, quantity : felt
@@ -188,27 +170,27 @@ namespace Combat:
         let (unpacked_army : Army) = unpack_army(army_packed)
 
         let (cavalry_attack) = calculate_attack_values(
-            BattlionIds.LightCavalry,
+            BattalionIds.LightCavalry,
             unpacked_army.LightCavalry.quantity,
-            BattlionIds.HeavyCavalry,
+            BattalionIds.HeavyCavalry,
             unpacked_army.HeavyCavalry.quantity,
         )
         let (archery_attack) = calculate_attack_values(
-            BattlionIds.Archer,
+            BattalionIds.Archer,
             unpacked_army.Archer.quantity,
-            BattlionIds.Longbow,
+            BattalionIds.Longbow,
             unpacked_army.Longbow.quantity,
         )
         let (magic_attack) = calculate_attack_values(
-            BattlionIds.Mage,
+            BattalionIds.Mage,
             unpacked_army.Mage.quantity,
-            BattlionIds.Arcanist,
+            BattalionIds.Arcanist,
             unpacked_army.Arcanist.quantity,
         )
         let (infantry_attack) = calculate_attack_values(
-            BattlionIds.LightInfantry,
+            BattalionIds.LightInfantry,
             unpacked_army.LightInfantry.quantity,
-            BattlionIds.HeavyInfantry,
+            BattalionIds.HeavyInfantry,
             unpacked_army.HeavyInfantry.quantity,
         )
 
@@ -382,7 +364,7 @@ namespace Combat:
     ) -> (new_health : felt):
         alloc_locals
 
-        let (battlion_div, _) = unsigned_div_rem(battalions * 100, total_battalions)
+        let (battalion_div, _) = unsigned_div_rem(battalions * 100, total_battalions)
 
         let (counter_div, _) = unsigned_div_rem(counter_attack * 100, counter_defence)
 
@@ -390,7 +372,7 @@ namespace Combat:
 
         let (actual, _) = unsigned_div_rem(h, 100)
 
-        let health = battlion_div * actual
+        let health = battalion_div * actual
 
         let (final_health, _) = unsigned_div_rem(health, 100)
 

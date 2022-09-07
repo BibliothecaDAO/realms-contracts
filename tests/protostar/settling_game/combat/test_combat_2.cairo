@@ -3,9 +3,8 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.alloc import alloc
 
-
 from contracts.settling_game.modules.combat.library import Combat, Army, Battalion, ArmyStatistics
-from contracts.settling_game.modules.combat.constants import BattalionDefence
+from contracts.settling_game.modules.combat.constants import BattalionDefence, BattalionIds
 
 func build_attacking_army() -> (a : Army):
     tempvar values = new (2, 100, 2, 100, 2, 100, 2, 100, 2, 100, 2, 100, 2, 100, 2, 100,)
@@ -29,8 +28,10 @@ func test_squad{
     let (packed_army) = Combat.pack_army(attacking_army)
     let (unpacked_army : Army) = Combat.unpack_army(packed_army)
 
-    assert TestAttackingArmy.LightCavalry.quantity = unpacked_army.LightCavalry.quantity
-    assert TestAttackingArmy.HeavyInfantry.quantity = unpacked_army.HeavyInfantry.quantity
+    assert unpacked_army.LightCavalry.quantity = 2
+    assert unpacked_army.LightCavalry.health = 100
+    assert unpacked_army.HeavyInfantry.quantity = 2
+    assert unpacked_army.HeavyInfantry.health = 100
 
     return ()
 end
@@ -127,12 +128,12 @@ func test_add_battalions_to_army{
     let (unpacked_army) = Combat.unpack_army(packed_army)
 
     let (battalion_ids : felt*) = alloc()
-    assert battalion_ids[0] = 1
-    assert battalion_ids[1] = 2
+    assert battalion_ids[0] = BattalionIds.LightCavalry
+    assert battalion_ids[1] = BattalionIds.HeavyCavalry
 
     let (battalions : Battalion*) = alloc()
-    assert battalions[0] = Battalion(3, TestAttackingArmy.LightCavalry.health)
-    assert battalions[1] = Battalion(TestAttackingArmy.HeavyCavalry.quantity, TestAttackingArmy.HeavyCavalry.health)
+    assert battalions[0] = Battalion(3, 20)
+    assert battalions[1] = Battalion(1, 100)
 
     let (total_battalions : Army) = Combat.add_battalions_to_army(
         unpacked_army, 2, battalion_ids, 2, battalions

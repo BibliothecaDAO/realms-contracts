@@ -69,7 +69,7 @@ from contracts.settling_game.modules.combat.constants import (
     Battalion,
     Army,
     ArmyStatistics,
-    BattlionIds,
+    BattalionIds,
     ArmyData,
 )
 

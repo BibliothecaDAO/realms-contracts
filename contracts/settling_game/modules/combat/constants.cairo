@@ -91,7 +91,7 @@ struct ArmyStatistics:
     member InfantryDefence : felt  # (Sum of all units Infantry Defence*Percentage of Attacking Infantry Battalions)
 end
 
-namespace BattlionIds:
+namespace BattalionIds:
     const LightCavalry = 1
     const HeavyCavalry = 2
     const Archer = 3
