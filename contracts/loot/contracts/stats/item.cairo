@@ -1,3 +1,7 @@
+# Item helper functions
+#
+# MIT License
+
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
@@ -15,6 +19,7 @@ from contracts.loot.constants.item import (
     ItemType,
     ItemMaterial
 )
+from contracts.loot.constants.rankings import ItemRank
 
 namespace Statistics:
     func item_slot{syscall_ptr : felt*, range_check_ptr}(item_id : felt) -> (slot : felt):
@@ -345,5 +350,115 @@ namespace Statistics:
         dw ItemMaterial.Gauntlets
         dw ItemMaterial.ChainGloves
         dw ItemMaterial.HeavyGloves
+    end
+
+    func item_rank{syscall_ptr : felt*, range_check_ptr}(item_id : felt) -> (rank : felt):
+        alloc_locals
+
+        let (label_location) = get_label_location(labels)
+        return ([label_location + item_id - 1])
+
+        labels:
+        dw ItemRank.Pendant
+        dw ItemRank.Necklace
+        dw ItemRank.Amulet
+        dw ItemRank.SilverRing
+        dw ItemRank.BronzeRing
+        dw ItemRank.PlatinumRing
+        dw ItemRank.TitaniumRing
+        dw ItemRank.GoldRing
+        dw ItemRank.GhostWand
+        dw ItemRank.GraveWand
+        dw ItemRank.BoneWand
+        dw ItemRank.Wand
+        dw ItemRank.Grimoire
+        dw ItemRank.Chronicle
+        dw ItemRank.Tome
+        dw ItemRank.Book
+        dw ItemRank.DivineRobe
+        dw ItemRank.SilkRobe
+        dw ItemRank.LinenRobe
+        dw ItemRank.Robe
+        dw ItemRank.Shirt
+        dw ItemRank.Crown
+        dw ItemRank.DivineHood
+        dw ItemRank.SilkHood
+        dw ItemRank.LinenHood
+        dw ItemRank.Hood
+        dw ItemRank.BrightsilkSash
+        dw ItemRank.SilkSash
+        dw ItemRank.WoolSash
+        dw ItemRank.LinenSash
+        dw ItemRank.Sash
+        dw ItemRank.DivineSlippers
+        dw ItemRank.SilkSlippers
+        dw ItemRank.WoolShoes
+        dw ItemRank.LinenShoes
+        dw ItemRank.Shoes
+        dw ItemRank.DivineGloves
+        dw ItemRank.SilkGloves
+        dw ItemRank.WoolGloves
+        dw ItemRank.LinenGloves
+        dw ItemRank.Gloves
+        dw ItemRank.Katana
+        dw ItemRank.Falchion
+        dw ItemRank.Scimitar
+        dw ItemRank.LongSword
+        dw ItemRank.ShortSword
+        dw ItemRank.DemonHusk
+        dw ItemRank.DragonskinArmor
+        dw ItemRank.StuddedLeatherArmor
+        dw ItemRank.HardLeatherArmor
+        dw ItemRank.LeatherArmor
+        dw ItemRank.DemonCrown
+        dw ItemRank.DragonsCrown
+        dw ItemRank.WarCap
+        dw ItemRank.LeatherCap
+        dw ItemRank.Cap
+        dw ItemRank.DemonhideBelt
+        dw ItemRank.DragonskinBelt
+        dw ItemRank.StuddedLeatherBelt
+        dw ItemRank.HardLeatherBelt
+        dw ItemRank.LeatherBelt
+        dw ItemRank.DemonhideBoots
+        dw ItemRank.DragonskinBoots
+        dw ItemRank.StuddedLeatherBoots
+        dw ItemRank.HardLeatherBoots
+        dw ItemRank.LeatherBoots
+        dw ItemRank.DemonsHands
+        dw ItemRank.DragonskinGloves
+        dw ItemRank.StuddedLeatherGloves
+        dw ItemRank.HardLeatherGloves
+        dw ItemRank.LeatherGloves
+        dw ItemRank.Warhammer
+        dw ItemRank.Quarterstaff
+        dw ItemRank.Maul
+        dw ItemRank.Mace
+        dw ItemRank.Club
+        dw ItemRank.HolyChestplate
+        dw ItemRank.OrnateChestplate
+        dw ItemRank.PlateMail
+        dw ItemRank.ChainMail
+        dw ItemRank.RingMail
+        dw ItemRank.AncientHelm
+        dw ItemRank.OrnateHelm
+        dw ItemRank.GreatHelm
+        dw ItemRank.FullHelm
+        dw ItemRank.Helm
+        dw ItemRank.OrnateBelt
+        dw ItemRank.WarBelt
+        dw ItemRank.PlatedBelt
+        dw ItemRank.MeshBelt
+        dw ItemRank.HeavyBelt
+        dw ItemRank.HolyGreaves
+        dw ItemRank.OrnateGreaves
+        dw ItemRank.Greaves
+        dw ItemRank.ChainBoots
+        dw ItemRank.HeavyBoots
+        dw ItemRank.HolyGauntlets
+        dw ItemRank.OrnateGauntlets
+        dw ItemRank.Gauntlets
+        dw ItemRank.ChainGloves
+        dw ItemRank.HeavyGloves
     end
 end

@@ -4,14 +4,13 @@ from starkware.cairo.common.math_cmp import is_nn, is_le
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
 from starkware.cairo.common.pow import pow
 
-# from contracts.loot.item.constants import ItemIds, ItemAgility, Item
-
 from contracts.loot.constants.item import (
     ItemIds,
     ItemSlot,
     ItemType,
     ItemMaterial
 )
+from contracts.loot.constants.rankings import ItemRank
 from contracts.loot.contracts.stats.item import Statistics
 
 @external
@@ -52,6 +51,22 @@ func test_item_material{syscall_ptr : felt*, range_check_ptr}():
 
     let (typeb) = Statistics.item_material(ItemIds.OrnateGauntlets)
     assert typeb = ItemMaterial.OrnateGauntlets
+
+    return ()
+end
+
+@external
+func test_item_rank{syscall_ptr : felt*, range_check_ptr}():
+    alloc_locals
+
+    let (ranka) = Statistics.item_rank(ItemIds.GoldRing)
+    assert ranka = ItemRank.GoldRing
+
+    let (rankb) = Statistics.item_rank(ItemIds.DragonsCrown)
+    assert rankb = ItemRank.DragonsCrown
+
+    let (rankc) = Statistics.item_rank(ItemIds.ChainGloves)
+    assert rankc = ItemRank.ChainGloves
 
     return ()
 end
