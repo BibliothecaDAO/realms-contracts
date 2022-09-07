@@ -77,16 +77,16 @@ from contracts.settling_game.modules.combat.constants import (
 # Events
 # -----------------------------------
 
-# @event
-# func CombatStart_4(
-#     attacking_realm_id : Uint256,
-#     defending_realm_id : Uint256,
-#     attacking_army : Army,
-#     defending_army : Army,
-#     attacking_army_id : felt,
-#     defending_army_id : felt,
-# ):
-# end
+@event
+func CombatStart_4(
+    attacking_realm_id : Uint256,
+    defending_realm_id : Uint256,
+    attacking_army : Army,
+    defending_army : Army,
+    attacking_army_id : felt,
+    defending_army_id : felt,
+):
+end
 
 @event
 func CombatEnd_4(
@@ -98,38 +98,16 @@ func CombatEnd_4(
     defending_army_id : felt,
 ):
 end
-# @event
-# func CombatStart_3(
-#     attacking_realm_id : Uint256,
-#     defending_realm_id : Uint256,
-#     attacking_squad : Squad,
-#     defending_squad : Squad,
-# ):
-# end
-
-# @event
-# func CombatOutcome_3(
-#     attacking_realm_id : Uint256,
-#     defending_realm_id : Uint256,
-#     attacking_squad : Squad,
-#     defending_squad : Squad,
-#     outcome : felt,
-# ):
-# end
-
-# @event
-# func CombatStep_3(
-#     attacking_realm_id : Uint256,
-#     defending_realm_id : Uint256,
-#     attacking_squad : Squad,
-#     defending_squad : Squad,
-#     hit_points : felt,
-# ):
-# end
 
 @event
-func BuildBattalion(
-    army : Army, troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, army_id : felt
+func BuildArmy(
+    realm_id : Uint256,
+    army_id : felt,
+    army : Army,
+    battalion_ids_len : felt,
+    battalion_ids : felt*,
+    battalions_len : felt,
+    battalions : Battalion*,
 ):
 end
 
@@ -195,7 +173,14 @@ end
 @external
 func build_army_from_battalions{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-}(troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, army_id : felt):
+}(
+    realm_id : Uint256,
+    army_id : felt,
+    battalion_ids_len : felt,
+    battalion_ids : felt*,
+    battalions_len : felt,
+    battalions : Battalion*,
+):
     alloc_locals
 
     # TODO: assert can build army -> # max regions
@@ -209,18 +194,21 @@ func build_army_from_battalions{
     let (realm_buildings : RealmBuildings) = IL03_Buildings.get_effective_buildings(
         buildings_module, realm_id
     )
-    # Combat.assert_can_build_troops(troop_ids_len, troop_ids, realm_buildings)
+
+    # TODO: assert less than total battalions
+    # Combat.assert_can_build_troops(battalion_ids_len, battalion_ids, realm_buildings)
 
     # get the Cost for every Troop to build
+    # TODO: add in QUANTITY of battalions being built -> this is only getting 1 cost value
     let (troop_costs : Cost*) = alloc()
-    load_troop_costs(troop_ids_len, troop_ids, troop_costs)
+    load_troop_costs(battalion_ids_len, battalion_ids, troop_costs)
 
     # transform costs into tokens
     let (
         token_len : felt, token_ids : Uint256*, token_values : Uint256*
-    ) = transform_costs_to_tokens(troop_ids_len, troop_costs, 1)
+    ) = transform_costs_to_tokens(battalion_ids_len, troop_costs, 1)
 
-    # pay for the squad
+    # pay for the battalions
     let (caller) = get_caller_address()
     let (controller) = Module.controller_address()
     let (resource_address) = IModuleController.get_external_contract_address(
@@ -230,20 +218,46 @@ func build_army_from_battalions{
 
     # fetch packed army
     let (army_packed) = army_data_by_id.read(army_id, realm_id)
-
     let (army_unpacked : Army) = Combat.unpack_army(army_packed.ArmyPacked)
 
-    # TODO: add battalions to army and return and
+    # add battalions to Army and return new Army
+    let (new_army : Army) = Combat.add_battalions_to_army(
+        army_unpacked, battalion_ids_len, battalion_ids, battalions_len, battalions
+    )
 
-    # let (squad) = Combat.add_troops_to_squad(current_squad, troop_ids_len, troop_ids)
+    # update army on realm
+    update_army_in_realm(army_id, new_army, realm_id)
 
-    # update_squad_in_realm(squad, realm_id, slot)
-
-    # BuildBattalion.emit(squad, troop_ids_len, troop_ids, realm_id, slot)
+    # emit new Army built
+    BuildArmy.emit(
+        realm_id, army_id, new_army, battalion_ids_len, battalion_ids, battalions_len, battalions
+    )
 
     return ()
 end
 
+func update_army_in_realm{
+    range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*
+}(army_id : felt, army : Army, realm_id : Uint256):
+    alloc_locals
+
+    Module.ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
+
+    # pack army
+    let (new_packed_army) = Combat.pack_army(army)
+
+    # retrieve stored data
+    let (current_packed_army : ArmyData) = army_data_by_id.read(army_id, realm_id)
+
+    # save army in storage with new Army, but keep the old information
+    army_data_by_id.write(
+        army_id,
+        realm_id,
+        ArmyData(new_packed_army, current_packed_army.LastAttacked, current_packed_army.XP, current_packed_army.Level, current_packed_army.CallSign),
+    )
+
+    return ()
+end
 # @notice Commence the raid
 # @param attacking_realm_id: Staked Realm id (S_Realm)
 # @param defending_realm_id: Staked Realm id (S_Realm)

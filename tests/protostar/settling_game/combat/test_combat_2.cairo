@@ -316,13 +316,21 @@ func test_add_battalions_to_army{
 
     let (unpacked_army) = Combat.unpack_army(packed_army)
 
-    let (troops : felt*) = alloc()
-    assert troops[0] = 1
-    assert troops[1] = 2
+    let (battalion_ids : felt*) = alloc()
+    assert battalion_ids[0] = 1
+    assert battalion_ids[1] = 2
 
-    let (total_battalions) = Combat.add_battalions_to_army(attacking_army, 2, troops, 2, troops)
+    let (battalions : Battalion*) = alloc()
+    assert battalions[0] = Battalion(3, TestAttackingArmy.LightCavalry.health)
+    assert battalions[1] = Battalion(TestAttackingArmy.HeavyCavalry.quantity, TestAttackingArmy.HeavyCavalry.health)
 
-    %{ print('health:', ids.total_battalions) %}
+    let (total_battalions : Army) = Combat.add_battalions_to_army(
+        unpacked_army, 2, battalion_ids, 2, battalions
+    )
+
+    assert total_battalions.LightCavalry.quantity = 3
+
+    # %{ print('battalions:', ids.b) %}
 
     return ()
 end

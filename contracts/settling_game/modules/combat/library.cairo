@@ -19,6 +19,8 @@ from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
 from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.bool import TRUE, FALSE
+from starkware.cairo.common.memcpy import memcpy
+from starkware.cairo.common.memset import memset
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.modules.combat.constants import (
     BattalionDefence,
@@ -32,21 +34,25 @@ from contracts.settling_game.modules.combat.constants import (
 namespace Combat:
     func add_battalions_to_army{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         current : Army,
-        troop_ids_len : felt,
-        troop_ids : felt*,
-        troop_qty_len : felt,
-        troop_qty : felt*,
+        battalion_ids_len : felt,
+        battalion_ids : felt*,
+        battalions_len : felt,
+        battalions : Battalion*,
     ) -> (army : Army):
         alloc_locals
 
-        if troop_ids_len == 0:
+        if battalions_len == 0:
             return (current)
         end
 
-        let (updated) = add_battalion_to_battalion(current, [troop_ids], [troop_qty])
+        let (updated) = add_battalion_to_battalion(current, [battalion_ids], [battalions])
 
         return add_battalions_to_army(
-            updated, troop_ids_len - 1, troop_ids + 1, troop_qty_len - 1, troop_qty + 1
+            updated,
+            battalion_ids_len - 1,
+            battalion_ids + 1,
+            battalions_len - 1,
+            battalions + Battalion.SIZE,
         )
     end
 
@@ -60,33 +66,37 @@ namespace Combat:
         let (updated : felt*) = alloc()
 
         let battalion_idx = (battalion_id - 1) * Battalion.SIZE
-        let old_battalion = [&current + battalion_idx] # [&old + battalion_idx]
+        let old_battalion = [&current + battalion_idx]  # [&old + battalion_idx]
 
         memcpy(updated, &current, battalion_idx)
         memcpy(updated + battalion_idx, &battalion, Battalion.SIZE)
-        memcpy(updated + battalion_idx + Battalion.SIZE, &current + battalion_idx + Battalion.SIZE, Army.SIZE - battalion_idx - Battalion.SIZE)
+        memcpy(
+            updated + battalion_idx + Battalion.SIZE,
+            &current + battalion_idx + Battalion.SIZE,
+            Army.SIZE - battalion_idx - Battalion.SIZE,
+        )
 
         let army = cast(updated, Army*)
         return ([army])
     end
 
-    // func add_battalion_to_battalion{
-    //     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-    // }(current : Army, battalion_id : felt, quantity : felt) -> (army : Army):
-    //     alloc_locals
+    # // func add_battalion_to_battalion{
+    # //     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+    # // }(current : Army, battalion_id : felt, quantity : felt) -> (army : Army):
+    # //     alloc_locals
 
-    //     if battalion_id == BattlionIds.LightCavalry:
-    //         let casted_army = cast_battalin(current, battalion_id, quantity)
-    //         return (current)
-    //     end
+    # //     if battalion_id == BattlionIds.LightCavalry:
+    # //         let casted_army = cast_battalin(current, battalion_id, quantity)
+    # //         return (current)
+    # //     end
 
-    //     if battalion_id == BattlionIds.HeavyCavalry:
-    //         let casted_army = cast_battalin(current, battalion_id, quantity)
-    //         return (current)
-    //     end
+    # //     if battalion_id == BattlionIds.HeavyCavalry:
+    # //         let casted_army = cast_battalin(current, battalion_id, quantity)
+    # //         return (current)
+    # //     end
 
-    //     return (current)
-    // end
+    # //     return (current)
+    # // end
 
     func cast_battalin{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         current : Army, battalion_id : felt, quantity : felt

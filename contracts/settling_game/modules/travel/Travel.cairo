@@ -30,8 +30,17 @@ from contracts.settling_game.modules.travel.library import Travel
 # Events
 # -----------------------------------
 
+# @notice Event fires on every movement of an Asset/Army
+# @param traveller_nested_id: This exists for nested units within the token. Eg: An Army.
+#        If the asset has no nested ID, then this will be 0.
+# @param traveller_contract_id: Traveller contract ID of asset
+# @param traveller_token_id: Traveller token_id (Actual NFT ID)
+# @param destination_contract_id: Destination contract id
+# @param destination_token_id: Destination token_id (Actual NFT ID)
+# @param arrival_time: Arrival time in unix
 @event
 func TravelAction(
+    traveller_nested_id : felt,
     traveller_contract_id : felt,
     traveller_token_id : Uint256,
     destination_contract_id : felt,
@@ -51,9 +60,9 @@ func coordinates(asset_id : felt, token_id : Uint256) -> (point : Point):
 end
 
 @storage_var
-func travel_information(traveller_contract_id : felt, traveller : Uint256) -> (
-    travel_information : TravelInformation
-):
+func travel_information(
+    traveller_nested_id : felt, traveller_contract_id : felt, traveller : Uint256
+) -> (travel_information : TravelInformation):
 end
 
 # -----------------------------------
@@ -95,6 +104,7 @@ end
 # @destination_token_id: Destination token ID
 @external
 func travel{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    traveller_nested_id : felt,
     traveller_contract_id : felt,
     traveller_token_id : Uint256,
     destination_contract_id : felt,
@@ -107,7 +117,7 @@ func travel{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     Module.ERC721_owner_check(traveller_token_id, traveller_contract_id)
 
     # check has arrived
-    assert_arrived(traveller_contract_id, traveller_token_id)
+    assert_arrived(traveller_nested_id, traveller_contract_id, traveller_token_id)
 
     # get travel coordinates
     let (traveller_coordinates : Point) = get_coordinates(traveller_contract_id, traveller_token_id)
@@ -122,6 +132,7 @@ func travel{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
 
     # set travel_information
     travel_information.write(
+        traveller_nested_id,
         traveller_contract_id,
         traveller_token_id,
         TravelInformation(destination_contract_id, destination_token_id, time),
@@ -129,6 +140,7 @@ func travel{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
 
     # emit event
     TravelAction.emit(
+        traveller_nested_id,
         traveller_contract_id,
         traveller_token_id,
         destination_contract_id,
@@ -152,9 +164,9 @@ end
 
 @view
 func get_travel_information{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    contract_id : felt, token_id : Uint256
+    nested_id : felt, contract_id : felt, token_id : Uint256
 ) -> (travel_information : TravelInformation):
-    return travel_information.read(contract_id, token_id)
+    return travel_information.read(nested_id, contract_id, token_id)
 end
 
 @view
@@ -184,11 +196,13 @@ end
 
 @view
 func assert_arrived{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    contract_id : felt, token_id : Uint256
+    nested_id : felt, contract_id : felt, token_id : Uint256
 ):
     alloc_locals
     let (now) = get_block_timestamp()
-    let (travel_information : TravelInformation) = get_travel_information(contract_id, token_id)
+    let (travel_information : TravelInformation) = get_travel_information(
+        nested_id, contract_id, token_id
+    )
 
     let (arrived) = is_le(travel_information.travel_time, now)
 
@@ -203,6 +217,7 @@ end
 func assert_traveller_is_at_location{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
 }(
+    traveller_nested_id : felt,
     traveller_contract_id : felt,
     traveller_token_id : Uint256,
     destination_contract_id : felt,
@@ -211,11 +226,11 @@ func assert_traveller_is_at_location{
     alloc_locals
 
     # check traveller has arrived
-    assert_arrived(destination_contract_id, destination_token_id)
+    assert_arrived(traveller_nested_id, destination_contract_id, destination_token_id)
 
     # get traveller information
     let (traveller_information : TravelInformation) = get_travel_information(
-        traveller_contract_id, traveller_token_id
+        traveller_nested_id, traveller_contract_id, traveller_token_id
     )
 
     # get coordinates of travellers destination

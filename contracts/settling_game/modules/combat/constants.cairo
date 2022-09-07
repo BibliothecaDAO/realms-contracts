@@ -105,4 +105,7 @@ end
 struct ArmyData:
     member ArmyPacked : felt
     member LastAttacked : felt
+    member XP : felt
+    member Level : felt
+    member CallSign : felt
 end
