@@ -8,75 +8,11 @@ from starkware.starknet.common.syscalls import get_caller_address
 from contracts.settling_game.modules.combat.library import Combat, Army, Battalion, ArmyStatistics
 from contracts.settling_game.modules.combat.constants import BattalionDefence
 
-namespace TestAttackingArmy:
-    namespace LightCavalry:
-        const quantity = 2
-        const health = 100
-    end
-    namespace HeavyCavalry:
-        const quantity = 2
-        const health = 100
-    end
-    namespace Archer:
-        const quantity = 2
-        const health = 100
-    end
-    namespace Longbow:
-        const quantity = 2
-        const health = 100
-    end
-    namespace Mage:
-        const quantity = 2
-        const health = 100
-    end
-    namespace Arcanist:
-        const quantity = 2
-        const health = 100
-    end
-    namespace LightInfantry:
-        const quantity = 2
-        const health = 100
-    end
-    namespace HeavyInfantry:
-        const quantity = 2
-        const health = 100
-    end
-end
+from tests.protostar.settling_game.combat.combat_test_constants import (
+    TestAttackingArmy,
+    TestDefendingArmy,
+)
 
-namespace TestDefendingArmy:
-    namespace LightCavalry:
-        const quantity = 1
-        const health = 100
-    end
-    namespace HeavyCavalry:
-        const quantity = 1
-        const health = 100
-    end
-    namespace Archer:
-        const quantity = 10
-        const health = 100
-    end
-    namespace Longbow:
-        const quantity = 2
-        const health = 100
-    end
-    namespace Mage:
-        const quantity = 2
-        const health = 100
-    end
-    namespace Arcanist:
-        const quantity = 2
-        const health = 100
-    end
-    namespace LightInfantry:
-        const quantity = 2
-        const health = 100
-    end
-    namespace HeavyInfantry:
-        const quantity = 1
-        const health = 100
-    end
-end
 @external
 func test_squad{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
