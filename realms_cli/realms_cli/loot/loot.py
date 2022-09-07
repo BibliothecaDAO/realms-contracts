@@ -1,7 +1,7 @@
 import click
 from realms_cli.caller_invoker import wrapped_call, wrapped_send
 from realms_cli.config import Config
-from realms_cli.shared import uint
+from realms_cli.shared import uint, felt_to_str
 from realms_cli.utils import print_over_colums
 
 
@@ -45,3 +45,5 @@ def get_loot(loot_token_id, network):
 
     print("_________ LOOT ITEM - " + str(out[0]) + "___________")
     print_over_colums(pretty_out)
+
+    print(felt_to_str(491494928928))
