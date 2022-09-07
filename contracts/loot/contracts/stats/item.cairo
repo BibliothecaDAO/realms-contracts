@@ -13,12 +13,7 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.registers import get_label_location
 
-from contracts.loot.constants.item import (
-    ItemIds,
-    ItemSlot,
-    ItemType,
-    ItemMaterial
-)
+from contracts.loot.constants.item import ItemIds, ItemSlot, ItemType, ItemMaterial
 from contracts.loot.constants.rankings import ItemRank
 
 namespace Statistics:
@@ -460,5 +455,15 @@ namespace Statistics:
         dw ItemRank.Gauntlets
         dw ItemRank.ChainGloves
         dw ItemRank.HeavyGloves
+    end
+
+    func item_suffix_1{syscall_ptr : felt*, range_check_ptr}(item_id : felt) -> (rank : felt):
+        alloc_locals
+
+        let (label_location) = get_label_location(labels)
+        return ([label_location + item_id - 1])
+
+        labels:
+        dw 'roar '
     end
 end
