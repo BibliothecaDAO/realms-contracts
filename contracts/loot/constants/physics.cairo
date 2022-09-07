@@ -1,5 +1,5 @@
-# Item Structs
-#   A struct that holds the Loot item statistics
+# Core Physics
+#   Physics for the game
 #
 #
 # MIT License

@@ -1,5 +1,5 @@
-# Item Structs
-#   A struct that holds the Loot item statistics
+# Item Structs and Consts
+#   Data structure and constants for the loot items
 #
 #
 # MIT License
