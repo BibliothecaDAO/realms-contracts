@@ -10,12 +10,7 @@ from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.math_cmp import is_le_felt, is_le
 from starkware.cairo.common.math import unsigned_div_rem, assert_lt
 
-from openzeppelin.access.ownable import (
-    Ownable_initializer,
-    Ownable_only_owner,
-    Ownable_transfer_ownership,
-    Ownable_get_owner,
-)
+from openzeppelin.access.ownable.library import Ownable
 
 from contracts.desiege.utils.interfaces import IModuleController, I02_TowerStorage
 from contracts.desiege.tokens.ERC1155.IERC1155_Mintable_Ownable import IERC1155
@@ -91,7 +86,7 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     blocks_per_minute.write(_blocks_per_min)
     hours_per_game.write(_hours_per_game)
 
-    Ownable_initializer(_owner)
+    Ownable.initializer(_owner)
 
     return ()
 end
@@ -134,7 +129,7 @@ func create_game{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     _init_main_health : felt
 ):
     alloc_locals
-    Ownable_only_owner()
+    Ownable.assert_only_owner()
 
     let (local controller) = controller_address.read()
 
@@ -461,7 +456,7 @@ end
 func get_owner{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}() -> (
     owner : felt
 ):
-    let (o) = Ownable_get_owner()
+    let (o) = Ownable.owner()
     return (owner=o)
 end
 
@@ -469,6 +464,6 @@ end
 func transfer_ownership{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
     next_owner : felt
 ):
-    Ownable_transfer_ownership(next_owner)
+    Ownable.transfer_ownership(next_owner)
     return ()
 end

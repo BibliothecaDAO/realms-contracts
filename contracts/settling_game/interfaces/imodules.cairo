@@ -16,7 +16,6 @@ namespace IArbiter:
         module_02_addr : felt,
         module_03_addr : felt,
         module_04_addr : felt,
-        module_05_addr : felt,
         module_06_addr : felt,
         module_07_addr : felt,
         module_08_addr : felt,
@@ -59,79 +58,8 @@ namespace IModuleController:
         module_02_addr : felt,
         module_03_addr : felt,
         module_04_addr : felt,
-        module_05_addr : felt,
         module_06_addr : felt,
     ):
-    end
-end
-
-@contract_interface
-namespace IL02_Resources:
-    func check_if_claimable(token_id : Uint256) -> (can_claim : felt):
-    end
-    func claim_resources(token_id : Uint256):
-    end
-    func pillage_resources(token_id : Uint256, claimer : felt):
-    end
-    func wonder_claim(token_id : Uint256):
-    end
-end
-
-@contract_interface
-namespace IL03_Buildings:
-    func get_buildings_unpacked(token_id : Uint256) -> (realm_buildings : RealmBuildings):
-    end
-    func get_effective_buildings(token_id : Uint256) -> (realm_buildings : RealmBuildings):
-    end
-    func get_building_cost(building_id : felt) -> (cost : Cost, lords : Uint256):
-    end
-    func get_effective_population_buildings(token_id : Uint256) -> (
-        realm_buildings : RealmBuildings
-    ):
-    end
-end
-
-@contract_interface
-namespace IL05_Wonders:
-    func update_wonder_settlement(token_id : Uint256):
-    end
-    func set_total_wonders_staked(epoch : felt, amount : felt):
-    end
-
-    func set_last_updated_epoch(epoch : felt):
-    end
-
-    func set_wonder_id_staked(token_id : Uint256, epoch : felt):
-    end
-
-    func set_wonder_epoch_upkeep(epoch : felt, token_id : Uint256, upkept : felt):
-    end
-
-    func set_tax_pool(epoch : felt, resource_id : felt, supply : felt):
-    end
-
-    func batch_set_tax_pool(
-        epoch : felt,
-        resource_ids_len : felt,
-        resource_ids : Uint256*,
-        amounts_len : felt,
-        amounts : felt*,
-    ):
-    end
-
-    func get_total_wonders_staked(epoch : felt) -> (amount : felt):
-    end
-
-    func get_last_updated_epoch() -> (epoch : felt):
-    end
-
-    func get_wonder_id_staked(token_id : Uint256) -> (epoch : felt):
-    end
-
-    func get_wonder_epoch_upkeep(epoch : felt, token_id : Uint256) -> (upkept : felt):
-    end
-
-    func get_tax_pool(epoch : felt, resource_id : felt) -> (supply : felt):
     end
 end
 

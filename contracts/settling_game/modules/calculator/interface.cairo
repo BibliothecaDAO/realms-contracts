@@ -16,8 +16,6 @@ namespace ICalculator:
     end
     func calculate_tribute() -> (tribute : felt):
     end
-    func calculate_wonder_tax() -> (tax_percentage : felt):
-    end
     func calculate_troop_coefficent(token_id : Uint256) -> (troop_coefficent : felt):
     end
 end

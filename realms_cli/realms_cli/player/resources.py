@@ -78,7 +78,7 @@ def claim_resources(realm_token_id, network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_L02_Resources",
+        contract_alias="proxy_Resources",
         function="claim_resources",
         arguments=calldata
     )
@@ -95,7 +95,7 @@ def days_available(realm_token_id, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_L02_Resources",
+        contract_alias="proxy_Resources",
         function="days_accrued",
         arguments=[
             realm_token_id,   # uint 1
@@ -118,7 +118,7 @@ def upgrade_resource(realm_token_id, resource_id, network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_L02_Resources",
+        contract_alias="proxy_Resources",
         function="upgrade_resource",
         arguments=[
             realm_token_id,   # uint 1
@@ -142,7 +142,7 @@ def approve_resource_module(network):
         contract_alias="proxy_resources",
         function="setApprovalForAll",
         arguments=[
-            int(config.L02_RESOURCES_PROXY_ADDRESS, 16),  # uint1
+            int(config.RESOURCES_PROXY_ADDRESS, 16),  # uint1
             "1",               # true
         ],
     )
@@ -159,7 +159,7 @@ def get_resource_upgrade_cost(resource_id, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_L02_Resources",
+        contract_alias="proxy_Resources",
         function="get_resource_upgrade_cost",
         arguments=[resource_id],
     )
@@ -177,7 +177,7 @@ def get_vault(realm_token_id, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_L02_Resources",
+        contract_alias="proxy_Resources",
         function="get_all_vault_raidable",
         arguments=[
             realm_token_id,

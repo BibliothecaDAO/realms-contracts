@@ -7,8 +7,8 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
 from starkware.cairo.common.uint256 import ALL_ONES, Uint256, uint256_check, uint256_eq
 
-from openzeppelin.security.safemath import SafeUint256
-from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
+from openzeppelin.security.safemath.library import SafeUint256
+from openzeppelin.token.erc20.IERC20 import IERC20
 from openzeppelin.token.erc20.library import ERC20
 from openzeppelin.upgrades.library import Proxy
 

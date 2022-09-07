@@ -10,10 +10,10 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.uint256 import Uint256, uint256_check
 from starkware.cairo.common.bool import TRUE, FALSE
 
-from openzeppelin.introspection.IERC165 import IERC165
-from openzeppelin.introspection.ERC165 import ERC165
+from openzeppelin.introspection.erc165.IERC165 import IERC165
+from openzeppelin.introspection.erc165.library import ERC165
 from contracts.token.interfaces.IERC1155_Receiver import IERC1155_Receiver
-from openzeppelin.security.safemath import SafeUint256
+from openzeppelin.security.safemath.library import SafeUint256
 from contracts.token.constants import (
     IERC1155_ID,
     IERC1155_METADATA_ID,
@@ -84,7 +84,7 @@ namespace ERC1155:
     #
 
     func token_uri{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id: Uint256
+        token_id : Uint256
     ) -> (token_uri : felt):
         let (token_uri) = ERC1155_token_uri.read(token_id)
         return (token_uri)
