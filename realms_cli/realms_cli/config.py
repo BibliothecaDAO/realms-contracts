@@ -165,3 +165,18 @@ class Config:
             "ArcherTower",
             "Castle",
         ]
+
+        self.LOOT = [
+            "Id",
+            "Slot",
+            "Type",
+            "Material",
+            "Rank",
+            "Prefix_1",
+            "Prefix_2",
+            "Suffix",
+            "Greatness",
+            "CreatedBlock",
+            "XP",
+            "State",
+        ]
