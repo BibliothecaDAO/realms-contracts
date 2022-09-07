@@ -15,7 +15,6 @@ from contracts.loot.item.constants import (
     ItemSlot,
     ItemClass,
     Adventurer,
-    PackedAdventurerStats,
     AdventurerState,
 )
 
