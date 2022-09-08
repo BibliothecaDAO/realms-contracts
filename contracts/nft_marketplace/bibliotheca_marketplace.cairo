@@ -15,7 +15,7 @@ from starkware.cairo.common.math import assert_nn_le, unsigned_div_rem, assert_l
 from starkware.cairo.common.uint256 import Uint256, uint256_le
 
 from openzeppelin.token.erc20.IERC20 import IERC20
-from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
+from openzeppelin.token.erc721.IERC721 import IERC721
 
 from openzeppelin.access.ownable.library import Ownable
 

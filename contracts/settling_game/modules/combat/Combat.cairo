@@ -25,7 +25,7 @@ from starkware.cairo.common.uint256 import Uint256
 from starkware.starknet.common.syscalls import get_block_timestamp, get_caller_address
 
 from openzeppelin.upgrades.library import Proxy
-from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
+from openzeppelin.token.erc20.IERC20 import IERC20
 
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 
