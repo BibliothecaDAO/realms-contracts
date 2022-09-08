@@ -24,6 +24,9 @@ namespace WeightModifier:
         const studded = 120
         const hard = 105
     end
+    namespace Bone:
+        const demon = 150
+        const dragon = 135
 end
 
 # Densities expressed in mg/cm^3
@@ -51,13 +54,16 @@ namespace MaterialDensity:
     end
     namespace Biotic:
         const leather = 8600
+        const bone = 1155
         const StuddedLeather = cast((leather * (WeightModifier.Hide.studded / 100)), felt)
         const HardLeather = cast((leather * (WeightModifier.Hide.hard / 100)), felt)
         namespace Demon:
             const hide = cast((leather * (WeightModifier.Hide.demon / 100)), felt)
+            const bone = cast((bone * (WeightModifier.Bone.demon / 100)), felt)
         end
         namespace Dragon:
             const skin = cast((leather * (WeightModifier.Hide.dragon / 100)), felt)
+            const bone = cast((bone * (WeightModifier.Bone.dragon / 100)), felt)
         end
     end
 
