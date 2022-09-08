@@ -19,7 +19,7 @@
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import BitwiseBuiltin, HashBuiltin
-from starkware.cairo.common.math import unsigned_div_rem
+from starkware.cairo.common.math import unsigned_div_rem, assert_lt
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.uint256 import Uint256
 from starkware.starknet.common.syscalls import get_block_timestamp, get_caller_address
@@ -54,6 +54,7 @@ from contracts.settling_game.utils.constants import (
     DEFENDING_SQUAD_SLOT,
     DEFENDING_ARMY_XP,
     ATTACKING_ARMY_XP,
+    TOTAL_BATTALIONS,
 )
 from contracts.settling_game.utils.game_structs import (
     ModuleIds,
@@ -137,14 +138,12 @@ end
 
 # @notice Module initializer
 # @param address_of_controller: Controller/arbiter address
-# @param xoroshiro_addr: Address of a PRNG contract conforming to IXoroshiro
 # @proxy_admin: Proxy admin address
 @external
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    address_of_controller : felt, xoroshiro_addr : felt, proxy_admin : felt
+    address_of_controller : felt, proxy_admin : felt
 ):
     Module.initializer(address_of_controller)
-    xoroshiro_address.write(xoroshiro_addr)
     Proxy.initializer(proxy_admin)
     return ()
 end
@@ -187,7 +186,6 @@ func build_army_from_battalions{
 
     # TODO: assert can build army -> # max regions
     # TODO: can only add to the army if you are at homebase or friendly Realm
-    # Combat.assert_slot(army_id)
 
     Module.ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
 
@@ -197,8 +195,7 @@ func build_army_from_battalions{
         buildings_module, realm_id
     )
 
-    # TODO: assert less than total battalions
-    # Combat.assert_can_build_troops(battalion_ids_len, battalion_ids, realm_buildings)
+    Combat.assert_can_build_battalions(battalion_ids_len, battalion_ids, realm_buildings)
 
     # get the Cost for every Troop to build
     # TODO: add in QUANTITY of battalions being built -> this is only getting 1 cost value
@@ -227,6 +224,12 @@ func build_army_from_battalions{
         army_unpacked, battalion_ids_len, battalion_ids, battalions_len, battalions
     )
 
+    # check battalions less than TOTAL_BATTALIONS
+    let (total_battalions) = Combat.calculate_total_battalions(new_army)
+    with_attr error_message("Combat: Too many battalions"):
+        assert_lt(total_battalions, TOTAL_BATTALIONS + 1)
+    end
+
     # update army on realm
     update_army_in_realm(army_id, new_army, realm_id)
 
@@ -238,7 +241,7 @@ func build_army_from_battalions{
     return ()
 end
 
-# @notice Commence the raid
+# @notice Commence the attack
 # @param attacking_realm_id: Staked Realm id (S_Realm)
 # @param defending_realm_id: Staked Realm id (S_Realm)
 # @return: combat_outcome: Which side won - either the attacker (COMBAT_OUTCOME_ATTACKER_WINS)
@@ -274,13 +277,6 @@ func initiate_combat{
         defending_army_id,
     )
 
-    let (attacking_realm_data : ArmyData) = get_realm_army_combat_data(
-        attacking_army_id, attacking_realm_id
-    )
-    let (defending_realm_data : ArmyData) = get_realm_army_combat_data(
-        defending_army_id, defending_realm_id
-    )
-
     # check if the fighting realms have enough food, otherwise
     # decrease whole squad vitality by 50%
 
@@ -308,10 +304,19 @@ func initiate_combat{
     # end
     # tempvar defender = defender
 
+    # fetch combat data
+    let (attacking_realm_data : ArmyData) = get_realm_army_combat_data(
+        attacking_army_id, attacking_realm_id
+    )
+    let (defending_realm_data : ArmyData) = get_realm_army_combat_data(
+        defending_army_id, defending_realm_id
+    )
+
+    # unpack armies
     let (starting_attack_army : Army) = Combat.unpack_army(attacking_realm_data.ArmyPacked)
     let (starting_defend_army : Army) = Combat.unpack_army(defending_realm_data.ArmyPacked)
 
-    # EMIT FIRST
+    # emit starting
     CombatStart_4.emit(
         attacking_army_id,
         attacking_realm_id,
@@ -321,7 +326,7 @@ func initiate_combat{
         starting_defend_army,
     )
 
-    # get outcome
+    # luck role and then outcome
     let (luck) = roll_dice()
     let (
         combat_outcome, ending_attacking_army_packed, ending_defending_army_packed
@@ -393,11 +398,10 @@ end
 # Internal
 # -----------------------------------
 
-# @notice Populate an array of Cost structs with the proper values
+# @notice Update army in Realm
 # @param army_id: Army ID
-# @param army: Army struct
+# @param army: Army to update
 # @param realm_id: Realm ID
-
 func update_army_in_realm{
     range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*
 }(army_id : felt, army : Army, realm_id : Uint256):
@@ -420,6 +424,10 @@ func update_army_in_realm{
     return ()
 end
 
+# @notice saves data and emits the changed metadata for cache
+# @param army_id: Army ID
+# @param realm_id: Realm ID
+# @param army_data: Army metadata
 func set_army_data_and_emit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     army_id : felt, realm_id : Uint256, army_data : ArmyData
 ):
@@ -450,8 +458,8 @@ func load_battalion_costs{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, rang
     return load_battalion_costs(battlion_ids_len - 1, battlion_ids + 1, costs + Cost.SIZE)
 end
 
-# @notice Perform a 150 sided dice roll
-# @return Dice roll value, from 1 to 150 (inclusive)
+# @notice Get number between 75 - 125
+# @return Dice roll value, from 75 to 125 (inclusive)
 func roll_dice{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}() -> (
     dice_roll : felt
 ):
@@ -561,7 +569,6 @@ end
 func set_xoroshiro{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     xoroshiro : felt
 ):
-    # TODO:
     Proxy.assert_only_admin()
     xoroshiro_address.write(xoroshiro)
     return ()

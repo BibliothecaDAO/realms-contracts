@@ -13,7 +13,7 @@
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.registers import get_label_location
-from starkware.cairo.common.math import unsigned_div_rem
+from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_lt
 from starkware.cairo.common.math_cmp import is_nn_le, is_nn, is_le
 from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
 from starkware.starknet.common.syscalls import get_block_timestamp
@@ -23,13 +23,14 @@ from starkware.cairo.common.memcpy import memcpy
 from starkware.cairo.common.memset import memset
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.modules.combat.constants import (
-    BattalionDefence,
+    BattalionStatistics,
     SHIFT_ARMY,
     Battalion,
     Army,
     ArmyStatistics,
     BattalionIds,
 )
+from contracts.settling_game.utils.game_structs import RealmBuildings
 
 namespace Combat:
     func add_battalions_to_army{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -98,6 +99,7 @@ namespace Combat:
         return ([a])
     end
 
+    # @notice Unpack Army
     func unpack_army{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
@@ -129,6 +131,7 @@ namespace Combat:
         )
     end
 
+    # @notice Pack Army
     func pack_army{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
@@ -159,6 +162,9 @@ namespace Combat:
         return (packed)
     end
 
+    # @notice Gets statistics of Army
+    # @param army_packed: packed army
+    # @ returns ArmyStatistics
     func calculate_army_statistics{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
@@ -203,7 +209,12 @@ namespace Combat:
         )
     end
 
-    # calculates attack of all battalions
+    # @notice Gets attack value on same type battalions (Cav, Archer etc) to be used in combat formula
+    # @param unit_1_id: unit id 1
+    # @param unit_1_number: unit id 1
+    # @param unit_2_id: unit id 2
+    # @param unit_2_number: number of units
+    # @ returns attack value
     func calculate_attack_values{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         unit_1_id : felt, unit_1_number : felt, unit_2_id : felt, unit_2_number : felt
     ) -> (attack : felt):
@@ -215,28 +226,34 @@ namespace Combat:
         return (unit_1_attack_value * unit_1_number + unit_2_attack_value * unit_2_number)
     end
 
-    # fetches attack constants
+    # @notice Gets attack value
+    # @param battalion_id: Battalion ID
+    # @ returns attack value
     func attack_value{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        unit_id : felt
+        battalion_id : felt
     ) -> (attack : felt):
         alloc_locals
 
         let (type_label) = get_label_location(unit_attack)
 
-        return ([type_label + unit_id - 1])
+        return ([type_label + battalion_id - 1])
 
         unit_attack:
-        dw 20
-        dw 30
-        dw 20
-        dw 30
-        dw 20
-        dw 30
-        dw 20
-        dw 30
+        dw BattalionStatistics.Attack.LightCavalry
+        dw BattalionStatistics.Attack.HeavyCavalry
+        dw BattalionStatistics.Attack.Archer
+        dw BattalionStatistics.Attack.Longbow
+        dw BattalionStatistics.Attack.Mage
+        dw BattalionStatistics.Attack.Arcanist
+        dw BattalionStatistics.Attack.LightInfantry
+        dw BattalionStatistics.Attack.HeavyInfantry
     end
 
-    # calculates defence values
+    # @notice Calculates real defence value
+    # @param defense_sum: Sum of defence values
+    # @param total_battalions: Total battalions of Army
+    # @param unit_battalions: Qty of battalions
+    # @ returns defence value
     func calculate_defence_values{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     }(defense_sum : felt, total_battalions : felt, unit_battalions : felt) -> (defence : felt):
@@ -251,7 +268,9 @@ namespace Combat:
         return (values)
     end
 
-    # TODO: Add in the 1 for the missing battalions
+    # @notice Calculates total battalions
+    # @param army: Unpacked Army
+    # @ returns total battalions
     func calculate_total_battalions{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     }(army : Army) -> (total_battalions : felt):
@@ -262,7 +281,9 @@ namespace Combat:
         )
     end
 
-    # TODO: Add in real values
+    # @notice Sums all defence values
+    # @param army: Unpacked Army
+    # @ returns cavalry_defence, archer_defence, magic_defence, infantry_defence
     func all_defence_value{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         army : Army
     ) -> (cavalry_defence, archer_defence, magic_defence, infantry_defence):
@@ -270,13 +291,13 @@ namespace Combat:
 
         let (total_battalions) = calculate_total_battalions(army)
 
-        let c_defence = army.LightCavalry.quantity * BattalionDefence.Cavalry.LightCavalry + army.HeavyCavalry.quantity * BattalionDefence.Cavalry.HeavyCavalry + army.Archer.quantity * BattalionDefence.Cavalry.Archer + army.Longbow.quantity * BattalionDefence.Cavalry.Longbow + army.Mage.quantity * BattalionDefence.Cavalry.Mage + army.Arcanist.quantity * BattalionDefence.Cavalry.Arcanist + army.LightInfantry.quantity * BattalionDefence.Cavalry.LightInfantry + army.HeavyInfantry.quantity * BattalionDefence.Cavalry.HeavyInfantry
+        let c_defence = army.LightCavalry.quantity * BattalionStatistics.Defence.Cavalry.LightCavalry + army.HeavyCavalry.quantity * BattalionStatistics.Defence.Cavalry.HeavyCavalry + army.Archer.quantity * BattalionStatistics.Defence.Cavalry.Archer + army.Longbow.quantity * BattalionStatistics.Defence.Cavalry.Longbow + army.Mage.quantity * BattalionStatistics.Defence.Cavalry.Mage + army.Arcanist.quantity * BattalionStatistics.Defence.Cavalry.Arcanist + army.LightInfantry.quantity * BattalionStatistics.Defence.Cavalry.LightInfantry + army.HeavyInfantry.quantity * BattalionStatistics.Defence.Cavalry.HeavyInfantry
 
-        let a_defence = army.LightCavalry.quantity * BattalionDefence.Archery.LightCavalry + army.HeavyCavalry.quantity * BattalionDefence.Archery.HeavyCavalry + army.Archer.quantity * BattalionDefence.Archery.Archer + army.Longbow.quantity * BattalionDefence.Archery.Longbow + army.Mage.quantity * BattalionDefence.Archery.Mage + army.Arcanist.quantity * BattalionDefence.Archery.Arcanist + army.LightInfantry.quantity * BattalionDefence.Archery.LightInfantry + army.HeavyInfantry.quantity * BattalionDefence.Archery.HeavyInfantry
+        let a_defence = army.LightCavalry.quantity * BattalionStatistics.Defence.Archery.LightCavalry + army.HeavyCavalry.quantity * BattalionStatistics.Defence.Archery.HeavyCavalry + army.Archer.quantity * BattalionStatistics.Defence.Archery.Archer + army.Longbow.quantity * BattalionStatistics.Defence.Archery.Longbow + army.Mage.quantity * BattalionStatistics.Defence.Archery.Mage + army.Arcanist.quantity * BattalionStatistics.Defence.Archery.Arcanist + army.LightInfantry.quantity * BattalionStatistics.Defence.Archery.LightInfantry + army.HeavyInfantry.quantity * BattalionStatistics.Defence.Archery.HeavyInfantry
 
-        let m_defence = army.LightCavalry.quantity * BattalionDefence.Magic.LightCavalry + army.HeavyCavalry.quantity * BattalionDefence.Magic.HeavyCavalry + army.Archer.quantity * BattalionDefence.Magic.Archer + army.Longbow.quantity * BattalionDefence.Magic.Longbow + army.Mage.quantity * BattalionDefence.Magic.Mage + army.Arcanist.quantity * BattalionDefence.Magic.Arcanist + army.LightInfantry.quantity * BattalionDefence.Magic.LightInfantry + army.HeavyInfantry.quantity * BattalionDefence.Magic.HeavyInfantry
+        let m_defence = army.LightCavalry.quantity * BattalionStatistics.Defence.Magic.LightCavalry + army.HeavyCavalry.quantity * BattalionStatistics.Defence.Magic.HeavyCavalry + army.Archer.quantity * BattalionStatistics.Defence.Magic.Archer + army.Longbow.quantity * BattalionStatistics.Defence.Magic.Longbow + army.Mage.quantity * BattalionStatistics.Defence.Magic.Mage + army.Arcanist.quantity * BattalionStatistics.Defence.Magic.Arcanist + army.LightInfantry.quantity * BattalionStatistics.Defence.Magic.LightInfantry + army.HeavyInfantry.quantity * BattalionStatistics.Defence.Magic.HeavyInfantry
 
-        let i_defence = army.LightCavalry.quantity * BattalionDefence.Infantry.LightCavalry + army.HeavyCavalry.quantity * BattalionDefence.Infantry.HeavyCavalry + army.Archer.quantity * BattalionDefence.Infantry.Archer + army.Longbow.quantity * BattalionDefence.Infantry.Longbow + army.Mage.quantity * BattalionDefence.Infantry.Mage + army.Arcanist.quantity * BattalionDefence.Infantry.Arcanist + army.LightInfantry.quantity * BattalionDefence.Infantry.LightInfantry + army.HeavyInfantry.quantity * BattalionDefence.Infantry.HeavyInfantry
+        let i_defence = army.LightCavalry.quantity * BattalionStatistics.Defence.Infantry.LightCavalry + army.HeavyCavalry.quantity * BattalionStatistics.Defence.Infantry.HeavyCavalry + army.Archer.quantity * BattalionStatistics.Defence.Infantry.Archer + army.Longbow.quantity * BattalionStatistics.Defence.Infantry.Longbow + army.Mage.quantity * BattalionStatistics.Defence.Infantry.Mage + army.Arcanist.quantity * BattalionStatistics.Defence.Infantry.Arcanist + army.LightInfantry.quantity * BattalionStatistics.Defence.Infantry.LightInfantry + army.HeavyInfantry.quantity * BattalionStatistics.Defence.Infantry.HeavyInfantry
 
         let (cavalry_defence) = calculate_defence_values(
             c_defence, total_battalions, army.LightCavalry.quantity + army.HeavyCavalry.quantity
@@ -293,17 +314,10 @@ namespace Combat:
         return (cavalry_defence, archer_defence, magic_defence, infantry_defence)
     end
 
-    # luck -> 75-125 random number
-    func calculate_luck_outcome{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        luck : felt, attacking_statistics : felt, defending_statistics : felt
-    ) -> (outcome : felt):
-        alloc_locals
-
-        let (luck, _) = unsigned_div_rem(attacking_statistics * luck, 100)
-
-        return (luck - defending_statistics)
-    end
-
+    # @notice Calculates winner of battle
+    # @param luck: Luck of Attacker - this is a number between 75-125 which adjusts the battle outcome
+    # @param attack_army_packed: Attacking Army packed
+    # @param defending_army_packed: Defending Army packed
     func calculate_winner{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
@@ -352,7 +366,25 @@ namespace Combat:
         return (FALSE, updated_attack_army_packed, updated_defence_army_packed)
     end
 
-    # TODO: not quite right
+    # @notice Calculates value after applying luck. All units use this.
+    # @param attacking_statistics: Attacker statistics
+    # @param defending_statistics: Defender statistics
+    func calculate_luck_outcome{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        luck : felt, attacking_statistics : felt, defending_statistics : felt
+    ) -> (outcome : felt):
+        alloc_locals
+
+        let (luck, _) = unsigned_div_rem(attacking_statistics * luck, 100)
+
+        return (luck - defending_statistics)
+    end
+
+    # @notice calculates health of Battalion remaining after a battle
+    # @param starting_health: Starting health of Battalion
+    # @param battalions: Number of Battalions
+    # @param total_battalions: Total Battalions in Army
+    # @param counter_attack: Counter attack value
+    # @param counter_defence: Counter defence value
     func calculate_health_remaining{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     }(
@@ -379,7 +411,11 @@ namespace Combat:
         return (final_health)
     end
 
-    # returns updated packed armies ready for storage
+    # @notice gets updated packed armies
+    # @param attack_army_statistics: ArmyStatistics of attacking Army
+    # @param defending_army_statistics: ArmyStatistics of defending Army
+    # @param attack_army_packed: packed attacking Army
+    # @param defending_army_packed: packed defending Army
     func get_updated_packed_armies{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
@@ -413,7 +449,11 @@ namespace Combat:
         return (attack_army_packed, defence_army_packed)
     end
 
-    # helper to calculate health of armies and then pack
+    # @notice updates Army and packs
+    # @param attack_army_statistics: ArmyStatistics of attacking Army
+    # @param defending_army_statistics: ArmyStatistics of defending Army
+    # @param attack_army_unpacked: Attacking Army
+    # @param defending_army_unpacked: Defending Army
     func update_and_pack_army{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
@@ -506,5 +546,53 @@ namespace Combat:
         let (packed_army) = pack_army(updated_attacking_army)
 
         return (packed_army)
+    end
+
+    # @notice Asserts can build battalions
+    # @param battalion_ids: Array of Battalion IDs that you want to build
+    # @param realm_buildings: A RealmBuildings struct specifying which buildings does a Realm have
+    func assert_can_build_battalions{range_check_ptr}(
+        battalion_ids_len : felt, battalion_ids : felt*, realm_buildings : RealmBuildings
+    ):
+        alloc_locals
+        let (__fp__, _) = get_fp_and_pc()
+
+        if troop_ids_len == 0:
+            return ()
+        end
+
+        let (building) = get_battalion_building([battalion_ids])
+        let buildings = cast(&realm_buildings, felt*)
+        let buildings_in_realm : felt = [buildings + building - 1]
+        with_attr error_message(
+                "Combat: missing building {troop.building} to build troop {troop.id}"):
+            assert_not_zero(buildings_in_realm)
+        end
+
+        return assert_can_build_battalions(
+            battalion_ids_len - 1, battalion_ids + 1, realm_buildings
+        )
+    end
+
+    # @notice Returns battalion building
+    # @param battalion_id: Battalion ID
+    # @return building id
+    func get_battalion_building{range_check_ptr}(battalion_id : felt) -> (building):
+        assert_not_zero(battalion_id)
+        assert_lt(battalion_id, BattalionIds.SIZE)
+
+        let (building_label) = get_label_location(battalion_building_per_id)
+
+        return ([building_label + battalion_id - 1])
+
+        battalion_building_per_id:
+        dw BattalionStatistics.RequiredBuilding.LightCavalry
+        dw BattalionStatistics.RequiredBuilding.HeavyCavalry
+        dw BattalionStatistics.RequiredBuilding.Archer
+        dw BattalionStatistics.RequiredBuilding.Longbow
+        dw BattalionStatistics.RequiredBuilding.Mage
+        dw BattalionStatistics.RequiredBuilding.Arcanist
+        dw BattalionStatistics.RequiredBuilding.LightInfantry
+        dw BattalionStatistics.RequiredBuilding.HeavyInfantry
     end
 end

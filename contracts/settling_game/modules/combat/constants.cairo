@@ -1,46 +1,82 @@
 %lang starknet
 
-namespace BattalionDefence:
-    namespace Cavalry:
+from contracts.settling_game.utils.game_structs import RealmBuildingsIds
+
+namespace BattalionStatistics:
+    namespace Attack:
         const LightCavalry = 20
         const HeavyCavalry = 30
-        const Archer = 15
-        const Longbow = 25
-        const Mage = 25
-        const Arcanist = 35
-        const LightInfantry = 25
-        const HeavyInfantry = 35
-    end
-    namespace Archery:
-        const LightCavalry = 25
-        const HeavyCavalry = 35
         const Archer = 20
         const Longbow = 30
-        const Mage = 15
-        const Arcanist = 25
-        const LightInfantry = 25
-        const HeavyInfantry = 35
-    end
-    namespace Magic:
-        const LightCavalry = 25
-        const HeavyCavalry = 35
-        const Archer = 25
-        const Longbow = 35
         const Mage = 20
         const Arcanist = 30
-        const LightInfantry = 15
-        const HeavyInfantry = 25
-    end
-    namespace Infantry:
-        const LightCavalry = 15
-        const HeavyCavalry = 25
-        const Archer = 25
-        const Longbow = 35
-        const Mage = 25
-        const Arcanist = 35
         const LightInfantry = 20
         const HeavyInfantry = 30
     end
+    namespace Defence:
+        namespace Cavalry:
+            const LightCavalry = 20
+            const HeavyCavalry = 30
+            const Archer = 15
+            const Longbow = 25
+            const Mage = 25
+            const Arcanist = 35
+            const LightInfantry = 25
+            const HeavyInfantry = 35
+        end
+        namespace Archery:
+            const LightCavalry = 25
+            const HeavyCavalry = 35
+            const Archer = 20
+            const Longbow = 30
+            const Mage = 15
+            const Arcanist = 25
+            const LightInfantry = 25
+            const HeavyInfantry = 35
+        end
+        namespace Magic:
+            const LightCavalry = 25
+            const HeavyCavalry = 35
+            const Archer = 25
+            const Longbow = 35
+            const Mage = 20
+            const Arcanist = 30
+            const LightInfantry = 15
+            const HeavyInfantry = 25
+        end
+        namespace Infantry:
+            const LightCavalry = 15
+            const HeavyCavalry = 25
+            const Archer = 25
+            const Longbow = 35
+            const Mage = 25
+            const Arcanist = 35
+            const LightInfantry = 20
+            const HeavyInfantry = 30
+        end
+    end
+    namespace RequiredBuilding:
+        const LightCavalry = RealmBuildingsIds.Castle
+        const HeavyCavalry = RealmBuildingsIds.Castle
+        const Archer = RealmBuildingsIds.ArcherTower
+        const Longbow = RealmBuildingsIds.ArcherTower
+        const Mage = RealmBuildingsIds.MageTower
+        const Arcanist = RealmBuildingsIds.MageTower
+        const LightInfantry = RealmBuildingsIds.Barracks
+        const HeavyInfantry = RealmBuildingsIds.Barracks
+    end
+end
+
+namespace BattalionIds:
+    const LightCavalry = 1
+    const HeavyCavalry = 2
+    const Archer = 3
+    const Longbow = 4
+    const Mage = 5
+    const Arcanist = 6
+    const LightInfantry = 7
+    const HeavyInfantry = 8
+    const SIZE = 9
 end
 
 namespace SHIFT_ARMY:
@@ -89,17 +125,6 @@ struct ArmyStatistics:
     member ArcheryDefence : felt  # (Sum of all units Archery Defence*Percentage of Attacking Archery Battalions)
     member MagicDefence : felt  # (Sum of all units Magic Cav Defence*Percentage of Attacking Magic Battalions)
     member InfantryDefence : felt  # (Sum of all units Infantry Defence*Percentage of Attacking Infantry Battalions)
-end
-
-namespace BattalionIds:
-    const LightCavalry = 1
-    const HeavyCavalry = 2
-    const Archer = 3
-    const Longbow = 4
-    const Mage = 5
-    const Arcanist = 6
-    const LightInfantry = 7
-    const HeavyInfantry = 8
 end
 
 struct ArmyData:

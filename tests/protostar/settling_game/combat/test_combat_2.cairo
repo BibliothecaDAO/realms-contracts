@@ -68,8 +68,6 @@ func test_winner{
     ) = Combat.calculate_winner(luck, attacking_army_packed, defending_army_packed)
 
     %{ print('outcome:', ids.outcome) %}
-    %{ print('attacker:', ids.updated_attack_army_packed) %}
-    %{ print('defender:', ids.updated_defence_army_packed) %}
 
     return ()
 end
@@ -140,8 +138,6 @@ func test_add_battalions_to_army{
     )
 
     assert total_battalions.LightCavalry.quantity = 3
-
-    # %{ print('battalions:', ids.b) %}
 
     return ()
 end

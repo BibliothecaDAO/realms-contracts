@@ -49,11 +49,14 @@ end
 
 # @asset_id: ContractId
 # @token_id: TokenID
-# @nested_id: NestedID
+# @nested_asset_id: NestedID
 @storage_var
 func coordinates(asset_id : felt, token_id : Uint256, nested_asset_id : felt) -> (point : Point):
 end
 
+# @traveller_contract_id: ContractId
+# @traveller: TokenID
+# @traveller_nested_id: NestedID
 @storage_var
 func travel_information(
     traveller_contract_id : felt, traveller : Uint256, traveller_nested_id : felt
