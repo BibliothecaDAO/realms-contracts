@@ -27,9 +27,10 @@ namespace WeightModifier:
     namespace Bone:
         const demon = 150
         const dragon = 135
+    end
 end
 
-# Densities expressed in mg/cm^3
+# Densities expressed in kg/m^3
 namespace MaterialDensity:
     namespace Metal:
         const gold = 19300
@@ -54,16 +55,16 @@ namespace MaterialDensity:
     end
     namespace Biotic:
         const leather = 8600
-        const bone = 1155
-        const StuddedLeather = cast((leather * (WeightModifier.Hide.studded / 100)), felt)
-        const HardLeather = cast((leather * (WeightModifier.Hide.hard / 100)), felt)
+        const human_bone = 1155
+        const studded_leather = cast((leather * (WeightModifier.Hide.studded / 100)), felt)
+        const hard_leather = cast((leather * (WeightModifier.Hide.hard / 100)), felt)
         namespace Demon:
             const hide = cast((leather * (WeightModifier.Hide.demon / 100)), felt)
-            const bone = cast((bone * (WeightModifier.Bone.demon / 100)), felt)
+            const demon_bone = cast((human_bone * (WeightModifier.Bone.demon / 100)), felt)
         end
         namespace Dragon:
             const skin = cast((leather * (WeightModifier.Hide.dragon / 100)), felt)
-            const bone = cast((bone * (WeightModifier.Bone.dragon / 100)), felt)
+            const dragon_bone = cast((human_bone * (WeightModifier.Bone.dragon / 100)), felt)
         end
     end
 
@@ -71,24 +72,24 @@ namespace MaterialDensity:
     
     namespace Wood:
         namespace Hard:
-            const walnut = 6900
-            const mahogany = 8500
-            const maple = 7500
-            const oak = 9000
-            const rosewood = 8800
-            const cherry = 9000
-            const balsa = 1400
-            const birch = 6700
-            const holly = 6400
+            const walnut = 690
+            const mahogany = 850
+            const maple = 750
+            const oak = 900
+            const rosewood = 880
+            const cherry = 900
+            const balsa = 140
+            const birch = 670
+            const holly = 640
         end
         namespace Soft:
-            const elder = 4900
-            const cedar = 5800
-            const pine = 8500
-            const fir = 7400
-            const hemlock = 8000
-            const spruce = 7100
-            const yew = 6700
+            const elder = 490
+            const cedar = 580
+            const pine = 850
+            const fir = 740
+            const hemlock = 800
+            const spruce = 710
+            const yew = 670
         end
     end
 end
