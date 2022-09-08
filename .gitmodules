@@ -1,6 +1,6 @@
 [submodule "lib/cairo_erc4626"]
 	path = lib/cairo_erc4626
 	url = git@github.com:auditless/cairo-erc4626.git
-[submodule "open_zeppelin"]
+[submodule "cairo_contracts"]
 	url = https://github.com/OpenZeppelin/cairo-contracts
-	path = lib/open_zeppelin
+	path = lib/cairo_contracts
