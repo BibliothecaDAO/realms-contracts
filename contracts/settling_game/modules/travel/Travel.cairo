@@ -1,23 +1,17 @@
 # ____TRAVEL
 #   Logic for travel
 #   Assets must exist on the same point in space in order to interact with each other.
-#
+#   Assets have nested selectors allowing (n) number of potential assets to spawn from a single asset.
 # MIT License
 
 %lang starknet
 
 from starkware.cairo.common.alloc import alloc
-from starkware.cairo.common.bool import TRUE, FALSE
-from starkware.cairo.common.cairo_builtins import BitwiseBuiltin, HashBuiltin
-from starkware.cairo.common.math import unsigned_div_rem
-from starkware.cairo.common.math_cmp import is_le
+from starkware.cairo.common.bool import TRUE
+from starkware.cairo.common.cairo_builtins import HashBuiltin
+from starkware.cairo.common.math_cmp import is_le, is_nn
 from starkware.cairo.common.uint256 import Uint256
-from starkware.starknet.common.syscalls import (
-    get_block_timestamp,
-    get_caller_address,
-    get_tx_info,
-    get_contract_address,
-)
+from starkware.starknet.common.syscalls import get_block_timestamp
 
 from openzeppelin.upgrades.library import Proxy
 
@@ -72,7 +66,6 @@ end
 
 # @notice Module initializer
 # @param address_of_controller: Controller/arbiter address
-# @param xoroshiro_addr: Address of a PRNG contract conforming to IXoroshiro
 # @proxy_admin: Proxy admin address
 @external
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -117,6 +110,12 @@ func travel{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     alloc_locals
 
     # TODO: assert is correct ID (can't try move unmoveable assets)
+
+    # You cannot move nested asset ID 0 - this is the actual location.
+    let (is_not_defending_army) = is_nn(traveller_nested_id)
+    with_attr error_message("Combat: You cannot move your Defending Army"):
+        assert is_not_defending_army = TRUE
+    end
 
     Module.ERC721_owner_check(traveller_token_id, traveller_contract_id)
 

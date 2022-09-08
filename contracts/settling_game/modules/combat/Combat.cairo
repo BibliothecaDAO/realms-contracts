@@ -1,7 +1,18 @@
-# ____MODULE_L06___COMBAT_LOGIC
-#   Logic for combat between characters, troops, etc.
+# -----------------------------------
+# ____Module.Combat
+#   Logic around Combat system
+
+# ELI5:
+#   Combat revolves around Armies fighting Armies.
+#   A Realm can have many Armies and Armies can fight any other Army.
+#   Army ID 0 is reserved for your defending Army, and it cannot move.
+#   Armies accrue points if they enter a battle. Both Armies must exist at the same coordinates in order to battle.
 #
+#
+#
+
 # MIT License
+# -----------------------------------
 
 %lang starknet
 
@@ -11,37 +22,34 @@ from starkware.cairo.common.cairo_builtins import BitwiseBuiltin, HashBuiltin
 from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.uint256 import Uint256
-from starkware.starknet.common.syscalls import (
-    get_block_timestamp,
-    get_caller_address,
-    get_tx_info,
-    get_contract_address,
-)
+from starkware.starknet.common.syscalls import get_block_timestamp, get_caller_address
 
 from openzeppelin.upgrades.library import Proxy
 from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
 
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
-from contracts.settling_game.modules.calculator.interface import ICalculator
+
+from contracts.settling_game.library.library_module import Module
+from contracts.settling_game.modules.combat.library import Combat
 from contracts.settling_game.interfaces.imodules import (
     IModuleController,
     IL09_Relics,
     IFood,
     IGoblinTown,
 )
+
+from contracts.settling_game.utils.general import transform_costs_to_tokens
+
+from contracts.settling_game.modules.travel.interface import ITravel
 from contracts.settling_game.modules.resources.interface import IResources
 from contracts.settling_game.modules.buildings.interface import Buildings
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
-from contracts.settling_game.modules.combat.library import Combat
 
 from contracts.settling_game.utils.constants import (
     ATTACK_COOLDOWN_PERIOD,
     COMBAT_OUTCOME_ATTACKER_WINS,
     COMBAT_OUTCOME_DEFENDER_WINS,
-    ATTACKING_SQUAD_SLOT,
-    POPULATION_PER_HIT_POINT,
-    MAX_WALL_DEFENSE_HIT_POINTS,
     GOBLINDOWN_REWARD,
     DEFENDING_SQUAD_SLOT,
     DEFENDING_ARMY_XP,
@@ -50,20 +58,10 @@ from contracts.settling_game.utils.constants import (
 from contracts.settling_game.utils.game_structs import (
     ModuleIds,
     RealmData,
-    RealmCombatData,
     RealmBuildings,
-    Troop,
-    Squad,
-    SquadStats,
     Cost,
     ExternalContractIds,
 )
-from contracts.settling_game.utils.general import unpack_data, transform_costs_to_tokens
-from contracts.settling_game.library.library_module import Module
-
-from contracts.settling_game.utils.constants import DAY
-
-from contracts.settling_game.modules.travel.interface import ITravel
 
 from contracts.settling_game.modules.combat.constants import (
     BattalionDefence,
@@ -167,11 +165,13 @@ end
 # External
 # -----------------------------------
 
-# @notice Create a new attacking or defending Squad from Troops in Realm
-# @param troop_ids: array of TroopId values of the troops to be built/bought
+# @notice Creates a new Army on Realm. Armies are comprised of Battalions.
 # @param realm_id: Staked Realm ID (S_Realm)
-# @param slot: one of ATTACKING_SQUAD_SLOT or DEFENDING_SQUAD_SLOT values, designating
-#              where the Squad should be assigned to in the Realm
+# @param army_id: Army ID being added too.
+# @param battalion_ids_len: Battlion IDs length
+# @param battalion_ids: Battlion IDs
+# @param battalions_len: Battalions lengh
+# @param battalions: Battalions to add
 @external
 func build_army_from_battalions{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
@@ -238,28 +238,6 @@ func build_army_from_battalions{
     return ()
 end
 
-func update_army_in_realm{
-    range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*
-}(army_id : felt, army : Army, realm_id : Uint256):
-    alloc_locals
-
-    Module.ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
-
-    # pack army
-    let (new_packed_army) = Combat.pack_army(army)
-
-    # retrieve stored data
-    let (current_packed_army : ArmyData) = army_data_by_id.read(army_id, realm_id)
-
-    # save army in storage with new Army, but keep the old information
-    army_data_by_id.write(
-        army_id,
-        realm_id,
-        ArmyData(new_packed_army, current_packed_army.LastAttacked, current_packed_army.XP, current_packed_army.Level, current_packed_army.CallSign),
-    )
-
-    return ()
-end
 # @notice Commence the raid
 # @param attacking_realm_id: Staked Realm id (S_Realm)
 # @param defending_realm_id: Staked Realm id (S_Realm)
@@ -396,13 +374,13 @@ func initiate_combat{
     tempvar defending_xp = defending_xp
 
     # store new values with added XP
-    set_army_data_by_id(
+    set_army_data_and_emit(
         attacking_army_id,
         attacking_realm_id,
         ArmyData(ending_attacking_army_packed, now, attacking_realm_data.XP + attacking_xp, attacking_realm_data.Level, attacking_realm_data.CallSign),
     )
 
-    set_army_data_by_id(
+    set_army_data_and_emit(
         defending_army_id,
         defending_realm_id,
         ArmyData(ending_defending_army_packed, now, defending_realm_data.XP + defending_xp, defending_realm_data.Level, defending_realm_data.CallSign),
@@ -416,25 +394,64 @@ end
 # -----------------------------------
 
 # @notice Populate an array of Cost structs with the proper values
-# @param troop_ids: An array of troops for which we need to load the costs
-# @param costs: A pointer to a Cost memory segment that gets populated
-func load_battalion_costs{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    troop_ids_len : felt, troop_ids : felt*, costs : Cost*
+# @param army_id: Army ID
+# @param army: Army struct
+# @param realm_id: Realm ID
+
+func update_army_in_realm{
+    range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*
+}(army_id : felt, army : Army, realm_id : Uint256):
+    alloc_locals
+
+    Module.ERC721_owner_check(realm_id, ExternalContractIds.S_Realms)
+
+    # pack army
+    let (new_packed_army) = Combat.pack_army(army)
+
+    # retrieve stored data
+    let (current_packed_army : ArmyData) = army_data_by_id.read(army_id, realm_id)
+
+    set_army_data_and_emit(
+        army_id,
+        realm_id,
+        ArmyData(new_packed_army, current_packed_army.LastAttacked, current_packed_army.XP, current_packed_army.Level, current_packed_army.CallSign),
+    )
+
+    return ()
+end
+
+func set_army_data_and_emit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    army_id : felt, realm_id : Uint256, army_data : ArmyData
 ):
     alloc_locals
 
-    if troop_ids_len == 0:
+    # update state
+    army_data_by_id.write(army_id, realm_id, army_data)
+
+    # emit data
+    ArmyMetadata.emit(army_id, realm_id, army_data)
+
+    return ()
+end
+
+# @notice Load Battalion costs
+func load_battalion_costs{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    battlion_ids_len : felt, battlion_ids : felt*, costs : Cost*
+):
+    alloc_locals
+
+    if battlion_ids_len == 0:
         return ()
     end
 
-    let (cost : Cost) = get_battalion_cost([troop_ids])
+    let (cost : Cost) = get_battalion_cost([battlion_ids])
     assert [costs] = cost
 
-    return load_battalion_costs(troop_ids_len - 1, troop_ids + 1, costs + Cost.SIZE)
+    return load_battalion_costs(battlion_ids_len - 1, battlion_ids + 1, costs + Cost.SIZE)
 end
 
-# @notice Perform a 12 sided dice roll
-# @return Dice roll value, from 1 to 12 (inclusive)
+# @notice Perform a 150 sided dice roll
+# @return Dice roll value, from 1 to 150 (inclusive)
 func roll_dice{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}() -> (
     dice_roll : felt
 ):
@@ -452,24 +469,11 @@ func roll_dice{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     return (r + 1 + 75)  # values from 75 to 125 inclusive
 end
 
-func set_army_data_by_id{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    army_id : felt, realm_id : Uint256, army_data : ArmyData
-):
-    alloc_locals
-
-    # update state
-    army_data_by_id.write(army_id, realm_id, army_data)
-
-    # emit data
-    ArmyMetadata.emit(army_id, realm_id, army_data)
-
-    return ()
-end
-
 # -----------------------------------
 # Getters
 # -----------------------------------
 
+# @notice Get Battalion costs as Cost
 @view
 func get_battalion_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}(
     battalion_id : felt
@@ -478,6 +482,15 @@ func get_battalion_cost{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : Has
     return (c)
 end
 
+# @notice Get Army Data
+@view
+func get_realm_army_combat_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    army_id : felt, realm_id : Uint256
+) -> (army_data : ArmyData):
+    return army_data_by_id.read(army_id, realm_id)
+end
+
+# @notice Check if Realm an be attacked
 @view
 func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     attacking_army_id : felt,
@@ -529,13 +542,6 @@ func Realm_can_be_attacked{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, ran
     end
 
     return (TRUE)
-end
-
-@view
-func get_realm_army_combat_data{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    army_id : felt, realm_id : Uint256
-) -> (army_data : ArmyData):
-    return army_data_by_id.read(army_id, realm_id)
 end
 
 #########
