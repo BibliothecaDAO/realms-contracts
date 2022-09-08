@@ -513,5 +513,6 @@ end
 struct TravelInformation:
     member destination_asset_id : felt
     member destination_token_id : Uint256  # id of destination
+    member destination_nested_asset_id : felt
     member travel_time : felt  # timestamp in the future
 end

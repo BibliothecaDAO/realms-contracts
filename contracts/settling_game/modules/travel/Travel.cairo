@@ -23,7 +23,6 @@ from openzeppelin.upgrades.library import Proxy
 
 from contracts.settling_game.utils.game_structs import TravelInformation, ExternalContractIds, Point
 from contracts.settling_game.library.library_module import Module
-
 from contracts.settling_game.modules.travel.library import Travel
 
 # -----------------------------------
@@ -40,11 +39,12 @@ from contracts.settling_game.modules.travel.library import Travel
 # @param arrival_time: Arrival time in unix
 @event
 func TravelAction(
-    traveller_nested_id : felt,
     traveller_contract_id : felt,
     traveller_token_id : Uint256,
+    traveller_nested_id : felt,
     destination_contract_id : felt,
     destination_token_id : Uint256,
+    destination_nested_id : felt,
     arrival_time : felt,
 ):
 end
@@ -54,14 +54,15 @@ end
 # -----------------------------------
 
 # @asset_id: ContractId
-# @token_id: ContractId
+# @token_id: TokenID
+# @nested_id: NestedID
 @storage_var
-func coordinates(asset_id : felt, token_id : Uint256) -> (point : Point):
+func coordinates(asset_id : felt, token_id : Uint256, nested_asset_id : felt) -> (point : Point):
 end
 
 @storage_var
 func travel_information(
-    traveller_nested_id : felt, traveller_contract_id : felt, traveller : Uint256
+    traveller_contract_id : felt, traveller : Uint256, traveller_nested_id : felt
 ) -> (travel_information : TravelInformation):
 end
 
@@ -100,15 +101,18 @@ end
 
 # @traveller_contract_id: External contract ID -> keeping the same for consistency
 # @traveller_token_id: Asset token ID moving (Realm, Adventurer)
+# @traveller_nested_id: Nested asset ID (Armies, persons etc)
 # @destination_contract_id: ContractId
 # @destination_token_id: Destination token ID
+# @destination_nested_id: Nested asset ID (Armies, persons etc)
 @external
 func travel{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    traveller_nested_id : felt,
     traveller_contract_id : felt,
     traveller_token_id : Uint256,
+    traveller_nested_id : felt,
     destination_contract_id : felt,
     destination_token_id : Uint256,
+    destination_nested_id : felt,
 ):
     alloc_locals
 
@@ -117,14 +121,16 @@ func travel{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     Module.ERC721_owner_check(traveller_token_id, traveller_contract_id)
 
     # check has arrived
-    assert_arrived(traveller_nested_id, traveller_contract_id, traveller_token_id)
+    assert_arrived(traveller_contract_id, traveller_token_id, traveller_nested_id)
 
     # get travel coordinates
-    let (traveller_coordinates : Point) = get_coordinates(traveller_contract_id, traveller_token_id)
+    let (traveller_coordinates : Point) = get_coordinates(
+        traveller_contract_id, traveller_token_id, traveller_nested_id
+    )
 
     # get destination coordinates
     let (destination_coordinates : Point) = get_coordinates(
-        destination_contract_id, destination_token_id
+        destination_contract_id, destination_token_id, destination_nested_id
     )
 
     # calculate time
@@ -132,19 +138,20 @@ func travel{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
 
     # set travel_information
     travel_information.write(
-        traveller_nested_id,
         traveller_contract_id,
         traveller_token_id,
-        TravelInformation(destination_contract_id, destination_token_id, time),
+        traveller_nested_id,
+        TravelInformation(destination_contract_id, destination_token_id, destination_nested_id, time),
     )
 
     # emit event
     TravelAction.emit(
-        traveller_nested_id,
         traveller_contract_id,
         traveller_token_id,
+        traveller_nested_id,
         destination_contract_id,
         destination_token_id,
+        destination_nested_id,
         time,
     )
 
@@ -157,16 +164,16 @@ end
 
 @view
 func get_coordinates{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    contract_id : felt, token_id : Uint256
+    contract_id : felt, token_id : Uint256, nested_id : felt
 ) -> (point : Point):
-    return coordinates.read(contract_id, token_id)
+    return coordinates.read(contract_id, token_id, nested_id)
 end
 
 @view
 func get_travel_information{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    nested_id : felt, contract_id : felt, token_id : Uint256
+    contract_id : felt, token_id : Uint256, nested_id : felt
 ) -> (travel_information : TravelInformation):
-    return travel_information.read(nested_id, contract_id, token_id)
+    return travel_information.read(contract_id, token_id, nested_id)
 end
 
 @view
@@ -196,12 +203,12 @@ end
 
 @view
 func assert_arrived{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    nested_id : felt, contract_id : felt, token_id : Uint256
+    contract_id : felt, token_id : Uint256, nested_id : felt
 ):
     alloc_locals
     let (now) = get_block_timestamp()
     let (travel_information : TravelInformation) = get_travel_information(
-        nested_id, contract_id, token_id
+        contract_id, token_id, nested_id
     )
 
     let (arrived) = is_le(travel_information.travel_time, now)
@@ -217,29 +224,34 @@ end
 func assert_traveller_is_at_location{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
 }(
-    traveller_nested_id : felt,
     traveller_contract_id : felt,
     traveller_token_id : Uint256,
+    traveller_nested_id : felt,
     destination_contract_id : felt,
     destination_token_id : Uint256,
+    destination_nested_id : felt,
 ):
     alloc_locals
 
     # check traveller has arrived
-    assert_arrived(traveller_nested_id, destination_contract_id, destination_token_id)
+    assert_arrived(traveller_contract_id, traveller_token_id, traveller_nested_id)
 
     # get traveller information
     let (traveller_information : TravelInformation) = get_travel_information(
-        traveller_nested_id, traveller_contract_id, traveller_token_id
+        traveller_contract_id, traveller_token_id, traveller_nested_id
     )
 
     # get coordinates of travellers destination
     let (traveller_destination) = get_coordinates(
-        traveller_information.destination_asset_id, traveller_information.destination_token_id
+        traveller_information.destination_asset_id,
+        traveller_information.destination_token_id,
+        traveller_information.destination_nested_asset_id,
     )
 
     # get requested destination coordinates
-    let (destination) = get_coordinates(destination_contract_id, destination_token_id)
+    let (destination) = get_coordinates(
+        destination_contract_id, destination_token_id, destination_nested_id
+    )
 
     # assert travellers destination and requested information is the same
     Travel.assert_same_points(traveller_destination, destination)
@@ -253,9 +265,9 @@ end
 
 @external
 func set_coordinates{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    contract_id : felt, token_id : Uint256, point : Point
+    contract_id : felt, token_id : Uint256, nested_id : felt, point : Point
 ):
     Proxy.assert_only_admin()
-    coordinates.write(contract_id, token_id, point)
+    coordinates.write(contract_id, token_id, nested_id, point)
     return ()
 end
