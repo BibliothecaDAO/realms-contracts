@@ -1,10 +1,9 @@
 # First, import click dependency
 import click
 
-from realms_cli.caller_invoker import wrapped_call, wrapped_send, compile, deploy
-from realms_cli.config import Config, strhex_as_strfelt, safe_load_deployment
-from realms_cli.shared import uint, expanded_uint_list, from_bn
-from realms_cli.deployer import logged_deploy
+from realms_cli.caller_invoker import wrapped_send
+from realms_cli.config import Config, strhex_as_strfelt
+from realms_cli.utils import uint
 
 
 @click.command()

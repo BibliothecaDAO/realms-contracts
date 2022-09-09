@@ -7,9 +7,6 @@ from realms_cli.realms_cli.config import Config
 ... = Config.NILE_NETWORK
 """
 from nile import deployments
-from nile.core.declare import alias_exists
-import os
-
 
 def safe_load_deployment(alias: str, network: str):
     """Safely loads address from deployments file"""

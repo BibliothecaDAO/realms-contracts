@@ -3,10 +3,9 @@ import click
 
 from nile.core.declare import declare
 
-from realms_cli.caller_invoker import wrapped_call, wrapped_send, compile, deploy
-from realms_cli.config import Config, strhex_as_strfelt, safe_load_deployment
-from realms_cli.shared import uint
-from realms_cli.deployer import logged_deploy
+from realms_cli.caller_invoker import wrapped_send, compile, deploy
+from realms_cli.config import Config, strhex_as_strfelt
+from realms_cli.utils import uint
 
 resources = uint(100000000 * 10 ** 18)
 
