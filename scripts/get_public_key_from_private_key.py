@@ -1,6 +1,7 @@
 import os
 from nile.signer import Signer
 
+# put your private key in the system environment variables
 private_key = int(os.environ["STARKNET_PRIVATE_KEY"])
 
 signer = Signer(private_key)
