@@ -51,7 +51,6 @@ from contracts.settling_game.utils.constants import (
     COMBAT_OUTCOME_ATTACKER_WINS,
     COMBAT_OUTCOME_DEFENDER_WINS,
     GOBLINDOWN_REWARD,
-    DEFENDING_SQUAD_SLOT,
     DEFENDING_ARMY_XP,
     ATTACKING_ARMY_XP,
     TOTAL_BATTALIONS,
@@ -64,15 +63,7 @@ from contracts.settling_game.utils.game_structs import (
     ExternalContractIds,
 )
 
-from contracts.settling_game.modules.combat.constants import (
-    BattalionDefence,
-    SHIFT_ARMY,
-    Battalion,
-    Army,
-    ArmyStatistics,
-    BattalionIds,
-    ArmyData,
-)
+from contracts.settling_game.modules.combat.constants import Battalion, Army, ArmyData
 
 # -----------------------------------
 # Events

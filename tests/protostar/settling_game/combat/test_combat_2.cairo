@@ -4,7 +4,7 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.alloc import alloc
 
 from contracts.settling_game.modules.combat.library import Combat, Army, Battalion, ArmyStatistics
-from contracts.settling_game.modules.combat.constants import BattalionDefence, BattalionIds
+from contracts.settling_game.modules.combat.constants import BattalionStatistics, BattalionIds
 
 func build_attacking_army() -> (a : Army):
     tempvar values = new (2, 100, 2, 100, 2, 100, 2, 100, 2, 100, 2, 100, 2, 100, 2, 100,)
@@ -28,10 +28,10 @@ func test_squad{
     let (packed_army) = Combat.pack_army(attacking_army)
     let (unpacked_army : Army) = Combat.unpack_army(packed_army)
 
-    assert unpacked_army.LightCavalry.quantity = 2
-    assert unpacked_army.LightCavalry.health = 100
-    assert unpacked_army.HeavyInfantry.quantity = 2
-    assert unpacked_army.HeavyInfantry.health = 100
+    assert unpacked_army.LightCavalry.Quantity = 2
+    assert unpacked_army.LightCavalry.Health = 100
+    assert unpacked_army.HeavyInfantry.Quantity = 2
+    assert unpacked_army.HeavyInfantry.Health = 100
 
     return ()
 end
@@ -67,7 +67,7 @@ func test_winner{
         outcome, updated_attack_army_packed, updated_defence_army_packed
     ) = Combat.calculate_winner(luck, attacking_army_packed, defending_army_packed)
 
-    %{ print('outcome:', ids.outcome) %}
+    assert outcome = 0
 
     return ()
 end
@@ -83,17 +83,17 @@ func test_calculate_total_battalions{
     let (unpacked_army) = Combat.unpack_army(packed_army)
     let (total_battalions) = Combat.calculate_total_battalions(attacking_army)
 
-    %{ print('battalions:', ids.total_battalions) %}
+    assert total_battalions = 16
 
-    let c_defence = unpacked_army.LightCavalry.quantity * BattalionDefence.Cavalry.LightCavalry + unpacked_army.HeavyCavalry.quantity * BattalionDefence.Cavalry.HeavyCavalry + unpacked_army.Archer.quantity * BattalionDefence.Cavalry.Archer + unpacked_army.Longbow.quantity * BattalionDefence.Cavalry.Longbow + unpacked_army.Mage.quantity * BattalionDefence.Cavalry.Mage + unpacked_army.Arcanist.quantity * BattalionDefence.Cavalry.Arcanist + unpacked_army.LightInfantry.quantity * BattalionDefence.Cavalry.LightInfantry + unpacked_army.HeavyInfantry.quantity * BattalionDefence.Cavalry.HeavyInfantry
+    let c_defence = unpacked_army.LightCavalry.Quantity * BattalionStatistics.Defence.Cavalry.LightCavalry + unpacked_army.HeavyCavalry.Quantity * BattalionStatistics.Defence.Cavalry.HeavyCavalry + unpacked_army.Archer.Quantity * BattalionStatistics.Defence.Cavalry.Archer + unpacked_army.Longbow.Quantity * BattalionStatistics.Defence.Cavalry.Longbow + unpacked_army.Mage.Quantity * BattalionStatistics.Defence.Cavalry.Mage + unpacked_army.Arcanist.Quantity * BattalionStatistics.Defence.Cavalry.Arcanist + unpacked_army.LightInfantry.Quantity * BattalionStatistics.Defence.Cavalry.LightInfantry + unpacked_army.HeavyInfantry.Quantity * BattalionStatistics.Defence.Cavalry.HeavyInfantry
 
     let (cavalry_defence) = Combat.calculate_defence_values(
         c_defence,
         total_battalions,
-        unpacked_army.LightCavalry.quantity + unpacked_army.HeavyCavalry.quantity,
+        unpacked_army.LightCavalry.Quantity + unpacked_army.HeavyCavalry.Quantity,
     )
 
-    %{ print('wins:', ids.cavalry_defence) %}
+    assert cavalry_defence = c_defence
 
     return ()
 end
@@ -110,7 +110,7 @@ func test_health_remaining{
 
     let (total_battalions) = Combat.calculate_health_remaining(100 * 10, 2, 8, 100, 200)
 
-    %{ print('health:', ids.total_battalions) %}
+    %{ print('Health:', ids.total_battalions) %}
 
     return ()
 end
@@ -137,7 +137,7 @@ func test_add_battalions_to_army{
         unpacked_army, 2, battalion_ids, 2, battalions
     )
 
-    assert total_battalions.LightCavalry.quantity = 3
+    assert total_battalions.LightCavalry.Quantity = battalions[0].Quantity
 
     return ()
 end

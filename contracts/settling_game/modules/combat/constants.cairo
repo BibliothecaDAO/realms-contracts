@@ -100,8 +100,8 @@ namespace SHIFT_ARMY:
 end
 
 struct Battalion:
-    member quantity : felt  # 1-23
-    member health : felt  # 1-100
+    member Quantity : felt  # 1-23
+    member Health : felt  # 1-100
 end
 
 struct Army:
