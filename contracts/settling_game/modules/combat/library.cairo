@@ -278,7 +278,7 @@ namespace Combat:
 
     # @notice Sums all defence values
     # @param army: Unpacked Army
-    # @ returns cavalry_defence, archer_defence, magic_defence, infantry_defence
+    # @returns cavalry_defence, archer_defence, magic_defence, infantry_defence
     func all_defence_value{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         army : Army
     ) -> (cavalry_defence, archer_defence, magic_defence, infantry_defence):
@@ -313,6 +313,7 @@ namespace Combat:
     # @param luck: Luck of Attacker - this is a number between 75-125 which adjusts the battle outcome
     # @param attack_army_packed: Attacking Army packed
     # @param defending_army_packed: Defending Army packed
+    # @return battle outcome (WIN or LOSS), packed attacking army, packed defending army
     func calculate_winner{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
@@ -364,6 +365,7 @@ namespace Combat:
     # @notice Calculates value after applying luck. All units use this.
     # @param attacking_statistics: Attacker statistics
     # @param defending_statistics: Defender statistics
+    # @return luck outcome
     func calculate_luck_outcome{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         luck : felt, attacking_statistics : felt, defending_statistics : felt
     ) -> (outcome : felt):
@@ -380,6 +382,12 @@ namespace Combat:
     # @param total_battalions: Total Battalions in Army
     # @param counter_attack: Counter attack value
     # @param counter_defence: Counter defence value
+    # @return new health of battalions and battalions remaining
+    #         if health goes to 0, then no battalions are alive and we return 0
+
+    const COMBAT_ALGO_WEIGHT_1 = 50  # weight in bp
+    const FIXED_DAMAGE_AMOUNT = 20
+
     func calculate_health_remaining{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     }(
@@ -388,22 +396,30 @@ namespace Combat:
         total_battalions : felt,
         counter_attack : felt,
         counter_defence : felt,
-    ) -> (new_health : felt):
+    ) -> (new_health : felt, battalions : felt):
         alloc_locals
 
-        let (battalion_div, _) = unsigned_div_rem(battalions * 100, total_battalions)
+        let (attack_over_defence, _) = unsigned_div_rem(
+            (counter_attack * 100) * COMBAT_ALGO_WEIGHT_1, counter_defence
+        )
 
-        let (counter_div, _) = unsigned_div_rem(counter_attack * 100, counter_defence)
+        let (health_remaining, _) = unsigned_div_rem(attack_over_defence * starting_health, 10000)
 
-        let (h, _) = unsigned_div_rem(((starting_health * counter_div) * 90), 100)
+        let (battalion_distribution, _) = unsigned_div_rem(battalions * 100, total_battalions)
 
-        let (actual, _) = unsigned_div_rem(h, 100)
+        let (real_battalion_health, _) = unsigned_div_rem(
+            health_remaining * battalion_distribution, 100
+        )
 
-        let Health = battalion_div * actual
+        let modified_health = real_battalion_health - FIXED_DAMAGE_AMOUNT
 
-        let (final_health, _) = unsigned_div_rem(Health, 100)
+        let (is_dead) = is_le(modified_health, 0)
 
-        return (final_health)
+        if is_dead == TRUE:
+            return (0, 0)
+        end
+
+        return (real_battalion_health, battalions)
     end
 
     # @notice gets updated packed armies
@@ -462,56 +478,56 @@ namespace Combat:
     ) -> (packed_army : felt):
         alloc_locals
 
-        let (light_cavalry_health) = calculate_health_remaining(
+        let (light_cavalry_health, light_cavalry_battalions) = calculate_health_remaining(
             attack_army_unpacked.LightCavalry.Health,
             attack_army_unpacked.LightCavalry.Quantity,
             attack_army_unpacked.LightCavalry.Quantity + attack_army_unpacked.HeavyCavalry.Quantity,
             attack_army_statistics.InfantryAttack,
             defending_army_statistics.InfantryDefence,
         )
-        let (heavy_cavalry_health) = calculate_health_remaining(
+        let (heavy_cavalry_health, heavy_cavalry_battalions) = calculate_health_remaining(
             attack_army_unpacked.HeavyCavalry.Health,
             attack_army_unpacked.HeavyCavalry.Quantity,
             attack_army_unpacked.LightCavalry.Quantity + attack_army_unpacked.HeavyCavalry.Quantity,
             attack_army_statistics.InfantryAttack,
             defending_army_statistics.InfantryDefence,
         )
-        let (archer_health) = calculate_health_remaining(
+        let (archer_health, archer_battalions) = calculate_health_remaining(
             attack_army_unpacked.Archer.Health,
             attack_army_unpacked.Archer.Quantity,
             attack_army_unpacked.Archer.Quantity + attack_army_unpacked.Longbow.Quantity,
             attack_army_statistics.CavalryAttack,
             defending_army_statistics.CavalryDefence,
         )
-        let (longbow_health) = calculate_health_remaining(
+        let (longbow_health, longbow_battalions) = calculate_health_remaining(
             attack_army_unpacked.Longbow.Health,
             attack_army_unpacked.Longbow.Quantity,
             attack_army_unpacked.Archer.Quantity + attack_army_unpacked.Longbow.Quantity,
             attack_army_statistics.CavalryAttack,
             defending_army_statistics.CavalryDefence,
         )
-        let (mage_health) = calculate_health_remaining(
+        let (mage_health, mage_battalions) = calculate_health_remaining(
             attack_army_unpacked.Mage.Health,
             attack_army_unpacked.Mage.Quantity,
             attack_army_unpacked.Mage.Quantity + attack_army_unpacked.Arcanist.Quantity,
             attack_army_statistics.ArcheryAttack,
             defending_army_statistics.ArcheryDefence,
         )
-        let (archanist_health) = calculate_health_remaining(
+        let (archanist_health, archanist_battalions) = calculate_health_remaining(
             attack_army_unpacked.Arcanist.Health,
             attack_army_unpacked.Arcanist.Quantity,
             attack_army_unpacked.Mage.Quantity + attack_army_unpacked.Arcanist.Quantity,
             attack_army_statistics.ArcheryAttack,
             defending_army_statistics.ArcheryDefence,
         )
-        let (light_infantry_health) = calculate_health_remaining(
+        let (light_infantry_health, light_infantry_battalions) = calculate_health_remaining(
             attack_army_unpacked.LightInfantry.Health,
             attack_army_unpacked.LightInfantry.Quantity,
             attack_army_unpacked.LightInfantry.Quantity + attack_army_unpacked.LightInfantry.Quantity,
             attack_army_statistics.InfantryAttack,
             defending_army_statistics.InfantryDefence,
         )
-        let (heavy_infantry_health) = calculate_health_remaining(
+        let (heavy_infantry_health, heavy_infantry_battalions) = calculate_health_remaining(
             attack_army_unpacked.HeavyInfantry.Health,
             attack_army_unpacked.HeavyInfantry.Quantity,
             attack_army_unpacked.HeavyInfantry.Quantity + attack_army_unpacked.HeavyInfantry.Quantity,
@@ -520,21 +536,21 @@ namespace Combat:
         )
 
         let updated_attacking_army = Army(
-            Battalion(attack_army_unpacked.LightCavalry.Quantity,
+            Battalion(light_cavalry_battalions,
             light_cavalry_health),
-            Battalion(attack_army_unpacked.HeavyCavalry.Quantity,
+            Battalion(heavy_cavalry_battalions,
             heavy_cavalry_health),
-            Battalion(attack_army_unpacked.Archer.Quantity,
+            Battalion(archer_battalions,
             archer_health),
-            Battalion(attack_army_unpacked.Longbow.Quantity,
+            Battalion(longbow_battalions,
             longbow_health),
-            Battalion(attack_army_unpacked.Mage.Quantity,
+            Battalion(mage_battalions,
             mage_health),
-            Battalion(attack_army_unpacked.Arcanist.Quantity,
+            Battalion(archanist_battalions,
             archanist_health),
-            Battalion(attack_army_unpacked.LightInfantry.Quantity,
+            Battalion(light_infantry_battalions,
             light_infantry_health),
-            Battalion(attack_army_unpacked.HeavyInfantry.Quantity,
+            Battalion(heavy_infantry_battalions,
             heavy_infantry_health),
         )
 
