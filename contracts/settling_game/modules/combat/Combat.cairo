@@ -102,8 +102,8 @@ func BuildArmy(
     army : Army,
     battalion_ids_len : felt,
     battalion_ids : felt*,
-    battalions_len : felt,
-    battalions : Battalion*,
+    battalion_quantity_len : felt,
+    battalion_quantity : felt*,
 ):
 end
 
@@ -170,8 +170,8 @@ func build_army_from_battalions{
     army_id : felt,
     battalion_ids_len : felt,
     battalion_ids : felt*,
-    battalions_len : felt,
-    battalions : Battalion*,
+    battalion_quantity_len : felt,
+    battalion_quantity : felt*,
 ):
     alloc_locals
 
@@ -190,13 +190,13 @@ func build_army_from_battalions{
 
     # get the Cost for every Troop to build
     # TODO: add in QUANTITY of battalions being built -> this is only getting 1 cost value
-    let (troop_costs : Cost*) = alloc()
-    load_battalion_costs(battalion_ids_len, battalion_ids, troop_costs)
+    let (battalion_costs : Cost*) = alloc()
+    load_battalion_costs(battalion_ids_len, battalion_ids, battalion_costs)
 
     # transform costs into tokens
     let (
         token_len : felt, token_ids : Uint256*, token_values : Uint256*
-    ) = transform_costs_to_tokens(battalion_ids_len, troop_costs, 1)
+    ) = transform_costs_to_tokens(battalion_ids_len, battalion_costs, 1)
 
     # pay for the battalions
     let (caller) = get_caller_address()
@@ -212,7 +212,7 @@ func build_army_from_battalions{
 
     # add battalions to Army and return new Army
     let (new_army : Army) = Combat.add_battalions_to_army(
-        army_unpacked, battalion_ids_len, battalion_ids, battalions_len, battalions
+        army_unpacked, battalion_ids_len, battalion_ids, battalion_quantity_len, battalion_quantity
     )
 
     # check battalions less than TOTAL_BATTALIONS
@@ -226,7 +226,13 @@ func build_army_from_battalions{
 
     # emit new Army built
     BuildArmy.emit(
-        army_id, realm_id, new_army, battalion_ids_len, battalion_ids, battalions_len, battalions
+        army_id,
+        realm_id,
+        new_army,
+        battalion_ids_len,
+        battalion_ids,
+        battalion_quantity_len,
+        battalion_quantity,
     )
 
     return ()

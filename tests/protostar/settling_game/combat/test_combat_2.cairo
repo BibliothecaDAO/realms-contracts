@@ -7,7 +7,7 @@ from contracts.settling_game.modules.combat.library import Combat, Army, Battali
 from contracts.settling_game.modules.combat.constants import BattalionStatistics, BattalionIds
 
 func build_attacking_army() -> (a : Army):
-    tempvar values = new (2, 100, 2, 100, 2, 100, 2, 100, 2, 100, 2, 100, 2, 100, 2, 100,)
+    tempvar values = new (2, 100, 2, 100, 2, 100, 2, 100, 2, 100, 2, 100, 0, 0, 0, 0,)
     let a = cast(values, Army*)
     return ([a])
 end
@@ -30,8 +30,8 @@ func test_squad{
 
     assert unpacked_army.LightCavalry.Quantity = 2
     assert unpacked_army.LightCavalry.Health = 100
-    assert unpacked_army.HeavyInfantry.Quantity = 2
-    assert unpacked_army.HeavyInfantry.Health = 100
+    assert unpacked_army.HeavyInfantry.Quantity = 0
+    assert unpacked_army.HeavyInfantry.Health = 0
 
     return ()
 end
@@ -83,7 +83,7 @@ func test_calculate_total_battalions{
     let (unpacked_army) = Combat.unpack_army(packed_army)
     let (total_battalions) = Combat.calculate_total_battalions(attacking_army)
 
-    assert total_battalions = 16
+    assert total_battalions = 12
 
     let c_defence = unpacked_army.LightCavalry.Quantity * BattalionStatistics.Defence.Cavalry.LightCavalry + unpacked_army.HeavyCavalry.Quantity * BattalionStatistics.Defence.Cavalry.HeavyCavalry + unpacked_army.Archer.Quantity * BattalionStatistics.Defence.Cavalry.Archer + unpacked_army.Longbow.Quantity * BattalionStatistics.Defence.Cavalry.Longbow + unpacked_army.Mage.Quantity * BattalionStatistics.Defence.Cavalry.Mage + unpacked_army.Arcanist.Quantity * BattalionStatistics.Defence.Cavalry.Arcanist + unpacked_army.LightInfantry.Quantity * BattalionStatistics.Defence.Cavalry.LightInfantry + unpacked_army.HeavyInfantry.Quantity * BattalionStatistics.Defence.Cavalry.HeavyInfantry
 
@@ -129,15 +129,15 @@ func test_add_battalions_to_army{
     assert battalion_ids[0] = BattalionIds.LightCavalry
     assert battalion_ids[1] = BattalionIds.HeavyCavalry
 
-    let (battalions : Battalion*) = alloc()
-    assert battalions[0] = Battalion(3, 20)
-    assert battalions[1] = Battalion(1, 100)
+    let (battalions : felt*) = alloc()
+    assert battalions[0] = 3
+    assert battalions[1] = 3
 
     let (total_battalions : Army) = Combat.add_battalions_to_army(
         unpacked_army, 2, battalion_ids, 2, battalions
     )
 
-    assert total_battalions.LightCavalry.Quantity = battalions[0].Quantity
+    assert total_battalions.LightCavalry.Quantity = battalions[0]
 
     return ()
 end

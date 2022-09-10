@@ -42,7 +42,7 @@ namespace Combat:
         battalion_ids_len : felt,
         battalion_ids : felt*,
         battalions_len : felt,
-        battalions : Battalion*,
+        battalion_quantity : felt*,
     ) -> (army : Army):
         alloc_locals
 
@@ -50,14 +50,16 @@ namespace Combat:
             return (current)
         end
 
-        let (updated) = add_battalion_to_battalion(current, [battalion_ids], [battalions])
+        let (updated) = add_battalion_to_battalion(
+            current, [battalion_ids], Battalion([battalion_quantity], 100)
+        )
 
         return add_battalions_to_army(
             updated,
             battalion_ids_len - 1,
             battalion_ids + 1,
             battalions_len - 1,
-            battalions + Battalion.SIZE,
+            battalion_quantity + 1,
         )
     end
 
@@ -248,7 +250,7 @@ namespace Combat:
     # @param defense_sum: Sum of defence values
     # @param total_battalions: Total battalions of Army
     # @param unit_battalions: Qty of battalions
-    # @ returns defence value
+    # @returns defence value
     func calculate_defence_values{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     }(defense_sum : felt, total_battalions : felt, unit_battalions : felt) -> (defence : felt):
@@ -265,7 +267,7 @@ namespace Combat:
 
     # @notice Calculates total battalions
     # @param army: Unpacked Army
-    # @ returns total battalions
+    # @returns Total battalions
     func calculate_total_battalions{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
     }(army : Army) -> (total_battalions : felt):
@@ -387,6 +389,8 @@ namespace Combat:
 
     const COMBAT_ALGO_WEIGHT_1 = 50  # weight in bp
     const FIXED_DAMAGE_AMOUNT = 20
+    const BASE_STATISTICS = 7
+    const BASE_BATTALIONS = 1  # adds a base value to the battalions to make algo work
 
     func calculate_health_remaining{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
@@ -401,14 +405,17 @@ namespace Combat:
 
         # get weight of attack over defence
         let (attack_over_defence, _) = unsigned_div_rem(
-            (counter_attack * 100) * COMBAT_ALGO_WEIGHT_1, counter_defence
+            ((counter_attack + BASE_STATISTICS) * 100) * COMBAT_ALGO_WEIGHT_1,
+            counter_defence + BASE_STATISTICS,
         )
 
         # use weight and multiple by starting health to get remaining health
         let (health_remaining, _) = unsigned_div_rem(attack_over_defence * starting_health, 10000)
 
         # get % of calculated battalions over total battalions of that type
-        let (battalion_distribution, _) = unsigned_div_rem(battalions * 100, total_battalions)
+        let (battalion_distribution, _) = unsigned_div_rem(
+            (battalions) * 100, total_battalions + BASE_BATTALIONS
+        )
 
         # get actual health in of battalion by using the battalion distribution
         let (real_battalion_health, _) = unsigned_div_rem(
@@ -569,21 +576,21 @@ namespace Combat:
     # @notice Asserts can build battalions
     # @param battalion_ids: Array of Battalion IDs that you want to build
     # @param realm_buildings: A RealmBuildings struct specifying which buildings does a Realm have
+    # @return fails if buildings do not exist on Realm
     func assert_can_build_battalions{range_check_ptr}(
         battalion_ids_len : felt, battalion_ids : felt*, realm_buildings : RealmBuildings
     ):
         alloc_locals
         let (__fp__, _) = get_fp_and_pc()
 
-        if troop_ids_len == 0:
+        if battalion_ids_len == 0:
             return ()
         end
 
         let (building) = get_battalion_building([battalion_ids])
         let buildings = cast(&realm_buildings, felt*)
         let buildings_in_realm : felt = [buildings + building - 1]
-        with_attr error_message(
-                "Combat: missing building {troop.building} to build troop {troop.id}"):
+        with_attr error_message("Combat: missing building to build Battalion"):
             assert_not_zero(buildings_in_realm)
         end
 
