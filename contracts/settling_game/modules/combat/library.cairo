@@ -257,7 +257,7 @@ namespace Combat:
         alloc_locals
 
         let (percentage_of_battalions, _) = unsigned_div_rem(
-            unit_battalions * 100, total_battalions
+            (unit_battalions * 100) + 1, total_battalions + 1
         )
 
         let (values, _) = unsigned_div_rem(defense_sum * percentage_of_battalions, 100)

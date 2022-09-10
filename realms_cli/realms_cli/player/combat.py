@@ -17,7 +17,7 @@ def get_unit_cost(unit_id, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_L06_Combat",
+        contract_alias="proxy_Combat",
         function="get_troop_cost",
         arguments=[unit_id],
     )
@@ -64,7 +64,7 @@ def can_attack(attacking_realm, defending_realm, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_L06_Combat",
+        contract_alias="proxy_Combat",
         function="Realm_can_be_attacked",
         arguments=[*uint(attacking_realm), *uint(defending_realm)],
     )
@@ -84,9 +84,9 @@ def attack_realm(attacking_realm, defending_realm, network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_L06_Combat",
+        contract_alias="proxy_Combat",
         function="initiate_combat",
-        arguments=[*uint(attacking_realm), *uint(defending_realm)],
+        arguments=[1, *uint(attacking_realm), 0, *uint(defending_realm)],
     )
 
 
@@ -101,7 +101,7 @@ def get_troops(realm_id, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_L06_Combat",
+        contract_alias="proxy_Combat",
         function="view_troops",
         arguments=[*uint(realm_id)],
     )
@@ -119,7 +119,7 @@ def get_combat_data(realm_id, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_L06_Combat",
+        contract_alias="proxy_Combat",
         function="get_realm_combat_data",
         arguments=[*uint(realm_id)],
     )
@@ -136,7 +136,7 @@ def get_xoroshiro(network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_L06_Combat",
+        contract_alias="proxy_Combat",
         function="get_xoroshiro",
         arguments=[1],
     )
@@ -191,7 +191,7 @@ def attack_goblins(network, realm_id):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_L06_Combat",
+        contract_alias="proxy_Combat",
         function="attack_goblin_town",
         arguments=[*uint(realm_id)],
     )

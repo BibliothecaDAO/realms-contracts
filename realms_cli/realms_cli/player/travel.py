@@ -1,7 +1,7 @@
 # First, import click dependency
 
 import click
-
+import datetime
 from realms_cli.caller_invoker import wrapped_call, wrapped_send
 from realms_cli.config import Config
 from realms_cli.utils import print_over_colums
@@ -96,7 +96,8 @@ def get_travel(realm_token_id, network):
         ],
     )
     out = out.split(" ")
-    print(str(out))
+    print('Destination Realm: ' + str(out[1]))
+    print('Arrival Time: ' + str(datetime.datetime.fromtimestamp(int(out[4]))))
 
 
 @click.command()
