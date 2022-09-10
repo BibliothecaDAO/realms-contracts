@@ -8,10 +8,12 @@ from contracts.loot.constants.item import (
     ItemIds,
     ItemSlot,
     ItemType,
-    ItemMaterial
+    ItemMaterial,
+    Material
 )
 from contracts.loot.constants.rankings import ItemRank
 from contracts.loot.contracts.stats.item import Statistics
+from contracts.loot.constants.physics import MaterialDensity
 
 @external
 func test_item_slot{syscall_ptr : felt*, range_check_ptr}():
@@ -67,6 +69,34 @@ func test_item_rank{syscall_ptr : felt*, range_check_ptr}():
 
     let (rankc) = Statistics.item_rank(ItemIds.ChainGloves)
     assert rankc = ItemRank.ChainGloves
+
+    return ()
+end
+
+@external
+func test_material_density{syscall_ptr : felt*, range_check_ptr}():
+    alloc_locals
+
+    let (densitya) = Statistics.material_density(Material.Metal.generic)
+    assert densitya = MaterialDensity.Metal.generic
+
+    let (densityb) = Statistics.material_density(Material.Metal.gold)
+    assert densityb = MaterialDensity.Metal.gold
+
+    let (densityc) = Statistics.material_density(Material.Cloth.brightsilk)
+    assert densityc = MaterialDensity.Cloth.brightsilk
+
+    let (densityd) = Statistics.material_density(Material.Biotic.Demon.hide)
+    assert densityd = MaterialDensity.Biotic.Demon.hide
+
+    let (densitye) = Statistics.material_density(Material.Biotic.Human.bones)
+    assert densitye = MaterialDensity.Biotic.Human.bones
+
+    let (densityf) = Statistics.material_density(Material.Wood.Hard.walnut)
+    assert densityf = MaterialDensity.Wood.Hard.walnut
+
+    let (densityg) = Statistics.material_density(Material.Wood.Soft.yew)
+    assert densityg = MaterialDensity.Wood.Soft.yew
 
     return ()
 end

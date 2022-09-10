@@ -32,7 +32,12 @@ end
 
 # Densities expressed in kg/m^3
 namespace MaterialDensity:
+    # TODO: this is a placeholder
+    const generic = 0
+
     namespace Metal:
+        # TODO: this is a placeholder
+        const generic = 0
         const gold = 19300
         const silver = 10490
         const bronze = 8730
@@ -46,6 +51,8 @@ namespace MaterialDensity:
         const ornate = cast((steel * (WeightModifier.Metal.ornate / 100)), felt) # steel * ornate modifier
     end
     namespace Cloth:
+        # TODO: this is a placeholder
+        const generic = 0
         const silk = 1370 # single fiber of silk
         const wool = 1307 # single fiber of wool
         const linen = 1280 # single linen (flax) fiber
@@ -54,24 +61,141 @@ namespace MaterialDensity:
         const brightsilk = cast((silk * (WeightModifier.Cloth.brightsilk / 100)), felt)
     end
     namespace Biotic:
-        const leather = 8600
-        const human_bone = 1155
-        const studded_leather = cast((leather * (WeightModifier.Hide.studded / 100)), felt)
-        const hard_leather = cast((leather * (WeightModifier.Hide.hard / 100)), felt)
-        namespace Demon:
-            const hide = cast((leather * (WeightModifier.Hide.demon / 100)), felt)
-            const demon_bone = cast((human_bone * (WeightModifier.Bone.demon / 100)), felt)
+        # TODO: this is a placeholder
+        const generic = 0
+
+        namespace Animal:
+            # TODO: this is a placeholder
+            const generic = 0
+            # TODO: this is a placeholder
+            const blood = 0
+            # TODO: this is a placeholder
+            const bones = 0
+            # TODO: this is a placeholder
+            const brain = 0
+            # TODO: this is a placeholder
+            const eyes = 0
+
+            const hide = 8600
+
+            # TODO: this is a placeholder
+            const flesh = 0
+            # TODO: this is a placeholder
+            const hair = 0
+            # TODO: this is a placeholder
+            const heart = 0
+            # TODO: this is a placeholder
+            const entrails = 0
+            # TODO: this is a placeholder
+            const hands = 0
+            # TODO: this is a placeholder
+            const feet = 0
+
+            const studded_leather = cast((hide * (WeightModifier.Hide.studded / 100)), felt)
+            const hard_leather = cast((hide * (WeightModifier.Hide.hard / 100)), felt)
         end
+
+        namespace Human:
+            # TODO: this is a placeholder
+            const generic = 0
+            # TODO: this is a placeholder
+            const blood = 0
+
+            const bones = 1155
+
+            # TODO: this is a placeholder
+            const brain = 0
+            # TODO: this is a placeholder
+            const eyes = 0
+            # TODO: this is a placeholder
+            const hide = 0
+            # TODO: this is a placeholder
+            const flesh = 0
+            # TODO: this is a placeholder
+            const hair = 0
+            # TODO: this is a placeholder
+            const heart = 0
+            # TODO: this is a placeholder
+            const entrails = 0
+            # TODO: this is a placeholder
+            const hands = 0
+            # TODO: this is a placeholder
+            const feet = 0
+        end
+
+        namespace Demon:
+            # TODO: this is a placeholder
+            const generic = 0
+            # TODO: this is a placeholder
+            const blood = 0
+
+            const bones = cast((Human.bones * (WeightModifier.Bone.demon / 100)), felt)
+
+            # TODO: this is a placeholder
+            const brain = 0
+            # TODO: this is a placeholder
+            const eyes = 0
+
+            const hide = cast((Animal.hide * (WeightModifier.Hide.demon / 100)), felt)
+
+            # TODO: this is a placeholder
+            const flesh = 0
+            # TODO: this is a placeholder
+            const hair = 0
+            # TODO: this is a placeholder
+            const heart = 0
+            # TODO: this is a placeholder
+            const entrails = 0
+            # TODO: this is a placeholder
+            const hands = 0
+            # TODO: this is a placeholder
+            const feet = 0
+        end
+
         namespace Dragon:
-            const skin = cast((leather * (WeightModifier.Hide.dragon / 100)), felt)
-            const dragon_bone = cast((human_bone * (WeightModifier.Bone.dragon / 100)), felt)
+            # TODO: this is a placeholder
+            const generic = 0
+            # TODO: this is a placeholder
+            const blood = 0
+
+            const bones = cast((Human.bones * (WeightModifier.Bone.dragon / 100)), felt)
+
+            # TODO: this is a placeholder
+            const brain = 0
+            # TODO: this is a placeholder
+            const eyes = 0
+
+            const skin = cast((Animal.hide * (WeightModifier.Hide.dragon / 100)), felt)
+
+            # TODO: this is a placeholder
+            const flesh = 0
+            # TODO: this is a placeholder
+            const hair = 0
+            # TODO: this is a placeholder
+            const heart = 0
+            # TODO: this is a placeholder
+            const entrails = 0
+            # TODO: this is a placeholder
+            const hands = 0
+            # TODO: this is a placeholder
+            const feet = 0
         end
     end
 
-    const Paper = 1200
-    
+    namespace Paper:
+        const generic = 1200
+        # TODO: this is a placeholder
+        const magical = 0
+    end
+
     namespace Wood:
+        # TODO: this is a placeholder
+        const generic = 0
+
         namespace Hard:
+            # TODO: this is a placeholder
+            const generic = 0
+
             const walnut = 690
             const mahogany = 850
             const maple = 750
@@ -83,6 +207,9 @@ namespace MaterialDensity:
             const holly = 640
         end
         namespace Soft:
+            # TODO: this is a placeholder
+            const generic = 0
+
             const elder = 490
             const cedar = 580
             const pine = 850

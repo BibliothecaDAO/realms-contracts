@@ -29,11 +29,11 @@ struct Item:
 end
 
 # To provide cleaner numbering with the expectation we'll add more materials
-#    we give each material type it's own number space 
+#    we give each material type it's own number space
 namespace Material:
     const generic = 0
 
-    # Metal gets 1000 number space 
+    # Metal gets 1000 number space
     namespace Metal:
         const generic = 1000
         const ancient = 1001
@@ -140,8 +140,8 @@ namespace Material:
 
         # hard woods get 5100
         namespace Hard:
-            const generic = 5101
-            const walnut = 5102
+            const generic = 5100
+            const walnut = 5101
             const mahogany = 5102
             const maple = 5103
             const oak = 5104
@@ -627,7 +627,7 @@ namespace ItemNamePrefixes:
     const Behemoth = 5
     const Blight = 6
     const Blood = 7
-    const Bramble = 8 
+    const Bramble = 8
     const Brimstone = 9
     const Brood = 10
     const Carrion = 11
@@ -635,7 +635,7 @@ namespace ItemNamePrefixes:
     const Chimeric = 13
     const Corpse = 14
     const Corruption = 15
-    const Damnation = 16 
+    const Damnation = 16
     const Death = 17
     const Demon = 18
     const Dire = 19
@@ -646,7 +646,7 @@ namespace ItemNamePrefixes:
     const Eagle = 24
     const Empyrean = 25
     const Fate = 26
-    const Foe = 27 
+    const Foe = 27
     const Gale = 28
     const Ghoul = 29
     const Gloom = 30
@@ -657,7 +657,7 @@ namespace ItemNamePrefixes:
     const Havoc = 35
     const Honour = 36
     const Horror = 37
-    const Hypnotic = 38 
+    const Hypnotic = 38
     const Kraken = 39
     const Loath = 40
     const Maelstrom = 41
@@ -666,7 +666,7 @@ namespace ItemNamePrefixes:
     const Morbid = 44
     const Oblivion = 45
     const Onslaught = 46
-    const Pain = 47 
+    const Pain = 47
     const Pandemonium = 48
     const Phoenix = 49
     const Plague = 50
@@ -676,7 +676,7 @@ namespace ItemNamePrefixes:
     const Skull = 53
     const Sol = 54
     const Soul = 55
-    const Sorrow = 56 
+    const Sorrow = 56
     const Spirit = 57
     const Storm = 58
     const Tempest = 59
@@ -690,8 +690,8 @@ namespace ItemNamePrefixes:
     const Lights = 67
     const Shimmering = 68
 end
-    
-namespace ItemNameSuffixes: 
+
+namespace ItemNameSuffixes:
     const Bane = 1
     const Root = 2
     const Bite = 3
@@ -712,7 +712,7 @@ namespace ItemNameSuffixes:
     const Moon = 18
 end
 
-namespace ItemSuffixes: 
+namespace ItemSuffixes:
     const of_Power = 1
     const of_Giant = 2
     const of_Titans = 3

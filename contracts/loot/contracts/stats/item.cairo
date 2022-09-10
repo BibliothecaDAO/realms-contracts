@@ -1,6 +1,5 @@
-# Item helper functions
+# SPDX-License-Identifier: MIT
 #
-# MIT License
 
 %lang starknet
 
@@ -15,6 +14,7 @@ from starkware.cairo.common.registers import get_label_location
 
 from contracts.loot.constants.item import ItemIds, ItemSlot, ItemType, ItemMaterial, ItemNamePrefixes, ItemNameSuffixes, ItemSuffixes
 from contracts.loot.constants.rankings import ItemRank
+from contracts.loot.constants.physics import MaterialDensity
 
 namespace Statistics:
     func item_slot{syscall_ptr : felt*, range_check_ptr}(item_id : felt) -> (slot : felt):
@@ -347,6 +347,130 @@ namespace Statistics:
         dw ItemMaterial.HeavyGloves
     end
 
+    func material_density{syscall_ptr : felt*, range_check_ptr}(material_id : felt) -> (density : felt):
+        alloc_locals
+
+        let (_, label_id) = unsigned_div_rem(material_id, 100)
+
+        let (isle10) = is_le(1000, material_id)
+        let (isle20) = is_le(2000, material_id)
+        let (isle30) = is_le(3000, material_id)
+        let (isle31) = is_le(3100, material_id)
+        let (isle32) = is_le(3200, material_id)
+        let (isle33) = is_le(3300, material_id)
+        let (isle34) = is_le(3400, material_id)
+        let (isle40) = is_le(4000, material_id)
+        let (isle50) = is_le(5000, material_id)
+        let (isle51) = is_le(5100, material_id)
+        let (isle52) = is_le(5200, material_id)
+
+        let idx = label_id +
+            isle10 * 1 +
+            isle20 * 10 +
+            isle30 * 7 +
+            isle31 * 1 +
+            isle32 * 12 +
+            isle33 * 12 +
+            isle34 * 12 +
+            isle40 * 12 +
+            isle50 * 2 +
+            isle51 * 1 +
+            isle52 * 10
+
+        let (label_location) = get_label_location(labels)
+        return ([label_location + idx])
+
+        labels:
+        dw MaterialDensity.generic
+        dw MaterialDensity.Metal.generic
+        dw MaterialDensity.Metal.ancient
+        dw MaterialDensity.Metal.holy
+        dw MaterialDensity.Metal.ornate
+        dw MaterialDensity.Metal.gold
+        dw MaterialDensity.Metal.silver
+        dw MaterialDensity.Metal.bronze
+        dw MaterialDensity.Metal.platinum
+        dw MaterialDensity.Metal.titanium
+        dw MaterialDensity.Metal.steel
+        dw MaterialDensity.Cloth.generic
+        dw MaterialDensity.Cloth.royal
+        dw MaterialDensity.Cloth.divine
+        dw MaterialDensity.Cloth.brightsilk
+        dw MaterialDensity.Cloth.silk
+        dw MaterialDensity.Cloth.wool
+        dw MaterialDensity.Cloth.linen
+        dw MaterialDensity.Biotic.generic
+        dw MaterialDensity.Biotic.Demon.generic
+        dw MaterialDensity.Biotic.Demon.blood
+        dw MaterialDensity.Biotic.Demon.bones
+        dw MaterialDensity.Biotic.Demon.brain
+        dw MaterialDensity.Biotic.Demon.eyes
+        dw MaterialDensity.Biotic.Demon.hide
+        dw MaterialDensity.Biotic.Demon.flesh
+        dw MaterialDensity.Biotic.Demon.hair
+        dw MaterialDensity.Biotic.Demon.heart
+        dw MaterialDensity.Biotic.Demon.entrails
+        dw MaterialDensity.Biotic.Demon.hands
+        dw MaterialDensity.Biotic.Demon.feet
+        dw MaterialDensity.Biotic.Dragon.generic
+        dw MaterialDensity.Biotic.Dragon.blood
+        dw MaterialDensity.Biotic.Dragon.bones
+        dw MaterialDensity.Biotic.Dragon.brain
+        dw MaterialDensity.Biotic.Dragon.eyes
+        dw MaterialDensity.Biotic.Dragon.skin
+        dw MaterialDensity.Biotic.Dragon.flesh
+        dw MaterialDensity.Biotic.Dragon.hair
+        dw MaterialDensity.Biotic.Dragon.heart
+        dw MaterialDensity.Biotic.Dragon.entrails
+        dw MaterialDensity.Biotic.Dragon.hands
+        dw MaterialDensity.Biotic.Dragon.feet
+        dw MaterialDensity.Biotic.Animal.generic
+        dw MaterialDensity.Biotic.Animal.blood
+        dw MaterialDensity.Biotic.Animal.bones
+        dw MaterialDensity.Biotic.Animal.brain
+        dw MaterialDensity.Biotic.Animal.eyes
+        dw MaterialDensity.Biotic.Animal.hide
+        dw MaterialDensity.Biotic.Animal.flesh
+        dw MaterialDensity.Biotic.Animal.hair
+        dw MaterialDensity.Biotic.Animal.heart
+        dw MaterialDensity.Biotic.Animal.entrails
+        dw MaterialDensity.Biotic.Animal.hands
+        dw MaterialDensity.Biotic.Animal.feet
+        dw MaterialDensity.Biotic.Human.generic
+        dw MaterialDensity.Biotic.Human.blood
+        dw MaterialDensity.Biotic.Human.bones
+        dw MaterialDensity.Biotic.Human.brain
+        dw MaterialDensity.Biotic.Human.eyes
+        dw MaterialDensity.Biotic.Human.hide
+        dw MaterialDensity.Biotic.Human.flesh
+        dw MaterialDensity.Biotic.Human.hair
+        dw MaterialDensity.Biotic.Human.heart
+        dw MaterialDensity.Biotic.Human.entrails
+        dw MaterialDensity.Biotic.Human.hands
+        dw MaterialDensity.Biotic.Human.feet
+        dw MaterialDensity.Paper.generic
+        dw MaterialDensity.Paper.magical
+        dw MaterialDensity.Wood.generic
+        dw MaterialDensity.Wood.Hard.generic
+        dw MaterialDensity.Wood.Hard.walnut
+        dw MaterialDensity.Wood.Hard.mahogany
+        dw MaterialDensity.Wood.Hard.maple
+        dw MaterialDensity.Wood.Hard.oak
+        dw MaterialDensity.Wood.Hard.rosewood
+        dw MaterialDensity.Wood.Hard.cherry
+        dw MaterialDensity.Wood.Hard.balsa
+        dw MaterialDensity.Wood.Hard.birch
+        dw MaterialDensity.Wood.Hard.holly
+        dw MaterialDensity.Wood.Soft.generic
+        dw MaterialDensity.Wood.Soft.cedar
+        dw MaterialDensity.Wood.Soft.pine
+        dw MaterialDensity.Wood.Soft.fir
+        dw MaterialDensity.Wood.Soft.hemlock
+        dw MaterialDensity.Wood.Soft.spruce
+        dw MaterialDensity.Wood.Soft.elder
+        dw MaterialDensity.Wood.Soft.yew
+    end
+
     func item_rank{syscall_ptr : felt*, range_check_ptr}(item_id : felt) -> (rank : felt):
         alloc_locals
 
@@ -479,7 +603,7 @@ namespace Statistics:
         dw ItemNamePrefixes.Chimeric
         dw ItemNamePrefixes.Corpse
         dw ItemNamePrefixes.Corruption
-        dw ItemNamePrefixes.Damnation 
+        dw ItemNamePrefixes.Damnation
         dw ItemNamePrefixes.Death
         dw ItemNamePrefixes.Demon
         dw ItemNamePrefixes.Dire
@@ -561,7 +685,7 @@ namespace Statistics:
         dw ItemNameSuffixes.Sun
         dw ItemNameSuffixes.Moon
     end
-    
+
     func item_suffix{syscall_ptr : felt*, range_check_ptr}(item_id : felt) -> (rank : felt):
         alloc_locals
 
