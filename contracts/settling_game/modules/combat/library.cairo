@@ -399,22 +399,27 @@ namespace Combat:
     ) -> (new_health : felt, battalions : felt):
         alloc_locals
 
+        # get weight of attack over defence
         let (attack_over_defence, _) = unsigned_div_rem(
             (counter_attack * 100) * COMBAT_ALGO_WEIGHT_1, counter_defence
         )
 
+        # use weight and multiple by starting health to get remaining health
         let (health_remaining, _) = unsigned_div_rem(attack_over_defence * starting_health, 10000)
 
+        # get % of calculated battalions over total battalions of that type
         let (battalion_distribution, _) = unsigned_div_rem(battalions * 100, total_battalions)
 
+        # get actual health in of battalion by using the battalion distribution
         let (real_battalion_health, _) = unsigned_div_rem(
             health_remaining * battalion_distribution, 100
         )
 
+        # add modifier so the health can depleate past 0
         let modified_health = real_battalion_health - FIXED_DAMAGE_AMOUNT
 
+        # check if dead,IF yes, then return 0,0
         let (is_dead) = is_le(modified_health, 0)
-
         if is_dead == TRUE:
             return (0, 0)
         end
@@ -427,6 +432,7 @@ namespace Combat:
     # @param defending_army_statistics: ArmyStatistics of defending Army
     # @param attack_army_packed: packed attacking Army
     # @param defending_army_packed: packed defending Army
+    # @return packed attacking army, packed defending army
     func get_updated_packed_armies{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
@@ -465,6 +471,7 @@ namespace Combat:
     # @param defending_army_statistics: ArmyStatistics of defending Army
     # @param attack_army_unpacked: Attacking Army
     # @param defending_army_unpacked: Defending Army
+    # @returns packed Army after it has had health modifier applied
     func update_and_pack_army{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
