@@ -45,7 +45,7 @@ def build_squad(network, realm_token_id):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Combat",
         function="build_army_from_battalions",
-        arguments=[*uint(realm_token_id), 0,
+        arguments=[*uint(realm_token_id), 1,
                    2, 1, 2,
                    2, 2, 2,
                    ],

@@ -25,9 +25,8 @@ S_Crypts = 8
 
 
 @click.command()
-@click.argument("realm_token_id", nargs=1)
 @click.option("--network", default="goerli")
-def set_coordinates(realm_token_id, network):
+def set_coordinates(network):
     """
     Set realm data
     """
@@ -42,7 +41,7 @@ def set_coordinates(realm_token_id, network):
         myList = list(range((i * per_set), (per_set * (i + 1))))
 
         calldata = [
-            [S_Realms, *uint(id + 1), *coordinates_by_id(int(id + 1))]
+            [S_Realms, *uint(id + 1), 0, *coordinates_by_id(int(id + 1))]
             for id in myList
         ]
         print(calldata)
@@ -71,8 +70,8 @@ def travel(travelling_token_id, destination_token_id, network):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Travel",
         function="travel",
-        arguments=[S_Realms, *uint(travelling_token_id), S_Realms, *
-                   uint(destination_token_id)],
+        arguments=[S_Realms, *uint(travelling_token_id), 1, S_Realms, *
+                   uint(destination_token_id), 0],
     )
 
 
@@ -92,7 +91,8 @@ def get_travel(realm_token_id, network):
         arguments=[
             S_Realms,
             realm_token_id,                 # uint 1
-            0
+            0,
+            1
         ],
     )
     out = out.split(" ")

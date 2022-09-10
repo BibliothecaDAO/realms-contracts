@@ -15,7 +15,7 @@ Contracts = namedtuple('Contracts', 'alias contract_name id')
 # 6. Set token contract approval if needed - Resources etc
 
 NEW_MODULES = [
-    Contracts("Combat", "Combat", "6"),
+    Contracts("Travel", "Travel", "15"),
 ]
 
 

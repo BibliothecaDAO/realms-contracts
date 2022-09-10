@@ -335,16 +335,6 @@ func initiate_combat{
     let (ending_attacking_army : Army) = Combat.unpack_army(ending_attacking_army_packed)
     let (ending_defending_army : Army) = Combat.unpack_army(ending_defending_army_packed)
 
-    # emit end
-    CombatEnd_4.emit(
-        attacking_army_id,
-        attacking_realm_id,
-        ending_attacking_army,
-        defending_army_id,
-        defending_realm_id,
-        ending_defending_army,
-    )
-
     # pillaging only if attacker wins
     let (now) = get_block_timestamp()
     if combat_outcome == COMBAT_OUTCOME_ATTACKER_WINS:
@@ -386,6 +376,16 @@ func initiate_combat{
         defending_army_id,
         defending_realm_id,
         ArmyData(ending_defending_army_packed, now, defending_realm_data.XP + defending_xp, defending_realm_data.Level, defending_realm_data.CallSign),
+    )
+
+    # emit end
+    CombatEnd_4.emit(
+        attacking_army_id,
+        attacking_realm_id,
+        ending_attacking_army,
+        defending_army_id,
+        defending_realm_id,
+        ending_defending_army,
     )
 
     return (combat_outcome)

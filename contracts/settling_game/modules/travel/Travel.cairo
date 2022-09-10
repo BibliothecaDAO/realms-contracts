@@ -130,6 +130,22 @@ func travel{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         traveller_contract_id, traveller_token_id, traveller_nested_id
     )
 
+    # if no current location set, use the home coordinates
+    if traveller_coordinates.x == 0:
+        let (traveller_coordinates : Point) = get_coordinates(
+            traveller_contract_id, traveller_token_id, 0
+        )
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    else:
+        tempvar syscall_ptr = syscall_ptr
+        tempvar range_check_ptr = range_check_ptr
+        tempvar pedersen_ptr = pedersen_ptr
+    end
+
+    tempvar traveller_coordinates = traveller_coordinates
+
     # get destination coordinates
     let (destination_coordinates : Point) = get_coordinates(
         destination_contract_id, destination_token_id, destination_nested_id
