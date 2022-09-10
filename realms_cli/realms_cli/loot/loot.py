@@ -40,10 +40,14 @@ def get_loot(loot_token_id, network):
     out = out.split(" ")
     pretty_out = []
     for i, key in enumerate(config.LOOT):
-        pretty_out.append(
+
+        # Output names for item name prefix1, prefix2, and suffix
+        if i in [5,6,7]:
+            pretty_out.append(
+            f"{key} : {felt_to_str(int(out[i]))}")
+        else:
+            pretty_out.append(
             f"{key} : {int(out[i])}")
 
     print("_________ LOOT ITEM - " + str(out[0]) + "___________")
     print_over_colums(pretty_out)
-
-    print(felt_to_str(491494928928))

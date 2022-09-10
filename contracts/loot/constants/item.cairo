@@ -618,3 +618,115 @@ namespace ItemType:
     const ChainGloves = Type.Armor.metal
     const HeavyGloves = Type.Armor.metal
 end
+
+namespace ItemNamePrefixes:
+    const Agony = 1
+    const Apocalypse = 2
+    const Armageddon = 3
+    const Beast = 4
+    const Behemoth = 5
+    const Blight = 6
+    const Blood = 7
+    const Bramble = 8 
+    const Brimstone = 9
+    const Brood = 10
+    const Carrion = 11
+    const Cataclysm = 12
+    const Chimeric = 13
+    const Corpse = 14
+    const Corruption = 15
+    const Damnation = 16 
+    const Death = 17
+    const Demon = 18
+    const Dire = 19
+    const Dragon = 20
+    const Dread = 21
+    const Doom = 22
+    const Dusk = 23
+    const Eagle = 24
+    const Empyrean = 25
+    const Fate = 26
+    const Foe = 27 
+    const Gale = 28
+    const Ghoul = 29
+    const Gloom = 30
+    const Glyph = 31
+    const Golem = 32
+    const Grim = 33
+    const Hate = 34
+    const Havoc = 35
+    const Honour = 36
+    const Horror = 37
+    const Hypnotic = 38 
+    const Kraken = 39
+    const Loath = 40
+    const Maelstrom = 41
+    const Mind = 42
+    const Miracle = 43
+    const Morbid = 44
+    const Oblivion = 45
+    const Onslaught = 46
+    const Pain = 47 
+    const Pandemonium = 48
+    const Phoenix = 49
+    const Plague = 50
+    const Rage = 51
+    const Rapture = 52
+    const Rune = 52
+    const Skull = 53
+    const Sol = 54
+    const Soul = 55
+    const Sorrow = 56 
+    const Spirit = 57
+    const Storm = 58
+    const Tempest = 59
+    const Torment = 60
+    const Vengeance = 61
+    const Victory = 62
+    const Viper = 63
+    const Vortex = 64
+    const Woe = 65
+    const Wrath = 66
+    const Lights = 67
+    const Shimmering = 68
+end
+    
+namespace ItemNameSuffixes: 
+    const Bane = 1
+    const Root = 2
+    const Bite = 3
+    const Song = 4
+    const Roar = 5
+    const Grasp = 6
+    const Instrument = 7
+    const Glow = 8
+    const Bender = 9
+    const Shadow = 10
+    const Whisper = 11
+    const Shout = 12
+    const Growl = 13
+    const Tear = 14
+    const Peak = 15
+    const Form = 16
+    const Sun = 17
+    const Moon = 18
+end
+
+namespace ItemSuffixes: 
+    const of_Power = 1
+    const of_Giant = 2
+    const of_Titans = 3
+    const of_Skill = 4
+    const of_Perfection = 5
+    const of_Brilliance = 6
+    const of_Enlightenment = 7
+    const of_Protection = 8
+    const of_Anger = 9
+    const of_Rage = 10
+    const of_Fury = 11
+    const of_Vitriol = 12
+    const of_the_Fox = 13
+    const of_Detection = 14
+    const of_Reflection = 15
+    const of_the_Twins = 16
+end

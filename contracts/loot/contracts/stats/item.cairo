@@ -13,7 +13,7 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.registers import get_label_location
 
-from contracts.loot.constants.item import ItemIds, ItemSlot, ItemType, ItemMaterial
+from contracts.loot.constants.item import ItemIds, ItemSlot, ItemType, ItemMaterial, ItemNamePrefixes, ItemNameSuffixes, ItemSuffixes
 from contracts.loot.constants.rankings import ItemRank
 
 namespace Statistics:
@@ -457,13 +457,133 @@ namespace Statistics:
         dw ItemRank.HeavyGloves
     end
 
-    func item_suffix_1{syscall_ptr : felt*, range_check_ptr}(item_id : felt) -> (rank : felt):
+    func item_name_prefix{syscall_ptr : felt*, range_check_ptr}(item_id : felt) -> (rank : felt):
         alloc_locals
 
         let (label_location) = get_label_location(labels)
         return ([label_location + item_id - 1])
 
         labels:
-        dw 'roar '
+        dw ItemNamePrefixes.Agony
+        dw ItemNamePrefixes.Apocalypse
+        dw ItemNamePrefixes.Armageddon
+        dw ItemNamePrefixes.Beast
+        dw ItemNamePrefixes.Behemoth
+        dw ItemNamePrefixes.Blight
+        dw ItemNamePrefixes.Blood
+        dw ItemNamePrefixes.Bramble
+        dw ItemNamePrefixes.Brimstone
+        dw ItemNamePrefixes.Brood
+        dw ItemNamePrefixes.Carrion
+        dw ItemNamePrefixes.Cataclysm
+        dw ItemNamePrefixes.Chimeric
+        dw ItemNamePrefixes.Corpse
+        dw ItemNamePrefixes.Corruption
+        dw ItemNamePrefixes.Damnation 
+        dw ItemNamePrefixes.Death
+        dw ItemNamePrefixes.Demon
+        dw ItemNamePrefixes.Dire
+        dw ItemNamePrefixes.Dragon
+        dw ItemNamePrefixes.Dread
+        dw ItemNamePrefixes.Doom
+        dw ItemNamePrefixes.Dusk
+        dw ItemNamePrefixes.Eagle
+        dw ItemNamePrefixes.Empyrean
+        dw ItemNamePrefixes.Fate
+        dw ItemNamePrefixes.Foe
+        dw ItemNamePrefixes.Gale
+        dw ItemNamePrefixes.Ghoul
+        dw ItemNamePrefixes.Gloom
+        dw ItemNamePrefixes.Glyph
+        dw ItemNamePrefixes.Golem
+        dw ItemNamePrefixes.Grim
+        dw ItemNamePrefixes.Hate
+        dw ItemNamePrefixes.Havoc
+        dw ItemNamePrefixes.Honour
+        dw ItemNamePrefixes.Horror
+        dw ItemNamePrefixes.Hypnotic
+        dw ItemNamePrefixes.Kraken
+        dw ItemNamePrefixes.Loath
+        dw ItemNamePrefixes.Maelstrom
+        dw ItemNamePrefixes.Mind
+        dw ItemNamePrefixes.Miracle
+        dw ItemNamePrefixes.Morbid
+        dw ItemNamePrefixes.Oblivion
+        dw ItemNamePrefixes.Onslaught
+        dw ItemNamePrefixes.Pain
+        dw ItemNamePrefixes.Pandemonium
+        dw ItemNamePrefixes.Phoenix
+        dw ItemNamePrefixes.Plague
+        dw ItemNamePrefixes.Rage
+        dw ItemNamePrefixes.Rapture
+        dw ItemNamePrefixes.Rune
+        dw ItemNamePrefixes.Skull
+        dw ItemNamePrefixes.Sol
+        dw ItemNamePrefixes.Soul
+        dw ItemNamePrefixes.Sorrow
+        dw ItemNamePrefixes.Spirit
+        dw ItemNamePrefixes.Storm
+        dw ItemNamePrefixes.Tempest
+        dw ItemNamePrefixes.Torment
+        dw ItemNamePrefixes.Vengeance
+        dw ItemNamePrefixes.Victory
+        dw ItemNamePrefixes.Viper
+        dw ItemNamePrefixes.Vortex
+        dw ItemNamePrefixes.Woe
+        dw ItemNamePrefixes.Wrath
+        dw ItemNamePrefixes.Lights
+        dw ItemNamePrefixes.Shimmering
+    end
+
+    func item_name_suffix{syscall_ptr : felt*, range_check_ptr}(item_id : felt) -> (rank : felt):
+        alloc_locals
+
+        let (label_location) = get_label_location(labels)
+        return ([label_location + item_id - 1])
+
+        labels:
+        dw ItemNameSuffixes.Bane
+        dw ItemNameSuffixes.Root
+        dw ItemNameSuffixes.Bite
+        dw ItemNameSuffixes.Song
+        dw ItemNameSuffixes.Roar
+        dw ItemNameSuffixes.Grasp
+        dw ItemNameSuffixes.Instrument
+        dw ItemNameSuffixes.Glow
+        dw ItemNameSuffixes.Bender
+        dw ItemNameSuffixes.Shadow
+        dw ItemNameSuffixes.Whisper
+        dw ItemNameSuffixes.Shout
+        dw ItemNameSuffixes.Growl
+        dw ItemNameSuffixes.Tear
+        dw ItemNameSuffixes.Peak
+        dw ItemNameSuffixes.Form
+        dw ItemNameSuffixes.Sun
+        dw ItemNameSuffixes.Moon
+    end
+    
+    func item_suffix{syscall_ptr : felt*, range_check_ptr}(item_id : felt) -> (rank : felt):
+        alloc_locals
+
+        let (label_location) = get_label_location(labels)
+        return ([label_location + item_id - 1])
+
+        labels:
+        dw ItemSuffixes.of_Power
+        dw ItemSuffixes.of_Giant
+        dw ItemSuffixes.of_Titans
+        dw ItemSuffixes.of_Skill
+        dw ItemSuffixes.of_Perfection
+        dw ItemSuffixes.of_Brilliance
+        dw ItemSuffixes.of_Enlightenment
+        dw ItemSuffixes.of_Protection
+        dw ItemSuffixes.of_Anger
+        dw ItemSuffixes.of_Rage
+        dw ItemSuffixes.of_Fury
+        dw ItemSuffixes.of_Vitriol
+        dw ItemSuffixes.of_the_Fox
+        dw ItemSuffixes.of_Detection
+        dw ItemSuffixes.of_Reflection
+        dw ItemSuffixes.of_the_Twins
     end
 end

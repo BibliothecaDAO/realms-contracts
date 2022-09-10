@@ -260,9 +260,9 @@ func getItemByTokenId{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     let (Type) = Statistics.item_type(storedItem.Id)  # determined by Id
     let (Material) = Statistics.item_material(storedItem.Id)  # determined by Id
     let (Rank) = Statistics.item_rank(storedItem.Id)  # stored state
-    let (Prefix_1) = Statistics.item_suffix_1(1)  # stored state
-    let Prefix_2 = 0  # stored state
-    let Suffix = 0  # stored state
+    let (Prefix_1) = Statistics.item_name_prefix(1)  # stored state
+    let (Prefix_2) = Statistics.item_name_suffix(1)  # stored state
+    let (Suffix) = Statistics.item_suffix(1) # stored state
     let Greatness = 0  # stored state
     let CreatedBlock = storedItem.CreatedBlock  # timestamp
     let XP = 0  # stored state
