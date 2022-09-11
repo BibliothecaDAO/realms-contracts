@@ -44,3 +44,15 @@ func test_weapon_vs_armor_efficacy{syscall_ptr : felt*, range_check_ptr}():
 
     return ()
 end
+
+@external
+func test_calculate_damage{syscall_ptr : felt*, range_check_ptr}():
+    alloc_locals
+
+    # Greatness 20 Katana vs Greatness 0 Robe (gg)
+    # TODO: This needs to use items instead of just itemIds since ItemIds don't inherently have a greatness
+    let (g20_katana_vs_g0_robe) = CombatStats.calculate_damage(ItemIds.Katana, ItemIds.Shirt)
+    assert g20_katana_vs_g0_robe = 200
+
+    return ()
+end

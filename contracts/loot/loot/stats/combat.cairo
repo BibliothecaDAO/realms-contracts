@@ -13,7 +13,7 @@ from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.registers import get_label_location
 
 from contracts.loot.constants.item import Type
-from contracts.loot.constants.combat import WeaponEfficacy
+from contracts.loot.constants.combat import WeaponEfficacy, WeaponEfficiacyDamageMultiplier
 from contracts.loot.loot.stats.item import ItemStats
 
 namespace CombatStats:
@@ -59,5 +59,46 @@ namespace CombatStats:
         dw WeaponEfficacy.High
         dw WeaponEfficacy.Low
         dw WeaponEfficacy.Medium
+    end
+
+    # calculat_damage accepts a weapon_id and armor_id and returns the damage that weapon does against that armor
+    # TODO: Add a third parameter which controls the constants that drive the calculation, namely:
+    #       - Item Ranks
+    #       - WeaponEfficacy Multplier
+    func calculate_damage{syscall_ptr : felt*, range_check_ptr}(weapon_id : felt, armor_id : felt) -> (damage : felt):
+        alloc_locals
+        
+        const rank_ceiling = 6
+
+        # TODO: Get greatness from contract
+        const weapon_greatness = 20
+
+        # Base damage is 
+        let (weapon_rank) = ItemStats.item_rank(weapon_id)
+        let base_weapon_damage = (rank_ceiling - weapon_rank) * weapon_greatness
+
+        # Get effectiveness of weapon vs armor
+        let (attack_effectiveness) = weapon_vs_armor_efficacy(weapon_id, armor_id)
+        local total_weapon_damage: felt
+        if attack_effectiveness == WeaponEfficacy.Low:
+            total_weapon_damage = base_weapon_damage * WeaponEfficiacyDamageMultiplier.Low
+        else:
+            if attack_effectiveness == WeaponEfficacy.Medium:
+                total_weapon_damage = base_weapon_damage * WeaponEfficiacyDamageMultiplier.Medium
+            else:
+                if attack_effectiveness == WeaponEfficacy.High:
+                    total_weapon_damage = base_weapon_damage * WeaponEfficiacyDamageMultiplier.High
+                end
+            end
+        end
+
+        # TODO: Get armor greatness from contract
+        const armor_greatness = 0
+        let (armor_rank) = ItemStats.item_rank(weapon_id)
+        let base_armor = (rank_ceiling - armor_rank) * armor_greatness
+
+        let damage_dealt = total_weapon_damage - base_armor
+
+        return (damage_dealt)
     end
 end

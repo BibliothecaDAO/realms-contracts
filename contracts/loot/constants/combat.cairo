@@ -13,7 +13,15 @@ from contracts.loot.constants.item import (
     Type,
 )
 
+# psuedo enum
 namespace WeaponEfficacy:
+    const Low = 0
+    const Medium = 1
+    const High = 2
+end
+
+# Controls damage multiplier
+namespace WeaponEfficiacyDamageMultiplier:
     const Low = 0
     const Medium = 1
     const High = 2
