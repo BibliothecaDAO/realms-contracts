@@ -4,7 +4,7 @@
 %lang starknet
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin
-from starkware.cairo.common.uint256 import Uint256
+from starkware.cairo.common.uint256 import Uint256, uint256_add
 from starkware.cairo.common.math import unsigned_div_rem
 
 from openzeppelin.access.ownable.library import Ownable
@@ -36,6 +36,7 @@ end
 @storage_var
 func counter() -> (count : felt):
 end
+
 # -----------------------------------
 # Initialize & upgrade
 # -----------------------------------
@@ -180,21 +181,21 @@ func setApprovalForAll{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     return ()
 end
 
-@external
-func transferFrom{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-    from_ : felt, to : felt, tokenId : Uint256
-):
-    ERC721Enumerable.transfer_from(from_, to, tokenId)
-    return ()
-end
+# @external
+# func transferFrom{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+#     from_ : felt, to : felt, tokenId : Uint256
+# ):
+#     ERC721Enumerable.transfer_from(from_, to, tokenId)
+#     return ()
+# end
 
-@external
-func safeTransferFrom{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-    from_ : felt, to : felt, tokenId : Uint256, data_len : felt, data : felt*
-):
-    ERC721Enumerable.safe_transfer_from(from_, to, tokenId, data_len, data)
-    return ()
-end
+# @external
+# func safeTransferFrom{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
+#     from_ : felt, to : felt, tokenId : Uint256, data_len : felt, data : felt*
+# ):
+#     ERC721Enumerable.safe_transfer_from(from_, to, tokenId, data_len, data)
+#     return ()
+# end
 
 @external
 func burn{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(tokenId : Uint256):
@@ -226,6 +227,8 @@ func renounceOwnership{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_c
     return ()
 end
 
+# ------------ADVENTURERS
+
 @storage_var
 func item(tokenId : Uint256) -> (item : Item):
 end
@@ -237,17 +240,16 @@ func mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(to 
     # fetch new item with random Id
     let (new_item : Item) = generateRandomItem()
 
-    let (next_id) = counter.read()
+    let (current_id : Uint256) = totalSupply()
 
-    item.write(Uint256(next_id, 0), new_item)
+    let (next_id, _) = uint256_add(current_id, Uint256(1, 0))
 
-    ERC721Enumerable._mint(to, Uint256(next_id, 0))
+    item.write(next_id, new_item)
 
-    counter.write(next_id + 1)
+    ERC721Enumerable._mint(to, next_id)
+
     return ()
 end
-
-# ------------new
 
 @view
 func getItemByTokenId{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
@@ -260,9 +262,9 @@ func getItemByTokenId{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     let (Type) = Statistics.item_type(storedItem.Id)  # determined by Id
     let (Material) = Statistics.item_material(storedItem.Id)  # determined by Id
     let (Rank) = Statistics.item_rank(storedItem.Id)  # stored state
-    let (Prefix_1) = Statistics.item_suffix_1(1)  # stored state
-    let Prefix_2 = 0  # stored state
-    let Suffix = 0  # stored state
+    let (Prefix_1) = Statistics.item_name_prefix(1)  # stored state
+    let (Prefix_2) = Statistics.item_name_suffix(1)  # stored state
+    let (Suffix) = Statistics.item_suffix(1)  # stored state
     let Greatness = 0  # stored state
     let CreatedBlock = storedItem.CreatedBlock  # timestamp
     let XP = 0  # stored state
@@ -363,3 +365,8 @@ func roll_dice{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*
     let (_, r) = unsigned_div_rem(rnd, 101)
     return (r + 1)  # values from 1 to 101 inclusive
 end
+
+# mint adventurer
+# encode a name
+# encode a race
+# encode a

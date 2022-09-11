@@ -1,18 +1,16 @@
-# Item Structs
+# Adventurer Structs
 #   A struct that holds the Loot item statistics
-#
-#
 # MIT License
 
 %lang starknet
 
-#import item consts
+# import item consts
 from contracts.loot.constants.item import Item
 from contracts.loot.constants.bag import Bag
 
+# @notice This is viewable information of the Adventurer. We DO NOT store this on-chain.
+#         This is the object that is returned when requesting the Adventurer by ID.
 struct Adventurer:
-    member Id : felt # primary key for adventurer
-
     # Physical
     member Strength : felt
     member Dexterity : felt
@@ -38,22 +36,34 @@ struct Adventurer:
     # adventurers can carry multiple bags
     member Bags : Bag*
 
-    # other unique state
-    member Health : felt
-    member Birthdate : felt # Birthdate/Age of Adventure
-    member Name : felt  # Name of Adventurer
-    member XP : felt # 
-    member Level : felt
-    member Order : felt
+    # immutable stats
+    member Race : felt  # 1-6
+    member HomeRealm : felt  # The OG Realm the Adventurer was birthed on 1 - 8000
+    member Name : felt  # Name of Adventurer - encoded name max 10 letters
+    member Birthdate : felt  # Birthdate/Age of Adventure timestamp
+
+    # evolving stats
+    member Health : felt  # 1-1000
+    member XP : felt  # 1 - 10000000
+    member Level : felt  # 1- 100
+    member Order : felt  # 1 - 16
 end
 
+# @notice This is immutable information stored on-chain
+# We pack all this information tightly into felts
+#    to save on storage costs.
 struct AdventurerState:
-    # other unique state p1
-    member Class : felt
-    member Age : felt
-    member Name : felt  # mint time
-    member XP : felt
-    member Order : felt
+    # immutable stats
+    member Race : felt  # 1-6
+    member HomeRealm : felt  # The OG Realm the Adventurer was birthed on 1 - 8000
+    member Name : felt  # Name of Adventurer - encoded name max 10 letters
+    member Birthdate : felt  # Birthdate/Age of Adventure timestamp
+
+    # evolving stats
+    member Health : felt  # 1-1000
+    member XP : felt  # 1 - 10000000
+    member Level : felt  # 1- 100
+    member Order : felt  # 1 - 16
 
     # store item NFT id when equiped
     # Packed Stats p2
@@ -61,12 +71,13 @@ struct AdventurerState:
     member WeaponId : felt
     member RingId : felt
     member ChestId : felt
-
     # Packed Stats p3
     member HeadId : felt
     member WaistId : felt
     member FeetId : felt
     member HandsId : felt
+
+    member Bags : felt*  # save only the Bag IDs to storage.
 end
 
 struct PackedAdventurerStats:
