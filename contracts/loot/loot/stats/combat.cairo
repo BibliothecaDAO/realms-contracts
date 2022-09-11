@@ -14,7 +14,7 @@ from starkware.cairo.common.registers import get_label_location
 
 from contracts.loot.constants.item import Type
 from contracts.loot.constants.combat import WeaponEfficacy
-from contracts.loot.contracts.stats.item import ItemStats
+from contracts.loot.loot.stats.item import ItemStats
 
 namespace CombatStats:
     func weapon_vs_armor_efficacy{syscall_ptr : felt*, range_check_ptr}(weapon_item_id : felt, armor_item_id : felt) -> (class : felt):

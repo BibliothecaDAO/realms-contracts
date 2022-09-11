@@ -6,10 +6,10 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.uint256 import Uint256
 
-from openzeppelin.access.ownable import Ownable
-from openzeppelin.introspection.ERC165 import ERC165
+from openzeppelin.access.ownable.library import Ownable
+from openzeppelin.introspection.erc165.library import ERC165
 from openzeppelin.token.erc721.library import ERC721
-from openzeppelin.token.erc721_enumerable.library import ERC721_Enumerable
+from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
 from openzeppelin.upgrades.library import Proxy
 
 # -----------------------------------
@@ -24,7 +24,7 @@ func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     name : felt, symbol : felt, proxy_admin : felt
 ):
     ERC721.initializer(name, symbol)
-    ERC721_Enumerable.initializer()
+    ERC721Enumerable.initializer()
     Proxy.initializer(proxy_admin)
     return ()
 end
