@@ -12,14 +12,35 @@ from contracts.loot.loot.stats.combat import CombatStats
 func test_weapon_vs_armor_efficacy{syscall_ptr : felt*, range_check_ptr}():
     alloc_locals
 
-    let (val1) = CombatStats.weapon_vs_armor_efficacy(ItemIds.Katana, ItemIds.OrnateChestplate)
-    assert val1 = WeaponEfficacy.Low
+    # Blade vs Metal inflicts minimal damage
+    let (blade_vs_metal) = CombatStats.weapon_vs_armor_efficacy(ItemIds.Katana, ItemIds.OrnateChestplate)
+    assert blade_vs_metal = WeaponEfficacy.Low
+    # Blade vs Hide inflicts normal damage
+    let (blade_vs_hide) = CombatStats.weapon_vs_armor_efficacy(ItemIds.ShortSword, ItemIds.HardLeatherArmor)
+    assert blade_vs_hide = WeaponEfficacy.Medium
+    # Blade vs Cloth inflicts high damage
+    let (blade_vs_cloth) = CombatStats.weapon_vs_armor_efficacy(ItemIds.LongSword, ItemIds.DivineRobe)
+    assert blade_vs_cloth = WeaponEfficacy.High
 
-    let (val2) = CombatStats.weapon_vs_armor_efficacy(ItemIds.Maul, ItemIds.DemonHusk)
-    assert val2 = WeaponEfficacy.High
+    # Bludgeon vs Metal inflicts normal damage
+    let (bludgeon_vs_metal) = CombatStats.weapon_vs_armor_efficacy(ItemIds.Maul, ItemIds.HolyChestplate)
+    assert bludgeon_vs_metal = WeaponEfficacy.Medium
+    # Bludgeon vs Hide  inflicts high damage
+    let (bludgeon_vs_hide) = CombatStats.weapon_vs_armor_efficacy(ItemIds.Mace, ItemIds.HardLeatherArmor)
+    assert bludgeon_vs_hide = WeaponEfficacy.High
+    # Bludgeon vs Cloth inflicts low damage
+    let (bludgeon_vs_cloth) = CombatStats.weapon_vs_armor_efficacy(ItemIds.Warhammer, ItemIds.LinenRobe)
+    assert bludgeon_vs_cloth = WeaponEfficacy.Low
 
-    let (val3) = CombatStats.weapon_vs_armor_efficacy(ItemIds.GraveWand, ItemIds.LinenShoes)
-    assert val3 = WeaponEfficacy.Medium
+    # Magic vs Metal  inflicts high damage
+    let (magic_vs_metal) = CombatStats.weapon_vs_armor_efficacy(ItemIds.Grimoire, ItemIds.RingMail)
+    assert magic_vs_metal = WeaponEfficacy.High
+    # Magic vs Hide inflicts low damage
+    let (magic_vs_hide) = CombatStats.weapon_vs_armor_efficacy(ItemIds.GraveWand, ItemIds.DragonskinArmor)
+    assert magic_vs_hide = WeaponEfficacy.Low
+    # Magic vs Cloth inflicts normal damage
+    let (magic_vs_cloth) = CombatStats.weapon_vs_armor_efficacy(ItemIds.GhostWand, ItemIds.Shirt)
+    assert magic_vs_cloth = WeaponEfficacy.Medium
 
     return ()
 end
