@@ -7,8 +7,11 @@ from realms_cli.realms_cli.config import Config
 ... = Config.NILE_NETWORK
 """
 from nile import deployments
+from nile.core.declare import alias_exists
+import os
 
-def safe_load_deployment(alias : str, network : str):
+
+def safe_load_deployment(alias: str, network: str):
     """Safely loads address from deployments file"""
     try:
         address, _ = next(deployments.load(alias, network))
@@ -18,7 +21,15 @@ def safe_load_deployment(alias : str, network : str):
         print(f"Deployment for alias {alias} not found.")
         return None, None
 
-def strhex_as_strfelt(strhex : str):
+
+def safe_load_declarations(alias: str, network: str):
+    """Safely loads address from deployments file"""
+    address, _ = next(deployments.load_class(alias, network), None)
+    print(f"Found deployment for alias {alias}.")
+    return address
+
+
+def strhex_as_strfelt(strhex: str):
     """Converts a string in hex format to a string in felt format"""
     if strhex is not None:
         return str(int(strhex, 16))
@@ -29,8 +40,11 @@ class Config:
     def __init__(self, nile_network : str):
         self.nile_network = "127.0.0.1" if nile_network=="localhost" else nile_network
 
+        
+
         self.ADMIN_ALIAS = "STARKNET_ADMIN_PRIVATE_KEY"
-        self.ADMIN_ADDRESS, _ = safe_load_deployment("account-0", self.nile_network)
+        self.ADMIN_ADDRESS, _ = safe_load_deployment(
+            "account-0", self.nile_network)
 
         self.INITIAL_LORDS_SUPPLY = 500000000 * (10 ** 18)
 
@@ -69,9 +83,6 @@ class Config:
         self.Exchange_ERC20_1155_ADDRESS, _ = safe_load_deployment("Exchange_ERC20_1155", self.nile_network)
         self.Exchange_ERC20_1155_PROXY_ADDRESS, _ = safe_load_deployment("proxy_Exchange_ERC20_1155", self.nile_network)
 
-        self.Bridge_ADDRESS, _ = safe_load_deployment("proxy_Bridge", self.nile_network)
-        self.L1_BRIDGE_CONTRACT_ADDRESS_ALIAS = "L1_BRIDGE_CONTRACT_ADDRESS"
-
         self.RESOURCES = [
             "Wood",
             "Stone",
@@ -95,4 +106,24 @@ class Config:
             "Adamantine",
             "Mithral",
             "Dragonhide",
+            # "DesertGlass",
+            # "DivineCloth",
+            # "CuriousSpre",
+            # "UnrefinedOre",
+            # "SunkenShekel",
+            # "Demonhide",
+            "Wheat",
+            "Fish"
+        ]
+
+        self.BUILDINGS = [
+            "House",
+            "StoreHouse",
+            "Granary",
+            "Farm",
+            "FishingVillage",
+            "Barracks",
+            "MageTower",
+            "ArcherTower",
+            "Castle",
         ]

@@ -46,6 +46,8 @@ cairo-nile = "^0.5.0"
 
 #-----------PLAYER
 "create_pk" = "realms_cli.player.account.create_pk"
+"transfer_realm" = "realms_cli.player.account.transfer_realm"
+"transfer_s_realm" = "realms_cli.player.account.transfer_s_realm"
 
 #-----------LORDS
 "check_lords" = "realms_cli.player.lords.check_lords"
@@ -61,6 +63,7 @@ cairo-nile = "^0.5.0"
 "unsettle" = "realms_cli.player.settle.unsettle"
 "set_realm_data" = "realms_cli.player.settle.set_realm_data"
 "get_realm_data" = "realms_cli.player.settle.get_realm_data"
+"get_owned" = "realms_cli.player.settle.get_owned"
 
 #-----------CALCULATOR
 "troop_population" = "realms_cli.player.calculator.troop_population"
@@ -71,7 +74,8 @@ cairo-nile = "^0.5.0"
 
 #-----------BUILDINGS
 "build" = "realms_cli.player.buildings.build"
-"get_buildings" = "realms_cli.player.buildings.get_buildings"
+"buildings" = "realms_cli.player.buildings.buildings"
+"buildings_integrity" = "realms_cli.player.buildings.buildings_integrity"
 
 #-----------RESOURCES
 "check_resources" = "realms_cli.player.resources.check_resources"
@@ -80,6 +84,7 @@ cairo-nile = "^0.5.0"
 "approve_resource_module" = "realms_cli.player.resources.approve_resource_module"
 "get_resource_upgrade_cost" = "realms_cli.player.resources.get_resource_upgrade_cost"
 "days_available" = "realms_cli.player.resources.days_available"
+"get_vault" = "realms_cli.player.resources.get_vault"
 
 #-----------COMBAT
 "get_unit_cost" = "realms_cli.player.combat.get_unit_cost"
@@ -90,19 +95,57 @@ cairo-nile = "^0.5.0"
 "get_combat_data" = "realms_cli.player.combat.get_realm_combat_data"
 "get_xoroshiro" = "realms_cli.player.combat.get_xoroshiro"
 
+"get_goblins" = "realms_cli.player.combat.get_goblins"
+"get_goblin_squad" = "realms_cli.player.combat.get_goblin_squad"
+"attack_goblins" = "realms_cli.player.combat.attack_goblins"
+
 #-----------ADMIN
 "mint_resources" = "realms_cli.admin.main.mint_resources"
 "upgrade_module" = "realms_cli.admin.main.upgrade_module"
+"transfer_to" = "realms_cli.admin.main.transfer_to"
+"set_xoroshiro" = "realms_cli.admin.main.set_xoroshiro"
+"zero_dead_squads" = "realms_cli.admin.main.zero_dead_squads"
 
 #-----------MARKET
 "set_initial_liq" = "realms_cli.exchange.admin.set_initial_liq"
-"set_lords_approval" =  "realms_cli.exchange.admin.set_lords_approval"
-"set_resources_approval" =  "realms_cli.exchange.admin.set_resources_approval"
 
-"get_currency_r" =  "realms_cli.exchange.admin.get_currency_r"
+"get_currency_r" =  "realms_cli.exchange.trade.get_currency_r"
+"get_token_r" =  "realms_cli.exchange.trade.get_token_r"
+
+"buy_tokens" =  "realms_cli.exchange.trade.buy_tokens"
+"sell_tokens" =  "realms_cli.exchange.trade.sell_tokens"
+
+"get_buy_price" =  "realms_cli.exchange.trade.get_buy_price"
+
+"add_liq" = "realms_cli.exchange.trade.add_liq"
+
+"get_lp_pos" = "realms_cli.exchange.trade.get_lp_pos"
+
+"get_market" = "realms_cli.exchange.trade.get_market"
+"get_all_rates" = "realms_cli.exchange.trade.get_all_rates"
+
+"transfer_lords" = "realms_cli.player.lords.transfer_lords"
+"market_approval" = "realms_cli.exchange.trade.market_approval"
+
+"get_all_currency_reserves" = "realms_cli.exchange.trade.get_all_currency_reserves"
+
+"get_owed_currency_tokens" ="realms_cli.exchange.trade.get_owed_currency_tokens"
+
+"update_treasury" = "realms_cli.exchange.admin.update_treasury"
+
+#-----------FOOD
+"build_food" = "realms_cli.player.food.build_food"
+"harvest" = "realms_cli.player.food.harvest"
+"harvests_left" = "realms_cli.player.food.harvests_left"
+"harvests" = "realms_cli.player.food.harvests"
+"store_house" = "realms_cli.player.food.store_house"
+"reset" = "realms_cli.player.food.reset"
+"full_store_houses" = "realms_cli.player.food.full_store_houses"
+
+#-----------NEXUS
+"check_splitter_lords" = "realms_cli.nexus.admin.check_splitter_lords"
+"split" = "realms_cli.nexus.admin.split"
+"deposit" = "realms_cli.nexus.admin.deposit"
 
 "buy_tokens" = "realms_cli.exchange.trade.buy_tokens"
 "sell_tokens" = "realms_cli.exchange.trade.sell_tokens"
-
-#----------- Bridge
-"set_l1_bridge_contract_address" = "realms_cli.bridge.admin.set_l1_bridge_contract_address"

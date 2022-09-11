@@ -22,7 +22,9 @@ namespace IERC1155:
     func setApprovalForAll(operator : felt, approved : felt):
     end
 
-    func safeTransferFrom(_from : felt, to : felt, id : Uint256, amount : Uint256):
+    func safeTransferFrom(
+        _from : felt, to : felt, id : Uint256, amount : Uint256, data_len : felt, data : felt*
+    ):
     end
 
     func safeBatchTransferFrom(
@@ -32,14 +34,22 @@ namespace IERC1155:
         ids : Uint256*,
         amounts_len : felt,
         amounts : Uint256*,
+        data_len : felt,
+        data : felt*,
     ):
     end
 
-    func mint(to : felt, id : Uint256, amount : Uint256) -> ():
+    func mint(to : felt, id : Uint256, amount : Uint256, data_len : felt, data : felt*) -> ():
     end
 
     func mintBatch(
-        to : felt, ids_len : felt, ids : Uint256*, amounts_len : felt, amounts : Uint256*
+        to : felt,
+        ids_len : felt,
+        ids : Uint256*,
+        amounts_len : felt,
+        amounts : Uint256*,
+        data_len : felt,
+        data : felt*,
     ) -> ():
     end
 

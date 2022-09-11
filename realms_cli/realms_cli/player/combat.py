@@ -45,6 +45,7 @@ def build_squad(network, troops, realm_token_id):
                    *uint(realm_token_id), 1],
     )
 
+
 @click.command()
 @click.argument("attacking_realm", nargs=1)
 @click.argument("defending_realm", nargs=1)
@@ -79,7 +80,7 @@ def attack_realm(attacking_realm, defending_realm, network):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_L06_Combat",
         function="initiate_combat",
-        arguments=[*uint(attacking_realm), *uint(defending_realm), 1],
+        arguments=[*uint(attacking_realm), *uint(defending_realm)],
     )
 
 
@@ -134,3 +135,57 @@ def get_xoroshiro(network):
         arguments=[1],
     )
     print(out)
+
+
+@click.command()
+@click.argument("realm_id", nargs=1)
+@click.option("--network", default="goerli")
+def get_goblins(network, realm_id):
+    """
+    Get goblin strength and timestamp
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_GoblinTown",
+        function="get_strength_and_timestamp",
+        arguments=[*uint(realm_id)],
+    )
+    print(out)
+
+
+@click.command()
+@click.argument("realm_id", nargs=1)
+@click.option("--network", default="goerli")
+def get_goblin_squad(network, realm_id):
+    """
+    Get Goblins squad on Realm
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_GoblinTown",
+        function="get_goblin_squad",
+        arguments=[*uint(realm_id)],
+    )
+    print(out)
+
+
+@click.command()
+@click.argument("realm_id", nargs=1)
+@click.option("--network", default="goerli")
+def attack_goblins(network, realm_id):
+    """
+    Attack Goblins
+    """
+    config = Config(nile_network=network)
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_L06_Combat",
+        function="attack_goblin_town",
+        arguments=[*uint(realm_id)],
+    )

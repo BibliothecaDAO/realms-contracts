@@ -3,13 +3,11 @@ import json
 import click
 
 from nile.core.account import Account
-from ecdsa import SigningKey, SECP256k1
 
-from realms_cli.caller_invoker import wrapped_call, wrapped_send
+from realms_cli.caller_invoker import call_multi, wrapped_call, wrapped_send
 from realms_cli.config import Config
-from realms_cli.utils import print_over_colums
+from realms_cli.utils import parse_multi_input
 from realms_cli.binary_converter import map_realm
-from realms_cli.shared import uint
 
 
 @click.command()
@@ -21,16 +19,18 @@ def mint_realm(realm_token_id, network):
     """
     config = Config(nile_network=network)
 
+    realm_token_ids = parse_multi_input(realm_token_id)
+    calldata = [
+        [int(config.USER_ADDRESS, 16), id, 0]
+        for id in realm_token_ids
+    ]
+
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_realms",
         function="mint",
-        arguments=[
-            int(config.USER_ADDRESS, 16),  # felt
-            realm_token_id,                 # uint 1
-            0,                              # uint 2
-        ],
+        arguments=calldata
     )
 
 
@@ -48,7 +48,7 @@ def approve_realm(network):
         contract_alias="proxy_realms",
         function="setApprovalForAll",
         arguments=[
-            int(config.L01_SETTLING_PROXY_ADDRESS, 16),  # uint1
+            int(config.SETTLING_PROXY_ADDRESS, 16),  # uint1
             "1",               # true
         ],
     )
@@ -63,16 +63,20 @@ def settle(realm_token_id, network):
     """
     config = Config(nile_network=network)
 
+    realm_token_ids = parse_multi_input(realm_token_id)
+    calldata = [
+        [id, 0]
+        for id in realm_token_ids
+    ]
+
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_L01_Settling",
+        contract_alias="proxy_Settling",
         function="settle",
-        arguments=[
-            realm_token_id,  # uint1
-            0,               # uint2
-        ],
+        arguments=calldata
     )
+
 
 @click.command()
 @click.argument("realm_token_id", nargs=1)
@@ -83,15 +87,18 @@ def unsettle(realm_token_id, network):
     """
     config = Config(nile_network=network)
 
+    realm_token_ids = parse_multi_input(realm_token_id)
+    calldata = [
+        [id, 0]
+        for id in realm_token_ids
+    ]
+
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_L01_Settling",
+        contract_alias="proxy_Settling",
         function="unsettle",
-        arguments=[
-            realm_token_id,  # uint1
-            0,               # uint2
-        ],
+        arguments=calldata,
     )
 
 
@@ -100,7 +107,7 @@ def unsettle(realm_token_id, network):
 @click.option("--network", default="goerli")
 def set_realm_data(realm_token_id, network):
     """
-    Set Realm data
+    Set realm data
     """
     config = Config(nile_network=network)
 
@@ -109,26 +116,25 @@ def set_realm_data(realm_token_id, network):
     orders = json.load(open("data/orders.json", "r"))
     wonders = json.load(open("data/wonders.json", ))
 
-    realm_data_felt = map_realm(
-        realms[str(realm_token_id)], resources, wonders, orders)
+    realm_token_ids = parse_multi_input(realm_token_id)
+    calldata = [
+        [id, 0, map_realm(realms[str(id)], resources, wonders, orders)]
+        for id in realm_token_ids
+    ]
 
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_realms",
         function="set_realm_data",
-        arguments=[
-            realm_token_id,   # uint 1
-            0,                # uint 2
-            realm_data_felt,  # felt
-        ],
+        arguments=calldata,
     )
 
 
 @click.command()
 @click.option("--address", default="", help="Account address in hex format 0x...")
 @click.option("--network", default="goerli")
-def check_realms(address, network):
+def check_realms(address, network) -> str:
     """
     Check Realms balance
     """
@@ -144,7 +150,7 @@ def check_realms(address, network):
         function="balanceOf",
         arguments=[address],
     )
-    print(out)
+    return out
 
 
 @click.command()
@@ -184,7 +190,7 @@ def check_owner_of_realm(realm_token_id, network):
         function="ownerOf",
         arguments=[realm_token_id, 0],
     )
-    print('Ser, owner of realm id: '+ realm_token_id + " is " + out)
+    print('Ser, owner of realm id: ' + realm_token_id + " is " + out)
 
 
 @click.command()
@@ -192,7 +198,7 @@ def check_owner_of_realm(realm_token_id, network):
 @click.option("--network", default="goerli")
 def check_owner_of_s_realm(realm_token_id, network):
     """
-    Check owner of Realm
+    Check owner of S Realm
     """
     config = Config(nile_network=network)
 
@@ -202,7 +208,7 @@ def check_owner_of_s_realm(realm_token_id, network):
         function="ownerOf",
         arguments=[realm_token_id, 0],
     )
-    print('Ser, owner of settled realm id: '+ realm_token_id + " is " + out)
+    print('Ser, owner of settled realm id: ' + realm_token_id + " is " + out)
 
 
 @click.command()
@@ -221,3 +227,73 @@ def get_realm_data(realm_token_id, network):
         arguments=[realm_token_id, 0],
     )
     print(out)
+
+
+@click.command()
+@click.option("--address", default="", help="Account address in hex format 0x...")
+@click.option("--network", default="goerli")
+def get_owned(address, network):
+    """
+    Get owned realms and owned settled realms.
+    """
+    config = Config(nile_network=network)
+
+    # out = check_realms(address, network)
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_realms",
+        function="balanceOf",
+        arguments=[int(address or config.USER_ADDRESS, 16)],
+    )
+    n_realms, _ = out.split(" ")
+
+    print(f"You own {n_realms} unsettled realms.")
+    print("Quering which unsettled realms you own.")
+
+    # prepare for multi-call
+    calldata = [
+        [int(address or config.USER_ADDRESS, 16), i, 0]
+        for i in range(int(n_realms))
+    ]
+
+    stdout = call_multi(
+        network=config.nile_network,
+        contract_alias="proxy_realms",
+        function="tokenOfOwnerByIndex",
+        calldata=calldata,
+    )
+
+    realm_ids = [int(realm_id.strip(" 0\n")) for realm_id in stdout]
+    realm_ids.sort()
+    print(",".join(map(str, realm_ids)))
+
+    #
+    # s_realms
+    #
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_s_realms",
+        function="balanceOf",
+        arguments=[int(address or config.USER_ADDRESS, 16)],
+    )
+    n_realms, _ = out.split(" ")
+
+    print(f"You own {n_realms} settled realms.")
+
+    # prepare for multi-call
+    calldata = [
+        [int(address or config.USER_ADDRESS, 16), i, 0]
+        for i in range(int(n_realms))
+    ]
+
+    stdout = call_multi(
+        network=config.nile_network,
+        contract_alias="proxy_s_realms",
+        function="tokenOfOwnerByIndex",
+        calldata=calldata,
+    )
+
+    realm_ids = [int(realm_id.strip(" 0\n")) for realm_id in stdout]
+    realm_ids.sort()
+    print(",".join(map(str, realm_ids)))

@@ -68,23 +68,29 @@ func unpack_data{
     return (score=result)
 end
 
-# function takes an array of Cost structs and restructures it into two arrays,
+# calculates cost and returns
+# TODO: docstring
+
+# @notice function takes an array of Cost structs and restructures it into two arrays,
 # one holding the resource IDs of tokens and the other the amounts of these tokens
 # which can be directly passed into a IERC1155.burnBatch call
-# the return value of this function is the length of the token arrays, i.e. the
-# count of unique tokens
-# the token_ids and token_values argument have to be `alloc()`ed in the calling
-# scope:
-#
-# let (token_ids : Uint256*) = alloc()
-# let (token_values : Uint256*) = alloc()
-# let (token_len : felt) = transform_costs_to_token_ids_values(costs_len, costs, toekn_ids, token_values)
-func transform_costs_to_token_ids_values{
-    syscall_ptr : felt*, range_check_ptr, pedersen_ptr : HashBuiltin*, bitwise_ptr : BitwiseBuiltin*
-}(costs_len : felt, costs : Cost*, token_ids : Uint256*, token_values : Uint256*) -> (
-    tokens : felt
+# the thrid argument to this function is a quantity multiplier that is applied
+# to every amount value in the token_values array; useful when "buying" multiples
+# of the same stuff
+# @param costs_len: length of the costs array
+# @param costs: array of costs
+# @param qty: quantity multiplier for value amounts
+# @return token_len: length of the two return arrays (token_ids and token_values, their length is identical),
+#                    in other words, the count of unique tokens
+# @return token_ids: an array of resource IDs
+# @return token_values: an array of amounts of resources
+func transform_costs_to_tokens{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(costs_len : felt, costs : Cost*, qty : felt) -> (
+    token_len : felt, token_ids : Uint256*, token_values : Uint256*
 ):
     alloc_locals
+
     # destructure the costs array to two arrays, one
     # holding the IDs of resources and the other one values of resources
     # that are required to build the Troops
@@ -99,9 +105,14 @@ func transform_costs_to_token_ids_values{
     let (d_len : felt, d : DictAccess*) = sum_values_by_key(
         resource_len, resource_ids, resource_values
     )
-    convert_cost_dict_to_tokens_and_values(d_len, d, token_ids, token_values)
 
-    return (d_len)
+    # populate the toke IDs and token values arrays with correct values
+    # from the dictionary
+    let (token_ids : Uint256*) = alloc()
+    let (token_values : Uint256*) = alloc()
+    convert_cost_dict_to_tokens_and_values(d_len, d, qty, token_ids, token_values)
+
+    return (d_len, token_ids, token_values)
 end
 
 # function takes an array of Cost structs (which hold packed values of
@@ -159,8 +170,13 @@ end
 # function takes a dictionary where the keys are (ERC1155) token IDs and
 # values are the amounts to be bought and populates the passed in `token_ids`
 # and `token_values` arrays with Uint256 elements
+# all values are multiplier by `value_multiplier`
 func convert_cost_dict_to_tokens_and_values{range_check_ptr}(
-    len : felt, d : DictAccess*, token_ids : Uint256*, token_values : Uint256*
+    len : felt,
+    d : DictAccess*,
+    value_multiplier : felt,
+    token_ids : Uint256*,
+    token_values : Uint256*,
 ):
     alloc_locals
 
@@ -177,10 +193,14 @@ func convert_cost_dict_to_tokens_and_values{range_check_ptr}(
         assert_le(current_entry.new_value, MAX_UINT_PART)
     end
     assert [token_ids] = Uint256(low=current_entry.key, high=0)
-    assert [token_values] = Uint256(low=current_entry.new_value, high=0)
+    assert [token_values] = Uint256(low=current_entry.new_value * 10 ** 18 * value_multiplier, high=0)
 
     return convert_cost_dict_to_tokens_and_values(
-        len - 1, d + DictAccess.SIZE, token_ids + Uint256.SIZE, token_values + Uint256.SIZE
+        len - 1,
+        d + DictAccess.SIZE,
+        value_multiplier,
+        token_ids + Uint256.SIZE,
+        token_values + Uint256.SIZE,
     )
 end
 

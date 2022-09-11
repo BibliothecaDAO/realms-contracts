@@ -1,9 +1,7 @@
+[submodule "lib/cairo_erc4626"]
+	path = lib/cairo_erc4626
+	url = git@github.com:auditless/cairo-erc4626.git
 [submodule "cairo_contracts"]
 	url = https://github.com/OpenZeppelin/cairo-contracts
 	path = lib/cairo_contracts
-[submodule "cairo_math_64x61"]
-	url = https://github.com/influenceth/cairo-math-64x61
-	path = lib/cairo_math_64x61
-[submodule "hello_foundry/lib/forge-std"]
-	path = hello_foundry/lib/forge-std
-	url = https://github.com/foundry-rs/forge-std
+	branch = refs/heads/v0.3.2

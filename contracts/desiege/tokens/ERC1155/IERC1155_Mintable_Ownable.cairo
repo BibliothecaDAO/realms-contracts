@@ -6,8 +6,8 @@ namespace IERC1155:
     end
 
     func balanceOfBatch(
-            owners_len : felt, owners : felt*, tokens_id_len : felt, tokens_id : felt*) -> (
-            balance_len : felt, balance : felt*):
+        owners_len : felt, owners : felt*, tokens_id_len : felt, tokens_id : felt*
+    ) -> (balance_len : felt, balance : felt*):
     end
 
     func isApprovedForAll(account : felt, operator : felt) -> (res : felt):
@@ -20,24 +20,33 @@ namespace IERC1155:
     end
 
     func safeBatchTransferFrom(
-            sender : felt, recipient : felt, tokens_id_len : felt, tokens_id : felt*,
-            amounts_len : felt, amounts : felt*):
+        sender : felt,
+        recipient : felt,
+        tokens_id_len : felt,
+        tokens_id : felt*,
+        amounts_len : felt,
+        amounts : felt*,
+    ):
     end
 
     func mint(recipient : felt, token_id : felt, amount : felt) -> ():
     end
 
     func mintBatch(
-            recipient : felt, token_ids_len : felt, token_ids : felt*, amounts_len : felt,
-            amounts : felt*) -> ():
+        recipient : felt,
+        token_ids_len : felt,
+        token_ids : felt*,
+        amounts_len : felt,
+        amounts : felt*,
+    ) -> ():
     end
 
     func burn(account : felt, token_id : felt, amount : felt):
     end
 
     func burnBatch(
-            account : felt, token_ids_len : felt, token_ids : felt*, amounts_len : felt,
-            amounts : felt*):
+        account : felt, token_ids_len : felt, token_ids : felt*, amounts_len : felt, amounts : felt*
+    ):
     end
 
     func getOwner() -> (owner : felt):

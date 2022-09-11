@@ -3,6 +3,7 @@
 This is in heavy development and things might not work as expected... Bring a torch to slay some STARK dragons...
 
 This feature has been tested in
+
 ```
 python 3.7.13
 ---
@@ -11,14 +12,13 @@ cairo-nile==0.6.1
 ```
 
 ---
-## Regular Setup
 
+## Regular Setup
 
 <details><summary>Python Setup</summary>
 
-
 1. Upgrade pip: `/usr/local/bin/python -m pip install --upgrade pip` (Note: This will [break for OSX users who install via homebrew](https://github.com/Homebrew/legacy-homebrew/issues/26900). The workaround is to upgrade with homebrew: `brew install python3` or python3<area>@3.7)
-2. Remove *all* previous cairo nile packages: `$ pip uninstall cairo-nile` and check with `$ pip freeze` to make sure it's removed.
+2. Remove _all_ previous cairo nile packages: `$ pip uninstall cairo-nile` and check with `$ pip freeze` to make sure it's removed.
 3. Install nile 0.6.1: `pip install cairo-nile`
 4. Install the realms_cli: `$ pip install realms_cli/` (ensure you are in the realms-contracts dir)
 
@@ -37,14 +37,15 @@ Create an `.env.nile` in the realms_cli/ directory with the following entries:
 export STARKNET_PRIVATE_KEY=<A PRIVATE KEY>  # admin private key - see below to generate
 export STARKNET_NETWORK=alpha-goerli  # different from nile_network
 ```
-⚠️ Never commit this file!
 
+⚠️ Never commit this file!
 
 After your initial setup you will have to rerun the following commands on each new session:
 
 ```bash
 $ source realms_cli/.env.nile
 ```
+
 </details>
 
 <details><summary>Create Wallet via CLI [First time setup]</summary>
@@ -52,23 +53,30 @@ $ source realms_cli/.env.nile
 ### NOTE: This is the temporary solution until native ArgentX integration
 
 1. First create a new private key
+
 ```bash
 $ nile create_pk
 ```
+
 2. Save in printed private key in the .env.nile you created in the previous step as STARKNET_PRIVATE_KEY
 3. The run the following to save it in your enviroment:
+
 ```
 $ source realms_cli/.env.nile
 ```
+
 4. The setup and deploy your account with the following:
+
 ```
 $ nile setup STARKNET_PRIVATE_KEY --network goerli
 ```
+
 5. Now your address will be saved in the goerli.accounts.json with the account name account-1 (NOTE: If you plan to contribute to the code, please delete reference of your account before commiting. There is a current limitation with nile that does not allow the saving of this information elsewhere.)
 
 </details>
 
 ---
+
 ## Docker Setup (only if you have docker installed)
 
 <details><summary>Generate Keys</summary>
@@ -142,9 +150,7 @@ docker build \
 
 </details>
 
-
 <details><summary>Run Actions</summary>
-
 
 ```bash
 # list available actions
@@ -168,14 +174,15 @@ docker run -it --entrypoint /bin/zsh realms_cli
 
 This is not the full list of actions and new commands are being frequently added. To find all the current available commands run
 
-``` bash
+```bash
 nile
 ```
+
 ---
 
 ### Mint Realm
 
-``` bash
+```bash
 nile mint_realm 1
 
 ```
@@ -248,12 +255,9 @@ $ nile claim_resources 1
 
 ---
 
-
 </details>
 
-
 <details><summary>Admin Actions</summary>
-
 
 The following scripts deploy all contracts necessary to test and play realms on localhost/goerli (ADMIN ONLY).
 
@@ -285,9 +289,6 @@ The following scripts deploy all contracts necessary to test and play realms on 
 
 `$ nile run --network goerli realms_cli/8_deploy_AMM.py`
 
-### Deploy L2 Bridge Contract
-`$ nile run --network goerli realms_cli/9_deploy_bridge.py`
-
 ### Tips
 
 If you want to check a tx hash, run either
@@ -302,21 +303,12 @@ Add your logic to `realms_cli/realms_cli/main.py`
 Add you cli entro to `realms_cli/pyproject.toml`
 Reinstall the plugin cli `pip install realms_cli/`
 
-</details>
-
 ---
-# Notes on proxy deployments 
 
-<details><summary>Must read first</summary>
-
-Proxy contracts have some quirks which you must understand before playing with them.
-
-1. Proxies do not know what functions they have in them. This means you need to use the implementation abi when calling them.
-2. This means when you have deployed them you must replace the .json of the proxy with the implementation .json - Seen below
-
-```
-0x0708ccaad83939596224933ffc265cf468aeaccabac7bbe6d04fee416308785d:artifacts/abis/Exchange_ERC20_1155.json:Exchange_ERC20_1155
-0x01dc57f37705770448008e8083da883a06d81b28f01c6a398a010fff12703401:artifacts/abis/Exchange_ERC20_1155.json:proxy_Exchange_ERC20_1155
-```
-
-</details>
+1. Export PK from Argent
+2. Save as STARKNET_PRIVATE_KEY in env
+3. `source realms_cli/.env.nile`
+4. `python scripts/script.py`
+5. Save the printed public key in the goerli.accounts.json in address-1
+6. Copy your address from argent and save it in both goerli.accounts.json and in goerli.deployments.txt (replacing the account-1 address)
+7. `pip install realms_cli/`

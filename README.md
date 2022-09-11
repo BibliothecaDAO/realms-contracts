@@ -1,6 +1,16 @@
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/uQnjZhZPfu)
 [![Twitter](https://badgen.net/badge/icon/twitter?icon=twitter&label)](https://twitter.com/LootRealms)
 
+<!-- badges -->
+<p>
+  <a href="https://starkware.co/">
+    <img src="https://img.shields.io/badge/powered_by-StarkWare-navy">
+  </a>
+  <a href="https://github.com/dontpanicdao/starknet-burner/blob/main/LICENSE/">
+    <img src="https://img.shields.io/badge/license-MIT-black">
+  </a>
+</p>
+
 ![Realms x Bibliotheca header](/static/realmsxbibliotheca.jpg)
 
 # 📝 Realms Contracts
@@ -16,7 +26,6 @@ This monorepo contains all of the Contracts (StarkNet/Cairo Ethereum/Solidity) f
 | [/desiege](./contracts/desiege) | Desiege | A web-based team game built on Starknet. |
 | [/token](./contracts/token) | Standard Tokens | Standard tokens (ERC721, ERC1155, ERC20) written in Cairo. |
 | [/L1-Solidity](./contracts/L1-Solidity/) | L1 contracts | A set of L1 contracts including the $LORDS, Realms, and the Journey (Realms staking). |
-| [/openzeppelin](./contracts/openzeppelin/) | OpenZeppelin libraries | Ports of common libraries (e.g. ERC721) written in Cairo. |
 | [/game_utils](./contracts/game_utils) | Game Utils | Game utility contracts such as grid positions written in Cairo. |
 | [/loot](./contracts/loot/) | Loot | Loot contracts ported to Cairo. |
 | [/exchange](./contracts/exchange/) | Exchange | Allows trades between pairs of ERC20 and ERC1155 contract tokens. |
@@ -28,7 +37,7 @@ This monorepo contains all of the Contracts (StarkNet/Cairo Ethereum/Solidity) f
 
 First, visit the [Bibliotheca DAO Site](https://bibliothecadao.xyz/) for an overview of our ecosystem.
 
-Next, read the [Master Scroll](https://docs.bibliothecadao.xyz/lootverse-master-scroll/). This is our deep dive into everything about the game. The Master Scroll is the source of truth before this readme.
+Next, read the [Master Scroll](https://scroll.bibliothecadao.xyz/). This is our deep dive into everything about the game. The Master Scroll is the source of truth before this readme.
 
 Finally, visit [The Atlas](https://atlas.bibliothecadao.xyz/) to see the Settling game in action.
 
@@ -50,10 +59,19 @@ The development container loads settings and the repository information on your 
 
 Instead, you can use the [Github CLI](https://cli.github.com/) to auth from your dev container:
 
-1. Download the [Github CLI](https://cli.github.com/).
+1. Download the [Github CLI](https://github.com/cli/cli/blob/trunk/docs/install_linux.md#debian-ubuntu-linux-raspberry-pi-os-apt).
 2. Visit the [Github Tokens page](https://github.com/settings/tokens) and click `Generate New Token` to create a new token that will be used in your dev container. Make sure to save it somewhere as the token is only visible upon creation.
 3. With the container loaded, open the dev container terminal in vscode.
 4. Run `gh auth login` and follow the steps, pasting in your new access token when asked.
+</details>
+
+<details><summary>OSX ARM chips: Running without a container</summary>
+Docker performance on ARM chips is pretty poor, so we recommend running without a container until these perf issues are resolved:
+1. Pull down the repository
+2. Install homebrew: https://brew.sh/
+3. Install gmp: `brew install gmp`
+4. Install dependencies: `pip3 install -r ./requirements.txt`
+5. Install realms cli: `pip3 install ./realms_cli`
 </details>
 
 If you have further questions about the development workflow, please ask in [#builders-chat in the Realms Discord](https://discord.gg/yP4BCbRjUs).
@@ -68,6 +86,7 @@ We encourage pull requests.
 2. **Fork the repo** so you can make and test changes in your local repository.
 3. **Test your changes** Follow the procedures for testing in each contract sub-directory (e.g. [/contracts/settling_game](./contracts/settling_game/) and make sure your tests (manual and/or automated) pass.
 4. **Create a pull request** and describe the changes you made. Include a reference to the Issue you created.
+5. **Verify cairo lint warnings** run through the 'Files Changed' tab for your PR and resolve any warnings. These do not show up locally so you need to view them on GitHub.
 5. **Monitor and respond to comments** made by the team around code standards and suggestions. Most pull requests will have some back and forth.
 
 If you have further questions, visit [#builders-chat in our discord](https://discord.gg/yP4BCbRjUs) and make sure to reference your issue number.

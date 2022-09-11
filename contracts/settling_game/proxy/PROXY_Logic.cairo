@@ -1,14 +1,13 @@
 # SPDX-License-Identifier: MIT
-# OpenZeppelin Contracts for Cairo v0.1.0 (upgrades/Proxy.cairo)
+# OpenZeppelin Contracts for Cairo v0.x.0 (upgrades/Proxy.cairo)
 
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
-from starkware.starknet.common.syscalls import delegate_call
-from openzeppelin.upgrades.library import (
-    Proxy_implementation_address,
-    Proxy_set_implementation
-)
+from starkware.starknet.common.syscalls import library_call, library_call_l1_handler
+
+# temporary solution
+from contracts.settling_game.proxy.library import Proxy
 
 #
 # Constructor
@@ -16,9 +15,9 @@ from openzeppelin.upgrades.library import (
 
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    implementation_address : felt
+    implementation_hash : felt
 ):
-    Proxy_set_implementation(implementation_address)
+    Proxy._set_implementation_hash(implementation_hash)
     return ()
 end
 
@@ -32,14 +31,29 @@ end
 func __default__{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     selector : felt, calldata_size : felt, calldata : felt*
 ) -> (retdata_size : felt, retdata : felt*):
-    let (address) = Proxy_implementation_address.read()
+    let (class_hash) = Proxy.get_implementation_hash()
 
-    let (retdata_size : felt, retdata : felt*) = delegate_call(
-        contract_address=address,
+    let (retdata_size : felt, retdata : felt*) = library_call(
+        class_hash=class_hash,
         function_selector=selector,
         calldata_size=calldata_size,
         calldata=calldata,
     )
-
     return (retdata_size=retdata_size, retdata=retdata)
+end
+
+@l1_handler
+@raw_input
+func __l1_default__{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    selector : felt, calldata_size : felt, calldata : felt*
+):
+    let (class_hash) = Proxy.get_implementation_hash()
+
+    library_call_l1_handler(
+        class_hash=class_hash,
+        function_selector=selector,
+        calldata_size=calldata_size,
+        calldata=calldata,
+    )
+    return ()
 end

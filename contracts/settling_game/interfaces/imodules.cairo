@@ -16,8 +16,9 @@ namespace IArbiter:
         module_02_addr : felt,
         module_03_addr : felt,
         module_04_addr : felt,
-        module_05_addr : felt,
-        module_06_addr : felt
+        module_06_addr : felt,
+        module_07_addr : felt,
+        module_08_addr : felt,
     ):
     end
 end
@@ -57,61 +58,16 @@ namespace IModuleController:
         module_02_addr : felt,
         module_03_addr : felt,
         module_04_addr : felt,
-        module_05_addr : felt,
-        module_06_addr : felt
+        module_06_addr : felt,
     ):
     end
 end
 
 @contract_interface
-namespace IL01_Settling:
-    func set_time_staked(token_id : Uint256, time_left : felt):
-    end
-    func set_time_vault_staked(token_id : Uint256, time_left : felt):
-    end
-    func set_total_realms_settled(amount : felt):
-    end
-    func get_time_staked(token_id : Uint256) -> (time : felt):
-    end
-    func get_time_vault_staked(token_id : Uint256) -> (time : felt):
-    end
-    func get_total_realms_settled() -> (amount : felt):
-    end
-    func return_approved():
-    end
-end
-
-@contract_interface
-namespace IL02_Resources:
-    func check_if_claimable(token_id : Uint256) -> (can_claim : felt):
-    end
-    func claim_resources(token_id : Uint256):
-    end
-    func pillage_resources(token_id : Uint256, claimer : felt):
-    end
-end
-
-@contract_interface
-namespace IL03_Buildings:
-    func get_buildings_unpacked(token_id : Uint256) -> (realm_buildings : RealmBuildings):
-    end
-end
-
-@contract_interface
-namespace IL04_Calculator:
-    func calculate_epoch() -> (epoch : felt):
-    end
-    func calculate_wonder_tax() -> (tax_percentage : felt):
-    end
-    func calculate_happiness(token_id : Uint256) -> (happiness : felt):
-    end
-    func calculate_tribute() -> (tribute : felt):
-    end
-end
-
-@contract_interface
 namespace IL06_Combat:
-    func build_squad_from_troops_in_realm(troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt):
+    func build_squad_from_troops_in_realm(
+        troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt
+    ):
     end
     func set_troop_cost(troop_id : felt, cost : Cost):
     end
@@ -122,45 +78,45 @@ namespace IL06_Combat:
 end
 
 @contract_interface
-namespace IL05_Wonders:
-    func update_wonder_settlement(token_id : Uint256):
+namespace IL07_Crypts:
+    func set_time_staked(token_id : Uint256, time_left : felt):
     end
-    func set_total_wonders_staked(epoch : felt, amount : felt):
+    func get_time_staked(token_id : Uint256) -> (time : felt):
+    end
+    func return_approved():
+    end
+end
+
+@contract_interface
+namespace IL08_Crypts_Resources:
+    func check_if_claimable(token_id : Uint256) -> (can_claim : felt):
+    end
+    func claim_resources(token_id : Uint256):
+    end
+end
+
+@contract_interface
+namespace IL09_Relics:
+    func set_relic_holder(winner_token_id : Uint256, loser_token_id : Uint256):
+    end
+end
+
+@contract_interface
+namespace IFood:
+    func available_food_in_store(token_id : Uint256) -> (available : felt):
+    end
+    func get_full_store_houses(token_id : Uint256) -> (full_store_houses : felt):
+    end
+end
+
+@contract_interface
+namespace IGoblinTown:
+    func spawn_goblin_welcomparty(realm_id : Uint256):
     end
 
-    func set_last_updated_epoch(epoch : felt):
+    func get_strength_and_timestamp(realm_id : Uint256) -> (strength : felt, spawn_ts : felt):
     end
 
-    func set_wonder_id_staked(token_id : Uint256, epoch : felt):
-    end
-
-    func set_wonder_epoch_upkeep(epoch : felt, token_id : Uint256, upkept : felt):
-    end
-
-    func set_tax_pool(epoch : felt, resource_id : felt, supply : felt):
-    end
-
-    func batch_set_tax_pool(
-        epoch : felt,
-        resource_ids_len : felt,
-        resource_ids : Uint256*,
-        amounts_len : felt,
-        amounts : felt*,
-    ):
-    end
-
-    func get_total_wonders_staked(epoch : felt) -> (amount : felt):
-    end
-
-    func get_last_updated_epoch() -> (epoch : felt):
-    end
-
-    func get_wonder_id_staked(token_id : Uint256) -> (epoch : felt):
-    end
-
-    func get_wonder_epoch_upkeep(epoch : felt, token_id : Uint256) -> (upkept : felt):
-    end
-
-    func get_tax_pool(epoch : felt, resource_id : felt) -> (supply : felt):
+    func spawn_next(realm_id : Uint256):
     end
 end

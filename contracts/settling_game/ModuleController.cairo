@@ -1,8 +1,24 @@
+# -----------------------------------
 # ____MODULE_CONTROLLER___SETTLING_LOGIC
 #   A long-lived open-ended lookup table that routes logic between modules.
 #   Each module must be registered here and Logic vs State write permissions are mapped here.
 #
+#  Is in control of the addresses game modules use.
+#  Is controlled by the Arbiter, who can update addresses. This will be a Multisig.
+#  Maintains a generic mapping that is open ended and which
+#  can be added to for new modules.
+#
+#  To be compliant with this system, a new module containint variables
+#  intended to be open to the ecosystem MUST implement a check
+#  on any contract.
+#  1. Get address attempting to write to the variables in the contract.
+#  2. Call 'has_write_access()'
+#
+# This way, new modules can be added to update existing systems a
+# and create new dynamics.
+#
 # MIT LICENSE
+# -----------------------------------
 
 %lang starknet
 
@@ -11,26 +27,11 @@ from starkware.cairo.common.math import assert_not_zero
 from starkware.starknet.common.syscalls import get_caller_address
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
 from starkware.starknet.common.syscalls import get_block_timestamp
-from contracts.settling_game.utils.constants import TRUE, FALSE
+from starkware.cairo.common.bool import TRUE, FALSE
 
-# Is in control of the addresses game modules use.
-# Is controlled by the Arbiter, who can update addresses. This will be a Multisig.
-# Maintains a generic mapping that is open ended and which
-# can be added to for new modules.
-
-#######################
-# To be compliant with this system, a new module containint variables
-# intended to be open to the ecosystem MUST implement a check
-# on any contract.
-# 1. Get address attempting to write to the variables in the contract.
-# 2. Call 'has_write_access()'
-
-# This way, new modules can be added to update existing systems a
-# and create new dynamics.
-
-###########
-# STORAGE #
-###########
+# -----------------------------------
+# Storage
+# -----------------------------------
 
 @storage_var
 func arbiter() -> (address : felt):
@@ -60,10 +61,19 @@ end
 func genesis() -> (time : felt):
 end
 
-###############
-# CONSTRUCTOR #
-###############
+# -----------------------------------
+# CONSTRUCTOR
+# -----------------------------------
 
+# @notice Constructor function
+# @param arbiter_address: Arbiter contract address
+# @param _lords_address: Lords contract address
+# @param _resources_address: Resources contract address
+# @param _realms_address: Realms erc721 contract address
+# @param _treasury_address: Treasury address
+# @param _s_realms_address: Staked realms erc721 contract address
+# @param crypts_address: Crypts contract address
+# @param _s_crypts_address: Staked crypts contract address
 @constructor
 func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     arbiter_address : felt,
@@ -71,7 +81,7 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     _resources_address : felt,
     _realms_address : felt,
     _treasury_address : felt,
-    _s_realms_address : felt
+    _s_realms_address : felt,
 ):
     arbiter.write(arbiter_address)
 
@@ -80,26 +90,46 @@ func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     genesis.write(block_timestamp)
 
     # write patterns known at deployment. E.g., 1->2, 1->3, 5->6.
-    
-    # settling to wonders logic
-    can_write_to.write(ModuleIds.L01_Settling, ModuleIds.L05_Wonders, TRUE)
 
-    # # resources logic to settling state
-    can_write_to.write(ModuleIds.L02_Resources, ModuleIds.L01_Settling, TRUE)
+    # resources logic to settling state
+    can_write_to.write(ModuleIds.Resources, ModuleIds.Settling, TRUE)
 
-    # # resources logic to wonders state
-    can_write_to.write(ModuleIds.L02_Resources, ModuleIds.L05_Wonders, TRUE)
+    # combat can write to resources
+    can_write_to.write(ModuleIds.L06_Combat, ModuleIds.Resources, TRUE)
 
-    # # combat can write to resources
-    can_write_to.write(ModuleIds.L06_Combat, ModuleIds.L02_Resources, TRUE)
+    # # combat can write to settling
+    can_write_to.write(ModuleIds.L06_Combat, ModuleIds.Settling, TRUE)
 
-    # # combat can write to resources
-    can_write_to.write(ModuleIds.L06_Combat, ModuleIds.L01_Settling, TRUE)
+    # settling can write to s realms tokens
+    can_write_to.write(ModuleIds.Settling, ModuleIds.S_Realms_Token, TRUE)
+
+    # resources can write to resources token
+    can_write_to.write(ModuleIds.Resources, ModuleIds.Resources_Token, TRUE)
+
+    # buildings can write to resources token
+    can_write_to.write(ModuleIds.Buildings, ModuleIds.Resources_Token, TRUE)
+
+    # combat can write to resources token
+    can_write_to.write(ModuleIds.L06_Combat, ModuleIds.Resources_Token, TRUE)
+
+    # crypts can write to crypts token
+    can_write_to.write(ModuleIds.L07_Crypts, ModuleIds.S_Crypts_Token, TRUE)
+
+    # crypts resources can write to resources token
+    can_write_to.write(ModuleIds.L08_Crypts_Resources, ModuleIds.Resources_Token, TRUE)
+
+    # # crypts logic to resources
+    # can_write_to.write(ModuleIds.L07_Crypts, ModuleIds.L08_Crypts_Resources, TRUE)
+
+    # # resources logic to crypts state
+    # can_write_to.write(ModuleIds.L08_Crypts_Resources, ModuleIds.L07_Crypts, TRUE)
 
     # Lookup table for NON module contracts
     external_contract_table.write(ExternalContractIds.Lords, _lords_address)
     external_contract_table.write(ExternalContractIds.Realms, _realms_address)
     external_contract_table.write(ExternalContractIds.S_Realms, _s_realms_address)
+    # external_contract_table.write(ExternalContractIds.Crypts, _crypts_address)
+    # external_contract_table.write(ExternalContractIds.S_Crypts, _s_crypts_address)
     external_contract_table.write(ExternalContractIds.Resources, _resources_address)
     external_contract_table.write(ExternalContractIds.Treasury, _treasury_address)
 
@@ -110,7 +140,9 @@ end
 # EXTERNAL #
 ############
 
-# Called by the Arbiter to set new address mappings.
+# @notice Called by the Arbiter to set new address mappings
+# @param external_contract_id: External contract id
+# @param contract_address: New contract address
 @external
 func set_address_for_external_contract{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
@@ -121,7 +153,8 @@ func set_address_for_external_contract{
     return ()
 end
 
-# Called by the current Arbiter to replace itself.
+# @notice Called by the current Arbiter to replace itself.
+# @param new_arbiter: New arbiter contract address
 @external
 func appoint_new_arbiter{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     new_arbiter : felt
@@ -131,7 +164,9 @@ func appoint_new_arbiter{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
     return ()
 end
 
-# Called by the Arbiter to set new address mappings.
+# @notice Called by the Arbiter to set new address mappings
+# @param module_id: Module id
+# @param module_address: New module address
 @external
 func set_address_for_module_id{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     module_id : felt, module_address : felt
@@ -143,52 +178,58 @@ func set_address_for_module_id{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
     return ()
 end
 
-# Called by the Arbiter to batch set new address mappings on deployment.
+# @notice Called by the Arbiter to batch set new address mappings on deployment
 @external
 func set_initial_module_addresses{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
 }(
-    module_01_addr : felt,
-    module_02_addr : felt,
-    module_03_addr : felt,
-    module_04_addr : felt,
+    settling_module_addr : felt,
+    resources_module_addr : felt,
+    buildings_module_addr : felt,
+    calculator_module_addr : felt,
     module_05_addr : felt,
-    module_06_addr : felt
+    module_06_addr : felt,
 ):
     only_arbiter()
 
-    # # Settling Logic
-    address_of_module_id.write(ModuleIds.L01_Settling, module_01_addr)
-    module_id_of_address.write(module_01_addr, ModuleIds.L01_Settling)
+    # Settling Logic
+    address_of_module_id.write(ModuleIds.Settling, settling_module_addr)
+    module_id_of_address.write(settling_module_addr, ModuleIds.Settling)
 
-    # # # Resources Logic
-    address_of_module_id.write(ModuleIds.L02_Resources, module_02_addr)
-    module_id_of_address.write(module_02_addr, ModuleIds.L02_Resources)
+    # Resources Logic
+    address_of_module_id.write(ModuleIds.Resources, resources_module_addr)
+    module_id_of_address.write(resources_module_addr, ModuleIds.Resources)
 
-    # # # Buildings Logic
-    address_of_module_id.write(ModuleIds.L03_Buildings, module_03_addr)
-    module_id_of_address.write(module_03_addr, ModuleIds.L03_Buildings)
+    # Buildings Logic
+    address_of_module_id.write(ModuleIds.Buildings, buildings_module_addr)
+    module_id_of_address.write(buildings_module_addr, ModuleIds.Buildings)
 
-    # # # Calculator Logic
-    address_of_module_id.write(ModuleIds.L04_Calculator, module_04_addr)
-    module_id_of_address.write(module_04_addr, ModuleIds.L04_Calculator)
+    # Calculator Logic
+    address_of_module_id.write(ModuleIds.Calculator, calculator_module_addr)
+    module_id_of_address.write(calculator_module_addr, ModuleIds.Calculator)
 
-    # # # Wonders Logic
-    address_of_module_id.write(ModuleIds.L05_Wonders, module_05_addr)
-    module_id_of_address.write(module_05_addr, ModuleIds.L05_Wonders)
-
-    # # # Combat Logic
+    # Combat Logic
     address_of_module_id.write(ModuleIds.L06_Combat, module_06_addr)
     module_id_of_address.write(module_06_addr, ModuleIds.L06_Combat)
+
+    # # Crypts Logic
+    # address_of_module_id.write(ModuleIds.L07_Crypts, module_07_addr)
+    # module_id_of_address.write(module_07_addr, ModuleIds.L07_Crypts)
+
+    # # Crypts Resources Logic
+    # address_of_module_id.write(ModuleIds.L08_Crypts_Resources, module_08_addr)
+    # module_id_of_address.write(module_08_addr, ModuleIds.L08_Crypts_Resources)
 
     return ()
 end
 
-###########
-# SETTERS #
-###########
+# -----------------------------------
+# SETTERS
+# -----------------------------------
 
-# Called to authorise write access of one module to another.
+# @notice Called to authorise write access of one module to another.
+# @param module_id_doing_writing: Writer module id
+# @param module_id_being_written_to: Module id being written to
 @external
 func set_write_access{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     module_id_doing_writing : felt, module_id_being_written_to : felt
@@ -198,46 +239,55 @@ func set_write_access{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     return ()
 end
 
-###########
-# GETTERS #
-###########
+# -----------------------------------
+# GETTERS
+# -----------------------------------
 
+# @notice Get module address
+# @param module_id: Module id
+# @return address: Module address
 @view
 func get_module_address{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     module_id : felt
 ) -> (address : felt):
-    let (address) = address_of_module_id.read(module_id)
-    return (address)
+    return address_of_module_id.read(module_id)
 end
 
+# @notice Get external contract address
+# @param external_contract_id: External contract id
+# @return address: External contract address
 @view
 func get_external_contract_address{
     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
 }(external_contract_id : felt) -> (address : felt):
-    let (address) = external_contract_table.read(external_contract_id)
-    return (address)
+    return external_contract_table.read(external_contract_id)
 end
 
+# @notice Get time of deployment
+# @return genesis_time: Genesis time
 @view
 func get_genesis{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-    genesis_time : felt
+    time : felt
 ):
-    let (genesis_time) = genesis.read()
-    return (genesis_time=genesis_time)
+    return genesis.read()
 end
 
+# @notice Get arbiter
+# @return Arbiter address
 @view
 func get_arbiter{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-    arbiter_address : felt
+    address : felt
 ):
-    let (arbiter_address) = arbiter.read()
-    return (arbiter_address=arbiter_address)
+    return arbiter.read()
 end
 
-#############
-# INTERNALS #
-#############
+# -----------------------------------
+# INTERNALS
+# -----------------------------------
 
+# @notice Check if a module (caller) has write access to another module
+# @param address_attempting_to_write
+# @return success: 1 if successful, 0 otherwise
 @view
 func has_write_access{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     address_attempting_to_write : felt
@@ -277,14 +327,14 @@ func has_write_access{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     return (TRUE)
 end
 
-############
-# PRIVATES #
-############
+# -----------------------------------
+# PRIVATES
+# -----------------------------------
 
-# Assert that the person calling has authority.
+# @notice Check if caller is the arbiter
+# @dev Reverts if caller is not the arbiter
 func only_arbiter{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    alloc_locals
-    let (local caller) = get_caller_address()
+    let (caller) = get_caller_address()
     let (current_arbiter) = arbiter.read()
     assert caller = current_arbiter
     return ()

@@ -14,195 +14,160 @@ namespace TraitsIds:
 end
 
 struct RealmData:
-    member regions : felt  #
-    member cities : felt  #
-    member harbours : felt  #
-    member rivers : felt  #
-    member resource_number : felt  #
-    member resource_1 : felt  #
-    member resource_2 : felt  #
-    member resource_3 : felt  #
-    member resource_4 : felt  #
-    member resource_5 : felt  #
-    member resource_6 : felt  #
-    member resource_7 : felt  #
-    member wonder : felt  #
-    member order : felt  #
+    member regions : felt
+    member cities : felt
+    member harbours : felt
+    member rivers : felt
+    member resource_number : felt
+    member resource_1 : felt
+    member resource_2 : felt
+    member resource_3 : felt
+    member resource_4 : felt
+    member resource_5 : felt
+    member resource_6 : felt
+    member resource_7 : felt
+    member wonder : felt
+    member order : felt
 end
 
 struct RealmBuildings:
-    member Fairgrounds : felt
-    member RoyalReserve : felt
-    member GrandMarket : felt
-    member Castle : felt
-    member Guild : felt
-    member OfficerAcademy : felt
+    member House : felt
+    member StoreHouse : felt
     member Granary : felt
-    member Housing : felt
-    member Amphitheater : felt
-    member ArcherTower : felt
-    member School : felt
-    member MageTower : felt
-    member TradeOffice : felt
-    member Architect : felt
-    member ParadeGrounds : felt
+    member Farm : felt
+    member FishingVillage : felt
     member Barracks : felt
-    member Dock : felt
-    member Fishmonger : felt
-    member Farms : felt
-    member Hamlet : felt
+    member MageTower : felt
+    member ArcherTower : felt
+    member Castle : felt
 end
 
 namespace RealmBuildingsIds:
-    const Fairgrounds = 1
-    const RoyalReserve = 2
-    const GrandMarket = 3
-    const Castle = 4
-    const Guild = 5
-    const OfficerAcademy = 6
-    const Granary = 7
-    const Housing = 8
-    const Amphitheater = 9
-    const ArcherTower = 10
-    const School = 11
-    const MageTower = 12
-    const TradeOffice = 13
-    const Architect = 14
-    const ParadeGrounds = 15
-    const Barracks = 16
-    const Dock = 17
-    const Fishmonger = 18
-    const Farms = 19
-    const Hamlet = 20
+    const House = 1
+    const StoreHouse = 2
+    const Granary = 3
+    const Farm = 4
+    const FishingVillage = 5
+    const Barracks = 6
+    const MageTower = 7
+    const ArcherTower = 8
+    const Castle = 9
 end
 
-namespace RealmBuildingLimitTraitsIds:
-    const Fairgrounds = TraitsIds.Region
-    const RoyalReserve = TraitsIds.Region
-    const GrandMarket = TraitsIds.Region
-    const Castle = TraitsIds.Region
-    const Guild = TraitsIds.Region
-    const OfficerAcademy = TraitsIds.Region
-    const Granary = TraitsIds.City
-    const Housing = TraitsIds.City
-    const Amphitheater = TraitsIds.City
-    const ArcherTower = TraitsIds.City
-    const School = TraitsIds.City
-    const MageTower = TraitsIds.City
-    const TradeOffice = TraitsIds.City
-    const Architect = TraitsIds.City
-    const ParadeGrounds = TraitsIds.City
-    const Barracks = TraitsIds.City
-    const Dock = TraitsIds.Harbour
-    const Fishmonger = TraitsIds.Harbour
-    const Farms = TraitsIds.River
-    const Hamlet = TraitsIds.River
+# square meters
+namespace RealmBuildingsSize:
+    const House = 4
+    const StoreHouse = 2
+    const Granary = 3
+    const Farm = 3
+    const FishingVillage = 3
+    const Barracks = 16
+    const MageTower = 16
+    const ArcherTower = 16
+    const Castle = 16
 end
 
 namespace BuildingsFood:
-    const Fairgrounds = 5
-    const RoyalReserve = 5
-    const GrandMarket = 5
-    const Castle = -1
-    const Guild = -1
-    const OfficerAcademy = -1
+    const House = 2
+    const StoreHouse = 3
     const Granary = 3
-    const Housing = -1
-    const Amphitheater = -1
-    const ArcherTower = -1
-    const School = -1
-    const MageTower = -1
-    const TradeOffice = -1
-    const Architect = -1
-    const ParadeGrounds = -1
-    const Barracks = -1
-    const Dock = -1
-    const Fishmonger = 2
-    const Farms = 1
-    const Hamlet = 1
+    const Farm = 3
+    const FishingVillage = 3
+    const Barracks = 6
+    const MageTower = 6
+    const ArcherTower = 6
+    const Castle = 12
 end
 
 namespace BuildingsCulture:
-    const Fairgrounds = 5
-    const RoyalReserve = 5
-    const GrandMarket = 0
-    const Castle = 5
-    const Guild = 5
-    const OfficerAcademy = 0
-    const Granary = 0
-    const Housing = 0
-    const Amphitheater = 2
-    const ArcherTower = 0
-    const School = 3
-    const MageTower = 0
-    const TradeOffice = 1
-    const Architect = 1
-    const ParadeGrounds = 1
-    const Barracks = 0
-    const Dock = 0
-    const Fishmonger = 0
-    const Farms = 0
-    const Hamlet = 0
+    const House = 2
+    const StoreHouse = 3
+    const Granary = 3
+    const Farm = 3
+    const FishingVillage = 3
+    const Barracks = 6
+    const MageTower = 6
+    const ArcherTower = 6
+    const Castle = 12
 end
 
 namespace BuildingsPopulation:
-    const Fairgrounds = -10
-    const RoyalReserve = -10
-    const GrandMarket = -10
-    const Castle = -10
-    const Guild = -10
-    const OfficerAcademy = -10
-    const Granary = -10
-    const Housing = 75
-    const Amphitheater = -10
-    const ArcherTower = -10
-    const School = -10
-    const MageTower = -10
-    const TradeOffice = -10
-    const Architect = -10
-    const ParadeGrounds = -10
-    const Barracks = -10
-    const Dock = -10
-    const Fishmonger = -10
-    const Farms = 10
-    const Hamlet = 35
+    const House = 12
+    const StoreHouse = 3
+    const Granary = 3
+    const Farm = 3
+    const FishingVillage = 3
+    const Barracks = 5
+    const MageTower = 5
+    const ArcherTower = 5
+    const Castle = 5
+end
+
+namespace BuildingsIntegrityLength:
+    const House = 3600
+    const StoreHouse = 2000
+    const Granary = 2000
+    const Farm = 2000
+    const FishingVillage = 2000
+    const Barracks = 37319
+    const MageTower = 37319
+    const ArcherTower = 37319
+    const Castle = 37319
+end
+
+namespace BuildingsTroopIndustry:
+    const House = 0
+    const StoreHouse = 0
+    const Granary = 0
+    const Farm = 0
+    const FishingVillage = 0
+    const Barracks = 2
+    const MageTower = 2
+    const ArcherTower = 2
+    const Castle = 4
+end
+
+namespace BuildingsDecaySlope:
+    const House = 400
+    const StoreHouse = 400
+    const Granary = 400
+    const Farm = 400
+    const FishingVillage = 400
+    const Barracks = 400
+    const MageTower = 400
+    const ArcherTower = 400
+    const Castle = 200
 end
 
 namespace ArmyCap:
-    const Fairgrounds = 0
-    const RoyalReserve = 5
-    const GrandMarket = 0
-    const Castle = 5
-    const Guild = 5
-    const OfficerAcademy = 5
-    const Granary = 0
-    const Housing = 0
-    const Amphitheater = 2
-    const ArcherTower = 0
-    const School = 3
-    const MageTower = 0
-    const TradeOffice = 0
-    const Architect = 1
-    const ParadeGrounds = 2
-    const Barracks = 1
-    const Dock = 0
-    const Fishmonger = 0
-    const Farms = 0
-    const Hamlet = 0
+    const House = 2
+    const StoreHouse = 3
+    const Granary = 3
+    const Farm = 3
+    const FishingVillage = 3
+    const Barracks = 6
+    const MageTower = 6
+    const ArcherTower = 6
+    const Castle = 12
 end
 
 namespace ModuleIds:
-    const L01_Settling = 1
-    # const S01_Settling = 2
-    const L02_Resources = 2
-    # const S02_Resources = 4
-    const L03_Buildings = 3
-    # const S03_Buildings = 6
-    const L04_Calculator = 4
-    const L05_Wonders = 5
-    # const S05_Wonders = 9
+    const Settling = 1
+    const Resources = 2
+    const Buildings = 3
+    const Calculator = 4
     const L06_Combat = 6
-    # const S06_Combat = 12
+    const L07_Crypts = 7
+    const L08_Crypts_Resources = 8
+    const L09_Relics = 12
+    const L10_Food = 13
+    const GoblinTown = 14
+    const Crypts_Token = 1001
+    const Lords_Token = 1002
+    const Realms_Token = 1003
+    const Resources_Token = 1004
+    const S_Crypts_Token = 1005
+    const S_Realms_Token = 1006
 end
 
 namespace ExternalContractIds:
@@ -212,9 +177,43 @@ namespace ExternalContractIds:
     const Resources = 4
     const Treasury = 5
     const Storage = 6
+    const Crypts = 7
+    const S_Crypts = 8
+end
+
+struct CryptData:
+    member resource : felt  # uint256 - resource generated by this dungeon (23-28)
+    member environment : felt  # uint256 - environment of the dungeon (1-6)
+    member legendary : felt  # uint256 - flag if dungeon is legendary (0/1)
+    member size : felt  # uint256 - size (e.g. 6x6) of dungeon. (6-25)
+    member num_doors : felt  # uint256 - number of doors (0-12)
+    member num_points : felt  # uint256 - number of points (0-12)
+    member affinity : felt  # uint256 - affinity of the dungeon (0, 1-58)
+    # member name : felt  # string - name of the dungeon
+end
+
+# struct holding the different environments for Crypts and Caverns dungeons
+# we'll use this to determine how many resources to grant during staking
+namespace EnvironmentIds:
+    const DesertOasis = 1
+    const StoneTemple = 2
+    const ForestRuins = 3
+    const MountainDeep = 4
+    const UnderwaterKeep = 5
+    const EmbersGlow = 6
+end
+
+namespace EnvironmentProduction:
+    const DesertOasis = 170
+    const StoneTemple = 90
+    const ForestRuins = 80
+    const MountainDeep = 60
+    const UnderwaterKeep = 25
+    const EmbersGlow = 10
 end
 
 namespace ResourceIds:
+    # Realms Resources
     const Wood = 1
     const Stone = 2
     const Coal = 3
@@ -237,49 +236,193 @@ namespace ResourceIds:
     const Adamantine = 20
     const Mithral = 21
     const Dragonhide = 22
+    # Crypts and Caverns Resources
+    const DesertGlass = 23
+    const DivineCloth = 24
+    const CuriousSpore = 25
+    const UnrefinedOre = 26
+    const SunkenShekel = 27
+    const Demonhide = 28
     # IMPORTANT: if you're adding to this enum
     # make sure the SIZE is one greater than the
     # maximal value; certain algorithms depend on that
-    const SIZE = 23
+    const wheat = 10000
+    const fish = 10001
+    const SIZE = 31
 end
 
 namespace TroopId:
-    const Watchman = 1
-    const Guard = 2
-    const GuardCaptain = 3
-    const Squire = 4
+    const Skirmisher = 1
+    const Longbow = 2
+    const Crossbow = 3
+    const Pikeman = 4
     const Knight = 5
-    const KnightCommander = 6
-    const Scout = 7
-    const Archer = 8
-    const Sniper = 9
-    const Scorpio = 10
-    const Ballista = 11
-    const Catapult = 12
-    const Apprentice = 13
-    const Mage = 14
-    const Arcanist = 15
-    const GrandMarshal = 16
+    const Paladin = 6
+    const Ballista = 7
+    const Mangonel = 8
+    const Trebuchet = 9
+    const Apprentice = 10
+    const Mage = 11
+    const Arcanist = 12
+    const Goblin = 13
+    # IMPORTANT: if you're adding to this enum
+    # make sure the SIZE is one greater than the
+    # maximal value; certain algorithms depend on that
+    const SIZE = 14
 end
 
 namespace TroopType:
-    const Melee = 1
-    const Ranged = 2
-    const Siege = 3
+    const RangedNormal = 1
+    const RangedMagic = 2
+    const Melee = 3
+    const Siege = 4
 end
 
 struct Troop:
+    member id : felt  # TroopId
     member type : felt  # TroopType
     member tier : felt
+    member building : felt  # RealmBuildingsIds, the troop's production building
     member agility : felt
     member attack : felt
-    member defense : felt
+    member armor : felt
     member vitality : felt
     member wisdom : felt
 end
 
-# TODO: add a t4 Troop that's a Character from our Character module;
-#       it should be optional
+namespace TroopProps:
+    namespace Type:
+        const Skirmisher = TroopType.RangedNormal
+        const Longbow = TroopType.RangedNormal
+        const Crossbow = TroopType.RangedNormal
+        const Pikeman = TroopType.Melee
+        const Knight = TroopType.Melee
+        const Paladin = TroopType.Melee
+        const Ballista = TroopType.Siege
+        const Mangonel = TroopType.Siege
+        const Trebuchet = TroopType.Siege
+        const Apprentice = TroopType.RangedMagic
+        const Mage = TroopType.RangedMagic
+        const Arcanist = TroopType.RangedMagic
+        const Goblin = TroopType.Melee
+    end
+
+    namespace Tier:
+        const Skirmisher = 1
+        const Longbow = 2
+        const Crossbow = 3
+        const Pikeman = 1
+        const Knight = 2
+        const Paladin = 3
+        const Ballista = 1
+        const Mangonel = 2
+        const Trebuchet = 3
+        const Apprentice = 1
+        const Mage = 2
+        const Arcanist = 3
+        const Goblin = 1
+    end
+
+    namespace Building:
+        const Skirmisher = RealmBuildingsIds.ArcherTower
+        const Longbow = RealmBuildingsIds.ArcherTower
+        const Crossbow = RealmBuildingsIds.ArcherTower
+        const Pikeman = RealmBuildingsIds.Barracks
+        const Knight = RealmBuildingsIds.Barracks
+        const Paladin = RealmBuildingsIds.Barracks
+        const Ballista = RealmBuildingsIds.Castle
+        const Mangonel = RealmBuildingsIds.Castle
+        const Trebuchet = RealmBuildingsIds.Castle
+        const Apprentice = RealmBuildingsIds.MageTower
+        const Mage = RealmBuildingsIds.MageTower
+        const Arcanist = RealmBuildingsIds.MageTower
+        const Goblin = 0
+    end
+
+    namespace Agility:
+        const Skirmisher = 8
+        const Longbow = 10
+        const Crossbow = 12
+        const Pikeman = 2
+        const Knight = 3
+        const Paladin = 4
+        const Ballista = 5
+        const Mangonel = 3
+        const Trebuchet = 4
+        const Apprentice = 6
+        const Mage = 8
+        const Arcanist = 10
+        const Goblin = 3
+    end
+
+    namespace Attack:
+        const Skirmisher = 6
+        const Longbow = 8
+        const Crossbow = 10
+        const Pikeman = 6
+        const Knight = 8
+        const Paladin = 10
+        const Ballista = 8
+        const Mangonel = 10
+        const Trebuchet = 12
+        const Apprentice = 6
+        const Mage = 8
+        const Arcanist = 10
+        const Goblin = 8
+    end
+
+    namespace Armor:
+        const Skirmisher = 2
+        const Longbow = 3
+        const Crossbow = 4
+        const Pikeman = 4
+        const Knight = 6
+        const Paladin = 8
+        const Ballista = 2
+        const Mangonel = 3
+        const Trebuchet = 4
+        const Apprentice = 2
+        const Mage = 3
+        const Arcanist = 4
+        const Goblin = 2
+    end
+
+    namespace Vitality:
+        const Skirmisher = 30
+        const Longbow = 40
+        const Crossbow = 60
+        const Pikeman = 30
+        const Knight = 60
+        const Paladin = 80
+        const Ballista = 30
+        const Mangonel = 50
+        const Trebuchet = 70
+        const Apprentice = 40
+        const Mage = 50
+        const Arcanist = 80
+        const Goblin = 20
+    end
+
+    namespace Wisdom:
+        const Skirmisher = 3
+        const Longbow = 4
+        const Crossbow = 4
+        const Pikeman = 4
+        const Knight = 6
+        const Paladin = 8
+        const Ballista = 2
+        const Mangonel = 3
+        const Trebuchet = 4
+        const Apprentice = 6
+        const Mage = 8
+        const Arcanist = 10
+        const Goblin = 1
+    end
+end
+
+# one packed troop fits into 2 bytes (troop ID + vitality)
+# one felt is ~31 bytes -> can hold 15 troops
+# ==> the whole Squad can be packed into a single felt
 struct Squad:
     # tier 1 troops
     member t1_1 : Troop
@@ -291,13 +434,6 @@ struct Squad:
     member t1_7 : Troop
     member t1_8 : Troop
     member t1_9 : Troop
-    member t1_10 : Troop
-    member t1_11 : Troop
-    member t1_12 : Troop
-    member t1_13 : Troop
-    member t1_14 : Troop
-    member t1_15 : Troop
-    member t1_16 : Troop
 
     # tier 2 troops
     member t2_1 : Troop
@@ -305,31 +441,15 @@ struct Squad:
     member t2_3 : Troop
     member t2_4 : Troop
     member t2_5 : Troop
-    member t2_6 : Troop
-    member t2_7 : Troop
-    member t2_8 : Troop
 
     # tier 3 troop
     member t3_1 : Troop
 end
 
-struct PackedSquad:
-    # one packed troop fits into 7 bytes
-    # one felt is ~31 bytes -> can hold 4 troops
-    # a squad has 25 troops -> fits into 7 felts when packed
-    member p1 : felt  # packed Troops t1_1 ... t1_4
-    member p2 : felt  # packed Troops t1_5 ... t1_8
-    member p3 : felt  # packed Troops t1_9 ... t1_12
-    member p4 : felt  # packed Troops t1_13 ... t1_16
-    member p5 : felt  # packed Troops t2_1 ... t2_4
-    member p6 : felt  # packed Troops t2_5 ... t2_8
-    member p7 : felt  # packed Troop t3_1
-end
-
 struct SquadStats:
     member agility : felt
     member attack : felt
-    member defense : felt
+    member armor : felt
     member vitality : felt
     member wisdom : felt
 end
@@ -338,8 +458,8 @@ end
 # a Realm can have two squads, one used for attacking
 # and another used for defending; this struct holds them
 struct RealmCombatData:
-    member attacking_squad : PackedSquad
-    member defending_squad : PackedSquad
+    member attacking_squad : felt  # packed Squad
+    member defending_squad : felt  # packed Squad
     member last_attacked_at : felt
 end
 
@@ -363,4 +483,23 @@ struct ResourceOutput:
     member resource_5 : felt
     member resource_6 : felt
     member resource_7 : felt
-end    
+end
+
+# Packed Military Buildings
+struct PackedBuildings:
+    member military : felt
+    member economic : felt
+    member housing : felt
+end
+
+# Farm Harvest Types
+namespace HarvestType:
+    const Export = 1
+    const Store = 2
+end
+
+struct FoodBuildings:
+    member number_built : felt
+    member collections_left : felt
+    member update_time : felt
+end
