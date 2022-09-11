@@ -17,7 +17,9 @@ from contracts.loot.constants.combat import WeaponEfficacy, WeaponEfficiacyDamag
 from contracts.loot.loot.stats.item import ItemStats
 
 namespace CombatStats:
-    func weapon_vs_armor_efficacy{syscall_ptr : felt*, range_check_ptr}(weapon_item_id : felt, armor_item_id : felt) -> (class : felt):
+    func weapon_vs_armor_efficacy{syscall_ptr : felt*, range_check_ptr}(
+        weapon_item_id : felt, armor_item_id : felt
+    ) -> (class : felt):
         alloc_locals
 
         let (weapon_type) = ItemStats.item_type(weapon_item_id)
@@ -65,21 +67,23 @@ namespace CombatStats:
     # TODO: Add a third parameter which controls the constants that drive the calculation, namely:
     #       - Item Ranks
     #       - WeaponEfficacy Multplier
-    func calculate_damage{syscall_ptr : felt*, range_check_ptr}(weapon_id : felt, armor_id : felt) -> (damage : felt):
+    func calculate_damage{syscall_ptr : felt*, range_check_ptr}(
+        weapon_id : felt, armor_id : felt
+    ) -> (damage : felt):
         alloc_locals
-        
+
         const rank_ceiling = 6
 
         # TODO: Get greatness from contract
         const weapon_greatness = 20
 
-        # Base damage is 
+        # Base damage is
         let (weapon_rank) = ItemStats.item_rank(weapon_id)
         let base_weapon_damage = (rank_ceiling - weapon_rank) * weapon_greatness
 
         # Get effectiveness of weapon vs armor
         let (attack_effectiveness) = weapon_vs_armor_efficacy(weapon_id, armor_id)
-        local total_weapon_damage: felt
+        local total_weapon_damage : felt
         if attack_effectiveness == WeaponEfficacy.Low:
             total_weapon_damage = base_weapon_damage * WeaponEfficiacyDamageMultiplier.Low
         else:

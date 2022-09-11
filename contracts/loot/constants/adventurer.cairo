@@ -57,8 +57,8 @@ struct AdventurerState:
     # immutable stats
     member Race : felt  # 3
     member HomeRealm : felt  # 13
-    member Name : felt
     member Birthdate : felt
+    member Name : felt
 
     # evolving stats
     member Health : felt  #
@@ -99,4 +99,27 @@ struct PackedAdventurerState:
     member p2 : felt
     member p3 : felt
     member p4 : felt
+end
+
+namespace SHIFT_P_1:
+    const _1 = 2 ** 0
+    const _2 = 2 ** 3
+    const _3 = 2 ** 16
+    const _4 = 2 ** 65
+end
+
+namespace SHIFT_P_2:
+    const _1 = 2 ** 0
+    const _2 = 2 ** 13
+    const _3 = 2 ** 22
+    const _4 = 2 ** 27
+    const _5 = 2 ** 37
+    const _6 = 2 ** 47
+    const _7 = 2 ** 57
+    const _8 = 2 ** 67
+    const _9 = 2 ** 77
+    const _10 = 2 ** 87
+    const _11 = 2 ** 97
+    const _12 = 2 ** 107
+    const _13 = 2 ** 117
 end

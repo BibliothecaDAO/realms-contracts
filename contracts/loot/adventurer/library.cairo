@@ -17,29 +17,29 @@ from starkware.cairo.common.registers import get_label_location
 
 from contracts.loot.loot.stats.item import ItemStats
 
-from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState
+from contracts.loot.constants.adventurer import (
+    Adventurer,
+    AdventurerState,
+    PackedAdventurerState,
+    SHIFT_P_1,
+    SHIFT_P_2,
+)
+
+from contracts.loot.constants.item import Item
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.constants import SHIFT_41
-
-namespace SHIFT_ADVENTURER:
-    const _1 = 2 ** 0
-    const _2 = 2 ** 4
-    const _3 = 2 ** 14
-    const _4 = 2 ** 18
-    const _5 = 2 ** 38
-end
 
 namespace AdventurerLib:
     func birth{syscall_ptr : felt*, range_check_ptr}(
         race : felt, home_realm : felt, name : felt, birth_date : felt, order : felt
     ) -> (adventurer : AdventurerState):
         alloc_locals
-        # set blank item
 
         let Race = race  # stored state
         let HomeRealm = home_realm  # stored state
-        let Name = name  # stored state
         let Birthdate = birth_date  # stored state
+        let Name = name  # stored state
+
         let Health = 100  # stored state
         let XP = 0  # stored state
         let Level = 0  # stored state
@@ -70,8 +70,8 @@ namespace AdventurerLib:
             AdventurerState(
             Race=Race,
             HomeRealm=HomeRealm,
-            Name=Name,
             Birthdate=Birthdate,
+            Name=Name,
             Health=Health,
             Level=Level,
             Order=Order,
@@ -95,29 +95,6 @@ namespace AdventurerLib:
         )
     end
 
-    namespace SHIFT_P_1:
-        const _1 = 2 ** 0
-        const _2 = 2 ** 3
-        const _3 = 2 ** 16
-        const _4 = 2 ** 49
-    end
-
-    namespace SHIFT_P_2:
-        const _1 = 2 ** 0
-        const _2 = 2 ** 13
-        const _3 = 2 ** 22
-        const _4 = 2 ** 27
-        const _5 = 2 ** 37
-        const _6 = 2 ** 47
-        const _7 = 2 ** 57
-        const _8 = 2 ** 67
-        const _9 = 2 ** 77
-        const _10 = 2 ** 87
-        const _11 = 2 ** 97
-        const _12 = 2 ** 107
-        const _13 = 2 ** 117
-    end
-
     func pack{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
@@ -125,7 +102,7 @@ namespace AdventurerLib:
         bitwise_ptr : BitwiseBuiltin*,
     }(unpacked_adventurer_state : AdventurerState) -> (packed_adventurer : PackedAdventurerState):
         alloc_locals
-
+        # ---------- p1 ---------#
         let Race = unpacked_adventurer_state.Race * SHIFT_P_1._1
         let HomeRealm = unpacked_adventurer_state.HomeRealm * SHIFT_P_1._2
         let Birthdate = unpacked_adventurer_state.Birthdate * SHIFT_P_1._3
@@ -179,11 +156,13 @@ namespace AdventurerLib:
     }(packed_adventurer : PackedAdventurerState) -> (adventurer : AdventurerState):
         alloc_locals
 
-        let (Race) = unpack_data(packed_adventurer.p1, 0, 15)  # 4
-        let (HomeRealm) = unpack_data(packed_adventurer.p1, 4, 1023)  # 10
-        let (Name) = unpack_data(packed_adventurer.p1, 14, 15)  # 4
-        let (Birthdate) = unpack_data(packed_adventurer.p1, 18, 15)  # 4
+        # ---------- p1 ---------#
+        let (Race) = unpack_data(packed_adventurer.p1, 0, 15)  # 3
+        let (HomeRealm) = unpack_data(packed_adventurer.p1, 3, 8191)  # 13
+        let (Birthdate) = unpack_data(packed_adventurer.p1, 16, 8589934591)  # 36
+        let (Name) = unpack_data(packed_adventurer.p1, 65, 562949953421311)  # 59
 
+        # ---------- p2 ---------#
         let (Health) = unpack_data(packed_adventurer.p2, 0, 8191)
         let (Level) = unpack_data(packed_adventurer.p2, 13, 511)
         let (Order) = unpack_data(packed_adventurer.p2, 22, 31)
@@ -198,17 +177,19 @@ namespace AdventurerLib:
         let (Wisdom) = unpack_data(packed_adventurer.p2, 67, 1023)
         let (Charisma) = unpack_data(packed_adventurer.p2, 77, 1023)
 
+        # Luck
         let (Luck) = unpack_data(packed_adventurer.p2, 87, 1023)
 
-        let (XP) = unpack_data(packed_adventurer.p2, 97, 1023)
+        # XP
+        let (XP) = unpack_data(packed_adventurer.p2, 97, 134217727)  # the rest of the felt
 
-        # p3
+        # ---------- p3 ---------#
         let (NeckId) = unpack_data(packed_adventurer.p3, 0, 2199023255551)  # 41
         let (WeaponId) = unpack_data(packed_adventurer.p3, 41, 2199023255551)  # 41
         let (RingId) = unpack_data(packed_adventurer.p3, 82, 2199023255551)  # 41
         let (ChestId) = unpack_data(packed_adventurer.p3, 123, 2199023255551)  # 41
 
-        # p4
+        # ---------- p4 ---------#
         let (HeadId) = unpack_data(packed_adventurer.p3, 0, 2199023255551)  # 41
         let (WaistId) = unpack_data(packed_adventurer.p3, 41, 2199023255551)  # 41
         let (FeetId) = unpack_data(packed_adventurer.p3, 82, 2199023255551)  # 41
@@ -218,8 +199,8 @@ namespace AdventurerLib:
             AdventurerState(
             Race=Race,
             HomeRealm=HomeRealm,
-            Name=Name,
             Birthdate=Birthdate,
+            Name=Name,
             Health=Health,
             Level=Level,
             Order=Order,
@@ -241,6 +222,18 @@ namespace AdventurerLib:
             HandsId=HandsId
             ),
         )
+    end
+
+    func equip_item{syscall_ptr : felt*, range_check_ptr}(
+        item_token_id : felt, item : Item, unpacked_adventurer : AdventurerState
+    ) -> (success : felt):
+        alloc_locals
+
+        if item.Slot == Slot.Neck:
+            let Neck = item_token_id * SHIFT_41._1
+        end
+
+        return (0)
     end
     # func _stats{syscall_ptr : felt*, range_check_ptr}(adventurer : Adventurer) -> (
     #     agility, attack, armour, wisdom, vitality
@@ -280,17 +273,5 @@ namespace AdventurerLib:
     #     )
 
     # return (adventurer)
-    # end
-
-    # func _equip_item{syscall_ptr : felt*, range_check_ptr}(
-    #     item_token_id : felt, item : Item, unpacked_adventurer : AdventurerState
-    # ) -> (success : felt):
-    #     alloc_locals
-
-    # if item.Slot == Slot.Neck:
-    #         let Neck = item_token_id * SHIFT_41._1
-    #     end
-
-    # return (0)
     # end
 end

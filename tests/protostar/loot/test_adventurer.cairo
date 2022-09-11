@@ -29,8 +29,8 @@ namespace TestAdventurerState:
     # immutable stats
     const Race = 1  # 3
     const HomeRealm = 2  # 13
-    const Name = 'loaf'
     const Birthdate = 1662888731
+    const Name = 'loaf'
 
     # evolving stats
     const Health = 5000  #
@@ -77,8 +77,8 @@ func test_pack{
         AdventurerState(
         TestAdventurerState.Race,
         TestAdventurerState.HomeRealm,
-        TestAdventurerState.Name,
         TestAdventurerState.Birthdate,
+        TestAdventurerState.Name,
         TestAdventurerState.Health,
         TestAdventurerState.Level,
         TestAdventurerState.Order,
@@ -103,7 +103,44 @@ func test_pack{
 
     let (adventurer : AdventurerState) = AdventurerLib.unpack(adventurer_state)
 
-    # %{ print('Realm Happiness:', ids.order) %}
+    assert TestAdventurerState.Race = adventurer.Race  # 3
+    assert TestAdventurerState.HomeRealm = adventurer.HomeRealm  # 13
+    assert TestAdventurerState.Birthdate = adventurer.Birthdate
+    assert TestAdventurerState.Name = adventurer.Name
+
+    # evolving stats
+    assert TestAdventurerState.Health = adventurer.Health  #
+
+    assert TestAdventurerState.Level = adventurer.Level  #
+    assert TestAdventurerState.Order = adventurer.Order  #
+
+    # Physical
+    assert TestAdventurerState.Strength = adventurer.Strength
+    assert TestAdventurerState.Dexterity = adventurer.Dexterity
+    assert TestAdventurerState.Vitality = adventurer.Vitality
+
+    # Mental
+    assert TestAdventurerState.Intelligence = adventurer.Intelligence
+    assert TestAdventurerState.Wisdom = adventurer.Wisdom
+    assert TestAdventurerState.Charisma = adventurer.Charisma
+
+    # Meta Physical
+    assert TestAdventurerState.Luck = adventurer.Luck
+
+    assert TestAdventurerState.XP = adventurer.XP  #
+
+    # store item NFT id when equiped
+    # Packed Stats p2
+    assert TestAdventurerState.NeckId = adventurer.NeckId
+    assert TestAdventurerState.WeaponId = adventurer.WeaponId
+    assert TestAdventurerState.RingId = adventurer.RingId
+    assert TestAdventurerState.ChestId = adventurer.ChestId
+
+    # Packed Stats p3
+    assert TestAdventurerState.HeadId = adventurer.HeadId
+    assert TestAdventurerState.WaistId = adventurer.WaistId
+    assert TestAdventurerState.FeetId = adventurer.FeetId
+    assert TestAdventurerState.HandsId = adventurer.HandsId
 
     return ()
 end
