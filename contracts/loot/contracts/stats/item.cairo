@@ -16,7 +16,7 @@ from contracts.loot.constants.item import ItemIds, ItemSlot, ItemType, ItemMater
 from contracts.loot.constants.rankings import ItemRank
 from contracts.loot.constants.physics import MaterialDensity
 
-namespace Statistics:
+namespace ItemStats:
     func item_slot{syscall_ptr : felt*, range_check_ptr}(item_id : felt) -> (slot : felt):
         alloc_locals
 
