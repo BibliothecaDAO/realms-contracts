@@ -15,6 +15,7 @@ struct Adventurer:
     member Strength : felt
     member Dexterity : felt
     member Vitality : felt
+
     # Mental
     member Intelligence : felt
     member Wisdom : felt
@@ -37,7 +38,7 @@ struct Adventurer:
     member Bags : Bag*
 
     # immutable stats
-    member Race : felt  # 1-6
+    member Race : felt  # 1 - 6
     member HomeRealm : felt  # The OG Realm the Adventurer was birthed on 1 - 8000
     member Name : felt  # Name of Adventurer - encoded name max 10 letters
     member Birthdate : felt  # Birthdate/Age of Adventure timestamp
@@ -60,9 +61,9 @@ struct AdventurerState:
     member Birthdate : felt  # Birthdate/Age of Adventure timestamp
 
     # evolving stats
-    member Health : felt  # 1-1000
+    member Health : felt  # 1 - 1000
     member XP : felt  # 1 - 10000000
-    member Level : felt  # 1- 100
+    member Level : felt  # 1 - 100
     member Order : felt  # 1 - 16
 
     # store item NFT id when equiped
@@ -71,6 +72,7 @@ struct AdventurerState:
     member WeaponId : felt
     member RingId : felt
     member ChestId : felt
+
     # Packed Stats p3
     member HeadId : felt
     member WaistId : felt
