@@ -12,14 +12,14 @@ from contracts.loot.constants.item import (
     Material
 )
 from contracts.loot.constants.rankings import ItemRank
-from contracts.loot.contracts.stats.item import Statistics
+from contracts.loot.contracts.stats.item import ItemStats
 from contracts.loot.constants.physics import MaterialDensity
 
 @external
 func test_item_slot{syscall_ptr : felt*, range_check_ptr}():
     alloc_locals
 
-    let (slot) = Statistics.item_slot(ItemIds.WoolGloves)
+    let (slot) = ItemStats.item_slot(ItemIds.WoolGloves)
     assert slot = ItemSlot.WoolGloves
 
     return ()
@@ -29,13 +29,13 @@ end
 func test_item_type{syscall_ptr : felt*, range_check_ptr}():
     alloc_locals
 
-    let (typea) = Statistics.item_type(ItemIds.GraveWand)
+    let (typea) = ItemStats.item_type(ItemIds.GraveWand)
     assert typea = ItemType.GraveWand
 
-    let (typeb) = Statistics.item_type(ItemIds.LinenHood)
+    let (typeb) = ItemStats.item_type(ItemIds.LinenHood)
     assert typeb = ItemType.LinenHood
 
-    let (typeb) = Statistics.item_type(ItemIds.HeavyGloves)
+    let (typeb) = ItemStats.item_type(ItemIds.HeavyGloves)
     assert typeb = ItemType.HeavyGloves
 
     return ()
@@ -45,13 +45,13 @@ end
 func test_item_material{syscall_ptr : felt*, range_check_ptr}():
     alloc_locals
 
-    let (typea) = Statistics.item_material(ItemIds.PlatinumRing)
+    let (typea) = ItemStats.item_material(ItemIds.PlatinumRing)
     assert typea = ItemMaterial.PlatinumRing
 
-    let (typeb) = Statistics.item_material(ItemIds.DemonhideBelt)
+    let (typeb) = ItemStats.item_material(ItemIds.DemonhideBelt)
     assert typeb = ItemMaterial.DemonhideBelt
 
-    let (typeb) = Statistics.item_material(ItemIds.OrnateGauntlets)
+    let (typeb) = ItemStats.item_material(ItemIds.OrnateGauntlets)
     assert typeb = ItemMaterial.OrnateGauntlets
 
     return ()
@@ -61,13 +61,13 @@ end
 func test_item_rank{syscall_ptr : felt*, range_check_ptr}():
     alloc_locals
 
-    let (ranka) = Statistics.item_rank(ItemIds.GoldRing)
+    let (ranka) = ItemStats.item_rank(ItemIds.GoldRing)
     assert ranka = ItemRank.GoldRing
 
-    let (rankb) = Statistics.item_rank(ItemIds.DragonsCrown)
+    let (rankb) = ItemStats.item_rank(ItemIds.DragonsCrown)
     assert rankb = ItemRank.DragonsCrown
 
-    let (rankc) = Statistics.item_rank(ItemIds.ChainGloves)
+    let (rankc) = ItemStats.item_rank(ItemIds.ChainGloves)
     assert rankc = ItemRank.ChainGloves
 
     return ()
@@ -77,25 +77,25 @@ end
 func test_material_density{syscall_ptr : felt*, range_check_ptr}():
     alloc_locals
 
-    let (densitya) = Statistics.material_density(Material.Metal.generic)
+    let (densitya) = ItemStats.material_density(Material.Metal.generic)
     assert densitya = MaterialDensity.Metal.generic
 
-    let (densityb) = Statistics.material_density(Material.Metal.gold)
+    let (densityb) = ItemStats.material_density(Material.Metal.gold)
     assert densityb = MaterialDensity.Metal.gold
 
-    let (densityc) = Statistics.material_density(Material.Cloth.brightsilk)
+    let (densityc) = ItemStats.material_density(Material.Cloth.brightsilk)
     assert densityc = MaterialDensity.Cloth.brightsilk
 
-    let (densityd) = Statistics.material_density(Material.Biotic.Demon.hide)
+    let (densityd) = ItemStats.material_density(Material.Biotic.Demon.hide)
     assert densityd = MaterialDensity.Biotic.Demon.hide
 
-    let (densitye) = Statistics.material_density(Material.Biotic.Human.bones)
+    let (densitye) = ItemStats.material_density(Material.Biotic.Human.bones)
     assert densitye = MaterialDensity.Biotic.Human.bones
 
-    let (densityf) = Statistics.material_density(Material.Wood.Hard.walnut)
+    let (densityf) = ItemStats.material_density(Material.Wood.Hard.walnut)
     assert densityf = MaterialDensity.Wood.Hard.walnut
 
-    let (densityg) = Statistics.material_density(Material.Wood.Soft.yew)
+    let (densityg) = ItemStats.material_density(Material.Wood.Soft.yew)
     assert densityg = MaterialDensity.Wood.Soft.yew
 
     return ()
