@@ -23,7 +23,7 @@ from starkware.starknet.common.syscalls import (
     get_contract_address,
 )
 
-from contracts.loot.contracts.stats.item import Statistics
+from contracts.loot.loot.stats.item import ItemStats
 
 # -----------------------------------
 # Storage
@@ -256,13 +256,13 @@ func getItemByTokenId{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     let (storedItem : Item) = item.read(tokenId)
 
     let Id = storedItem.Id
-    let (Slot) = Statistics.item_slot(storedItem.Id)  # determined by Id
-    let (Type) = Statistics.item_type(storedItem.Id)  # determined by Id
-    let (Material) = Statistics.item_material(storedItem.Id)  # determined by Id
-    let (Rank) = Statistics.item_rank(storedItem.Id)  # stored state
-    let (Prefix_1) = Statistics.item_name_prefix(1)  # stored state
-    let (Prefix_2) = Statistics.item_name_suffix(1)  # stored state
-    let (Suffix) = Statistics.item_suffix(1) # stored state
+    let (Slot) = ItemStats.item_slot(storedItem.Id)  # determined by Id
+    let (Type) = ItemStats.item_type(storedItem.Id)  # determined by Id
+    let (Material) = ItemStats.item_material(storedItem.Id)  # determined by Id
+    let (Rank) = ItemStats.item_rank(storedItem.Id)  # stored state
+    let (Prefix_1) = ItemStats.item_name_prefix(1)  # stored state
+    let (Prefix_2) = ItemStats.item_name_suffix(1)  # stored state
+    let (Suffix) = ItemStats.item_suffix(1) # stored state
     let Greatness = 0  # stored state
     let CreatedBlock = storedItem.CreatedBlock  # timestamp
     let XP = 0  # stored state
