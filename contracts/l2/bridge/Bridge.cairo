@@ -12,18 +12,11 @@ from starkware.starknet.common.syscalls import get_caller_address, get_contract_
 from starkware.starknet.common.messages import send_message_to_l1
 
 # OZ
-from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
-from openzeppelin.access.ownable import Ownable_initializer, Ownable_only_owner
-from openzeppelin.utils.constants import IERC721_RECEIVER_ID
-from openzeppelin.introspection.ERC165 import (
-    ERC165_supports_interface,
-    ERC165_register_interface
-)
-from openzeppelin.upgrades.library import (
-    Proxy_initializer,
-    Proxy_only_admin,
-    Proxy_set_implementation,
-)
+from openzeppelin.token.erc721.IERC721 import IERC721
+from openzeppelin.access.ownable.library import Ownable
+from openzeppelin.utils.constants.library import IERC721_RECEIVER_ID
+from openzeppelin.introspection.ERC165.library import ERC165
+from openzeppelin.upgrades.library import Proxy
 
 @storage_var
 func l1_bridge_contract_address() -> (res: felt):
@@ -44,13 +37,11 @@ end
 
 @external
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    proxy_admin : felt,
-    l2_realms_address: felt
+    proxy_admin : felt
 ):
-    Ownable_initializer(proxy_admin)
-    Proxy_initializer(proxy_admin)
-    ERC165_register_interface(IERC721_RECEIVER_ID)
-    l2_realms_contract_address.write(l2_realms_address)
+    Ownable.initializer(proxy_admin)
+    Proxy.initializer(proxy_admin)
+    ERC165.register_interface(IERC721_RECEIVER_ID)
 
     return ()
 end
@@ -59,8 +50,8 @@ end
 func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     new_implementation : felt
 ):
-    Proxy_only_admin()
-    Proxy_set_implementation(new_implementation)
+    Proxy.assert_only_admin()
+    Proxy._set_implementation_hash(new_implementation)
     return ()
 end
 
@@ -73,7 +64,7 @@ func supportsInterface{
         pedersen_ptr : HashBuiltin*,
         range_check_ptr
     }(interfaceId: felt) -> (success: felt):
-    let (success) = ERC165_supports_interface(interfaceId)
+    let (success) = ERC165.supports_interface(interfaceId)
     return (success)
 end
 
@@ -256,7 +247,7 @@ func set_l1_bridge_contract_address{
         new_address: felt
     ):
 
-    Ownable_only_owner()
+    Ownable.assert_only_owner()
 
     l1_bridge_contract_address.write(new_address)
 
@@ -272,7 +263,7 @@ func set_l2_realms_contract_address{
         new_address: felt
     ):
 
-    Ownable_only_owner()
+    Ownable.assert_only_owner()
 
     l2_realms_contract_address.write(new_address)
 
