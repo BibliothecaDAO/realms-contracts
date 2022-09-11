@@ -13,7 +13,7 @@ from openzeppelin.token.erc721.library import ERC721
 from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
 from openzeppelin.upgrades.library import Proxy
 
-from contracts.loot.constants.item import Item
+from contracts.loot.constants.adventurer import Adventurer, AdventurerState
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 
 from starkware.starknet.common.syscalls import (
@@ -22,8 +22,6 @@ from starkware.starknet.common.syscalls import (
     get_tx_info,
     get_contract_address,
 )
-
-from contracts.loot.contracts.stats.item import Statistics
 
 # -----------------------------------
 # Storage
@@ -230,7 +228,7 @@ end
 # ------------ADVENTURERS
 
 @storage_var
-func item(tokenId : Uint256) -> (item : Item):
+func adventurer(tokenId : Uint256) -> (adventurer : AdventurerState):
 end
 
 @external
@@ -238,97 +236,17 @@ func mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(to 
     alloc_locals
 
     # fetch new item with random Id
-    let (new_item : Item) = generateRandomItem()
+    # let (new_item : Item) = generateRandomItem()
 
     let (current_id : Uint256) = totalSupply()
 
-    let (next_id, _) = uint256_add(current_id, Uint256(1, 0))
+    let (next_adventurer, _) = uint256_add(current_id, Uint256(1, 0))
 
-    item.write(next_id, new_item)
+    adventurer.write(next_id, next_adventurer)
 
     ERC721Enumerable._mint(to, next_id)
 
     return ()
-end
-
-@view
-func getItemByTokenId{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    tokenId : Uint256
-) -> (item : Item):
-    let (storedItem : Item) = item.read(tokenId)
-
-    let Id = storedItem.Id
-    let (Slot) = Statistics.item_slot(storedItem.Id)  # determined by Id
-    let (Type) = Statistics.item_type(storedItem.Id)  # determined by Id
-    let (Material) = Statistics.item_material(storedItem.Id)  # determined by Id
-    let (Rank) = Statistics.item_rank(storedItem.Id)  # stored state
-    let (Prefix_1) = Statistics.item_name_prefix(1)  # stored state
-    let (Prefix_2) = Statistics.item_name_suffix(1)  # stored state
-    let (Suffix) = Statistics.item_suffix(1)  # stored state
-    let Greatness = 0  # stored state
-    let CreatedBlock = storedItem.CreatedBlock  # timestamp
-    let XP = 0  # stored state
-    let State = 2  # loose state
-
-    return (
-        Item(
-        Id=Id,
-        Slot=Slot,
-        Type=Type,
-        Material=Material,
-        Rank=Rank,
-        Prefix_1=Prefix_1,
-        Prefix_2=Prefix_2,
-        Suffix=Suffix,
-        Greatness=Greatness,
-        CreatedBlock=CreatedBlock,
-        XP=XP,
-        State=State,
-        ),
-    )
-end
-
-@view
-func fetchItemData{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    itemId : felt
-):
-    #
-    return ()
-end
-
-func generateRandomItem{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-    item : Item
-):
-    # set blank item
-    let (Id) = roll_dice()
-    let Slot = 0  # determined by Id
-    let Type = 0  # determined by Id
-    let Material = 0  # determined by Id
-    let Rank = 0  # stored state
-    let Prefix_1 = 0  # stored state
-    let Prefix_2 = 0  # stored state
-    let Suffix = 0  # stored state
-    let Greatness = 0  # stored state
-    let (CreatedBlock) = get_block_timestamp()  # timestamp
-    let XP = 0  # stored state
-    let State = 2  # loose state
-
-    return (
-        Item(
-        Id=Id,
-        Slot=Slot,
-        Type=Type,
-        Material=Material,
-        Rank=Rank,
-        Prefix_1=Prefix_1,
-        Prefix_2=Prefix_2,
-        Suffix=Suffix,
-        Greatness=Greatness,
-        CreatedBlock=CreatedBlock,
-        XP=XP,
-        State=State,
-        ),
-    )
 end
 
 @external

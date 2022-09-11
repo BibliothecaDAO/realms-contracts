@@ -6,7 +6,7 @@ from starkware.cairo.common.pow import pow
 
 from contracts.loot.constants.item import ItemIds
 from contracts.loot.constants.combat import WeaponEfficacy
-from contracts.loot.contracts.stats.combat import CombatStats
+from contracts.loot.loot.stats.combat import CombatStats
 
 @external
 func test_weapon_vs_armor_efficacy{syscall_ptr : felt*, range_check_ptr}():
@@ -23,4 +23,3 @@ func test_weapon_vs_armor_efficacy{syscall_ptr : felt*, range_check_ptr}():
 
     return ()
 end
-

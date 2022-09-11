@@ -4,15 +4,9 @@ from starkware.cairo.common.math_cmp import is_nn, is_le
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
 from starkware.cairo.common.pow import pow
 
-from contracts.loot.constants.item import (
-    ItemIds,
-    ItemSlot,
-    ItemType,
-    ItemMaterial,
-    Material
-)
+from contracts.loot.constants.item import ItemIds, ItemSlot, ItemType, ItemMaterial, Material
 from contracts.loot.constants.rankings import ItemRank
-from contracts.loot.contracts.stats.item import ItemStats
+from contracts.loot.loot.stats.item import ItemStats
 from contracts.loot.constants.physics import MaterialDensity
 
 @external
@@ -100,4 +94,3 @@ func test_material_density{syscall_ptr : felt*, range_check_ptr}():
 
     return ()
 end
-

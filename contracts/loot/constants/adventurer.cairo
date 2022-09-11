@@ -55,17 +55,31 @@ end
 #    to save on storage costs.
 struct AdventurerState:
     # immutable stats
-    member Race : felt  # 1-6
-    member HomeRealm : felt  # The OG Realm the Adventurer was birthed on 1 - 8000
-    member Name : felt  # Name of Adventurer - encoded name max 10 letters
-    member Birthdate : felt  # Birthdate/Age of Adventure timestamp
+    member Race : felt  # 3
+    member HomeRealm : felt  # 13
+    member Name : felt
+    member Birthdate : felt
 
     # evolving stats
-    member Health : felt  # 1 - 1000
-    member XP : felt  # 1 - 10000000
-    member Level : felt  # 1 - 100
-    member Order : felt  # 1 - 16
+    member Health : felt  #
+    member Level : felt  #
+    member Order : felt  #
 
+    # Physical
+    member Strength : felt
+    member Dexterity : felt
+    member Vitality : felt
+
+    # Mental
+    member Intelligence : felt
+    member Wisdom : felt
+    member Charisma : felt
+
+    # Meta Physical
+    member Luck : felt
+
+    # XP
+    member XP : felt  #
     # store item NFT id when equiped
     # Packed Stats p2
     member NeckId : felt
@@ -78,12 +92,11 @@ struct AdventurerState:
     member WaistId : felt
     member FeetId : felt
     member HandsId : felt
-
-    member Bags : felt*  # save only the Bag IDs to storage.
 end
 
-struct PackedAdventurerStats:
+struct PackedAdventurerState:
     member p1 : felt
     member p2 : felt
     member p3 : felt
+    member p4 : felt
 end

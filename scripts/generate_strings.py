@@ -53,4 +53,4 @@ def encode(decoded):
 
 
 if __name__ == '__main__':
-    print(decode_felt_to_domain_string(54699836952))
+    print(encode('knightlawsa'))
