@@ -2,6 +2,15 @@
 pragma solidity ^0.8.0;
 
 interface IRealmsL1Bridge {
-    function depositToL2(uint256 _l2AccountAddress, uint256[] memory _realmsId, uint256[] memory _journeyVersions) external;
-    function withdrawFromL2(address to, uint256[] memory _realmsId, uint256[] memory _journeyVersions) external;
+  function depositToL2(
+    uint256 _l2AccountAddress,
+    uint256[] memory _realmsId,
+    uint256[] memory _journeyVersions
+  ) external payable;
+
+  function withdrawFromL2(
+    address to,
+    uint256[] memory _realmsId,
+    uint256[] memory _journeyVersions
+  ) external;
 }
