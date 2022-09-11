@@ -82,6 +82,7 @@ end
 
 @event
 func CombatEnd_4(
+    combat_outcome : felt,
     attacking_army_id : felt,
     attacking_realm_id : Uint256,
     attacking_army : Army,
@@ -380,6 +381,7 @@ func initiate_combat{
 
     # emit end
     CombatEnd_4.emit(
+        combat_outcome,
         attacking_army_id,
         attacking_realm_id,
         ending_attacking_army,
