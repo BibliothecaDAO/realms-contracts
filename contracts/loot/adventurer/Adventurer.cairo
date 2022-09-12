@@ -311,7 +311,8 @@ func getAdventurerById{
     alloc_locals
 
     let (packed_adventurer) = adventurer.read(tokenId)
-    # pack
+
+    # unpack
     let (unpacked_adventurer : AdventurerState) = AdventurerLib.unpack(packed_adventurer)
 
     return (unpacked_adventurer)

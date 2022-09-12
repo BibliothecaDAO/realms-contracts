@@ -2,6 +2,10 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState
+from contracts.loot.constants.item import Item, ItemIds, ItemType, ItemSlot, ItemMaterial, State
+from contracts.loot.constants.rankings import ItemRank
+
+const TEST_WEAPON_TOKEN_ID = 20
 
 namespace TestAdventurerState:
     # immutable stats
@@ -33,16 +37,16 @@ namespace TestAdventurerState:
 
     # store item NFT id when equiped
     # Packed Stats p2
-    const NeckId = 1000
-    const WeaponId = 1000
-    const RingId = 1000
-    const ChestId = 1000
+    const WeaponId = 1001
+    const ChestId = 1002
+    const HeadId = 1003
+    const WaistId = 1004
+    const FeetId = 1005
+    const HandsId = 1006
+    const NeckId = 1007
+    const RingId = 1008
 
     # Packed Stats p3
-    const HeadId = 1000
-    const WaistId = 1000
-    const FeetId = 1000
-    const HandsId = 1000
 end
 
 func get_adventurer_state{syscall_ptr : felt*, range_check_ptr}() -> (
@@ -67,14 +71,35 @@ func get_adventurer_state{syscall_ptr : felt*, range_check_ptr}() -> (
         TestAdventurerState.Charisma,
         TestAdventurerState.Luck,
         TestAdventurerState.XP,
-        TestAdventurerState.NeckId,
         TestAdventurerState.WeaponId,
-        TestAdventurerState.RingId,
         TestAdventurerState.ChestId,
         TestAdventurerState.HeadId,
         TestAdventurerState.WaistId,
         TestAdventurerState.FeetId,
         TestAdventurerState.HandsId,
+        TestAdventurerState.NeckId,
+        TestAdventurerState.RingId,
+        ),
+    )
+end
+
+func get_item{syscall_ptr : felt*, range_check_ptr}() -> (item : Item):
+    alloc_locals
+
+    return (
+        Item(
+        ItemIds.Katana,
+        ItemSlot.Katana,
+        ItemType.Katana,
+        ItemMaterial.Katana,
+        ItemRank.Katana,
+        1,
+        1,
+        1,
+        20,
+        1,
+        1,
+        State.Loose,
         ),
     )
 end

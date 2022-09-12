@@ -12,10 +12,17 @@ from contracts.loot.constants.physics import MaterialDensity
 from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState
 from contracts.loot.adventurer.library import AdventurerLib
 
-from tests.protostar.loot.test_structs import TestAdventurerState, get_adventurer_state
+from tests.protostar.loot.test_structs import (
+    TestAdventurerState,
+    get_adventurer_state,
+    get_item,
+    TEST_WEAPON_TOKEN_ID,
+)
 
 @external
-func test_birth{syscall_ptr : felt*, range_check_ptr}():
+func test_birth{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}():
     alloc_locals
 
     let (adventurer : AdventurerState) = AdventurerLib.birth(
@@ -25,6 +32,11 @@ func test_birth{syscall_ptr : felt*, range_check_ptr}():
         TestAdventurerState.Birthdate,
         TestAdventurerState.Order,
     )
+
+    let (adventurer_state : PackedAdventurerState) = AdventurerLib.pack(adventurer)
+
+    let (adventurer : AdventurerState) = AdventurerLib.unpack(adventurer_state)
+
     assert TestAdventurerState.Race = adventurer.Race
     assert TestAdventurerState.HomeRealm = adventurer.HomeRealm
     assert TestAdventurerState.Name = adventurer.Name
@@ -88,19 +100,42 @@ func test_pack{
     return ()
 end
 
-# @external
-# func test_cast{
-#     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-# }():
-#     alloc_locals
+@external
+func test_cast{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}():
+    alloc_locals
 
-# let (adventurer_state : PackedAdventurerState) = AdventurerLib.pack(state)
+    let (state) = get_adventurer_state()
 
-# let (adventurer : AdventurerState) = AdventurerLib.unpack(adventurer_state)
+    let (adventurer_state : PackedAdventurerState) = AdventurerLib.pack(state)
 
-# let (c) = AdventurerLib.cast_state(0, 2, adventurer)
+    let (adventurer : AdventurerState) = AdventurerLib.unpack(adventurer_state)
 
-# %{ print('Race', ids.c.Race) %}
+    let (c) = AdventurerLib.cast_state(0, 3, adventurer)
 
-# return ()
-# end
+    %{ print('Race', ids.c.Race) %}
+
+    return ()
+end
+
+@external
+func test_equip{
+    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}():
+    alloc_locals
+
+    let (state) = get_adventurer_state()
+
+    let (item) = get_item()
+
+    let (adventurer_state : PackedAdventurerState) = AdventurerLib.pack(state)
+
+    let (adventurer : AdventurerState) = AdventurerLib.unpack(adventurer_state)
+
+    let (c) = AdventurerLib.equip_item(TEST_WEAPON_TOKEN_ID, item, adventurer)
+
+    assert c.WeaponId = TEST_WEAPON_TOKEN_ID
+
+    return ()
+end

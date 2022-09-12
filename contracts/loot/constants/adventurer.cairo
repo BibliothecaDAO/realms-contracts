@@ -82,16 +82,16 @@ struct AdventurerState:
     member XP : felt  #
     # store item NFT id when equiped
     # Packed Stats p2
-    member NeckId : felt
     member WeaponId : felt
-    member RingId : felt
     member ChestId : felt
-
-    # Packed Stats p3
     member HeadId : felt
     member WaistId : felt
+
+    # Packed Stats p3
     member FeetId : felt
     member HandsId : felt
+    member NeckId : felt
+    member RingId : felt
 end
 
 struct PackedAdventurerState:
@@ -123,3 +123,48 @@ namespace SHIFT_P_2:
     const _12 = 2 ** 107
     const _13 = 2 ** 117
 end
+
+namespace AdventurerSlotIds:
+    # immutable stats
+    const Race = 0  # 3
+    const HomeRealm = 1  # 13
+    const Birthdate = 2
+    const Name = 3
+
+    # evolving stats
+    const Health = 4  #
+    const Level = 5  #
+    const Order = 6  #
+
+    # Physical
+    const Strength = 7
+    const Dexterity = 8
+    const Vitality = 9
+
+    # Mental
+    const Intelligence = 10
+    const Wisdom = 11
+    const Charisma = 12
+
+    # Meta Physical
+    const Luck = 13
+
+    # XP
+    const XP = 14  #
+    # store item NFT id when equiped
+    # Packed Stats p2
+    const WeaponId = 15
+    const ChestId = 16
+    const HeadId = 17
+    const WaistId = 18
+
+    # Packed Stats p3
+    const FeetId = 19
+    const HandsId = 20
+    const NeckId = 21
+    const RingId = 22
+end
+
+# index for items - used in cast function to set values
+const ItemShift = AdventurerSlotIds.WeaponId - 1
+const StatisticShift = AdventurerSlotIds.Strength - 1

@@ -26,6 +26,8 @@ from contracts.loot.constants.adventurer import (
     PackedAdventurerState,
     SHIFT_P_1,
     SHIFT_P_2,
+    ItemShift,
+    StatisticShift,
 )
 
 from contracts.loot.constants.item import Item
@@ -86,14 +88,14 @@ namespace AdventurerLib:
             Charisma=Charisma,
             Luck=Luck,
             XP=XP,
-            NeckId=NeckId,
             WeaponId=WeaponId,
-            RingId=RingId,
             ChestId=ChestId,
             HeadId=HeadId,
             WaistId=WaistId,
             FeetId=FeetId,
-            HandsId=HandsId
+            HandsId=HandsId,
+            NeckId=NeckId,
+            RingId=RingId,
             ),
         )
     end
@@ -130,21 +132,21 @@ namespace AdventurerLib:
         let XP = unpacked_adventurer_state.XP * SHIFT_P_2._11
 
         # Items
-        let Neck = unpacked_adventurer_state.NeckId * SHIFT_41._1  # 30
-        let Weapon = unpacked_adventurer_state.WeaponId * SHIFT_41._2  # 30
-        let Ring = unpacked_adventurer_state.RingId * SHIFT_41._3  # 30
-        let Chest = unpacked_adventurer_state.ChestId * SHIFT_41._4  # 30
+        let Weapon = unpacked_adventurer_state.WeaponId * SHIFT_41._1
+        let Chest = unpacked_adventurer_state.ChestId * SHIFT_41._2
+        let Head = unpacked_adventurer_state.HeadId * SHIFT_41._3
+        let Waist = unpacked_adventurer_state.WaistId * SHIFT_41._4
 
-        let Head = unpacked_adventurer_state.HeadId * SHIFT_41._1  # 30
-        let Waist = unpacked_adventurer_state.WaistId * SHIFT_41._2  # 30
-        let Feet = unpacked_adventurer_state.FeetId * SHIFT_41._3  # 30
-        let Hands = unpacked_adventurer_state.HandsId * SHIFT_41._4  # 30
+        let Feet = unpacked_adventurer_state.FeetId * SHIFT_41._1
+        let Hands = unpacked_adventurer_state.HandsId * SHIFT_41._2
+        let Neck = unpacked_adventurer_state.NeckId * SHIFT_41._3
+        let Ring = unpacked_adventurer_state.RingId * SHIFT_41._4
 
         # packing
         let p1 = Name + Birthdate + HomeRealm + Race
         let p2 = XP + Luck + Charisma + Wisdom + Intelligence + Vitality + Dexterity + Strength + Order + Level + Health
-        let p3 = Chest + Ring + Weapon + Neck
-        let p4 = Hands + Feet + Waist + Head
+        let p3 = Waist + Head + Chest + Weapon
+        let p4 = Ring + Neck + Hands + Feet
 
         let packedAdventurer = PackedAdventurerState(p1, p2, p3, p4)
 
@@ -187,16 +189,16 @@ namespace AdventurerLib:
         let (XP) = unpack_data(packed_adventurer.p2, 97, 134217727)  # the rest of the felt
 
         # ---------- p3 ---------#
-        let (NeckId) = unpack_data(packed_adventurer.p3, 0, 2199023255551)  # 41
-        let (WeaponId) = unpack_data(packed_adventurer.p3, 41, 2199023255551)  # 41
-        let (RingId) = unpack_data(packed_adventurer.p3, 82, 2199023255551)  # 41
-        let (ChestId) = unpack_data(packed_adventurer.p3, 123, 2199023255551)  # 41
+        let (WeaponId) = unpack_data(packed_adventurer.p3, 0, 2199023255551)  # 41
+        let (ChestId) = unpack_data(packed_adventurer.p3, 41, 2199023255551)  # 41
+        let (HeadId) = unpack_data(packed_adventurer.p3, 82, 2199023255551)  # 41
+        let (WaistId) = unpack_data(packed_adventurer.p3, 123, 2199023255551)  # 41
 
         # ---------- p4 ---------#
-        let (HeadId) = unpack_data(packed_adventurer.p3, 0, 2199023255551)  # 41
-        let (WaistId) = unpack_data(packed_adventurer.p3, 41, 2199023255551)  # 41
-        let (FeetId) = unpack_data(packed_adventurer.p3, 82, 2199023255551)  # 41
-        let (HandsId) = unpack_data(packed_adventurer.p3, 123, 2199023255551)  # 41
+        let (FeetId) = unpack_data(packed_adventurer.p4, 0, 2199023255551)  # 41
+        let (HandsId) = unpack_data(packed_adventurer.p4, 41, 2199023255551)  # 41
+        let (NeckId) = unpack_data(packed_adventurer.p4, 82, 2199023255551)  # 41
+        let (RingId) = unpack_data(packed_adventurer.p4, 123, 2199023255551)  # 41
 
         return (
             AdventurerState(
@@ -215,14 +217,14 @@ namespace AdventurerLib:
             Charisma=Charisma,
             Luck=Luck,
             XP=XP,
-            NeckId=NeckId,
             WeaponId=WeaponId,
-            RingId=RingId,
             ChestId=ChestId,
             HeadId=HeadId,
             WaistId=WaistId,
             FeetId=FeetId,
-            HandsId=HandsId
+            HandsId=HandsId,
+            NeckId=NeckId,
+            RingId=RingId,
             ),
         )
     end
@@ -242,7 +244,7 @@ namespace AdventurerLib:
         let (a) = alloc()
 
         memcpy(a, &unpacked_adventurer, index)
-        memset(a + index, value, AdventurerState.SIZE)
+        memset(a + index, value, 1)
         memcpy(
             a + (index + 1), &unpacked_adventurer + (index + 1), AdventurerState.SIZE - (index + 1)
         )
@@ -257,11 +259,10 @@ namespace AdventurerLib:
     ) -> (new_unpacked_adventurer : AdventurerState):
         alloc_locals
 
-        let (updated_adventurer) = cast_state(1, 15, unpacked_adventurer)
-
-        # cast state into felt array
-        # make adjustment to felt at index
-        # cast back into adventuerState
+        # pass index shift and Item slot to find what item to update
+        let (updated_adventurer : AdventurerState) = cast_state(
+            ItemShift + item.Slot, item_token_id, unpacked_adventurer
+        )
 
         return (updated_adventurer)
     end
