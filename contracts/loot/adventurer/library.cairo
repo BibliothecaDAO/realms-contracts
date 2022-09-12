@@ -237,14 +237,15 @@ namespace AdventurerLib:
         index : felt, value : felt, unpacked_adventurer : AdventurerState
     ) -> (new_unpacked_adventurer : AdventurerState):
         alloc_locals
-
         let (__fp__, _) = get_fp_and_pc()
+
         let (a) = alloc()
 
-        # let updated = cast(a, Squad*)
-        # cast state into felt array
-        # make adjustment to felt at index
-        # cast back into adventuerState
+        memcpy(a, &unpacked_adventurer, index)
+        memset(a + index, value, AdventurerState.SIZE)
+        memcpy(
+            a + (index + 1), &unpacked_adventurer + (index + 1), AdventurerState.SIZE - (index + 1)
+        )
 
         let cast_adventurer = cast(a, AdventurerState*)
 
@@ -256,11 +257,13 @@ namespace AdventurerLib:
     ) -> (new_unpacked_adventurer : AdventurerState):
         alloc_locals
 
+        let (updated_adventurer) = cast_state(1, 15, unpacked_adventurer)
+
         # cast state into felt array
         # make adjustment to felt at index
         # cast back into adventuerState
 
-        return (0)
+        return (updated_adventurer)
     end
 
     func adjust_health{syscall_ptr : felt*, range_check_ptr}(
