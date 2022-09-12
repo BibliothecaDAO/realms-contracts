@@ -4,9 +4,11 @@ from starkware.cairo.common.math_cmp import is_nn, is_le
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
 from starkware.cairo.common.pow import pow
 
-from contracts.loot.constants.item import ItemIds
+from contracts.loot.constants.item import Item, ItemIds, ItemType, ItemSlot, ItemMaterial, State
+from contracts.loot.constants.rankings import ItemRank
 from contracts.loot.constants.combat import WeaponEfficacy
 from contracts.loot.loot.stats.combat import CombatStats
+from contracts.loot.loot.Loot import generateItem, generateRandomItem
 
 @external
 func test_weapon_vs_armor_efficacy{syscall_ptr : felt*, range_check_ptr}():
@@ -51,7 +53,39 @@ func test_calculate_damage{syscall_ptr : felt*, range_check_ptr}():
 
     # Greatness 20 Katana vs Greatness 0 Robe (gg)
     # TODO: This needs to use items instead of just itemIds since ItemIds don't inherently have a greatness
-    let (g20_katana_vs_g0_robe) = CombatStats.calculate_damage(ItemIds.Katana, ItemIds.Shirt)
+    
+    # Create a greatness 20 katana
+    let g20_katana = Item(
+        ItemIds.Katana,
+        ItemSlot.Katana,
+        ItemType.Katana,
+        ItemMaterial.Katana,
+        ItemRank.Katana,
+        1,
+        1,
+        1,
+        20,
+        1,
+        1,
+        State.Loose
+    )
+
+    let g0_shirt = Item(
+        ItemIds.Shirt,
+        ItemSlot.Shirt,
+        ItemType.Shirt,
+        ItemMaterial.Shirt,
+        ItemRank.Shirt,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        State.Loose
+    )
+
+    let (g20_katana_vs_g0_robe) = CombatStats.calculate_damage(g20_katana, g0_shirt)
     assert g20_katana_vs_g0_robe = 200
 
     return ()
