@@ -6,6 +6,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_add
 from starkware.cairo.common.math import unsigned_div_rem
+from starkware.starknet.common.syscalls import get_block_timestamp
 
 from openzeppelin.access.ownable.library import Ownable
 from openzeppelin.introspection.erc165.library import ERC165
@@ -13,15 +14,9 @@ from openzeppelin.token.erc721.library import ERC721
 from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
 from openzeppelin.upgrades.library import Proxy
 
+from contracts.loot.adventurer.library import AdventurerLib
 from contracts.loot.constants.adventurer import Adventurer, AdventurerState
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
-
-from starkware.starknet.common.syscalls import (
-    get_block_timestamp,
-    get_caller_address,
-    get_tx_info,
-    get_contract_address,
-)
 
 # -----------------------------------
 # Storage
@@ -32,7 +27,15 @@ func xoroshiro_address() -> (address : felt):
 end
 
 @storage_var
-func counter() -> (count : felt):
+func item_address() -> (address : felt):
+end
+
+@storage_var
+func bag_address() -> (address : felt):
+end
+
+@storage_var
+func lords_address() -> (address : felt):
 end
 
 # -----------------------------------
@@ -236,15 +239,15 @@ func mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(to 
     alloc_locals
 
     # fetch new item with random Id
-    # let (new_item : Item) = generateRandomItem()
+    let (new_item : Item) = AdventurerLib.birth()
 
     let (current_id : Uint256) = totalSupply()
 
     let (next_adventurer, _) = uint256_add(current_id, Uint256(1, 0))
 
-    adventurer.write(next_id, next_adventurer)
+    adventurer.write(next_adventurer, next_adventurer)
 
-    ERC721Enumerable._mint(to, next_id)
+    ERC721Enumerable._mint(to, next_adventurer)
 
     return ()
 end
