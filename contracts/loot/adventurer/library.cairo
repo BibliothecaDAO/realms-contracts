@@ -14,6 +14,9 @@ from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.registers import get_label_location
+from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
+from starkware.cairo.common.memcpy import memcpy
+from starkware.cairo.common.memset import memset
 
 from contracts.loot.loot.stats.item import ItemStats
 
@@ -224,54 +227,75 @@ namespace AdventurerLib:
         )
     end
 
-    func equip_item{syscall_ptr : felt*, range_check_ptr}(
-        item_token_id : felt, item : Item, unpacked_adventurer : AdventurerState
-    ) -> (success : felt):
+    # TODO: Equip Item
+    # TODO: update stats
+    # TODO: increase XP
+    # TODO: effect health function
+
+    # helper to cast value to location in State
+    func cast_state{syscall_ptr : felt*, range_check_ptr}(
+        index : felt, value : felt, unpacked_adventurer : AdventurerState
+    ) -> (new_unpacked_adventurer : AdventurerState):
         alloc_locals
 
-        if item.Slot == Slot.Neck:
-            let Neck = item_token_id * SHIFT_41._1
-        end
+        let (__fp__, _) = get_fp_and_pc()
+        let (a) = alloc()
+
+        # let updated = cast(a, Squad*)
+        # cast state into felt array
+        # make adjustment to felt at index
+        # cast back into adventuerState
+
+        let cast_adventurer = cast(a, AdventurerState*)
+
+        return ([cast_adventurer])
+    end
+
+    func equip_item{syscall_ptr : felt*, range_check_ptr}(
+        item_token_id : felt, item : Item, unpacked_adventurer : AdventurerState
+    ) -> (new_unpacked_adventurer : AdventurerState):
+        alloc_locals
+
+        # cast state into felt array
+        # make adjustment to felt at index
+        # cast back into adventuerState
 
         return (0)
     end
-    # func _stats{syscall_ptr : felt*, range_check_ptr}(adventurer : Adventurer) -> (
-    #     agility, attack, armour, wisdom, vitality
-    # ):
-    #     alloc_locals
 
-    # let (agility, attack, armour, wisdom, vitality) = _items(
-    #         adventurer.Weapon,
-    #         adventurer.Chest,
-    #         adventurer.Head,
-    #         adventurer.Waist,
-    #         adventurer.Feet,
-    #         adventurer.Hands,
-    #         adventurer.Neck,
-    #         adventurer.Ring,
-    #     )
+    func adjust_health{syscall_ptr : felt*, range_check_ptr}(
+        item_token_id : felt, item : Item, unpacked_adventurer : AdventurerState
+    ) -> (new_unpacked_adventurer : AdventurerState):
+        alloc_locals
 
-    # let adventurer = Adventurer(
-    #         adventurer.Class,
-    #         agility,
-    #         attack,
-    #         armour,
-    #         wisdom,
-    #         vitality,
-    #         adventurer.Neck,
-    #         adventurer.Weapon,
-    #         adventurer.Ring,
-    #         adventurer.Chest,
-    #         adventurer.Head,
-    #         adventurer.Waist,
-    #         adventurer.Feet,
-    #         adventurer.Hands,
-    #         adventurer.Age,
-    #         adventurer.Name,
-    #         adventurer.XP,
-    #         adventurer.Order,
-    #     )
+        # cast state into felt array
+        # make adjustment to felt at index
+        # cast back into adventuerState
 
-    # return (adventurer)
-    # end
+        return (0)
+    end
+
+    func increase_xp{syscall_ptr : felt*, range_check_ptr}(
+        item_token_id : felt, item : Item, unpacked_adventurer : AdventurerState
+    ) -> (new_unpacked_adventurer : AdventurerState):
+        alloc_locals
+
+        # cast state into felt array
+        # make adjustment to felt at index
+        # cast back into adventuerState
+
+        return (0)
+    end
+
+    func update_statistics{syscall_ptr : felt*, range_check_ptr}(
+        item_token_id : felt, item : Item, unpacked_adventurer : AdventurerState
+    ) -> (new_unpacked_adventurer : AdventurerState):
+        alloc_locals
+
+        # cast state into felt array
+        # make adjustment to felt at index
+        # cast back into adventuerState
+
+        return (0)
+    end
 end

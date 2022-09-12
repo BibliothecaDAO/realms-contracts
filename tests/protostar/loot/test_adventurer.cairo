@@ -144,3 +144,44 @@ func test_pack{
 
     return ()
 end
+
+# @external
+# func test_cast{
+#     syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+# }():
+#     alloc_locals
+
+# let (adventurer_state : PackedAdventurerState) = AdventurerLib.pack(
+#         AdventurerState(
+#         TestAdventurerState.Race,
+#         TestAdventurerState.HomeRealm,
+#         TestAdventurerState.Birthdate,
+#         TestAdventurerState.Name,
+#         TestAdventurerState.Health,
+#         TestAdventurerState.Level,
+#         TestAdventurerState.Order,
+#         TestAdventurerState.Strength,
+#         TestAdventurerState.Dexterity,
+#         TestAdventurerState.Vitality,
+#         TestAdventurerState.Intelligence,
+#         TestAdventurerState.Wisdom,
+#         TestAdventurerState.Charisma,
+#         TestAdventurerState.Luck,
+#         TestAdventurerState.XP,
+#         TestAdventurerState.NeckId,
+#         TestAdventurerState.WeaponId,
+#         TestAdventurerState.RingId,
+#         TestAdventurerState.ChestId,
+#         TestAdventurerState.HeadId,
+#         TestAdventurerState.WaistId,
+#         TestAdventurerState.FeetId,
+#         TestAdventurerState.HandsId,
+#         ),
+#     )
+
+# let (adventurer : AdventurerState) = AdventurerLib.unpack(adventurer_state)
+
+# let (c) = AdventurerLib.cast_state(1, 2, adventurer)
+
+# return ()
+# end
