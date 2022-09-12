@@ -3,7 +3,7 @@
 
 %lang starknet
 from starkware.cairo.common.alloc import alloc
-from starkware.cairo.common.cairo_builtins import HashBuiltin
+from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_add
 from starkware.cairo.common.math import unsigned_div_rem
 from starkware.starknet.common.syscalls import get_block_timestamp
@@ -15,8 +15,10 @@ from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
 from openzeppelin.upgrades.library import Proxy
 
 from contracts.loot.adventurer.library import AdventurerLib
-from contracts.loot.constants.adventurer import Adventurer, AdventurerState
+from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
+
+# const MINT_COST = 5000000000000000000
 
 # -----------------------------------
 # Storage
@@ -47,12 +49,23 @@ end
 # @return proxy_admin: Proxy admin address
 @external
 func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    name : felt, symbol : felt, proxy_admin : felt, xoroshiro_address_ : felt
+    name : felt,
+    symbol : felt,
+    proxy_admin : felt,
+    xoroshiro_address_ : felt,
+    item_address_ : felt,
+    bag_address_ : felt,
+    lords_address_ : felt,
 ):
     ERC721.initializer(name, symbol)
     ERC721Enumerable.initializer()
     Proxy.initializer(proxy_admin)
+
+    # contracts
     xoroshiro_address.write(xoroshiro_address_)
+    item_address.write(item_address_)
+    bag_address.write(bag_address_)
+    lords_address.write(lords_address_)
     return ()
 end
 
@@ -231,23 +244,32 @@ end
 # ------------ADVENTURERS
 
 @storage_var
-func adventurer(tokenId : Uint256) -> (adventurer : AdventurerState):
+func adventurer(tokenId : Uint256) -> (adventurer : PackedAdventurerState):
 end
 
 @external
-func mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(to : felt):
+func mint{
+    pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(to : felt, race : felt, home_realm : felt, name : felt, order : felt):
     alloc_locals
 
-    # fetch new item with random Id
-    let (new_item : Item) = AdventurerLib.birth()
+    # birth
+    let (birth_time) = get_block_timestamp()
+    let (new_adventurer : AdventurerState) = AdventurerLib.birth(
+        race, home_realm, name, birth_time, order
+    )
 
+    # pack
+    let (packed_new_adventurer : PackedAdventurerState) = AdventurerLib.pack(new_adventurer)
+
+    # get current ID and add 1
     let (current_id : Uint256) = totalSupply()
+    let (next_adventurer_id, _) = uint256_add(current_id, Uint256(1, 0))
 
-    let (next_adventurer, _) = uint256_add(current_id, Uint256(1, 0))
+    # store
+    adventurer.write(next_adventurer_id, packed_new_adventurer)
 
-    adventurer.write(next_adventurer, next_adventurer)
-
-    ERC721Enumerable._mint(to, next_adventurer)
+    ERC721Enumerable._mint(to, next_adventurer_id)
 
     return ()
 end
@@ -256,7 +278,6 @@ end
 func set_xoroshiro{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     xoroshiro : felt
 ):
-    # TODO:
     Proxy.assert_only_admin()
     xoroshiro_address.write(xoroshiro)
     return ()
@@ -264,30 +285,34 @@ end
 
 @view
 func get_xoroshiro{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-    x : felt
+    address : felt
 ):
-    let (xoroshiro) = xoroshiro_address.read()
-    return (xoroshiro)
+    return xoroshiro_address.read()
 end
 
-func roll_dice{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}() -> (
-    dice_roll : felt
+@external
+func set_lords{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(lords : felt):
+    Proxy.assert_only_admin()
+    lords_address.write(lords)
+    return ()
+end
+
+@view
+func get_lords{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+    address : felt
 ):
+    return lords_address.read()
+end
+
+@external
+func getAdventurerById{
+    pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(tokenId : Uint256) -> (adventurer : AdventurerState):
     alloc_locals
-    let (xoroshiro_address_) = xoroshiro_address.read()
-    let (rnd) = IXoroshiro.next(xoroshiro_address_)
 
-    # useful for testing:
-    # local rnd
-    # %{
-    #     import random
-    #     ids.rnd = random.randint(0, 5000)
-    # %}
-    let (_, r) = unsigned_div_rem(rnd, 101)
-    return (r + 1)  # values from 1 to 101 inclusive
+    let (packed_adventurer) = adventurer.read(tokenId)
+    # pack
+    let (unpacked_adventurer : AdventurerState) = AdventurerLib.unpack(packed_adventurer)
+
+    return (unpacked_adventurer)
 end
-
-# mint adventurer
-# encode a name
-# encode a race
-# encode a

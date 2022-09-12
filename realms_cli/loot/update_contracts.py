@@ -17,7 +17,7 @@ Contracts = namedtuple('Contracts', 'alias contract_name')
 NEW_MODULES = [
     # Contracts("realms", "Realms_ERC721_Mintable"),
     # Contracts("s_realms", "S_Realms_ERC721_Mintable"),
-    Contracts("Loot", "Loot"),
+    Contracts("Adventurer", "Adventurer"),
 ]
 
 
@@ -44,7 +44,7 @@ def run(nre):
                     f.write(line)
             f.truncate()
 
-        compile(contract_alias="contracts/loot/contracts/Loot.cairo")
+        compile(contract_alias="contracts/loot/adventurer/Adventurer.cairo")
 
         logged_deploy(
             nre,

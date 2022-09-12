@@ -13,12 +13,15 @@ Contracts = namedtuple('Contracts', 'alias contract_name id')
 # 3. Initialise
 
 NEW_MODULES = [
-    Contracts("Loot", "Loot", "14"),
+    Contracts("Adventurer", "Adventurer", "14"),
 ]
 
 # Realms
 LOOT = str_to_felt("LOOT")
 LOOT_SYMBOL = str_to_felt("LOOT")
+
+ADVENTURER = str_to_felt("ADVENTURER")
+ADVENTURER_SYMBOL = str_to_felt("ADVENTURER")
 
 
 def run(nre):
@@ -56,6 +59,6 @@ def run(nre):
             signer_alias=config.ADMIN_ALIAS,
             contract_alias="proxy_" + contract.contract_name,
             function="initializer",
-            arguments=[LOOT, LOOT_SYMBOL, strhex_as_strfelt(
-                config.ADMIN_ADDRESS), strhex_as_strfelt(config.XOROSHIRO_ADDRESS)],
+            arguments=[ADVENTURER, ADVENTURER_SYMBOL, strhex_as_strfelt(
+                config.ADMIN_ADDRESS), strhex_as_strfelt(config.XOROSHIRO_ADDRESS), strhex_as_strfelt(config.LOOT_PROXY_ADDRESS), strhex_as_strfelt(config.XOROSHIRO_ADDRESS), strhex_as_strfelt(config.LORDS_PROXY_ADDRESS)],
         )
