@@ -94,21 +94,16 @@ namespace CombatStats:
         const rank_ceiling = 6
 
         # use weapon rank and greatness to give every item a damage rating of 0-100
-        let weapon_greatness = weapon.Greatness
-        let (weapon_rank) = ItemStats.item_rank(weapon.Id)
-        let base_weapon_damage = (rank_ceiling - weapon.Rank) * weapon_greatness
+        let base_weapon_damage = (rank_ceiling - weapon.Rank) * weapon.Greatness
 
         # Get effectiveness of weapon vs armor
         let (attack_effectiveness) = weapon_vs_armor_efficacy(weapon.Id, armor.Id)
+        let (total_weapon_damage) = get_attack_effectiveness(attack_effectiveness, base_weapon_damage)
 
         # use armor rank and greatness to give every item a damage rating of 0-100
-        let armor_greatness = armor.Greatness
-        let (armor_rank) = ItemStats.item_rank(armor.Id)
-        let base_armor = (rank_ceiling - armor_rank) * armor_greatness
+        let armor_strength = (rank_ceiling - armor.Rank) * armor.Greatness
 
-        let (a) = get_attack_effectiveness(attack_effectiveness, base_weapon_damage)
-
-        let damage_dealt = a - base_armor
+        let damage_dealt = total_weapon_damage - armor_strength
 
         return (damage_dealt)
     end
