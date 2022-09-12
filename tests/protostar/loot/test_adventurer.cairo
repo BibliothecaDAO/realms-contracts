@@ -12,59 +12,26 @@ from contracts.loot.constants.physics import MaterialDensity
 from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState
 from contracts.loot.adventurer.library import AdventurerLib
 
-# @external
-# func test_birth{syscall_ptr : felt*, range_check_ptr}():
-#     alloc_locals
+from tests.protostar.loot.test_structs import TestAdventurerState, get_adventurer_state
 
-# let (adventurer : AdventurerState) = AdventurerLib.birth(1, 2, 3, 4, 5)
+@external
+func test_birth{syscall_ptr : felt*, range_check_ptr}():
+    alloc_locals
 
-# let order = adventurer.Order
+    let (adventurer : AdventurerState) = AdventurerLib.birth(
+        TestAdventurerState.Race,
+        TestAdventurerState.HomeRealm,
+        TestAdventurerState.Name,
+        TestAdventurerState.Birthdate,
+        TestAdventurerState.Order,
+    )
+    assert TestAdventurerState.Race = adventurer.Race
+    assert TestAdventurerState.HomeRealm = adventurer.HomeRealm
+    assert TestAdventurerState.Name = adventurer.Name
+    assert TestAdventurerState.Birthdate = adventurer.Birthdate
+    assert TestAdventurerState.Order = adventurer.Order
 
-# %{ print('Realm Happiness:', ids.order) %}
-
-# return ()
-# end
-
-namespace TestAdventurerState:
-    # immutable stats
-    const Race = 1  # 3
-    const HomeRealm = 2  # 13
-    const Birthdate = 1662888731
-    const Name = 'loaf'
-
-    # evolving stats
-    const Health = 5000  #
-
-    const Level = 500  #
-    const Order = 12  #
-
-    # Physical
-    const Strength = 1000
-    const Dexterity = 1000
-    const Vitality = 1000
-
-    # Mental
-    const Intelligence = 1000
-    const Wisdom = 1000
-    const Charisma = 1000
-
-    # Meta Physical
-    const Luck = 1000
-
-    const XP = 1000000  #
-
-    # store item NFT id when equiped
-    # Packed Stats p2
-    const NeckId = 1000
-    const WeaponId = 1000
-    const RingId = 1000
-    const ChestId = 1000
-
-    # Packed Stats p3
-    const HeadId = 1000
-    const WaistId = 1000
-    const FeetId = 1000
-    const HandsId = 1000
+    return ()
 end
 
 @external
@@ -73,33 +40,9 @@ func test_pack{
 }():
     alloc_locals
 
-    let (adventurer_state : PackedAdventurerState) = AdventurerLib.pack(
-        AdventurerState(
-        TestAdventurerState.Race,
-        TestAdventurerState.HomeRealm,
-        TestAdventurerState.Birthdate,
-        TestAdventurerState.Name,
-        TestAdventurerState.Health,
-        TestAdventurerState.Level,
-        TestAdventurerState.Order,
-        TestAdventurerState.Strength,
-        TestAdventurerState.Dexterity,
-        TestAdventurerState.Vitality,
-        TestAdventurerState.Intelligence,
-        TestAdventurerState.Wisdom,
-        TestAdventurerState.Charisma,
-        TestAdventurerState.Luck,
-        TestAdventurerState.XP,
-        TestAdventurerState.NeckId,
-        TestAdventurerState.WeaponId,
-        TestAdventurerState.RingId,
-        TestAdventurerState.ChestId,
-        TestAdventurerState.HeadId,
-        TestAdventurerState.WaistId,
-        TestAdventurerState.FeetId,
-        TestAdventurerState.HandsId,
-        ),
-    )
+    let (state) = get_adventurer_state()
+
+    let (adventurer_state : PackedAdventurerState) = AdventurerLib.pack(state)
 
     let (adventurer : AdventurerState) = AdventurerLib.unpack(adventurer_state)
 
@@ -151,37 +94,13 @@ end
 # }():
 #     alloc_locals
 
-# let (adventurer_state : PackedAdventurerState) = AdventurerLib.pack(
-#         AdventurerState(
-#         TestAdventurerState.Race,
-#         TestAdventurerState.HomeRealm,
-#         TestAdventurerState.Birthdate,
-#         TestAdventurerState.Name,
-#         TestAdventurerState.Health,
-#         TestAdventurerState.Level,
-#         TestAdventurerState.Order,
-#         TestAdventurerState.Strength,
-#         TestAdventurerState.Dexterity,
-#         TestAdventurerState.Vitality,
-#         TestAdventurerState.Intelligence,
-#         TestAdventurerState.Wisdom,
-#         TestAdventurerState.Charisma,
-#         TestAdventurerState.Luck,
-#         TestAdventurerState.XP,
-#         TestAdventurerState.NeckId,
-#         TestAdventurerState.WeaponId,
-#         TestAdventurerState.RingId,
-#         TestAdventurerState.ChestId,
-#         TestAdventurerState.HeadId,
-#         TestAdventurerState.WaistId,
-#         TestAdventurerState.FeetId,
-#         TestAdventurerState.HandsId,
-#         ),
-#     )
+# let (adventurer_state : PackedAdventurerState) = AdventurerLib.pack(state)
 
 # let (adventurer : AdventurerState) = AdventurerLib.unpack(adventurer_state)
 
-# let (c) = AdventurerLib.cast_state(1, 2, adventurer)
+# let (c) = AdventurerLib.cast_state(0, 2, adventurer)
+
+# %{ print('Race', ids.c.Race) %}
 
 # return ()
 # end
