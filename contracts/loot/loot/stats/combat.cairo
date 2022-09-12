@@ -63,42 +63,52 @@ namespace CombatStats:
         dw WeaponEfficacy.Medium
     end
 
+    func get_attack_effectiveness{syscall_ptr : felt*, range_check_ptr}(
+        attack_effectiveness : felt, base_weapon_damage : felt
+    ) -> (damage : felt):
+        alloc_locals
+
+        if attack_effectiveness == WeaponEfficacy.Low:
+            return (base_weapon_damage * WeaponEfficiacyDamageMultiplier.Low)
+        end
+
+        if attack_effectiveness == WeaponEfficacy.Medium:
+            return (base_weapon_damage * WeaponEfficiacyDamageMultiplier.Medium)
+        end
+
+        if attack_effectiveness == WeaponEfficacy.High:
+            return (base_weapon_damage * WeaponEfficiacyDamageMultiplier.High)
+        end
+
+        return (0)
+    end
+
     # calculate_damage calculates the damage a weapon does to an armor
     # parameters: weapon Item, armor Item
     # returns: damage
-    func calculate_damage{syscall_ptr : felt*, range_check_ptr}(
-        weapon : Item, armor : Item
-    ) -> (damage : felt):
+    func calculate_damage{syscall_ptr : felt*, range_check_ptr}(weapon : Item, armor : Item) -> (
+        damage : felt
+    ):
         alloc_locals
-        
+
         const rank_ceiling = 6
 
         # use weapon rank and greatness to give every item a damage rating of 0-100
         let weapon_greatness = weapon.Greatness
         let (weapon_rank) = ItemStats.item_rank(weapon.Id)
-        let base_weapon_damage = (rank_ceiling - weapon_rank) * weapon_greatness
+        let base_weapon_damage = (rank_ceiling - weapon.Rank) * weapon_greatness
 
         # Get effectiveness of weapon vs armor
         let (attack_effectiveness) = weapon_vs_armor_efficacy(weapon.Id, armor.Id)
-        local total_weapon_damage : felt
-        if attack_effectiveness == WeaponEfficacy.Low:
-            total_weapon_damage = base_weapon_damage * WeaponEfficiacyDamageMultiplier.Low
-        else:
-            if attack_effectiveness == WeaponEfficacy.Medium:
-                total_weapon_damage = base_weapon_damage * WeaponEfficiacyDamageMultiplier.Medium
-            else:
-                if attack_effectiveness == WeaponEfficacy.High:
-                    total_weapon_damage = base_weapon_damage * WeaponEfficiacyDamageMultiplier.High
-                end
-            end
-        end
 
-         # use armor rank and greatness to give every item a damage rating of 0-100
+        # use armor rank and greatness to give every item a damage rating of 0-100
         let armor_greatness = armor.Greatness
         let (armor_rank) = ItemStats.item_rank(armor.Id)
         let base_armor = (rank_ceiling - armor_rank) * armor_greatness
 
-        let damage_dealt = total_weapon_damage - base_armor
+        let (a) = get_attack_effectiveness(attack_effectiveness, base_weapon_damage)
+
+        let damage_dealt = a - base_armor
 
         return (damage_dealt)
     end
