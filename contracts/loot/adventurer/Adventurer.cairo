@@ -342,29 +342,43 @@ func equipItem{
 }(tokenId : Uint256, itemTokenId : Uint256) -> (success : felt):
     alloc_locals
 
+    # only adventurer can equip ofc
+    ERC721.assert_only_token_owner(tokenId)
+
+    # unpack adventurer
     let (unpacked_adventurer) = getAdventurerById(tokenId)
 
-    # get Item from Loot contract
+    # Get Item from Loot contract
     let (loot_address) = get_loot()
     let (item) = ILoot.getItemByTokenId(loot_address, itemTokenId)
 
-    # Check item is owned
+    assert item.Adventurer = 0
+    assert item.Bag = 0
+
+    # Check item is owned by caller
     let (owner) = IERC721.ownerOf(loot_address, itemTokenId)
     let (caller) = get_caller_address()
     assert owner = caller
 
-    # get convert token to Felt
+    # Convert token to Felt
     let (token_to_felt) = _uint_to_felt(itemTokenId)
 
-    # equip Item
+    # Equip Item
     let (equiped_adventurer) = AdventurerLib.equip_item(token_to_felt, item, unpacked_adventurer)
 
-    # TODO: Set item state so it can only be equiped to one character at a time.
+    # TODO: Move to function that emits adventurers state
+    let (packed_new_adventurer : PackedAdventurerState) = AdventurerLib.pack(equiped_adventurer)
+    adventurer.write(tokenId, packed_new_adventurer)
+
+    let (adventurer_to_felt) = _uint_to_felt(tokenId)
+
+    # update state
+    ILoot.updateAdventurer(loot_address, itemTokenId, adventurer_to_felt)
 
     return (1)
 end
 
-# TODO: Move
+# TODO: Move to Utils
 func _uint_to_felt{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     value : Uint256
 ) -> (value : felt):

@@ -99,7 +99,8 @@ func get_item{syscall_ptr : felt*, range_check_ptr}() -> (item : Item):
         20,
         1,
         1,
-        State.Loose,
+        0,
+        0
         ),
     )
 end

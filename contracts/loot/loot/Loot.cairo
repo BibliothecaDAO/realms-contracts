@@ -253,7 +253,6 @@ end
 func getItemByTokenId{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     tokenId : Uint256
 ) -> (item : Item):
-    ERC721.assert_only_token_owner(tokenId)
     let (storedItem : Item) = item.read(tokenId)
 
     let Id = storedItem.Id
@@ -267,7 +266,8 @@ func getItemByTokenId{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     let Greatness = 0  # stored state
     let CreatedBlock = storedItem.CreatedBlock  # timestamp
     let XP = 0  # stored state
-    let State = 2  # loose state
+    let Adventurer = 0
+    let Bag = 0
 
     return (
         Item(
@@ -282,16 +282,48 @@ func getItemByTokenId{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
         Greatness=Greatness,
         CreatedBlock=CreatedBlock,
         XP=XP,
-        State=State,
+        Adventurer=Adventurer,
+        Bag=Bag
         ),
     )
 end
 
-@view
-func fetchItemData{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    itemId : felt
+# TODO: Unequip Item
+
+@external
+func updateAdventurer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    tokenId : Uint256, adventurerId : felt
 ):
-    #
+    # TODO: Only allow calling by Adventurer Contract
+    let (item_ : Item) = item.read(tokenId)
+
+    # TODO: Move library
+    let update_item = Item(
+        Id=item_.Id,
+        Slot=item_.Slot,
+        Type=item_.Type,
+        Material=item_.Material,
+        Rank=item_.Rank,
+        Prefix_1=item_.Prefix_1,
+        Prefix_2=item_.Prefix_2,
+        Suffix=item_.Suffix,
+        Greatness=item_.Greatness,
+        CreatedBlock=item_.CreatedBlock,
+        XP=item_.XP,
+        Adventurer=adventurerId,
+        Bag=item_.Bag,
+    )
+
+    setItemById(tokenId, update_item)
+    return ()
+end
+
+@external
+func setItemById{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    tokenId : Uint256, item_ : Item
+):
+    # TODO: Security
+    item.write(tokenId, item_)
     return ()
 end
 
@@ -310,7 +342,8 @@ func generateRandomItem{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     let Greatness = 0  # stored state
     let (CreatedBlock) = get_block_timestamp()  # timestamp
     let XP = 0  # stored state
-    let State = 2  # loose state
+    let Adventurer = 0
+    let Bag = 0
 
     return (
         Item(
@@ -325,7 +358,8 @@ func generateRandomItem{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         Greatness=Greatness,
         CreatedBlock=CreatedBlock,
         XP=XP,
-        State=State,
+        Adventurer=Adventurer,
+        Bag=Bag
         ),
     )
 end

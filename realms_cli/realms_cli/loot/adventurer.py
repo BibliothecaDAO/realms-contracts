@@ -63,3 +63,24 @@ def get_adventurer(adventurer_token_id, network):
           felt_to_str(int(out[3])) + " +*______________________")
     print("_____________________________________________________")
     print_over_colums(pretty_out)
+
+
+@click.command()
+@click.option("--network", default="goerli")
+@click.option('--adventurer', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='adventurer', prompt=True)
+@click.option('--item', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='item', prompt=True)
+def equip(network, adventurer, item):
+    """
+    Mint a Random Loot Item
+    """
+    config = Config(nile_network=network)
+
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_Adventurer",
+        function="equipItem",
+        arguments=[*uint(adventurer), *uint(item)]
+    )

@@ -17,13 +17,17 @@ Contracts = namedtuple('Contracts', 'alias contract_name')
 NEW_MODULES = [
     # Contracts("realms", "Realms_ERC721_Mintable"),
     # Contracts("s_realms", "S_Realms_ERC721_Mintable"),
-    Contracts("Adventurer", "Adventurer"),
+    # Contracts("Adventurer", "Adventurer"),
+    Contracts("Loot", "Loot"),
 ]
 
 
 def run(nre):
 
     config = Config(nre.network)
+
+    # compile(contract_alias="contracts/loot/adventurer/Adventurer.cairo")
+    compile(contract_alias="contracts/loot/loot/Loot.cairo")
 
     #---------------- SET MODULES  ----------------#
 
@@ -43,8 +47,6 @@ def run(nre):
                 if contract.alias not in line:
                     f.write(line)
             f.truncate()
-
-        compile(contract_alias="contracts/loot/adventurer/Adventurer.cairo")
 
         logged_deploy(
             nre,

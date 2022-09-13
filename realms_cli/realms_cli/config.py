@@ -178,7 +178,8 @@ class Config:
             "Greatness",
             "CreatedBlock",
             "XP",
-            "State",
+            "Adventurer",
+            "Bag",
         ]
 
         self.LOOT_PROXY_ADDRESS, _ = safe_load_deployment(

@@ -7,4 +7,6 @@ from contracts.loot.constants.item import Item
 namespace ILoot:
     func getItemByTokenId(tokenId : Uint256) -> (item : Item):
     end
+    func updateAdventurer(tokenId : Uint256, adventurer : felt):
+    end
 end

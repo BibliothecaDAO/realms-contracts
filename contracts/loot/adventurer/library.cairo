@@ -28,6 +28,7 @@ from contracts.loot.constants.adventurer import (
     SHIFT_P_2,
     ItemShift,
     StatisticShift,
+    AdventurerSlotIds,
 )
 
 from contracts.loot.constants.item import Item
@@ -268,15 +269,20 @@ namespace AdventurerLib:
     end
 
     func adjust_health{syscall_ptr : felt*, range_check_ptr}(
-        item_token_id : felt, item : Item, unpacked_adventurer : AdventurerState
+        health_change : felt, unpacked_adventurer : AdventurerState
     ) -> (new_unpacked_adventurer : AdventurerState):
         alloc_locals
 
-        # cast state into felt array
-        # make adjustment to felt at index
-        # cast back into adventuerState
+        # check if negative unpacked_adventurer.Health - health_change
 
-        return (0)
+        # if Negative then set 0 and KILL
+        let (updated_adventurer : AdventurerState) = cast_state(
+            AdventurerSlotIds.Health,
+            unpacked_adventurer.Health - health_change,
+            unpacked_adventurer,
+        )
+
+        return (updated_adventurer)
     end
 
     func increase_xp{syscall_ptr : felt*, range_check_ptr}(

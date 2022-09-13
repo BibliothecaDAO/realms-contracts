@@ -7,25 +7,26 @@
 %lang starknet
 
 namespace State:
-    const Bagged = 0 # protected in a loot bag
+    const Bagged = 0  # protected in a loot bag
     const Equipped = 1  # equipped on an adventurer
-    const Loose  = 2 # not in loot bag or equipped (i.e on a table at a market)
+    const Loose = 2  # not in loot bag or equipped (i.e on a table at a market)
 end
 
 # Loot item shape. This is the on-chain metadata of each item.
 struct Item:
     member Id : felt  # item id 1 - 100
-    member Slot : felt # weapon, head, chest, etc
-    member Type : felt # weapon.blade, armor.metal, jewlery.ring
-    member Material : felt # the material of the item
-    member Rank : felt # 1 is best (Divine Robe = 1, Silk Robe = 2, Linen Robe = 3, Robe = 4, Shirt = 5)
+    member Slot : felt  # weapon, head, chest, etc
+    member Type : felt  # weapon.blade, armor.metal, jewlery.ring
+    member Material : felt  # the material of the item
+    member Rank : felt  # 1 is best (Divine Robe = 1, Silk Robe = 2, Linen Robe = 3, Robe = 4, Shirt = 5)
     member Prefix_1 : felt  # First part of the name prefix (i.e Demon)
     member Prefix_2 : felt  # Second part of the name prefix (i.e Grasp)
     member Suffix : felt  # Stored value if item has a Suffix (i.e of Power)
     member Greatness : felt  # Item greatness
     member CreatedBlock : felt  # Timestamp of when item was created
     member XP : felt  # Experience of the item
-    member State : felt # the state of the item: {bagged, equipped, loose}
+    member Adventurer : felt  # Adventurer ID IF equiped
+    member Bag : felt  # Bag ID IF bagged
 end
 
 # To provide cleaner numbering with the expectation we'll add more materials
@@ -78,7 +79,7 @@ namespace Material:
             const feet = 3111
         end
 
-        #dragon biotic materials get 3200
+        # dragon biotic materials get 3200
         namespace Dragon:
             const generic = 3200
             const blood = 3201
@@ -94,7 +95,7 @@ namespace Material:
             const feet = 3211
         end
 
-        #animal biotic materials get 3300
+        # animal biotic materials get 3300
         namespace Animal:
             const generic = 3300
             const blood = 3301
@@ -110,7 +111,7 @@ namespace Material:
             const feet = 3311
         end
 
-        #human biotic materials get 3400
+        # human biotic materials get 3400
         namespace Human:
             const generic = 3400
             const blood = 3401
@@ -127,15 +128,14 @@ namespace Material:
         end
     end
 
-    #paper gets 4000
+    # paper gets 4000
     namespace Paper:
         const generic = 4000
         const magical = 4001
     end
 
-    #wood gets 5000
+    # wood gets 5000
     namespace Wood:
-
         const generic = 5000
 
         # hard woods get 5100
@@ -394,9 +394,9 @@ namespace ItemMaterial:
     const PlatinumRing = Material.Metal.platinum
     const TitaniumRing = Material.Metal.titanium
     const GoldRing = Material.Metal.gold
-    const GhostWand = Material.Wood.Soft.elder # dumbledoor's wand was made of elder
-    const GraveWand = Material.Wood.Soft.yew # voldemort's wand was made of yew
-    const BoneWand = Material.Wood.Hard.holly # HP's wand was made of holly
+    const GhostWand = Material.Wood.Soft.elder  # dumbledoor's wand was made of elder
+    const GraveWand = Material.Wood.Soft.yew  # voldemort's wand was made of yew
+    const BoneWand = Material.Wood.Hard.holly  # HP's wand was made of holly
     const Wand = Material.Wood.Hard.oak
     const Grimoire = Material.Paper.magical
     const Chronicle = Material.Paper.generic
@@ -434,7 +434,7 @@ namespace ItemMaterial:
     const ShortSword = Material.Metal.steel
     const DemonHusk = Material.Biotic.Demon.hide
     const DragonskinArmor = Material.Biotic.Dragon.skin
-    const StuddedLeatherArmor =  Material.Biotic.Animal.hide
+    const StuddedLeatherArmor = Material.Biotic.Animal.hide
     const HardLeatherArmor = Material.Biotic.Animal.hide
     const LeatherArmor = Material.Biotic.Animal.hide
     const DemonCrown = Material.Biotic.Demon.bones
@@ -452,7 +452,7 @@ namespace ItemMaterial:
     const StuddedLeatherBoots = Material.Biotic.Animal.hide
     const HardLeatherBoots = Material.Biotic.Animal.hide
     const LeatherBoots = Material.Biotic.Animal.hide
-    const DemonsHands =Material.Biotic.Demon.hands
+    const DemonsHands = Material.Biotic.Demon.hands
     const DragonskinGloves = Material.Biotic.Dragon.skin
     const StuddedLeatherGloves = Material.Biotic.Animal.hide
     const HardLeatherGloves = Material.Biotic.Animal.hide
@@ -489,7 +489,6 @@ namespace ItemMaterial:
     const HeavyGloves = Material.Metal.generic
 end
 
-
 # number space the types to provide room for future work
 namespace Type:
     const generic = 0
@@ -509,7 +508,6 @@ namespace Type:
         const hide = 202
         const cloth = 203
     end
-
 
     const ring = 300
     const neckalce = 400
@@ -564,7 +562,7 @@ namespace ItemType:
     const ShortSword = Type.Weapon.blade
     const DemonHusk = Type.Armor.hide
     const DragonskinArmor = Type.Armor.hide
-    const StuddedLeatherArmor =  Type.Armor.hide
+    const StuddedLeatherArmor = Type.Armor.hide
     const HardLeatherArmor = Type.Armor.hide
     const LeatherArmor = Type.Armor.hide
     const DemonCrown = Type.Armor.hide

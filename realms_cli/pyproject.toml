@@ -158,3 +158,4 @@ cairo-nile = "^0.5.0"
 #-----------ADVENTURER
 "mint_adventurer"  =  "realms_cli.loot.adventurer.mint_adventurer"
 "get_adventurer"  =  "realms_cli.loot.adventurer.get_adventurer"
+"equip"  =  "realms_cli.loot.adventurer.equip"

@@ -80,7 +80,8 @@ func test_calculate_damage{syscall_ptr : felt*, range_check_ptr}():
         20,
         1,
         1,
-        State.Loose,
+        0,
+        0,
     )
 
     let g0_shirt = Item(
@@ -95,7 +96,8 @@ func test_calculate_damage{syscall_ptr : felt*, range_check_ptr}():
         0,
         1,
         1,
-        State.Loose,
+        0,
+        0,
     )
 
     let (g20_katana_vs_g0_robe) = CombatStats.calculate_damage(g20_katana, g0_shirt)
