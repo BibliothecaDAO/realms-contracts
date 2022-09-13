@@ -228,7 +228,7 @@ end
 func set_realm_data{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
     tokenId : Uint256, _realm_data : felt
 ):
-    # # ONLY OWNER TODO
+    Ownable.assert_only_owner()
     realm_data.write(tokenId, _realm_data)
     return ()
 end

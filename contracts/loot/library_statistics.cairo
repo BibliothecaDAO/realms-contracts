@@ -28,6 +28,7 @@ from contracts.loot.ItemConstants import (
 
 namespace Statistics:
     # Get Item Class
+
     func item_class{syscall_ptr : felt*, range_check_ptr}(item_id : felt) -> (class : felt):
         alloc_locals
 

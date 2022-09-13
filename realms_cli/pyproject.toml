@@ -148,3 +148,9 @@ cairo-nile = "^0.5.0"
 "deposit" = "realms_cli.nexus.admin.deposit"
 
 "increase_allowance_nexus" =  "realms_cli.nexus.admin.increase_allowance_nexus"
+
+#-----------TRAVEL
+"set_coordinates" = "realms_cli.player.travel.set_coordinates"
+"travel" = "realms_cli.player.travel.travel"
+"get_travel" = "realms_cli.player.travel.get_travel"
+"travel_time" = "realms_cli.player.travel.travel_time"

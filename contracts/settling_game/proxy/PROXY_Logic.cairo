@@ -57,3 +57,10 @@ func __l1_default__{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
     )
     return ()
 end
+
+@external
+func get_implementation_hash{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    ) -> (implementation : felt):
+    let (implementation) = Proxy.get_implementation_hash()
+    return (implementation)
+end

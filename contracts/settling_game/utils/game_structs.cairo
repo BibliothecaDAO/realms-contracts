@@ -3,8 +3,8 @@
 #   Each module will need to add a struct with their metadata.
 #
 # MIT License
-
 %lang starknet
+from starkware.cairo.common.uint256 import Uint256
 
 namespace TraitsIds:
     const Region = 1
@@ -162,6 +162,7 @@ namespace ModuleIds:
     const L09_Relics = 12
     const L10_Food = 13
     const GoblinTown = 14
+    const Travel = 15
     const Crypts_Token = 1001
     const Lords_Token = 1002
     const Realms_Token = 1003
@@ -502,4 +503,16 @@ struct FoodBuildings:
     member number_built : felt
     member collections_left : felt
     member update_time : felt
+end
+
+struct Point:
+    member x : felt
+    member y : felt
+end
+
+struct TravelInformation:
+    member destination_asset_id : felt
+    member destination_token_id : Uint256  # id of destination
+    member destination_nested_asset_id : felt
+    member travel_time : felt  # timestamp in the future
 end
