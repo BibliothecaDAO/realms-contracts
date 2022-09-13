@@ -1082,10 +1082,10 @@ func supportsInterface{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     return ERC165.supports_interface(interfaceId);
 }
 
-@view
-func uri{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (uri: felt) {
-    return ERC1155.uri();
-}
+// @view
+// func uri{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (uri: felt) {
+//     return ERC1155.uri();
+// }
 
 @view
 func balanceOf{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
