@@ -14,7 +14,7 @@ from starkware.starknet.common.syscalls import get_caller_address, get_block_tim
 from starkware.cairo.common.uint256 import Uint256, uint256_lt
 from starkware.cairo.common.bool import TRUE, FALSE
 
-from openzeppelin.token.erc20.IERC20 import IERC20
+from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
 from openzeppelin.token.erc721.IERC721 import IERC721
 from openzeppelin.upgrades.library import Proxy
 

@@ -108,7 +108,7 @@ const BASE_FOOD_PRODUCTION = 14000  # food production per unit
 
 # a min delay between attacks on a Realm; it can't
 # be attacked again during cooldown
-const ATTACK_COOLDOWN_PERIOD = DAY  # 1 day unit
+const ATTACK_COOLDOWN_PERIOD = DAY / 10  # 1 day unit
 
 # used to signal which side won the battle
 const COMBAT_OUTCOME_ATTACKER_WINS = 1
@@ -129,6 +129,13 @@ const MAX_WALL_DEFENSE_HIT_POINTS = 5
 # amount of $LORDS as a reward for tearing down a goblin town
 const GOBLINDOWN_REWARD = 20
 
+# Army XP
+const DEFENDING_ARMY_XP = 30
+const ATTACKING_ARMY_XP = 100
+
+# total battalions
+const TOTAL_BATTALIONS = 30
+
 # -----------------------------------
 # Crypts
 # -----------------------------------
@@ -145,3 +152,8 @@ const GENESIS_TIMESTAMP = 1645743897
 # -----------------------------------
 const GOBLIN_WELCOME_PARTY_STRENGTH = 1
 const MAX_GOBLIN_TOWN_STRENGTH = 12
+
+# -----------------------------------
+# Coordinates
+# -----------------------------------
+const SECONDS_PER_KM = 30

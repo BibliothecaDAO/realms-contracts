@@ -9,18 +9,14 @@ Troop = namedtuple('Troop', 'type tier agility attack defense vitality wisdom')
 
 
 class TroopId(IntEnum):
-    Skirmisher = 1
-    Longbow = 2
-    Crossbow = 3
-    Pikeman = 4
-    Knight = 5
-    Paladin = 6
-    Ballista = 7
-    Mangonel = 8
-    Trebuchet = 9
-    Apprentice = 10
-    Mage = 11
-    Arcanist = 12
+    LightCavalry = 1
+    HeavyCavalry = 2
+    Archer = 3
+    Longbow = 4
+    Mage = 5
+    Arcanist = 6
+    LightInfantry = 7
+    HeavyInfantry = 8
 
 
 class ResourceIds(IntEnum):
@@ -188,81 +184,60 @@ BUILDING_COSTS = {
 
 
 TROOP_COSTS = {
-    TroopId.Skirmisher: Cost(
-        2,
+    TroopId.LightCavalry: Cost(
+        4,
         8,
-        pack_values([ResourceIds.Copper, ResourceIds.Obsidian]),
-        pack_values([4, 1]),
+        pack_values([ResourceIds.Wood, ResourceIds.Obsidian,
+                    ResourceIds.ColdIron, ResourceIds.Sapphire]),
+        pack_values([10, 5, 2, 2]),
+    ),
+    TroopId.HeavyCavalry: Cost(
+        4,
+        8,
+        pack_values([ResourceIds.Stone, ResourceIds.Silver,
+                    ResourceIds.Diamonds, ResourceIds.EtherealSilica]),
+        pack_values([6, 10, 5, 1]),
+    ),
+    TroopId.Archer: Cost(
+        4,
+        8,
+        pack_values([ResourceIds.Wood, ResourceIds.Coal,
+                    ResourceIds.Silver, ResourceIds.Sapphire]),
+        pack_values([10, 10, 2, 2]),
     ),
     TroopId.Longbow: Cost(
-        1,
-        8,
-        pack_values([ResourceIds.Adamantine]),
-        pack_values([1]),
-    ),
-    TroopId.Crossbow: Cost(
-        4,
-        8,
-        pack_values([ResourceIds.Stone, ResourceIds.Gold,
-                    ResourceIds.Mithral, ResourceIds.Dragonhide]),
-        pack_values([20, 2, 1, 1]),
-    ),
-    TroopId.Pikeman: Cost(
-        2,
-        8,
-        pack_values([ResourceIds.Ironwood, ResourceIds.Diamonds]),
-        pack_values([1, 1]),
-    ),
-    TroopId.Knight: Cost(
-        1,
-        8,
-        pack_values([ResourceIds.Sapphire]),
-        pack_values([4]),
-    ),
-    TroopId.Paladin: Cost(
-        6,
-        8,
-        pack_values([ResourceIds.Coal, ResourceIds.ColdIron, ResourceIds.Diamonds,
-                    ResourceIds.Ruby, ResourceIds.DeepCrystal, ResourceIds.AlchemicalSilver]),
-        pack_values([10, 6, 2, 4, 4, 1]),
-    ),
-    TroopId.Ballista: Cost(
-        3,
-        8,
-        pack_values([ResourceIds.Wood, ResourceIds.Stone, ResourceIds.Coal]),
-        pack_values([6, 6, 6]),
-    ),
-    TroopId.Mangonel: Cost(
-        4,
+        5,
         8,
         pack_values([ResourceIds.Wood, ResourceIds.Stone,
-                    ResourceIds.Coal, ResourceIds.Silver]),
-        pack_values([5, 4, 8, 20]),
-    ),
-    TroopId.Trebuchet: Cost(
-        7,
-        8,
-        pack_values([ResourceIds.Wood, ResourceIds.Copper, ResourceIds.Obsidian, ResourceIds.Silver,
-                    ResourceIds.Ironwood, ResourceIds.Ignium, ResourceIds.EtherealSilica, ResourceIds.Adamantine]),
-        pack_values([5, 20, 40, 10, 20, 2, 1]),
-    ),
-    TroopId.Apprentice: Cost(
-        1,
-        8,
-        pack_values([ResourceIds.Ignium]),
-        pack_values([1]),
+                    ResourceIds.Obsidian, ResourceIds.Ironwood, ResourceIds.Ruby]),
+        pack_values([5, 9, 10, 7, 4]),
     ),
     TroopId.Mage: Cost(
-        2,
+        3,
         8,
-        pack_values([ResourceIds.ColdIron, ResourceIds.EtherealSilica]),
-        pack_values([4, 2]),
+        pack_values(
+            [ResourceIds.Coal, ResourceIds.ColdIron, ResourceIds.Ignium]),
+        pack_values([12, 2, 2]),
     ),
     TroopId.Arcanist: Cost(
         4,
         8,
-        pack_values([ResourceIds.Gold, ResourceIds.Hartwood,
-                    ResourceIds.TrueIce, ResourceIds.TwilightQuartz]),
-        pack_values([10, 15, 3, 2]),
+        pack_values([ResourceIds.Stone, ResourceIds.Copper, ResourceIds.Hartwood,
+                    ResourceIds.DeepCrystal]),
+        pack_values([10, 7, 5, 4]),
+    ),
+    TroopId.LightInfantry: Cost(
+        3,
+        8,
+        pack_values(
+            [ResourceIds.Copper, ResourceIds.ColdIron, ResourceIds.Ignium]),
+        pack_values([10, 2, 2]),
+    ),
+    TroopId.HeavyInfantry: Cost(
+        4,
+        8,
+        pack_values([ResourceIds.Wood, ResourceIds.Gold,
+                    ResourceIds.EtherealSilica, ResourceIds.TrueIce]),
+        pack_values([5, 5, 2, 2]),
     )
 }

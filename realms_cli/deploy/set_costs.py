@@ -8,18 +8,18 @@ def run(nre):
     config = Config(nre.network)
 
     # --------- BUILDING COSTS ------- #
-    building_calldata = [
-        [building_id.value, building_cost.resource_count, building_cost.bits,
-         building_cost.packed_ids, building_cost.packed_amounts, building_cost.lords, "0"]
-        for building_id, building_cost in BUILDING_COSTS.items()
-    ]
-    wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_Buildings",
-        function="set_building_cost",
-        arguments=building_calldata
-    )
+    # building_calldata = [
+    #     [building_id.value, building_cost.resource_count, building_cost.bits,
+    #      building_cost.packed_ids, building_cost.packed_amounts, building_cost.lords, "0"]
+    #     for building_id, building_cost in BUILDING_COSTS.items()
+    # ]
+    # wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="proxy_Buildings",
+    #     function="set_building_cost",
+    #     arguments=building_calldata
+    # )
 
     # --------- TROOP COSTS ------- #
     troop_calldata = [
@@ -30,7 +30,7 @@ def run(nre):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_L06_Combat",
+        contract_alias="proxy_Combat",
         function="set_troop_cost",
         arguments=troop_calldata
     )

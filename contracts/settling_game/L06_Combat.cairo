@@ -62,6 +62,8 @@ from contracts.settling_game.library.library_module import Module
 
 from contracts.settling_game.utils.constants import DAY
 
+from contracts.settling_game.modules.travel.interface import ITravel
+
 # -----------------------------------
 # Events
 # -----------------------------------
@@ -221,6 +223,16 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
         let (can_attack) = Realm_can_be_attacked(attacking_realm_id, defending_realm_id)
         assert can_attack = TRUE
     end
+
+    # Check Army is at actual Realm
+    let (travel_module) = Module.get_module_address(ModuleIds.Travel)
+    ITravel.assert_traveller_is_at_location(
+        travel_module,
+        ExternalContractIds.S_Realms,
+        attacking_realm_id,
+        ExternalContractIds.S_Realms,
+        defending_realm_id,
+    )
 
     let (attacking_realm_data : RealmCombatData) = get_realm_combat_data(attacking_realm_id)
     let (defending_realm_data : RealmCombatData) = get_realm_combat_data(defending_realm_id)
