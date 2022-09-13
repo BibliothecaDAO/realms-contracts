@@ -5,54 +5,54 @@ from contracts.loot.constants.adventurer import Adventurer, AdventurerState, Pac
 from contracts.loot.constants.item import Item, ItemIds, ItemType, ItemSlot, ItemMaterial, State
 from contracts.loot.constants.rankings import ItemRank
 
-const TEST_WEAPON_TOKEN_ID = 20
+const TEST_WEAPON_TOKEN_ID = 20;
 
-namespace TestAdventurerState:
-    # immutable stats
-    const Race = 1  # 3
-    const HomeRealm = 2  # 13
-    const Birthdate = 1662888731
-    const Name = 'loaf'
+namespace TestAdventurerState {
+    // immutable stats
+    const Race = 1;  // 3
+    const HomeRealm = 2;  // 13
+    const Birthdate = 1662888731;
+    const Name = 'loaf';
 
-    # evolving stats
-    const Health = 5000  #
+    // evolving stats
+    const Health = 5000;  //
 
-    const Level = 500  #
-    const Order = 12  #
+    const Level = 500;  //
+    const Order = 12;  //
 
-    # Physical
-    const Strength = 1000
-    const Dexterity = 1000
-    const Vitality = 1000
+    // Physical
+    const Strength = 1000;
+    const Dexterity = 1000;
+    const Vitality = 1000;
 
-    # Mental
-    const Intelligence = 1000
-    const Wisdom = 1000
-    const Charisma = 1000
+    // Mental
+    const Intelligence = 1000;
+    const Wisdom = 1000;
+    const Charisma = 1000;
 
-    # Meta Physical
-    const Luck = 1000
+    // Meta Physical
+    const Luck = 1000;
 
-    const XP = 1000000  #
+    const XP = 1000000;  //
 
-    # store item NFT id when equiped
-    # Packed Stats p2
-    const WeaponId = 1001
-    const ChestId = 1002
-    const HeadId = 1003
-    const WaistId = 1004
-    const FeetId = 1005
-    const HandsId = 1006
-    const NeckId = 1007
-    const RingId = 1008
+    // store item NFT id when equiped
+    // Packed Stats p2
+    const WeaponId = 1001;
+    const ChestId = 1002;
+    const HeadId = 1003;
+    const WaistId = 1004;
+    const FeetId = 1005;
+    const HandsId = 1006;
+    const NeckId = 1007;
+    const RingId = 1008;
 
-    # Packed Stats p3
-end
+    // Packed Stats p3
+}
 
-func get_adventurer_state{syscall_ptr : felt*, range_check_ptr}() -> (
-    adventurer_state : AdventurerState
-):
-    alloc_locals
+func get_adventurer_state{syscall_ptr: felt*, range_check_ptr}() -> (
+    adventurer_state: AdventurerState
+) {
+    alloc_locals;
 
     return (
         AdventurerState(
@@ -80,11 +80,11 @@ func get_adventurer_state{syscall_ptr : felt*, range_check_ptr}() -> (
         TestAdventurerState.NeckId,
         TestAdventurerState.RingId,
         ),
-    )
-end
+    );
+}
 
-func get_item{syscall_ptr : felt*, range_check_ptr}() -> (item : Item):
-    alloc_locals
+func get_item{syscall_ptr: felt*, range_check_ptr}() -> (item: Item) {
+    alloc_locals;
 
     return (
         Item(
@@ -102,5 +102,5 @@ func get_item{syscall_ptr : felt*, range_check_ptr}() -> (item : Item):
         0,
         0
         ),
-    )
-end
+    );
+}

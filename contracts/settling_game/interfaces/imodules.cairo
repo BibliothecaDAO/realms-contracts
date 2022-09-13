@@ -1,8 +1,8 @@
-# Module Interfaces
-#   These are interfaces that can be imported by other contracts for convenience.
-#   All of the functions in an interface must be @view or @external.
-#
-# MIT License
+// Module Interfaces
+//   These are interfaces that can be imported by other contracts for convenience.
+//   All of the functions in an interface must be @view or @external.
+//
+// MIT License
 
 %lang starknet
 
@@ -10,113 +10,113 @@ from starkware.cairo.common.uint256 import Uint256
 from contracts.settling_game.utils.game_structs import RealmBuildings, RealmCombatData, Cost, Squad
 
 @contract_interface
-namespace IArbiter:
+namespace IArbiter {
     func batch_set_controller_addresses(
-        module_01_addr : felt,
-        module_02_addr : felt,
-        module_03_addr : felt,
-        module_04_addr : felt,
-        module_06_addr : felt,
-        module_07_addr : felt,
-        module_08_addr : felt,
-    ):
-    end
-end
+        module_01_addr: felt,
+        module_02_addr: felt,
+        module_03_addr: felt,
+        module_04_addr: felt,
+        module_06_addr: felt,
+        module_07_addr: felt,
+        module_08_addr: felt,
+    ) {
+    }
+}
 
-# Interface for the ModuleController.
+// Interface for the ModuleController.
 @contract_interface
-namespace IModuleController:
-    func get_module_address(module_id : felt) -> (address : felt):
-    end
+namespace IModuleController {
+    func get_module_address(module_id: felt) -> (address: felt) {
+    }
 
-    func get_external_contract_address(external_contract_id : felt) -> (address : felt):
-    end
+    func get_external_contract_address(external_contract_id: felt) -> (address: felt) {
+    }
 
-    func get_genesis() -> (genesis_time : felt):
-    end
+    func get_genesis() -> (genesis_time: felt) {
+    }
 
-    func get_arbiter() -> (arbiter : felt):
-    end
+    func get_arbiter() -> (arbiter: felt) {
+    }
 
-    func has_write_access(address_attempting_to_write : felt) -> (success : felt):
-    end
+    func has_write_access(address_attempting_to_write: felt) -> (success: felt) {
+    }
 
-    func appoint_new_arbiter(new_arbiter : felt):
-    end
+    func appoint_new_arbiter(new_arbiter: felt) {
+    }
 
-    func set_address_for_module_id(module_id : felt, module_address : felt):
-    end
+    func set_address_for_module_id(module_id: felt, module_address: felt) {
+    }
 
-    func set_address_for_external_contract(external_contract_id : felt, address : felt):
-    end
+    func set_address_for_external_contract(external_contract_id: felt, address: felt) {
+    }
 
-    func set_write_access(module_id_doing_writing : felt, module_id_being_written_to : felt):
-    end
+    func set_write_access(module_id_doing_writing: felt, module_id_being_written_to: felt) {
+    }
 
     func set_initial_module_addresses(
-        module_01_addr : felt,
-        module_02_addr : felt,
-        module_03_addr : felt,
-        module_04_addr : felt,
-        module_06_addr : felt,
-    ):
-    end
-end
+        module_01_addr: felt,
+        module_02_addr: felt,
+        module_03_addr: felt,
+        module_04_addr: felt,
+        module_06_addr: felt,
+    ) {
+    }
+}
 
 @contract_interface
-namespace IL06_Combat:
+namespace IL06_Combat {
     func build_squad_from_troops_in_realm(
-        troop_ids_len : felt, troop_ids : felt*, realm_id : Uint256, slot : felt
-    ):
-    end
-    func set_troop_cost(troop_id : felt, cost : Cost):
-    end
-    func view_troops(realm_id : Uint256) -> (attacking_troops : Squad, defending_troops : Squad):
-    end
-    func get_realm_combat_data(realm_id : Uint256) -> (combat_data : RealmCombatData):
-    end
-end
+        troop_ids_len: felt, troop_ids: felt*, realm_id: Uint256, slot: felt
+    ) {
+    }
+    func set_troop_cost(troop_id: felt, cost: Cost) {
+    }
+    func view_troops(realm_id: Uint256) -> (attacking_troops: Squad, defending_troops: Squad) {
+    }
+    func get_realm_combat_data(realm_id: Uint256) -> (combat_data: RealmCombatData) {
+    }
+}
 
 @contract_interface
-namespace IL07_Crypts:
-    func set_time_staked(token_id : Uint256, time_left : felt):
-    end
-    func get_time_staked(token_id : Uint256) -> (time : felt):
-    end
-    func return_approved():
-    end
-end
+namespace IL07_Crypts {
+    func set_time_staked(token_id: Uint256, time_left: felt) {
+    }
+    func get_time_staked(token_id: Uint256) -> (time: felt) {
+    }
+    func return_approved() {
+    }
+}
 
 @contract_interface
-namespace IL08_Crypts_Resources:
-    func check_if_claimable(token_id : Uint256) -> (can_claim : felt):
-    end
-    func claim_resources(token_id : Uint256):
-    end
-end
+namespace IL08_Crypts_Resources {
+    func check_if_claimable(token_id: Uint256) -> (can_claim: felt) {
+    }
+    func claim_resources(token_id: Uint256) {
+    }
+}
 
 @contract_interface
-namespace IL09_Relics:
-    func set_relic_holder(winner_token_id : Uint256, loser_token_id : Uint256):
-    end
-end
+namespace IL09_Relics {
+    func set_relic_holder(winner_token_id: Uint256, loser_token_id: Uint256) {
+    }
+}
 
 @contract_interface
-namespace IFood:
-    func available_food_in_store(token_id : Uint256) -> (available : felt):
-    end
-    func get_full_store_houses(token_id : Uint256) -> (full_store_houses : felt):
-    end
-end
+namespace IFood {
+    func available_food_in_store(token_id: Uint256) -> (available: felt) {
+    }
+    func get_full_store_houses(token_id: Uint256) -> (full_store_houses: felt) {
+    }
+}
 
 @contract_interface
-namespace IGoblinTown:
-    func spawn_goblin_welcomparty(realm_id : Uint256):
-    end
+namespace IGoblinTown {
+    func spawn_goblin_welcomparty(realm_id: Uint256) {
+    }
 
-    func get_strength_and_timestamp(realm_id : Uint256) -> (strength : felt, spawn_ts : felt):
-    end
+    func get_strength_and_timestamp(realm_id: Uint256) -> (strength: felt, spawn_ts: felt) {
+    }
 
-    func spawn_next(realm_id : Uint256):
-    end
-end
+    func spawn_next(realm_id: Uint256) {
+    }
+}

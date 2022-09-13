@@ -21,121 +21,121 @@ from tests.protostar.loot.test_structs import (
 
 @external
 func test_birth{
-    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-}():
-    alloc_locals
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}() {
+    alloc_locals;
 
-    let (adventurer : AdventurerState) = AdventurerLib.birth(
+    let (adventurer: AdventurerState) = AdventurerLib.birth(
         TestAdventurerState.Race,
         TestAdventurerState.HomeRealm,
         TestAdventurerState.Name,
         TestAdventurerState.Birthdate,
         TestAdventurerState.Order,
-    )
+    );
 
-    let (adventurer_state : PackedAdventurerState) = AdventurerLib.pack(adventurer)
+    let (adventurer_state: PackedAdventurerState) = AdventurerLib.pack(adventurer);
 
-    let (adventurer : AdventurerState) = AdventurerLib.unpack(adventurer_state)
+    let (adventurer: AdventurerState) = AdventurerLib.unpack(adventurer_state);
 
-    assert TestAdventurerState.Race = adventurer.Race
-    assert TestAdventurerState.HomeRealm = adventurer.HomeRealm
-    assert TestAdventurerState.Name = adventurer.Name
-    assert TestAdventurerState.Birthdate = adventurer.Birthdate
-    assert TestAdventurerState.Order = adventurer.Order
+    assert TestAdventurerState.Race = adventurer.Race;
+    assert TestAdventurerState.HomeRealm = adventurer.HomeRealm;
+    assert TestAdventurerState.Name = adventurer.Name;
+    assert TestAdventurerState.Birthdate = adventurer.Birthdate;
+    assert TestAdventurerState.Order = adventurer.Order;
 
-    return ()
-end
+    return ();
+}
 
 @external
 func test_pack{
-    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-}():
-    alloc_locals
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}() {
+    alloc_locals;
 
-    let (state) = get_adventurer_state()
+    let (state) = get_adventurer_state();
 
-    let (adventurer_state : PackedAdventurerState) = AdventurerLib.pack(state)
+    let (adventurer_state: PackedAdventurerState) = AdventurerLib.pack(state);
 
-    let (adventurer : AdventurerState) = AdventurerLib.unpack(adventurer_state)
+    let (adventurer: AdventurerState) = AdventurerLib.unpack(adventurer_state);
 
-    assert TestAdventurerState.Race = adventurer.Race  # 3
-    assert TestAdventurerState.HomeRealm = adventurer.HomeRealm  # 13
-    assert TestAdventurerState.Birthdate = adventurer.Birthdate
-    assert TestAdventurerState.Name = adventurer.Name
+    assert TestAdventurerState.Race = adventurer.Race;  // 3
+    assert TestAdventurerState.HomeRealm = adventurer.HomeRealm;  // 13
+    assert TestAdventurerState.Birthdate = adventurer.Birthdate;
+    assert TestAdventurerState.Name = adventurer.Name;
 
-    # evolving stats
-    assert TestAdventurerState.Health = adventurer.Health  #
+    // evolving stats
+    assert TestAdventurerState.Health = adventurer.Health;  //
 
-    assert TestAdventurerState.Level = adventurer.Level  #
-    assert TestAdventurerState.Order = adventurer.Order  #
+    assert TestAdventurerState.Level = adventurer.Level;  //
+    assert TestAdventurerState.Order = adventurer.Order;  //
 
-    # Physical
-    assert TestAdventurerState.Strength = adventurer.Strength
-    assert TestAdventurerState.Dexterity = adventurer.Dexterity
-    assert TestAdventurerState.Vitality = adventurer.Vitality
+    // Physical
+    assert TestAdventurerState.Strength = adventurer.Strength;
+    assert TestAdventurerState.Dexterity = adventurer.Dexterity;
+    assert TestAdventurerState.Vitality = adventurer.Vitality;
 
-    # Mental
-    assert TestAdventurerState.Intelligence = adventurer.Intelligence
-    assert TestAdventurerState.Wisdom = adventurer.Wisdom
-    assert TestAdventurerState.Charisma = adventurer.Charisma
+    // Mental
+    assert TestAdventurerState.Intelligence = adventurer.Intelligence;
+    assert TestAdventurerState.Wisdom = adventurer.Wisdom;
+    assert TestAdventurerState.Charisma = adventurer.Charisma;
 
-    # Meta Physical
-    assert TestAdventurerState.Luck = adventurer.Luck
+    // Meta Physical
+    assert TestAdventurerState.Luck = adventurer.Luck;
 
-    assert TestAdventurerState.XP = adventurer.XP  #
+    assert TestAdventurerState.XP = adventurer.XP;  //
 
-    # store item NFT id when equiped
-    # Packed Stats p2
-    assert TestAdventurerState.NeckId = adventurer.NeckId
-    assert TestAdventurerState.WeaponId = adventurer.WeaponId
-    assert TestAdventurerState.RingId = adventurer.RingId
-    assert TestAdventurerState.ChestId = adventurer.ChestId
+    // store item NFT id when equiped
+    // Packed Stats p2
+    assert TestAdventurerState.NeckId = adventurer.NeckId;
+    assert TestAdventurerState.WeaponId = adventurer.WeaponId;
+    assert TestAdventurerState.RingId = adventurer.RingId;
+    assert TestAdventurerState.ChestId = adventurer.ChestId;
 
-    # Packed Stats p3
-    assert TestAdventurerState.HeadId = adventurer.HeadId
-    assert TestAdventurerState.WaistId = adventurer.WaistId
-    assert TestAdventurerState.FeetId = adventurer.FeetId
-    assert TestAdventurerState.HandsId = adventurer.HandsId
+    // Packed Stats p3
+    assert TestAdventurerState.HeadId = adventurer.HeadId;
+    assert TestAdventurerState.WaistId = adventurer.WaistId;
+    assert TestAdventurerState.FeetId = adventurer.FeetId;
+    assert TestAdventurerState.HandsId = adventurer.HandsId;
 
-    return ()
-end
+    return ();
+}
 
 @external
 func test_cast{
-    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-}():
-    alloc_locals
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}() {
+    alloc_locals;
 
-    let (state) = get_adventurer_state()
+    let (state) = get_adventurer_state();
 
-    let (adventurer_state : PackedAdventurerState) = AdventurerLib.pack(state)
+    let (adventurer_state: PackedAdventurerState) = AdventurerLib.pack(state);
 
-    let (adventurer : AdventurerState) = AdventurerLib.unpack(adventurer_state)
+    let (adventurer: AdventurerState) = AdventurerLib.unpack(adventurer_state);
 
-    let (c) = AdventurerLib.cast_state(0, 3, adventurer)
+    let (c) = AdventurerLib.cast_state(0, 3, adventurer);
 
     %{ print('Race', ids.c.Race) %}
 
-    return ()
-end
+    return ();
+}
 
 @external
 func test_equip{
-    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
-}():
-    alloc_locals
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}() {
+    alloc_locals;
 
-    let (state) = get_adventurer_state()
+    let (state) = get_adventurer_state();
 
-    let (item) = get_item()
+    let (item) = get_item();
 
-    let (adventurer_state : PackedAdventurerState) = AdventurerLib.pack(state)
+    let (adventurer_state: PackedAdventurerState) = AdventurerLib.pack(state);
 
-    let (adventurer : AdventurerState) = AdventurerLib.unpack(adventurer_state)
+    let (adventurer: AdventurerState) = AdventurerLib.unpack(adventurer_state);
 
-    let (c) = AdventurerLib.equip_item(TEST_WEAPON_TOKEN_ID, item, adventurer)
+    let (c) = AdventurerLib.equip_item(TEST_WEAPON_TOKEN_ID, item, adventurer);
 
-    assert c.WeaponId = TEST_WEAPON_TOKEN_ID
+    assert c.WeaponId = TEST_WEAPON_TOKEN_ID;
 
-    return ()
-end
+    return ();
+}
