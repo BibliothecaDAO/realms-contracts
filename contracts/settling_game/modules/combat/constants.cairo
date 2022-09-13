@@ -98,39 +98,3 @@ namespace SHIFT_ARMY:
     const _15 = 2 ** 84
     const _16 = 2 ** 91
 end
-
-struct Battalion:
-    member Quantity : felt  # 1-23
-    member Health : felt  # 1-100
-end
-
-struct Army:
-    member LightCavalry : Battalion
-    member HeavyCavalry : Battalion
-    member Archer : Battalion
-    member Longbow : Battalion
-    member Mage : Battalion
-    member Arcanist : Battalion
-    member LightInfantry : Battalion
-    member HeavyInfantry : Battalion
-end
-
-struct ArmyStatistics:
-    member CavalryAttack : felt  # (Light Cav Base Attack*Number of Attacking Light Cav Battalions)+(Heavy Cav Base Attack*Number of Attacking Heavy Cav Battalions)
-    member ArcheryAttack : felt  # (Archer Base Attack*Number of Attacking Archer Battalions)+(Longbow Base Attack*Number of Attacking Longbow Battalions)
-    member MagicAttack : felt  # (Mage Base Attack*Number of Attacking Mage Battalions)+(Arcanist Base Attack*Number of Attacking Arcanist Battalions)
-    member InfantryAttack : felt  # (Light Inf Base Attack*Number of Attacking Light Inf Battalions)+(Heavy Inf Base Attack*Number of Attacking Heavy Inf Battalions)
-
-    member CavalryDefence : felt  # (Sum of all units Cavalry Defence*Percentage of Attacking Cav Battalions)
-    member ArcheryDefence : felt  # (Sum of all units Archery Defence*Percentage of Attacking Archery Battalions)
-    member MagicDefence : felt  # (Sum of all units Magic Cav Defence*Percentage of Attacking Magic Battalions)
-    member InfantryDefence : felt  # (Sum of all units Infantry Defence*Percentage of Attacking Infantry Battalions)
-end
-
-struct ArmyData:
-    member ArmyPacked : felt
-    member LastAttacked : felt
-    member XP : felt
-    member Level : felt
-    member CallSign : felt
-end

@@ -516,3 +516,40 @@ struct TravelInformation:
     member destination_nested_asset_id : felt
     member travel_time : felt  # timestamp in the future
 end
+
+
+struct Battalion:
+    member quantity : felt  # 1-23
+    member health : felt  # 1-100
+end
+
+struct Army:
+    member light_cavalry : Battalion
+    member heavy_cavalry : Battalion
+    member archer : Battalion
+    member longbow : Battalion
+    member mage : Battalion
+    member arcanist : Battalion
+    member light_infantry : Battalion
+    member heavy_infantry : Battalion
+end
+
+struct ArmyStatistics:
+    member cavalry_attack : felt  # (Light Cav Base Attack*Number of Attacking Light Cav Battalions)+(Heavy Cav Base Attack*Number of Attacking Heavy Cav Battalions)
+    member archery_attack : felt  # (Archer Base Attack*Number of Attacking Archer Battalions)+(Longbow Base Attack*Number of Attacking Longbow Battalions)
+    member magic_attack : felt  # (Mage Base Attack*Number of Attacking Mage Battalions)+(Arcanist Base Attack*Number of Attacking Arcanist Battalions)
+    member infantry_attack : felt  # (Light Inf Base Attack*Number of Attacking Light Inf Battalions)+(Heavy Inf Base Attack*Number of Attacking Heavy Inf Battalions)
+
+    member cavalry_defence : felt  # (Sum of all units Cavalry Defence*Percentage of Attacking Cav Battalions)
+    member archery_defence : felt  # (Sum of all units Archery Defence*Percentage of Attacking Archery Battalions)
+    member magic_defence : felt  # (Sum of all units Magic Cav Defence*Percentage of Attacking Magic Battalions)
+    member infantry_defence : felt  # (Sum of all units Infantry Defence*Percentage of Attacking Infantry Battalions)
+end
+
+struct ArmyData:
+    member packed : felt
+    member last_attacked : felt
+    member XP : felt
+    member level : felt
+    member call_sign : felt
+end
