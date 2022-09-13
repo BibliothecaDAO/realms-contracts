@@ -165,3 +165,48 @@ class Config:
             "ArcherTower",
             "Castle",
         ]
+
+        self.LOOT = [
+            "Id",
+            "Slot",
+            "Type",
+            "Material",
+            "Rank",
+            "Prefix_1",
+            "Prefix_2",
+            "Suffix",
+            "Greatness",
+            "CreatedBlock",
+            "XP",
+            "Adventurer",
+            "Bag",
+        ]
+
+        self.LOOT_PROXY_ADDRESS, _ = safe_load_deployment(
+            "proxy_Loot", self.nile_network)
+
+        self.ADVENTURER = [
+            "Race",
+            "HomeRealm",
+            "Birthdate",
+            "Name",
+            "Health",
+            "Level",
+            "Order",
+            "Strength",
+            "Dexterity",
+            "Vitality",
+            "Intelligence",
+            "Wisdom",
+            "Charisma",
+            "Luck",
+            "XP",
+            "NeckId",
+            "WeaponId",
+            "RingId",
+            "ChestId",
+            "HeadId",
+            "WaistId",
+            "FeetId",
+            "HandsId"
+        ]
