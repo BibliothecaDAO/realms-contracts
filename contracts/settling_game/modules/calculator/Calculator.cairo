@@ -32,7 +32,7 @@ from contracts.settling_game.interfaces.imodules import IModuleController, IL06_
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.library.library_calculator import Calculator
 from contracts.settling_game.library.library_combat import Combat
-from contracts.settling_game.modules.buildings.interface import Buildings
+from contracts.settling_game.modules.buildings.interface import IBuildings
 // -----------------------------------
 // Initialize & upgrade
 // -----------------------------------
@@ -118,7 +118,7 @@ func calculate_population{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
     let (buildings_logic_address) = IModuleController.get_module_address(
         controller, ModuleIds.Buildings
     );
-    let (current_buildings: RealmBuildings) = Buildings.get_effective_population_buildings(
+    let (current_buildings: RealmBuildings) = IBuildings.get_effective_population_buildings(
         buildings_logic_address, token_id
     );
 
@@ -141,7 +141,7 @@ func calculate_food{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_
     let (buildings_logic_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.Buildings
     );
-    let (current_buildings: RealmBuildings) = Buildings.get_effective_buildings(
+    let (current_buildings: RealmBuildings) = IBuildings.get_effective_buildings(
         buildings_logic_address, token_id
     );
 
@@ -172,7 +172,7 @@ func calculate_troop_coefficent{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, 
     let (buildings_logic_address) = IModuleController.get_module_address(
         contract_address=controller, module_id=ModuleIds.Buildings
     );
-    let (current_buildings: RealmBuildings) = Buildings.get_effective_buildings(
+    let (current_buildings: RealmBuildings) = IBuildings.get_effective_buildings(
         buildings_logic_address, token_id
     );
 

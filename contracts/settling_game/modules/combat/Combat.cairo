@@ -42,7 +42,7 @@ from contracts.settling_game.utils.general import transform_costs_to_tokens
 
 from contracts.settling_game.modules.travel.interface import ITravel
 from contracts.settling_game.modules.resources.interface import IResources
-from contracts.settling_game.modules.buildings.interface import Buildings
+from contracts.settling_game.modules.buildings.interface import IBuildings
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 
@@ -183,7 +183,7 @@ func build_army_from_battalions{
 
     // check if Realm has the buildings to build the requested troops
     let (buildings_module) = Module.get_module_address(ModuleIds.Buildings);
-    let (realm_buildings: RealmBuildings) = Buildings.get_effective_buildings(
+    let (realm_buildings: RealmBuildings) = IBuildings.get_effective_buildings(
         buildings_module, realm_id
     );
 

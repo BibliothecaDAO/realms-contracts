@@ -30,7 +30,7 @@ from contracts.settling_game.interfaces.imodules import (
     IGoblinTown,
 )
 from contracts.settling_game.modules.resources.interface import IResources
-from contracts.settling_game.modules.buildings.interface import Buildings
+from contracts.settling_game.modules.buildings.interface import IBuildings
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library.library_combat import Combat
@@ -169,7 +169,7 @@ func build_squad_from_troops_in_realm{
 
     // check if Realm has the buildings to build the requested troops
     let (buildings_module) = Module.get_module_address(ModuleIds.Buildings);
-    let (realm_buildings: RealmBuildings) = Buildings.get_effective_buildings(
+    let (realm_buildings: RealmBuildings) = IBuildings.get_effective_buildings(
         buildings_module, realm_id
     );
     Combat.assert_can_build_troops(troop_ids_len, troop_ids, realm_buildings);

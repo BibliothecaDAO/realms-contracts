@@ -45,7 +45,7 @@ from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from openzeppelin.upgrades.library import Proxy
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.modules.calculator.interface import ICalculator
-from contracts.settling_game.modules.buildings.interface import Buildings
+from contracts.settling_game.modules.buildings.interface import IBuildings
 // -----------------------------------
 // Events
 // -----------------------------------
@@ -161,7 +161,7 @@ func create{
 
     // Costs
     let (buildings_address) = Module.get_module_address(ModuleIds.Buildings);
-    let (cost, _) = Buildings.get_building_cost(buildings_address, food_building_id);
+    let (cost, _) = IBuildings.get_building_cost(buildings_address, food_building_id);
     let (costs: Cost*) = alloc();
     assert [costs] = cost;
     let (token_len, token_ids, token_values) = transform_costs_to_tokens(1, costs, qty);

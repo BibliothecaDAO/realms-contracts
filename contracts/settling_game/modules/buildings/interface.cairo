@@ -4,7 +4,7 @@ from starkware.cairo.common.uint256 import Uint256
 from contracts.settling_game.utils.game_structs import RealmData, RealmBuildings, Cost
 
 @contract_interface
-namespace Buildings {
+namespace IBuildings {
     func build(token_id: Uint256, building_id: felt, quantity: felt) -> (success: felt) {
     }
 
