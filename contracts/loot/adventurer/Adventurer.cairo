@@ -5,18 +5,22 @@
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_add
-from starkware.cairo.common.math import unsigned_div_rem
+from starkware.cairo.common.math import unsigned_div_rem, assert_lt_felt
 from starkware.starknet.common.syscalls import get_block_timestamp
+from starkware.starknet.common.syscalls import get_caller_address
 
 from openzeppelin.access.ownable.library import Ownable
 from openzeppelin.introspection.erc165.library import ERC165
 from openzeppelin.token.erc721.library import ERC721
+from openzeppelin.token.erc721.IERC721 import IERC721
 from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
 from openzeppelin.upgrades.library import Proxy
 
 from contracts.loot.adventurer.library import AdventurerLib
 from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
+
+from contracts.loot.loot.ILoot import ILoot
 
 # const MINT_COST = 5000000000000000000
 
@@ -305,6 +309,20 @@ func get_lords{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
 end
 
 @external
+func set_loot{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(loot : felt):
+    Proxy.assert_only_admin()
+    lords_address.write(loot)
+    return ()
+end
+
+@view
+func get_loot{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
+    address : felt
+):
+    return item_address.read()
+end
+
+@external
 func getAdventurerById{
     pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
 }(tokenId : Uint256) -> (adventurer : AdventurerState):
@@ -316,4 +334,40 @@ func getAdventurerById{
     let (unpacked_adventurer : AdventurerState) = AdventurerLib.unpack(packed_adventurer)
 
     return (unpacked_adventurer)
+end
+
+@external
+func equipItem{
+    pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr, bitwise_ptr : BitwiseBuiltin*
+}(tokenId : Uint256, itemTokenId : Uint256) -> (success : felt):
+    alloc_locals
+
+    let (unpacked_adventurer) = getAdventurerById(tokenId)
+
+    # get Item from Loot contract
+    let (loot_address) = get_loot()
+    let (item) = ILoot.getItemByTokenId(loot_address, itemTokenId)
+
+    # Check item is owned
+    let (owner) = IERC721.ownerOf(loot_address, itemTokenId)
+    let (caller) = get_caller_address()
+    assert owner = caller
+
+    # get convert token to Felt
+    let (token_to_felt) = _uint_to_felt(itemTokenId)
+
+    # equip Item
+    let (equiped_adventurer) = AdventurerLib.equip_item(token_to_felt, item, unpacked_adventurer)
+
+    # TODO: Set item state so it can only be equiped to one character at a time.
+
+    return (1)
+end
+
+# TODO: Move
+func _uint_to_felt{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    value : Uint256
+) -> (value : felt):
+    assert_lt_felt(value.high, 2 ** 123)
+    return (value.high * (2 ** 128) + value.low)
 end

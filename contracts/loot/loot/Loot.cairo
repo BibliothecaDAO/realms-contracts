@@ -253,6 +253,7 @@ end
 func getItemByTokenId{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
     tokenId : Uint256
 ) -> (item : Item):
+    ERC721.assert_only_token_owner(tokenId)
     let (storedItem : Item) = item.read(tokenId)
 
     let Id = storedItem.Id
@@ -262,7 +263,7 @@ func getItemByTokenId{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
     let (Rank) = ItemStats.item_rank(storedItem.Id)  # stored state
     let (Prefix_1) = ItemStats.item_name_prefix(1)  # stored state
     let (Prefix_2) = ItemStats.item_name_suffix(1)  # stored state
-    let (Suffix) = ItemStats.item_suffix(1) # stored state
+    let (Suffix) = ItemStats.item_suffix(1)  # stored state
     let Greatness = 0  # stored state
     let CreatedBlock = storedItem.CreatedBlock  # timestamp
     let XP = 0  # stored state
