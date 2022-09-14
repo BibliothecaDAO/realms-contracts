@@ -10,87 +10,87 @@ from contracts.loot.loot.stats.item import ItemStats
 from contracts.loot.constants.physics import MaterialDensity
 
 @external
-func test_item_slot{syscall_ptr : felt*, range_check_ptr}():
-    alloc_locals
+func test_item_slot{syscall_ptr: felt*, range_check_ptr}() {
+    alloc_locals;
 
-    let (slot) = ItemStats.item_slot(ItemIds.WoolGloves)
-    assert slot = ItemSlot.WoolGloves
+    let (slot) = ItemStats.item_slot(ItemIds.WoolGloves);
+    assert slot = ItemSlot.WoolGloves;
 
-    return ()
-end
-
-@external
-func test_item_type{syscall_ptr : felt*, range_check_ptr}():
-    alloc_locals
-
-    let (typea) = ItemStats.item_type(ItemIds.GraveWand)
-    assert typea = ItemType.GraveWand
-
-    let (typeb) = ItemStats.item_type(ItemIds.LinenHood)
-    assert typeb = ItemType.LinenHood
-
-    let (typeb) = ItemStats.item_type(ItemIds.HeavyGloves)
-    assert typeb = ItemType.HeavyGloves
-
-    return ()
-end
+    return ();
+}
 
 @external
-func test_item_material{syscall_ptr : felt*, range_check_ptr}():
-    alloc_locals
+func test_item_type{syscall_ptr: felt*, range_check_ptr}() {
+    alloc_locals;
 
-    let (typea) = ItemStats.item_material(ItemIds.PlatinumRing)
-    assert typea = ItemMaterial.PlatinumRing
+    let (typea) = ItemStats.item_type(ItemIds.GraveWand);
+    assert typea = ItemType.GraveWand;
 
-    let (typeb) = ItemStats.item_material(ItemIds.DemonhideBelt)
-    assert typeb = ItemMaterial.DemonhideBelt
+    let (typeb) = ItemStats.item_type(ItemIds.LinenHood);
+    assert typeb = ItemType.LinenHood;
 
-    let (typeb) = ItemStats.item_material(ItemIds.OrnateGauntlets)
-    assert typeb = ItemMaterial.OrnateGauntlets
+    let (typeb) = ItemStats.item_type(ItemIds.HeavyGloves);
+    assert typeb = ItemType.HeavyGloves;
 
-    return ()
-end
-
-@external
-func test_item_rank{syscall_ptr : felt*, range_check_ptr}():
-    alloc_locals
-
-    let (ranka) = ItemStats.item_rank(ItemIds.GoldRing)
-    assert ranka = ItemRank.GoldRing
-
-    let (rankb) = ItemStats.item_rank(ItemIds.DragonsCrown)
-    assert rankb = ItemRank.DragonsCrown
-
-    let (rankc) = ItemStats.item_rank(ItemIds.ChainGloves)
-    assert rankc = ItemRank.ChainGloves
-
-    return ()
-end
+    return ();
+}
 
 @external
-func test_material_density{syscall_ptr : felt*, range_check_ptr}():
-    alloc_locals
+func test_item_material{syscall_ptr: felt*, range_check_ptr}() {
+    alloc_locals;
 
-    let (densitya) = ItemStats.material_density(Material.Metal.generic)
-    assert densitya = MaterialDensity.Metal.generic
+    let (typea) = ItemStats.item_material(ItemIds.PlatinumRing);
+    assert typea = ItemMaterial.PlatinumRing;
 
-    let (densityb) = ItemStats.material_density(Material.Metal.gold)
-    assert densityb = MaterialDensity.Metal.gold
+    let (typeb) = ItemStats.item_material(ItemIds.DemonhideBelt);
+    assert typeb = ItemMaterial.DemonhideBelt;
 
-    let (densityc) = ItemStats.material_density(Material.Cloth.brightsilk)
-    assert densityc = MaterialDensity.Cloth.brightsilk
+    let (typeb) = ItemStats.item_material(ItemIds.OrnateGauntlets);
+    assert typeb = ItemMaterial.OrnateGauntlets;
 
-    let (densityd) = ItemStats.material_density(Material.Biotic.Demon.hide)
-    assert densityd = MaterialDensity.Biotic.Demon.hide
+    return ();
+}
 
-    let (densitye) = ItemStats.material_density(Material.Biotic.Human.bones)
-    assert densitye = MaterialDensity.Biotic.Human.bones
+@external
+func test_item_rank{syscall_ptr: felt*, range_check_ptr}() {
+    alloc_locals;
 
-    let (densityf) = ItemStats.material_density(Material.Wood.Hard.walnut)
-    assert densityf = MaterialDensity.Wood.Hard.walnut
+    let (ranka) = ItemStats.item_rank(ItemIds.GoldRing);
+    assert ranka = ItemRank.GoldRing;
 
-    let (densityg) = ItemStats.material_density(Material.Wood.Soft.yew)
-    assert densityg = MaterialDensity.Wood.Soft.yew
+    let (rankb) = ItemStats.item_rank(ItemIds.DragonsCrown);
+    assert rankb = ItemRank.DragonsCrown;
 
-    return ()
-end
+    let (rankc) = ItemStats.item_rank(ItemIds.ChainGloves);
+    assert rankc = ItemRank.ChainGloves;
+
+    return ();
+}
+
+@external
+func test_material_density{syscall_ptr: felt*, range_check_ptr}() {
+    alloc_locals;
+
+    let (densitya) = ItemStats.material_density(Material.Metal.generic);
+    assert densitya = MaterialDensity.Metal.generic;
+
+    let (densityb) = ItemStats.material_density(Material.Metal.gold);
+    assert densityb = MaterialDensity.Metal.gold;
+
+    let (densityc) = ItemStats.material_density(Material.Cloth.brightsilk);
+    assert densityc = MaterialDensity.Cloth.brightsilk;
+
+    let (densityd) = ItemStats.material_density(Material.Biotic.Demon.hide);
+    assert densityd = MaterialDensity.Biotic.Demon.hide;
+
+    let (densitye) = ItemStats.material_density(Material.Biotic.Human.bones);
+    assert densitye = MaterialDensity.Biotic.Human.bones;
+
+    let (densityf) = ItemStats.material_density(Material.Wood.Hard.walnut);
+    assert densityf = MaterialDensity.Wood.Hard.walnut;
+
+    let (densityg) = ItemStats.material_density(Material.Wood.Soft.yew);
+    assert densityg = MaterialDensity.Wood.Soft.yew;
+
+    return ();
+}

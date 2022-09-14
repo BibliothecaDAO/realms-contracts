@@ -1,5 +1,5 @@
 # See here for image contents: https://github.com/microsoft/vscode-dev-containers/tree/v0.202.5/containers/python-3/.devcontainer/base.Dockerfile
-FROM mcr.microsoft.com/vscode/devcontainers/python:0-3.7-bullseye
+FROM mcr.microsoft.com/vscode/devcontainers/python:0-3.9-bullseye
 
 COPY requirements.txt /tmp/pip-tmp/
 RUN pip3 --disable-pip-version-check --no-cache-dir install -r /tmp/pip-tmp/requirements.txt \

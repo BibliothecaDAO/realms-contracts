@@ -1,5 +1,5 @@
-# SPDX-License-Identifier: MIT
-# OpenZeppelin Contracts for Cairo v0.3.2 (token/erc721/enumerable/presets/ERC721EnumerableMintableBurnable.cairo)
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Contracts for Cairo v0.3.2 (token/erc721/enumerable/presets/ERC721EnumerableMintableBurnable.cairo)
 
 %lang starknet
 from starkware.cairo.common.alloc import alloc
@@ -25,249 +25,249 @@ from starkware.starknet.common.syscalls import (
 
 from contracts.loot.loot.stats.item import ItemStats
 
-# -----------------------------------
-# Storage
-# -----------------------------------
+// -----------------------------------
+// Storage
+// -----------------------------------
 
 @storage_var
-func xoroshiro_address() -> (address : felt):
-end
+func xoroshiro_address() -> (address: felt) {
+}
 
 @storage_var
-func counter() -> (count : felt):
-end
-# -----------------------------------
-# Initialize & upgrade
-# -----------------------------------
+func counter() -> (count: felt) {
+}
+// -----------------------------------
+// Initialize & upgrade
+// -----------------------------------
 
-# @notice Module initializer
-# @param address_of_controller: Controller/arbiter address
-# @return proxy_admin: Proxy admin address
+// @notice Module initializer
+// @param address_of_controller: Controller/arbiter address
+// @return proxy_admin: Proxy admin address
 @external
-func initializer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    name : felt, symbol : felt, proxy_admin : felt, xoroshiro_address_ : felt
-):
-    ERC721.initializer(name, symbol)
-    ERC721Enumerable.initializer()
-    Proxy.initializer(proxy_admin)
-    xoroshiro_address.write(xoroshiro_address_)
-    return ()
-end
+func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    name: felt, symbol: felt, proxy_admin: felt, xoroshiro_address_: felt
+) {
+    ERC721.initializer(name, symbol);
+    ERC721Enumerable.initializer();
+    Proxy.initializer(proxy_admin);
+    xoroshiro_address.write(xoroshiro_address_);
+    return ();
+}
 
-# @notice Set new proxy implementation
-# @dev Can only be set by the arbiter
-# @param new_implementation: New implementation contract address
+// @notice Set new proxy implementation
+// @dev Can only be set by the arbiter
+// @param new_implementation: New implementation contract address
 @external
-func upgrade{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    new_implementation : felt
-):
-    Proxy.assert_only_admin()
-    Proxy._set_implementation_hash(new_implementation)
-    return ()
-end
+func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    new_implementation: felt
+) {
+    Proxy.assert_only_admin();
+    Proxy._set_implementation_hash(new_implementation);
+    return ();
+}
 
-#
-# Getters
-#
-
-@view
-func totalSupply{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}() -> (
-    totalSupply : Uint256
-):
-    let (totalSupply : Uint256) = ERC721Enumerable.total_supply()
-    return (totalSupply)
-end
+//
+// Getters
+//
 
 @view
-func tokenByIndex{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-    index : Uint256
-) -> (tokenId : Uint256):
-    let (tokenId : Uint256) = ERC721Enumerable.token_by_index(index)
-    return (tokenId)
-end
+func totalSupply{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}() -> (
+    totalSupply: Uint256
+) {
+    let (totalSupply: Uint256) = ERC721Enumerable.total_supply();
+    return (totalSupply,);
+}
 
 @view
-func tokenOfOwnerByIndex{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-    owner : felt, index : Uint256
-) -> (tokenId : Uint256):
-    let (tokenId : Uint256) = ERC721Enumerable.token_of_owner_by_index(owner, index)
-    return (tokenId)
-end
+func tokenByIndex{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    index: Uint256
+) -> (tokenId: Uint256) {
+    let (tokenId: Uint256) = ERC721Enumerable.token_by_index(index);
+    return (tokenId,);
+}
 
 @view
-func supportsInterface{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    interfaceId : felt
-) -> (success : felt):
-    let (success) = ERC165.supports_interface(interfaceId)
-    return (success)
-end
+func tokenOfOwnerByIndex{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    owner: felt, index: Uint256
+) -> (tokenId: Uint256) {
+    let (tokenId: Uint256) = ERC721Enumerable.token_of_owner_by_index(owner, index);
+    return (tokenId,);
+}
 
 @view
-func name{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (name : felt):
-    let (name) = ERC721.name()
-    return (name)
-end
+func supportsInterface{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    interfaceId: felt
+) -> (success: felt) {
+    let (success) = ERC165.supports_interface(interfaceId);
+    return (success,);
+}
 
 @view
-func symbol{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (symbol : felt):
-    let (symbol) = ERC721.symbol()
-    return (symbol)
-end
+func name{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (name: felt) {
+    let (name) = ERC721.name();
+    return (name,);
+}
 
 @view
-func balanceOf{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(owner : felt) -> (
-    balance : Uint256
-):
-    let (balance : Uint256) = ERC721.balance_of(owner)
-    return (balance)
-end
+func symbol{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (symbol: felt) {
+    let (symbol) = ERC721.symbol();
+    return (symbol,);
+}
 
 @view
-func ownerOf{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    tokenId : Uint256
-) -> (owner : felt):
-    let (owner : felt) = ERC721.owner_of(tokenId)
-    return (owner)
-end
+func balanceOf{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(owner: felt) -> (
+    balance: Uint256
+) {
+    let (balance: Uint256) = ERC721.balance_of(owner);
+    return (balance,);
+}
 
 @view
-func getApproved{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    tokenId : Uint256
-) -> (approved : felt):
-    let (approved : felt) = ERC721.get_approved(tokenId)
-    return (approved)
-end
+func ownerOf{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(tokenId: Uint256) -> (
+    owner: felt
+) {
+    let (owner: felt) = ERC721.owner_of(tokenId);
+    return (owner,);
+}
 
 @view
-func isApprovedForAll{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    owner : felt, operator : felt
-) -> (isApproved : felt):
-    let (isApproved : felt) = ERC721.is_approved_for_all(owner, operator)
-    return (isApproved)
-end
+func getApproved{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    tokenId: Uint256
+) -> (approved: felt) {
+    let (approved: felt) = ERC721.get_approved(tokenId);
+    return (approved,);
+}
 
 @view
-func tokenURI{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    tokenId : Uint256
-) -> (tokenURI : felt):
-    let (tokenURI : felt) = ERC721.token_uri(tokenId)
-    return (tokenURI)
-end
+func isApprovedForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    owner: felt, operator: felt
+) -> (isApproved: felt) {
+    let (isApproved: felt) = ERC721.is_approved_for_all(owner, operator);
+    return (isApproved,);
+}
 
 @view
-func owner{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (owner : felt):
-    let (owner : felt) = Ownable.owner()
-    return (owner)
-end
+func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    tokenId: Uint256
+) -> (tokenURI: felt) {
+    let (tokenURI: felt) = ERC721.token_uri(tokenId);
+    return (tokenURI,);
+}
 
-#
-# Externals
-#
+@view
+func owner{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (owner: felt) {
+    let (owner: felt) = Ownable.owner();
+    return (owner,);
+}
 
-@external
-func approve{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-    to : felt, tokenId : Uint256
-):
-    ERC721.approve(to, tokenId)
-    return ()
-end
+//
+// Externals
+//
 
 @external
-func setApprovalForAll{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    operator : felt, approved : felt
-):
-    ERC721.set_approval_for_all(operator, approved)
-    return ()
-end
+func approve{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    to: felt, tokenId: Uint256
+) {
+    ERC721.approve(to, tokenId);
+    return ();
+}
 
 @external
-func transferFrom{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-    from_ : felt, to : felt, tokenId : Uint256
-):
-    ERC721Enumerable.transfer_from(from_, to, tokenId)
-    return ()
-end
+func setApprovalForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    operator: felt, approved: felt
+) {
+    ERC721.set_approval_for_all(operator, approved);
+    return ();
+}
 
 @external
-func safeTransferFrom{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-    from_ : felt, to : felt, tokenId : Uint256, data_len : felt, data : felt*
-):
-    ERC721Enumerable.safe_transfer_from(from_, to, tokenId, data_len, data)
-    return ()
-end
+func transferFrom{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    from_: felt, to: felt, tokenId: Uint256
+) {
+    ERC721Enumerable.transfer_from(from_, to, tokenId);
+    return ();
+}
 
 @external
-func burn{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(tokenId : Uint256):
-    ERC721.assert_only_token_owner(tokenId)
-    ERC721Enumerable._burn(tokenId)
-    return ()
-end
+func safeTransferFrom{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    from_: felt, to: felt, tokenId: Uint256, data_len: felt, data: felt*
+) {
+    ERC721Enumerable.safe_transfer_from(from_, to, tokenId, data_len, data);
+    return ();
+}
 
 @external
-func setTokenURI{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-    tokenId : Uint256, tokenURI : felt
-):
-    Ownable.assert_only_owner()
-    ERC721._set_token_uri(tokenId, tokenURI)
-    return ()
-end
+func burn{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(tokenId: Uint256) {
+    ERC721.assert_only_token_owner(tokenId);
+    ERC721Enumerable._burn(tokenId);
+    return ();
+}
 
 @external
-func transferOwnership{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    newOwner : felt
-):
-    Ownable.transfer_ownership(newOwner)
-    return ()
-end
+func setTokenURI{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    tokenId: Uint256, tokenURI: felt
+) {
+    Ownable.assert_only_owner();
+    ERC721._set_token_uri(tokenId, tokenURI);
+    return ();
+}
 
 @external
-func renounceOwnership{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    Ownable.renounce_ownership()
-    return ()
-end
+func transferOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    newOwner: felt
+) {
+    Ownable.transfer_ownership(newOwner);
+    return ();
+}
+
+@external
+func renounceOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    Ownable.renounce_ownership();
+    return ();
+}
 
 @storage_var
-func item(tokenId : Uint256) -> (item : Item):
-end
+func item(tokenId: Uint256) -> (item: Item) {
+}
 
 @external
-func mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(to : felt):
-    alloc_locals
+func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: felt) {
+    alloc_locals;
 
-    # fetch new item with random Id
-    let (new_item : Item) = generateRandomItem()
+    // fetch new item with random Id
+    let (new_item: Item) = generateRandomItem();
 
-    let (next_id) = counter.read()
+    let (next_id) = counter.read();
 
-    item.write(Uint256(next_id, 0), new_item)
+    item.write(Uint256(next_id, 0), new_item);
 
-    ERC721Enumerable._mint(to, Uint256(next_id, 0))
+    ERC721Enumerable._mint(to, Uint256(next_id, 0));
 
-    counter.write(next_id + 1)
-    return ()
-end
+    counter.write(next_id + 1);
+    return ();
+}
 
-# ------------new
+// ------------new
 
 @view
-func getItemByTokenId{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    tokenId : Uint256
-) -> (item : Item):
-    let (storedItem : Item) = item.read(tokenId)
+func getItemByTokenId{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    tokenId: Uint256
+) -> (item: Item) {
+    let (storedItem: Item) = item.read(tokenId);
 
-    let Id = storedItem.Id
-    let (Slot) = ItemStats.item_slot(storedItem.Id)  # determined by Id
-    let (Type) = ItemStats.item_type(storedItem.Id)  # determined by Id
-    let (Material) = ItemStats.item_material(storedItem.Id)  # determined by Id
-    let (Rank) = ItemStats.item_rank(storedItem.Id)  # stored state
-    let (Prefix_1) = ItemStats.item_name_prefix(1)  # stored state
-    let (Prefix_2) = ItemStats.item_name_suffix(1)  # stored state
-    let (Suffix) = ItemStats.item_suffix(1)  # stored state
-    let Greatness = 0  # stored state
-    let CreatedBlock = storedItem.CreatedBlock  # timestamp
-    let XP = 0  # stored state
-    let Adventurer = 0
-    let Bag = 0
+    let Id = storedItem.Id;
+    let (Slot) = ItemStats.item_slot(storedItem.Id);  // determined by Id
+    let (Type) = ItemStats.item_type(storedItem.Id);  // determined by Id
+    let (Material) = ItemStats.item_material(storedItem.Id);  // determined by Id
+    let (Rank) = ItemStats.item_rank(storedItem.Id);  // stored state
+    let (Prefix_1) = ItemStats.item_name_prefix(1);  // stored state
+    let (Prefix_2) = ItemStats.item_name_suffix(1);  // stored state
+    let (Suffix) = ItemStats.item_suffix(1);  // stored state
+    let Greatness = 0;  // stored state
+    let CreatedBlock = storedItem.CreatedBlock;  // timestamp
+    let XP = 0;  // stored state
+    let Adventurer = 0;
+    let Bag = 0;
 
     return (
         Item(
@@ -285,19 +285,19 @@ func getItemByTokenId{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
         Adventurer=Adventurer,
         Bag=Bag
         ),
-    )
-end
+    );
+}
 
-# TODO: Unequip Item
+// TODO: Unequip Item
 
 @external
-func updateAdventurer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    tokenId : Uint256, adventurerId : felt
-):
-    # TODO: Only allow calling by Adventurer Contract
-    let (item_ : Item) = item.read(tokenId)
+func updateAdventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    tokenId: Uint256, adventurerId: felt
+) {
+    // TODO: Only allow calling by Adventurer Contract
+    let (item_: Item) = item.read(tokenId);
 
-    # TODO: Move library
+    // TODO: Move library
     let update_item = Item(
         Id=item_.Id,
         Slot=item_.Slot,
@@ -312,38 +312,38 @@ func updateAdventurer{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_ch
         XP=item_.XP,
         Adventurer=adventurerId,
         Bag=item_.Bag,
-    )
+    );
 
-    setItemById(tokenId, update_item)
-    return ()
-end
+    setItemById(tokenId, update_item);
+    return ();
+}
 
 @external
-func setItemById{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    tokenId : Uint256, item_ : Item
-):
-    # TODO: Security
-    item.write(tokenId, item_)
-    return ()
-end
+func setItemById{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    tokenId: Uint256, item_: Item
+) {
+    // TODO: Security
+    item.write(tokenId, item_);
+    return ();
+}
 
-func generateRandomItem{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-    item : Item
-):
-    # set blank item
-    let (Id) = roll_dice()
-    let Slot = 0  # determined by Id
-    let Type = 0  # determined by Id
-    let Material = 0  # determined by Id
-    let Rank = 0  # stored state
-    let Prefix_1 = 0  # stored state
-    let Prefix_2 = 0  # stored state
-    let Suffix = 0  # stored state
-    let Greatness = 0  # stored state
-    let (CreatedBlock) = get_block_timestamp()  # timestamp
-    let XP = 0  # stored state
-    let Adventurer = 0
-    let Bag = 0
+func generateRandomItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
+    item: Item
+) {
+    // set blank item
+    let (Id) = roll_dice();
+    let Slot = 0;  // determined by Id
+    let Type = 0;  // determined by Id
+    let Material = 0;  // determined by Id
+    let Rank = 0;  // stored state
+    let Prefix_1 = 0;  // stored state
+    let Prefix_2 = 0;  // stored state
+    let Suffix = 0;  // stored state
+    let Greatness = 0;  // stored state
+    let (CreatedBlock) = get_block_timestamp();  // timestamp
+    let XP = 0;  // stored state
+    let Adventurer = 0;
+    let Bag = 0;
 
     return (
         Item(
@@ -361,40 +361,38 @@ func generateRandomItem{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
         Adventurer=Adventurer,
         Bag=Bag
         ),
-    )
-end
+    );
+}
 
 @external
-func set_xoroshiro{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-    xoroshiro : felt
-):
-    # TODO:
-    Proxy.assert_only_admin()
-    xoroshiro_address.write(xoroshiro)
-    return ()
-end
+func set_xoroshiro{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    xoroshiro: felt
+) {
+    // TODO:
+    Proxy.assert_only_admin();
+    xoroshiro_address.write(xoroshiro);
+    return ();
+}
 
 @view
-func get_xoroshiro{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (
-    x : felt
-):
-    let (xoroshiro) = xoroshiro_address.read()
-    return (xoroshiro)
-end
+func get_xoroshiro{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (x: felt) {
+    let (xoroshiro) = xoroshiro_address.read();
+    return (xoroshiro,);
+}
 
-func roll_dice{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}() -> (
-    dice_roll : felt
-):
-    alloc_locals
-    let (xoroshiro_address_) = xoroshiro_address.read()
-    let (rnd) = IXoroshiro.next(xoroshiro_address_)
+func roll_dice{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}() -> (
+    dice_roll: felt
+) {
+    alloc_locals;
+    let (xoroshiro_address_) = xoroshiro_address.read();
+    let (rnd) = IXoroshiro.next(xoroshiro_address_);
 
-    # useful for testing:
-    # local rnd
-    # %{
-    #     import random
-    #     ids.rnd = random.randint(0, 5000)
-    # %}
-    let (_, r) = unsigned_div_rem(rnd, 101)
-    return (r + 1)  # values from 1 to 101 inclusive
-end
+    // useful for testing:
+    // local rnd
+    // %{
+    //     import random
+    //     ids.rnd = random.randint(0, 5000)
+    // %}
+    let (_, r) = unsigned_div_rem(rnd, 101);
+    return (r + 1,);  // values from 1 to 101 inclusive
+}

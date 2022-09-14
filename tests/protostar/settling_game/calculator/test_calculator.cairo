@@ -14,11 +14,11 @@ from contracts.settling_game.library.library_calculator import Calculator
 
 from tests.protostar.settling_game.test_structs import TEST_REALM_BUILDINGS
 
-const TROOP_POPULATION = 10
+const TROOP_POPULATION = 10;
 
 @external
-func test_calculate_happiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    alloc_locals
+func test_calculate_happiness{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
     let test_buildings = RealmBuildings(
         TEST_REALM_BUILDINGS.HOUSE,
         TEST_REALM_BUILDINGS.STOREHOUSE,
@@ -29,24 +29,24 @@ func test_calculate_happiness{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
         TEST_REALM_BUILDINGS.MAGETOWER,
         TEST_REALM_BUILDINGS.ARCHERTOWER,
         TEST_REALM_BUILDINGS.CASTLE,
-    )
+    );
 
-    let (realm_population) = Calculator.calculate_food(test_buildings, TROOP_POPULATION)
+    let (realm_population) = Calculator.calculate_food(test_buildings, TROOP_POPULATION);
 
-    let (realm_food) = Calculator.calculate_food(test_buildings, TROOP_POPULATION)
+    let (realm_food) = Calculator.calculate_food(test_buildings, TROOP_POPULATION);
 
-    let (realm_happiness) = Calculator.calculate_happiness(realm_population, realm_food)
+    let (realm_happiness) = Calculator.calculate_happiness(realm_population, realm_food);
 
-    # %{ print('Realm Happiness:', ids.realm_happiness) %}
+    // %{ print('Realm Happiness:', ids.realm_happiness) %}
 
-    # TODO: missing assert
+    // TODO: missing assert
 
-    return ()
-end
+    return ();
+}
 
 @external
-func test_calculate_food{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    alloc_locals
+func test_calculate_food{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
     let test_buildings = RealmBuildings(
         TEST_REALM_BUILDINGS.HOUSE,
         TEST_REALM_BUILDINGS.STOREHOUSE,
@@ -57,30 +57,30 @@ func test_calculate_food{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range
         TEST_REALM_BUILDINGS.MAGETOWER,
         TEST_REALM_BUILDINGS.ARCHERTOWER,
         TEST_REALM_BUILDINGS.CASTLE,
-    )
+    );
 
-    let (realm_food) = Calculator.calculate_food(test_buildings, TROOP_POPULATION)
+    let (realm_food) = Calculator.calculate_food(test_buildings, TROOP_POPULATION);
 
-    # %{ print('Realm Food:', ids.realm_food) %}
+    // %{ print('Realm Food:', ids.realm_food) %}
 
-    let House = BuildingsFood.House * TEST_REALM_BUILDINGS.HOUSE
-    let StoreHouse = BuildingsFood.StoreHouse * TEST_REALM_BUILDINGS.STOREHOUSE
-    let Granary = BuildingsFood.Granary * TEST_REALM_BUILDINGS.GRANARY
-    let Farm = BuildingsFood.Farm * TEST_REALM_BUILDINGS.FARM
-    let FishingVillage = BuildingsFood.FishingVillage * TEST_REALM_BUILDINGS.FISHINGVILLAGE
-    let Barracks = BuildingsFood.Barracks * TEST_REALM_BUILDINGS.BARRACKS
-    let MageTower = BuildingsFood.MageTower * TEST_REALM_BUILDINGS.MAGETOWER
-    let ArcherTower = BuildingsFood.ArcherTower * TEST_REALM_BUILDINGS.ARCHERTOWER
-    let Castle = BuildingsFood.Castle * TEST_REALM_BUILDINGS.CASTLE
+    let House = BuildingsFood.House * TEST_REALM_BUILDINGS.HOUSE;
+    let StoreHouse = BuildingsFood.StoreHouse * TEST_REALM_BUILDINGS.STOREHOUSE;
+    let Granary = BuildingsFood.Granary * TEST_REALM_BUILDINGS.GRANARY;
+    let Farm = BuildingsFood.Farm * TEST_REALM_BUILDINGS.FARM;
+    let FishingVillage = BuildingsFood.FishingVillage * TEST_REALM_BUILDINGS.FISHINGVILLAGE;
+    let Barracks = BuildingsFood.Barracks * TEST_REALM_BUILDINGS.BARRACKS;
+    let MageTower = BuildingsFood.MageTower * TEST_REALM_BUILDINGS.MAGETOWER;
+    let ArcherTower = BuildingsFood.ArcherTower * TEST_REALM_BUILDINGS.ARCHERTOWER;
+    let Castle = BuildingsFood.Castle * TEST_REALM_BUILDINGS.CASTLE;
 
-    assert realm_food = House + StoreHouse + Granary + Farm + FishingVillage + Barracks + MageTower + ArcherTower + Castle - TROOP_POPULATION
+    assert realm_food = House + StoreHouse + Granary + Farm + FishingVillage + Barracks + MageTower + ArcherTower + Castle - TROOP_POPULATION;
 
-    return ()
-end
+    return ();
+}
 
 @external
-func test_calculate_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}():
-    alloc_locals
+func test_calculate_population{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
     let test_buildings = RealmBuildings(
         TEST_REALM_BUILDINGS.HOUSE,
         TEST_REALM_BUILDINGS.STOREHOUSE,
@@ -91,30 +91,30 @@ func test_calculate_population{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
         TEST_REALM_BUILDINGS.MAGETOWER,
         TEST_REALM_BUILDINGS.ARCHERTOWER,
         TEST_REALM_BUILDINGS.CASTLE,
-    )
+    );
 
-    let (realm_population) = Calculator.calculate_population(test_buildings, TROOP_POPULATION)
+    let (realm_population) = Calculator.calculate_population(test_buildings, TROOP_POPULATION);
 
-    # %{ print('Realm Population:', ids.realm_population) %}
+    // %{ print('Realm Population:', ids.realm_population) %}
 
-    let House = BuildingsPopulation.House * TEST_REALM_BUILDINGS.HOUSE
-    let StoreHouse = BuildingsPopulation.StoreHouse * TEST_REALM_BUILDINGS.STOREHOUSE
-    let Granary = BuildingsPopulation.Granary * TEST_REALM_BUILDINGS.GRANARY
-    let Farm = BuildingsPopulation.Farm * TEST_REALM_BUILDINGS.FARM
-    let FishingVillage = BuildingsPopulation.FishingVillage * TEST_REALM_BUILDINGS.FISHINGVILLAGE
-    let Barracks = BuildingsPopulation.Barracks * TEST_REALM_BUILDINGS.BARRACKS
-    let MageTower = BuildingsPopulation.MageTower * TEST_REALM_BUILDINGS.MAGETOWER
-    let ArcherTower = BuildingsPopulation.ArcherTower * TEST_REALM_BUILDINGS.ARCHERTOWER
-    let Castle = BuildingsPopulation.Castle * TEST_REALM_BUILDINGS.CASTLE
+    let House = BuildingsPopulation.House * TEST_REALM_BUILDINGS.HOUSE;
+    let StoreHouse = BuildingsPopulation.StoreHouse * TEST_REALM_BUILDINGS.STOREHOUSE;
+    let Granary = BuildingsPopulation.Granary * TEST_REALM_BUILDINGS.GRANARY;
+    let Farm = BuildingsPopulation.Farm * TEST_REALM_BUILDINGS.FARM;
+    let FishingVillage = BuildingsPopulation.FishingVillage * TEST_REALM_BUILDINGS.FISHINGVILLAGE;
+    let Barracks = BuildingsPopulation.Barracks * TEST_REALM_BUILDINGS.BARRACKS;
+    let MageTower = BuildingsPopulation.MageTower * TEST_REALM_BUILDINGS.MAGETOWER;
+    let ArcherTower = BuildingsPopulation.ArcherTower * TEST_REALM_BUILDINGS.ARCHERTOWER;
+    let Castle = BuildingsPopulation.Castle * TEST_REALM_BUILDINGS.CASTLE;
 
-    assert realm_population = House + StoreHouse + Granary + Farm + FishingVillage + Barracks + MageTower + ArcherTower + Castle - TROOP_POPULATION
+    assert realm_population = House + StoreHouse + Granary + Farm + FishingVillage + Barracks + MageTower + ArcherTower + Castle - TROOP_POPULATION;
 
-    return ()
-end
+    return ();
+}
 
 @external
-func test_calculate_troop_coefficient{syscall_ptr : felt*, range_check_ptr}():
-    alloc_locals
+func test_calculate_troop_coefficient{syscall_ptr: felt*, range_check_ptr}() {
+    alloc_locals;
 
     let test_buildings = RealmBuildings(
         TEST_REALM_BUILDINGS.HOUSE,
@@ -126,18 +126,18 @@ func test_calculate_troop_coefficient{syscall_ptr : felt*, range_check_ptr}():
         TEST_REALM_BUILDINGS.MAGETOWER,
         TEST_REALM_BUILDINGS.ARCHERTOWER,
         TEST_REALM_BUILDINGS.CASTLE,
-    )
+    );
 
-    let (troop_coefficient) = Calculator.calculate_troop_coefficient(test_buildings)
+    let (troop_coefficient) = Calculator.calculate_troop_coefficient(test_buildings);
 
-    # %{ print('Troop coefficient:', ids.troop_coefficient) %}
+    // %{ print('Troop coefficient:', ids.troop_coefficient) %}
 
-    let barracks = TEST_REALM_BUILDINGS.BARRACKS * BuildingsTroopIndustry.Barracks
-    let mageTower = TEST_REALM_BUILDINGS.MAGETOWER * BuildingsTroopIndustry.MageTower
-    let archerTower = TEST_REALM_BUILDINGS.ARCHERTOWER * BuildingsTroopIndustry.ArcherTower
-    let castle = TEST_REALM_BUILDINGS.CASTLE * BuildingsTroopIndustry.Castle
+    let barracks = TEST_REALM_BUILDINGS.BARRACKS * BuildingsTroopIndustry.Barracks;
+    let mageTower = TEST_REALM_BUILDINGS.MAGETOWER * BuildingsTroopIndustry.MageTower;
+    let archerTower = TEST_REALM_BUILDINGS.ARCHERTOWER * BuildingsTroopIndustry.ArcherTower;
+    let castle = TEST_REALM_BUILDINGS.CASTLE * BuildingsTroopIndustry.Castle;
 
-    assert troop_coefficient = barracks + mageTower + archerTower + castle
+    assert troop_coefficient = barracks + mageTower + archerTower + castle;
 
-    return ()
-end
+    return ();
+}
