@@ -1,8 +1,7 @@
 import click
 from realms_cli.caller_invoker import wrapped_call, wrapped_send
 from realms_cli.config import Config
-from realms_cli.shared import uint, felt_to_str, str_to_felt
-from realms_cli.utils import print_over_colums
+from realms_cli.utils import print_over_colums,  uint, felt_to_str, str_to_felt
 
 
 @click.command()

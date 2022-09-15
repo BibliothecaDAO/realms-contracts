@@ -6,8 +6,7 @@ from realms_cli.caller_invoker import wrapped_call, wrapped_send
 from realms_cli.config import Config
 from realms_cli.utils import print_over_colums
 from realms_cli.coordinates import coordinates_by_id
-from realms_cli.shared import uint
-from realms_cli.utils import parse_multi_input
+from realms_cli.utils import parse_multi_input, uint
 
 per_set = 50
 total = 8000
