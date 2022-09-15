@@ -1,8 +1,9 @@
-[![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/uQnjZhZPfu)
-[![Twitter](https://badgen.net/badge/icon/twitter?icon=twitter&label)](https://twitter.com/LootRealms)
+
 
 <!-- badges -->
-<p>
+<p> [![Twitter](https://badgen.net/badge/icon/twitter?icon=twitter&label)](https://twitter.com/LootRealms)
+[![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/uQnjZhZPfu)
+
   <a href="https://starkware.co/">
     <img src="https://img.shields.io/badge/powered_by-StarkWare-navy">
   </a>
@@ -13,24 +14,22 @@
 
 ![Realms x Bibliotheca header](/static/realmsxbibliotheca.jpg)
 
-# 📝 Realms Contracts
+# Realmverse Contracts
 
-Realms is an ever-expanding on-chain permission-less gaming Lootverse built on StarkNet. 
+## Realms is an ever-expanding on-chain permission-less gaming Lootverse built on StarkNet. 
 
-This monorepo contains all of the Contracts (StarkNet/Cairo Ethereum/Solidity) for BibliothecaDAO, $LORDS, and Realms.
+### This monorepo contains all of the Contracts (StarkNet/Cairo Ethereum/Solidity) for Bibliotheca DAO, $LORDS, and Realms.
 
-## Contracts
+---
+
+# Contracts
 | Directory | Title | Description                     |
 | --------- | ----- | ------------------------------- |
-| **[/settling_game](./contracts/settling_game)** | The Realms Settling Game | A modular game engine architecture built on StarkNet. |
+| [/settling_game](./contracts/settling_game) | The Realms Settling Game | A modular game engine architecture built on StarkNet. |
 | [/desiege](./contracts/desiege) | Desiege | A web-based team game built on Starknet. |
-| [/token](./contracts/token) | Standard Tokens | Standard tokens (ERC721, ERC1155, ERC20) written in Cairo. |
-| [/L1-Solidity](./contracts/L1-Solidity/) | L1 contracts | A set of L1 contracts including the $LORDS, Realms, and the Journey (Realms staking). |
-| [/game_utils](./contracts/game_utils) | Game Utils | Game utility contracts such as grid positions written in Cairo. |
 | [/loot](./contracts/loot/) | Loot | Loot contracts ported to Cairo. |
 | [/exchange](./contracts/exchange/) | Exchange | Allows trades between pairs of ERC20 and ERC1155 contract tokens. |
 | [/nft_marketplace](./contracts/nft_marketplace/) | NFT Marketplace | A marketplace for Realms, Dungeons, etc. built on Starknet. |
-| [/utils](./contracts/utils) | Cairo utility contracts | Helper contracts such as safemath written in Cairo. |
 
 
 ## Learn more about Realms
