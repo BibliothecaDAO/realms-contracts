@@ -39,6 +39,8 @@ class Config:
     def __init__(self, nile_network: str):
         self.nile_network = "127.0.0.1" if nile_network == "localhost" else nile_network
 
+        self.MAX_FEE = 80999285161067
+
         self.ADMIN_ALIAS = "STARKNET_ADMIN_PRIVATE_KEY"
         self.ADMIN_ADDRESS, _ = safe_load_deployment(
             "account-1", self.nile_network)
