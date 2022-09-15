@@ -137,3 +137,8 @@ dmypy.json
 
 node_modules
 artifacts
+
+# nile specific
+goerli.deployments.txt
+goerli.declarations.txt
+goerli.accounts.json
