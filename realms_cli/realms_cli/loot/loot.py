@@ -1,8 +1,7 @@
 import click
 from realms_cli.caller_invoker import wrapped_call, wrapped_send
 from realms_cli.config import Config
-from realms_cli.shared import uint, felt_to_str
-from realms_cli.utils import print_over_colums
+from realms_cli.utils import print_over_colums, uint, felt_to_str
 
 
 @click.command()
@@ -42,12 +41,12 @@ def get_loot(loot_token_id, network):
     for i, key in enumerate(config.LOOT):
 
         # Output names for item name prefix1, prefix2, and suffix
-        if i in [5,6,7]:
+        if i in [5, 6, 7]:
             pretty_out.append(
-            f"{key} : {felt_to_str(int(out[i]))}")
+                f"{key} : {felt_to_str(int(out[i]))}")
         else:
             pretty_out.append(
-            f"{key} : {int(out[i])}")
+                f"{key} : {int(out[i])}")
 
     print("_________ LOOT ITEM - " + str(out[0]) + "___________")
     print_over_colums(pretty_out)

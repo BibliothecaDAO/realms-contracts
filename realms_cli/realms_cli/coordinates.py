@@ -1,5 +1,5 @@
 import json
-from realms_cli.shared import str_to_felt
+from realms_cli.utils import str_to_felt
 
 offset = 1800000
 
