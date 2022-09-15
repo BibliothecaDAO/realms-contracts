@@ -3,7 +3,7 @@ import click
 
 from realms_cli.caller_invoker import wrapped_call, wrapped_send
 from realms_cli.config import Config
-from realms_cli.shared import uint
+from realms_cli.utils import uint
 
 
 @click.command()
