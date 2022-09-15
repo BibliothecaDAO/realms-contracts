@@ -40,7 +40,7 @@
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "pip3 install --user -r requirements.txt",
 	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-	"remoteUser": "vscode",
+	"remoteUser": "root",
 	"remoteEnv": {
 		"CAIRO_PATH": "/workspaces/realms-contracts/lib/cairo_contracts/src:/workspaces/realms-contracts/lib/cairo_math_64x61/contracts:${containerEnv:PATH}"
 	}
