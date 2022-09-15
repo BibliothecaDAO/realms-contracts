@@ -1,6 +1,8 @@
+"""This file contains helper functions to encode data for starknet."""
+
 import json
 
-def decimalToBinary(n, chunksize):
+def decimal_to_binary(n, chunksize):
     bit = []
 
     for x in n:
@@ -19,11 +21,11 @@ def decimalToBinary(n, chunksize):
     return int(reversed_bit, 2)
 
 
-def createOutput(value, chunksize):
+def create_output(value, chunksize):
     # print(value)
     for index, x in enumerate(value):
-        value[index]["costs_bitmap"] = decimalToBinary(x['costs'], chunksize)
-        value[index]["ids_bitmap"] = decimalToBinary(x['ids'], chunksize)
+        value[index]["costs_bitmap"] = decimal_to_binary(x['costs'], chunksize)
+        value[index]["ids_bitmap"] = decimal_to_binary(x['ids'], chunksize)
     return value
 
 
@@ -79,7 +81,7 @@ def map_realm(value, resources, wonders, orders):
 
     # concat all together
     meta = traits + resourceLength + resourceIds + wonder + order
-    return decimalToBinary(meta, 8)
+    return decimal_to_binary(meta, 8)
 
 
 # Maps the different attributes of a crypt to a series of arrays
@@ -128,7 +130,7 @@ def map_crypt(value, environments, affinities):
     meta = resourceIds + environment + legendary + size + numDoors + numPoints + affinity
 
     # We pack the crypts with 6 bits as our largest number is 55
-    return decimalToBinary(meta, 6)
+    return decimal_to_binary(meta, 6)
 
 if __name__ == '__main__':
 
@@ -140,7 +142,7 @@ if __name__ == '__main__':
     # f.write(str(output))
 
     # # with open('scripts/json_data.json', 'w') as outfile:
-    # #     outfile.write(str(createOutput(buildings, 6)))
+    # #     outfile.write(str(create_output(buildings, 6)))
 
     building_costs = [6, 6, 6, 6, 6, 6, 6, 6, 6]
 
@@ -162,8 +164,8 @@ if __name__ == '__main__':
     orders = json.load(open('data/orders.json'))
     wonders = json.load(open('data/wonders.json'))
 
-    print(decimalToBinary(resource_ids, 8))
-    print(decimalToBinary(resource_values, 12))
+    print(decimal_to_binary(resource_ids, 8))
+    print(decimal_to_binary(resource_values, 12))
 
     print(map_realm(realms["1"], resources, wonders, orders))
 

@@ -8,13 +8,10 @@ import json
 import click
 
 from nile.core.account import Account
-from ecdsa import SigningKey, SECP256k1
 
 from realms_cli.caller_invoker import wrapped_call, wrapped_send
 from realms_cli.config import Config
-from realms_cli.utils import print_over_colums
 from realms_cli.binary_converter import map_crypt
-from realms_cli.shared import uint
 
 @click.command()
 @click.argument("crypt_token_id", nargs=1)
@@ -123,7 +120,7 @@ def check_crypts(address, network):
         function="balanceOf",
         arguments=[address],
     )
-    print(out)   
+    print(out)
 
 @click.command()
 @click.option("--address", default="", help="Account address in hex format 0x...")
@@ -144,7 +141,7 @@ def check_s_crypts(address, network):
         function="balanceOf",
         arguments=[address],
     )
-    print(out)   
+    print(out)
 
 @click.command()
 @click.argument("crypt_token_id", nargs=1)
@@ -161,7 +158,7 @@ def check_owner_of_crypt(crypt_token_id, network):
         function="ownerOf",
         arguments=[crypt_token_id, 0],
     )
-    print(out)   
+    print(out)
 
 @click.command()
 @click.argument("crypt_token_id", nargs=1)
@@ -178,5 +175,4 @@ def check_owner_of_s_crypt(crypt_token_id, network):
         function="ownerOf",
         arguments=[crypt_token_id, 0],
     )
-    print(out)   
-
+    print(out)

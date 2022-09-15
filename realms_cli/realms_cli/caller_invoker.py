@@ -1,4 +1,8 @@
-import os
+"""
+This files holds wrapper functions for calls and invokes.
+As you can see, we just invoke other nile CLI commands and we can
+probably also just call nile python functions.
+"""
 import re
 import subprocess
 import asyncio
@@ -43,7 +47,7 @@ def send_multi(self, to, method, calldata, nonce=None):
     )
 
 
-# bind it to the account class, needed for signage
+# bind it to the account class so that we can use the function when signing
 Account.send_multi = send_multi
 
 
@@ -114,8 +118,6 @@ def wrapped_call(network, contract_alias, function, arguments) -> str:
     print("------- CALL ----------------------------------------------------")
     # return out such that it can be prettified at a higher level
     return out
-
-# TODO: Add in no args
 
 
 def send(network, signer_alias, contract_alias, function, arguments) -> str:
