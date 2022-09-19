@@ -23,7 +23,7 @@ export STARKNET_PRIVATE_KEY=$STARKNET_PRIVATE_KEY
 export STARKNET_NETWORK=$STARKNET_NETWORK
 EOT
 
-cat <<EOT >> goerli.deployments.txt
+cat <<EOT > goerli.deployments.txt
 0x00155e87abe207e81645c236df829448268f636d41bf5851e5e39e27af5324ed:artifacts/abis/Lords_ERC20_Mintable.json:lords
 0x0448549cccff35dc6d5df90efceda3123e4cec9fa2faff21d392c4a92e95493c:artifacts/abis/Lords_ERC20_Mintable.json:proxy_lords
 0x076bb5a142fa1d9c5d3a46eefaec38cc32b44e093432b1eb46466ea124f848a5:artifacts/abis/Realms_ERC721_Mintable.json:proxy_realms
@@ -70,7 +70,7 @@ cat <<EOT >> goerli.deployments.txt
 $STARKNET_ACCOUNT_ADDRESS:/usr/local/lib/python3.9/site-packages/nile/artifacts/abis/Account.json:account-0
 EOT
 
-cat <<EOT >> goerli.accounts.json
+cat <<EOT > goerli.accounts.json
 {"$STARKNET_PUBLIC_KEY": {"address": "$STARKNET_ACCOUNT_ADDRESS", "index": 0, "alias": "STARKNET_PRIVATE_KEY"}}
 EOT
 
