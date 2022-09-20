@@ -1,4 +1,4 @@
-#!/bin/bassh
+#!/bin/bash
 
 #This script currently has two run modes:
 ## Import account from argentx
@@ -13,68 +13,84 @@ VALID_ARGENTX_PK_LEN=76;
 #Example Argentx Account: 0x02a35361e0aF1CEaC7ab383a7F0476fC2e864018661F14D5C6FaeE1C9eF40984
 VALID_ARGENTX_ACCOUNT='0x[a-fA-F0-9]{64}$';
 
-# Re-prompt user if they enter invalid option
-while true; do
-    echo "Please enter setup type";
-    echo "1: Import account from ArgentX (recommended)";
-    echo "2: Create new account";
-    read -p 'Setup Type: ' script_mode;
-    case $script_mode in
+# import_argentx_account prompts user for an ArgentX Private Key and Account and validates input
+import_argentx_account() {
+    while true; do
+        read -p "Enter Private Key from ArgentX: " STARKNET_PRIVATE_KEY;
+        if [[ $STARKNET_PRIVATE_KEY =~ $VALID_ARGENTX_PK_REGEX ]]; then
+            break;
+        fi
+        echo "Provided input is not a valid PK";
+    done
+    # Get and validate Argentx account
+    while true; do
+        read -p "Enter Account Address from ArgentX: " STARKNET_ACCOUNT_ADDRESS
+        if [[ $STARKNET_ACCOUNT_ADDRESS =~ $VALID_ARGENTX_ACCOUNT ]] ; then
+            break;
+        fi
+        echo "Provided input is not a valid account";
+    done
+    run_setup
+}
 
-        # For ArgentX import
-        $OPTION1_IMPORT_ARGENTX_ACCOUNT)
-            # Get and validate ArgentX PK
-            while true; do
-                read -p "Enter Private Key from ArgentX: " STARKNET_PRIVATE_KEY;
-                if [[ $STARKNET_PRIVATE_KEY =~ $VALID_ARGENTX_PK_REGEX ]]; then
-                    break;
-                fi
-                echo "Provided input is not a valid PK";
-            done
-            # Get and validate Argentx account
-            while true; do
-                read -p "Enter Account Address from ArgentX: " STARKNET_ACCOUNT_ADDRESS
-                if [[ $STARKNET_ACCOUNT_ADDRESS =~ $VALID_ARGENTX_ACCOUNT ]] ; then
-                    break;
-                fi
-                echo "Provided input is not a valid account";
-            done
-            break
+#generate_account generates a PK and Account using nile
+generate_account() {
+    # Use nile to create new PK
+    STARKNET_PRIVATE_KEY=$(nile create_pk);
+    # Use nile to deploy new account using PK
+    nile setup STARKNET_PRIVATE_KEY > account_details.txt 2>&1;
+    # Get Account
+    STARKNET_ACCOUNT_ADDRESS=$(grep -i Account account_details.txt | grep -Eo "0x[a-fA-F0-9]{64}");
+    
+    # Output account info
+    echo "Created new account";
+    echo "PK: $STARKNET_PRIVATE_KEY";
+    echo "Account: $STARKNET_ACCOUNT_ADDRESS";
+    run_setup
+}
+
+# mode_selection allows user to select between importing an account or generating an account
+mode_selection() {
+    # Re-prompt user if they enter invalid option
+    while true; do
+        echo "Please enter setup type";
+        echo "1: Import account from ArgentX (recommended)";
+        echo "2: Create new account";
+        read -p 'Setup Type: ' script_mode;
+        case $script_mode in
+            
+            # For ArgentX import
+            $OPTION1_IMPORT_ARGENTX_ACCOUNT)
+                import_argentx_account;
+                break;
             ;;
-
-        # For New Account Generation
-        $OPTION2_GENERATE_ACCOUNT)
-            # Use nile to create new PK
-            STARKNET_PRIVATE_KEY=$(nile create_pk);
-            # Use nile to deploy new account using PK
-            nile setup STARKNET_PRIVATE_KEY > account_details.txt 2>&1;
-            # Get Account
-            STARKNET_ACCOUNT_ADDRESS=$(grep -i Account account_details.txt | grep -Eo "0x[a-fA-F0-9]{64}");
-
-            # Output account info
-            echo "Created new account";
-            echo "PK: $STARKNET_PRIVATE_KEY";
-            echo "Account: $STARKNET_ACCOUNT_ADDRESS";
-            break
+            
+            # For New Account Generation
+            $OPTION2_GENERATE_ACCOUNT)
+                generate_account;
+                break;
             ;;
-         *)
-            echo 'Invalid option, please enter 1 or 2' >&2;
-    esac
-done
+            *)
+                echo 'Invalid option, please enter 1 or 2' >&2;
+        esac
+    done
+}
 
-# set CAIRO_PATH if not already set (e.g. from Dockerfile)
-export CAIRO_PATH=${CAIRO_PATH:-/loot/realms-contracts/lib/cairo_contracts/src}
-export STARKNET_NETWORK=alpha-goerli
-export STARKNET_PUBLIC_KEY=`python -c 'import os; from nile.signer import Signer; private_key = int(os.environ["STARKNET_PRIVATE_KEY"]); signer = Signer(private_key); print(signer.public_key)'`
-
-nile compile
-nile compile lib/cairo_contracts/src/openzeppelin/account/presets/Account.cairo --account_contract
-
+# main setup code
+run_setup () {
+    # set CAIRO_PATH if not already set (e.g. from Dockerfile)
+    export CAIRO_PATH=${CAIRO_PATH:-/loot/realms-contracts/lib/cairo_contracts/src}
+    export STARKNET_NETWORK=alpha-goerli
+    export STARKNET_PUBLIC_KEY=`python -c 'import os; from nile.signer import Signer; private_key = int(os.environ["STARKNET_PRIVATE_KEY"]); signer = Signer(private_key); print(signer.public_key)'`
+    
+    nile compile
+    nile compile lib/cairo_contracts/src/openzeppelin/account/presets/Account.cairo --account_contract
+    
 cat <<EOT > realms_cli/.env.nile
 export STARKNET_PRIVATE_KEY=$STARKNET_PRIVATE_KEY
 export STARKNET_NETWORK=$STARKNET_NETWORK
 EOT
-
+    
 cat <<EOT > goerli.deployments.txt
 0x00155e87abe207e81645c236df829448268f636d41bf5851e5e39e27af5324ed:artifacts/abis/Lords_ERC20_Mintable.json:lords
 0x0448549cccff35dc6d5df90efceda3123e4cec9fa2faff21d392c4a92e95493c:artifacts/abis/Lords_ERC20_Mintable.json:proxy_lords
@@ -121,9 +137,53 @@ cat <<EOT > goerli.deployments.txt
 0x063431c98f0a5b9f4187b8c5616c8063d37e8e2d7b02ff9796c777bf5922205a:artifacts/abis/Combat.json:Combat
 $STARKNET_ACCOUNT_ADDRESS:/usr/local/lib/python3.9/site-packages/nile/artifacts/abis/Account.json:account-0
 EOT
-
+    
 cat <<EOT > goerli.accounts.json
 {"$STARKNET_PUBLIC_KEY": {"address": "$STARKNET_ACCOUNT_ADDRESS", "index": 0, "alias": "STARKNET_PRIVATE_KEY"}}
 EOT
+    
+    pip install realms_cli/
+}
 
-pip install realms_cli/
+has_valid_env_vars() {
+    # If the STARKNET_PRIVATE_KEY AND STARKNET_ACCOUNT_ADDRESS env vars are not empty
+    if [ ! -z "$STARKNET_PRIVATE_KEY" ] && [ ! -z "$STARKNET_ACCOUNT_ADDRESS" ]; then
+        
+        # and env vars are valid
+        if [[ $STARKNET_PRIVATE_KEY =~ $VALID_ARGENTX_PK_REGEX ]] && [[ $STARKNET_ACCOUNT_ADDRESS =~ $VALID_ARGENTX_ACCOUNT ]]; then
+            #return true
+            true
+            return
+            
+        else
+            # output invalid env vars to user
+            echo "Found existing env vars but one or both are invalid";
+            echo "STARKNET_PRIVATE_KEY: $STARKNET_PRIVATE_KEY";
+            echo "STARKNET_ACCOUNT_ADDRESS: $STARKNET_ACCOUNT_ADDRESS";
+            echo "Redirecting to setup wizard...";
+            # and return false
+            false
+            return
+        fi
+        
+    else #one or both of the env vars are empty
+        # so return false
+        false
+        return
+    fi
+}
+
+main() {
+
+    # if system has valid env vars already set
+    if has_valid_env_vars; then
+        # proceed to setup
+        run_setup;
+    # else system does not have valid env vars    
+    else
+        # so proceed to mode selection
+        mode_selection;
+    fi
+}
+
+main
