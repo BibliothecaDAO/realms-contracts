@@ -53,6 +53,9 @@ namespace IModuleController {
     func set_write_access(module_id_doing_writing: felt, module_id_being_written_to: felt) {
     }
 
+    func set_xoroshiro(xoroshiro: felt) {
+    }
+
     func set_initial_module_addresses(
         module_01_addr: felt,
         module_02_addr: felt,

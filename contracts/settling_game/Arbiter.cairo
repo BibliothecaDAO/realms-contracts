@@ -17,6 +17,7 @@ from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.bool import TRUE, FALSE
 
 from openzeppelin.access.ownable.library import Ownable
+from openzeppelin.upgrades.library import Proxy
 
 from contracts.settling_game.interfaces.imodules import IModuleController
 
@@ -29,13 +30,30 @@ func controller_address() -> (address: felt) {
 func lock() -> (bool: felt) {
 }
 
-// @notice Constructor function
-// @dev Whoever deploys the arbiter sets the only owner
-// @param owner: Arbiter address
-@constructor
-func constructor{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(owner: felt) {
-    // Whoever deploys the arbiter sets the only owner.
-    Ownable.initializer(owner);
+// -----------------------------------
+// Initialize & upgrade
+// -----------------------------------
+
+// @notice Module initializer
+// @param address_of_controller: Controller/arbiter address
+// @return proxy_admin: Proxy admin address
+@external
+func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    proxy_admin: felt
+) {
+    Proxy.initializer(proxy_admin);
+    return ();
+}
+
+// @notice Set new proxy implementation
+// @dev Can only be set by the arbiter
+// @param new_implementation: New implementation contract address
+@external
+func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    new_implementation: felt
+) {
+    Proxy.assert_only_admin();
+    Proxy._set_implementation_hash(new_implementation);
     return ();
 }
 
@@ -45,7 +63,7 @@ func constructor{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 func set_address_of_controller{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     contract_address: felt
 ) {
-    Ownable.assert_only_owner();
+    Proxy.assert_only_admin();
     let (locked) = lock.read();
     // Locked starts as zero
     assert_not_zero(TRUE - locked);
@@ -77,7 +95,7 @@ func replace_self{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
 func appoint_new_owner{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     new_owner_address: felt
 ) {
-    Ownable.assert_only_owner();
+    Proxy.assert_only_admin();
     Ownable.transfer_ownership(new_owner_address);
     return ();
 }
@@ -89,7 +107,7 @@ func appoint_new_owner{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 func appoint_contract_as_module{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     module_address: felt, module_id: felt
 ) {
-    Ownable.assert_only_owner();
+    Proxy.assert_only_admin();
     let (controller) = controller_address.read();
     // Call the ModuleController and enable the new address.
     IModuleController.set_address_for_module_id(controller, module_id, module_address);
@@ -103,10 +121,21 @@ func appoint_contract_as_module{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, 
 func set_external_contract_address{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     address: felt, contract_id: felt
 ) {
-    Ownable.assert_only_owner();
+    Proxy.assert_only_admin();
     let (controller) = controller_address.read();
     // Call the ModuleController and enable the new address.
     IModuleController.set_address_for_external_contract(controller, contract_id, address);
+    return ();
+}
+
+// @notice Invoked to set an external contract
+// @param address: External contract address
+// @param contract_id: External contract id
+@external
+func set_xoroshiro{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(address: felt) {
+    Proxy.assert_only_admin();
+    let (controller) = controller_address.read();
+    IModuleController.set_xoroshiro(controller, address);
     return ();
 }
 
@@ -117,7 +146,7 @@ func set_external_contract_address{syscall_ptr: felt*, pedersen_ptr: HashBuiltin
 func approve_module_to_module_write_access{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 }(module_id_doing_writing: felt, module_id_being_written_to: felt) {
-    Ownable.assert_only_owner();
+    Proxy.assert_only_admin();
     let (controller) = controller_address.read();
     IModuleController.set_write_access(
         contract_address=controller,
@@ -143,7 +172,7 @@ func batch_set_controller_addresses{
     module_04_addr: felt,
     module_06_addr: felt,
 ) {
-    Ownable.assert_only_owner();
+    Proxy.assert_only_admin();
     let (controller) = controller_address.read();
     IModuleController.set_initial_module_addresses(
         controller, module_01_addr, module_02_addr, module_03_addr, module_04_addr, module_06_addr
