@@ -1,14 +1,66 @@
-#!/bin/sh
+#!/bin/bassh
 
-if [[ -z "$STARKNET_PRIVATE_KEY" ]]; then
-    echo "Must provide STARKNET_PRIVATE_KEY in environment" 1>&2
-    return
-fi
+#This script currently has two run modes:
+## Import account from argentx
+OPTION1_IMPORT_ARGENTX_ACCOUNT=1;
+## Generate new Account
+OPTION2_GENERATE_ACCOUNT=2;
 
-if [[ -z "$STARKNET_ACCOUNT_ADDRESS" ]]; then
-    echo "Must provide STARKNET_ACCOUNT_ADDRESS in environment" 1>&2
-    return
-fi
+#Example Argentx PK: 1738894601847262057947312354369785682447196114282863931776046095852523510768
+VALID_ARGENTX_PK_REGEX='^[0-9]{76}$';
+VALID_ARGENTX_PK_LEN=76;
+
+#Example Argentx Account: 0x02a35361e0aF1CEaC7ab383a7F0476fC2e864018661F14D5C6FaeE1C9eF40984
+VALID_ARGENTX_ACCOUNT='0x[a-fA-F0-9]{64}$';
+
+# Re-prompt user if they enter invalid option
+while true; do
+    echo "Please enter setup type";
+    echo "1: Import account from ArgentX (recommended)";
+    echo "2: Create new account";
+    read -p 'Setup Type: ' script_mode;
+    case $script_mode in
+
+        # For ArgentX import
+        $OPTION1_IMPORT_ARGENTX_ACCOUNT)
+            # Get and validate ArgentX PK
+            while true; do
+                read -p "Enter Private Key from ArgentX: " STARKNET_PRIVATE_KEY;
+                if [[ $STARKNET_PRIVATE_KEY =~ $VALID_ARGENTX_PK_REGEX ]]; then
+                    break;
+                fi
+                echo "Provided input is not a valid PK";
+            done
+            # Get and validate Argentx account
+            while true; do
+                read -p "Enter Account Address from ArgentX: " STARKNET_ACCOUNT_ADDRESS
+                if [[ $STARKNET_ACCOUNT_ADDRESS =~ $VALID_ARGENTX_ACCOUNT ]] ; then
+                    break;
+                fi
+                echo "Provided input is not a valid account";
+            done
+            break
+            ;;
+
+        # For New Account Generation
+        $OPTION2_GENERATE_ACCOUNT)
+            # Use nile to create new PK
+            STARKNET_PRIVATE_KEY=$(nile create_pk);
+            # Use nile to deploy new account using PK
+            nile setup STARKNET_PRIVATE_KEY > account_details.txt 2>&1;
+            # Get Account
+            STARKNET_ACCOUNT_ADDRESS=$(grep -i Account account_details.txt | grep -Eo "0x[a-fA-F0-9]{64}");
+
+            # Output account info
+            echo "Created new account";
+            echo "PK: $STARKNET_PRIVATE_KEY";
+            echo "Account: $STARKNET_ACCOUNT_ADDRESS";
+            break
+            ;;
+         *)
+            echo 'Invalid option, please enter 1 or 2' >&2;
+    esac
+done
 
 # set CAIRO_PATH if not already set (e.g. from Dockerfile)
 export CAIRO_PATH=${CAIRO_PATH:-/loot/realms-contracts/lib/cairo_contracts/src}
