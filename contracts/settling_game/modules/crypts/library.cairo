@@ -41,6 +41,16 @@ namespace Crypts {
         return (x_len, a_array);
     }
 
+    func get_neigbours{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        idx: felt, length: felt, rows: felt
+    ) -> (neigbours: felt) {
+        alloc_locals;
+
+        // TODO: inject correct neighbours accordingly
+
+        return (neigbours=3);
+    }
+
     // TODO: unpack the bitmapped crypts and pass in index + POI and rebuild graph
     func traverse_x{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         x_len: felt, x: Vertex*, adj_vertices_count: felt*
@@ -58,7 +68,9 @@ namespace Crypts {
         assert [x] = vertex_a;
 
         // TODO: since maps at a 2d array, we need to make adj_vertices_count represent this.
-        assert [adj_vertices_count] = 3;
+
+        let (neigbours) = get_neigbours(x_len, x_len);
+        assert [adj_vertices_count] = neigbours;
 
         return traverse_x(x_len - 1, x + Vertex.SIZE, adj_vertices_count + 1);
     }
