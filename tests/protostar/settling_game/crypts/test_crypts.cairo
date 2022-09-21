@@ -28,7 +28,9 @@ func test_build_graph_before_each{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
     ) {
     alloc_locals;
 
-    let (graph, graph_len, adj_vertices_count, neighbors_len) = Crypts.build_graph_before_each(625);
+    let (graph, graph_len, adj_vertices_count, neighbors_len) = Crypts.build_graph_before_each(
+        625, 25
+    );
 
     assert graph[0].identifier = 123;
     assert graph[1].identifier = 123;
