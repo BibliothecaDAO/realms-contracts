@@ -142,3 +142,6 @@ artifacts
 goerli.deployments.txt
 goerli.declarations.txt
 goerli.accounts.json
+
+#we create this file if user opts to create new account via our setup script
+account_details.txt
