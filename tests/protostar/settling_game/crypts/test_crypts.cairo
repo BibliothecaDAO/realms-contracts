@@ -34,21 +34,21 @@ func test_build_graph_before_each{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
     ) {
     alloc_locals;
 
-    let (graph_len, graph, adj_vertices_count) = Crypts.build_graph_before_each(12, 12);
+    let (graph_len, graph, adj_vertices_count) = Crypts.build_graph_before_each(25, 25, 25232);
+
+    %{ print(ids.graph_len) %}
 
     let (path_len, path, distance) = Dijkstra.shortest_path(
         graph_len, graph, adj_vertices_count, 1, 5
     );
 
-    %{ print(ids.distance) %}
+    // let (graph_len, predecessors, distances) = Dijkstra.run(
+    //     graph_len, graph, adj_vertices_count, 6
+    // );
 
-    let (graph_len, predecessors, distances) = Dijkstra.run(
-        graph_len, graph, adj_vertices_count, 6
-    );
+    // let d = predecessors[1];
 
-    let d = predecessors[1];
-
-    %{ print(ids.d) %}
+    // %{ print(ids.d) %}
 
     return ();
 }

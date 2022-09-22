@@ -37,7 +37,7 @@ namespace Crypts {
 
     // TODO: unpack the bitmapped crypts and pass in index + POI and rebuild graph
     func populate_edges{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-        graph_len: felt, row_len: felt, edge: Edge*
+        graph_len: felt, row_len: felt, edge: Edge*, seed: felt
     ) -> (graph_len: felt, row_len: felt, edge: Edge*) {
         alloc_locals;
 
@@ -47,10 +47,17 @@ namespace Crypts {
 
         // TODO: Replace TOKEN_A with actual POI
 
+        // randomise node connections
+        let (_, r) = unsigned_div_rem(seed + graph_len, graph_len);
+
         if (graph_len == 1) {
             tempvar dst = 0;  // final node has path back to start
         } else {
-            tempvar dst = row_len - graph_len + 1;
+            if (r == (row_len - graph_len)) {
+                tempvar dst = r + 1;
+            } else {
+                tempvar dst = r;
+            }
         }
 
         local edge_a: Edge = Edge(row_len - graph_len, dst, 1);
@@ -61,29 +68,28 @@ namespace Crypts {
         // let (neigbours) = get_neigbours(graph_len, graph_len, row_len);
         // assert [adj_vertices_count] = 1;
 
-        return populate_edges(graph_len - 1, row_len, edge + Edge.SIZE);
+        return populate_edges(graph_len - 1, row_len, edge + Edge.SIZE, seed);
     }
 
+    // TODO: injext this with a seed + crypts metadata
+    // outputs a dungeon which can be used in other parts.
     func build_graph_before_each{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-        num_vertex: felt, row_len: felt
+        num_vertex: felt, row_len: felt, seed: felt
     ) -> (graph_len: felt, graph: Vertex*, neighbors: felt*) {
         alloc_locals;
 
-        let (edges: Edge*) = alloc();
+        // add in some random edges ontop of fixed amount
+        let (_, r) = unsigned_div_rem(seed + num_vertex, 100);
 
-        populate_edges(num_vertex, row_len, edges);
+        let (edges: Edge*) = alloc();
+        populate_edges(num_vertex + r, row_len + r, edges, seed);
 
         let (graph_len, graph, adj_vertices_count) = Graph.build_directed_graph_from_edges(
             num_vertex, edges
         );
 
-        // adds edge to graph between two vertices
-        local edge_a: Edge = Edge(1, 4, 1);
-
-        let (graph_len, adj_vertices_count) = Graph.add_edge(
-            graph, graph_len, adj_vertices_count, edge_a
-        );
-
         return (graph_len, graph, adj_vertices_count);
     }
+
+    // TOOD: stop travellers from jumping nodes. Eg: Check if a path exists.
 }
