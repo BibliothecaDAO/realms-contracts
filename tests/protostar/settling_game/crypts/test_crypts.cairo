@@ -50,5 +50,9 @@ func test_build_graph_before_each{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
 
     // %{ print(ids.d) %}
 
+    let (entity) = Crypts.get_entity_index(25, 25, 25232);
+
+    %{ print(ids.entity) %}
+
     return ();
 }

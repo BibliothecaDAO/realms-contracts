@@ -25,16 +25,6 @@ namespace Points {
 
 // traverse array
 namespace Crypts {
-    func get_neigbours{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-        idx: felt, graph_len: felt, row_len: felt
-    ) -> (neigbours: felt) {
-        alloc_locals;
-
-        // TODO: inject correct neighbours accordingly
-
-        return (neigbours=3);
-    }
-
     // TODO: unpack the bitmapped crypts and pass in index + POI and rebuild graph
     func populate_edges{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         graph_len: felt, row_len: felt, edge: Edge*, seed: felt
@@ -44,8 +34,6 @@ namespace Crypts {
         if (graph_len == 0) {
             return (graph_len, row_len, edge);
         }
-
-        // TODO: Replace TOKEN_A with actual POI
 
         // randomise node connections
         let (_, r) = unsigned_div_rem(seed + graph_len, graph_len);
@@ -63,10 +51,6 @@ namespace Crypts {
         local edge_a: Edge = Edge(row_len - graph_len, dst, 1);
 
         assert [edge] = edge_a;
-
-        // TODO: since maps at a 2d array, we need to make adj_vertices_count represent this.
-        // let (neigbours) = get_neigbours(graph_len, graph_len, row_len);
-        // assert [adj_vertices_count] = 1;
 
         return populate_edges(graph_len - 1, row_len, edge + Edge.SIZE, seed);
     }
@@ -91,5 +75,20 @@ namespace Crypts {
         return (graph_len, graph, adj_vertices_count);
     }
 
-    // TOOD: stop travellers from jumping nodes. Eg: Check if a path exists.
+    // @notice: calculates what will be at the index of the graph. Moster, Loot, nothing.
+    func get_entity_index{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        num_vertex: felt, row_len: felt, seed: felt
+    ) -> (entity: felt) {
+        alloc_locals;
+
+        // add in some random edges ontop of fixed amount
+        let (_, r) = unsigned_div_rem(seed + num_vertex, 100);
+
+        let (_, entity) = unsigned_div_rem(row_len + r, 5);
+
+        return (entity=entity);
+    }
+
+    // TOOD: PATHING: stop travellers from jumping nodes. Eg: Check if a path exists.
+    //
 }
