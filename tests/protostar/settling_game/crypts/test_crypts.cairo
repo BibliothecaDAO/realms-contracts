@@ -8,7 +8,7 @@ from starkware.cairo.common.alloc import alloc
 
 from cairo_graphs.graph.dijkstra import Dijkstra
 from cairo_graphs.graph.graph import Graph
-from cairo_graphs.data_types.data_types import Edge, Vertex
+from cairo_graphs.data_types.data_types import Edge, Vertex, AdjacentVertex
 
 from starkware.cairo.common.registers import get_fp_and_pc
 
@@ -34,21 +34,30 @@ func test_build_graph_before_each{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
     ) {
     alloc_locals;
 
-    let (graph_len, graph, adj_vertices_count) = Crypts.build_graph_before_each(25, 25, 25232);
-
-    %{ print(ids.graph_len) %}
-
-    let (path_len, path, distance) = Dijkstra.shortest_path(
-        graph_len, graph, adj_vertices_count, 1, 5
+    let (graph_len, graph, adj_vertices_count) = Crypts.build_graph_before_each(
+        10, 10, 252232312312323232
     );
 
-    // let (graph_len, predecessors, distances) = Dijkstra.run(
-    //     graph_len, graph, adj_vertices_count, 6
+    // %{ print(ids.graph_len) %}
+
+    // let (path_len, path, distance) = Dijkstra.shortest_path(
+    //     graph_len, graph, adj_vertices_count, 1, 5
     // );
 
-    // let d = predecessors[1];
-
-    // %{ print(ids.d) %}
+    %{
+        IDENTIFIER_INDEX = 1
+        ADJACENT_VERTICES_INDEX = 2
+        for i in range(ids.graph_len):
+            neighbours_len = memory[ids.adj_vertices_count+i]
+            vertex_id = memory[ids.graph.address_+i*ids.Vertex.SIZE+IDENTIFIER_INDEX]
+            adjacent_vertices_pointer = memory[ids.graph.address_+i*ids.Vertex.SIZE+ADJACENT_VERTICES_INDEX]
+            print(f"{vertex_id} -> {{",end='')
+            for j in range (neighbours_len):
+                adjacent_vertex = memory[adjacent_vertices_pointer+j*ids.AdjacentVertex.SIZE+IDENTIFIER_INDEX]
+                print(f"{adjacent_vertex} ",end='')
+            print('}',end='')
+            print()
+    %}
 
     let (entity) = Crypts.get_entity_index(25, 25, 25232);
 
