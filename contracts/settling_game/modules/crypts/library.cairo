@@ -23,24 +23,8 @@ namespace Points {
     const loot = 3;
 }
 
-const TOKEN_A = 123;
-const TOKEN_B = 456;
-const TOKEN_C = 990;
-const TOKEN_D = 982;
-
 // traverse array
 namespace Crypts {
-    func traverse{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-        x_len: felt, x: felt*, y: felt
-    ) -> (a_len: felt, a: felt*) {
-        alloc_locals;
-
-        let (a_array: felt*) = alloc();
-        populate_graph(x_len, a_array);
-
-        return (x_len, a_array);
-    }
-
     func get_neigbours{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         idx: felt, graph_len: felt, row_len: felt
     ) -> (neigbours: felt) {
@@ -52,44 +36,54 @@ namespace Crypts {
     }
 
     // TODO: unpack the bitmapped crypts and pass in index + POI and rebuild graph
-    func populate_graph{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-        graph_len: felt, row_len: felt, vertex: Vertex*, adj_vertices_count: felt*
-    ) -> (graph_len: felt, row_len: felt, vertex: Vertex*, adj_vertices_count: felt*) {
+    func populate_edges{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        graph_len: felt, row_len: felt, edge: Edge*
+    ) -> (graph_len: felt, row_len: felt, edge: Edge*) {
         alloc_locals;
 
         if (graph_len == 0) {
-            return (graph_len, row_len, vertex, adj_vertices_count);
+            return (graph_len, row_len, edge);
         }
 
-        let (vertex_a_neighbors: AdjacentVertex*) = alloc();
+        // TODO: Replace TOKEN_A with actual POI
 
-        local vertex_a: Vertex = Vertex(graph_len - 0, TOKEN_A, vertex_a_neighbors);
+        if (graph_len == 1) {
+            tempvar dst = 0;  // final node has path back to start
+        } else {
+            tempvar dst = row_len - graph_len + 1;
+        }
 
-        assert [vertex] = vertex_a;
+        local edge_a: Edge = Edge(row_len - graph_len, dst, 1);
+
+        assert [edge] = edge_a;
 
         // TODO: since maps at a 2d array, we need to make adj_vertices_count represent this.
-        let (neigbours) = get_neigbours(graph_len, graph_len, row_len);
-        assert [adj_vertices_count] = neigbours;
+        // let (neigbours) = get_neigbours(graph_len, graph_len, row_len);
+        // assert [adj_vertices_count] = 1;
 
-        return populate_graph(
-            graph_len - 1, row_len - 1, vertex + Vertex.SIZE, adj_vertices_count + 1
-        );
+        return populate_edges(graph_len - 1, row_len, edge + Edge.SIZE);
     }
 
     func build_graph_before_each{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         num_vertex: felt, row_len: felt
-    ) -> (graph: Vertex*, graph_len: felt, neighbors: felt*, neighbors_len: felt) {
+    ) -> (graph_len: felt, graph: Vertex*, neighbors: felt*) {
         alloc_locals;
 
-        let (graph_len, graph, adj_vertices_count) = Graph.new_graph();
+        let (edges: Edge*) = alloc();
 
-        // populate graph
-        populate_graph(num_vertex, row_len, graph, adj_vertices_count);
+        populate_edges(num_vertex, row_len, edges);
 
-        let neighbors_len = num_vertex;
+        let (graph_len, graph, adj_vertices_count) = Graph.build_directed_graph_from_edges(
+            num_vertex, edges
+        );
 
-        let graph_len = num_vertex;
+        // adds edge to graph between two vertices
+        local edge_a: Edge = Edge(1, 4, 1);
 
-        return (graph, graph_len, adj_vertices_count, neighbors_len);
+        let (graph_len, adj_vertices_count) = Graph.add_edge(
+            graph, graph_len, adj_vertices_count, edge_a
+        );
+
+        return (graph_len, graph, adj_vertices_count);
     }
 }

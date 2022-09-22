@@ -21,8 +21,10 @@ sys.stdout = sys.stderr
 # Create signers that use a private key to sign transaction objects.
 DUMMY_PRIVATE = 123456789987654321
 
-CONTRACTS_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "contracts")
-OZ_CONTRACTS_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "lib", "cairo_contracts", "src")
+CONTRACTS_PATH = os.path.join(
+    os.path.dirname(__file__), "..", "..", "contracts")
+OZ_CONTRACTS_PATH = os.path.join(os.path.dirname(
+    __file__), "..", "..", "lib", "cairo_contracts", "src")
 INITIAL_LORDS_SUPPLY = 500000000 * (10**18)
 REALM_MINT_PRICE = 10 * (10**18)
 
@@ -100,11 +102,14 @@ async def _build_copyable_deployment(compiled_proxy):
 
     defs = SimpleNamespace(
         account=compile("openzeppelin/account/Account.cairo"),
-        lords=compile("contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo"),
-        resources=compile("contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo"),
+        lords=compile(
+            "contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo"),
+        resources=compile(
+            "contracts/settling_game/tokens/Resources_ERC1155_Mintable_Burnable.cairo"),
     )
 
-    signers = dict(admin=MockSigner(83745982347), arbiter=MockSigner(7891011), user1=MockSigner(897654321))
+    signers = dict(admin=MockSigner(83745982347), arbiter=MockSigner(
+        7891011), user1=MockSigner(897654321))
 
     accounts = SimpleNamespace(
         **{name: (await create_account(starknet, signer, defs.account)) for name, signer in signers.items()}
@@ -189,7 +194,8 @@ async def ctx_factory(copyable_deployment):
             )
 
         def advance_clock(num_seconds):
-            set_block_timestamp(starknet_state, get_block_timestamp(starknet_state) + num_seconds)
+            set_block_timestamp(starknet_state, get_block_timestamp(
+                starknet_state) + num_seconds)
 
         return SimpleNamespace(
             starknet=Starknet(starknet_state),
@@ -572,7 +578,8 @@ async def game_factory(token_factory, compiled_proxy):
         admin_key,
         admin_account,
         "contracts/settling_game/L06_Combat.cairo",
-        [controller.contract_address, xoroshiro128.contract_address, admin_account.contract_address],
+        [controller.contract_address, xoroshiro128.contract_address,
+            admin_account.contract_address],
     )
 
     crypts_logic = await proxy_builder(

@@ -6,6 +6,12 @@ from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
 from contracts.settling_game.modules.crypts.library import Crypts
 from starkware.cairo.common.alloc import alloc
 
+from cairo_graphs.graph.dijkstra import Dijkstra
+from cairo_graphs.graph.graph import Graph
+from cairo_graphs.data_types.data_types import Edge, Vertex
+
+from starkware.cairo.common.registers import get_fp_and_pc
+
 // @external
 // func test_calculate_traverse{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
 //     alloc_locals;
@@ -28,13 +34,21 @@ func test_build_graph_before_each{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
     ) {
     alloc_locals;
 
-    let (graph, graph_len, adj_vertices_count, neighbors_len) = Crypts.build_graph_before_each(
-        625, 25
+    let (graph_len, graph, adj_vertices_count) = Crypts.build_graph_before_each(12, 12);
+
+    let (path_len, path, distance) = Dijkstra.shortest_path(
+        graph_len, graph, adj_vertices_count, 1, 5
     );
 
-    assert graph[0].identifier = 123;
-    assert graph[1].identifier = 123;
-    assert graph[2].identifier = 123;
+    %{ print(ids.distance) %}
+
+    let (graph_len, predecessors, distances) = Dijkstra.run(
+        graph_len, graph, adj_vertices_count, 6
+    );
+
+    let d = predecessors[1];
+
+    %{ print(ids.d) %}
 
     return ();
 }
