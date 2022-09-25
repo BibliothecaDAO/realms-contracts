@@ -47,7 +47,7 @@ parsimonious==0.8.1
 pipdeptree==2.2.0
 pluggy==1.0.0
 prometheus-client==0.12.0
-protobuf==3.19.1
+protobuf==3.19.5
 py==1.10.0
 pycryptodome==3.11.0
 pyparsing==2.4.7
