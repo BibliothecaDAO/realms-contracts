@@ -132,5 +132,6 @@ namespace Crypts {
     }
 
     // TOOD: PATHING: stop travellers from jumping nodes. Eg: Check if a path exists.
-    //
+    // TODO: Interaction on a node? Do we create a key pair action where the adventuer is locked to that index until they
+    // complete the interaction
 }
