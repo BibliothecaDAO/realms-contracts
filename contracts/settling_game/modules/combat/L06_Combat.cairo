@@ -1,5 +1,11 @@
-// ____MODULE_L06___COMBAT_LOGIC
-//   Logic for combat between characters, troops, etc.
+// -----------------------------------
+// ____Module.Combat (ORIGINAL)
+//   Logic around original Combat system
+
+// ELI5:
+// This module is currently not in use.
+//
+//
 //
 // MIT License
 
@@ -20,18 +26,18 @@ from starkware.starknet.common.syscalls import (
 
 from openzeppelin.upgrades.library import Proxy
 from openzeppelin.token.erc20.IERC20 import IERC20
+from openzeppelin.token.erc721.IERC721 import IERC721
 
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
+
+from contracts.settling_game.interfaces.imodules import IModuleController
 from contracts.settling_game.modules.calculator.interface import ICalculator
-from contracts.settling_game.interfaces.imodules import (
-    IModuleController,
-    IL09_Relics,
-    IFood,
-    IGoblinTown,
-)
+from contracts.settling_game.modules.goblintown.interface import IGoblinTown
+from contracts.settling_game.modules.food.interface import IFood
+from contracts.settling_game.modules.relics.interface import IRelics
 from contracts.settling_game.modules.resources.interface import IResources
 from contracts.settling_game.modules.buildings.interface import IBuildings
-from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
+from contracts.settling_game.interfaces.IRealms import IRealms
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library.library_combat import Combat
 
@@ -224,14 +230,16 @@ func initiate_combat{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuil
     }
 
     // Check Army is at actual Realm
-    let (travel_module) = Module.get_module_address(ModuleIds.Travel);
-    ITravel.assert_traveller_is_at_location(
-        travel_module,
-        ExternalContractIds.S_Realms,
-        attacking_realm_id,
-        ExternalContractIds.S_Realms,
-        defending_realm_id,
-    );
+    // let (travel_module) = Module.get_module_address(ModuleIds.Travel);
+    // ITravel.assert_traveller_is_at_location(
+    //     travel_module,
+    //     ExternalContractIds.S_Realms,
+    //     attacking_realm_id,
+    //     attacking_army_id,
+    //     ExternalContractIds.S_Realms,
+    //     defending_realm_id,
+    //     defending_army_id,
+    // );
 
     let (attacking_realm_data: RealmCombatData) = get_realm_combat_data(attacking_realm_id);
     let (defending_realm_data: RealmCombatData) = get_realm_combat_data(defending_realm_id);
@@ -301,7 +309,7 @@ func initiate_combat{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuil
         );
         let (caller) = get_caller_address();
         IResources.pillage_resources(resources_logic_address, defending_realm_id, caller);
-        IL09_Relics.set_relic_holder(relic_address, attacking_realm_id, defending_realm_id);
+        IRelics.set_relic_holder(relic_address, attacking_realm_id, defending_realm_id);
         tempvar syscall_ptr = syscall_ptr;
         tempvar range_check_ptr = range_check_ptr;
         tempvar pedersen_ptr = pedersen_ptr;
@@ -666,10 +674,10 @@ func Realm_can_be_attacked{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range
     let (s_realms_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.S_Realms
     );
-    let (attacking_realm_data: RealmData) = realms_IERC721.fetch_realm_data(
+    let (attacking_realm_data: RealmData) = IRealms.fetch_realm_data(
         realms_address, attacking_realm_id
     );
-    let (defending_realm_data: RealmData) = realms_IERC721.fetch_realm_data(
+    let (defending_realm_data: RealmData) = IRealms.fetch_realm_data(
         realms_address, defending_realm_id
     );
 
@@ -679,8 +687,8 @@ func Realm_can_be_attacked{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range
     }
 
     // CANNOT ATTACK YOUR OWN
-    let (attacking_realm_owner) = realms_IERC721.ownerOf(s_realms_address, attacking_realm_id);
-    let (defending_realm_owner) = realms_IERC721.ownerOf(s_realms_address, defending_realm_id);
+    let (attacking_realm_owner) = IERC721.ownerOf(s_realms_address, attacking_realm_id);
+    let (defending_realm_owner) = IERC721.ownerOf(s_realms_address, defending_realm_id);
 
     if (attacking_realm_owner == defending_realm_owner) {
         return (FALSE,);

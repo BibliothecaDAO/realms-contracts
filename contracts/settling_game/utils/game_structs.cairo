@@ -516,3 +516,39 @@ struct TravelInformation {
     destination_nested_asset_id: felt,
     travel_time: felt,  // timestamp in the future
 }
+
+struct Battalion {
+    Quantity: felt,  // 1-23
+    Health: felt,  // 1-100
+}
+
+struct Army {
+    LightCavalry: Battalion,
+    HeavyCavalry: Battalion,
+    Archer: Battalion,
+    Longbow: Battalion,
+    Mage: Battalion,
+    Arcanist: Battalion,
+    LightInfantry: Battalion,
+    HeavyInfantry: Battalion,
+}
+
+struct ArmyStatistics {
+    CavalryAttack: felt,  // (Light Cav Base Attack*Number of Attacking Light Cav Battalions)+(Heavy Cav Base Attack*Number of Attacking Heavy Cav Battalions)
+    ArcheryAttack: felt,  // (Archer Base Attack*Number of Attacking Archer Battalions)+(Longbow Base Attack*Number of Attacking Longbow Battalions)
+    MagicAttack: felt,  // (Mage Base Attack*Number of Attacking Mage Battalions)+(Arcanist Base Attack*Number of Attacking Arcanist Battalions)
+    InfantryAttack: felt,  // (Light Inf Base Attack*Number of Attacking Light Inf Battalions)+(Heavy Inf Base Attack*Number of Attacking Heavy Inf Battalions)
+
+    CavalryDefence: felt,  // (Sum of all units Cavalry Defence*Percentage of Attacking Cav Battalions)
+    ArcheryDefence: felt,  // (Sum of all units Archery Defence*Percentage of Attacking Archery Battalions)
+    MagicDefence: felt,  // (Sum of all units Magic Cav Defence*Percentage of Attacking Magic Battalions)
+    InfantryDefence: felt,  // (Sum of all units Infantry Defence*Percentage of Attacking Infantry Battalions)
+}
+
+struct ArmyData {
+    ArmyPacked: felt,
+    LastAttacked: felt,
+    XP: felt,
+    Level: felt,
+    CallSign: felt,
+}

@@ -23,6 +23,10 @@ from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.math import assert_not_zero
+
+from openzeppelin.upgrades.library import Proxy
+from openzeppelin.token.erc721.IERC721 import IERC721
+
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.utils.constants import (
     BASE_HARVESTS,
@@ -40,12 +44,14 @@ from contracts.settling_game.utils.game_structs import (
     RealmBuildingsIds,
     FoodBuildings,
 )
+
 from contracts.settling_game.modules.food.library import Food
+
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
-from openzeppelin.upgrades.library import Proxy
-from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.modules.calculator.interface import ICalculator
 from contracts.settling_game.modules.buildings.interface import IBuildings
+from contracts.settling_game.interfaces.IRealms import IRealms
+
 // -----------------------------------
 // Events
 // -----------------------------------
@@ -128,7 +134,7 @@ func create{
     // contracts
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms);
     let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms);
-    let (realm_data) = realms_IERC721.fetch_realm_data(realms_address, token_id);
+    let (realm_data) = IRealms.fetch_realm_data(realms_address, token_id);
 
     let (owner) = get_caller_address();
 
@@ -195,7 +201,7 @@ func harvest{
     // contracts
     let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms);
     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources);
-    let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id);
+    let (owner) = IERC721.ownerOf(s_realms_address, token_id);
 
     // get packed building info from storage
     if (food_building_id == RealmBuildingsIds.Farm) {
