@@ -3,7 +3,7 @@
 //   Logic of the Goblin Town, as far as one can claim goblins follow logic
 
 // ELI5:
-//   TODO
+//   WIP: Upgrade to new Combat.
 // MIT License
 // -----------------------------------
 
@@ -15,8 +15,9 @@ from starkware.cairo.common.uint256 import Uint256
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 
 from openzeppelin.upgrades.library import Proxy
+from openzeppelin.token.erc721.IERC721 import IERC721
 
-from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
+from contracts.settling_game.interfaces.IRealms import IRealms
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.modules.goblintown.library import GoblinTown
@@ -24,6 +25,7 @@ from contracts.settling_game.utils.constants import GOBLIN_WELCOME_PARTY_STRENGT
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds, RealmData
 from contracts.settling_game.utils.game_structs import Squad
 from contracts.settling_game.library.library_combat import Combat
+
 // -----------------------------------
 // Events
 // -----------------------------------
@@ -120,7 +122,7 @@ func spawn_next{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
     // calculate the strength
     // normal and staked Realms have the same ID, so the following will work
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms);
-    let (realm_data: RealmData) = realms_IERC721.fetch_realm_data(realms_address, realm_id);
+    let (realm_data: RealmData) = IRealms.fetch_realm_data(realms_address, realm_id);
     let (_, extras) = unsigned_div_rem(rnd, 5);  // [0,4]
     let (strength) = GoblinTown.calculate_strength(realm_data, extras);
 

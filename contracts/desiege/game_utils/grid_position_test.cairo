@@ -5,7 +5,7 @@
 %lang starknet
 %builtins pedersen range_check
 
-from contracts.game_utils.grid_position import unpack_position, pack_position
+from contracts.desiege.game_utils.grid_position import unpack_position, pack_position
 
 @external
 func test_unpack_position{syscall_ptr: felt*, range_check_ptr}(

@@ -26,7 +26,7 @@ from contracts.token.library import ERC1155
 func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     uri: felt, proxy_admin: felt
 ) {
-    ERC1155.initializer(uri);
+    ERC1155.initializer();
     Ownable.initializer(proxy_admin);
     Proxy.initializer(proxy_admin);
     return ();
@@ -52,10 +52,10 @@ func supportsInterface{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     return ERC165.supports_interface(interfaceId);
 }
 
-@view
-func uri{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (uri: felt) {
-    return ERC1155.uri();
-}
+// @view
+// func uri{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (uri: felt) {
+//     return ERC1155.uri();
+// }
 
 @view
 func balanceOf{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(

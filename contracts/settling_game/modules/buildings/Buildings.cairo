@@ -17,6 +17,7 @@ from starkware.cairo.common.uint256 import Uint256
 
 from openzeppelin.token.erc20.IERC20 import IERC20
 from openzeppelin.upgrades.library import Proxy
+from openzeppelin.token.erc721.IERC721 import IERC721
 
 from contracts.settling_game.library.library_buildings import Buildings
 from contracts.settling_game.library.library_resources import Resources
@@ -34,8 +35,8 @@ from contracts.settling_game.utils.game_structs import (
 )
 
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
-from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
-from contracts.settling_game.interfaces.imodules import IFood
+from contracts.settling_game.modules.food.interface import IFood
+from contracts.settling_game.interfaces.IRealms import IRealms
 from contracts.settling_game.library.library_module import Module
 
 // -----------------------------------
@@ -123,7 +124,7 @@ func build{
     let (resource_address) = Module.get_external_contract_address(ExternalContractIds.Resources);
 
     // Get Realm Data
-    let (realms_data: RealmData) = realms_IERC721.fetch_realm_data(
+    let (realms_data: RealmData) = IRealms.fetch_realm_data(
         contract_address=realms_address, token_id=token_id
     );
 

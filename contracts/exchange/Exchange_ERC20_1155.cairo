@@ -118,7 +118,6 @@ func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     royalty_fee_address_: felt,
     proxy_admin: felt,
 ) {
-    ERC1155.initializer(uri);
     currency_address.write(currency_address_);
     token_address.write(token_address_);
     lp_fee_thousands.write(lp_fee_thousands_);

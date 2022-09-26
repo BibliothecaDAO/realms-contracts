@@ -22,12 +22,14 @@ from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.modules.combat.constants import (
     BattalionStatistics,
     SHIFT_ARMY,
+    BattalionIds,
+)
+from contracts.settling_game.utils.game_structs import (
+    RealmBuildings,
     Battalion,
     Army,
     ArmyStatistics,
-    BattalionIds,
 )
-from contracts.settling_game.utils.game_structs import RealmBuildings
 
 namespace Combat {
     // @notice Add Battalion to Army
