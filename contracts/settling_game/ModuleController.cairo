@@ -185,7 +185,6 @@ func set_initial_module_addresses{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
     resources_module_addr: felt,
     buildings_module_addr: felt,
     calculator_module_addr: felt,
-    module_05_addr: felt,
     module_06_addr: felt,
 ) {
     only_arbiter();
