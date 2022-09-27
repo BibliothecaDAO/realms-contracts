@@ -1,5 +1,5 @@
 // -----------------------------------
-//   MODULE_BUILDING_LOGIC
+//   Module.Buildings
 //   Manages all buildings in game. Responsible for construction of buildings.
 //
 // MIT License
