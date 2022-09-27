@@ -29,6 +29,7 @@
 | [/loot](./contracts/loot/) | Loot | Loot contracts ported to Cairo. |
 | [/exchange](./contracts/exchange/) | Exchange | Allows trades between pairs of ERC20 and ERC1155 contract tokens. |
 | [/nft_marketplace](./contracts/nft_marketplace/) | NFT Marketplace | A marketplace for Realms, Dungeons, etc. built on Starknet. |
+| [/lib/guild_contracts](./lib/guild_contracts/) | Guild Contracts | Contracts pulled from Guildly to allow shared player accounts. More info in [Guildly Repo](https://github.com/Guildly/contracts) |
 
 ---
 # Learn more about Realms
