@@ -7,8 +7,6 @@ from realms_cli.realms_cli.config import Config
 ... = Config.NILE_NETWORK
 """
 from nile import deployments
-from nile.core.declare import alias_exists
-import os
 
 
 def safe_load_deployment(alias: str, network: str):
@@ -41,15 +39,17 @@ class Config:
     def __init__(self, nile_network: str):
         self.nile_network = "127.0.0.1" if nile_network == "localhost" else nile_network
 
+        self.MAX_FEE = 80999285161067
+
         self.ADMIN_ALIAS = "STARKNET_ADMIN_PRIVATE_KEY"
         self.ADMIN_ADDRESS, _ = safe_load_deployment(
-            "account-0", self.nile_network)
+            "account-1", self.nile_network)
 
         self.INITIAL_LORDS_SUPPLY = 500000000 * (10 ** 18)
 
         self.USER_ALIAS = "STARKNET_PRIVATE_KEY"
         self.USER_ADDRESS, _ = safe_load_deployment(
-            "account-1", self.nile_network)
+            "account-0", self.nile_network)
 
         self.ARBITER_ADDRESS, _ = safe_load_deployment(
             "arbiter", self.nile_network)
@@ -168,4 +168,49 @@ class Config:
             "MageTower",
             "ArcherTower",
             "Castle",
+        ]
+
+        self.LOOT = [
+            "Id",
+            "Slot",
+            "Type",
+            "Material",
+            "Rank",
+            "Prefix_1",
+            "Prefix_2",
+            "Suffix",
+            "Greatness",
+            "CreatedBlock",
+            "XP",
+            "Adventurer",
+            "Bag",
+        ]
+
+        self.LOOT_PROXY_ADDRESS, _ = safe_load_deployment(
+            "proxy_Loot", self.nile_network)
+
+        self.ADVENTURER = [
+            "Race",
+            "HomeRealm",
+            "Birthdate",
+            "Name",
+            "Health",
+            "Level",
+            "Order",
+            "Strength",
+            "Dexterity",
+            "Vitality",
+            "Intelligence",
+            "Wisdom",
+            "Charisma",
+            "Luck",
+            "XP",
+            "NeckId",
+            "WeaponId",
+            "RingId",
+            "ChestId",
+            "HeadId",
+            "WaistId",
+            "FeetId",
+            "HandsId"
         ]

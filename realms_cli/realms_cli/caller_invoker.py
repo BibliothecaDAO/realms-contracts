@@ -1,58 +1,54 @@
-import os
+"""
+This files holds wrapper functions for calls and invokes.
+As you can see, we just invoke other nile CLI commands and we can
+probably also just call nile python functions.
+"""
 import re
 import subprocess
 import asyncio
 
-from nile.core.account import Account
+from nile.core.account import Account, get_nonce
 from nile import deployments
 from nile.core.call_or_invoke import call_or_invoke
+from realms_cli.config import Config
 
 
 def send_multi(self, to, method, calldata, nonce=None):
     """Execute a tx going through an Account contract. Inspired from openzeppelin."""
+    config = Config(nile_network=self.network)
     target_address, _ = next(deployments.load(to, self.network)) or to
+
     calldata = [[int(x) for x in c] for c in calldata]
 
     if nonce is None:
-        nonce = int(
-            call_or_invoke(self.address, "call", "get_nonce", [], self.network)
-        )
+        nonce = get_nonce(self.address, self.network)
 
-    if len(calldata) > 0:
-        (call_array, calldata, sig_r, sig_s) = self.signer.sign_transaction(
-            sender=self.address,
-            calls=[[target_address, method, c] for c in calldata],
-            nonce=nonce,
-            max_fee='8989832783197500',
-        )
-    else:
-        (call_array, calldata, sig_r, sig_s) = self.signer.sign_transaction(
-            sender=self.address,
-            calls=[[target_address, method, calldata]],
-            nonce=nonce,
-            max_fee='8989832783197500',
-        )
+    (execute_calldata, sig_r, sig_s) = self.signer.sign_transaction(
+        sender=self.address,
+        calls=[[target_address, method, c] for c in calldata],
+        nonce=nonce,
+        max_fee=config.MAX_FEE,
+    )
 
-    params = []
-    params.append(str(len(call_array)))
-    params.extend([str(elem)
-                   for sublist in call_array for elem in sublist])
-    params.append(str(len(calldata)))
-    params.extend([str(param) for param in calldata])
-    params.append(str(nonce))
+    # params = []
+    # # params.append(str(len(call_array)))
+    # # params.extend([str(elem) for sublist in call_array for elem in sublist])
+    # params.append(str(len(calldata)))
+    # params.extend([str(param) for param in calldata])
+    # params.append(str(nonce))
 
     return call_or_invoke(
         contract=self.address,
         type="invoke",
         method="__execute__",
-        params=params,
+        params=execute_calldata,
         network=self.network,
         signature=[str(sig_r), str(sig_s)],
-        max_fee='8989832783197500',
+        max_fee=str(config.MAX_FEE),
     )
 
 
-# bind it to the account class, needed for signage
+# bind it to the account class so that we can use the function when signing
 Account.send_multi = send_multi
 
 
@@ -124,16 +120,12 @@ def wrapped_call(network, contract_alias, function, arguments) -> str:
     # return out such that it can be prettified at a higher level
     return out
 
-# TODO: Add in no args
-
 
 def send(network, signer_alias, contract_alias, function, arguments) -> str:
     """Nile send function."""
     account = Account(signer_alias, network)
     if isinstance(arguments[0], list):
         return account.send_multi(contract_alias, function, arguments)
-    # if not arguments:
-    #     return account.send_multi(contract_alias, function, [])
     return account.send_multi(contract_alias, function, [arguments])
 
 
@@ -147,8 +139,11 @@ def wrapped_send(network, signer_alias, contract_alias, function, arguments):
     print("------- SEND ----------------------------------------------------")
     print(f"invoking {function} from {contract_alias} with {arguments}")
     out = send(network, signer_alias, contract_alias, function, arguments)
-    _, tx_hash = parse_send(out)
-    get_tx_status(network, tx_hash,)
+    if out:
+        _, tx_hash = parse_send(out)
+        get_tx_status(network, tx_hash,)
+    else:
+        raise Exception("send message returned None")
     print("------- SEND ----------------------------------------------------")
 
 

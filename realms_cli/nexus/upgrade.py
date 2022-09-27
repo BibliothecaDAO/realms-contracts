@@ -4,7 +4,7 @@ from realms_cli.caller_invoker import wrapped_call, wrapped_send, compile, deplo
 from realms_cli.deployer import logged_deploy
 from realms_cli.config import Config, strhex_as_strfelt, safe_load_deployment
 import time
-from realms_cli.shared import uint
+from realms_cli.utils import uint
 
 
 def run(nre):

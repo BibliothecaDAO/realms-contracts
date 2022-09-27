@@ -26,7 +26,7 @@ from contracts.settling_game.utils.constants import (
 )
 
 from contracts.settling_game.utils.game_structs import RealmData
-from contracts.settling_game.library.library_resources import Resources
+from contracts.settling_game.modules.resources.library import Resources
 
 from tests.protostar.settling_game.test_structs import (
     TEST_REALM_DATA,
@@ -39,9 +39,9 @@ from tests.protostar.settling_game.test_structs import (
 
 @external
 func test_calculate_realm_resource_ids{
-    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-}():
-    alloc_locals
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+}() {
+    alloc_locals;
 
     let realmData = RealmData(
         TEST_REALM_DATA.REGIONS,
@@ -58,26 +58,26 @@ func test_calculate_realm_resource_ids{
         TEST_REALM_DATA.RESOURCE_7,
         TEST_REALM_DATA.WONDER,
         TEST_REALM_DATA.ORDER,
-    )
+    );
 
-    let (resource_ids : Uint256*) = Resources._calculate_realm_resource_ids(realmData)
+    let (resource_ids: Uint256*) = Resources._calculate_realm_resource_ids(realmData);
 
-    assert resource_ids[0].low = TEST_REALM_DATA.RESOURCE_1
-    assert resource_ids[1].low = TEST_REALM_DATA.RESOURCE_2
-    assert resource_ids[2].low = TEST_REALM_DATA.RESOURCE_3
-    assert resource_ids[3].low = TEST_REALM_DATA.RESOURCE_4
-    assert resource_ids[4].low = TEST_REALM_DATA.RESOURCE_5
-    assert resource_ids[5].low = TEST_REALM_DATA.RESOURCE_6
-    assert resource_ids[6].low = TEST_REALM_DATA.RESOURCE_7
+    assert resource_ids[0].low = TEST_REALM_DATA.RESOURCE_1;
+    assert resource_ids[1].low = TEST_REALM_DATA.RESOURCE_2;
+    assert resource_ids[2].low = TEST_REALM_DATA.RESOURCE_3;
+    assert resource_ids[3].low = TEST_REALM_DATA.RESOURCE_4;
+    assert resource_ids[4].low = TEST_REALM_DATA.RESOURCE_5;
+    assert resource_ids[5].low = TEST_REALM_DATA.RESOURCE_6;
+    assert resource_ids[6].low = TEST_REALM_DATA.RESOURCE_7;
 
-    return ()
-end
+    return ();
+}
 
 @external
 func test_calculate_mintable_resources{
-    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-}():
-    alloc_locals
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+}() {
+    alloc_locals;
 
     let realmData = RealmData(
         TEST_REALM_DATA.REGIONS,
@@ -94,11 +94,11 @@ func test_calculate_mintable_resources{
         TEST_REALM_DATA.RESOURCE_7,
         TEST_REALM_DATA.WONDER,
         TEST_REALM_DATA.ORDER,
-    )
+    );
 
-    let resource_mint = Uint256(1000, 0)
+    let resource_mint = Uint256(1000, 0);
 
-    let (_, all_resources_mint : Uint256*) = Resources._calculate_mintable_resources(
+    let (_, all_resources_mint: Uint256*) = Resources._calculate_mintable_resources(
         realmData,
         resource_mint,
         resource_mint,
@@ -107,52 +107,52 @@ func test_calculate_mintable_resources{
         resource_mint,
         resource_mint,
         resource_mint,
-    )
+    );
 
-    let (is_equal) = uint256_eq(all_resources_mint[0], resource_mint)
+    let (is_equal) = uint256_eq(all_resources_mint[0], resource_mint);
 
-    assert is_equal = 1
+    assert is_equal = 1;
 
-    return ()
-end
+    return ();
+}
 
 @external
 func test_calculate_resource_claimable{
-    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-}():
-    alloc_locals
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+}() {
+    alloc_locals;
 
-    let (value) = Resources._calculate_resource_claimable(TEST_DAYS, TEST_MINT_PERCENTAGE, 100)
+    let (value) = Resources._calculate_resource_claimable(TEST_DAYS, TEST_MINT_PERCENTAGE, 100);
 
-    let work_bn = 2 * 100 * 10 ** 18
+    let work_bn = 2 * 100 * 10 ** 18;
 
-    let (is_equal) = uint256_eq(value, Uint256(work_bn, 0))
+    let (is_equal) = uint256_eq(value, Uint256(work_bn, 0));
 
-    assert is_equal = 1
+    assert is_equal = 1;
 
-    return ()
-end
+    return ();
+}
 
 @external
 func test_calculate_resource_output{
-    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-}():
-    alloc_locals
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+}() {
+    alloc_locals;
 
-    let (value) = Resources._calculate_resource_output(TEST_WORK_HUTS, TEST_HAPPINESS)
+    let (value) = Resources._calculate_resource_output(TEST_WORK_HUTS, TEST_HAPPINESS);
 
-    let (production_output, _) = unsigned_div_rem(BASE_RESOURCES_PER_DAY * TEST_HAPPINESS, 100)
+    let (production_output, _) = unsigned_div_rem(BASE_RESOURCES_PER_DAY * TEST_HAPPINESS, 100);
 
-    assert value = production_output + TEST_WORK_HUTS * WORK_HUT_OUTPUT
+    assert value = production_output + TEST_WORK_HUTS * WORK_HUT_OUTPUT;
 
-    return ()
-end
+    return ();
+}
 
 @external
 func test_calculate_total_mintable_resources{
-    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-}():
-    alloc_locals
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+}() {
+    alloc_locals;
 
     let realmData = RealmData(
         TEST_REALM_DATA.REGIONS,
@@ -169,26 +169,26 @@ func test_calculate_total_mintable_resources{
         TEST_REALM_DATA.RESOURCE_7,
         TEST_REALM_DATA.WONDER,
         TEST_REALM_DATA.ORDER,
-    )
+    );
 
-    let (resource_mint : Uint256*) = Resources._calculate_total_mintable_resources(
+    let (resource_mint: Uint256*) = Resources._calculate_total_mintable_resources(
         TEST_WORK_HUTS, TEST_HAPPINESS, realmData, TEST_DAYS, TEST_MINT_PERCENTAGE
-    )
+    );
 
-    # TODO: missing assert ?!
+    // TODO: missing assert ?!
 
-    return ()
-end
+    return ();
+}
 
 @external
 func test_calculate_vault_time_remaining{
-    syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
-}():
-    alloc_locals
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+}() {
+    alloc_locals;
 
-    let (resource_mint) = Resources._calculate_vault_time_remaining(200)
+    let (resource_mint) = Resources._calculate_vault_time_remaining(200);
 
     %{ print('Resource Mint:', ids.resource_mint) %}
 
-    return ()
-end
+    return ();
+}

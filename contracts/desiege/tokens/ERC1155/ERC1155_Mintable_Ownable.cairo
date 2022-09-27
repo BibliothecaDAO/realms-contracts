@@ -25,113 +25,111 @@ from contracts.desiege.tokens.ERC1155.ERC1155_base import (
     balanceOfBatch,
 )
 
-#
-# Constructor
-#
+//
+// Constructor
+//
 
 @constructor
-func constructor{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(owner : felt):
-    Ownable.initializer(owner)
-    return ()
-end
+func constructor{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(owner: felt) {
+    Ownable.initializer(owner);
+    return ();
+}
 
-#
-# Externals
-#
-
-@external
-func SetURI{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(uri_ : TokenUri):
-    ERC1155_URI.write(uri_)
-    return ()
-end
+//
+// Externals
+//
 
 @external
-func setApprovalForAll{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-    operator : felt, approved : felt
-):
-    let (account) = get_caller_address()
-    ERC1155_set_approval_for_all(operator, approved)
-    return ()
-end
+func SetURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(uri_: TokenUri) {
+    ERC1155_URI.write(uri_);
+    return ();
+}
 
 @external
-func safeTransferFrom{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-    sender : felt, recipient : felt, token_id : felt, amount : felt
-):
-    ERC1155_assert_is_owner_or_approved(sender)
-    ERC1155_transfer_from(sender, recipient, token_id, amount)
-    return ()
-end
+func setApprovalForAll{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    operator: felt, approved: felt
+) {
+    let (account) = get_caller_address();
+    ERC1155_set_approval_for_all(operator, approved);
+    return ();
+}
 
 @external
-func safeBatchTransferFrom{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-    sender : felt,
-    recipient : felt,
-    tokens_id_len : felt,
-    tokens_id : felt*,
-    amounts_len : felt,
-    amounts : felt*,
-):
-    ERC1155_assert_is_owner_or_approved(sender)
-    ERC1155_batch_transfer_from(sender, recipient, tokens_id_len, tokens_id, amounts_len, amounts)
-    return ()
-end
+func safeTransferFrom{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    sender: felt, recipient: felt, token_id: felt, amount: felt
+) {
+    ERC1155_assert_is_owner_or_approved(sender);
+    ERC1155_transfer_from(sender, recipient, token_id, amount);
+    return ();
+}
 
 @external
-func mint{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-    recipient : felt, token_id : felt, amount : felt
-) -> ():
-    Ownable.assert_only_owner()
-    ERC1155_mint(recipient, token_id, amount)
-
-    return ()
-end
-
-@external
-func mintBatch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-    recipient : felt, token_ids_len : felt, token_ids : felt*, amounts_len : felt, amounts : felt*
-) -> ():
-    Ownable.assert_only_owner()
-    ERC1155_mint_batch(recipient, token_ids_len, token_ids, amounts_len, amounts)
-
-    return ()
-end
+func safeBatchTransferFrom{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    sender: felt,
+    recipient: felt,
+    tokens_id_len: felt,
+    tokens_id: felt*,
+    amounts_len: felt,
+    amounts: felt*,
+) {
+    ERC1155_assert_is_owner_or_approved(sender);
+    ERC1155_batch_transfer_from(sender, recipient, tokens_id_len, tokens_id, amounts_len, amounts);
+    return ();
+}
 
 @external
-func burn{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-    account : felt, token_id : felt, amount : felt
-):
-    Ownable.assert_only_owner()
-    ERC1155_burn(account, token_id, amount)
+func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    recipient: felt, token_id: felt, amount: felt
+) -> () {
+    Ownable.assert_only_owner();
+    ERC1155_mint(recipient, token_id, amount);
 
-    return ()
-end
+    return ();
+}
 
 @external
-func burnBatch{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-    account : felt, token_ids_len : felt, token_ids : felt*, amounts_len : felt, amounts : felt*
-):
-    Ownable.assert_only_owner()
-    ERC1155_burn_batch(account, token_ids_len, token_ids, amounts_len, amounts)
+func mintBatch{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    recipient: felt, token_ids_len: felt, token_ids: felt*, amounts_len: felt, amounts: felt*
+) -> () {
+    Ownable.assert_only_owner();
+    ERC1155_mint_batch(recipient, token_ids_len, token_ids, amounts_len, amounts);
 
-    return ()
-end
+    return ();
+}
 
-#
-# Ownable Externals
-#
+@external
+func burn{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    account: felt, token_id: felt, amount: felt
+) {
+    Ownable.assert_only_owner();
+    ERC1155_burn(account, token_id, amount);
+
+    return ();
+}
+
+@external
+func burnBatch{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    account: felt, token_ids_len: felt, token_ids: felt*, amounts_len: felt, amounts: felt*
+) {
+    Ownable.assert_only_owner();
+    ERC1155_burn_batch(account, token_ids_len, token_ids, amounts_len, amounts);
+
+    return ();
+}
+
+//
+// Ownable Externals
+//
 @view
-func getOwner{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}() -> (
-    owner : felt
-):
-    let (o) = Ownable.owner()
-    return (owner=o)
-end
+func getOwner{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}() -> (owner: felt) {
+    let (o) = Ownable.owner();
+    return (owner=o);
+}
 
 @external
-func transferOwnership{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-    next_owner : felt
-):
-    Ownable.transfer_ownership(next_owner)
-    return ()
-end
+func transferOwnership{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    next_owner: felt
+) {
+    Ownable.transfer_ownership(next_owner);
+    return ();
+}
