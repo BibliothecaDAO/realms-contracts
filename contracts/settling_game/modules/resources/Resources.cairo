@@ -43,7 +43,7 @@ from contracts.settling_game.modules.buildings.interface import IBuildings
 from contracts.settling_game.modules.goblintown.interface import IGoblinTown
 from contracts.settling_game.modules.calculator.interface import ICalculator
 from contracts.settling_game.interfaces.IRealms import IRealms
-from contracts.settling_game.library.library_resources import Resources
+from contracts.settling_game.modules.resources.library import Resources
 
 // -----------------------------------
 // Events
