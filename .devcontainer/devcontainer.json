@@ -43,5 +43,7 @@
 	"remoteUser": "root",
 	"remoteEnv": {
 		"CAIRO_PATH": "/workspaces/realms-contracts/lib/cairo_contracts/src:/workspaces/realms-contracts/lib/cairo_math_64x61/contracts:${containerEnv:PATH}"
-	}
+	},
+	"postStartCommand": "bash /workspaces/realms-contracts/scripts/setup_cli_env.sh"
+
 }
