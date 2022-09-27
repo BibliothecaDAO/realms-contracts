@@ -1,8 +1,9 @@
-// Module Template
-//   Use this template when you want to make a new module.
-//   See directions below (____MODULE_XXX___BUILDING_STATE)
+// -----------------------------------
+//   Module.EXAMPLE
+//   [insert what this module does]
 //
 // MIT License
+// -----------------------------------
 
 %lang starknet
 
@@ -15,27 +16,17 @@ from contracts.settling_game.library.library_module import Module
 
 from openzeppelin.upgrades.library import Proxy
 
-// ____MODULE_XXX___BUILDING_STATE
-//
-// This module [module functional description]
-//
-// It predominantly is used by modules [] and uses modules [].
-//
-
 // Steps - Copy and modify this template contract for new modules.
-// 1. Assign the new module the next available number in the contracts/ folder.
-// 2. Add to namespace within game_structs
-// 3. Increase module controller and arbiter contract functions to include new module. (Only if before game is live)
-// 4. Import any module dependencies from interfaces.imodules (above).
-// 5. Document which modules this module will interact with (above).
-// 6. Document which modules this module requires write access to.
-// 7. Write tests in testing/XX_test.py and add to scripts/test.
-// 8. +/- Add useful interfaces for this module to interfaces/imodules.cairo.
-// 9. Delete this set of instructions.
+// 1. Start writing Logic within the library.cairo file.
+// 2. Create tests around this Logic within the ./tests/protostar/settling_game/[module]/module_test.cairo
+// 3. Once stateless logic is complete, begin on the Core.cairo file.
+// 4. Import library into this file
+// 5. Import other libraries where neded
+// 6. Add module ID into the ModuleIds struct.
 
-//##############
-// CONSTRUCTOR #
-//##############
+// -----------------------------------
+// INITIALIZER & UPGRADE
+// -----------------------------------
 
 @external
 func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
@@ -55,9 +46,9 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     return ();
 }
 
-//###########
-// EXTERNAL #
-//###########
+// -----------------------------------
+// EXTERNAL
+// -----------------------------------
 
 // Called by another module to update a global variable.
 @external
@@ -67,10 +58,10 @@ func update_value{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
     return ();
 }
 
-//##########
-// GETTERS #
-//##########
+// -----------------------------------
+// GETTERS
+// -----------------------------------
 
-//##########
-// SETTERS #
-//##########
+// -----------------------------------
+// SETTERS
+// -----------------------------------

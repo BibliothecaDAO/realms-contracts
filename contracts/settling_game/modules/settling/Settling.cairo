@@ -1,5 +1,5 @@
 // -----------------------------------
-//   Module.SETTLING_LOGIC
+//   Module.SETTLING
 //   Core Settling Game logic including setting up the world
 //   and staking/unstaking a realm.
 //

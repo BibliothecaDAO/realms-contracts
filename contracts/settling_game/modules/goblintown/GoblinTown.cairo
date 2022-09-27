@@ -1,5 +1,5 @@
 // -----------------------------------
-// ____Module.GoblinTown
+//   Module.GoblinTown
 //   Logic of the Goblin Town, as far as one can claim goblins follow logic
 
 // ELI5:

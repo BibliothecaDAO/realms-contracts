@@ -1,5 +1,5 @@
 // -----------------------------------
-// ____Module.Combat
+//   Module.Combat
 //   Logic around Combat system
 
 // ELI5:
