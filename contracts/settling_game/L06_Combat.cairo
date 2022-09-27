@@ -25,12 +25,13 @@ from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.modules.calculator.interface import ICalculator
 from contracts.settling_game.interfaces.imodules import (
     IModuleController,
-    IL02_Resources,
     IL03_Buildings,
     IL09_Relics,
     IFood,
     IGoblinTown,
 )
+from contracts.settling_game.modules.resources.interface import IResources
+
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library.library_combat import Combat
@@ -282,11 +283,11 @@ func initiate_combat{range_check_ptr, syscall_ptr : felt*, pedersen_ptr : HashBu
     if combat_outcome == COMBAT_OUTCOME_ATTACKER_WINS:
         let (controller) = Module.controller_address()
         let (resources_logic_address) = IModuleController.get_module_address(
-            controller, ModuleIds.L02_Resources
+            controller, ModuleIds.Resources
         )
         let (relic_address) = IModuleController.get_module_address(controller, ModuleIds.L09_Relics)
         let (caller) = get_caller_address()
-        IL02_Resources.pillage_resources(resources_logic_address, defending_realm_id, caller)
+        IResources.pillage_resources(resources_logic_address, defending_realm_id, caller)
         IL09_Relics.set_relic_holder(relic_address, attacking_realm_id, defending_realm_id)
         tempvar syscall_ptr = syscall_ptr
         tempvar range_check_ptr = range_check_ptr

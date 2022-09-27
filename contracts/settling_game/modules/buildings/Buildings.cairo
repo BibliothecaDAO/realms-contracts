@@ -1,5 +1,5 @@
 # -----------------------------------
-# ____MODULE_L03___BUILDING_LOGIC
+#   MODULE_BUILDING_LOGIC
 #   Manages all buildings in game. Responsible for construction of buildings.
 #
 # MIT License

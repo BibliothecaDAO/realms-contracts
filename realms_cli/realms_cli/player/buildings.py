@@ -26,7 +26,7 @@ def build(realm_token_id, building_id, qty, network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_L03_Buildings",
+        contract_alias="proxy_Buildings",
         function="build",
         arguments=[
             realm_token_id,                 # uint 1
@@ -48,7 +48,7 @@ def buildings(realm_token_id, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_L03_Buildings",
+        contract_alias="proxy_Buildings",
         function="get_effective_buildings",
         arguments=[
             realm_token_id,                 # uint 1
@@ -76,7 +76,7 @@ def buildings_integrity(realm_token_id, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_L03_Buildings",
+        contract_alias="proxy_Buildings",
         function="get_buildings_integrity_unpacked",
         arguments=[
             realm_token_id,                 # uint 1

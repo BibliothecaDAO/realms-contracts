@@ -16,7 +16,7 @@ def run(nre):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_L03_Buildings",
+        contract_alias="proxy_Buildings",
         function="set_building_cost",
         arguments=building_calldata
     )

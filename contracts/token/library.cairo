@@ -84,7 +84,7 @@ namespace ERC1155:
     #
 
     func token_uri{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        token_id: Uint256
+        token_id : Uint256
     ) -> (token_uri : felt):
         let (token_uri) = ERC1155_token_uri.read(token_id)
         return (token_uri)

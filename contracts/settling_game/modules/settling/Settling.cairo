@@ -23,7 +23,8 @@ from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContra
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
-from contracts.settling_game.interfaces.imodules import IL02_Resources, IGoblinTown
+from contracts.settling_game.interfaces.imodules import IGoblinTown
+from contracts.settling_game.modules.resources.interface import IResources
 
 # -----------------------------------
 # Events
@@ -145,13 +146,13 @@ func unsettle{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}
     # FETCH ADDRESSES
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms)
     let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms)
-    let (resource_logic_address) = Module.get_module_address(ModuleIds.L02_Resources)
+    let (resource_logic_address) = Module.get_module_address(ModuleIds.Resources)
 
     # CHECK NO PENDING RESOURCES OR LORDS
-    let (can_claim) = IL02_Resources.check_if_claimable(resource_logic_address, token_id)
+    let (can_claim) = IResources.check_if_claimable(resource_logic_address, token_id)
 
     if can_claim == TRUE:
-        IL02_Resources.claim_resources(resource_logic_address, token_id)
+        IResources.claim_resources(resource_logic_address, token_id)
         _set_world_state(token_id, caller, realms_address)
     else:
         _set_world_state(token_id, caller, realms_address)
