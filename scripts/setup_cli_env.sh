@@ -9,11 +9,10 @@ OPTION2_GENERATE_ACCOUNT=2;
 OPTION3_EXIT=3;
 
 #Example Argentx PK: 1738894601847262057947312354369785682447196114282863931776046095852523510768
-VALID_ARGENTX_PK_REGEX='^[0-9]{76}$';
-VALID_ARGENTX_PK_LEN=76;
+VALID_ARGENTX_PK_REGEX='^[0-9]*$';
 
 #Example Argentx Account: 0x02a35361e0aF1CEaC7ab383a7F0476fC2e864018661F14D5C6FaeE1C9eF40984
-VALID_ARGENTX_ACCOUNT='0x[a-fA-F0-9]{64}$';
+VALID_ARGENTX_ACCOUNT_REGEX='0x[a-fA-F0-9]*$';
 
 # import_argentx_account prompts user for an ArgentX Private Key and Account and validates input
 import_argentx_account() {
@@ -27,7 +26,7 @@ import_argentx_account() {
     # Get and validate Argentx account
     while true; do
         read -p "Enter Account Address from ArgentX: " STARKNET_ACCOUNT_ADDRESS
-        if [[ $STARKNET_ACCOUNT_ADDRESS =~ $VALID_ARGENTX_ACCOUNT ]] ; then
+        if [[ $STARKNET_ACCOUNT_ADDRESS =~ $VALID_ARGENTX_ACCOUNT_REGEX ]] ; then
             break;
         fi
         echo "Provided input is not a valid account";
@@ -194,7 +193,7 @@ has_valid_env_vars() {
     if [ ! -z "$STARKNET_PRIVATE_KEY" ] && [ ! -z "$STARKNET_ACCOUNT_ADDRESS" ]; then
         
         # and env vars are valid
-        if [[ $STARKNET_PRIVATE_KEY =~ $VALID_ARGENTX_PK_REGEX ]] && [[ $STARKNET_ACCOUNT_ADDRESS =~ $VALID_ARGENTX_ACCOUNT ]]; then
+        if [[ $STARKNET_PRIVATE_KEY =~ $VALID_ARGENTX_PK_REGEX ]] && [[ $STARKNET_ACCOUNT_ADDRESS =~ $VALID_ARGENTX_ACCOUNT_REGEX ]]; then
             echo "Found starknet env vars, skipping account import/generation"
             # return true
             true
