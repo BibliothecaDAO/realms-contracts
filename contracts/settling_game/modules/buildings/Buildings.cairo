@@ -19,8 +19,8 @@ from openzeppelin.token.erc20.IERC20 import IERC20
 from openzeppelin.upgrades.library import Proxy
 from openzeppelin.token.erc721.IERC721 import IERC721
 
-from contracts.settling_game.library.library_buildings import Buildings
-from contracts.settling_game.library.library_resources import Resources
+from contracts.settling_game.modules.buildings.library import Buildings
+from contracts.settling_game.modules.resources.library import Resources
 from contracts.settling_game.utils.constants import STORE_HOUSE_SIZE
 
 from contracts.settling_game.utils.general import unpack_data, transform_costs_to_tokens
