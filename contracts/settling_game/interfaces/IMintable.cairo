@@ -6,4 +6,6 @@ from starkware.cairo.common.uint256 import Uint256
 namespace IMintable {
     func mint(to: felt, amount: Uint256) {
     }
+    func burn(token_id: Uint256) {
+    }
 }

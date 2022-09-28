@@ -26,8 +26,9 @@ from contracts.settling_game.utils.constants import DAY, RESOURCES_PER_CRYPT, LE
 from contracts.settling_game.library.library_module import Module
 
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
-from contracts.settling_game.interfaces.crypts_IERC721 import crypts_IERC721
-from contracts.settling_game.interfaces.imodules import IModuleController, IL07_Crypts
+from contracts.settling_game.interfaces.ICrypts import ICrypts
+from contracts.settling_game.modules.crypts.interface import IL07_Crypts
+from contracts.settling_game.interfaces.imodules import IModuleController
 
 //##############
 // CONSTRUCTOR #
@@ -99,7 +100,7 @@ func claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     let (local user_resources_value: Uint256*) = alloc();  // How many of this resource get minted
 
     // FETCH CRYPT DATA
-    let (crypts_data: CryptData) = crypts_IERC721.fetch_crypt_data(crypts_address, token_id);
+    let (crypts_data: CryptData) = ICrypts.fetch_crypt_data(crypts_address, token_id);
 
     // CALC DAYS
     let (days, _) = days_accrued(token_id);

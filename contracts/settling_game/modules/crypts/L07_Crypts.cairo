@@ -20,8 +20,10 @@ from openzeppelin.token.erc721.IERC721 import IERC721
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
 
 from contracts.settling_game.library.library_module import Module
-from contracts.settling_game.interfaces.s_crypts_IERC721 import s_crypts_IERC721
-from contracts.settling_game.interfaces.imodules import IModuleController, IL08_Crypts_Resources
+from contracts.settling_game.interfaces.ICrypts import ICrypts
+from contracts.settling_game.interfaces.imodules import IModuleController
+from contracts.settling_game.modules.crypts.interface import IL08_Crypts_Resources
+from contracts.settling_game.interfaces.IMintable import IMintable
 
 // -----------------------------------
 // Events
@@ -95,7 +97,7 @@ func settle{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(tok
     IERC721.transferFrom(crypts_address, caller, contract_address, token_id);
 
     // MINT S_CRYPT
-    s_crypts_IERC721.mint(s_crypts_address, caller, token_id);
+    IMintable.mint(s_crypts_address, caller, token_id);
 
     // SETS TIME STAKED FOR FUTURE CLAIMS
     _set_time_staked(token_id, 0);
@@ -142,7 +144,7 @@ func unsettle{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     IERC721.transferFrom(crypts_address, contract_address, caller, token_id);
 
     // BURN S_CRYPT
-    s_crypts_IERC721.burn(s_crypts_address, token_id);
+    IMintable.burn(s_crypts_address, token_id);
 
     // EMIT
     UnSettled.emit(caller, token_id);

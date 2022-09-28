@@ -14,7 +14,7 @@ from openzeppelin.access.ownable.library import Ownable
 
 from contracts.desiege.utils.interfaces import IModuleController, I02_TowerStorage
 from contracts.desiege.tokens.ERC1155.IERC1155_Mintable_Ownable import IERC1155
-from contracts.game_utils.game_structs import ShieldGameRole
+from contracts.desiege.game_utils.game_structs import ShieldGameRole
 
 // ############# Storage ################
 @storage_var

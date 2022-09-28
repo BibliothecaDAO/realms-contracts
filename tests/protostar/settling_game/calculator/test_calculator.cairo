@@ -10,7 +10,7 @@ from contracts.settling_game.utils.game_structs import (
     RealmBuildings,
     BuildingsTroopIndustry,
 )
-from contracts.settling_game.library.library_calculator import Calculator
+from contracts.settling_game.modules.calculator.library import Calculator
 
 from tests.protostar.settling_game.test_structs import TEST_REALM_BUILDINGS
 
