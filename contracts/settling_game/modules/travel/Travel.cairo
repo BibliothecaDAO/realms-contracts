@@ -195,7 +195,7 @@ func get_travel_information{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
 }
 
 @view
-func get_travel_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func get_arrival_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     traveller_coordinates: Point, destination_coordinates: Point
 ) -> (time: felt) {
     // get distance between two points
@@ -207,6 +207,19 @@ func get_travel_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     let (now) = get_block_timestamp();
 
     return (time + now,);
+}
+
+@view
+func get_travel_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    traveller_coordinates: Point, destination_coordinates: Point
+) -> (time: felt) {
+    // get distance between two points
+    let (distance) = get_travel_distance(traveller_coordinates, destination_coordinates);
+
+    // calculate time
+    let (time) = Travel.calculate_time(distance);
+
+    return (time,);
 }
 
 @view
