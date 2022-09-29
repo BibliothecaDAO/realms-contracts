@@ -37,9 +37,3 @@ func test_current_relic_holder_stolen{
 
     return ();
 }
-
-// @external
-// func test_order_relic_claim{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
-// }() {
-    
-// }

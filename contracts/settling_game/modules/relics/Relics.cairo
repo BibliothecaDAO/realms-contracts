@@ -7,8 +7,9 @@
 
 %lang starknet
 
+from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin
-from starkware.cairo.common.uint256 import Uint256, uint256_eq
+from starkware.cairo.common.uint256 import Uint256, uint256_eq, uint256_lt
 
 from starkware.cairo.common.bool import TRUE
 
@@ -19,11 +20,7 @@ from contracts.settling_game.modules.relics.library import Relics
 
 from contracts.settling_game.interfaces.IRealms import IRealms
 from contracts.settling_game.interfaces.imodules import IModuleController
-from contracts.settling_game.utils.game_structs import (
-    ModuleIds,
-    RealmData,
-    ExternalContractIds,
-)
+from contracts.settling_game.utils.game_structs import ModuleIds, RealmData, ExternalContractIds
 
 // -----------------------------------
 // Events
@@ -42,11 +39,11 @@ func storage_relic_holder(relic_id: Uint256) -> (owner_token_id: Uint256) {
 }
 
 @storage_var
-func owned_relic_count(owner_token_id : Uint256) -> (res : felt) {
+func owned_relics_count(owner_token_id: Uint256) -> (res: felt) {
 }
 
 @storage_var
-func relics_owned(owner_token_id : Uint256, index : felt) -> (relic_id: Uint256) {
+func owned_relics(owner_token_id: Uint256, index: felt) -> (relic_id: Uint256) {
 }
 
 // -----------------------------------
@@ -113,17 +110,6 @@ func set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
         tempvar pedersen_ptr = pedersen_ptr;
     }
 
-    // Capture back if held by loser
-    // Check if loser has winners token
-    // let (winners_relic_owner) = get_current_relic_holder(winner_token_id);
-
-    // let (holds_relic) = uint256_eq(winners_relic_owner, loser_token_id);
-
-    // if (holds_relic == TRUE) {
-    //     _set_relic_holder(winner_token_id, winner_token_id);
-    //     return ();
-    // }
-
     // TODO: Add Order capture back
     let (controller) = Module.controller_address();
 
@@ -131,24 +117,21 @@ func set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
         controller, ExternalContractIds.Realms
     );
 
-    let (winner_realm_data: RealmData) = IRealms.fetch_realm_data(
-        realms_address, winner_token_id
-    );
+    let (winner_realm_data: RealmData) = IRealms.fetch_realm_data(realms_address, winner_token_id);
 
-    let (relics_len) = owned_relic_count.read(loser_token_id);
+    let (relics_len) = owned_relics_count.read(loser_token_id);
 
-    loop_relic(0, winner_realm_data, loser_token_id, relics_len);
-
-    if (winner_realm_data.order == relic_owner_data.order) {
-        _set_relic_holder(current_realm_owner, current_realm_owner);
-        return ();
-    }
+    loop_relic(0, realms_address, winner_realm_data, loser_token_id, relics_len);
 
     return ();
 }
 
 func loop_relic{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    index: felt, realms_address: felt, winner_realm_data: RealmData, loser_token_id: Uint256, relics_len: felt
+    index: felt,
+    realms_address: felt,
+    winner_realm_data: RealmData,
+    loser_token_id: Uint256,
+    relics_len: felt,
 ) {
     if (index == relics_len) {
         return ();
@@ -156,34 +139,30 @@ func loop_relic{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}
 
     let (relic_id) = owned_relics.read(loser_token_id, index);
 
-    let (relic_owner_data: RealmData) = IRealms.fetch_realm_data(
-        realms_address, relic_id
-    );
+    let (relic_owner_data: RealmData) = IRealms.fetch_realm_data(realms_address, relic_id);
 
     if (winner_realm_data.order == relic_owner_data.order) {
         _set_relic_holder(relic_id, relic_id);
         return ();
     }
 
-    loop_relic(index+1, winner_token_id, loser_token_id, relics_len);
+    loop_relic(index + 1, realms_address, winner_realm_data, loser_token_id, relics_len);
 
     return ();
 }
 
 @external
-func return_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
-} (
+func return_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     realms_token_id: Uint256
 ) {
-    let (relic_count) = owned_relic_count.read(realms_token_id)
+    let (relic_count) = owned_relics_count.read(realms_token_id);
 
-    loop_return_relics(0, realms_token_id, relic_count)
+    loop_return_relics(0, realms_token_id, relic_count);
 
     return ();
 }
 
-func loop_return_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
-} (
+func loop_return_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     index: felt, realms_token_id: Uint256, relic_count: felt
 ) {
     if (index == relic_count) {
@@ -194,16 +173,21 @@ func loop_return_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_ch
 
     _set_relic_holder(relic_id, relic_id);
 
-    loop_return_relics(index+1, realms_token_id, relic_count);
+    loop_return_relics(index + 1, realms_token_id, relic_count);
 
-    return();
+    return ();
 }
 
-func get_relic_index{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
-} (
-    relic_id: Uint256, relic_count: owner_token_index
-) {
+func get_relic_index{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    relic_id: Uint256, owner_token_id: Uint256
+) -> (index: felt) {
+    let (relics_len: felt, relics: Uint256*) = get_owned_relics(owner_token_id);
+
+    let (index) = find_uint256_value(0, relics_len, relics, value=relic_id);
+
+    return (index=index);
 }
+
 // -----------------------------------
 // SETTERS
 // -----------------------------------
@@ -211,22 +195,30 @@ func get_relic_index{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
 func _set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
     relic_id: Uint256, owner_token_id: Uint256
 ) {
-
-    // Get old relic holder to update in array
-    let (old_owner_token_id) = storage_relic_holder.read(relic_id)
+    alloc_locals;
+    // Get old relic holder, then update array
+    let (old_owner_token_id) = storage_relic_holder.read(relic_id);
 
     storage_relic_holder.write(relic_id, owner_token_id);
 
-    // Update old owner array
-    let (relic_index) = get_relic_index(
-        relic_id=relic_id, owner_token_id=owner_token_id
-    );
-    relics_owned.write(owner_token_id, relic_index, Uint256(0,0))
+    // If old owner exists, update array
+    let (check_exists) = uint256_lt(Uint256(0,0), old_owner_token_id);
+    if (check_exists == TRUE) {
+        let (relic_index) = get_relic_index(relic_id=relic_id, owner_token_id=old_owner_token_id);
+        owned_relics.write(old_owner_token_id, relic_index, Uint256(0, 0));
+        tempvar syscall_ptr = syscall_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar pedersen_ptr = pedersen_ptr;
+    } else {
+        tempvar syscall_ptr = syscall_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar pedersen_ptr = pedersen_ptr;
+    }
 
     // Array stored for multiple relic returns
-    let relic_count = owned_relic_count.read(owner_token_id)
-    relics_owned.write(owner_token_id, relic_count - 1, relic_id);
-    owned_relic_count.write(relic_count + 1)
+    let (relic_count) = owned_relics_count.read(owner_token_id);
+    owned_relics.write(owner_token_id, relic_count, relic_id);
+    owned_relics_count.write(owner_token_id, relic_count + 1);
 
     // Emit update whenever Relic changes hands
     RelicUpdate.emit(relic_id, owner_token_id);
@@ -253,4 +245,52 @@ func get_current_relic_holder{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, ra
     let (data) = Relics._current_relic_holder(relic_id, holder_id);
 
     return (data,);
+}
+
+@view
+func get_owned_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    owned_token_id: Uint256
+) -> (relics_len: felt, relics: Uint256*) {
+    alloc_locals;
+    let (relics_len) = owned_relics_count.read(owned_token_id);
+    let (relics: Uint256*) = alloc();
+    loop_get_relics(0, owned_token_id, relics_len, relics);
+    return (relics_len, relics);
+}
+
+func loop_get_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    index: felt, owned_token_id: Uint256, relics_len: felt, relics: Uint256*
+) {
+    if (index == relics_len) {
+        return ();
+    }
+
+    let (relic) = owned_relics.read(owned_token_id, index);
+
+    assert relics[index] = relic;
+
+    loop_get_relics(
+        index=index + 1, owned_token_id=owned_token_id, relics_len=relics_len, relics=relics
+    );
+
+    return ();
+}
+
+@view
+func find_uint256_value{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    arr_index: felt, arr_len: felt, arr: Uint256*, value: Uint256
+) -> (index: felt) {
+    if (arr_index == arr_len) {
+        with_attr error_message("Find Value: Value not found") {
+            assert 1 = 0;
+        }
+    }
+    let (check) = uint256_eq(arr[arr_index], value);
+    if (check == TRUE) {
+        return (index=arr_index);
+    }
+
+    find_uint256_value(arr_index + 1, arr_len, arr, value);
+
+    return (index=arr_index);
 }
