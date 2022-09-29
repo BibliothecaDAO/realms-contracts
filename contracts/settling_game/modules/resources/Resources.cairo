@@ -27,12 +27,11 @@ from contracts.settling_game.utils.game_structs import (
 )
 
 from contracts.settling_game.utils.constants import (
+    CCombat,
     VAULT_LENGTH,
     DAY,
     BASE_RESOURCES_PER_DAY,
     BASE_LORDS_PER_DAY,
-    PILLAGE_AMOUNT,
-    MAX_DAYS_ACCURED,
     WONDER_RATE,
 )
 
@@ -462,7 +461,7 @@ func get_all_vault_raidable{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
 
     // pass 100 for base happiness
     let (vault_resource_mint: Uint256*) = Resources._calculate_total_mintable_resources(
-        current_buildings.House, 100, realms_data, total_vault_days, PILLAGE_AMOUNT
+        current_buildings.House, 100, realms_data, total_vault_days, CCombat.PILLAGE_AMOUNT
     );
 
     return (
