@@ -32,6 +32,7 @@ from contracts.settling_game.utils.constants import (
     DAY,
     BASE_RESOURCES_PER_DAY,
     BASE_LORDS_PER_DAY,
+    MAX_DAYS_ACCURED,
     WONDER_RATE,
 )
 
