@@ -195,11 +195,12 @@ def compile(contract_alias) -> str:
     return subprocess.check_output(command).strip().decode("utf-8")
 
 
-def declare(contract_name, alias) -> str:
+def declare(account_alias, contract_name, alias) -> str:
     """Nile declare function."""
     command = [
         "nile",
         "declare",
+        account_alias,
         contract_name,
         "--alias",
         alias,
