@@ -24,6 +24,8 @@ from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContra
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.interfaces.IMintable import IMintable
 from contracts.settling_game.interfaces.IRealms import IRealms
+from contracts.settling_game.modules.relics.interface import IRelics
+from contracts.settling_game.interfaces.imodules import IModuleController
 
 from contracts.settling_game.modules.goblintown.interface import IGoblinTown
 from contracts.settling_game.modules.resources.interface import IResources
@@ -143,6 +145,7 @@ func unsettle{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 ) -> (success: felt) {
     alloc_locals;
     let (caller) = get_caller_address();
+    let (controller) = Module.controller_address();
     let (contract_address) = get_contract_address();
 
     // FETCH ADDRESSES
@@ -159,6 +162,12 @@ func unsettle{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     } else {
         _set_world_state(token_id, caller, realms_address);
     }
+
+    // SEND ANY RELICS BACK TO OWNERS
+    let (relic_address) = IModuleController.get_module_address(
+        controller, ModuleIds.L09_Relics
+    );
+    IRelics.return_relics(relic_address, token_id);
 
     // TRANSFER REALM BACK TO OWNER
     IERC721.transferFrom(realms_address, contract_address, caller, token_id);
