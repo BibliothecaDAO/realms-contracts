@@ -81,11 +81,6 @@ const WORK_HUT_COST = 75;  // 1/5 of resource output
 const WORK_HUT_OUTPUT = 50;
 
 // -----------------------------------
-// Combat
-// -----------------------------------
-const PILLAGE_AMOUNT = 25;  // bp of successful pillage
-
-// -----------------------------------
 // Buildings
 // -----------------------------------
 const BASE_SQM = 100;  // base sqm of base
@@ -106,35 +101,40 @@ const BASE_FOOD_PRODUCTION = 14000;  // food production per unit
 // Combat
 // -----------------------------------
 
-// a min delay between attacks on a Realm; it can't
-// be attacked again during cooldown
-const ATTACK_COOLDOWN_PERIOD = DAY / 10;  // 1 day unit
+namespace CCombat {
+    // bp of successful pillage
+    const PILLAGE_AMOUNT = 25;
 
-// used to signal which side won the battle
-const COMBAT_OUTCOME_ATTACKER_WINS = 1;
-const COMBAT_OUTCOME_DEFENDER_WINS = 2;
+    // a min delay between attacks on a Realm; it can't
+    // be attacked again during cooldown
+    const ATTACK_COOLDOWN_PERIOD = DAY / 10;  // 1 day unit
 
-// used when adding or removing squads to Realms
-const ATTACKING_SQUAD_SLOT = 1;
-const DEFENDING_SQUAD_SLOT = 2;
+    // used to signal which side won the battle
+    const COMBAT_OUTCOME_ATTACKER_WINS = 1;
+    const COMBAT_OUTCOME_DEFENDER_WINS = 2;
 
-// when defending, how many population does it take
-// to inflict a single hit point on the attacker
-const POPULATION_PER_HIT_POINT = 50;
+    // used when adding or removing squads to Realms
+    const ATTACKING_SQUAD_SLOT = 1;
+    const DEFENDING_SQUAD_SLOT = 2;
 
-// upper limit (inclusive) of how many hit points
-// can a defense wall inflict on the attacker
-const MAX_WALL_DEFENSE_HIT_POINTS = 5;
+    // when defending, how many population does it take
+    // to inflict a single hit point on the attacker
+    const POPULATION_PER_HIT_POINT = 50;
 
-// amount of $LORDS as a reward for tearing down a goblin town
-const GOBLINDOWN_REWARD = 20;
+    // upper limit (inclusive) of how many hit points
+    // can a defense wall inflict on the attacker
+    const MAX_WALL_DEFENSE_HIT_POINTS = 5;
 
-// Army XP
-const DEFENDING_ARMY_XP = 30;
-const ATTACKING_ARMY_XP = 100;
+    // amount of $LORDS as a reward for tearing down a goblin town
+    const GOBLINDOWN_REWARD = 20;
 
-// total battalions
-const TOTAL_BATTALIONS = 30;
+    // Army XP
+    const DEFENDING_ARMY_XP = 30;
+    const ATTACKING_ARMY_XP = 100;
+
+    // total battalions
+    const TOTAL_BATTALIONS = 30;
+}
 
 // -----------------------------------
 // Crypts
