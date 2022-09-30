@@ -14,7 +14,7 @@ from starkware.starknet.common.syscalls import get_caller_address, get_block_tim
 from starkware.cairo.common.uint256 import Uint256, uint256_lt
 from starkware.cairo.common.bool import TRUE, FALSE
 
-from openzeppelin.token.erc20.interfaces.IERC20 import IERC20
+from openzeppelin.token.erc20.IERC20 import IERC20
 from openzeppelin.token.erc721.IERC721 import IERC721
 from openzeppelin.upgrades.library import Proxy
 
@@ -38,11 +38,12 @@ from contracts.settling_game.utils.constants import (
 
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
-from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.modules.settling.interface import ISettling
-from contracts.settling_game.interfaces.imodules import IL03_Buildings, IGoblinTown
+from contracts.settling_game.modules.buildings.interface import IBuildings
+from contracts.settling_game.modules.goblintown.interface import IGoblinTown
 from contracts.settling_game.modules.calculator.interface import ICalculator
-from contracts.settling_game.library.library_resources import Resources
+from contracts.settling_game.interfaces.IRealms import IRealms
+from contracts.settling_game.modules.resources.library import Resources
 
 // -----------------------------------
 // Events
@@ -109,7 +110,6 @@ func claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms);
     let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms);
     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources);
-    let (wonder_address) = Module.get_module_address(ModuleIds.L05_Wonders);
 
     // modules
     let (settling_logic_address) = Module.get_module_address(ModuleIds.Settling);
@@ -138,7 +138,7 @@ func claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     }
 
     // FETCH REALM DATA
-    let (realms_data: RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id);
+    let (realms_data: RealmData) = IRealms.fetch_realm_data(realms_address, token_id);
 
     // CALC DAYS
     let (total_days, remainder) = days_accrued(token_id);
@@ -170,8 +170,8 @@ func claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     ISettling.set_time_vault_staked(settling_logic_address, token_id, vault_remainder);
 
     // get current buildings on realm
-    let (buildings_address) = Module.get_module_address(ModuleIds.L03_Buildings);
-    let (current_buildings: RealmBuildings) = IL03_Buildings.get_effective_buildings(
+    let (buildings_address) = Module.get_module_address(ModuleIds.Buildings);
+    let (current_buildings: RealmBuildings) = IBuildings.get_effective_buildings(
         buildings_address, token_id
     );
 
@@ -183,7 +183,7 @@ func claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     );
 
     // FETCH OWNER
-    let (owner) = realms_IERC721.ownerOf(s_realms_address, token_id);
+    let (owner) = IERC721.ownerOf(s_realms_address, token_id);
 
     let (local data: felt*) = alloc();
     assert data[0] = 0;
@@ -270,7 +270,7 @@ func pillage_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     ISettling.set_time_vault_staked(settling_logic_address, token_id, time_over);
 
     // resources ids
-    let (realms_data: RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id);
+    let (realms_data: RealmData) = IRealms.fetch_realm_data(realms_address, token_id);
     let (resource_ids: Uint256*) = Resources._calculate_realm_resource_ids(realms_data);
 
     let (local data: felt*) = alloc();
@@ -406,7 +406,7 @@ func get_all_resource_claimable{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, 
     let (calculator_address) = Module.get_module_address(ModuleIds.Calculator);
 
     // FETCH REALM DATA
-    let (realms_data: RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id);
+    let (realms_data: RealmData) = IRealms.fetch_realm_data(realms_address, token_id);
 
     // CALC DAYS
     let (total_days, remainder) = days_accrued(token_id);
@@ -423,8 +423,8 @@ func get_all_resource_claimable{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, 
     let (happiness) = ICalculator.calculate_happiness(calculator_address, token_id);
 
     // get current buildings on realm
-    let (buildings_address) = Module.get_module_address(ModuleIds.L03_Buildings);
-    let (current_buildings: RealmBuildings) = IL03_Buildings.get_effective_buildings(
+    let (buildings_address) = Module.get_module_address(ModuleIds.Buildings);
+    let (current_buildings: RealmBuildings) = IBuildings.get_effective_buildings(
         buildings_address, token_id
     );
 
@@ -450,13 +450,13 @@ func get_all_vault_raidable{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms);
 
     // FETCH REALM DATA
-    let (realms_data: RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id);
+    let (realms_data: RealmData) = IRealms.fetch_realm_data(realms_address, token_id);
 
     // CALC VAULT DAYS
     let (total_vault_days, total_vault_days_remaining) = vault_days_accrued(token_id);
 
-    let (buildings_address) = Module.get_module_address(ModuleIds.L03_Buildings);
-    let (current_buildings: RealmBuildings) = IL03_Buildings.get_effective_buildings(
+    let (buildings_address) = Module.get_module_address(ModuleIds.Buildings);
+    let (current_buildings: RealmBuildings) = IBuildings.get_effective_buildings(
         buildings_address, token_id
     );
 

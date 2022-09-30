@@ -1,5 +1,5 @@
 // -----------------------------------
-//   Module.SETTLING_LOGIC
+//   Module.SETTLING
 //   Core Settling Game logic including setting up the world
 //   and staking/unstaking a realm.
 //
@@ -18,12 +18,14 @@ from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.bool import TRUE, FALSE
 
 from openzeppelin.upgrades.library import Proxy
+from openzeppelin.token.erc721.IERC721 import IERC721
 
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds, RealmData
 from contracts.settling_game.library.library_module import Module
-from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
-from contracts.settling_game.interfaces.s_realms_IERC721 import s_realms_IERC721
-from contracts.settling_game.interfaces.imodules import IGoblinTown
+from contracts.settling_game.interfaces.IMintable import IMintable
+from contracts.settling_game.interfaces.IRealms import IRealms
+
+from contracts.settling_game.modules.goblintown.interface import IGoblinTown
 from contracts.settling_game.modules.resources.interface import IResources
 
 // -----------------------------------
@@ -111,10 +113,10 @@ func settle{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(tok
     let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms);
 
     // TRANSFER REALM
-    realms_IERC721.transferFrom(realms_address, caller, contract_address, token_id);
+    IERC721.transferFrom(realms_address, caller, contract_address, token_id);
 
     // MINT S_REALM
-    s_realms_IERC721.mint(s_realms_address, caller, token_id);
+    IMintable.mint(s_realms_address, caller, token_id);
 
     // SETS WORLD AND REALM STATE
     _set_world_state(token_id, caller, realms_address);
@@ -159,10 +161,10 @@ func unsettle{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     }
 
     // TRANSFER REALM BACK TO OWNER
-    realms_IERC721.transferFrom(realms_address, contract_address, caller, token_id);
+    IERC721.transferFrom(realms_address, contract_address, caller, token_id);
 
     // BURN S_REALM
-    s_realms_IERC721.burn(s_realms_address, token_id);
+    IMintable.burn(s_realms_address, token_id);
 
     // CHECK REALMS STATE
     let (realms_settled) = get_total_realms_settled();
@@ -237,7 +239,7 @@ func _set_world_state{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     _set_time_vault_staked(token_id, 0);
 
     // GET REALM DATA
-    let (realms_data: RealmData) = realms_IERC721.fetch_realm_data(realms_address, token_id);
+    let (realms_data: RealmData) = IRealms.fetch_realm_data(realms_address, token_id);
 
     return ();
 }

@@ -311,7 +311,7 @@ func get_lords{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 @external
 func set_loot{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(loot: felt) {
     Proxy.assert_only_admin();
-    lords_address.write(loot);
+    item_address.write(loot);
     return ();
 }
 

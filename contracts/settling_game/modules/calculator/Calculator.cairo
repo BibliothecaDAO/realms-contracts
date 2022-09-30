@@ -1,5 +1,5 @@
 // -----------------------------------
-//   CALCULATOR LOGIC
+//   Module.Calculator
 //   This modules focus is to calculate the values of the internal
 //   multipliers so other modules can use them. The aim is to have this
 //   as the core calculator controller that contains no state.
@@ -28,11 +28,13 @@ from contracts.settling_game.utils.game_structs import (
 )
 from contracts.settling_game.utils.constants import VAULT_LENGTH_SECONDS, BASE_LORDS_PER_DAY
 from contracts.settling_game.modules.settling.interface import ISettling
-from contracts.settling_game.interfaces.imodules import IModuleController, IL06_Combat
+from contracts.settling_game.interfaces.imodules import IModuleController
+from contracts.settling_game.modules.combat.interface import IL06_Combat
 from contracts.settling_game.library.library_module import Module
-from contracts.settling_game.library.library_calculator import Calculator
+from contracts.settling_game.modules.calculator.library import Calculator
 from contracts.settling_game.library.library_combat import Combat
 from contracts.settling_game.modules.buildings.interface import IBuildings
+
 // -----------------------------------
 // Initialize & upgrade
 // -----------------------------------

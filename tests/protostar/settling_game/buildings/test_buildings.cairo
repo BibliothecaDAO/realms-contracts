@@ -16,7 +16,7 @@ from contracts.settling_game.utils.game_structs import (
     BuildingsDecaySlope,
     Cost,
 )
-from contracts.settling_game.library.library_buildings import Buildings
+from contracts.settling_game.modules.buildings.library import Buildings
 
 from tests.protostar.settling_game.test_structs import TEST_REALM_BUILDINGS
 

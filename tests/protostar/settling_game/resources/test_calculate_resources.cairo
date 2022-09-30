@@ -26,7 +26,7 @@ from contracts.settling_game.utils.constants import (
 )
 
 from contracts.settling_game.utils.game_structs import RealmData
-from contracts.settling_game.library.library_resources import Resources
+from contracts.settling_game.modules.resources.library import Resources
 
 from tests.protostar.settling_game.test_structs import (
     TEST_REALM_DATA,

@@ -1,5 +1,5 @@
 // -----------------------------------
-// ____Module.Combat
+//   Module.Combat
 //   Logic around Combat system
 
 // ELI5:
@@ -26,25 +26,24 @@ from starkware.starknet.common.syscalls import get_block_timestamp, get_caller_a
 
 from openzeppelin.upgrades.library import Proxy
 from openzeppelin.token.erc20.IERC20 import IERC20
+from openzeppelin.token.erc721.IERC721 import IERC721
 
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.modules.combat.library import Combat
-from contracts.settling_game.interfaces.imodules import (
-    IModuleController,
-    IL09_Relics,
-    IFood,
-    IGoblinTown,
-)
+from contracts.settling_game.interfaces.imodules import IModuleController
 
 from contracts.settling_game.utils.general import transform_costs_to_tokens
 
+from contracts.settling_game.modules.goblintown.interface import IGoblinTown
+from contracts.settling_game.modules.food.interface import IFood
+from contracts.settling_game.modules.relics.interface import IRelics
 from contracts.settling_game.modules.travel.interface import ITravel
 from contracts.settling_game.modules.resources.interface import IResources
 from contracts.settling_game.modules.buildings.interface import IBuildings
-from contracts.settling_game.interfaces.realms_IERC721 import realms_IERC721
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
+from contracts.settling_game.interfaces.IRealms import IRealms
 
 from contracts.settling_game.utils.constants import (
     ATTACK_COOLDOWN_PERIOD,
@@ -61,9 +60,10 @@ from contracts.settling_game.utils.game_structs import (
     RealmBuildings,
     Cost,
     ExternalContractIds,
+    Battalion,
+    Army,
+    ArmyData,
 )
-
-from contracts.settling_game.modules.combat.constants import Battalion, Army, ArmyData
 
 // -----------------------------------
 // Events
@@ -209,7 +209,7 @@ func build_army_from_battalions{
 
     // fetch packed army
     let (army_packed) = army_data_by_id.read(army_id, realm_id);
-    let (army_unpacked: Army) = Combat.unpack_army(army_packed.ArmyPacked);
+    let (army_unpacked: Army) = Combat.unpack_army(army_packed.packed);
 
     // add battalions to Army and return new Army
     let (new_army: Army) = Combat.add_battalions_to_army(
@@ -311,8 +311,8 @@ func initiate_combat{
     );
 
     // unpack armies
-    let (starting_attack_army: Army) = Combat.unpack_army(attacking_realm_data.ArmyPacked);
-    let (starting_defend_army: Army) = Combat.unpack_army(defending_realm_data.ArmyPacked);
+    let (starting_attack_army: Army) = Combat.unpack_army(attacking_realm_data.packed);
+    let (starting_defend_army: Army) = Combat.unpack_army(defending_realm_data.packed);
 
     // emit starting
     CombatStart_4.emit(
@@ -328,9 +328,7 @@ func initiate_combat{
     let (luck) = roll_dice();
     let (
         combat_outcome, ending_attacking_army_packed, ending_defending_army_packed
-    ) = Combat.calculate_winner(
-        luck, attacking_realm_data.ArmyPacked, defending_realm_data.ArmyPacked
-    );
+    ) = Combat.calculate_winner(luck, attacking_realm_data.packed, defending_realm_data.packed);
 
     // unpack
     let (ending_attacking_army: Army) = Combat.unpack_army(ending_attacking_army_packed);
@@ -348,7 +346,7 @@ func initiate_combat{
         );
         let (caller) = get_caller_address();
         IResources.pillage_resources(resources_logic_address, defending_realm_id, caller);
-        IL09_Relics.set_relic_holder(relic_address, attacking_realm_id, defending_realm_id);
+        IRelics.set_relic_holder(relic_address, attacking_realm_id, defending_realm_id);
 
         tempvar syscall_ptr = syscall_ptr;
         tempvar range_check_ptr = range_check_ptr;
@@ -372,13 +370,13 @@ func initiate_combat{
     set_army_data_and_emit(
         attacking_army_id,
         attacking_realm_id,
-        ArmyData(ending_attacking_army_packed, now, attacking_realm_data.XP + attacking_xp, attacking_realm_data.Level, attacking_realm_data.CallSign),
+        ArmyData(ending_attacking_army_packed, now, attacking_realm_data.XP + attacking_xp, attacking_realm_data.level, attacking_realm_data.call_sign),
     );
 
     set_army_data_and_emit(
         defending_army_id,
         defending_realm_id,
-        ArmyData(ending_defending_army_packed, now, defending_realm_data.XP + defending_xp, defending_realm_data.Level, defending_realm_data.CallSign),
+        ArmyData(ending_defending_army_packed, now, defending_realm_data.XP + defending_xp, defending_realm_data.level, defending_realm_data.call_sign),
     );
 
     // emit end
@@ -419,7 +417,7 @@ func update_army_in_realm{
     set_army_data_and_emit(
         army_id,
         realm_id,
-        ArmyData(new_packed_army, current_packed_army.LastAttacked, current_packed_army.XP, current_packed_army.Level, current_packed_army.CallSign),
+        ArmyData(new_packed_army, current_packed_army.last_attacked, current_packed_army.XP, current_packed_army.level, current_packed_army.call_sign),
     );
 
     return ();
@@ -516,7 +514,7 @@ func Realm_can_be_attacked{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range
     );
 
     let (now) = get_block_timestamp();
-    let diff = now - defending_army_data.LastAttacked;
+    let diff = now - defending_army_data.last_attacked;
     let was_attacked_recently = is_le(diff, ATTACK_COOLDOWN_PERIOD);
 
     if (was_attacked_recently == 1) {
@@ -530,10 +528,10 @@ func Realm_can_be_attacked{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range
     let (s_realms_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.S_Realms
     );
-    let (attacking_realm_data: RealmData) = realms_IERC721.fetch_realm_data(
+    let (attacking_realm_data: RealmData) = IRealms.fetch_realm_data(
         realms_address, attacking_realm_id
     );
-    let (defending_realm_data: RealmData) = realms_IERC721.fetch_realm_data(
+    let (defending_realm_data: RealmData) = IRealms.fetch_realm_data(
         realms_address, defending_realm_id
     );
 
@@ -543,8 +541,8 @@ func Realm_can_be_attacked{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range
     }
 
     // CANNOT ATTACK YOUR OWN
-    let (attacking_realm_owner) = realms_IERC721.ownerOf(s_realms_address, attacking_realm_id);
-    let (defending_realm_owner) = realms_IERC721.ownerOf(s_realms_address, defending_realm_id);
+    let (attacking_realm_owner) = IERC721.ownerOf(s_realms_address, attacking_realm_id);
+    let (defending_realm_owner) = IERC721.ownerOf(s_realms_address, defending_realm_id);
 
     if (attacking_realm_owner == defending_realm_owner) {
         return (FALSE,);
