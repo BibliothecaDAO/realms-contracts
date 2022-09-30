@@ -100,6 +100,12 @@ func constructor{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     // # combat can write to settling
     can_write_to.write(ModuleIds.L06_Combat, ModuleIds.Settling, TRUE);
 
+    // combat can write to relics
+    can_write_to.write(ModuleIds.L06_Combat, ModuleIds.Relics, TRUE);
+
+    // settling can write to relics
+    can_write_to.write(ModuleIds.Settling, ModuleIds.Relics, TRUE);
+
     // settling can write to s realms tokens
     can_write_to.write(ModuleIds.Settling, ModuleIds.S_Realms_Token, TRUE);
 

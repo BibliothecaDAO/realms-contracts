@@ -1,8 +1,11 @@
 %lang starknet
+
+from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.bool import TRUE, FALSE
 from contracts.settling_game.modules.relics.library import Relics
+// from contracts.settling_game.utils.general import find_uint256_value
 
 @external
 func test_current_relic_holder{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
@@ -35,5 +38,21 @@ func test_current_relic_holder_stolen{
 
     assert is_equal = TRUE;
 
+    return ();
+}
+
+@external
+func test_relic_index{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+
+    let (relics: Uint256*) = alloc();
+
+    assert relics[0] = Uint256(1, 0);
+    assert relics[1] = Uint256(2, 0);
+    assert relics[2] = Uint256(3, 0);
+
+    let (index) = Relics._get_relic_index(0, 3, relics, Uint256(2,0));
+
+    assert index = 1;
     return ();
 }

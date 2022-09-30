@@ -7,6 +7,7 @@
 
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.bitwise import bitwise_and
+from starkware.cairo.common.bool import TRUE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.dict import dict_read, dict_write
 from starkware.cairo.common.dict_access import DictAccess
@@ -14,7 +15,7 @@ from starkware.cairo.common.default_dict import default_dict_new, default_dict_f
 from starkware.cairo.common.hash_state import hash_init, hash_update, HashState
 from starkware.cairo.common.math import assert_le, unsigned_div_rem
 from starkware.cairo.common.pow import pow
-from starkware.cairo.common.uint256 import Uint256
+from starkware.cairo.common.uint256 import Uint256, uint256_eq
 
 from contracts.settling_game.utils.game_structs import Cost
 from contracts.settling_game.utils.pow2 import pow2
@@ -244,4 +245,22 @@ func sum_values_by_key_loop{range_check_ptr}(
     dict_write{dict_ptr=dict}(key=[keys], new_value=updated);
 
     return sum_values_by_key_loop(dict, len - 1, keys + 1, values + 1);
+}
+
+func find_uint256_value{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    arr_index: felt, arr_len: felt, arr: Uint256*, value: Uint256
+) -> (index: felt) {
+    if (arr_index == arr_len) {
+        with_attr error_message("Find Value: Value not found") {
+            assert 1 = 0;
+        }
+    }
+    let (check) = uint256_eq(arr[arr_index], value);
+    if (check == TRUE) {
+        return (index=arr_index);
+    }
+
+    let (arr_index) = find_uint256_value(arr_index + 1, arr_len, arr, value);
+
+    return (index=arr_index);
 }

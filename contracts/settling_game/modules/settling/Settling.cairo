@@ -165,7 +165,7 @@ func unsettle{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     // SEND ANY RELICS BACK TO OWNERS
     let (relic_address) = IModuleController.get_module_address(
-        controller, ModuleIds.L09_Relics
+        controller, ModuleIds.Relics
     );
     IRelics.return_relics(relic_address, token_id);
 

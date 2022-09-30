@@ -11,6 +11,8 @@ from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 from starkware.cairo.common.bool import TRUE
 
+from contracts.settling_game.utils.general import find_uint256_value
+
 namespace Relics {
     // @notice gets current relic holder
     // @implicit syscall_ptr
@@ -31,5 +33,21 @@ namespace Relics {
         }
 
         return (holder_id,);
+    }
+    // @notice gets index of relic in array
+    // @implicit syscall_ptr
+    // @implicit range_check_ptr
+    // @param index: felt to start the finding loop, usually 0
+    // @param relics_len: felt for the length of relics a realm owns
+    // @param relics: list of relics a realm owns, Uint256
+    // @param relic_id: id of relic to find in list
+    // @return relic_index: returns index of relic in list
+    func _get_relic_index{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+       index: felt, relics_len: felt, relics: Uint256*, relic_id: Uint256
+    ) -> (relic_index: felt) {
+
+        let (relic_index) = find_uint256_value(0, relics_len, relics, relic_id);
+
+        return (relic_index,);
     }
 }

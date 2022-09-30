@@ -88,10 +88,10 @@ func set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
     winner_token_id: Uint256, loser_token_id: Uint256
 ) {
     alloc_locals;
-    // Only Combat
+    // Only combat
+    Module.only_approved();
 
-    // TODO: Fix auth issue
-    // Module.only_approved()
+    let (controller) = Module.controller_address();
 
     let (current_relic_owner) = get_current_relic_holder(loser_token_id);
 
@@ -111,7 +111,6 @@ func set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
     }
 
     // TODO: Add Order capture back
-    let (controller) = Module.controller_address();
 
     let (realms_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Realms
@@ -119,21 +118,21 @@ func set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
 
     let (winner_realm_data: RealmData) = IRealms.fetch_realm_data(realms_address, winner_token_id);
 
-    let (relics_len) = owned_relics_count.read(loser_token_id);
+    let (loser_relics_len) = owned_relics_count.read(loser_token_id);
 
-    loop_relic(0, realms_address, winner_realm_data, loser_token_id, relics_len);
+    loop_claim_order_relic(0, realms_address, winner_realm_data, loser_token_id, loser_relics_len);
 
     return ();
 }
 
-func loop_relic{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+func loop_claim_order_relic{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
     index: felt,
     realms_address: felt,
     winner_realm_data: RealmData,
     loser_token_id: Uint256,
-    relics_len: felt,
+    loser_relics_len: felt,
 ) {
-    if (index == relics_len) {
+    if (index == loser_relics_len) {
         return ();
     }
 
@@ -145,8 +144,9 @@ func loop_relic{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}
         _set_relic_holder(relic_id, relic_id);
         return ();
     }
+    // _set_relic_holder(relic_id, relic_id);
 
-    loop_relic(index + 1, realms_address, winner_realm_data, loser_token_id, relics_len);
+    loop_claim_order_relic(index + 1, realms_address, winner_realm_data, loser_token_id, loser_relics_len);
 
     return ();
 }
@@ -155,6 +155,8 @@ func loop_relic{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}
 func return_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     realms_token_id: Uint256
 ) {
+    // Only Settling
+    Module.only_approved();
     let (relic_count) = owned_relics_count.read(realms_token_id);
 
     loop_return_relics(0, realms_token_id, relic_count);
@@ -183,7 +185,7 @@ func get_relic_index{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
 ) -> (index: felt) {
     let (relics_len: felt, relics: Uint256*) = get_owned_relics(owner_token_id);
 
-    let (index) = find_uint256_value(0, relics_len, relics, value=relic_id);
+    let (index) = Relics._get_relic_index(0, relics_len, relics, relic_id);
 
     return (index=index);
 }
@@ -276,21 +278,21 @@ func loop_get_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     return ();
 }
 
-@view
-func find_uint256_value{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    arr_index: felt, arr_len: felt, arr: Uint256*, value: Uint256
-) -> (index: felt) {
-    if (arr_index == arr_len) {
-        with_attr error_message("Find Value: Value not found") {
-            assert 1 = 0;
-        }
-    }
-    let (check) = uint256_eq(arr[arr_index], value);
-    if (check == TRUE) {
-        return (index=arr_index);
-    }
+// @view
+// func find_uint256_value{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+//     arr_index: felt, arr_len: felt, arr: Uint256*, value: Uint256
+// ) -> (index: felt) {
+//     if (arr_index == arr_len) {
+//         with_attr error_message("Find Value: Value not found") {
+//             assert 1 = 0;
+//         }
+//     }
+//     let (check) = uint256_eq(arr[arr_index], value);
+//     if (check == TRUE) {
+//         return (index=arr_index);
+//     }
 
-    find_uint256_value(arr_index + 1, arr_len, arr, value);
+//     find_uint256_value(arr_index + 1, arr_len, arr, value);
 
-    return (index=arr_index);
-}
+//     return (index=arr_index);
+// }
