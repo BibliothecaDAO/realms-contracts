@@ -209,7 +209,7 @@ func build_army_from_battalions{
 
     // fetch packed army
     let (army_packed) = army_data_by_id.read(army_id, realm_id);
-    let (army_unpacked: Army) = Combat.unpack_army(army_packed.ArmyPacked);
+    let (army_unpacked: Army) = Combat.unpack_army(army_packed.packed);
 
     // add battalions to Army and return new Army
     let (new_army: Army) = Combat.add_battalions_to_army(
@@ -311,8 +311,8 @@ func initiate_combat{
     );
 
     // unpack armies
-    let (starting_attack_army: Army) = Combat.unpack_army(attacking_realm_data.ArmyPacked);
-    let (starting_defend_army: Army) = Combat.unpack_army(defending_realm_data.ArmyPacked);
+    let (starting_attack_army: Army) = Combat.unpack_army(attacking_realm_data.packed);
+    let (starting_defend_army: Army) = Combat.unpack_army(defending_realm_data.packed);
 
     // emit starting
     CombatStart_4.emit(
@@ -328,9 +328,7 @@ func initiate_combat{
     let (luck) = roll_dice();
     let (
         combat_outcome, ending_attacking_army_packed, ending_defending_army_packed
-    ) = Combat.calculate_winner(
-        luck, attacking_realm_data.ArmyPacked, defending_realm_data.ArmyPacked
-    );
+    ) = Combat.calculate_winner(luck, attacking_realm_data.packed, defending_realm_data.packed);
 
     // unpack
     let (ending_attacking_army: Army) = Combat.unpack_army(ending_attacking_army_packed);
@@ -372,13 +370,13 @@ func initiate_combat{
     set_army_data_and_emit(
         attacking_army_id,
         attacking_realm_id,
-        ArmyData(ending_attacking_army_packed, now, attacking_realm_data.XP + attacking_xp, attacking_realm_data.Level, attacking_realm_data.CallSign),
+        ArmyData(ending_attacking_army_packed, now, attacking_realm_data.XP + attacking_xp, attacking_realm_data.level, attacking_realm_data.call_sign),
     );
 
     set_army_data_and_emit(
         defending_army_id,
         defending_realm_id,
-        ArmyData(ending_defending_army_packed, now, defending_realm_data.XP + defending_xp, defending_realm_data.Level, defending_realm_data.CallSign),
+        ArmyData(ending_defending_army_packed, now, defending_realm_data.XP + defending_xp, defending_realm_data.level, defending_realm_data.call_sign),
     );
 
     // emit end
@@ -419,7 +417,7 @@ func update_army_in_realm{
     set_army_data_and_emit(
         army_id,
         realm_id,
-        ArmyData(new_packed_army, current_packed_army.LastAttacked, current_packed_army.XP, current_packed_army.Level, current_packed_army.CallSign),
+        ArmyData(new_packed_army, current_packed_army.last_attacked, current_packed_army.XP, current_packed_army.level, current_packed_army.call_sign),
     );
 
     return ();
@@ -516,7 +514,7 @@ func Realm_can_be_attacked{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range
     );
 
     let (now) = get_block_timestamp();
-    let diff = now - defending_army_data.LastAttacked;
+    let diff = now - defending_army_data.last_attacked;
     let was_attacked_recently = is_le(diff, ATTACK_COOLDOWN_PERIOD);
 
     if (was_attacked_recently == 1) {
