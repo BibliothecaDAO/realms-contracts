@@ -8,6 +8,5 @@
 	url = https://github.com/OpenZeppelin/cairo-contracts
 	path = lib/cairo_contracts
 [submodule "cairo_graphs"]
-	url = https://github.com/BibliothecaForAdventurers/cairo-graphs
+	url = https://github.com/msaug/cairo-graphs
 	path = lib/cairo_graphs
-	branch = refs/heads/v0.4.0b
