@@ -112,6 +112,10 @@ class Config:
         self.Exchange_ERC20_1155_PROXY_ADDRESS, _ = safe_load_deployment(
             "proxy_Exchange_ERC20_1155", self.nile_network)
 
+        self.GUILD_PROXY_CONTRACT, _ = safe_load_deployment(
+            "proxy_GuildContract", self.nile_network
+        )
+
         self.PROXY_NEXUS, _ = safe_load_deployment(
             "proxy_SingleSidedStaking", self.nile_network)
 

@@ -1,6 +1,10 @@
 [submodule "lib/cairo_erc4626"]
 	path = lib/cairo_erc4626
 	url = https://github.com/auditless/cairo-erc4626
+[submodule "guild_contracts"]
+	url = https://github.com/Guildly/contracts
+	path = lib/guild_contracts
 [submodule "cairo_contracts"]
 	url = https://github.com/OpenZeppelin/cairo-contracts
 	path = lib/cairo_contracts
+	branch = refs/heads/v0.4.0b
