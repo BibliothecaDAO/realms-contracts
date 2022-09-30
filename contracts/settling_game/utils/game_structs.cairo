@@ -546,9 +546,9 @@ struct ArmyStatistics {
 }
 
 struct ArmyData {
-    ArmyPacked: felt,
-    LastAttacked: felt,
+    packed: felt,
+    last_attacked: felt,
     XP: felt,
-    Level: felt,
-    CallSign: felt,
+    level: felt,
+    call_sign: felt,
 }
