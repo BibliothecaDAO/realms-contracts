@@ -39,7 +39,7 @@ generate_account() {
     # Use nile to create new PK
     STARKNET_PRIVATE_KEY=$(nile create_pk);
     # Use nile to deploy new account using PK
-    nile setup STARKNET_PRIVATE_KEY > account_details.txt 2>&1;
+    STARKNET_NETWORK=alpha-goerli STARKNET_PRIVATE_KEY=$STARKNET_PRIVATE_KEY nile setup STARKNET_PRIVATE_KEY > account_details.txt 2>&1;
     # Get Account
     STARKNET_ACCOUNT_ADDRESS=$(grep -i Account account_details.txt | grep -Eo "0x[a-fA-F0-9]{64}");
     
