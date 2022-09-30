@@ -17,7 +17,7 @@ from contracts.settling_game.utils.constants import (
     BASE_RESOURCES_PER_DAY,
     WORK_HUT_COST,
     WORK_HUT_OUTPUT,
-    PILLAGE_AMOUNT,
+    CCombat,
 )
 
 namespace Resources {
@@ -235,7 +235,7 @@ namespace Resources {
     }(total_time: felt) -> (resource_1: felt) {
         alloc_locals;
 
-        let (time_over, _) = unsigned_div_rem(total_time * PILLAGE_AMOUNT, 100);
+        let (time_over, _) = unsigned_div_rem(total_time * CCombat.PILLAGE_AMOUNT, 100);
 
         return (time_over,);
     }
