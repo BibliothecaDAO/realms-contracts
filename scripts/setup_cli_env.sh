@@ -42,7 +42,7 @@ generate_account() {
     STARKNET_NETWORK=alpha-goerli STARKNET_PRIVATE_KEY=$STARKNET_PRIVATE_KEY nile setup STARKNET_PRIVATE_KEY > account_details.txt 2>&1;
     # Get Account
     STARKNET_ACCOUNT_ADDRESS=$(grep -i Account account_details.txt | grep -Eo "0x[a-fA-F0-9]{64}");
-    
+
     # Output account info
     echo "Created new account";
     echo "PK: $STARKNET_PRIVATE_KEY";
@@ -52,21 +52,25 @@ generate_account() {
 
 # mode_selection allows user to select between importing an account or generating an account
 mode_selection() {
+
+    # temporarily carry out only account generation until ArgentX is fixed
+    generate_account;
+
     # Re-prompt user if they enter invalid option
-    while true; do
+    while false; do
         echo "Please enter setup type";
         echo "1: Import account from ArgentX (recommended)";
         echo "2: Create new account";
         echo "3: Exit";
         read -p 'Setup Type: ' script_mode;
         case $script_mode in
-            
+
             # For ArgentX import
             $OPTION1_IMPORT_ARGENTX_ACCOUNT)
                 import_argentx_account;
                 break;
             ;;
-            
+
             # For New Account Generation
             $OPTION2_GENERATE_ACCOUNT)
                 generate_account;
@@ -90,7 +94,7 @@ update_bashrc() {
         # add it
         echo "export STARKNET_PRIVATE_KEY=$STARKNET_PRIVATE_KEY" >> ~/.bashrc;
     fi
-    
+
     # if starknet network env var isn't in bashrc
     is_starknet_network_in_bashrc=$(grep -c "export STARKNET_NETWORK=" ~/.bashrc);
     if [ $is_starknet_network_in_bashrc -eq 0 ]; then
@@ -127,14 +131,14 @@ run_setup () {
     export STARKNET_NETWORK=alpha-goerli
     export STARKNET_PRIVATE_KEY=$STARKNET_PRIVATE_KEY
     export STARKNET_PUBLIC_KEY=`python -c 'import os; from nile.signer import Signer; private_key = int(os.environ["STARKNET_PRIVATE_KEY"]); signer = Signer(private_key); print(signer.public_key)'`
-    
+
     # add above env vars to bashrc
     update_bashrc
 
     # compile contracts
     nile compile
     nile compile lib/cairo_contracts/src/openzeppelin/account/presets/Account.cairo --account_contract
-    
+
 cat <<EOT > goerli.deployments.txt
 0x00155e87abe207e81645c236df829448268f636d41bf5851e5e39e27af5324ed:artifacts/abis/Lords_ERC20_Mintable.json:lords
 0x0448549cccff35dc6d5df90efceda3123e4cec9fa2faff21d392c4a92e95493c:artifacts/abis/Lords_ERC20_Mintable.json:proxy_lords
@@ -181,7 +185,7 @@ cat <<EOT > goerli.deployments.txt
 0x063431c98f0a5b9f4187b8c5616c8063d37e8e2d7b02ff9796c777bf5922205a:artifacts/abis/Combat.json:Combat
 $STARKNET_ACCOUNT_ADDRESS:/usr/local/lib/python3.9/site-packages/nile/artifacts/abis/Account.json:account-0
 EOT
-    
+
 cat <<EOT > goerli.accounts.json
 {"$STARKNET_PUBLIC_KEY": {"address": "$STARKNET_ACCOUNT_ADDRESS", "index": 0, "alias": "STARKNET_PRIVATE_KEY"}}
 EOT
@@ -191,14 +195,14 @@ EOT
 has_valid_env_vars() {
     # If the STARKNET_PRIVATE_KEY AND STARKNET_ACCOUNT_ADDRESS env vars are not empty
     if [ ! -z "$STARKNET_PRIVATE_KEY" ] && [ ! -z "$STARKNET_ACCOUNT_ADDRESS" ]; then
-        
+
         # and env vars are valid
         if [[ $STARKNET_PRIVATE_KEY =~ $VALID_ARGENTX_PK_REGEX ]] && [[ $STARKNET_ACCOUNT_ADDRESS =~ $VALID_ARGENTX_ACCOUNT_REGEX ]]; then
             echo "Found starknet env vars, skipping account import/generation"
             # return true
             true
             return
-            
+
         else
             # output invalid env vars to user
             echo "Found starknet env vars but one or both are invalid, proceeding to account import/generation";
@@ -209,7 +213,7 @@ has_valid_env_vars() {
             false
             return
         fi
-        
+
     else #one or both of the env vars are empty
         echo "Did not find starknet env vars, proceeding to account import/generation";
         # so return false
@@ -227,7 +231,7 @@ main() {
     if has_valid_env_vars; then
         # proceed to setup
         run_setup;
-    # else system does not have valid env vars    
+    # else system does not have valid env vars
     else
         # so proceed to mode selection
         mode_selection;
