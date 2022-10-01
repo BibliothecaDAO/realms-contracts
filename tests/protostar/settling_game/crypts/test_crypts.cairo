@@ -12,45 +12,28 @@ from cairo_graphs.data_types.data_types import Edge, Vertex, AdjacentVertex
 
 from starkware.cairo.common.registers import get_fp_and_pc
 
-// @external
-// func test_calculate_traverse{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
-//     alloc_locals;
-//     let (a_array: felt*) = alloc();
-
-// assert a_array[0] = 0;
-//     assert a_array[1] = 0;
-
-// let (x_len, x) = Crypts.traverse(2, a_array, 2);
-
-// let first = x[0];
-
-// %{ print('len:', ids.first) %}
-
-// return ();
-// }
+const NUM_VERTEX = 9;
+const ROW_LEN = 9;
+const SEED = 252232312312323232;
 
 @external
 func test_build_graph_before_each{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     ) {
     alloc_locals;
 
-    let (graph_len, graph, adj_vertices_count) = Crypts.build_graph_before_each(
-        10, 10, 252232312312323232
-    );
+    let graph = Crypts.build_graph_before_each(NUM_VERTEX, ROW_LEN, SEED);
 
-    // %{ print(ids.graph_len) %}
-
-    // let (path_len, path, distance) = Dijkstra.shortest_path(
-    //     graph_len, graph, adj_vertices_count, 1, 5
-    // );
+    let graph_len = graph.length;
+    let vertices = graph.vertices;
+    let adjacent_vertices_count = graph.adjacent_vertices_count;
 
     %{
         IDENTIFIER_INDEX = 1
         ADJACENT_VERTICES_INDEX = 2
         for i in range(ids.graph_len):
-            neighbours_len = memory[ids.adj_vertices_count+i]
-            vertex_id = memory[ids.graph.address_+i*ids.Vertex.SIZE+IDENTIFIER_INDEX]
-            adjacent_vertices_pointer = memory[ids.graph.address_+i*ids.Vertex.SIZE+ADJACENT_VERTICES_INDEX]
+            neighbours_len = memory[ids.adjacent_vertices_count+i]
+            vertex_id = memory[ids.vertices.address_+i*ids.Vertex.SIZE+IDENTIFIER_INDEX]
+            adjacent_vertices_pointer = memory[ids.vertices.address_+i*ids.Vertex.SIZE+ADJACENT_VERTICES_INDEX]
             print(f"{vertex_id} -> {{",end='')
             for j in range (neighbours_len):
                 adjacent_vertex = memory[adjacent_vertices_pointer+j*ids.AdjacentVertex.SIZE+IDENTIFIER_INDEX]
@@ -59,9 +42,69 @@ func test_build_graph_before_each{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
             print()
     %}
 
-    let (entity) = Crypts.get_entity_index(25, 25, 25232);
+    // let (entity) = Crypts.get_entity_index(25, 25, 25232);
 
-    %{ print(ids.entity) %}
+    // %{ print(ids.entity) %}
+
+    return ();
+}
+
+const START_VERTEX_1 = 1;
+const END_VERTEX_1 = 204;
+
+@external
+func test_check_path_exists{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+
+    let graph = Crypts.build_graph_before_each(NUM_VERTEX, ROW_LEN, SEED);
+
+    let (shortest_path_len, identifiers, total_distance) = Crypts.check_path_exists(
+        graph, START_VERTEX_1, END_VERTEX_1
+    );
+
+    %{
+        for i in range(ids.shortest_path_len):
+            path = memory[ids.identifiers+i]
+            print(f"{path}")
+    %}
+    return ();
+}
+
+@external
+func test_check_entity_in_path{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+
+    let graph = Crypts.build_graph_before_each(NUM_VERTEX, ROW_LEN, SEED);
+
+    let (shortest_path_len, identifiers, total_distance) = Crypts.check_path_exists(
+        graph, START_VERTEX_1, END_VERTEX_1
+    );
+
+    let (entites_index: felt*) = alloc();
+
+    assert entites_index[0] = 203;
+    assert entites_index[1] = 3;
+
+    let (can_pass) = Crypts.check_entity_in_path(shortest_path_len, identifiers, 2, entites_index);
+
+    %{ print(ids.can_pass) %}
+
+    return ();
+}
+
+@external
+func test_get_entity{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+
+    let graph = Crypts.build_graph_before_each(NUM_VERTEX, ROW_LEN, SEED);
+
+    let (entity, len) = Crypts.get_entity_list(graph, SEED);
+
+    %{
+        for i in range(ids.len):
+            path = memory[ids.entity+i]
+            print(f"{path}")
+    %}
 
     return ();
 }
