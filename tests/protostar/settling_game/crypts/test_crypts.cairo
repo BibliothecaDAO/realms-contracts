@@ -14,7 +14,7 @@ from starkware.cairo.common.registers import get_fp_and_pc
 
 const NUM_VERTEX = 9;
 const ROW_LEN = 9;
-const SEED = 252232312312323232;
+const SEED = 2231231232527543;
 
 @external
 func test_build_graph_before_each{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
@@ -42,15 +42,11 @@ func test_build_graph_before_each{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
             print()
     %}
 
-    // let (entity) = Crypts.get_entity_index(25, 25, 25232);
-
-    // %{ print(ids.entity) %}
-
     return ();
 }
 
 const START_VERTEX_1 = 1;
-const END_VERTEX_1 = 204;
+const END_VERTEX_1 = 104;
 
 @external
 func test_check_path_exists{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {

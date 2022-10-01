@@ -74,13 +74,6 @@ namespace Crypts {
         alloc_locals;
 
         if (graph_len == 0) {
-            return (graph_len, row_len, edge);
-        }
-
-        // randomise node connections
-        let (_, r) = unsigned_div_rem(seed + graph_len, graph_len);
-
-        if (start_index == 2) {
             tempvar dst = start_index;
         } else {
             tempvar dst = branch_identifier;
@@ -89,6 +82,10 @@ namespace Crypts {
         local edge_a: Edge = Edge(dst, branch_identifier + 1, 1);
 
         assert [edge] = edge_a;
+
+        if (graph_len == 0) {
+            return (graph_len, row_len, edge);
+        }
 
         return populate_side_edges(
             graph_len - 1, row_len, start_index + 1, branch_identifier + 1, edge + Edge.SIZE, seed
@@ -101,9 +98,12 @@ namespace Crypts {
     ) -> Graph {
         alloc_locals;
 
-        // add in some random edges on top of fixed amount
-        let random_number_edges = 10;  // hardcoded for now
-        let start_index = 2;
+        // let random_number_edges = 5;  // hardcoded for now
+        // let start_index = 2;
+
+        let (_, random_number_edges) = unsigned_div_rem(seed, 8);
+        let (_, start_index) = unsigned_div_rem(seed, num_vertex - 2);
+
         let index_shift = 100;  // hardcode for now - we shift to avoid index clashes
 
         // straight line
@@ -126,8 +126,10 @@ namespace Crypts {
         );
 
         // connect graph back to node back to vertex in the straight line
-        let (connecting_node, _) = unsigned_div_rem(num_vertex, 2);
+        let (_, connecting_node) = unsigned_div_rem(seed, num_vertex + 2);
+        local start_edge: Edge = Edge(start_index, start_index * index_shift, 1);
         local final_edge: Edge = Edge(start_index * index_shift + random_number_edges, connecting_node, 1);
+        let graph = GraphMethods.add_edge(graph, start_edge);
         let graph = GraphMethods.add_edge(graph, final_edge);
 
         return (graph);
@@ -153,7 +155,7 @@ namespace Crypts {
         alloc_locals;
 
         // get number of entities in the dungeon
-        let (_, r) = unsigned_div_rem(seed, graph.length - 3);
+        let (_, r) = unsigned_div_rem(seed, graph.length);
 
         // build array of entites
         let (entities: felt*) = alloc();
