@@ -454,6 +454,7 @@ namespace Combat {
             attack_army.light_cavalry.health,
             attack_army.light_cavalry.quantity,
             attack_army.light_cavalry.quantity + attack_army.heavy_cavalry.quantity,
+
             attack_army_statistics.infantry_attack,
             defending_army_statistics.infantry_defence,
         );
@@ -461,6 +462,7 @@ namespace Combat {
             attack_army.heavy_cavalry.health,
             attack_army.heavy_cavalry.quantity,
             attack_army.light_cavalry.quantity + attack_army.heavy_cavalry.quantity,
+
             attack_army_statistics.infantry_attack,
             defending_army_statistics.infantry_defence,
         );
@@ -468,6 +470,7 @@ namespace Combat {
             attack_army.archer.health,
             attack_army.archer.quantity,
             attack_army.archer.quantity + attack_army.longbow.quantity,
+
             attack_army_statistics.cavalry_attack,
             defending_army_statistics.cavalry_defence,
         );
