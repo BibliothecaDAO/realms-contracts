@@ -1,7 +1,9 @@
-// ____MODULE_L07___CRYPTS_LOGIC
-//   Staking/Unstaking a crypt.
+// -----------------------------------
+//   CryptRun.Library
+//   CryptRun
 //
 // MIT License
+// -----------------------------------
 
 %lang starknet
 
@@ -18,14 +20,17 @@ from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.math import assert_not_zero
 
 from contracts.settling_game.utils.constants import DAY
-
 from contracts.settling_game.modules.crypts.library import Crypts
+from contracts.settling_game.interfaces.imodules import IModuleController
+from contracts.settling_game.library.library_module import Module
+
+from openzeppelin.upgrades.library import Proxy
 from cairo_graphs.data_types.data_types import Graph, Vertex
 
 struct Crypt {
-    time_stamp: felt,
-    seed: felt,
-    successful_completions: felt,
+    time_stamp: felt,  // timestamp of when crypt was opened + 1 DAY
+    seed: felt,  // random seed
+    successful_completions: felt,  // number of times completed
 }
 
 struct AdventurerLocation {
@@ -34,10 +39,7 @@ struct AdventurerLocation {
     seed: felt,  // store seed, as during a run the crypts main seed my change
 }
 
-const NUMBER_SUCCESSFUL_RUNS = 10;
-const NODE_START_INDEX = 0;
-const EXAMPLE_RANDOM = 23123123123120;
-
+// FOR TESTING
 namespace CryptData {
     const resource = 1;
     const environment = 2;
@@ -48,7 +50,14 @@ namespace CryptData {
     const affinity = 2;
 }
 
-// seed storage
+const NUMBER_SUCCESSFUL_RUNS = 10;
+const NODE_START_INDEX = 0;
+const EXAMPLE_RANDOM = 23123123123120;
+
+// -----------------------------------
+// Storage
+// -----------------------------------
+
 @storage_var
 func crypt(token_id: Uint256) -> (crypt: Crypt) {
 }
@@ -57,9 +66,36 @@ func crypt(token_id: Uint256) -> (crypt: Crypt) {
 func adventurer(token_id: Uint256) -> (location: AdventurerLocation) {
 }
 
-// opens a crypt.
-// if SEED exists OR timestamp is less than 24hrs, use SEED, otherwise create new seed
-// only the opener of the crypt does this.
+// -----------------------------------
+// INITIALIZER & UPGRADE
+// -----------------------------------
+
+@external
+func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    address_of_controller: felt, proxy_admin: felt
+) {
+    Module.initializer(address_of_controller);
+    Proxy.initializer(proxy_admin);
+    return ();
+}
+
+@external
+func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    new_implementation: felt
+) {
+    Proxy.assert_only_admin();
+    Proxy._set_implementation_hash(new_implementation);
+    return ();
+}
+
+// -----------------------------------
+// EXTERNAL
+// -----------------------------------
+
+// @notice Opens crypt.... Checks if the Crypt is active. If < 24hrs or > 10 successful quests, function creates a new seed.
+// @param crypt_id: Crypts erc721 ID
+// @param adventurer_id: Adventurer erc721 ID
+// @returns seed: Random seed. This is used in the Client to reconstruct the Crypt in a visual form.
 @external
 func open_crypt{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     crypt_id: Uint256, adventurer_id: Uint256
@@ -95,6 +131,11 @@ func open_crypt{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
     return (seed=crypt_status.seed);
 }
 
+// @notice Move Adventurer within the Crypt.
+// @param crypt_id: Crypts erc721 ID
+// @param adventurer_id: Adventurer erc721 ID
+// @param start_location: Index of the current location
+// @param end_location: Index of the location wishing to travel to
 @external
 func move_to_location_in_crypt{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     crypt_id: Uint256, adventurer_id: Uint256, start_location: felt, end_location: felt
@@ -126,8 +167,12 @@ func move_to_location_in_crypt{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, r
     return ();
 }
 
+// @notice Can be called when the Adventurer exists on a Vertex
+// @param crypt_id: Crypts erc721 ID
+// @param adventurer_id: Adventurer erc721 ID
+// @param location: Index of the vertex
 @external
-func interact_with_node{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func interact_with_vertex{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     crypt_id: Uint256, adventurer_id: Uint256, location: felt
 ) -> () {
     // check ownership
@@ -144,15 +189,25 @@ func interact_with_node{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_ch
     return ();
 }
 
-// actions on the entity
+// -----------------------------------
+// INTERNAL
+// -----------------------------------
+
+// @notice Actions the entity at an index
+// @param crypt_id: Crypts erc721 ID
+// @param seed: Generated seed for the crypt
 func entity_action{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     entity: felt, adventurer_id: Uint256
 ) -> () {
     // all possible entity interactions according to what the entity is
+    // IF monster -> take health (perhaps calls back to Adventurer module). If dead, kill.
+    // IF loot -> store loot in state, when Adventurer leaves the dungeon mint loot.
     return ();
 }
 
-// builds dungeon
+// @notice Builds the graph of the Dungeon from the crypt and a Seed
+// @param crypt_id: Crypts erc721 ID
+// @param seed: Generated seed for the crypt
 func build_dungeon{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     crypt_id: Uint256, seed: felt
 ) -> (dungeon: Graph) {
@@ -162,6 +217,10 @@ func build_dungeon{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
     return (dungeon=graph);
 }
 
+// @notice Asserts Adventurer is at the location requested and then returns the location if they are.
+// @param crypt_id: Crypts erc721 ID
+// @param adventurer_id: Adventurer erc721 ID
+// @param location: Location of Adventurer within the crypt
 func assert_and_return_location{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     crypt_id: Uint256, adventurer_id: Uint256, location: felt
 ) -> (adventurer_location: AdventurerLocation) {
@@ -178,6 +237,8 @@ func assert_and_return_location{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, 
     return (adventurer_location=adventurer_location);
 }
 
+// @notice Asserts caller owns Adventurer
+// @param adventurer_id: Adventurer erc721 ID
 func assert_adventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     adventurer_id: Uint256
 ) -> () {
@@ -187,6 +248,12 @@ func assert_adventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     return ();
 }
 
+// -----------------------------------
+// GETTERS
+// -----------------------------------
+
+// @notice Get the location of an Adventurer within this module
+// @param adventurer_id: Adventurer erc721 ID
 @view
 func get_location{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     adventurer_id: Uint256

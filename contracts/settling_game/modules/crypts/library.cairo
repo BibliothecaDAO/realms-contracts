@@ -1,6 +1,6 @@
 // -----------------------------------
-// ____Food Library
-//   Food
+//   Crypts.Library
+//   Crypts
 //
 // MIT License
 // -----------------------------------
@@ -23,76 +23,9 @@ from cairo_graphs.graph.graph import (
 from cairo_graphs.graph.dijkstra import Dijkstra
 from cairo_graphs.data_types.data_types import Edge, Vertex, AdjacentVertex, Graph
 
-namespace Points {
-    const nothing = 0;
-    const wall = 1;
-    const enemy = 2;
-    const loot = 3;
-}
-
-// traverse array
 namespace Crypts {
-    // TODO: unpack the bitmapped crypts and pass in index + POI and rebuild graph
-    func populate_edges{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-        graph_len: felt, row_len: felt, edge: Edge*, seed: felt
-    ) -> (graph_len: felt, row_len: felt, edge: Edge*) {
-        alloc_locals;
-
-        if (graph_len == 0) {
-            return (graph_len, row_len, edge);
-        }
-
-        // randomise node connections
-        let (_, r) = unsigned_div_rem(seed + graph_len, graph_len);
-
-        // if (graph_len == 1) {
-        //     tempvar dst = 0;  // final node has path back to start
-        // } else {
-        // if (r == (row_len - graph_len)) {
-        tempvar dst = (row_len - graph_len) + 1;
-        // } else {
-        //     tempvar dst = r;
-        // }
-        // }
-
-        local edge_a: Edge = Edge(row_len - graph_len, dst, 1);
-
-        assert [edge] = edge_a;
-
-        return populate_edges(graph_len - 1, row_len, edge + Edge.SIZE, seed);
-    }
-
-    // TODO: generalise with above function
-    func populate_side_edges{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-        graph_len: felt,
-        row_len: felt,
-        start_index: felt,
-        branch_identifier: felt,
-        edge: Edge*,
-        seed: felt,
-    ) -> (graph_len: felt, row_len: felt, edge: Edge*) {
-        alloc_locals;
-
-        if (graph_len == 0) {
-            tempvar dst = start_index;
-        } else {
-            tempvar dst = branch_identifier;
-        }
-
-        local edge_a: Edge = Edge(dst, branch_identifier + 1, 1);
-
-        assert [edge] = edge_a;
-
-        if (graph_len == 0) {
-            return (graph_len, row_len, edge);
-        }
-
-        return populate_side_edges(
-            graph_len - 1, row_len, start_index + 1, branch_identifier + 1, edge + Edge.SIZE, seed
-        );
-    }
     // TODO: inject this with a seed + crypts metadata
-    // outputs a dungeon which can be used in other parts.
+    // @notice Builds dungeon seed and length
     func build_dungeon{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         num_vertex: felt, row_len: felt, seed: felt
     ) -> Graph {
@@ -134,8 +67,67 @@ namespace Crypts {
 
         return (graph);
     }
+    // @notice recursivley builds a straight graph to the length of the crypt
+    func populate_edges{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        graph_len: felt, row_len: felt, edge: Edge*, seed: felt
+    ) -> (graph_len: felt, row_len: felt, edge: Edge*) {
+        alloc_locals;
 
-    // @notice: calculates what will be at the index of the graph. Moster, Loot, nothing.
+        if (graph_len == 0) {
+            return (graph_len, row_len, edge);
+        }
+
+        // randomise node connections
+        let (_, r) = unsigned_div_rem(seed + graph_len, graph_len);
+
+        // if (graph_len == 1) {
+        //     tempvar dst = 0;  // final node has path back to start
+        // } else {
+        // if (r == (row_len - graph_len)) {
+        tempvar dst = (row_len - graph_len) + 1;
+        // } else {
+        //     tempvar dst = r;
+        // }
+        // }
+
+        local edge_a: Edge = Edge(row_len - graph_len, dst, 1);
+
+        assert [edge] = edge_a;
+
+        return populate_edges(graph_len - 1, row_len, edge + Edge.SIZE, seed);
+    }
+
+    // @notice recursivley builds a list of edges
+    func populate_side_edges{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        graph_len: felt,
+        row_len: felt,
+        start_index: felt,
+        branch_identifier: felt,
+        edge: Edge*,
+        seed: felt,
+    ) -> (graph_len: felt, row_len: felt, edge: Edge*) {
+        alloc_locals;
+
+        if (graph_len == 0) {
+            tempvar dst = start_index;
+        } else {
+            tempvar dst = branch_identifier;
+        }
+
+        local edge_a: Edge = Edge(dst, branch_identifier + 1, 1);
+
+        assert [edge] = edge_a;
+
+        if (graph_len == 0) {
+            return (graph_len, row_len, edge);
+        }
+
+        return populate_side_edges(
+            graph_len - 1, row_len, start_index + 1, branch_identifier + 1, edge + Edge.SIZE, seed
+        );
+    }
+
+    // @notice Gets a single entity
     func get_entity{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         random_number: felt
     ) -> (entity: felt) {
@@ -146,7 +138,7 @@ namespace Crypts {
         return (entity=entity);
     }
 
-    // builds random array of entities at indexes
+    // @notice Gets the entity list
     func get_entity_list{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         graph: Graph, seed: felt
     ) -> (entities: felt*, entity_len: felt) {
@@ -162,6 +154,7 @@ namespace Crypts {
         return (entities=entities, entity_len=r);
     }
 
+    // @notice Recursively builds a list of entities from a seed
     func build_entity_list{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         entity_quantity: felt, entities: felt*, vertices: Vertex*, seed: felt, fixed_quantity: felt
     ) -> (entities: felt*) {
@@ -180,8 +173,7 @@ namespace Crypts {
         );
     }
 
-    // returns path. If no path exists, returns 0
-    // used to check jumping from one node to the next
+    // @notice Checks path exists between two vertexs
     func check_path_exists{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         graph: Graph, start_vertex: felt, end_vertex: felt
     ) -> (shortest_path_len: felt, identifiers: felt*, total_distance: felt) {
@@ -194,7 +186,7 @@ namespace Crypts {
         return (shortest_path_len, identifiers, total_distance);
     }
 
-    // create path from graph, then check if user is trying to bypass
+    // @notice Checks entity exists in the path
     func check_entity_in_path{range_check_ptr}(
         identifiers_len: felt, identifiers: felt*, entity_ids_len: felt, entity_ids: felt*
     ) -> (can_pass: felt) {
@@ -214,7 +206,8 @@ namespace Crypts {
             identifiers_len - 1, identifiers + 1, entity_ids_len, entity_ids
         );
     }
-    // nested check on entity
+
+    // @notice Inner recursive method for checking entity path
     func check_entity_nested{range_check_ptr}(
         identifier: felt, entity_ids_len: felt, entity_ids: felt*
     ) -> (can_pass: felt) {
@@ -229,13 +222,6 @@ namespace Crypts {
         }
 
         return check_entity_nested(identifier, entity_ids_len - 1, entity_ids + 1);
-    }
-
-    // assert player can actually move to new index
-    func assert_can_move{range_check_ptr}(current_index: felt, final_index: felt, seed: felt) {
-        alloc_locals;
-
-        return ();
     }
 
     // TODO: Interaction on a node? Do we create a key pair action where the adventuer is locked to that index until they
