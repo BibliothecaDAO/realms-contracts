@@ -93,7 +93,7 @@ namespace Crypts {
     }
     // TODO: inject this with a seed + crypts metadata
     // outputs a dungeon which can be used in other parts.
-    func build_graph_before_each{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    func build_dungeon{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         num_vertex: felt, row_len: felt, seed: felt
     ) -> Graph {
         alloc_locals;
@@ -137,13 +137,11 @@ namespace Crypts {
 
     // @notice: calculates what will be at the index of the graph. Moster, Loot, nothing.
     func get_entity{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-        num_vertex: felt, row_len: felt, seed: felt
+        random_number: felt
     ) -> (entity: felt) {
         alloc_locals;
 
-        let (_, r) = unsigned_div_rem(seed + num_vertex, 100);
-
-        let (_, entity) = unsigned_div_rem(row_len + seed, 5);
+        let (_, entity) = unsigned_div_rem(random_number, 5);
 
         return (entity=entity);
     }
@@ -184,9 +182,9 @@ namespace Crypts {
 
     // returns path. If no path exists, returns 0
     // used to check jumping from one node to the next
-    func check_path_exists{range_check_ptr}(graph: Graph, start_vertex: felt, end_vertex: felt) -> (
-        shortest_path_len: felt, identifiers: felt*, total_distance: felt
-    ) {
+    func check_path_exists{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        graph: Graph, start_vertex: felt, end_vertex: felt
+    ) -> (shortest_path_len: felt, identifiers: felt*, total_distance: felt) {
         alloc_locals;
 
         let (shortest_path_len, identifiers, total_distance) = Dijkstra.shortest_path(

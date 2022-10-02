@@ -21,7 +21,7 @@ func test_build_graph_before_each{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
     ) {
     alloc_locals;
 
-    let graph = Crypts.build_graph_before_each(NUM_VERTEX, ROW_LEN, SEED);
+    let graph = Crypts.build_dungeon(NUM_VERTEX, ROW_LEN, SEED);
 
     let graph_len = graph.length;
     let vertices = graph.vertices;
@@ -45,14 +45,14 @@ func test_build_graph_before_each{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
     return ();
 }
 
-const START_VERTEX_1 = 1;
+const START_VERTEX_1 = 5;
 const END_VERTEX_1 = 104;
 
 @external
 func test_check_path_exists{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
 
-    let graph = Crypts.build_graph_before_each(NUM_VERTEX, ROW_LEN, SEED);
+    let graph = Crypts.build_dungeon(NUM_VERTEX, ROW_LEN, SEED);
 
     let (shortest_path_len, identifiers, total_distance) = Crypts.check_path_exists(
         graph, START_VERTEX_1, END_VERTEX_1
@@ -63,6 +63,8 @@ func test_check_path_exists{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
             path = memory[ids.identifiers+i]
             print(f"{path}")
     %}
+
+    %{ print(ids.shortest_path_len) %}
     return ();
 }
 
@@ -70,7 +72,7 @@ func test_check_path_exists{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
 func test_check_entity_in_path{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
 
-    let graph = Crypts.build_graph_before_each(NUM_VERTEX, ROW_LEN, SEED);
+    let graph = Crypts.build_dungeon(NUM_VERTEX, ROW_LEN, SEED);
 
     let (shortest_path_len, identifiers, total_distance) = Crypts.check_path_exists(
         graph, START_VERTEX_1, END_VERTEX_1
@@ -92,7 +94,7 @@ func test_check_entity_in_path{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, r
 func test_get_entity{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
 
-    let graph = Crypts.build_graph_before_each(NUM_VERTEX, ROW_LEN, SEED);
+    let graph = Crypts.build_dungeon(NUM_VERTEX, ROW_LEN, SEED);
 
     let (entity, len) = Crypts.get_entity_list(graph, SEED);
 
