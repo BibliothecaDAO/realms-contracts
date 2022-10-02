@@ -96,7 +96,7 @@ func test_get_entity{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
 
     let graph = Crypts.build_dungeon(NUM_VERTEX, ROW_LEN, SEED);
 
-    let (entity, len) = Crypts.get_entity_list(graph, SEED);
+    let (len, entity) = Crypts.get_entity_list(graph, SEED);
 
     %{
         for i in range(ids.len):

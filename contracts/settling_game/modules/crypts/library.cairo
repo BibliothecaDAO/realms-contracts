@@ -138,10 +138,11 @@ namespace Crypts {
         return (entity=entity);
     }
 
-    // @notice Gets the entity list
+    // OPTIMISATION IDEA: This could be stored in the state as a bitmapped felt. This way the user when interacting with it does not need to recreate the graph everytime. This might be a cheaper option...
+    // @notice Gets the entity list at indexes.
     func get_entity_list{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         graph: Graph, seed: felt
-    ) -> (entities: felt*, entity_len: felt) {
+    ) -> (entity_len: felt, entities: felt*) {
         alloc_locals;
 
         // get number of entities in the dungeon
@@ -151,7 +152,7 @@ namespace Crypts {
         let (entities: felt*) = alloc();
         build_entity_list(r, entities, graph.vertices, seed, r);
 
-        return (entities=entities, entity_len=r);
+        return (entity_len=r, entities=entities);
     }
 
     // @notice Recursively builds a list of entities from a seed
@@ -222,6 +223,23 @@ namespace Crypts {
         }
 
         return check_entity_nested(identifier, entity_ids_len - 1, entity_ids + 1);
+    }
+
+    // @notice Assert entity exists
+    func check_entity_at_index{range_check_ptr}(
+        identifier: felt, entity_ids_len: felt, entity_ids: felt*
+    ) -> (entity_exists: felt) {
+        alloc_locals;
+
+        if (entity_ids_len == 0) {
+            return (entity_exists=FALSE);
+        }
+
+        if (identifier == [entity_ids]) {
+            return (entity_exists=TRUE);
+        }
+
+        return check_entity_at_index(identifier, entity_ids_len - 1, entity_ids + 1);
     }
 
     // TODO: Interaction on a node? Do we create a key pair action where the adventuer is locked to that index until they

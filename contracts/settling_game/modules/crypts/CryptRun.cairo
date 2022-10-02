@@ -140,6 +140,7 @@ func open_crypt{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
 func move_to_location_in_crypt{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     crypt_id: Uint256, adventurer_id: Uint256, start_location: felt, end_location: felt
 ) -> () {
+    alloc_locals;
     // check ownership
     assert_adventurer(adventurer_id);
 
@@ -159,7 +160,6 @@ func move_to_location_in_crypt{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, r
     }
 
     // move player and store state
-    let (adventurer_location) = assert_and_return_location(crypt_id, adventurer_id, start_location);
     adventurer.write(
         adventurer_id, AdventurerLocation(crypt_id.low, end_location, adventurer_location.seed)
     );
@@ -175,15 +175,30 @@ func move_to_location_in_crypt{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, r
 func interact_with_vertex{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     crypt_id: Uint256, adventurer_id: Uint256, location: felt
 ) -> () {
+    alloc_locals;
     // check ownership
     assert_adventurer(adventurer_id);
 
     // assert at location
     let (adventurer_location) = assert_and_return_location(crypt_id, adventurer_id, location);
 
+    // build dungeon
+    let (dungeon) = build_dungeon(crypt_id, adventurer_location.seed);
+
+    // get entites
+    let (entity_list_len, entity_list) = Crypts.get_entity_list(dungeon, adventurer_location.seed);
+
+    // check entity exists
+    let (entity_exists) = Crypts.check_entity_at_index(location, entity_list_len, entity_list);
+
+    with_attr error_message("Crypts: There is no entity here") {
+        assert entity_exists = TRUE;
+    }
+
     // TODO: pass in new random number. Currently this will output the same entity everytime on specific indexes.
     let (entity) = Crypts.get_entity(adventurer_location.seed + location);
 
+    // action with entity
     entity_action(entity, adventurer_id);
 
     return ();
