@@ -2,6 +2,7 @@
 from starkware.cairo.common.uint256 import Uint256, uint256_add
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.math_cmp import is_nn, is_le
+from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
 from contracts.settling_game.modules.crypts.library import Crypts
 from starkware.cairo.common.alloc import alloc
@@ -15,6 +16,8 @@ from starkware.cairo.common.registers import get_fp_and_pc
 const NUM_VERTEX = 9;
 const ROW_LEN = 9;
 const SEED = 2231231232527543;
+
+// @notice Tests are based off the above seed. If you change it entities and asserts will fail.
 
 @external
 func test_build_graph_before_each{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
@@ -103,6 +106,25 @@ func test_get_entity{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
             path = memory[ids.entity+i]
             print(f"{path}")
     %}
+
+    return ();
+}
+
+@external
+func test_check_entity_at_index{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+
+    let graph = Crypts.build_dungeon(NUM_VERTEX, ROW_LEN, SEED);
+
+    let (entity_ids_len, entity_ids) = Crypts.get_entity_list(graph, SEED);
+
+    // will pass - 106 does not exist as an indetity in the graph
+    let (entity_exists_false) = Crypts.check_entity_at_index(106, entity_ids_len, entity_ids);
+    assert entity_exists_false = FALSE;
+
+    // will pass - 4 exists as an indetity in the graph
+    let (entity_exists_true) = Crypts.check_entity_at_index(4, entity_ids_len, entity_ids);
+    assert entity_exists_true = TRUE;
 
     return ();
 }

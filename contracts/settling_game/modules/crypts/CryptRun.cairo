@@ -120,7 +120,7 @@ func open_crypt{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
             adventurer_id, AdventurerLocation(crypt_id.low, NODE_START_INDEX, randomSeed)
         );
 
-        return (seed=crypt_status.seed);
+        return (seed=randomSeed);
     }
 
     // we save the seed within the adventurer struct, this is incase the seed changes midrun the player can still complete
