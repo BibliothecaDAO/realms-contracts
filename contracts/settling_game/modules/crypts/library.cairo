@@ -24,6 +24,10 @@ from cairo_graphs.graph.dijkstra import Dijkstra
 from cairo_graphs.data_types.data_types import Edge, Vertex, AdjacentVertex, Graph
 
 namespace Crypts {
+    // -----------------------------------
+    // GRAPH
+    // -----------------------------------
+
     // TODO: inject this with a seed + crypts metadata
     // @notice Builds dungeon seed and length
     func build_dungeon{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
@@ -31,18 +35,59 @@ namespace Crypts {
     ) -> Graph {
         alloc_locals;
 
-        // let random_number_edges = 5;  // hardcoded for now
-        // let start_index = 2;
-
-        let (_, random_number_edges) = unsigned_div_rem(seed, 8);
-        let (_, start_index) = unsigned_div_rem(seed, num_vertex - 2);
-
-        let index_shift = 100;  // hardcode for now - we shift to avoid index clashes
-
         // straight line
         let (edges: Edge*) = alloc();
         populate_edges(num_vertex, row_len, edges, seed);
         let graph = GraphMethods.build_directed_graph_from_edges(num_vertex, edges);
+
+        // get potential branch nodes as array
+        let (start_indexes_len, start_indexes) = get_potential_branches(graph, seed);
+
+        // recurse through the potential branches and build graph
+        let graph = build_edge_branches(graph, num_vertex, seed, start_indexes_len, start_indexes);
+
+        return (graph);
+    }
+
+    // @notice builds list of potential node branches
+    func get_potential_branches{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        graph: Graph, seed: felt
+    ) -> (branches_len: felt, branches: felt*) {
+        alloc_locals;
+
+        // get number of branches in the dungeon. -1 to stop the final node from having branches.
+        let (_, r) = unsigned_div_rem(seed, graph.length - 1);
+
+        let (branches: felt*) = alloc();
+        build_entity_list(r, r, branches, graph.vertices, seed, graph.length);
+
+        return (branches_len=r, branches=branches);
+    }
+
+    func build_edge_branches{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        graph: Graph, num_vertex: felt, seed: felt, start_indexes_len: felt, start_indexes: felt*
+    ) -> Graph {
+        alloc_locals;
+
+        if (start_indexes_len == 0) {
+            return (graph);
+        }
+
+        let graph = add_edges(graph, num_vertex, [start_indexes], seed);
+
+        // we change the seed by 100 to make the length of the branches edges random
+        return build_edge_branches(
+            graph, num_vertex, seed + 100, start_indexes_len - 1, start_indexes + 1
+        );
+    }
+
+    func add_edges{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        graph: Graph, num_vertex: felt, start_index: felt, seed: felt
+    ) -> Graph {
+        alloc_locals;
+        let (_, random_number_edges) = unsigned_div_rem(seed, 4);
+
+        let index_shift = 100;  // hardcode for now - we shift to avoid index clashes
 
         // add branch off straight line
         let (side_edges: Edge*) = alloc();
@@ -59,7 +104,7 @@ namespace Crypts {
         );
 
         // connect graph back to node back to vertex in the straight line
-        let (_, connecting_node) = unsigned_div_rem(seed, num_vertex + 2);
+        let (_, connecting_node) = unsigned_div_rem(seed, num_vertex);
         local start_edge: Edge = Edge(start_index, start_index * index_shift, 1);
         local final_edge: Edge = Edge(start_index * index_shift + random_number_edges, connecting_node, 1);
         let graph = GraphMethods.add_edge(graph, start_edge);
@@ -127,6 +172,10 @@ namespace Crypts {
         );
     }
 
+    // -----------------------------------
+    // ENTITY
+    // -----------------------------------
+
     // @notice Gets a single entity
     func get_entity{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         random_number: felt
@@ -150,28 +199,57 @@ namespace Crypts {
 
         // build array of entites
         let (entities: felt*) = alloc();
-        build_entity_list(r, entities, graph.vertices, seed, r);
+        build_entity_list(r, r, entities, graph.vertices, seed, graph.length);
 
         return (entity_len=r, entities=entities);
     }
 
     // @notice Recursively builds a list of entities from a seed
     func build_entity_list{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-        entity_quantity: felt, entities: felt*, vertices: Vertex*, seed: felt, fixed_quantity: felt
+        entity_quantity: felt,
+        fixed_entity_quantity: felt,
+        entities: felt*,
+        vertices: Vertex*,
+        seed: felt,
+        length: felt,
     ) -> (entities: felt*) {
         alloc_locals;
-
-        let (_, r) = unsigned_div_rem(seed, fixed_quantity);
 
         if (entity_quantity == 0) {
             return (entities=entities);
         }
 
-        assert [entities] = vertices[r].identifier;
+        // TODO: Bug when the same index is used. We need to pop copies so the array returned only contains unique indexes.
+        let (_, num) = unsigned_div_rem(seed, length);
+
+        // let (exists) = check_no_repeated_indexes(
+        //     fixed_entity_quantity - entity_quantity, entities, vertices[num].identifier
+        // );
+
+        // if (exists == FALSE) {
+        assert [entities] = vertices[num].identifier;
+        // }
 
         return build_entity_list(
-            entity_quantity - 1, entities + 1, vertices, seed - 1, fixed_quantity
+            entity_quantity - 1, fixed_entity_quantity, entities + 1, vertices, seed - 3, length
         );
+    }
+
+    // @notice Checks index not already in array
+    func check_no_repeated_indexes{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        entities_len: felt, entities: felt*, current_entity: felt
+    ) -> (exists: felt) {
+        alloc_locals;
+
+        if (entities_len == 0) {
+            return (exists=FALSE);
+        }
+
+        if ([entities] == current_entity) {
+            return (exists=TRUE);
+        }
+
+        return check_no_repeated_indexes(entities_len - 1, entities + 1, current_entity);
     }
 
     // @notice Checks path exists between two vertexs
@@ -241,7 +319,4 @@ namespace Crypts {
 
         return check_entity_at_index(identifier, entity_ids_len - 1, entity_ids + 1);
     }
-
-    // TODO: Interaction on a node? Do we create a key pair action where the adventuer is locked to that index until they
-    // complete the interaction
 }
