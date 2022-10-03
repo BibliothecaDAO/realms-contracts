@@ -162,45 +162,42 @@ namespace Combat {
     }
 
     // @notice Gets statistics of Army
-    // @param army_packed: packed army
+    // @param army: An army
     // @returns ArmyStatistics which is a computed value
     func calculate_army_statistics{
         syscall_ptr: felt*,
         pedersen_ptr: HashBuiltin*,
         range_check_ptr,
-        bitwise_ptr: BitwiseBuiltin*,
-    }(army_packed: felt) -> (statistics: ArmyStatistics) {
+    }(army: Army) -> (statistics: ArmyStatistics) {
         alloc_locals;
-
-        let (unpacked_army: Army) = unpack_army(army_packed);
 
         let (cavalry_attack) = calculate_attack_values(
             BattalionIds.LightCavalry,
-            unpacked_army.light_cavalry.quantity,
+            army.light_cavalry.quantity,
             BattalionIds.HeavyCavalry,
-            unpacked_army.heavy_cavalry.quantity,
+            army.heavy_cavalry.quantity,
         );
         let (archery_attack) = calculate_attack_values(
             BattalionIds.Archer,
-            unpacked_army.archer.quantity,
+            army.archer.quantity,
             BattalionIds.Longbow,
-            unpacked_army.longbow.quantity,
+            army.longbow.quantity,
         );
         let (magic_attack) = calculate_attack_values(
             BattalionIds.Mage,
-            unpacked_army.mage.quantity,
+            army.mage.quantity,
             BattalionIds.Arcanist,
-            unpacked_army.arcanist.quantity,
+            army.arcanist.quantity,
         );
         let (infantry_attack) = calculate_attack_values(
             BattalionIds.LightInfantry,
-            unpacked_army.light_infantry.quantity,
+            army.light_infantry.quantity,
             BattalionIds.HeavyInfantry,
-            unpacked_army.heavy_infantry.quantity,
+            army.heavy_infantry.quantity,
         );
 
         let (cavalry_defence, archer_defence, magic_defence, infantry_defence) = all_defence_value(
-            unpacked_army
+            army
         );
 
         return (
@@ -214,7 +211,7 @@ namespace Combat {
     // @param unit_2_id: unit id 2
     // @param unit_2_number: number of units
     // @ returns attack value
-    func calculate_attack_values{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    func calculate_attack_values{range_check_ptr}(
         unit_1_id: felt, unit_1_number: felt, unit_2_id: felt, unit_2_number: felt
     ) -> (attack: felt) {
         alloc_locals;
@@ -228,7 +225,7 @@ namespace Combat {
     // @notice Gets attack value
     // @param battalion_id: Battalion ID
     // @ returns attack value
-    func attack_value{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    func attack_value{range_check_ptr}(
         battalion_id: felt
     ) -> (attack: felt) {
         alloc_locals;
@@ -317,55 +314,54 @@ namespace Combat {
 
     // @notice Calculates winner of battle
     // @param luck: Luck of Attacker - this is a number between 75-125 which adjusts the battle outcome
-    // @param attack_army_packed: Attacking Army packed
-    // @param defending_army_packed: Defending Army packed
-    // @return battle outcome (WIN or LOSS), packed attacking army, packed defending army
+    // @param attacking_army: Attacking Army
+    // @param defending_army: Defending Army
+    // @return battle outcome (WIN or LOSS), updated attacking army, updated defending army
     func calculate_winner{
         syscall_ptr: felt*,
         pedersen_ptr: HashBuiltin*,
         range_check_ptr,
-        bitwise_ptr: BitwiseBuiltin*,
-    }(luck: felt, attack_army_packed: felt, defending_army_packed: felt) -> (
-        outcome: felt, attack_army_packed: felt, defending_army_packed: felt
+    }(luck: felt, attacking_army: Army, defending_army: Army) -> (
+        outcome: felt, updated_attacking_army: Army, updated_defending_army: Army
     ) {
         alloc_locals;
 
-        let (attack_army_statistics: ArmyStatistics) = calculate_army_statistics(
-            attack_army_packed
+        let (attacking_army_statistics: ArmyStatistics) = calculate_army_statistics(
+            attacking_army
         );
         let (defending_army_statistics: ArmyStatistics) = calculate_army_statistics(
-            defending_army_packed
+            defending_army
         );
 
         let (cavalry_outcome) = calculate_luck_outcome(
-            luck, attack_army_statistics.cavalry_attack, defending_army_statistics.cavalry_defence
+            luck, attacking_army_statistics.cavalry_attack, defending_army_statistics.cavalry_defence
         );
         let (archery_outcome) = calculate_luck_outcome(
-            luck, attack_army_statistics.archery_attack, defending_army_statistics.archery_defence
+            luck, attacking_army_statistics.archery_attack, defending_army_statistics.archery_defence
         );
         let (magic_outcome) = calculate_luck_outcome(
-            luck, attack_army_statistics.magic_attack, defending_army_statistics.magic_defence
+            luck, attacking_army_statistics.magic_attack, defending_army_statistics.magic_defence
         );
         let (infantry_outcome) = calculate_luck_outcome(
-            luck, attack_army_statistics.infantry_attack, defending_army_statistics.infantry_defence
+            luck, attacking_army_statistics.infantry_attack, defending_army_statistics.infantry_defence
         );
 
         let final_outcome = cavalry_outcome + archery_outcome + magic_outcome + infantry_outcome;
 
         let successful = is_nn(final_outcome);
 
-        let (updated_attack_army_packed, updated_defence_army_packed) = get_updated_packed_armies(
-            attack_army_statistics,
+        let (updated_attacking_army) = update_army(
+            attacking_army_statistics,
             defending_army_statistics,
-            attack_army_packed,
-            defending_army_packed,
+            attacking_army,
+        );
+        let (updated_defending_army) = update_army(
+            defending_army_statistics,
+            attacking_army_statistics,
+            defending_army,
         );
 
-        if (successful == TRUE) {
-            return (TRUE, updated_attack_army_packed, updated_defence_army_packed);
-        }
-
-        return (FALSE, updated_attack_army_packed, updated_defence_army_packed);
+        return (successful, updated_attacking_army, updated_defending_army);
     }
 
     // @notice Calculates value after applying luck. All units use this.
@@ -438,117 +434,78 @@ namespace Combat {
         return (real_battalion_health, battalions);
     }
 
-    // @notice gets updated packed armies
+    // @notice updates Army
     // @param attack_army_statistics: ArmyStatistics of attacking Army
     // @param defending_army_statistics: ArmyStatistics of defending Army
-    // @param attack_army_packed: packed attacking Army
-    // @param defending_army_packed: packed defending Army
-    // @return packed attacking army, packed defending army
-    func get_updated_packed_armies{
+    // @param attack_army: Army to be updated
+    // @returns Army after it has had health modifier applied
+    func update_army{
         syscall_ptr: felt*,
         pedersen_ptr: HashBuiltin*,
         range_check_ptr,
-        bitwise_ptr: BitwiseBuiltin*,
     }(
         attack_army_statistics: ArmyStatistics,
         defending_army_statistics: ArmyStatistics,
-        attack_army_packed: felt,
-        defending_army_packed: felt,
-    ) -> (attack_army_packed: felt, defending_army_packed: felt) {
-        alloc_locals;
-
-        let (attack_army_unpacked: Army) = unpack_army(attack_army_packed);
-        let (defending_army_unpacked: Army) = unpack_army(defending_army_packed);
-
-        let (attack_army_packed) = update_and_pack_army(
-            attack_army_statistics,
-            defending_army_statistics,
-            attack_army_unpacked,
-            defending_army_unpacked,
-        );
-
-        let (defence_army_packed) = update_and_pack_army(
-            defending_army_statistics,
-            attack_army_statistics,
-            defending_army_unpacked,
-            attack_army_unpacked,
-        );
-
-        return (attack_army_packed, defence_army_packed);
-    }
-
-    // @notice updates Army and packs
-    // @param attack_army_statistics: ArmyStatistics of attacking Army
-    // @param defending_army_statistics: ArmyStatistics of defending Army
-    // @param attack_army_unpacked: Attacking Army
-    // @param defending_army_unpacked: Defending Army
-    // @returns packed Army after it has had health modifier applied
-    func update_and_pack_army{
-        syscall_ptr: felt*,
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr,
-        bitwise_ptr: BitwiseBuiltin*,
-    }(
-        attack_army_statistics: ArmyStatistics,
-        defending_army_statistics: ArmyStatistics,
-        attack_army_unpacked: Army,
-        defending_army_unpacked: Army,
-    ) -> (packed_army: felt) {
+        attack_army: Army,
+    ) -> (updated_army: Army) {
         alloc_locals;
 
         let (light_cavalry_health, light_cavalry_battalions) = calculate_health_remaining(
-            attack_army_unpacked.light_cavalry.health,
-            attack_army_unpacked.light_cavalry.quantity,
-            attack_army_unpacked.light_cavalry.quantity + attack_army_unpacked.heavy_cavalry.quantity,
+            attack_army.light_cavalry.health,
+            attack_army.light_cavalry.quantity,
+            attack_army.light_cavalry.quantity + attack_army.heavy_cavalry.quantity,
+
             attack_army_statistics.infantry_attack,
             defending_army_statistics.infantry_defence,
         );
         let (heavy_cavalry_health, heavy_cavalry_battalions) = calculate_health_remaining(
-            attack_army_unpacked.heavy_cavalry.health,
-            attack_army_unpacked.heavy_cavalry.quantity,
-            attack_army_unpacked.light_cavalry.quantity + attack_army_unpacked.heavy_cavalry.quantity,
+            attack_army.heavy_cavalry.health,
+            attack_army.heavy_cavalry.quantity,
+            attack_army.light_cavalry.quantity + attack_army.heavy_cavalry.quantity,
+
             attack_army_statistics.infantry_attack,
             defending_army_statistics.infantry_defence,
         );
         let (archer_health, archer_battalions) = calculate_health_remaining(
-            attack_army_unpacked.archer.health,
-            attack_army_unpacked.archer.quantity,
-            attack_army_unpacked.archer.quantity + attack_army_unpacked.longbow.quantity,
+            attack_army.archer.health,
+            attack_army.archer.quantity,
+            attack_army.archer.quantity + attack_army.longbow.quantity,
+
             attack_army_statistics.cavalry_attack,
             defending_army_statistics.cavalry_defence,
         );
         let (longbow_health, longbow_battalions) = calculate_health_remaining(
-            attack_army_unpacked.longbow.health,
-            attack_army_unpacked.longbow.quantity,
-            attack_army_unpacked.archer.quantity + attack_army_unpacked.longbow.quantity,
+            attack_army.longbow.health,
+            attack_army.longbow.quantity,
+            attack_army.archer.quantity + attack_army.longbow.quantity,
             attack_army_statistics.cavalry_attack,
             defending_army_statistics.cavalry_defence,
         );
         let (mage_health, mage_battalions) = calculate_health_remaining(
-            attack_army_unpacked.mage.health,
-            attack_army_unpacked.mage.quantity,
-            attack_army_unpacked.mage.quantity + attack_army_unpacked.arcanist.quantity,
+            attack_army.mage.health,
+            attack_army.mage.quantity,
+            attack_army.mage.quantity + attack_army.arcanist.quantity,
             attack_army_statistics.archery_attack,
             defending_army_statistics.archery_defence,
         );
         let (archanist_health, archanist_battalions) = calculate_health_remaining(
-            attack_army_unpacked.arcanist.health,
-            attack_army_unpacked.arcanist.quantity,
-            attack_army_unpacked.mage.quantity + attack_army_unpacked.arcanist.quantity,
+            attack_army.arcanist.health,
+            attack_army.arcanist.quantity,
+            attack_army.mage.quantity + attack_army.arcanist.quantity,
             attack_army_statistics.archery_attack,
             defending_army_statistics.archery_defence,
         );
         let (light_infantry_health, light_infantry_battalions) = calculate_health_remaining(
-            attack_army_unpacked.light_infantry.health,
-            attack_army_unpacked.light_infantry.quantity,
-            attack_army_unpacked.light_infantry.quantity + attack_army_unpacked.heavy_infantry.quantity,
+            attack_army.light_infantry.health,
+            attack_army.light_infantry.quantity,
+            attack_army.light_infantry.quantity + attack_army.heavy_infantry.quantity,
             attack_army_statistics.infantry_attack,
             defending_army_statistics.infantry_defence,
         );
         let (heavy_infantry_health, heavy_infantry_battalions) = calculate_health_remaining(
-            attack_army_unpacked.heavy_infantry.health,
-            attack_army_unpacked.heavy_infantry.quantity,
-            attack_army_unpacked.light_infantry.quantity + attack_army_unpacked.heavy_infantry.quantity,
+            attack_army.heavy_infantry.health,
+            attack_army.heavy_infantry.quantity,
+            attack_army.light_infantry.quantity + attack_army.heavy_infantry.quantity,
             attack_army_statistics.magic_attack,
             defending_army_statistics.magic_defence,
         );
@@ -572,9 +529,7 @@ namespace Combat {
             heavy_infantry_health),
         );
 
-        let (packed_army) = pack_army(updated_attacking_army);
-
-        return (packed_army,);
+        return (updated_attacking_army,);
     }
 
     // @notice Asserts can build battalions
