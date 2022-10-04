@@ -1,9 +1,11 @@
 // -----------------------------------
 //   Crypts.Library
-//   Crypts
+//   Crypts Graph library. This library creates procedually generated dungeons from a seed and other parameters.
 //
 // MIT License
 // -----------------------------------
+
+// <author :: ponderingdemocritus@protonmail.com>
 
 %lang starknet
 
@@ -44,7 +46,9 @@ namespace Crypts {
         let (start_indexes_len, start_indexes) = get_potential_branches(graph, seed);
 
         // recurse through the potential branches and build graph
-        let graph = build_edge_branches(graph, num_vertex, seed, start_indexes_len, start_indexes);
+        let graph = build_and_add_vertices(
+            graph, num_vertex, seed, start_indexes_len, start_indexes
+        );
 
         return (graph);
     }
@@ -56,7 +60,7 @@ namespace Crypts {
         alloc_locals;
 
         // get number of branches in the dungeon. -1 to stop the final node from having branches.
-        let (_, r) = unsigned_div_rem(seed, graph.length - 1);
+        let (_, r) = unsigned_div_rem(seed, graph.length);
 
         let (branches: felt*) = alloc();
         build_entity_list(r, r, branches, graph.vertices, seed, graph.length);
@@ -64,7 +68,8 @@ namespace Crypts {
         return (branches_len=r, branches=branches);
     }
 
-    func build_edge_branches{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    // @notice builds branches and add to indexes
+    func build_and_add_vertices{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         graph: Graph, num_vertex: felt, seed: felt, start_indexes_len: felt, start_indexes: felt*
     ) -> Graph {
         alloc_locals;
@@ -76,7 +81,7 @@ namespace Crypts {
         let graph = add_edges(graph, num_vertex, [start_indexes], seed);
 
         // we change the seed by 100 to make the length of the branches edges random
-        return build_edge_branches(
+        return build_and_add_vertices(
             graph, num_vertex, seed + 100, start_indexes_len - 1, start_indexes + 1
         );
     }
@@ -85,7 +90,7 @@ namespace Crypts {
         graph: Graph, num_vertex: felt, start_index: felt, seed: felt
     ) -> Graph {
         alloc_locals;
-        let (_, random_number_edges) = unsigned_div_rem(seed, 4);
+        let (_, random_number_edges) = unsigned_div_rem(seed, 5);
 
         let index_shift = 100;  // hardcode for now - we shift to avoid index clashes
 
@@ -219,16 +224,11 @@ namespace Crypts {
             return (entities=entities);
         }
 
+        // Get random index
         // TODO: Bug when the same index is used. We need to pop copies so the array returned only contains unique indexes.
-        let (_, num) = unsigned_div_rem(seed, length);
+        let (_, vertex_index) = unsigned_div_rem(seed, length);
 
-        // let (exists) = check_no_repeated_indexes(
-        //     fixed_entity_quantity - entity_quantity, entities, vertices[num].identifier
-        // );
-
-        // if (exists == FALSE) {
-        assert [entities] = vertices[num].identifier;
-        // }
+        assert [entities] = vertices[vertex_index].identifier;
 
         return build_entity_list(
             entity_quantity - 1, fixed_entity_quantity, entities + 1, vertices, seed - 3, length
