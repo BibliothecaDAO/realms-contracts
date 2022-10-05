@@ -13,8 +13,8 @@ from cairo_graphs.data_types.data_types import Edge, Vertex, AdjacentVertex
 
 from starkware.cairo.common.registers import get_fp_and_pc
 
-const NUM_VERTEX = 12;
-const ROW_LEN = 12;
+const NUM_VERTEX = 5;
+const ROW_LEN = 5;
 const SEED = 42231785223151231321321398766;
 
 // @notice Tests are based off the above seed. If you change it entities and asserts will fail.
@@ -48,69 +48,67 @@ func test_build_graph_before_each{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
     return ();
 }
 
-// const START_VERTEX_1 = 5;
-// const END_VERTEX_1 = 104;
+const START_VERTEX_1 = 1;
+const END_VERTEX_1 = 4;
 
-// @external
-// func test_check_path_exists{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
-//     alloc_locals;
+@external
+func test_check_path_exists{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
 
-// let graph = Crypts.build_dungeon(NUM_VERTEX, ROW_LEN, SEED);
+    let graph = Crypts.build_dungeon(NUM_VERTEX, ROW_LEN, SEED);
 
-// let (shortest_path_len, identifiers, total_distance) = Crypts.check_path_exists(
-//         graph, START_VERTEX_1, END_VERTEX_1
-//     );
+    let (shortest_path_len, identifiers, total_distance) = Crypts.check_path_exists(
+        graph, START_VERTEX_1, END_VERTEX_1
+    );
 
-// %{
-//         for i in range(ids.shortest_path_len):
-//             path = memory[ids.identifiers+i]
-//             print(f"{path}")
-//     %}
+    %{
+        for i in range(ids.shortest_path_len):
+            path = memory[ids.identifiers+i]
+            print(f"{path}")
+    %}
 
-// %{ print(ids.shortest_path_len) %}
-//     return ();
-// }
+    %{ print(ids.shortest_path_len) %}
+    return ();
+}
 
-// @external
-// func test_check_entity_in_path{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
-//     alloc_locals;
+@external
+func test_check_entity_in_path{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
 
-// let graph = Crypts.build_dungeon(NUM_VERTEX, ROW_LEN, SEED);
+    let graph = Crypts.build_dungeon(NUM_VERTEX, ROW_LEN, SEED);
 
-// let (shortest_path_len, identifiers, total_distance) = Crypts.check_path_exists(
-//         graph, START_VERTEX_1, END_VERTEX_1
-//     );
+    let (shortest_path_len, identifiers, total_distance) = Crypts.check_path_exists(
+        graph, START_VERTEX_1, END_VERTEX_1
+    );
 
-// let (entites_index: felt*) = alloc();
+    let (entites_index: felt*) = alloc();
 
-// assert entites_index[0] = 203;
-//     assert entites_index[1] = 3;
+    assert entites_index[0] = 203;
+    assert entites_index[1] = 3;
 
-// let (can_pass) = Crypts.check_entity_in_path(shortest_path_len, identifiers, 2, entites_index);
+    let (can_pass) = Crypts.check_entity_in_path(shortest_path_len, identifiers, 2, entites_index);
 
-// %{ print(ids.can_pass) %}
+    %{ print(ids.can_pass) %}
 
-// return ();
-// }
+    return ();
+}
 
-// @external
-// func test_get_entity{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
-//     alloc_locals;
+@external
+func test_get_entity{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
 
-// let graph = Crypts.build_dungeon(NUM_VERTEX, ROW_LEN, SEED);
+    let graph = Crypts.build_dungeon(NUM_VERTEX, ROW_LEN, SEED);
 
-// let (len, entity) = Crypts.get_entity_list(graph, SEED);
+    let (len, entity) = Crypts.get_entity_list(graph, SEED);
 
-// let l = graph.length;
+    %{
+        for i in range(ids.len):
+            path = memory[ids.entity+i]
+            print(f"{path}")
+    %}
 
-// %{
-//         for i in range(ids.len):
-//             path = memory[ids.entity+i]
-//             print(f"{path}")
-//     %}
-
-// return ();
-// }
+    return ();
+}
 
 // @external
 // func test_check_entity_at_index{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {

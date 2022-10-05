@@ -28,7 +28,7 @@ from openzeppelin.upgrades.library import Proxy
 from cairo_graphs.data_types.data_types import Graph, Vertex
 
 struct Crypt {
-    time_stamp: felt,  // timestamp of when crypt was opened + 1 DAY
+    timestamp: felt,  // timestamp of when crypt was opened + 1 DAY
     seed: felt,  // random seed
     successful_completions: felt,  // number of times completed
 }
@@ -36,7 +36,7 @@ struct Crypt {
 struct AdventurerLocation {
     crypt: felt,  // crypt id
     location: felt,  // location within the crypt
-    seed: felt,  // store seed, as during a run the crypts main seed my change
+    seed: felt,  // store seed, as during a run the crypts main seed may change
 }
 
 // FOR TESTING
@@ -106,7 +106,7 @@ func open_crypt{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
     let (now) = get_block_timestamp();
 
     let (crypt_status) = crypt.read(crypt_id);
-    let is_seed_active = is_le(now, crypt_status.time_stamp);
+    let is_seed_active = is_le(now, crypt_status.timestamp);
 
     if (is_seed_active == FALSE) {
         // get random

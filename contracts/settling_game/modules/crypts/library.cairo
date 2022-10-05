@@ -14,6 +14,8 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.alloc import alloc
+from starkware.cairo.common.memcpy import memcpy
+from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
 
 from cairo_graphs.graph.graph import (
     add_neighbor,
@@ -24,6 +26,7 @@ from cairo_graphs.graph.graph import (
 
 from cairo_graphs.graph.dijkstra import Dijkstra
 from cairo_graphs.data_types.data_types import Edge, Vertex, AdjacentVertex, Graph
+from cairo_graphs.utils.array_utils import Stack
 
 namespace Crypts {
     // -----------------------------------
@@ -59,9 +62,11 @@ namespace Crypts {
     ) -> (branches_len: felt, branches: felt*) {
         alloc_locals;
 
-        // get number of branches in the dungeon. -1 to stop the final node from having branches.
+        // get number of branches in the dungeon.
         let (_, r) = unsigned_div_rem(seed, graph.length);
 
+        // TODO: Pop final vertice before building entity so no branches can form off the last Vertex which
+        // is the exit of the dungeon
         let (branches: felt*) = alloc();
         build_entity_list(r, r, branches, graph.vertices, seed, graph.length);
 
@@ -109,7 +114,8 @@ namespace Crypts {
         );
 
         // connect graph back to node back to vertex in the straight line
-        let (_, connecting_node) = unsigned_div_rem(seed, num_vertex);
+        // shift seed so we get a different connecting node
+        let (_, connecting_node) = unsigned_div_rem(seed + start_index * 100, num_vertex);
         local start_edge: Edge = Edge(start_index, start_index * index_shift, 1);
         local final_edge: Edge = Edge(start_index * index_shift + random_number_edges, connecting_node, 1);
         let graph = GraphMethods.add_edge(graph, start_edge);
@@ -127,18 +133,9 @@ namespace Crypts {
             return (graph_len, row_len, edge);
         }
 
-        // randomise node connections
         let (_, r) = unsigned_div_rem(seed + graph_len, graph_len);
 
-        // if (graph_len == 1) {
-        //     tempvar dst = 0;  // final node has path back to start
-        // } else {
-        // if (r == (row_len - graph_len)) {
         tempvar dst = (row_len - graph_len) + 1;
-        // } else {
-        //     tempvar dst = r;
-        // }
-        // }
 
         local edge_a: Edge = Edge(row_len - graph_len, dst, 1);
 
@@ -231,7 +228,7 @@ namespace Crypts {
         assert [entities] = vertices[vertex_index].identifier;
 
         return build_entity_list(
-            entity_quantity - 1, fixed_entity_quantity, entities + 1, vertices, seed - 3, length
+            entity_quantity - 1, fixed_entity_quantity, entities + 1, vertices, seed * 2, length
         );
     }
 
