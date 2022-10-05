@@ -13,9 +13,9 @@ from cairo_graphs.data_types.data_types import Edge, Vertex, AdjacentVertex
 
 from starkware.cairo.common.registers import get_fp_and_pc
 
-const NUM_VERTEX = 5;
-const ROW_LEN = 5;
-const SEED = 42231785223151231321321398766;
+const NUM_VERTEX = 16;
+const ROW_LEN = 16;
+const SEED = 785323178522315123341231;
 
 // @notice Tests are based off the above seed. If you change it entities and asserts will fail.
 

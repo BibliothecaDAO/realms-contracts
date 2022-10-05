@@ -28,21 +28,27 @@ from cairo_graphs.graph.dijkstra import Dijkstra
 from cairo_graphs.data_types.data_types import Edge, Vertex, AdjacentVertex, Graph
 from cairo_graphs.utils.array_utils import Stack
 
+// Maximum length of a side edge
+const MAX_EDGE_LENGTH = 8;
+
+// Monster, Loot, Resource, Item, Chest
+const NUMBER_OF_POTENTIAL_ENTITIES = 5;
+
 namespace Crypts {
     // -----------------------------------
-    // GRAPH
+    // GRAPH - (THE DUNGEON SHAPE)
+    // This functions build the shape of the dungeon
     // -----------------------------------
 
-    // TODO: inject this with a seed + crypts metadata
     // @notice Builds dungeon seed and length
     func build_dungeon{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         num_vertex: felt, row_len: felt, seed: felt
     ) -> Graph {
         alloc_locals;
 
-        // straight line
+        // straight line - Start at index 0
         let (edges: Edge*) = alloc();
-        populate_edges(num_vertex, row_len, edges, seed);
+        build_straight_line_of_edges(num_vertex, 0, edges);
         let graph = GraphMethods.build_directed_graph_from_edges(num_vertex, edges);
 
         // get potential branch nodes as array
@@ -56,24 +62,45 @@ namespace Crypts {
         return (graph);
     }
 
-    // @notice builds list of potential node branches
+    // @notice Builds list of indexes which will become the start indexes of the branches
     func get_potential_branches{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         graph: Graph, seed: felt
     ) -> (branches_len: felt, branches: felt*) {
         alloc_locals;
 
-        // get number of branches in the dungeon.
-        let (_, r) = unsigned_div_rem(seed, graph.length);
+        // pop final vertice which is the exit
+        let (updated_vertices: Vertex*) = alloc();
+        pop_vertex_array(graph.length, graph.vertices, updated_vertices);
 
-        // TODO: Pop final vertice before building entity so no branches can form off the last Vertex which
-        // is the exit of the dungeon
+        // get random number of side edges in the dungeon.
+        let (_, number_of_branches) = unsigned_div_rem(seed, graph.length);
+
+        // build_branches
         let (branches: felt*) = alloc();
-        build_entity_list(r, r, branches, graph.vertices, seed, graph.length);
+        build_random_index_list_from_vertices(
+            number_of_branches, branches, updated_vertices, seed, graph.length
+        );
 
-        return (branches_len=r, branches=branches);
+        return (branches_len=number_of_branches, branches=branches);
     }
 
-    // @notice builds branches and add to indexes
+    // @notice Removes final item in an array of Vertices
+    func pop_vertex_array{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        vertex_len: felt, existing_vertices: Vertex*, new_vertices: Vertex*
+    ) -> (vertex_len: felt, new_vertices: Vertex*) {
+        alloc_locals;
+        if (vertex_len == 1) {
+            return (vertex_len, new_vertices);
+        }
+
+        assert [new_vertices] = [existing_vertices];
+
+        return pop_vertex_array(
+            vertex_len - 1, existing_vertices + Vertex.SIZE, new_vertices + Vertex.SIZE
+        );
+    }
+
+    // @notice Builds branches and add to indexes
     func build_and_add_vertices{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         graph: Graph, num_vertex: felt, seed: felt, start_indexes_len: felt, start_indexes: felt*
     ) -> Graph {
@@ -87,35 +114,29 @@ namespace Crypts {
 
         // we change the seed by 100 to make the length of the branches edges random
         return build_and_add_vertices(
-            graph, num_vertex, seed + 100, start_indexes_len - 1, start_indexes + 1
+            graph, num_vertex, seed + 123456789, start_indexes_len - 1, start_indexes + 1
         );
     }
 
+    // @notice Add branches to a graph
     func add_edges{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         graph: Graph, num_vertex: felt, start_index: felt, seed: felt
     ) -> Graph {
         alloc_locals;
-        let (_, random_number_edges) = unsigned_div_rem(seed, 5);
+        let (_, random_number_edges) = unsigned_div_rem(seed, MAX_EDGE_LENGTH);
 
         let index_shift = 100;  // hardcode for now - we shift to avoid index clashes
 
         // add branch off straight line
         let (side_edges: Edge*) = alloc();
-        populate_side_edges(
-            random_number_edges,
-            random_number_edges,
-            start_index,
-            start_index * index_shift,
-            side_edges,
-            seed,
-        );
+        build_straight_line_of_edges(random_number_edges, start_index * index_shift, side_edges);
         let graph = build_directed_graph_from_edges_internal(
             random_number_edges, side_edges, graph
         );
 
         // connect graph back to node back to vertex in the straight line
         // shift seed so we get a different connecting node
-        let (_, connecting_node) = unsigned_div_rem(seed + start_index * 100, num_vertex);
+        let (_, connecting_node) = unsigned_div_rem(seed + start_index * 123546, num_vertex);
         local start_edge: Edge = Edge(start_index, start_index * index_shift, 1);
         local final_edge: Edge = Edge(start_index * index_shift + random_number_edges, connecting_node, 1);
         let graph = GraphMethods.add_edge(graph, start_edge);
@@ -123,73 +144,42 @@ namespace Crypts {
 
         return (graph);
     }
-    // @notice recursivley builds a straight graph to the length of the crypt
-    func populate_edges{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-        graph_len: felt, row_len: felt, edge: Edge*, seed: felt
-    ) -> (graph_len: felt, row_len: felt, edge: Edge*) {
+
+    // @notice Recursivley builds a list of edges in a sequential line
+    func build_straight_line_of_edges{
+        syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+    }(graph_len: felt, index_start: felt, edge: Edge*) -> (graph_len: felt, edge: Edge*) {
         alloc_locals;
 
-        if (graph_len == 0) {
-            return (graph_len, row_len, edge);
-        }
+        local new_edge: Edge = Edge(index_start, index_start + 1, 1);
 
-        let (_, r) = unsigned_div_rem(seed + graph_len, graph_len);
-
-        tempvar dst = (row_len - graph_len) + 1;
-
-        local edge_a: Edge = Edge(row_len - graph_len, dst, 1);
-
-        assert [edge] = edge_a;
-
-        return populate_edges(graph_len - 1, row_len, edge + Edge.SIZE, seed);
-    }
-
-    // @notice recursivley builds a list of edges
-    func populate_side_edges{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-        graph_len: felt,
-        row_len: felt,
-        start_index: felt,
-        branch_identifier: felt,
-        edge: Edge*,
-        seed: felt,
-    ) -> (graph_len: felt, row_len: felt, edge: Edge*) {
-        alloc_locals;
+        assert [edge] = new_edge;
 
         if (graph_len == 0) {
-            tempvar dst = start_index;
-        } else {
-            tempvar dst = branch_identifier;
+            return (graph_len, edge);
         }
 
-        local edge_a: Edge = Edge(dst, branch_identifier + 1, 1);
-
-        assert [edge] = edge_a;
-
-        if (graph_len == 0) {
-            return (graph_len, row_len, edge);
-        }
-
-        return populate_side_edges(
-            graph_len - 1, row_len, start_index + 1, branch_identifier + 1, edge + Edge.SIZE, seed
-        );
+        return build_straight_line_of_edges(graph_len - 1, index_start + 1, edge + Edge.SIZE);
     }
 
     // -----------------------------------
     // ENTITY
     // -----------------------------------
+    // Entities are objects within the dungeon. They could be anything!
+    // A player cannot move through them and must interact in order to pass.
 
-    // @notice Gets a single entity
+    // @notice Gets random entity from a random number
     func get_entity{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         random_number: felt
     ) -> (entity: felt) {
         alloc_locals;
 
-        let (_, entity) = unsigned_div_rem(random_number, 5);
+        let (_, entity) = unsigned_div_rem(random_number, NUMBER_OF_POTENTIAL_ENTITIES);
 
         return (entity=entity);
     }
 
-    // OPTIMISATION IDEA: This could be stored in the state as a bitmapped felt. This way the user when interacting with it does not need to recreate the graph everytime. This might be a cheaper option...
+    // TODO: OPTIMISATION IDEA: This could be stored in the state as a bitmapped felt. This way the user when interacting with it does not need to recreate the graph everytime. This might be a cheaper option...
     // @notice Gets the entity list at indexes.
     func get_entity_list{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         graph: Graph, seed: felt
@@ -197,59 +187,41 @@ namespace Crypts {
         alloc_locals;
 
         // get number of entities in the dungeon
-        let (_, r) = unsigned_div_rem(seed, graph.length);
+        let (_, random_number_of_entities) = unsigned_div_rem(seed, graph.length);
 
         // build array of entites
         let (entities: felt*) = alloc();
-        build_entity_list(r, r, entities, graph.vertices, seed, graph.length);
+        build_random_index_list_from_vertices(
+            random_number_of_entities, entities, graph.vertices, seed, graph.length
+        );
 
-        return (entity_len=r, entities=entities);
+        return (entity_len=random_number_of_entities, entities=entities);
     }
 
-    // @notice Recursively builds a list of entities from a seed
-    func build_entity_list{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-        entity_quantity: felt,
-        fixed_entity_quantity: felt,
-        entities: felt*,
-        vertices: Vertex*,
-        seed: felt,
-        length: felt,
-    ) -> (entities: felt*) {
+    // @notice Recursively builds a list of indexes from array of Vertices
+    func build_random_index_list_from_vertices{
+        syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+    }(quantity: felt, index_list: felt*, vertices: Vertex*, seed: felt, length: felt) -> (
+        entities: felt*
+    ) {
         alloc_locals;
 
-        if (entity_quantity == 0) {
-            return (entities=entities);
+        if (quantity == 0) {
+            return (entities=index_list);
         }
 
         // Get random index
         // TODO: Bug when the same index is used. We need to pop copies so the array returned only contains unique indexes.
         let (_, vertex_index) = unsigned_div_rem(seed, length);
 
-        assert [entities] = vertices[vertex_index].identifier;
+        assert [index_list] = vertices[vertex_index].identifier;
 
-        return build_entity_list(
-            entity_quantity - 1, fixed_entity_quantity, entities + 1, vertices, seed * 2, length
+        return build_random_index_list_from_vertices(
+            quantity - 1, index_list + 1, vertices, seed + 1234, length
         );
     }
 
-    // @notice Checks index not already in array
-    func check_no_repeated_indexes{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-        entities_len: felt, entities: felt*, current_entity: felt
-    ) -> (exists: felt) {
-        alloc_locals;
-
-        if (entities_len == 0) {
-            return (exists=FALSE);
-        }
-
-        if ([entities] == current_entity) {
-            return (exists=TRUE);
-        }
-
-        return check_no_repeated_indexes(entities_len - 1, entities + 1, current_entity);
-    }
-
-    // @notice Checks path exists between two vertexs
+    // @notice Checks path exists between two vertices
     func check_path_exists{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         graph: Graph, start_vertex: felt, end_vertex: felt
     ) -> (shortest_path_len: felt, identifiers: felt*, total_distance: felt) {
