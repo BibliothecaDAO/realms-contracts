@@ -15,6 +15,8 @@ from starkware.cairo.common.bool import TRUE
 
 from openzeppelin.upgrades.library import Proxy
 
+from contracts.settling_game.utils.general import find_uint256_value
+
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.modules.relics.library import Relics
 
@@ -110,8 +112,6 @@ func set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
         tempvar pedersen_ptr = pedersen_ptr;
     }
 
-    // TODO: Add Order capture back
-
     let (realms_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Realms
     );
@@ -120,11 +120,19 @@ func set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
 
     let (loser_relics_len) = owned_relics_count.read(loser_token_id);
 
-    loop_claim_order_relic(0, realms_address, winner_realm_data, loser_token_id, loser_relics_len);
-
-    return ();
+    return loop_claim_order_relic(
+        0, realms_address, winner_realm_data, loser_token_id, loser_relics_len
+    );
 }
 
+// @notice loop loser relic and return if order of winner matches holder
+// @implicit syscall_ptr
+// @implicit range_check_ptr
+// @param index: index of owner relics to check, starting at 0
+// @param realms_address: realms token address
+// @param winner_realm_data: realm data of the winner
+// @param loser_token_id: realm id of loser
+// @param loser_relics_len: length of relics array of loser
 func loop_claim_order_relic{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
     index: felt,
     realms_address: felt,
@@ -142,15 +150,24 @@ func loop_claim_order_relic{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, rang
 
     if (winner_realm_data.order == relic_owner_data.order) {
         _set_relic_holder(relic_id, relic_id);
-        return ();
+        tempvar syscall_ptr = syscall_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar pedersen_ptr = pedersen_ptr;
+    } else {
+        tempvar syscall_ptr = syscall_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar pedersen_ptr = pedersen_ptr;
     }
-    // _set_relic_holder(relic_id, relic_id);
 
-    loop_claim_order_relic(index + 1, realms_address, winner_realm_data, loser_token_id, loser_relics_len);
-
-    return ();
+    return loop_claim_order_relic(
+        index + 1, realms_address, winner_realm_data, loser_token_id, loser_relics_len
+    );
 }
 
+// @notice return held relics to original owners
+// @implicit syscall_ptr
+// @implicit range_check_ptr
+// @param realms_token_id: realm id that needs assets returned
 @external
 func return_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     realms_token_id: Uint256
@@ -159,11 +176,15 @@ func return_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
     Module.only_approved();
     let (relic_count) = owned_relics_count.read(realms_token_id);
 
-    loop_return_relics(0, realms_token_id, relic_count);
-
-    return ();
+    return loop_return_relics(0, realms_token_id, relic_count);
 }
 
+// @notice loop relic held and return it to original owner
+// @implicit syscall_ptr
+// @implicit range_check_ptr
+// @param index: index of relic held
+// @param realms_token_id: realm id holding the relics
+// @param relic_count: length of relic array held by realm id
 func loop_return_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     index: felt, realms_token_id: Uint256, relic_count: felt
 ) {
@@ -175,25 +196,33 @@ func loop_return_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_ch
 
     _set_relic_holder(relic_id, relic_id);
 
-    loop_return_relics(index + 1, realms_token_id, relic_count);
-
-    return ();
+    return loop_return_relics(index + 1, realms_token_id, relic_count);
 }
 
+// @notice get index of relic in the array of relics held
+// @implicit syscall_ptr
+// @implicit range_check_ptr
+// @param relic_id: relic id, original relic owner realm id
+// @param owner_token_id: realm id of held relics
 func get_relic_index{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     relic_id: Uint256, owner_token_id: Uint256
 ) -> (index: felt) {
     let (relics_len: felt, relics: Uint256*) = get_owned_relics(owner_token_id);
 
-    let (index) = Relics._get_relic_index(0, relics_len, relics, relic_id);
+    let (index) = find_uint256_value(0, relics_len, relics, relic_id);
 
-    return (index=index);
+    return (index,);
 }
 
 // -----------------------------------
 // SETTERS
 // -----------------------------------
 
+// @notice get index of relic in the array of relics held
+// @implicit syscall_ptr
+// @implicit range_check_ptr
+// @param relic_id: relic id, original relic owner realm id
+// @param owner_token_id: realm id of new owner
 func _set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
     relic_id: Uint256, owner_token_id: Uint256
 ) {
@@ -204,7 +233,7 @@ func _set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_che
     storage_relic_holder.write(relic_id, owner_token_id);
 
     // If old owner exists, update array
-    let (check_exists) = uint256_lt(Uint256(0,0), old_owner_token_id);
+    let (check_exists) = uint256_lt(Uint256(0, 0), old_owner_token_id);
     if (check_exists == TRUE) {
         let (relic_index) = get_relic_index(relic_id=relic_id, owner_token_id=old_owner_token_id);
         owned_relics.write(old_owner_token_id, relic_index, Uint256(0, 0));
@@ -249,6 +278,12 @@ func get_current_relic_holder{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, ra
     return (data,);
 }
 
+// @notice gets array of relics owned by a realm
+// @implicit syscall_ptr
+// @implicit range_check_ptr
+// @param owned_token_id: realm id of owned relics
+// @return relics_len: length of relics ownes
+// @return relics: array of relics Uint256
 @view
 func get_owned_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     owned_token_id: Uint256
@@ -260,6 +295,13 @@ func get_owned_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     return (relics_len, relics);
 }
 
+// @notice loop helper for getting relics in array
+// @implicit syscall_ptr
+// @implicit range_check_ptr
+// @param index: index of owner relics to check, starting at 0
+// @param owned_token_id: realm id of owner
+// @param relics_len: length of relics array
+// @param relics: array to temporarily store relics from storage
 func loop_get_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     index: felt, owned_token_id: Uint256, relics_len: felt, relics: Uint256*
 ) {
@@ -271,28 +313,5 @@ func loop_get_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
 
     assert relics[index] = relic;
 
-    loop_get_relics(
-        index=index + 1, owned_token_id=owned_token_id, relics_len=relics_len, relics=relics
-    );
-
-    return ();
+    return loop_get_relics(index + 1, owned_token_id, relics_len, relics);
 }
-
-// @view
-// func find_uint256_value{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-//     arr_index: felt, arr_len: felt, arr: Uint256*, value: Uint256
-// ) -> (index: felt) {
-//     if (arr_index == arr_len) {
-//         with_attr error_message("Find Value: Value not found") {
-//             assert 1 = 0;
-//         }
-//     }
-//     let (check) = uint256_eq(arr[arr_index], value);
-//     if (check == TRUE) {
-//         return (index=arr_index);
-//     }
-
-//     find_uint256_value(arr_index + 1, arr_len, arr, value);
-
-//     return (index=arr_index);
-// }

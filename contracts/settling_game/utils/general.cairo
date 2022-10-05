@@ -247,6 +247,17 @@ func sum_values_by_key_loop{range_check_ptr}(
     return sum_values_by_key_loop(dict, len - 1, keys + 1, values + 1);
 }
 
+// given any array of Uint256 length `arr_len`, and a value Uint256 
+// it returns the index where the value exists in the array
+// if value is not found in the array then function will revoke
+//
+// given input
+// arr_len = 3
+// arr = [Uint256(1,0), Uint256(2,0), Uint256(3,0)]
+// value = Uint256(2,0)
+//
+// the result is
+// index = 1
 func find_uint256_value{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     arr_index: felt, arr_len: felt, arr: Uint256*, value: Uint256
 ) -> (index: felt) {
@@ -260,7 +271,5 @@ func find_uint256_value{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_ch
         return (index=arr_index);
     }
 
-    let (arr_index) = find_uint256_value(arr_index + 1, arr_len, arr, value);
-
-    return (index=arr_index);
+    return find_uint256_value(arr_index + 1, arr_len, arr, value);
 }

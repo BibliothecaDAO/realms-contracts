@@ -131,6 +131,7 @@ func test_claim_order_relic{
     local realms_1_data;
     local realms_2_data;
     local realms_3_data;
+    local realms_4_data;
     %{
         from tests.protostar.settling_game.relics import utils
         ids.Relics_address = context.Relics_address
@@ -140,22 +141,27 @@ func test_claim_order_relic{
         ids.realms_1_data = utils.pack_realm(utils.build_realm_order(1))
         ids.realms_2_data = utils.pack_realm(utils.build_realm_order(2))
         ids.realms_3_data = utils.pack_realm(utils.build_realm_order(1))
+        ids.realms_4_data = utils.pack_realm(utils.build_realm_order(1))
         store(ids.Realms_token_address, "Ownable_owner", [ids.FAKE_OWNER_ADDR])
         stop_prank_callable = start_prank(ids.FAKE_OWNER_ADDR, ids.Realms_token_address)
     %}
     Realms.set_realm_data(Realms_token_address, Uint256(1, 0), realms_1_data);
     Realms.set_realm_data(Realms_token_address, Uint256(2, 0), realms_2_data);
     Realms.set_realm_data(Realms_token_address, Uint256(3, 0), realms_3_data);
+    Realms.set_realm_data(Realms_token_address, Uint256(4, 0), realms_4_data);
     %{
         stop_prank_callable()
         stop_prank_callable = start_prank(ids.FAKE_OWNER_ADDR, context.Relics_address)
     %}
     Relics.set_relic_holder(Relics_address, Uint256(2, 0), Uint256(1, 0));
+    Relics.set_relic_holder(Relics_address, Uint256(2, 0), Uint256(4, 0));
     // this returns fellow order relics to orginal owners
     Relics.set_relic_holder(Relics_address, Uint256(3, 0), Uint256(2, 0));
-    let (owner_id) = Relics.get_current_relic_holder(Relics_address, Uint256(1, 0));
+    let (owner_id_1) = Relics.get_current_relic_holder(Relics_address, Uint256(1, 0));
+    let (owner_id_4) = Relics.get_current_relic_holder(Relics_address, Uint256(4, 0));
     // check relic of same order was returned
-    assert owner_id = Uint256(1, 0);
+    assert owner_id_1 = Uint256(1, 0);
+    assert owner_id_4 = Uint256(4, 0);
     return ();
 }
 
