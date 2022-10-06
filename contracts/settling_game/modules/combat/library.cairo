@@ -11,10 +11,11 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_lt
-from starkware.cairo.common.math_cmp import is_nn_le, is_nn, is_le
+from starkware.cairo.common.math_cmp import is_nn_le, is_nn, is_le, is_not_zero
 from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
 from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
+from starkware.cairo.common.math import assert_250_bit
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.memcpy import memcpy
 from starkware.cairo.common.memset import memset
@@ -164,11 +165,9 @@ namespace Combat {
     // @notice Gets statistics of Army
     // @param army: An army
     // @returns ArmyStatistics which is a computed value
-    func calculate_army_statistics{
-        syscall_ptr: felt*,
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr,
-    }(army: Army) -> (statistics: ArmyStatistics) {
+    func calculate_army_statistics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        army: Army
+    ) -> (statistics: ArmyStatistics) {
         alloc_locals;
 
         let (cavalry_attack) = calculate_attack_values(
@@ -178,16 +177,10 @@ namespace Combat {
             army.heavy_cavalry.quantity,
         );
         let (archery_attack) = calculate_attack_values(
-            BattalionIds.Archer,
-            army.archer.quantity,
-            BattalionIds.Longbow,
-            army.longbow.quantity,
+            BattalionIds.Archer, army.archer.quantity, BattalionIds.Longbow, army.longbow.quantity
         );
         let (magic_attack) = calculate_attack_values(
-            BattalionIds.Mage,
-            army.mage.quantity,
-            BattalionIds.Arcanist,
-            army.arcanist.quantity,
+            BattalionIds.Mage, army.mage.quantity, BattalionIds.Arcanist, army.arcanist.quantity
         );
         let (infantry_attack) = calculate_attack_values(
             BattalionIds.LightInfantry,
@@ -225,9 +218,7 @@ namespace Combat {
     // @notice Gets attack value
     // @param battalion_id: Battalion ID
     // @ returns attack value
-    func attack_value{range_check_ptr}(
-        battalion_id: felt
-    ) -> (attack: felt) {
+    func attack_value{range_check_ptr}(battalion_id: felt) -> (attack: felt) {
         alloc_locals;
 
         let (type_label) = get_label_location(unit_attack);
@@ -317,33 +308,31 @@ namespace Combat {
     // @param attacking_army: Attacking Army
     // @param defending_army: Defending Army
     // @return battle outcome (WIN or LOSS), updated attacking army, updated defending army
-    func calculate_winner{
-        syscall_ptr: felt*,
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr,
-    }(luck: felt, attacking_army: Army, defending_army: Army) -> (
-        outcome: felt, updated_attacking_army: Army, updated_defending_army: Army
-    ) {
+    func calculate_winner{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        luck: felt, attacking_army: Army, defending_army: Army
+    ) -> (outcome: felt, updated_attacking_army: Army, updated_defending_army: Army) {
         alloc_locals;
 
-        let (attacking_army_statistics: ArmyStatistics) = calculate_army_statistics(
-            attacking_army
-        );
-        let (defending_army_statistics: ArmyStatistics) = calculate_army_statistics(
-            defending_army
-        );
+        let (attacking_army_statistics: ArmyStatistics) = calculate_army_statistics(attacking_army);
+        let (defending_army_statistics: ArmyStatistics) = calculate_army_statistics(defending_army);
 
         let (cavalry_outcome) = calculate_luck_outcome(
-            luck, attacking_army_statistics.cavalry_attack, defending_army_statistics.cavalry_defence
+            luck,
+            attacking_army_statistics.cavalry_attack,
+            defending_army_statistics.cavalry_defence,
         );
         let (archery_outcome) = calculate_luck_outcome(
-            luck, attacking_army_statistics.archery_attack, defending_army_statistics.archery_defence
+            luck,
+            attacking_army_statistics.archery_attack,
+            defending_army_statistics.archery_defence,
         );
         let (magic_outcome) = calculate_luck_outcome(
             luck, attacking_army_statistics.magic_attack, defending_army_statistics.magic_defence
         );
         let (infantry_outcome) = calculate_luck_outcome(
-            luck, attacking_army_statistics.infantry_attack, defending_army_statistics.infantry_defence
+            luck,
+            attacking_army_statistics.infantry_attack,
+            defending_army_statistics.infantry_defence,
         );
 
         let final_outcome = cavalry_outcome + archery_outcome + magic_outcome + infantry_outcome;
@@ -351,14 +340,10 @@ namespace Combat {
         let successful = is_nn(final_outcome);
 
         let (updated_attacking_army) = update_army(
-            attacking_army_statistics,
-            defending_army_statistics,
-            attacking_army,
+            attacking_army_statistics, defending_army_statistics, attacking_army
         );
         let (updated_defending_army) = update_army(
-            defending_army_statistics,
-            attacking_army_statistics,
-            defending_army,
+            defending_army_statistics, attacking_army_statistics, defending_army
         );
 
         return (successful, updated_attacking_army, updated_defending_army);
@@ -388,8 +373,8 @@ namespace Combat {
     //         if health goes to 0, then no battalions are alive and we return 0
 
     const COMBAT_ALGO_WEIGHT_1 = 50;  // weight in bp
-    const FIXED_DAMAGE_AMOUNT = 20;
-    const BASE_STATISTICS = 7;
+    const FIXED_DAMAGE_AMOUNT = 10;
+    const BASE_STATISTICS = 1;
     const BASE_BATTALIONS = 1;  // adds a base value to the battalions to make algo work
 
     func calculate_health_remaining{
@@ -405,17 +390,21 @@ namespace Combat {
 
         // get weight of attack over defence
         let (attack_over_defence, _) = unsigned_div_rem(
-            ((counter_attack + BASE_STATISTICS) * 100) * COMBAT_ALGO_WEIGHT_1,
-            counter_defence + BASE_STATISTICS,
+            ((counter_attack + BASE_STATISTICS) * 100), counter_defence + BASE_STATISTICS
         );
 
         // use weight and multiple by starting health to get remaining health
-        let (health_remaining, _) = unsigned_div_rem(attack_over_defence * starting_health, 10000);
+        let (health_remaining, _) = unsigned_div_rem(attack_over_defence * starting_health, 100);
 
         // get % of calculated battalions over total battalions of that type
-        let (battalion_distribution, _) = unsigned_div_rem(
-            (battalions) * 100, total_battalions + BASE_BATTALIONS
-        );
+
+        if (total_battalions == 0) {
+            tempvar unit_battalion = BASE_BATTALIONS;
+        } else {
+            tempvar unit_battalion = total_battalions;
+        }
+
+        let (battalion_distribution, _) = unsigned_div_rem((battalions) * 100, unit_battalion);
 
         // get actual health in of battalion by using the battalion distribution
         let (real_battalion_health, _) = unsigned_div_rem(
@@ -425,13 +414,13 @@ namespace Combat {
         // add modifier so the health can depleate past 0
         let modified_health = real_battalion_health - FIXED_DAMAGE_AMOUNT;
 
-        // check if dead,IF yes, then return 0,0
+        // check if dead, IF yes, then return 0,0
         let is_dead = is_le(modified_health, 0);
         if (is_dead == TRUE) {
             return (0, 0);
         }
 
-        return (real_battalion_health, battalions);
+        return (modified_health, battalions);
     }
 
     // @notice updates Army
@@ -439,11 +428,7 @@ namespace Combat {
     // @param defending_army_statistics: ArmyStatistics of defending Army
     // @param attack_army: Army to be updated
     // @returns Army after it has had health modifier applied
-    func update_army{
-        syscall_ptr: felt*,
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr,
-    }(
+    func update_army{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         attack_army_statistics: ArmyStatistics,
         defending_army_statistics: ArmyStatistics,
         attack_army: Army,
@@ -454,7 +439,6 @@ namespace Combat {
             attack_army.light_cavalry.health,
             attack_army.light_cavalry.quantity,
             attack_army.light_cavalry.quantity + attack_army.heavy_cavalry.quantity,
-
             attack_army_statistics.infantry_attack,
             defending_army_statistics.infantry_defence,
         );
@@ -462,7 +446,6 @@ namespace Combat {
             attack_army.heavy_cavalry.health,
             attack_army.heavy_cavalry.quantity,
             attack_army.light_cavalry.quantity + attack_army.heavy_cavalry.quantity,
-
             attack_army_statistics.infantry_attack,
             defending_army_statistics.infantry_defence,
         );
@@ -470,7 +453,6 @@ namespace Combat {
             attack_army.archer.health,
             attack_army.archer.quantity,
             attack_army.archer.quantity + attack_army.longbow.quantity,
-
             attack_army_statistics.cavalry_attack,
             defending_army_statistics.cavalry_defence,
         );
