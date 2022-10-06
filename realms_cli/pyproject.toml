@@ -142,6 +142,16 @@ cairo-nile = "^0.5.0"
 "reset" = "realms_cli.player.food.reset"
 "full_store_houses" = "realms_cli.player.food.full_store_houses"
 
+#-----------GUILDS
+"whitelist" = "realms_cli.player.guilds.whitelist"
+"join_guild" = "realms_cli.player.guilds.join_guild"
+"set_settle_permission" = "realms_cli.player.guilds.set_settle_permission"
+"approve_realm_guild" = "realms_cli.player.guilds.approve_realm_guild"
+"deposit_realm_to_guild" = "realms_cli.player.guilds.deposit_realm_to_guild"
+"deposit_s_realm_to_guild" = "realms_cli.player.guilds.deposit_s_realm_to_guild"
+"settle_realm_from_guild" = "realms_cli.player.guilds.settle_realm_from_guild"
+"claim_resources_from_guild" = "realms_cli.player.guilds.claim_resources_from_guild"
+
 #-----------NEXUS
 "check_splitter_lords" = "realms_cli.nexus.admin.check_splitter_lords"
 "split" = "realms_cli.nexus.admin.split"

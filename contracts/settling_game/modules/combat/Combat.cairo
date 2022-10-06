@@ -45,15 +45,7 @@ from contracts.settling_game.modules.buildings.interface import IBuildings
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.interfaces.IRealms import IRealms
 
-from contracts.settling_game.utils.constants import (
-    ATTACK_COOLDOWN_PERIOD,
-    COMBAT_OUTCOME_ATTACKER_WINS,
-    COMBAT_OUTCOME_DEFENDER_WINS,
-    GOBLINDOWN_REWARD,
-    DEFENDING_ARMY_XP,
-    ATTACKING_ARMY_XP,
-    TOTAL_BATTALIONS,
-)
+from contracts.settling_game.utils.constants import CCombat
 from contracts.settling_game.utils.game_structs import (
     ModuleIds,
     RealmData,
@@ -209,17 +201,17 @@ func build_army_from_battalions{
 
     // fetch packed army
     let (army_packed) = army_data_by_id.read(army_id, realm_id);
-    let (army_unpacked: Army) = Combat.unpack_army(army_packed.ArmyPacked);
+    let (army_unpacked: Army) = Combat.unpack_army(army_packed.packed);
 
     // add battalions to Army and return new Army
     let (new_army: Army) = Combat.add_battalions_to_army(
         army_unpacked, battalion_ids_len, battalion_ids, battalion_quantity_len, battalion_quantity
     );
 
-    // check battalions less than TOTAL_BATTALIONS
+    // check battalions less than CCombat.TOTAL_BATTALIONS
     let (total_battalions) = Combat.calculate_total_battalions(new_army);
     with_attr error_message("Combat: Too many battalions") {
-        assert_lt(total_battalions, TOTAL_BATTALIONS + 1);
+        assert_lt(total_battalions, CCombat.TOTAL_BATTALIONS + 1);
     }
 
     // update army on realm
@@ -242,8 +234,8 @@ func build_army_from_battalions{
 // @notice Commence the attack
 // @param attacking_realm_id: Staked Realm id (S_Realm)
 // @param defending_realm_id: Staked Realm id (S_Realm)
-// @return: combat_outcome: Which side won - either the attacker (COMBAT_OUTCOME_ATTACKER_WINS)
-//                          or the defender (COMBAT_OUTCOME_DEFENDER_WINS)
+// @return: combat_outcome: Which side won - either the attacker (CCombat.COMBAT_OUTCOME_ATTACKER_WINS)
+//                          or the defender (CCombat.COMBAT_OUTCOME_DEFENDER_WINS)
 @external
 func initiate_combat{
     range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, bitwise_ptr: BitwiseBuiltin*
@@ -311,8 +303,8 @@ func initiate_combat{
     );
 
     // unpack armies
-    let (starting_attack_army: Army) = Combat.unpack_army(attacking_realm_data.ArmyPacked);
-    let (starting_defend_army: Army) = Combat.unpack_army(defending_realm_data.ArmyPacked);
+    let (starting_attack_army: Army) = Combat.unpack_army(attacking_realm_data.packed);
+    let (starting_defend_army: Army) = Combat.unpack_army(defending_realm_data.packed);
 
     // emit starting
     CombatStart_4.emit(
@@ -327,18 +319,12 @@ func initiate_combat{
     // luck role and then outcome
     let (luck) = roll_dice();
     let (
-        combat_outcome, ending_attacking_army_packed, ending_defending_army_packed
-    ) = Combat.calculate_winner(
-        luck, attacking_realm_data.ArmyPacked, defending_realm_data.ArmyPacked
-    );
-
-    // unpack
-    let (ending_attacking_army: Army) = Combat.unpack_army(ending_attacking_army_packed);
-    let (ending_defending_army: Army) = Combat.unpack_army(ending_defending_army_packed);
+        combat_outcome, ending_attacking_army, ending_defending_army
+    ) = Combat.calculate_winner(luck, starting_attack_army, starting_defend_army);
 
     // pillaging only if attacker wins
     let (now) = get_block_timestamp();
-    if (combat_outcome == COMBAT_OUTCOME_ATTACKER_WINS) {
+    if (combat_outcome == CCombat.COMBAT_OUTCOME_ATTACKER_WINS) {
         let (controller) = Module.controller_address();
         let (resources_logic_address) = IModuleController.get_module_address(
             controller, ModuleIds.Resources
@@ -354,31 +340,34 @@ func initiate_combat{
         tempvar range_check_ptr = range_check_ptr;
         tempvar pedersen_ptr = pedersen_ptr;
 
-        tempvar attacking_xp = ATTACKING_ARMY_XP;
-        tempvar defending_xp = DEFENDING_ARMY_XP;
+        tempvar attacking_xp = CCombat.ATTACKING_ARMY_XP;
+        tempvar defending_xp = CCombat.DEFENDING_ARMY_XP;
     } else {
         tempvar syscall_ptr = syscall_ptr;
         tempvar range_check_ptr = range_check_ptr;
         tempvar pedersen_ptr = pedersen_ptr;
 
-        tempvar attacking_xp = DEFENDING_ARMY_XP;
-        tempvar defending_xp = ATTACKING_ARMY_XP;
+        tempvar attacking_xp = CCombat.DEFENDING_ARMY_XP;
+        tempvar defending_xp = CCombat.ATTACKING_ARMY_XP;
     }
 
     tempvar attacking_xp = attacking_xp;
     tempvar defending_xp = defending_xp;
 
+    let (ending_attacking_army_packed: felt) = Combat.pack_army(ending_attacking_army);
+    let (ending_defending_army_packed: felt) = Combat.pack_army(ending_defending_army);
+
     // store new values with added XP
     set_army_data_and_emit(
         attacking_army_id,
         attacking_realm_id,
-        ArmyData(ending_attacking_army_packed, now, attacking_realm_data.XP + attacking_xp, attacking_realm_data.Level, attacking_realm_data.CallSign),
+        ArmyData(ending_attacking_army_packed, now, attacking_realm_data.XP + attacking_xp, attacking_realm_data.level, attacking_realm_data.call_sign),
     );
 
     set_army_data_and_emit(
         defending_army_id,
         defending_realm_id,
-        ArmyData(ending_defending_army_packed, now, defending_realm_data.XP + defending_xp, defending_realm_data.Level, defending_realm_data.CallSign),
+        ArmyData(ending_defending_army_packed, now, defending_realm_data.XP + defending_xp, defending_realm_data.level, defending_realm_data.call_sign),
     );
 
     // emit end
@@ -419,7 +408,7 @@ func update_army_in_realm{
     set_army_data_and_emit(
         army_id,
         realm_id,
-        ArmyData(new_packed_army, current_packed_army.LastAttacked, current_packed_army.XP, current_packed_army.Level, current_packed_army.CallSign),
+        ArmyData(new_packed_army, current_packed_army.last_attacked, current_packed_army.XP, current_packed_army.level, current_packed_army.call_sign),
     );
 
     return ();
@@ -516,8 +505,8 @@ func Realm_can_be_attacked{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range
     );
 
     let (now) = get_block_timestamp();
-    let diff = now - defending_army_data.LastAttacked;
-    let was_attacked_recently = is_le(diff, ATTACK_COOLDOWN_PERIOD);
+    let diff = now - defending_army_data.last_attacked;
+    let was_attacked_recently = is_le(diff, CCombat.ATTACK_COOLDOWN_PERIOD);
 
     if (was_attacked_recently == 1) {
         return (FALSE,);

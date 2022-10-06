@@ -26,12 +26,13 @@ from contracts.settling_game.library.library_module import Module
 
 @external
 func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    name: felt, symbol: felt, proxy_admin: felt
+    name: felt, symbol: felt, proxy_admin: felt, module_controller_address: felt
 ) {
     ERC721.initializer(name, symbol);
     ERC721Enumerable.initializer();
     Ownable.initializer(proxy_admin);
     Proxy.initializer(proxy_admin);
+    Module.initializer(module_controller_address);
     return ();
 }
 

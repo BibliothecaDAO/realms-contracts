@@ -15,15 +15,7 @@ from contracts.settling_game.utils.game_structs import (
     BuildingsDecaySlope,
 )
 
-from contracts.settling_game.utils.constants import (
-    VAULT_LENGTH,
-    DAY,
-    BASE_RESOURCES_PER_DAY,
-    BASE_LORDS_PER_DAY,
-    PILLAGE_AMOUNT,
-    MAX_DAYS_ACCURED,
-    WORK_HUT_OUTPUT,
-)
+from contracts.settling_game.utils.constants import BASE_RESOURCES_PER_DAY, WORK_HUT_OUTPUT, CCombat
 
 from contracts.settling_game.utils.game_structs import RealmData
 from contracts.settling_game.modules.resources.library import Resources

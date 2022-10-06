@@ -41,16 +41,9 @@ from contracts.settling_game.interfaces.IRealms import IRealms
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library.library_combat import Combat
 
-from contracts.settling_game.utils.constants import (
-    ATTACK_COOLDOWN_PERIOD,
-    COMBAT_OUTCOME_ATTACKER_WINS,
-    COMBAT_OUTCOME_DEFENDER_WINS,
-    ATTACKING_SQUAD_SLOT,
-    POPULATION_PER_HIT_POINT,
-    MAX_WALL_DEFENSE_HIT_POINTS,
-    GOBLINDOWN_REWARD,
-    DEFENDING_SQUAD_SLOT,
-)
+from contracts.settling_game.utils.constants import CCombat
+
+from contracts.settling_game.utils.constants import CCombat
 from contracts.settling_game.utils.game_structs import (
     ModuleIds,
     RealmData,
@@ -161,7 +154,7 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 // @notice Create a new attacking or defending Squad from Troops in Realm
 // @param troop_ids: array of TroopId values of the troops to be built/bought
 // @param realm_id: Staked Realm ID (S_Realm)
-// @param slot: one of ATTACKING_SQUAD_SLOT or DEFENDING_SQUAD_SLOT values, designating
+// @param slot: one of CCombat.ATTACKING_SQUAD_SLOT or CCombat.DEFENDING_SQUAD_SLOT values, designating
 //              where the Squad should be assigned to in the Realm
 @external
 func build_squad_from_troops_in_realm{
@@ -199,7 +192,7 @@ func build_squad_from_troops_in_realm{
 
     // assemble the squad, store it in a Realm
     let (realm_combat_data: RealmCombatData) = get_realm_combat_data(realm_id);
-    if (slot == ATTACKING_SQUAD_SLOT) {
+    if (slot == CCombat.ATTACKING_SQUAD_SLOT) {
         let current_squad: Squad = Combat.unpack_squad(realm_combat_data.attacking_squad);
     } else {
         let current_squad: Squad = Combat.unpack_squad(realm_combat_data.defending_squad);
@@ -215,8 +208,8 @@ func build_squad_from_troops_in_realm{
 // @notice Commence the raid
 // @param attacking_realm_id: Staked Realm id (S_Realm)
 // @param defending_realm_id: Staked Realm id (S_Realm)
-// @return: combat_outcome: Which side won - either the attacker (COMBAT_OUTCOME_ATTACKER_WINS)
-//                          or the defender (COMBAT_OUTCOME_DEFENDER_WINS)
+// @return: combat_outcome: Which side won - either the attacker (CCombat.COMBAT_OUTCOME_ATTACKER_WINS)
+//                          or the defender (CCombat.COMBAT_OUTCOME_DEFENDER_WINS)
 @external
 func initiate_combat{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
     attacking_realm_id: Uint256, defending_realm_id: Uint256
@@ -299,7 +292,7 @@ func initiate_combat{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuil
     set_realm_combat_data(defending_realm_id, new_defending_realm_data);
 
     // # pillaging only if attacker wins
-    if (combat_outcome == COMBAT_OUTCOME_ATTACKER_WINS) {
+    if (combat_outcome == CCombat.COMBAT_OUTCOME_ATTACKER_WINS) {
         let (controller) = Module.controller_address();
         let (resources_logic_address) = IModuleController.get_module_address(
             controller, ModuleIds.Resources
@@ -329,7 +322,7 @@ func initiate_combat{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuil
 // @notice Remove one or more troops from a particular Squad
 // @param troop_idxs: Array of indexes of Troops to be removed form a Squad (0-based indexing)
 // @param realm_id: Staked Realm id (S_Realm)
-// @param slot: one of ATTACKING_SQUAD_SLOT or DEFENDING_SQUAD_SLOT values, designating
+// @param slot: one of CCombat.ATTACKING_SQUAD_SLOT or CCombat.DEFENDING_SQUAD_SLOT values, designating
 //              which Squad to remove the troops from
 @external
 func remove_troops_from_squad_in_realm{
@@ -343,7 +336,7 @@ func remove_troops_from_squad_in_realm{
 
     let (realm_combat_data: RealmCombatData) = get_realm_combat_data(realm_id);
 
-    if (slot == ATTACKING_SQUAD_SLOT) {
+    if (slot == CCombat.ATTACKING_SQUAD_SLOT) {
         let (squad) = Combat.unpack_squad(realm_combat_data.attacking_squad);
     } else {
         let (squad) = Combat.unpack_squad(realm_combat_data.defending_squad);
@@ -409,14 +402,14 @@ func attack_goblin_town{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_ch
 
     // if successful, earn $lords
 
-    if (outcome == COMBAT_OUTCOME_ATTACKER_WINS) {
+    if (outcome == CCombat.COMBAT_OUTCOME_ATTACKER_WINS) {
         // attack was successful, goblin town defeated
         let (this) = get_contract_address();
         // Lord earns $LORDS
         let (caller) = get_caller_address();
         let (lords_address) = Module.get_external_contract_address(ExternalContractIds.Lords);
-        IERC20.approve(lords_address, caller, Uint256(GOBLINDOWN_REWARD * 10 ** 18, 0));
-        IERC20.transfer(lords_address, caller, Uint256(GOBLINDOWN_REWARD * 10 ** 18, 0));
+        IERC20.approve(lords_address, caller, Uint256(CCombat.GOBLINDOWN_REWARD * 10 ** 18, 0));
+        IERC20.transfer(lords_address, caller, Uint256(CCombat.GOBLINDOWN_REWARD * 10 ** 18, 0));
 
         // new goblin town is spawned
         let (goblin_town_address) = Module.get_module_address(ModuleIds.GoblinTown);
@@ -465,12 +458,12 @@ func inflict_wall_defense{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: Has
     //     calculator_addr, defending_realm_id
     // )
 
-    let (q, _) = unsigned_div_rem(5, POPULATION_PER_HIT_POINT);
-    let is_in_range = is_le(q, MAX_WALL_DEFENSE_HIT_POINTS);
+    let (q, _) = unsigned_div_rem(5, CCombat.POPULATION_PER_HIT_POINT);
+    let is_in_range = is_le(q, CCombat.MAX_WALL_DEFENSE_HIT_POINTS);
     if (is_in_range == TRUE) {
         tempvar hit_points = q;
     } else {
-        tempvar hit_points = MAX_WALL_DEFENSE_HIT_POINTS;
+        tempvar hit_points = CCombat.MAX_WALL_DEFENSE_HIT_POINTS;
     }
 
     let (_, idx) = Combat.get_first_vital_troop(attacker);
@@ -486,7 +479,7 @@ func inflict_wall_defense{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: Has
 // @param defender: Defending squad entering the combat
 // @return attacker: Attacking squad after the combat has finished
 // @return defender: Defending squad after the combat has finished
-// @return outcome: One of COMBAT_OUTCOME_ATTACKER_WINS, COMBAT_OUTCOME_DEFENDER_WINS consts
+// @return outcome: One of CCombat.COMBAT_OUTCOME_ATTACKER_WINS, CCombat.COMBAT_OUTCOME_DEFENDER_WINS consts
 //                  specifying which side won
 func run_combat_loop{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
     attacking_realm_id: Uint256, defending_realm_id: Uint256, attacker: Squad, defender: Squad
@@ -498,14 +491,14 @@ func run_combat_loop{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuil
     let (defender_vitality) = Combat.compute_squad_vitality(step_defender);
     if (defender_vitality == 0) {
         // defender is defeated
-        return (attacker, step_defender, COMBAT_OUTCOME_ATTACKER_WINS);
+        return (attacker, step_defender, CCombat.COMBAT_OUTCOME_ATTACKER_WINS);
     }
 
     let (step_attacker) = attack(attacking_realm_id, defending_realm_id, step_defender, attacker);
     let (attacker_vitality) = Combat.compute_squad_vitality(step_attacker);
     if (attacker_vitality == 0) {
         // attacker is defeated
-        return (step_attacker, step_defender, COMBAT_OUTCOME_DEFENDER_WINS);
+        return (step_attacker, step_defender, CCombat.COMBAT_OUTCOME_DEFENDER_WINS);
     }
 
     return run_combat_loop(attacking_realm_id, defending_realm_id, step_attacker, step_defender);
@@ -573,7 +566,7 @@ func load_troop_costs{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 // @notice Modify (overwrite) a Squad in a Realm
 // @param s: New squad
 // @param realm_id: Staked Realm ID in which to modify the squad
-// @param slot: Which squad to modify. One of ATTACKING_SQUAD_SLOT or DEFENDING_SQUAD_SLOT
+// @param slot: Which squad to modify. One of CCombat.ATTACKING_SQUAD_SLOT or CCombat.DEFENDING_SQUAD_SLOT
 func update_squad_in_realm{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
     s: Squad, realm_id: Uint256, slot: felt
 ) {
@@ -584,7 +577,7 @@ func update_squad_in_realm{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: Ha
     let (realm_combat_data: RealmCombatData) = get_realm_combat_data(realm_id);
     let (packed_squad: felt) = Combat.pack_squad(s);
 
-    if (slot == ATTACKING_SQUAD_SLOT) {
+    if (slot == CCombat.ATTACKING_SQUAD_SLOT) {
         let new_realm_combat_data = RealmCombatData(
             attacking_squad=packed_squad,
             defending_squad=realm_combat_data.defending_squad,
@@ -661,7 +654,7 @@ func Realm_can_be_attacked{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range
 
     let (now) = get_block_timestamp();
     let diff = now - realm_combat_data.last_attacked_at;
-    let was_attacked_recently = is_le(diff, ATTACK_COOLDOWN_PERIOD);
+    let was_attacked_recently = is_le(diff, CCombat.ATTACK_COOLDOWN_PERIOD);
 
     if (was_attacked_recently == 1) {
         return (FALSE,);
@@ -737,7 +730,7 @@ func zero_dead_squads{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     let (troop: felt*) = alloc();
     assert troop[0] = 1;
 
-    BuildTroops_3.emit(new_squad, 1, troop, realm_id, ATTACKING_SQUAD_SLOT);
-    BuildTroops_3.emit(new_squad, 1, troop, realm_id, DEFENDING_SQUAD_SLOT);
+    BuildTroops_3.emit(new_squad, 1, troop, realm_id, CCombat.ATTACKING_SQUAD_SLOT);
+    BuildTroops_3.emit(new_squad, 1, troop, realm_id, CCombat.DEFENDING_SQUAD_SLOT);
     return ();
 }
