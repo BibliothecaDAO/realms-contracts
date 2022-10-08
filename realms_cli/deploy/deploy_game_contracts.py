@@ -49,25 +49,25 @@ def run(nre):
     config = Config(nre.network)
 
     #---------------- CONTROLLERS  ----------------#
-    # for contract in CONTROLLER_CONTRACT_IMPLEMENTATIONS:
+    for contract in CONTROLLER_CONTRACT_IMPLEMENTATIONS:
 
-    # logged_deploy(
-    #     nre,
-    #     contract.contract_name,
-    #     alias=contract.alias,
-    #     arguments=[],
-    # )
+        # logged_deploy(
+        #     nre,
+        #     contract.contract_name,
+        #     alias=contract.alias,
+        #     arguments=[],
+        # )
 
-    # declare(config.ADMIN_ALIAS, contract.contract_name, contract.alias)
+        declare(contract.contract_name, contract.alias)
 
-    # predeclared_class = nre.get_declaration(contract.alias)
+        predeclared_class = nre.get_declaration(contract.alias)
 
-    # logged_deploy(
-    #     nre,
-    #     'PROXY_Logic',
-    #     alias='proxy_' + contract.alias,
-    #     arguments=[strhex_as_strfelt(predeclared_class)],
-    # )
+        logged_deploy(
+            nre,
+            'PROXY_Logic',
+            alias='proxy_' + contract.alias,
+            arguments=[strhex_as_strfelt(predeclared_class)],
+        )
 
     # predeclared_class = nre.get_declaration(contract.alias)
     # print(predeclared_class)

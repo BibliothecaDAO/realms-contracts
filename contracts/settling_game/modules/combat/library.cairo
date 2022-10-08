@@ -1,5 +1,5 @@
 // -----------------------------------
-//   COMBAT Library
+//   module.COMBAT Library
 //   Library to help with the combat mechanics.
 //
 // MIT License
@@ -31,6 +31,7 @@ from contracts.settling_game.utils.game_structs import (
     Army,
     ArmyStatistics,
 )
+from contracts.settling_game.utils.constants import CCombat
 
 namespace Combat {
     // @notice Add Battalion to Army
@@ -166,31 +167,37 @@ namespace Combat {
     // @param army: An army
     // @returns ArmyStatistics which is a computed value
     func calculate_army_statistics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-        army: Army
+        attacking_army: Army, defending_army: Army
     ) -> (statistics: ArmyStatistics) {
         alloc_locals;
 
         let (cavalry_attack) = calculate_attack_values(
             BattalionIds.LightCavalry,
-            army.light_cavalry.quantity,
+            attacking_army.light_cavalry.quantity,
             BattalionIds.HeavyCavalry,
-            army.heavy_cavalry.quantity,
+            attacking_army.heavy_cavalry.quantity,
         );
         let (archery_attack) = calculate_attack_values(
-            BattalionIds.Archer, army.archer.quantity, BattalionIds.Longbow, army.longbow.quantity
+            BattalionIds.Archer,
+            attacking_army.archer.quantity,
+            BattalionIds.Longbow,
+            attacking_army.longbow.quantity,
         );
         let (magic_attack) = calculate_attack_values(
-            BattalionIds.Mage, army.mage.quantity, BattalionIds.Arcanist, army.arcanist.quantity
+            BattalionIds.Mage,
+            attacking_army.mage.quantity,
+            BattalionIds.Arcanist,
+            attacking_army.arcanist.quantity,
         );
         let (infantry_attack) = calculate_attack_values(
             BattalionIds.LightInfantry,
-            army.light_infantry.quantity,
+            attacking_army.light_infantry.quantity,
             BattalionIds.HeavyInfantry,
-            army.heavy_infantry.quantity,
+            attacking_army.heavy_infantry.quantity,
         );
 
         let (cavalry_defence, archer_defence, magic_defence, infantry_defence) = all_defence_value(
-            army
+            attacking_army, defending_army
         );
 
         return (
@@ -238,19 +245,19 @@ namespace Combat {
 
     // @notice Calculates real defence value
     // @param defense_sum: Sum of defence values
-    // @param total_battalions: Total battalions of Army
-    // @param unit_battalions: Qty of battalions
+    // @param attacking_total_battalions: Total battalions of Army
+    // @param attacking_unit_battalions: Qty of battalions
     // @returns defence value
     func calculate_defence_values{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-        defense_sum: felt, total_battalions: felt, unit_battalions: felt
+        defense_sum: felt, attacking_total_battalions: felt, attacking_unit_battalions: felt
     ) -> (defence: felt) {
         alloc_locals;
 
         let (percentage_of_battalions, _) = unsigned_div_rem(
-            (unit_battalions * 100) + 1, total_battalions + 1
+            (attacking_unit_battalions * 1000), attacking_total_battalions
         );
 
-        let (values, _) = unsigned_div_rem(defense_sum * percentage_of_battalions, 100);
+        let (values, _) = unsigned_div_rem(defense_sum * percentage_of_battalions, 1000);
 
         return (values,);
     }
@@ -272,33 +279,41 @@ namespace Combat {
     // @param army: Unpacked Army
     // @returns cavalry_defence, archer_defence, magic_defence, infantry_defence
     func all_defence_value{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-        army: Army
+        attacking_army: Army, defending_army: Army
     ) -> (
         cavalry_defence: felt, archer_defence: felt, magic_defence: felt, infantry_defence: felt
     ) {
         alloc_locals;
 
-        let (total_battalions) = calculate_total_battalions(army);
+        let (total_battalions) = calculate_total_battalions(defending_army);
 
-        let c_defence = army.light_cavalry.quantity * BattalionStatistics.Defence.Cavalry.LightCavalry + army.heavy_cavalry.quantity * BattalionStatistics.Defence.Cavalry.HeavyCavalry + army.archer.quantity * BattalionStatistics.Defence.Cavalry.Archer + army.longbow.quantity * BattalionStatistics.Defence.Cavalry.Longbow + army.mage.quantity * BattalionStatistics.Defence.Cavalry.Mage + army.arcanist.quantity * BattalionStatistics.Defence.Cavalry.Arcanist + army.light_infantry.quantity * BattalionStatistics.Defence.Cavalry.LightInfantry + army.heavy_infantry.quantity * BattalionStatistics.Defence.Cavalry.HeavyInfantry;
+        let c_defence = attacking_army.light_cavalry.quantity * BattalionStatistics.Defence.Cavalry.LightCavalry + attacking_army.heavy_cavalry.quantity * BattalionStatistics.Defence.Cavalry.HeavyCavalry + attacking_army.archer.quantity * BattalionStatistics.Defence.Cavalry.Archer + attacking_army.longbow.quantity * BattalionStatistics.Defence.Cavalry.Longbow + attacking_army.mage.quantity * BattalionStatistics.Defence.Cavalry.Mage + attacking_army.arcanist.quantity * BattalionStatistics.Defence.Cavalry.Arcanist + attacking_army.light_infantry.quantity * BattalionStatistics.Defence.Cavalry.LightInfantry + attacking_army.heavy_infantry.quantity * BattalionStatistics.Defence.Cavalry.HeavyInfantry;
 
-        let a_defence = army.light_cavalry.quantity * BattalionStatistics.Defence.Archery.LightCavalry + army.heavy_cavalry.quantity * BattalionStatistics.Defence.Archery.HeavyCavalry + army.archer.quantity * BattalionStatistics.Defence.Archery.Archer + army.longbow.quantity * BattalionStatistics.Defence.Archery.Longbow + army.mage.quantity * BattalionStatistics.Defence.Archery.Mage + army.arcanist.quantity * BattalionStatistics.Defence.Archery.Arcanist + army.light_infantry.quantity * BattalionStatistics.Defence.Archery.LightInfantry + army.heavy_infantry.quantity * BattalionStatistics.Defence.Archery.HeavyInfantry;
+        let a_defence = attacking_army.light_cavalry.quantity * BattalionStatistics.Defence.Archery.LightCavalry + attacking_army.heavy_cavalry.quantity * BattalionStatistics.Defence.Archery.HeavyCavalry + attacking_army.archer.quantity * BattalionStatistics.Defence.Archery.Archer + attacking_army.longbow.quantity * BattalionStatistics.Defence.Archery.Longbow + attacking_army.mage.quantity * BattalionStatistics.Defence.Archery.Mage + attacking_army.arcanist.quantity * BattalionStatistics.Defence.Archery.Arcanist + attacking_army.light_infantry.quantity * BattalionStatistics.Defence.Archery.LightInfantry + attacking_army.heavy_infantry.quantity * BattalionStatistics.Defence.Archery.HeavyInfantry;
 
-        let m_defence = army.light_cavalry.quantity * BattalionStatistics.Defence.Magic.LightCavalry + army.heavy_cavalry.quantity * BattalionStatistics.Defence.Magic.HeavyCavalry + army.archer.quantity * BattalionStatistics.Defence.Magic.Archer + army.longbow.quantity * BattalionStatistics.Defence.Magic.Longbow + army.mage.quantity * BattalionStatistics.Defence.Magic.Mage + army.arcanist.quantity * BattalionStatistics.Defence.Magic.Arcanist + army.light_infantry.quantity * BattalionStatistics.Defence.Magic.LightInfantry + army.heavy_infantry.quantity * BattalionStatistics.Defence.Magic.HeavyInfantry;
+        let m_defence = attacking_army.light_cavalry.quantity * BattalionStatistics.Defence.Magic.LightCavalry + attacking_army.heavy_cavalry.quantity * BattalionStatistics.Defence.Magic.HeavyCavalry + attacking_army.archer.quantity * BattalionStatistics.Defence.Magic.Archer + attacking_army.longbow.quantity * BattalionStatistics.Defence.Magic.Longbow + attacking_army.mage.quantity * BattalionStatistics.Defence.Magic.Mage + attacking_army.arcanist.quantity * BattalionStatistics.Defence.Magic.Arcanist + attacking_army.light_infantry.quantity * BattalionStatistics.Defence.Magic.LightInfantry + attacking_army.heavy_infantry.quantity * BattalionStatistics.Defence.Magic.HeavyInfantry;
 
-        let i_defence = army.light_cavalry.quantity * BattalionStatistics.Defence.Infantry.LightCavalry + army.heavy_cavalry.quantity * BattalionStatistics.Defence.Infantry.HeavyCavalry + army.archer.quantity * BattalionStatistics.Defence.Infantry.Archer + army.longbow.quantity * BattalionStatistics.Defence.Infantry.Longbow + army.mage.quantity * BattalionStatistics.Defence.Infantry.Mage + army.arcanist.quantity * BattalionStatistics.Defence.Infantry.Arcanist + army.light_infantry.quantity * BattalionStatistics.Defence.Infantry.LightInfantry + army.heavy_infantry.quantity * BattalionStatistics.Defence.Infantry.HeavyInfantry;
+        let i_defence = attacking_army.light_cavalry.quantity * BattalionStatistics.Defence.Infantry.LightCavalry + attacking_army.heavy_cavalry.quantity * BattalionStatistics.Defence.Infantry.HeavyCavalry + attacking_army.archer.quantity * BattalionStatistics.Defence.Infantry.Archer + attacking_army.longbow.quantity * BattalionStatistics.Defence.Infantry.Longbow + attacking_army.mage.quantity * BattalionStatistics.Defence.Infantry.Mage + attacking_army.arcanist.quantity * BattalionStatistics.Defence.Infantry.Arcanist + attacking_army.light_infantry.quantity * BattalionStatistics.Defence.Infantry.LightInfantry + attacking_army.heavy_infantry.quantity * BattalionStatistics.Defence.Infantry.HeavyInfantry;
 
         let (cavalry_defence) = calculate_defence_values(
-            c_defence, total_battalions, army.light_cavalry.quantity + army.heavy_cavalry.quantity
+            c_defence,
+            total_battalions,
+            defending_army.light_cavalry.quantity + defending_army.heavy_cavalry.quantity,
         );
         let (archer_defence) = calculate_defence_values(
-            a_defence, total_battalions, army.archer.quantity + army.longbow.quantity
+            a_defence,
+            total_battalions,
+            defending_army.archer.quantity + defending_army.longbow.quantity,
         );
         let (magic_defence) = calculate_defence_values(
-            m_defence, total_battalions, army.mage.quantity + army.arcanist.quantity
+            m_defence,
+            total_battalions,
+            defending_army.mage.quantity + defending_army.arcanist.quantity,
         );
         let (infantry_defence) = calculate_defence_values(
-            i_defence, total_battalions, army.light_infantry.quantity + army.heavy_infantry.quantity
+            i_defence,
+            total_battalions,
+            defending_army.light_infantry.quantity + defending_army.heavy_infantry.quantity,
         );
         return (cavalry_defence, archer_defence, magic_defence, infantry_defence);
     }
@@ -313,22 +328,30 @@ namespace Combat {
     ) -> (outcome: felt, updated_attacking_army: Army, updated_defending_army: Army) {
         alloc_locals;
 
-        let (attacking_army_statistics: ArmyStatistics) = calculate_army_statistics(attacking_army);
-        let (defending_army_statistics: ArmyStatistics) = calculate_army_statistics(defending_army);
+        let (attacking_army_statistics: ArmyStatistics) = calculate_army_statistics(
+            attacking_army, defending_army
+        );
+
+        let (defending_army_statistics: ArmyStatistics) = calculate_army_statistics(
+            defending_army, attacking_army
+        );
 
         let (cavalry_outcome) = calculate_luck_outcome(
             luck,
             attacking_army_statistics.cavalry_attack,
             defending_army_statistics.cavalry_defence,
         );
+
         let (archery_outcome) = calculate_luck_outcome(
             luck,
             attacking_army_statistics.archery_attack,
             defending_army_statistics.archery_defence,
         );
+
         let (magic_outcome) = calculate_luck_outcome(
             luck, attacking_army_statistics.magic_attack, defending_army_statistics.magic_defence
         );
+
         let (infantry_outcome) = calculate_luck_outcome(
             luck,
             attacking_army_statistics.infantry_attack,
@@ -340,10 +363,10 @@ namespace Combat {
         let successful = is_nn(final_outcome);
 
         let (updated_attacking_army) = update_army(
-            attacking_army_statistics, defending_army_statistics, attacking_army
+            attacking_army_statistics, defending_army_statistics, attacking_army, final_outcome
         );
         let (updated_defending_army) = update_army(
-            defending_army_statistics, attacking_army_statistics, defending_army
+            defending_army_statistics, attacking_army_statistics, defending_army, final_outcome
         );
 
         return (successful, updated_attacking_army, updated_defending_army);
@@ -372,55 +395,46 @@ namespace Combat {
     // @return new health of battalions and battalions remaining
     //         if health goes to 0, then no battalions are alive and we return 0
 
-    const COMBAT_ALGO_WEIGHT_1 = 50;  // weight in bp
-    const FIXED_DAMAGE_AMOUNT = 10;
-    const BASE_STATISTICS = 1;
-    const BASE_BATTALIONS = 1;  // adds a base value to the battalions to make algo work
-
     func calculate_health_remaining{
         syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
-    }(
-        starting_health: felt,
-        battalions: felt,
-        total_battalions: felt,
-        counter_attack: felt,
-        counter_defence: felt,
-    ) -> (new_health: felt, battalions: felt) {
+    }(starting_health: felt, battalion_attack: felt, counter_defence: felt, hp_loss: felt) -> (
+        new_health: felt, battalions: felt
+    ) {
         alloc_locals;
 
         // get weight of attack over defence
-        let (attack_over_defence, _) = unsigned_div_rem(
-            ((counter_attack + BASE_STATISTICS) * 100), counter_defence + BASE_STATISTICS
+        let (attack_over_defence, _) = unsigned_div_rem(battalion_attack * 1000, counter_defence);
+
+        // get base health remaining - divided by 1000000 as values coming in a bp
+        let (health_remaining, _) = unsigned_div_rem(
+            attack_over_defence * hp_loss * starting_health, 1000000
         );
 
-        // use weight and multiple by starting health to get remaining health
-        let (health_remaining, _) = unsigned_div_rem(attack_over_defence * starting_health, 100);
-
-        // get % of calculated battalions over total battalions of that type
-
-        if (total_battalions == 0) {
-            tempvar unit_battalion = BASE_BATTALIONS;
+        // check if health has been taken off. If no health, then apply fixed damage amount to starting health
+        // if yes, then apply fixed damage to health remaining
+        let is_above_base_line_health = is_le(starting_health, health_remaining);
+        if (is_above_base_line_health == TRUE) {
+            let (new_health, _) = unsigned_div_rem(
+                starting_health * CCombat.FIXED_DAMAGE_AMOUNT, 100
+            );
+            tempvar actual_health_remaining = new_health;
         } else {
-            tempvar unit_battalion = total_battalions;
+            let (new_health, _) = unsigned_div_rem(
+                health_remaining * CCombat.FIXED_DAMAGE_AMOUNT, 100
+            );
+            tempvar actual_health_remaining = new_health;
         }
 
-        let (battalion_distribution, _) = unsigned_div_rem((battalions) * 100, unit_battalion);
-
-        // get actual health in of battalion by using the battalion distribution
-        let (real_battalion_health, _) = unsigned_div_rem(
-            health_remaining * battalion_distribution, 100
-        );
-
-        // add modifier so the health can depleate past 0
-        let modified_health = real_battalion_health - FIXED_DAMAGE_AMOUNT;
-
-        // check if dead, IF yes, then return 0,0
-        let is_dead = is_le(modified_health, 0);
-        if (is_dead == TRUE) {
-            return (0, 0);
+        // smallest amount of battalions is 1 - Battles reduce the Battalions.
+        let is_battalion_alive = is_le(actual_health_remaining, 100);
+        let (adjusted_battalions, _) = unsigned_div_rem(actual_health_remaining, 100);
+        if (is_battalion_alive == TRUE) {
+            tempvar battalions = 1;
+        } else {
+            tempvar battalions = adjusted_battalions;
         }
 
-        return (modified_health, battalions);
+        return (actual_health_remaining, battalions);
     }
 
     // @notice updates Army
@@ -432,64 +446,60 @@ namespace Combat {
         attack_army_statistics: ArmyStatistics,
         defending_army_statistics: ArmyStatistics,
         attack_army: Army,
+        outcome: felt,
     ) -> (updated_army: Army) {
         alloc_locals;
 
+        // get HP loss
+        let (hp_loss) = calculate_health_loss_percentage(outcome);
+
         let (light_cavalry_health, light_cavalry_battalions) = calculate_health_remaining(
-            attack_army.light_cavalry.health,
-            attack_army.light_cavalry.quantity,
-            attack_army.light_cavalry.quantity + attack_army.heavy_cavalry.quantity,
+            attack_army.light_cavalry.health * attack_army.light_cavalry.quantity,
             attack_army_statistics.infantry_attack,
             defending_army_statistics.infantry_defence,
+            hp_loss,
         );
         let (heavy_cavalry_health, heavy_cavalry_battalions) = calculate_health_remaining(
-            attack_army.heavy_cavalry.health,
-            attack_army.heavy_cavalry.quantity,
-            attack_army.light_cavalry.quantity + attack_army.heavy_cavalry.quantity,
+            attack_army.heavy_cavalry.health * attack_army.heavy_cavalry.quantity,
             attack_army_statistics.infantry_attack,
             defending_army_statistics.infantry_defence,
+            hp_loss,
         );
         let (archer_health, archer_battalions) = calculate_health_remaining(
-            attack_army.archer.health,
-            attack_army.archer.quantity,
-            attack_army.archer.quantity + attack_army.longbow.quantity,
+            attack_army.archer.health * attack_army.archer.quantity,
             attack_army_statistics.cavalry_attack,
             defending_army_statistics.cavalry_defence,
+            hp_loss,
         );
         let (longbow_health, longbow_battalions) = calculate_health_remaining(
-            attack_army.longbow.health,
-            attack_army.longbow.quantity,
-            attack_army.archer.quantity + attack_army.longbow.quantity,
+            attack_army.longbow.health * attack_army.longbow.quantity,
             attack_army_statistics.cavalry_attack,
             defending_army_statistics.cavalry_defence,
+            hp_loss,
         );
         let (mage_health, mage_battalions) = calculate_health_remaining(
-            attack_army.mage.health,
-            attack_army.mage.quantity,
-            attack_army.mage.quantity + attack_army.arcanist.quantity,
+            attack_army.mage.health * attack_army.mage.quantity,
             attack_army_statistics.archery_attack,
             defending_army_statistics.archery_defence,
+            hp_loss,
         );
         let (archanist_health, archanist_battalions) = calculate_health_remaining(
-            attack_army.arcanist.health,
-            attack_army.arcanist.quantity,
-            attack_army.mage.quantity + attack_army.arcanist.quantity,
+            attack_army.arcanist.health * attack_army.arcanist.quantity,
             attack_army_statistics.archery_attack,
             defending_army_statistics.archery_defence,
+            hp_loss,
         );
         let (light_infantry_health, light_infantry_battalions) = calculate_health_remaining(
-            attack_army.light_infantry.health,
-            attack_army.light_infantry.quantity,
-            attack_army.light_infantry.quantity + attack_army.heavy_infantry.quantity,
-            attack_army_statistics.infantry_attack,
-            defending_army_statistics.infantry_defence,
-        );
-        let (heavy_infantry_health, heavy_infantry_battalions) = calculate_health_remaining(
-            attack_army.heavy_infantry.health,
-            attack_army.heavy_infantry.quantity,
-            attack_army.light_infantry.quantity + attack_army.heavy_infantry.quantity,
+            attack_army.light_infantry.health * attack_army.light_infantry.quantity,
             attack_army_statistics.magic_attack,
             defending_army_statistics.magic_defence,
+            hp_loss,
+        );
+        let (heavy_infantry_health, heavy_infantry_battalions) = calculate_health_remaining(
+            attack_army.heavy_infantry.health * attack_army.heavy_infantry.quantity,
+            attack_army_statistics.magic_attack,
+            defending_army_statistics.magic_defence,
+            hp_loss,
         );
 
         let updated_attacking_army = Army(
@@ -512,6 +522,24 @@ namespace Combat {
         );
 
         return (updated_attacking_army,);
+    }
+
+    // @notice calculates the health percentage loss of a battle. 450 is half the size of a fully maxxed Army
+    // @param outcome: battle outcome
+    // @return health_percentage: percentage loss
+    func calculate_health_loss_percentage{
+        syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+    }(outcome: felt) -> (health_percentage: felt) {
+        alloc_locals;
+
+        let less_than = is_le(outcome, 0);
+
+        if (less_than == TRUE) {
+            let (i, _) = unsigned_div_rem(((-outcome)) * 1000, 450);
+            return (health_percentage=1000 - i);
+        }
+
+        return (health_percentage=1000);
     }
 
     // @notice Asserts can build battalions
