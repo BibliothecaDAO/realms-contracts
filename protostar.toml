@@ -5,7 +5,7 @@ protostar_version = "0.5.0"
 libs_path = "./lib"
 
 ["protostar.shared_command_configs"]
-cairo-path = ["./lib/cairo_contracts/src", "./lib/cairo_math_64x61/contracts"]
+cairo-path = ["./lib/cairo_contracts/src", "./lib/cairo_math_64x61/contracts", "./lib/base64/src"]
 stdout-on-success = true
 
 # This section is explained in the "Project compilation" guide.
