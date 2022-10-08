@@ -21,7 +21,7 @@ func test_base64{
 
     // %{ print(ids.bracket) %}
     %{
-        for i in range(6):
+        for i in range(9):
             path = memory[ids.bracket+i]
             print(path.to_bytes(31, "big").decode())
     %}

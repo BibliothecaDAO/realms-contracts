@@ -61,21 +61,25 @@ namespace Base64Uri {
         let (comma) = base_encoded(Base64Ids.Comma);
         let (description) = base_encoded(Base64Ids.Description);
 
+        assert built_json[0] = 'data:';
+        assert built_json[1] = 'application';
+        assert built_json[2] = '/json;base64,';
+
         // open
-        assert built_json[0] = left_bracket;
+        assert built_json[3] = left_bracket;
 
         // description
-        assert built_json[1] = description;
-        assert built_json[2] = inverted_commas;
+        assert built_json[4] = description;
+        assert built_json[5] = inverted_commas;
 
         // get value of description
         let (name) = Base64URL.encode_single('mahala');
 
-        assert built_json[3] = name;
-        assert built_json[4] = comma;
+        assert built_json[6] = name;
+        assert built_json[7] = comma;
 
         // close
-        assert built_json[5] = right_bracket;
+        assert built_json[8] = right_bracket;
 
         return (encoded=built_json);
     }
