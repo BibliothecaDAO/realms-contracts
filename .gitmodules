@@ -8,3 +8,6 @@
 	url = https://github.com/OpenZeppelin/cairo-contracts
 	path = lib/cairo_contracts
 	branch = refs/heads/v0.4.0b
+[submodule "base64"]
+	path = lib/base64
+	url = https://github.com/cartridge-gg/cairo-base64
