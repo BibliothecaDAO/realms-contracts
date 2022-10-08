@@ -318,9 +318,9 @@ func initiate_combat{
 
     // luck role and then outcome
     let (luck) = roll_dice();
-    let (
-        combat_outcome, ending_attacking_army, ending_defending_army
-    ) = Combat.calculate_winner(luck, starting_attack_army, starting_defend_army);
+    let (combat_outcome, ending_attacking_army, ending_defending_army) = Combat.calculate_winner(
+        luck, starting_attack_army, starting_defend_army
+    );
 
     // pillaging only if attacker wins
     let (now) = get_block_timestamp();
