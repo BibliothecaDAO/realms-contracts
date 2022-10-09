@@ -52,36 +52,59 @@ namespace Base64Uri {
     }() -> (encoded: felt*) {
         alloc_locals;
 
-        let (built_json: felt*) = alloc();
-
         // pre-encoded for reusability
         let (left_bracket) = base_encoded(Base64Ids.LeftBracket);
         let (right_bracket) = base_encoded(Base64Ids.RightBracket);
         let (inverted_commas) = base_encoded(Base64Ids.InvertedCommas);
         let (comma) = base_encoded(Base64Ids.Comma);
-        let (description) = base_encoded(Base64Ids.Description);
-
-        assert built_json[0] = 'data:';
-        assert built_json[1] = 'application';
-        assert built_json[2] = '/json;base64,';
-
-        // open
-        assert built_json[3] = left_bracket;
-
-        // description
-        assert built_json[4] = description;
-        assert built_json[5] = inverted_commas;
+        let (description_key) = base_encoded(Base64Ids.Description);
+        let (name_key) = base_encoded(Base64Ids.Image);
+        let (image_key) = base_encoded(Base64Ids.Name);
+        let (attributes_key) = base_encoded(Base64Ids.Attributes);
 
         // get value of description
-        let (name) = Base64URL.encode_single('mahala');
+        let (description_value) = Base64URL.encode_single('mahala');
+        let (name_value) = Base64URL.encode_single('mahala');
 
-        assert built_json[6] = name;
-        assert built_json[7] = comma;
+        // image - realms-assets.s3.eu-west-3.amazonaws.com/renders/7430.webp
+        let (image_url_1) = Base64URL.encode_single('https://');
+        let (image_url_2) = Base64URL.encode_single('realms-asse');
+        let (image_url_3) = Base64URL.encode_single('ts.s3.eu-west-');
+        let (image_url_4) = Base64URL.encode_single('3.amazonaws.com');
+        let (image_url_5) = Base64URL.encode_single('/renders/');
+        let (image_url_6) = Base64URL.encode_single(7430);  // id
+        let (image_url_7) = Base64URL.encode_single('.webp');
 
-        // close
-        assert built_json[8] = right_bracket;
+        tempvar values = new (
+            'data:',
+            'application',
+            '/json;base64,',
+            left_bracket,  // start
+            description_key,  // description key
+            inverted_commas,
+            description_value,  // description value
+            inverted_commas,
+            comma,
+            name_key,  // name key
+            inverted_commas,
+            name_value,  // name value
+            inverted_commas,
+            comma,
+            image_key,  // image key
+            inverted_commas,
+            image_url_1,  // image value
+            image_url_2,
+            image_url_3,
+            image_url_4,
+            image_url_5,
+            image_url_6,
+            image_url_7,
+            inverted_commas,
+            comma,
+            right_bracket  // end
+            );
 
-        return (encoded=built_json);
+        return (encoded=values);
     }
 
     func base_encoded{range_check_ptr}(index: felt) -> (value: felt) {
