@@ -86,18 +86,16 @@ namespace Base64Uri {
         let (regions_value) = Base64URL.encode_single(7);
 
         let (cities_key) = Base64URL.encode_single('Cities",');
-        let (regions_value) = Base64URL.encode_single(7);
+        let (cities_value) = Base64URL.encode_single(7);
 
         let (harbours_key) = Base64URL.encode_single('Harbours",');
-        let (regions_value) = Base64URL.encode_single(7);
+        let (harbours_value) = Base64URL.encode_single(7);
 
         let (rivers_key) = Base64URL.encode_single('Rivers",');
-        let (regions_value) = Base64URL.encode_single(7);
+        let (rivers_value) = Base64URL.encode_single(7);
 
         tempvar values = new (
-            'data:',
-            'application',
-            '/json;base64,',
+            'data:application/json;base64,',
             left_bracket,  // start
             // description key
             description_key,
@@ -136,21 +134,21 @@ namespace Base64Uri {
             trait_key,
             cities_key,
             value_key,
-            regions_value,
+            cities_value,
             inverted_commas,
             comma,
             // harbours
             trait_key,
             harbours_key,
             value_key,
-            regions_value,
+            harbours_value,
             inverted_commas,
             comma,
             // rivers
             trait_key,
             rivers_key,
             value_key,
-            regions_value,
+            rivers_value,
             inverted_commas,
             comma,
             // end
