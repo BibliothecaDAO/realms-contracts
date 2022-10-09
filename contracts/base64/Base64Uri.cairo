@@ -62,8 +62,12 @@ namespace Base64Uri {
         let (image_key) = base_encoded(Base64Ids.Name);
         let (attributes_key) = base_encoded(Base64Ids.Attributes);
 
+        let (left_square_bracket) = Base64URL.encode_single('[');
+        let (right_square_bracket) = Base64URL.encode_single(']');
         // get value of description
-        let (description_value) = Base64URL.encode_single('mahala');
+        let (description_value) = Base64URL.encode_single('realms');
+
+        // get name
         let (name_value) = Base64URL.encode_single('mahala');
 
         // image - realms-assets.s3.eu-west-3.amazonaws.com/renders/7430.webp
@@ -75,24 +79,42 @@ namespace Base64Uri {
         let (image_url_6) = Base64URL.encode_single(7430);  // id
         let (image_url_7) = Base64URL.encode_single('.webp');
 
+        let (trait_key) = Base64URL.encode_single('{"trait_type":"');
+        let (value_key) = Base64URL.encode_single('"value": "');
+
+        let (regions_key) = Base64URL.encode_single('Regions",');
+        let (regions_value) = Base64URL.encode_single(7);
+
+        let (cities_key) = Base64URL.encode_single('Cities",');
+        let (regions_value) = Base64URL.encode_single(7);
+
+        let (harbours_key) = Base64URL.encode_single('Harbours",');
+        let (regions_value) = Base64URL.encode_single(7);
+
+        let (rivers_key) = Base64URL.encode_single('Rivers",');
+        let (regions_value) = Base64URL.encode_single(7);
+
         tempvar values = new (
             'data:',
             'application',
             '/json;base64,',
             left_bracket,  // start
-            description_key,  // description key
+            // description key
+            description_key,
             inverted_commas,
-            description_value,  // description value
-            inverted_commas,
-            comma,
-            name_key,  // name key
-            inverted_commas,
-            name_value,  // name value
+            description_value,
             inverted_commas,
             comma,
-            image_key,  // image key
+            // name value
+            name_key,
             inverted_commas,
-            image_url_1,  // image value
+            name_value,
+            inverted_commas,
+            comma,
+            // image value
+            image_key,
+            inverted_commas,
+            image_url_1,
             image_url_2,
             image_url_3,
             image_url_4,
@@ -101,7 +123,39 @@ namespace Base64Uri {
             image_url_7,
             inverted_commas,
             comma,
-            right_bracket  // end
+            attributes_key,
+            right_bracket,
+            // regions
+            trait_key,
+            regions_key,
+            value_key,
+            regions_value,
+            inverted_commas,
+            comma,
+            // cities
+            trait_key,
+            cities_key,
+            value_key,
+            regions_value,
+            inverted_commas,
+            comma,
+            // harbours
+            trait_key,
+            harbours_key,
+            value_key,
+            regions_value,
+            inverted_commas,
+            comma,
+            // rivers
+            trait_key,
+            rivers_key,
+            value_key,
+            regions_value,
+            inverted_commas,
+            comma,
+            // end
+            right_square_bracket,
+            comma,
             );
 
         return (encoded=values);
