@@ -321,12 +321,6 @@ namespace Combat {
             attack_over_defence * hp_loss * starting_health, 1000000
         );
 
-        // if health 0 the battalion is dead. Return 0,0
-        let is_dead = is_le(actual_health_remaining, 0);
-        if (is_dead == TRUE) {
-            return (0, 0);
-        }
-
         // check if health has been taken off. If no health, then apply fixed damage amount to starting health
         // if yes, then apply fixed damage to health remaining
         let is_above_base_line_health = is_le(starting_health, health_remaining);
@@ -340,6 +334,12 @@ namespace Combat {
                 health_remaining * CCombat.FIXED_DAMAGE_AMOUNT, 100
             );
             tempvar actual_health_remaining = new_health;
+        }
+
+        // if health 0 the battalion is dead. Return 0,0
+        let is_dead = is_le(actual_health_remaining, 0);
+        if (is_dead == TRUE) {
+            return (0, 0);
         }
 
         // smallest amount of battalions is 1 - Battles reduce the Battalions.
