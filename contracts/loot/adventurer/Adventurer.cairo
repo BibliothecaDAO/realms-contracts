@@ -290,10 +290,10 @@ func is_dead{
     let (adventurer: AdventurerState) = getAdventurerById(tokenId);
 
     if (adventurer.Health == 0) {
-        return (TRUE);
+        return (is_dead=TRUE);
     }
 
-    return (FALSE);
+    return (is_dead=FALSE);
 }
 
 // TODO: Move to Utils
