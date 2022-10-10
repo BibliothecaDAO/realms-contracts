@@ -37,7 +37,7 @@ const NUMBER_OF_POTENTIAL_ENTITIES = 5;
 namespace Crypts {
     // -----------------------------------
     // GRAPH - (THE DUNGEON SHAPE)
-    // This functions build the shape of the dungeon
+    // These functions build the shape of the dungeon
     // -----------------------------------
 
     // @notice Builds dungeon seed and length
@@ -123,6 +123,7 @@ namespace Crypts {
         graph: Graph, num_vertex: felt, start_index: felt, seed: felt
     ) -> Graph {
         alloc_locals;
+        // TODO: edge lengths are the same
         let (_, random_number_edges) = unsigned_div_rem(seed, MAX_EDGE_LENGTH);
 
         let index_shift = 100;  // hardcode for now - we shift to avoid index clashes
@@ -217,7 +218,7 @@ namespace Crypts {
         assert [index_list] = vertices[vertex_index].identifier;
 
         return build_random_index_list_from_vertices(
-            quantity - 1, index_list + 1, vertices, seed + 1234, length
+            quantity - 1, index_list + 1, vertices, seed + 123456789, length
         );
     }
 

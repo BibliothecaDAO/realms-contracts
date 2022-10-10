@@ -8,14 +8,20 @@ from contracts.settling_game.modules.crypts.library import Crypts
 from starkware.cairo.common.alloc import alloc
 
 from cairo_graphs.graph.dijkstra import Dijkstra
-from cairo_graphs.graph.graph import Graph
-from cairo_graphs.data_types.data_types import Edge, Vertex, AdjacentVertex
 
+from cairo_graphs.data_types.data_types import Edge, Vertex, AdjacentVertex
+from cairo_graphs.graph.graph import (
+    add_neighbor,
+    GraphMethods,
+    Graph,
+    build_directed_graph_from_edges_internal,
+    build_undirected_graph_from_edges_internal,
+)
 from starkware.cairo.common.registers import get_fp_and_pc
 
 const NUM_VERTEX = 16;
 const ROW_LEN = 16;
-const SEED = 785323178522315123341231;
+const SEED = 185323178;
 
 // @notice Tests are based off the above seed. If you change it entities and asserts will fail.
 
@@ -43,6 +49,29 @@ func test_build_graph_before_each{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
                 print(f"{adjacent_vertex} ",end='')
             print('}',end='')
             print()
+    %}
+
+    return ();
+}
+
+@external
+func test_build_steps{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+
+    // straight line - Start at index 0
+    let (edges: Edge*) = alloc();
+    Crypts.build_straight_line_of_edges(NUM_VERTEX, 0, edges);
+    let graph = GraphMethods.build_directed_graph_from_edges(NUM_VERTEX, edges);
+
+    // get potential branch nodes as array
+    let (start_indexes_len, start_indexes) = Crypts.get_potential_branches(graph, SEED);
+
+    let (_, number_of_branches) = unsigned_div_rem(SEED, graph.length);
+
+    %{
+        for i in range(ids.start_indexes_len):
+            index = memory[ids.start_indexes+i]
+            print(index)
     %}
 
     return ();
@@ -110,21 +139,21 @@ func test_get_entity{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     return ();
 }
 
-// @external
-// func test_check_entity_at_index{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
-//     alloc_locals;
+@external
+func test_check_entity_at_index{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
 
-// let graph = Crypts.build_dungeon(NUM_VERTEX, ROW_LEN, SEED);
+    let graph = Crypts.build_dungeon(NUM_VERTEX, ROW_LEN, SEED);
 
-// let (entity_ids_len, entity_ids) = Crypts.get_entity_list(graph, SEED);
+    let (entity_ids_len, entity_ids) = Crypts.get_entity_list(graph, SEED);
 
-// // will pass - 106 does not exist as an indetity in the graph
-//     let (entity_exists_false) = Crypts.check_entity_at_index(106, entity_ids_len, entity_ids);
-//     assert entity_exists_false = FALSE;
+    // will pass - 106 does not exist as an indetity in the graph
+    let (entity_exists_false) = Crypts.check_entity_at_index(106, entity_ids_len, entity_ids);
+    assert entity_exists_false = FALSE;
 
-// // will pass - 4 exists as an indetity in the graph
-//     let (entity_exists_true) = Crypts.check_entity_at_index(4, entity_ids_len, entity_ids);
-//     assert entity_exists_true = TRUE;
+    // will pass - 4 exists as an indetity in the graph
+    let (entity_exists_true) = Crypts.check_entity_at_index(4, entity_ids_len, entity_ids);
+    assert entity_exists_true = TRUE;
 
-// return ();
-// }
+    return ();
+}
