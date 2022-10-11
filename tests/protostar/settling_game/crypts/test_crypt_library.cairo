@@ -19,9 +19,9 @@ from cairo_graphs.graph.graph import (
 )
 from starkware.cairo.common.registers import get_fp_and_pc
 
-const NUM_VERTEX = 16;
-const ROW_LEN = 16;
-const SEED = 185323178;
+const NUM_VERTEX = 5;
+const ROW_LEN = 5;
+const SEED = 312531178;
 
 // @notice Tests are based off the above seed. If you change it entities and asserts will fail.
 

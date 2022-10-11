@@ -137,7 +137,7 @@ namespace Crypts {
 
         // connect graph back to node back to vertex in the straight line
         // shift seed so we get a different connecting node
-        let (_, connecting_node) = unsigned_div_rem(seed + start_index * 123546, num_vertex);
+        let (_, connecting_node) = unsigned_div_rem(seed, num_vertex);
         local start_edge: Edge = Edge(start_index, start_index * index_shift, 1);
         local final_edge: Edge = Edge(start_index * index_shift + random_number_edges, connecting_node, 1);
         let graph = GraphMethods.add_edge(graph, start_edge);
