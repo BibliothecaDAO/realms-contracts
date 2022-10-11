@@ -201,6 +201,28 @@ func equipItem{
     return (1,);
 }
 
+@external
+func deductHealth{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(tokenId: Uint256, amount: felt) -> (success: felt) {
+    alloc_locals;
+
+    // TODO: Determine who can deduct health from an adventurer
+    ERC721.assert_only_token_owner(tokenId);
+
+    // unpack adventurer
+    let (unpacked_adventurer) = getAdventurerById(tokenId);
+
+    // deduct health
+    let (equiped_adventurer) = AdventurerLib.adjust_health(amount, unpacked_adventurer);
+
+    // TODO: Move to function that emits adventurers state
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(equiped_adventurer);
+    adventurer.write(tokenId, packed_new_adventurer);
+
+    return (1,);
+}
+
 // --------------------
 // Setters
 // --------------------

@@ -17,6 +17,8 @@ from tests.protostar.loot.test_structs import (
     get_adventurer_state,
     get_item,
     TEST_WEAPON_TOKEN_ID,
+    TEST_DAMAGE_HEALTH_REMAINING,
+    TEST_DAMAGE_OVERKILL,
 )
 
 @external
@@ -136,6 +138,30 @@ func test_equip{
     let (c) = AdventurerLib.equip_item(TEST_WEAPON_TOKEN_ID, item, adventurer);
 
     assert c.WeaponId = TEST_WEAPON_TOKEN_ID;
+
+    return ();
+}
+@external
+func test_deductHealth{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}() {
+    alloc_locals;
+
+    let (state) = get_adventurer_state();
+
+    let (item) = get_item();
+
+    let (adventurer_state: PackedAdventurerState) = AdventurerLib.pack(state);
+
+    let (adventurer: AdventurerState) = AdventurerLib.unpack(adventurer_state);
+
+    let (c) = AdventurerLib.deduct_health(TEST_DAMAGE_HEALTH_REMAINING, adventurer);
+
+    assert c.Health = TestAdventurerState.Health - TEST_DAMAGE_HEALTH_REMAINING;
+
+    let (c) = AdventurerLib.deduct_health(TEST_DAMAGE_OVERKILL, adventurer);
+
+    assert c.Health = 0;
 
     return ();
 }
