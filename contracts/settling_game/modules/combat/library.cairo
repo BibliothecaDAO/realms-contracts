@@ -1,3 +1,4 @@
+// amarna: disable=arithmetic-add,arithmetic-div,arithmetic-mul,arithmetic-sub
 // -----------------------------------
 //   module.COMBAT Library
 //   Library to help with the combat mechanics.
@@ -11,11 +12,9 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_lt
-from starkware.cairo.common.math_cmp import is_nn_le, is_nn, is_le, is_not_zero
+from starkware.cairo.common.math_cmp import is_nn, is_le
 from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
 from starkware.starknet.common.syscalls import get_block_timestamp
-from starkware.cairo.common.uint256 import Uint256
-from starkware.cairo.common.math import assert_250_bit
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.memcpy import memcpy
 from starkware.cairo.common.memset import memset
