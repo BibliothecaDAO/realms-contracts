@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## Run Modes ##
-# Import account from argentx
+# Import account from argentx (currently disabled)
 OPTION1_IMPORT_ARGENTX_ACCOUNT=1;
 # Generate new Account
 OPTION2_GENERATE_ACCOUNT=2;
