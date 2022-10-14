@@ -4,8 +4,6 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.uint256 import Uint256, uint256_eq
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.bool import TRUE, FALSE
-from contracts.settling_game.modules.relics.library import Relics
-from contracts.settling_game.utils.general import find_uint256_value
 
 @external
 func test_current_relic_holder{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {

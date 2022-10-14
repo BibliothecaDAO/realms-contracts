@@ -36,9 +36,6 @@ namespace Relics {
 
     func get_current_relic_holder(relic_id: Uint256) -> (token_id: Uint256) {
     }
-
-    func get_owned_relics(owner_id: Uint256) -> (relics_len: felt, relics: Uint256*) {
-    }
 }
 
 @contract_interface
@@ -116,7 +113,6 @@ func test_set_relic_holder{
     Relics.set_relic_holder(Relics_address, Uint256(2, 0), Uint256(1, 0));
     let (owner_id) = Relics.get_current_relic_holder(Relics_address, Uint256(1, 0));
     assert owner_id = Uint256(2, 0);
-    let (relics_len, relics: Uint256*) = Relics.get_owned_relics(Relics_address, Uint256(2, 0));
     return ();
 }
 
