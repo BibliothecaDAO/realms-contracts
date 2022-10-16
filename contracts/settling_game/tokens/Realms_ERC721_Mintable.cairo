@@ -18,6 +18,9 @@ from openzeppelin.upgrades.library import Proxy
 
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.game_structs import RealmData
+from contracts.metadata.metadata import Uri
+from contracts.settling_game.library.library_module import Module
+from contracts.settling_game.interfaces.imodules import IModuleController
 
 //
 // Initializer
@@ -124,11 +127,13 @@ func isApprovedForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 }
 
 @view
-func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*}(
     tokenId: Uint256
-) -> (tokenURI: felt) {
-    let (tokenURI: felt) = ERC721.token_uri(tokenId);
-    return (tokenURI,);
+) -> (tokenURI_len: felt, tokenURI: felt*) {
+    let (controller) = Module.controller_address();
+    let (realm_data: RealmData) = fetch_realm_data(tokenId);
+    let (tokenURI_len, tokenURI) = Uri.build(tokenId, realm_data, 1);
+    return (tokenURI_len, tokenURI);
 }
 
 @view
@@ -186,15 +191,6 @@ func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
 func burn{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(tokenId: Uint256) {
     ERC721.assert_only_token_owner(tokenId);
     ERC721Enumerable._burn(tokenId);
-    return ();
-}
-
-@external
-func setTokenURI{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    tokenId: Uint256, tokenURI: felt
-) {
-    Ownable.assert_only_owner();
-    ERC721._set_token_uri(tokenId, tokenURI);
     return ();
 }
 
