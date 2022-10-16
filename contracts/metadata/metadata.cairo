@@ -10,7 +10,7 @@
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.registers import get_label_location
-from starkware.cairo.common.uint256 import Uint256
+from starkware.cairo.common.uint256 import Uint256, uint256_unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_not_zero
 from starkware.cairo.common.bool import TRUE, FALSE
 
@@ -154,8 +154,7 @@ namespace Uri {
         let image_url_3 = 2361885128291351757209958612169773;  // ts.s3.eu-west-
         let image_url_4 = 265747849610518128817807013032718189;  // 3.amazonaws.com
         let image_url_5 = 875240087534798271279;  // /renders/
-        let image_url_6 = realm_id.low + 48;  // id
-        let image_url_7 = 199571628656;  // .webp
+
         let trait_key = 639351341392214529084052888304630306;  // {"trait_type":"
         let value_key = 635719516926804900386;  // "value":"
 
@@ -197,49 +196,52 @@ namespace Uri {
         if (realm_type == 2) {
             assert values[14] = image_url_5;
         }
-        assert values[15] = image_url_6;
+
+        let (id_size) = append_number_ascii(realm_id, values + 15);
+        let id_index = 15 + id_size;
+
         if (realm_type == 1) {
-            assert values[16] = 779318887; // .svg
+            assert values[id_index] = 779318887; // .svg
         }
         if (realm_type == 2) {
-            assert values[16] = image_url_7; // .webp
+            assert values[id_index] = 199571628656; // .webp
         }
-        assert values[17] = inverted_commas;
-        assert values[18] = comma;
-        assert values[19] = attributes_key;
-        assert values[20] = left_square_bracket;
+        assert values[id_index + 1] = inverted_commas;
+        assert values[id_index + 2] = comma;
+        assert values[id_index + 3] = attributes_key;
+        assert values[id_index + 4] = left_square_bracket;
         // regions
-        assert values[21] = trait_key;
-        assert values[22] = regions_key;
-        assert values[23] = value_key;
-        assert values[24] = regions_value;
-        assert values[25] = inverted_commas;
-        assert values[26] = right_bracket;
-        assert values[27] = comma;
+        assert values[id_index + 5] = trait_key;
+        assert values[id_index + 6] = regions_key;
+        assert values[id_index + 7] = value_key;
+        assert values[id_index + 8] = regions_value;
+        assert values[id_index + 9] = inverted_commas;
+        assert values[id_index + 10] = right_bracket;
+        assert values[id_index + 11] = comma;
         // cities
-        assert values[28] = trait_key;
-        assert values[29] = cities_key;
-        assert values[30] = value_key;
-        assert values[31] = cities_value;
-        assert values[32] = inverted_commas;
-        assert values[33] = right_bracket;
-        assert values[34] = comma;
+        assert values[id_index + 12] = trait_key;
+        assert values[id_index + 13] = cities_key;
+        assert values[id_index + 14] = value_key;
+        assert values[id_index + 15] = cities_value;
+        assert values[id_index + 16] = inverted_commas;
+        assert values[id_index + 17] = right_bracket;
+        assert values[id_index + 18] = comma;
         // harbours
-        assert values[35] = trait_key;
-        assert values[36] = harbours_key;
-        assert values[37] = value_key;
-        assert values[38] = harbours_value;
-        assert values[39] = inverted_commas;
-        assert values[40] = right_bracket;
-        assert values[41] = comma;
+        assert values[id_index + 19] = trait_key;
+        assert values[id_index + 20] = harbours_key;
+        assert values[id_index + 21] = value_key;
+        assert values[id_index + 22] = harbours_value;
+        assert values[id_index + 23] = inverted_commas;
+        assert values[id_index + 24] = right_bracket;
+        assert values[id_index + 25] = comma;
         // rivers
-        assert values[42] = trait_key;
-        assert values[43] = rivers_key;
-        assert values[44] = value_key;
-        assert values[45] = rivers_value;
-        assert values[46] = inverted_commas;
-        assert values[47] = right_bracket;
-        assert values[48] = comma;
+        assert values[id_index + 26] = trait_key;
+        assert values[id_index + 27] = rivers_key;
+        assert values[id_index + 28] = value_key;
+        assert values[id_index + 29] = rivers_value;
+        assert values[id_index + 30] = inverted_commas;
+        assert values[id_index + 31] = right_bracket;
+        assert values[id_index + 32] = comma;
 
         let (resources: felt*) = alloc();
         assert resources[0] = realm_data.resource_1;
@@ -250,7 +252,7 @@ namespace Uri {
         assert resources[5] = realm_data.resource_6;
         assert resources[6] = realm_data.resource_7;
 
-        let (resources_index) = loop_append_resource_names(0, 7, resources, 49, values);
+        let (resources_index) = loop_append_resource_names(0, 7, resources, id_index + 33, values);
         
         let (wonder_index) = append_wonder_name(realm_data.wonder, resources_index, values);
 
@@ -599,5 +601,22 @@ namespace Uri {
         assert values[values_index + 6] = comma;
 
         return (values_index + 7,);
+    }
+    func append_number_ascii{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        num: Uint256, arr: felt*
+    ) -> (added_len: felt) {
+        alloc_locals;
+        local ten: Uint256 = Uint256(10, 0);
+        let (q: Uint256, r: Uint256) = uint256_unsigned_div_rem(num, ten);
+        let digit = r.low + 48;  // ascii
+
+        if (q.low == 0 and q.high == 0) {
+            assert arr[0] = digit;
+            return (1,);
+        }
+
+        let (added_len) = append_number_ascii(q, arr);
+        assert arr[added_len] = digit;
+        return (added_len + 1,);
     }
 }

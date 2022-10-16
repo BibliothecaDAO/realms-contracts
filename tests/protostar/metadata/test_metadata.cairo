@@ -13,13 +13,24 @@ func test_metadata{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }() {
     alloc_locals;
-    let realm_data = RealmData(4, 5, 2, 1, 4, 2, 8, 13, 6, 0, 0, 0, 1, 4);
-    let (data_len, data) = Uri.build(Uint256(7,0), realm_data, 1);
+    let realm_data_1 = RealmData(4, 5, 2, 1, 4, 2, 8, 13, 6, 0, 0, 0, 1, 4);
+    let realm_data_2 = RealmData(2, 3, 6, 4, 6, 1, 5, 2, 9, 14, 10, 0, 0, 10);
+    let (data_1_len, data_1) = Uri.build(Uint256(7,0), realm_data_1, 1);
 
     %{
         array = []
-        for i in range(92):
-            path = memory[ids.data+i]
+        for i in range(ids.data_1_len):
+            path = memory[ids.data_1+i]
+            array.append(path.to_bytes(31, "big").decode())
+        print(''.join(array))
+    %}
+
+    let (data_2_len, data_2) = Uri.build(Uint256(30,0), realm_data_2, 2);
+
+    %{
+        array = []
+        for i in range(ids.data_2_len):
+            path = memory[ids.data_2+i]
             array.append(path.to_bytes(31, "big").decode())
         print(''.join(array))
     %}

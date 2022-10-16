@@ -130,7 +130,6 @@ func isApprovedForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*}(
     tokenId: Uint256
 ) -> (tokenURI_len: felt, tokenURI: felt*) {
-    let (controller) = Module.controller_address();
     let (realm_data: RealmData) = fetch_realm_data(tokenId);
     let (tokenURI_len, tokenURI) = Uri.build(tokenId, realm_data, 1);
     return (tokenURI_len, tokenURI);

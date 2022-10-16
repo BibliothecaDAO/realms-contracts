@@ -93,7 +93,7 @@ func test_set_metadata{
     let (data_len, data) = Realms.tokenURI(Realms_token_address, Uint256(1, 0));
     %{
         array = []
-        for i in range(115):
+        for i in range(92):
             path = memory[ids.data+i]
             array.append(path.to_bytes(31, "big").decode())
         print(''.join(array))
