@@ -6,6 +6,8 @@ from contracts.loot.constants.item import Item, ItemIds, ItemType, ItemSlot, Ite
 from contracts.loot.constants.rankings import ItemRank
 
 const TEST_WEAPON_TOKEN_ID = 20;
+const TEST_DAMAGE_HEALTH_REMAINING = 100;
+const TEST_DAMAGE_OVERKILL = 10000;
 
 namespace TestAdventurerState {
     // immutable stats
