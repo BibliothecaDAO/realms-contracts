@@ -11,6 +11,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.common.uint256 import Uint256, uint256_unsigned_div_rem
+from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_not_zero
 from starkware.cairo.common.bool import TRUE, FALSE
 
@@ -159,16 +160,12 @@ namespace Uri {
         let value_key = 635719516926804900386;  // "value":"
 
         let regions_key = 1519939938891930477100;  // Regions",
-        let regions_value = realm_data.regions + 48;
 
         let cities_key = 4857541669118222892;  // Cities",
-        let cities_value = realm_data.cities + 48;
 
-        let harbours_key = 341807963214582545326636;  // Harbours",
-        let harbours_value = realm_data.harbours + 48;
+        let harbors_key = 1335187356306912780844;  // Harbors",
 
         let rivers_key = 5938407761748632108;  // Rivers",
-        let rivers_value = realm_data.rivers + 48;
 
         let resource_key = 389105490742926503125548;  // Resource",
 
@@ -197,7 +194,7 @@ namespace Uri {
             assert values[14] = image_url_5;
         }
 
-        let (id_size) = append_number_ascii(realm_id, values + 15);
+        let (id_size) = append_uint256_ascii(realm_id, values + 15);
         let id_index = 15 + id_size;
 
         if (realm_type == 1) {
@@ -214,34 +211,46 @@ namespace Uri {
         assert values[id_index + 5] = trait_key;
         assert values[id_index + 6] = regions_key;
         assert values[id_index + 7] = value_key;
-        assert values[id_index + 8] = regions_value;
-        assert values[id_index + 9] = inverted_commas;
-        assert values[id_index + 10] = right_bracket;
-        assert values[id_index + 11] = comma;
+
+        let (regions_size) = append_felt_ascii(realm_data.regions, values + id_index + 8);
+        let regions_index = id_index + 8 + regions_size;
+
+        assert values[regions_index] = inverted_commas;
+        assert values[regions_index + 1] = right_bracket;
+        assert values[regions_index + 2] = comma;
         // cities
-        assert values[id_index + 12] = trait_key;
-        assert values[id_index + 13] = cities_key;
-        assert values[id_index + 14] = value_key;
-        assert values[id_index + 15] = cities_value;
-        assert values[id_index + 16] = inverted_commas;
-        assert values[id_index + 17] = right_bracket;
-        assert values[id_index + 18] = comma;
+        assert values[regions_index + 3] = trait_key;
+        assert values[regions_index + 4] = cities_key;
+        assert values[regions_index + 5] = value_key;
+
+        let (cities_size) = append_felt_ascii(realm_data.cities, values + regions_index + 6);
+        let cities_index = regions_index + 6 + cities_size;
+
+        assert values[cities_index] = inverted_commas;
+        assert values[cities_index + 1] = right_bracket;
+        assert values[cities_index + 2] = comma;
         // harbours
-        assert values[id_index + 19] = trait_key;
-        assert values[id_index + 20] = harbours_key;
-        assert values[id_index + 21] = value_key;
-        assert values[id_index + 22] = harbours_value;
-        assert values[id_index + 23] = inverted_commas;
-        assert values[id_index + 24] = right_bracket;
-        assert values[id_index + 25] = comma;
+        assert values[cities_index + 3] = trait_key;
+        assert values[cities_index + 4] = harbors_key;
+        assert values[cities_index + 5] = value_key;
+
+        let (harbors_size) = append_felt_ascii(realm_data.harbours, values + cities_index + 6);
+        let harbors_index = cities_index + 6 + harbors_size;
+
+        assert values[harbors_index] = inverted_commas;
+        assert values[harbors_index + 1] = right_bracket;
+        assert values[harbors_index + 2] = comma;
         // rivers
-        assert values[id_index + 26] = trait_key;
-        assert values[id_index + 27] = rivers_key;
-        assert values[id_index + 28] = value_key;
-        assert values[id_index + 29] = rivers_value;
-        assert values[id_index + 30] = inverted_commas;
-        assert values[id_index + 31] = right_bracket;
-        assert values[id_index + 32] = comma;
+        assert values[harbors_index + 3] = trait_key;
+        assert values[harbors_index + 4] = rivers_key;
+        assert values[harbors_index + 5] = value_key;
+
+        let (rivers_size) = append_felt_ascii(realm_data.rivers, values + harbors_index + 6);
+        let rivers_index = harbors_index + 6 + rivers_size;
+
+        assert values[rivers_index] = inverted_commas;
+        assert values[rivers_index + 1] = right_bracket;
+        assert values[rivers_index + 2] = comma;
 
         let (resources: felt*) = alloc();
         assert resources[0] = realm_data.resource_1;
@@ -252,7 +261,7 @@ namespace Uri {
         assert resources[5] = realm_data.resource_6;
         assert resources[6] = realm_data.resource_7;
 
-        let (resources_index) = loop_append_resource_names(0, 7, resources, id_index + 33, values);
+        let (resources_index) = loop_append_resource_names(0, 7, resources, rivers_index + 3, values);
         
         let (wonder_index) = append_wonder_name(realm_data.wonder, resources_index, values);
 
@@ -602,7 +611,23 @@ namespace Uri {
 
         return (values_index + 7,);
     }
-    func append_number_ascii{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    func append_felt_ascii{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        num: felt, arr: felt*
+    ) -> (added_len: felt) {
+        alloc_locals;
+        let (q, r) = unsigned_div_rem(num, 10);
+        let digit = r + 48;  // ascii
+
+        if (q == 0) {
+            assert arr[0] = digit;
+            return (1,);
+        }
+
+        let (added_len) = append_felt_ascii(q, arr);
+        assert arr[added_len] = digit;
+        return (added_len + 1,);
+    }
+    func append_uint256_ascii{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         num: Uint256, arr: felt*
     ) -> (added_len: felt) {
         alloc_locals;
@@ -615,7 +640,7 @@ namespace Uri {
             return (1,);
         }
 
-        let (added_len) = append_number_ascii(q, arr);
+        let (added_len) = append_uint256_ascii(q, arr);
         assert arr[added_len] = digit;
         return (added_len + 1,);
     }
