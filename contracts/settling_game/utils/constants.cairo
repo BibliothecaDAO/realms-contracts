@@ -134,6 +134,9 @@ namespace CCombat {
 
     // total battalions
     const TOTAL_BATTALIONS = 30;
+
+    // weight in bp
+    const FIXED_DAMAGE_AMOUNT = 70;
 }
 
 // -----------------------------------

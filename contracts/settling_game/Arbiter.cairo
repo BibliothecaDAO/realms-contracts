@@ -1,5 +1,5 @@
 // -----------------------------------
-// ____ARBITER___
+//   ARBITER
 //   The Arbiter has authority over the ModuleController.
 //   Responsible for deciding how the controller administers authority.
 //   Can be replaced by a vote-based module by calling the
@@ -128,9 +128,8 @@ func set_external_contract_address{syscall_ptr: felt*, pedersen_ptr: HashBuiltin
     return ();
 }
 
-// @notice Invoked to set an external contract
-// @param address: External contract address
-// @param contract_id: External contract id
+// @notice Sets Xoroshiro or other random number address
+// @param address: Xoroshiro contract address
 @external
 func set_xoroshiro{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(address: felt) {
     Proxy.assert_only_admin();
@@ -152,30 +151,6 @@ func approve_module_to_module_write_access{
         contract_address=controller,
         module_id_doing_writing=module_id_doing_writing,
         module_id_being_written_to=module_id_being_written_to,
-    );
-    return ();
-}
-
-// @notice Batch set 8 module addresses in one go
-// @param module_01_addr: First module address
-// @param module_02_addr: Second module adddress
-// @param module_03_addr: Third module address
-// @param module_04_addr: Fourth module address
-// @param module_06_addr: Sixth module address
-@external
-func batch_set_controller_addresses{
-    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
-}(
-    module_01_addr: felt,
-    module_02_addr: felt,
-    module_03_addr: felt,
-    module_04_addr: felt,
-    module_06_addr: felt,
-) {
-    Proxy.assert_only_admin();
-    let (controller) = controller_address.read();
-    IModuleController.set_initial_module_addresses(
-        controller, module_01_addr, module_02_addr, module_03_addr, module_04_addr, module_06_addr
     );
     return ();
 }

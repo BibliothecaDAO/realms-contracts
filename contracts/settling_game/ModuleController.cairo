@@ -1,5 +1,5 @@
 // -----------------------------------
-// ____MODULE_CONTROLLER___SETTLING_LOGIC
+//   MODULE CONTROLLER
 //   A long-lived open-ended lookup table that routes logic between modules.
 //   Each module must be registered here and Logic vs State write permissions are mapped here.
 //
@@ -17,7 +17,7 @@
 // This way, new modules can be added to update existing systems a
 // and create new dynamics.
 //
-// MIT LICENSE
+// MIT License
 // -----------------------------------
 
 %lang starknet
@@ -59,10 +59,12 @@ func can_write_to(doing_writing: felt, being_written_to: felt) -> (bool: felt) {
 func external_contract_table(external_contract_id: felt) -> (address: felt) {
 }
 
+// Genesis time
 @storage_var
 func genesis() -> (time: felt) {
 }
 
+// Random number address
 @storage_var
 func xoroshiro_address() -> (address: felt) {
 }
@@ -100,80 +102,9 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     return ();
 }
 
-// // -----------------------------------
-// // CONSTRUCTOR
-// // -----------------------------------
-
-// // @notice Constructor function
-// // @param arbiter_address: Arbiter contract address
-// // @param _lords_address: Lords contract address
-// // @param _resources_address: Resources contract address
-// // @param _realms_address: Realms erc721 contract address
-// // @param _treasury_address: Treasury address
-// // @param _s_realms_address: Staked realms erc721 contract address
-// // @param crypts_address: Crypts contract address
-// // @param _s_crypts_address: Staked crypts contract address
-// @constructor
-// func constructor{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-//     arbiter_address: felt,
-//     _lords_address: felt,
-//     _resources_address: felt,
-//     _realms_address: felt,
-//     _treasury_address: felt,
-//     _s_realms_address: felt,
-// ) {
-//     arbiter.write(arbiter_address);
-
-// // set genesis
-//     let (block_timestamp) = get_block_timestamp();
-//     genesis.write(block_timestamp);
-
-// // write patterns known at deployment. E.g., 1->2, 1->3, 5->6.
-
-// // resources logic to settling state
-//     can_write_to.write(ModuleIds.Resources, ModuleIds.Settling, TRUE);
-
-// // combat can write to resources
-//     can_write_to.write(ModuleIds.L06_Combat, ModuleIds.Resources, TRUE);
-
-// // / combat can write to settling
-//     can_write_to.write(ModuleIds.L06_Combat, ModuleIds.Settling, TRUE);
-
-// // settling can write to s realms tokens
-//     can_write_to.write(ModuleIds.Settling, ModuleIds.S_Realms_Token, TRUE);
-
-// // resources can write to resources token
-//     can_write_to.write(ModuleIds.Resources, ModuleIds.Resources_Token, TRUE);
-
-// // buildings can write to resources token
-//     can_write_to.write(ModuleIds.Buildings, ModuleIds.Resources_Token, TRUE);
-
-// // combat can write to resources token
-//     can_write_to.write(ModuleIds.L06_Combat, ModuleIds.Resources_Token, TRUE);
-
-// // crypts can write to crypts token
-//     can_write_to.write(ModuleIds.L07_Crypts, ModuleIds.S_Crypts_Token, TRUE);
-
-// // crypts resources can write to resources token
-//     can_write_to.write(ModuleIds.L08_Crypts_Resources, ModuleIds.Resources_Token, TRUE);
-
-// // / crypts logic to resources
-//     // can_write_to.write(ModuleIds.L07_Crypts, ModuleIds.L08_Crypts_Resources, TRUE)
-
-// // / resources logic to crypts state
-//     // can_write_to.write(ModuleIds.L08_Crypts_Resources, ModuleIds.L07_Crypts, TRUE)
-
-// // Lookup table for NON module contracts
-//     external_contract_table.write(ExternalContractIds.Lords, _lords_address);
-//     external_contract_table.write(ExternalContractIds.Realms, _realms_address);
-//     external_contract_table.write(ExternalContractIds.S_Realms, _s_realms_address);
-//     // external_contract_table.write(ExternalContractIds.Crypts, _crypts_address)
-//     // external_contract_table.write(ExternalContractIds.S_Crypts, _s_crypts_address)
-//     external_contract_table.write(ExternalContractIds.Resources, _resources_address);
-//     external_contract_table.write(ExternalContractIds.Treasury, _treasury_address);
-
-// return ();
-// }
+// -----------------------------------
+// SETTERS
+// -----------------------------------
 
 // -----------------------------------
 // SETTERS
@@ -211,43 +142,6 @@ func set_address_for_module_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, r
     only_arbiter();
     address_of_module_id.write(module_id, module_address);
     module_id_of_address.write(module_address, module_id);
-    return ();
-}
-
-// @notice Called by the Arbiter to batch set new address mappings on deployment
-@external
-func set_initial_module_addresses{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    settling_module_addr: felt,
-    resources_module_addr: felt,
-    buildings_module_addr: felt,
-    calculator_module_addr: felt,
-    module_05_addr: felt,
-    module_06_addr: felt,
-) {
-    only_arbiter();
-
-    set_address_for_module_id(ModuleIds.Settling, ModuleIds.Settling);
-
-    // Settling Logic
-    address_of_module_id.write(ModuleIds.Settling, settling_module_addr);
-    module_id_of_address.write(settling_module_addr, ModuleIds.Settling);
-
-    // Resources Logic
-    address_of_module_id.write(ModuleIds.Resources, resources_module_addr);
-    module_id_of_address.write(resources_module_addr, ModuleIds.Resources);
-
-    // Buildings Logic
-    address_of_module_id.write(ModuleIds.Buildings, buildings_module_addr);
-    module_id_of_address.write(buildings_module_addr, ModuleIds.Buildings);
-
-    // Calculator Logic
-    address_of_module_id.write(ModuleIds.Calculator, calculator_module_addr);
-    module_id_of_address.write(calculator_module_addr, ModuleIds.Calculator);
-
-    // Combat Logic
-    address_of_module_id.write(ModuleIds.L06_Combat, module_06_addr);
-    module_id_of_address.write(module_06_addr, ModuleIds.L06_Combat);
-
     return ();
 }
 
