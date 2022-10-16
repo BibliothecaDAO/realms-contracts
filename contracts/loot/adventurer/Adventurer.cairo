@@ -214,7 +214,7 @@ func deductHealth{
     let (unpacked_adventurer) = getAdventurerById(tokenId);
 
     // deduct health
-    let (equiped_adventurer) = AdventurerLib.adjust_health(amount, unpacked_adventurer);
+    let (equiped_adventurer) = AdventurerLib.deduct_health(amount, unpacked_adventurer);
 
     // TODO: Move to function that emits adventurers state
     let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(equiped_adventurer);
