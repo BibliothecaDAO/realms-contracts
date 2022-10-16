@@ -5,8 +5,9 @@ Realm = namedtuple(
     'region cities harbours rivers resource_number resource_1 resource_2 resource_3 resource_4 resource_5 resource_6 resource_7 wonder order',
 )
 
-def build_realm_order(order) -> Realm:
-    return Realm(*[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, order])
+
+def build_realm_order(regions, cities, harbours, rivers, resource_number, resource_1, resource_2, resource_3, resource_4, resource_5, resource_6, resource_7, wonder, order) -> Realm:
+    return Realm(*[regions, cities, harbours, rivers, resource_number, resource_1, resource_2, resource_3, resource_4, resource_5, resource_6, resource_7, wonder, order])
 
 
 def pack_realm(realm: Realm) -> int:

@@ -90,15 +90,15 @@ func test_set_relic_holder{
     local realms_1_data;
     local realms_2_data;
     %{
-        from tests.protostar.settling_game.relics import utils
+        from tests.protostar.utils import utils
         ids.Relics_address = context.Relics_address
         ids.Realms_token_address = context.Realms_token_address
         # needed to fake module controller authoriztion
         stop_mock_1 = mock_call(ids.MODULE_CONTROLLER_ADDR, "get_external_contract_address", [ids.Realms_token_address])
         stop_mock_2 = mock_call(ids.MODULE_CONTROLLER_ADDR, "has_write_access", [1])
         # bitwise mapping functions, set default data with custom order
-        ids.realms_1_data = utils.pack_realm(utils.build_realm_order(1))
-        ids.realms_2_data = utils.pack_realm(utils.build_realm_order(2))
+        ids.realms_1_data = utils.pack_realm(utils.build_realm_order(0,0,0,0,0,0,0,0,0,0,0,0,0,1))
+        ids.realms_2_data = utils.pack_realm(utils.build_realm_order(0,0,0,0,0,0,0,0,0,0,0,0,0,2))
         # fake owner of realm contract
         store(ids.Realms_token_address, "Ownable_owner", [ids.FAKE_OWNER_ADDR])
         # fake caller to owner
@@ -129,15 +129,15 @@ func test_claim_order_relic{
     local realms_3_data;
     local realms_4_data;
     %{
-        from tests.protostar.settling_game.relics import utils
+        from tests.protostar.utils import utils
         ids.Relics_address = context.Relics_address
         ids.Realms_token_address = context.Realms_token_address
         mock_call(ids.MODULE_CONTROLLER_ADDR, "get_external_contract_address", [ids.Realms_token_address])
         mock_call(ids.MODULE_CONTROLLER_ADDR, "has_write_access", [1])
-        ids.realms_1_data = utils.pack_realm(utils.build_realm_order(1))
-        ids.realms_2_data = utils.pack_realm(utils.build_realm_order(2))
-        ids.realms_3_data = utils.pack_realm(utils.build_realm_order(1))
-        ids.realms_4_data = utils.pack_realm(utils.build_realm_order(1))
+        ids.realms_1_data = utils.pack_realm(utils.build_realm_order(0,0,0,0,0,0,0,0,0,0,0,0,0,1))
+        ids.realms_2_data = utils.pack_realm(utils.build_realm_order(0,0,0,0,0,0,0,0,0,0,0,0,0,2))
+        ids.realms_3_data = utils.pack_realm(utils.build_realm_order(0,0,0,0,0,0,0,0,0,0,0,0,0,1))
+        ids.realms_4_data = utils.pack_realm(utils.build_realm_order(0,0,0,0,0,0,0,0,0,0,0,0,0,1))
         store(ids.Realms_token_address, "Ownable_owner", [ids.FAKE_OWNER_ADDR])
         stop_prank_callable = start_prank(ids.FAKE_OWNER_ADDR, ids.Realms_token_address)
     %}
@@ -171,14 +171,14 @@ func test_return_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_ch
     local realms_2_data;
     local realms_3_data;
     %{
-        from tests.protostar.settling_game.relics import utils
+        from tests.protostar.utils import utils
         ids.Relics_address = context.Relics_address
         ids.Realms_token_address = context.Realms_token_address
         mock_call(ids.MODULE_CONTROLLER_ADDR, "get_external_contract_address", [ids.Realms_token_address])
         mock_call(ids.MODULE_CONTROLLER_ADDR, "has_write_access", [1])
-        ids.realms_1_data = utils.pack_realm(utils.build_realm_order(1))
-        ids.realms_2_data = utils.pack_realm(utils.build_realm_order(2))
-        ids.realms_3_data = utils.pack_realm(utils.build_realm_order(1))
+        ids.realms_1_data = utils.pack_realm(utils.build_realm_order(0,0,0,0,0,0,0,0,0,0,0,0,0,1))
+        ids.realms_2_data = utils.pack_realm(utils.build_realm_order(0,0,0,0,0,0,0,0,0,0,0,0,0,2))
+        ids.realms_3_data = utils.pack_realm(utils.build_realm_order(0,0,0,0,0,0,0,0,0,0,0,0,0,1))
         store(ids.Realms_token_address, "Ownable_owner", [ids.FAKE_OWNER_ADDR])
         stop_prank_callable = start_prank(ids.FAKE_OWNER_ADDR, ids.Realms_token_address)
     %}
