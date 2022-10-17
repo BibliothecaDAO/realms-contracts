@@ -1,11 +1,8 @@
-# First, import click dependency
 import click
-
-from nile.core.declare import declare
-
-from realms_cli.caller_invoker import wrapped_send, compile, deploy
-from realms_cli.config import Config, strhex_as_strfelt
+from realms_cli.caller_invoker import wrapped_send, compile, deploy, wrapped_declare
+from realms_cli.config import Config
 from realms_cli.utils import uint
+import time
 
 resources = uint(100000000 * 10 ** 18)
 
@@ -76,24 +73,29 @@ def upgrade_module(module_name, network):
                 f.write(line)
         f.truncate()
 
-    compile(contract_alias="contracts/settling_game/modules/" + module_name.lower() + "/" +
-            module_name + ".cairo")
+    name = "settling_game/modules/" + module_name.lower() + "/" + \
+        module_name
+
+    compile(contract_alias="contracts/" + name + ".cairo")
 
     deploy(
         network=network,
         alias=module_name
     )
 
-    module = declare(module_name, network, module_name)
+    time.sleep(60)
 
-    print(module)
+    class_hash = wrapped_declare(
+        config.ADMIN_ALIAS, name, network, module_name)
+
+    time.sleep(60)
 
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
         contract_alias="proxy_" + module_name,
         function="upgrade",
-        arguments=[strhex_as_strfelt(module)]
+        arguments=[class_hash]
     )
 
     print('Have patience, you might need to wait 30s before invoking this')

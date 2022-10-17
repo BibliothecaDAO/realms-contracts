@@ -7,7 +7,7 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin, BitwiseBuiltin
-from starkware.cairo.common.uint256 import Uint256
+from starkware.cairo.common.uint256 import Uint256, uint256_add
 
 from openzeppelin.token.erc721.library import ERC721
 from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
@@ -174,11 +174,11 @@ func safeTransferFrom{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
 }
 
 @external
-func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    to: felt, tokenId: Uint256
-) {
+func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: felt) {
+    let (current_id: Uint256) = totalSupply();
+    let (next_realm_id, _) = uint256_add(current_id, Uint256(1, 0));
     // Ownable.assert_only_owner()
-    ERC721Enumerable._mint(to, tokenId);
+    ERC721Enumerable._mint(to, next_realm_id);
     return ();
 }
 

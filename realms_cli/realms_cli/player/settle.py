@@ -9,26 +9,28 @@ from realms_cli.config import Config
 from realms_cli.utils import parse_multi_input
 from realms_cli.binary_converter import map_realm
 
+realms_alias = 'proxy_Realms_ERC721_Mintable'
+settling_alias = 'proxy_Settling'
+
 
 @click.command()
-@click.argument("realm_token_id", nargs=1)
+@click.argument("quantity", nargs=1)
 @click.option("--network", default="goerli")
-def mint_realm(realm_token_id, network):
+def mint_realm(quantity, network):
     """
     Mint Realm
     """
     config = Config(nile_network=network)
 
-    realm_token_ids = parse_multi_input(realm_token_id)
     calldata = [
-        [int(config.USER_ADDRESS, 16), id, 0]
-        for id in realm_token_ids
+        [config.USER_ADDRESS]
+        for id in enumerate(quantity)
     ]
 
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_realms",
+        contract_alias=realms_alias,
         function="mint",
         arguments=calldata
     )
@@ -38,17 +40,17 @@ def mint_realm(realm_token_id, network):
 @click.option("--network", default="goerli")
 def approve_realm(network):
     """
-    Approve Realm transfer
+    Approve Realm for transfer into Settling contract
     """
     config = Config(nile_network=network)
 
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_realms",
+        contract_alias=realms_alias,
         function="setApprovalForAll",
         arguments=[
-            int(config.SETTLING_PROXY_ADDRESS, 16),  # uint1
+            config.SETTLING_PROXY_ADDRESS,
             "1",               # true
         ],
     )
@@ -72,7 +74,7 @@ def settle(realm_token_id, network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_Settling",
+        contract_alias=settling_alias,
         function="settle",
         arguments=calldata
     )
@@ -96,7 +98,7 @@ def unsettle(realm_token_id, network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_Settling",
+        contract_alias=settling_alias,
         function="unsettle",
         arguments=calldata,
     )
@@ -124,8 +126,8 @@ def set_realm_data(realm_token_id, network):
 
     wrapped_send(
         network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_realms",
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias=realms_alias,
         function="set_realm_data",
         arguments=calldata,
     )
