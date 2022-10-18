@@ -179,17 +179,12 @@ namespace Uri {
         let description_value = '"realms"';
 
         // realm image url values
-        let realm_image_url_1 = 'https://';
-        let realm_image_url_2 = 'd23fdhqc1jb9no';
-        let realm_image_url_3 = '.cloudfront.net';
-        let realm_image_url_4 = '/_Realms/';
+        let realm_image_url_1 = 'https://d23fdhqc1jb9no';
+        let realm_image_url_2 = '.cloudfront.net/_Realms/';
 
         // s realm image url values
-        let s_realm_image_url_1 = 'https://';
-        let s_realm_image_url_2 = 'realms-asse';
-        let s_realm_image_url_3 = 'ts.s3.eu-west-';
-        let s_realm_image_url_4 = '3.amazonaws.com';
-        let s_realm_image_url_5 = '/renders/';
+        let s_realm_image_url_1 = 'https://realms-assets.s3.eu-we';
+        let s_realm_image_url_2 = 'st-3.amazonaws.com/renders/';
 
         let (values: felt*) = alloc();
         assert values[0] = data_format;
@@ -211,21 +206,15 @@ namespace Uri {
         if (realm_type == Utils.RealmType.Realm) {
             assert values[10] = realm_image_url_1;
             assert values[11] = realm_image_url_2;
-            assert values[12] = realm_image_url_3;
-            assert values[13] = 0;
-            assert values[14] = realm_image_url_4;
         }
 
         if (realm_type == Utils.RealmType.S_Realm) {
             assert values[10] = s_realm_image_url_1;
             assert values[11] = s_realm_image_url_2;
-            assert values[12] = s_realm_image_url_3;
-            assert values[13] = s_realm_image_url_4;
-            assert values[14] = s_realm_image_url_5;
         }
 
-        let (id_size) = append_uint256_ascii(realm_id, values + 15);
-        let id_index = 15 + id_size;
+        let (id_size) = append_uint256_ascii(realm_id, values + 12);
+        let id_index = 12 + id_size;
 
         if (realm_type == Utils.RealmType.Realm) {
             assert values[id_index] = '.svg';
@@ -658,6 +647,12 @@ namespace Uri {
         return (values_index + 7,);
     }
 
+    // @notice append ascii encoding of each number in felt
+    // @implicit syscall_ptr
+    // @implicit range_check_ptr
+    // @param num: number to encode
+    // @param arr: array to append encoding
+    // @return added_len: length of encoding
     func append_felt_ascii{range_check_ptr}(num: felt, arr: felt*) -> (added_len: felt) {
         alloc_locals;
         let (q, r) = unsigned_div_rem(num, 10);
@@ -673,6 +668,12 @@ namespace Uri {
         return (added_len + 1,);
     }
 
+    // @notice append ascii encoding of each number in uint256
+    // @implicit syscall_ptr
+    // @implicit range_check_ptr
+    // @param num: number to encode
+    // @param arr: array to append encoding
+    // @return added_len: length of encoding
     func append_uint256_ascii{range_check_ptr}(num: Uint256, arr: felt*) -> (added_len: felt) {
         alloc_locals;
         local ten: Uint256 = Uint256(10, 0);
