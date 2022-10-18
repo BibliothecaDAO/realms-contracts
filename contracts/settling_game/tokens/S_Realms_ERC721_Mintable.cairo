@@ -18,7 +18,7 @@ from openzeppelin.upgrades.library import Proxy
 
 from contracts.settling_game.utils.general import unpack_data
 
-from contracts.metadata.metadata import Uri
+from contracts.metadata.metadata import Uri, Utils
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.interfaces.IRealms import IRealms
 from contracts.settling_game.interfaces.imodules import IModuleController
@@ -137,8 +137,9 @@ func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, b
     let (realms_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Realms
     );
+    let (realm_name) = IRealms.get_realm_name(realms_address, tokenId);
     let (realm_data: RealmData) = IRealms.fetch_realm_data(realms_address, tokenId);
-    let (tokenURI_len, tokenURI) = Uri.build(tokenId, realm_data, 2);
+    let (tokenURI_len, tokenURI) = Uri.build(tokenId, realm_name, realm_data, Utils.RealmType.S_Realm);
     return (tokenURI_len, tokenURI);
 }
 

@@ -140,9 +140,22 @@ namespace Utils {
 }
 
 namespace Uri {
-    func build{syscall_ptr: felt*, range_check_ptr}(
-        realm_id: Uint256, realm_data: RealmData, realm_type: felt
-    ) -> (encoded_len: felt, encoded: felt*) {
+    // @notice build uri array from stored realm data
+    // @implicit syscall_ptr
+    // @implicit bitwise_ptr
+    // @implicit range_check_ptr
+    // @param realm_id: id of the realm
+    // @param realm_name: encoded string of the realm name
+    // @param realm_data: unpacked data for realm
+    // @param realm_type: type of realm (Realm or S_Realm)
+    func build{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr,
+        bitwise_ptr: BitwiseBuiltin*,
+    }(realm_id: Uint256, realm_name: felt, realm_data: RealmData, realm_type: felt) -> (
+        encoded_len: felt, encoded: felt*
+    ) {
         alloc_locals;
 
         // pre-defined for reusability
@@ -153,6 +166,7 @@ namespace Uri {
 
         let data_format = 'data:application/json,';
 
+        // keys
         let description_key = '"description":';
         let name_key = '"name":';
         let image_key = '"image":';
@@ -164,14 +178,13 @@ namespace Uri {
         // get value of description
         let description_value = '"realms"';
 
-        // get name
-        let name_value = '"mahala"';
-
+        // realm image url values
         let realm_image_url_1 = 'https://';
         let realm_image_url_2 = 'd23fdhqc1jb9no';
         let realm_image_url_3 = '.cloudfront.net';
         let realm_image_url_4 = '/_Realms/';
 
+        // s realm image url values
         let s_realm_image_url_1 = 'https://';
         let s_realm_image_url_2 = 'realms-asse';
         let s_realm_image_url_3 = 'ts.s3.eu-west-';
@@ -187,7 +200,9 @@ namespace Uri {
         assert values[4] = comma;
         // name value
         assert values[5] = name_key;
-        assert values[6] = name_value;
+
+        assert values[6] = realm_name;
+
         assert values[7] = comma;
         // image value
         assert values[8] = image_key;
@@ -274,8 +289,10 @@ namespace Uri {
         assert resources[5] = realm_data.resource_6;
         assert resources[6] = realm_data.resource_7;
 
-        let (resources_index) = loop_append_resource_names(0, 7, resources, rivers_index + 3, values);
-        
+        let (resources_index) = loop_append_resource_names(
+            0, 7, resources, rivers_index + 3, values
+        );
+
         let (wonder_index) = append_wonder_name(realm_data.wonder, resources_index, values);
 
         let (order_index) = append_order_name(realm_data.order, wonder_index, values);
@@ -382,7 +399,9 @@ namespace Uri {
         assert values[values_index + 4] = right_bracket;
         assert values[values_index + 5] = comma;
 
-        return loop_append_resource_names(index + 1, resources_len, resources, values_index + 6, values);
+        return loop_append_resource_names(
+            index + 1, resources_len, resources, values_index + 6, values
+        );
     }
 
     // @notice append felts to uri array for order
@@ -639,9 +658,7 @@ namespace Uri {
         return (values_index + 7,);
     }
 
-    func append_felt_ascii{range_check_ptr}(
-        num: felt, arr: felt*
-    ) -> (added_len: felt) {
+    func append_felt_ascii{range_check_ptr}(num: felt, arr: felt*) -> (added_len: felt) {
         alloc_locals;
         let (q, r) = unsigned_div_rem(num, 10);
         let digit = r + 48;  // ascii
@@ -656,9 +673,7 @@ namespace Uri {
         return (added_len + 1,);
     }
 
-    func append_uint256_ascii{range_check_ptr}(
-        num: Uint256, arr: felt*
-    ) -> (added_len: felt) {
+    func append_uint256_ascii{range_check_ptr}(num: Uint256, arr: felt*) -> (added_len: felt) {
         alloc_locals;
         local ten: Uint256 = Uint256(10, 0);
         let (q: Uint256, r: Uint256) = uint256_unsigned_div_rem(num, ten);
