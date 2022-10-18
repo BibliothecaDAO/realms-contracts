@@ -1,3 +1,4 @@
+// amarna: disable=arithmetic-add,arithmetic-div,arithmetic-mul,arithmetic-sub
 // -----------------------------------
 //   module.Uri Library
 //   Builds a JSON array which to represent Realm metadata
@@ -18,11 +19,26 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from contracts.settling_game.utils.game_structs import RealmData
 
 namespace Utils {
+    namespace RealmType {
+        const Realm = 1;
+        const S_Realm = 2;
+    }
+
     namespace Symbols {
         const LeftBracket = 123;
         const RightBracket = 125;
         const InvertedCommas = 34;
         const Comma = 44;
+    }
+
+    namespace TraitKeys {
+        const Regions = '{"trait_type":"Regions",';
+        const Cities = '{"trait_type":"Cities",';
+        const Harbors = '{"trait_type":"Harbors",';
+        const Rivers = '{"trait_type":"Rivers",';
+        const Resource = '{"trait_type":"Resource",';
+        const Order = '{"trait_type":"Order",';
+        const ValueKey = '"value":"';
     }
 
     namespace ResourceNames {
@@ -70,61 +86,61 @@ namespace Utils {
     }
 
     namespace WonderNames {
-        const wonder_1 = 5869685279522133479430859692172194274569849; // Cathedral Of Agony
-        const wonder_2 = 7263473853406419820284095938416172357088101; // Sanctum Of Purpose
-        const wonder_3 = 481883311566737542474031030182613395919585701751; // The Ancestral Willow
-        const wonder_4 = 1711993432598352222063181937205611; // The Crying Oak
-        const wonder_5 = 8084660405128776430809061735771005386676438088230202983; // The Immortal Hot Spring
-        const wonder_6 = 27352097982951288369672299819244365901683; // Pantheon Of Chaos
-        const wonder_7 = 481883311590669021234839932185475614649655059059; // The Solemn Catacombs
-        const wonder_8 = 7352955804017735861447528931499248859702642; // The Exalted Geyser
-        const wonder_9 = 28722483609359197732707359874549887625588; // The Devout Summit
-        const wonder_10 = 112197201601856810914962717658823226981; // The Mother Grove
-        const wonder_11 = 121997885348795365830646729210975641714649243612005; // Synagogue Of Collapse
-        const wonder_12 = 523388450233863627401720544685566915593149201765828182045811; // Sanctuary Of The Ancients
-        const wonder_13 = 7352955804381315141949450746130302195494775; // The Weeping Willow
-        const wonder_14 = 28722483609444280708779409888694642961509; // The Exalted Maple
-        const wonder_15 = 22262514756277102667967827675149625157988; // Altar Of The Void
-        const wonder_16 = 1711993432659797820957803886374501; // The Pure Stone
-        const wonder_17 = 481883311569349450335560438843499704155047748984; // The Celestial Vertex
-        const wonder_18 = 1882356685828459569654440618960132040441295460; // The Eternal Orchard
-        const wonder_19 = 481883311566732310636741426579044478833252066155; // The Amaranthine Rock
-        const wonder_20 = 112197201602773087146216251269839677812; // The Pearl Summit
-        const wonder_21 = 402067351925604188951510085417460601; // Mosque Of Mercy
-        const wonder_22 = 28722483610073484313728020690421595534447; // The Mirror Grotto
-        const wonder_23 = 7352955804057354288741202820445783305971058; // The Glowing Geyser
-        const wonder_24 = 1458996167067376200447920610668910546826915694; // Altar Of Perfection
-        const wonder_25 = 481883311569349573295484094481117318668873786738; // The Cerulean Chamber
-        const wonder_26 = 112197201601868900173442872257905255795; // The Mythic Trees
-        const wonder_27 = 1882356685885271628290621176910462547826861925; // The Perpetual Ridge
-        const wonder_28 = 1711993432612204213653063014638967; // The Fading Yew
-        const wonder_29 = 112197201602479355747873300554309658995; // The Origin Oasis
-        const wonder_30 = 481883311590596369487344008580053433603419239012; // The Sanctified Fjord
-        const wonder_31 = 438270318760813684155072613920301426; // The Pale Pillar
-        const wonder_32 = 121860869748951841111587458942179520484707200625765; // Sanctum Of The Oracle
-        const wonder_33 = 28722483609443051198127402181533308775525; // The Ethereal Isle
-        const wonder_34 = 438270318759661298254552393728812403; // The Omen Graves
-        const wonder_35 = 438270318760813684155079193911387512; // The Pale Vertex
-        const wonder_36 = 481883311574702770666943468041384486870196644965; // The Glowing Pinnacle
-        const wonder_37 = 1711993432589054777342731153927013; // The Azure Lake
-        const wonder_38 = 481883311566758392789555771262479592161113105011; // The Argent Catacombs
-        const wonder_39 = 28722483609357954936504568885723525114222; // The Dark Mountain
-        const wonder_40 = 6011031307300205428; // Sky Mast
-        const wonder_41 = 1489362693872759468834836248621669; // Infinity Spire
-        const wonder_42 = 28722483609444280708779409888647398517102; // The Exalted Basin
-        const wonder_43 = 1882356685807568525289183711650833565076514163; // The Ancestral Trees
-        const wonder_44 = 1882356685885271628290621176910462496304755300; // The Perpetual Fjord
-        const wonder_45 = 7352955803935814556680353466654377731125102; // The Ancient Lagoon
-        const wonder_46 = 438270318760832371664907227027105138; // The Pearl River
-        const wonder_47 = 31580704707008893635492845615914781084363527406318201; // The Cerulean Reliquary
-        const wonder_48 = 373503018769248307314653188184877340105860803692; // Altar Of Divine Will
-        const wonder_49 = 27352061535142984367278971188825042546277; // Pagoda Of Fortune
-        const wonder_50 = 438270318759684835528781643805323116; // The Oracle Pool
+        const wonder_1 = 'Cathedral Of Agony';
+        const wonder_2 = 'Sanctum Of Purpose';
+        const wonder_3 = 'The Ancestral Willow';
+        const wonder_4 = 'The Crying Oak';
+        const wonder_5 = 'The Immortal Hot Spring';
+        const wonder_6 = 'Pantheon Of Chaos';
+        const wonder_7 = 'The Solemn Catacombs';
+        const wonder_8 = 'The Exalted Geyser';
+        const wonder_9 = 'The Devout Summit';
+        const wonder_10 = 'The Mother Grove';
+        const wonder_11 = 'Synagogue Of Collapse';
+        const wonder_12 = 'Sanctuary Of The Ancients';
+        const wonder_13 = 'The Weeping Willow';
+        const wonder_14 = 'The Exalted Maple';
+        const wonder_15 = 'Altar Of The Void';
+        const wonder_16 = 'The Pure Stone';
+        const wonder_17 = 'The Celestial Vertex';
+        const wonder_18 = 'The Eternal Orchard';
+        const wonder_19 = 'The Amaranthine Rock';
+        const wonder_20 = 'The Pearl Summit';
+        const wonder_21 = 'Mosque Of Mercy';
+        const wonder_22 = 'The Mirror Grotto';
+        const wonder_23 = 'The Glowing Geyser';
+        const wonder_24 = 'Altar Of Perfection';
+        const wonder_25 = 'The Cerulean Chamber';
+        const wonder_26 = 'The Mythic Trees';
+        const wonder_27 = 'The Perpetual Ridge';
+        const wonder_28 = 'The Fading Yew';
+        const wonder_29 = 'The Origin Oasis';
+        const wonder_30 = 'The Sanctified Fjord';
+        const wonder_31 = 'The Pale Pillar';
+        const wonder_32 = 'Sanctum Of The Oracle';
+        const wonder_33 = 'The Ethereal Isle';
+        const wonder_34 = 'The Omen Graves';
+        const wonder_35 = 'The Pale Vertex';
+        const wonder_36 = 'The Glowing Pinnacle';
+        const wonder_37 = 'The Azure Lake';
+        const wonder_38 = 'The Argent Catacombs';
+        const wonder_39 = 'The Dark Mountain';
+        const wonder_40 = 'Sky Mast';
+        const wonder_41 = 'Infinity Spire';
+        const wonder_42 = 'The Exalted Basin';
+        const wonder_43 = 'The Ancestral Trees';
+        const wonder_44 = 'The Perpetual Fjord';
+        const wonder_45 = 'The Ancient Lagoon';
+        const wonder_46 = 'The Pearl River';
+        const wonder_47 = 'The Cerulean Reliquary';
+        const wonder_48 = 'Altar Of Divine Will';
+        const wonder_49 = 'Pagoda Of Fortune';
+        const wonder_50 = 'The Oracle Pool';
     }
 }
 
 namespace Uri {
-    func build{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*}(
+    func build{syscall_ptr: felt*, range_check_ptr}(
         realm_id: Uint256, realm_data: RealmData, realm_type: felt
     ) -> (encoded_len: felt, encoded: felt*) {
         alloc_locals;
@@ -135,39 +151,32 @@ namespace Uri {
         let inverted_commas = Utils.Symbols.InvertedCommas;
         let comma = Utils.Symbols.Comma;
 
-        let data_format = 37556871985679581542840396273993309325169359621942828; // data:application/json,
+        let data_format = 'data:application/json,';
 
-        let description_key = 697556140257669248036922561798714; // "description":
-        let name_key = 9691513934389818; // "name":
-        let image_key = 2479633334958105146; // "image":
-        let attributes_key = 2723918356737767845177276441146; // "attributes":
+        let description_key = '"description":';
+        let name_key = '"name":';
+        let image_key = '"image":';
+        let attributes_key = '"attributes":';
 
         let left_square_bracket = 91;
         let right_square_bracket = 93;
+
         // get value of description
-        let description_value = 2482157813739909922; // "realms"
+        let description_value = '"realms"';
 
         // get name
-        let name_value = 2480746070689997090; // "mahala"
+        let name_value = '"mahala"';
 
-        let image_url_1 = 7526768903561293615;  // https://
-        let image_url_2 = 138296299598040277212951397;  // realms-asse
-        let image_url_3 = 2361885128291351757209958612169773;  // ts.s3.eu-west-
-        let image_url_4 = 265747849610518128817807013032718189;  // 3.amazonaws.com
-        let image_url_5 = 875240087534798271279;  // /renders/
+        let realm_image_url_1 = 'https://';
+        let realm_image_url_2 = 'd23fdhqc1jb9no';
+        let realm_image_url_3 = '.cloudfront.net';
+        let realm_image_url_4 = '/_Realms/';
 
-        let trait_key = 639351341392214529084052888304630306;  // {"trait_type":"
-        let value_key = 635719516926804900386;  // "value":"
-
-        let regions_key = 1519939938891930477100;  // Regions",
-
-        let cities_key = 4857541669118222892;  // Cities",
-
-        let harbors_key = 1335187356306912780844;  // Harbors",
-
-        let rivers_key = 5938407761748632108;  // Rivers",
-
-        let resource_key = 389105490742926503125548;  // Resource",
+        let s_realm_image_url_1 = 'https://';
+        let s_realm_image_url_2 = 'realms-asse';
+        let s_realm_image_url_3 = 'ts.s3.eu-west-';
+        let s_realm_image_url_4 = '3.amazonaws.com';
+        let s_realm_image_url_5 = '/renders/';
 
         let (values: felt*) = alloc();
         assert values[0] = data_format;
@@ -183,70 +192,74 @@ namespace Uri {
         // image value
         assert values[8] = image_key;
         assert values[9] = inverted_commas;
-        assert values[10] = image_url_1;
-        assert values[11] = image_url_2;
-        assert values[12] = image_url_3;
-        assert values[13] = image_url_4;
-        if (realm_type == 1) {
-            assert values[14] = 47;
+
+        if (realm_type == Utils.RealmType.Realm) {
+            assert values[10] = realm_image_url_1;
+            assert values[11] = realm_image_url_2;
+            assert values[12] = realm_image_url_3;
+            assert values[13] = 0;
+            assert values[14] = realm_image_url_4;
         }
-        if (realm_type == 2) {
-            assert values[14] = image_url_5;
+
+        if (realm_type == Utils.RealmType.S_Realm) {
+            assert values[10] = s_realm_image_url_1;
+            assert values[11] = s_realm_image_url_2;
+            assert values[12] = s_realm_image_url_3;
+            assert values[13] = s_realm_image_url_4;
+            assert values[14] = s_realm_image_url_5;
         }
 
         let (id_size) = append_uint256_ascii(realm_id, values + 15);
         let id_index = 15 + id_size;
 
-        if (realm_type == 1) {
-            assert values[id_index] = 779318887; // .svg
+        if (realm_type == Utils.RealmType.Realm) {
+            assert values[id_index] = '.svg';
         }
-        if (realm_type == 2) {
-            assert values[id_index] = 199571628656; // .webp
+
+        if (realm_type == Utils.RealmType.S_Realm) {
+            assert values[id_index] = '.webp';
         }
+
         assert values[id_index + 1] = inverted_commas;
         assert values[id_index + 2] = comma;
         assert values[id_index + 3] = attributes_key;
         assert values[id_index + 4] = left_square_bracket;
         // regions
-        assert values[id_index + 5] = trait_key;
-        assert values[id_index + 6] = regions_key;
-        assert values[id_index + 7] = value_key;
+        assert values[id_index + 5] = Utils.TraitKeys.Regions;
+        assert values[id_index + 6] = Utils.TraitKeys.ValueKey;
 
-        let (regions_size) = append_felt_ascii(realm_data.regions, values + id_index + 8);
-        let regions_index = id_index + 8 + regions_size;
+        let (regions_size) = append_felt_ascii(realm_data.regions, values + id_index + 7);
+        let regions_index = id_index + 7 + regions_size;
 
         assert values[regions_index] = inverted_commas;
         assert values[regions_index + 1] = right_bracket;
         assert values[regions_index + 2] = comma;
         // cities
-        assert values[regions_index + 3] = trait_key;
-        assert values[regions_index + 4] = cities_key;
-        assert values[regions_index + 5] = value_key;
+        assert values[regions_index + 3] = Utils.TraitKeys.Cities;
+        assert values[regions_index + 4] = Utils.TraitKeys.ValueKey;
 
-        let (cities_size) = append_felt_ascii(realm_data.cities, values + regions_index + 6);
-        let cities_index = regions_index + 6 + cities_size;
+        let (cities_size) = append_felt_ascii(realm_data.cities, values + regions_index + 5);
+        let cities_index = regions_index + 5 + cities_size;
 
         assert values[cities_index] = inverted_commas;
         assert values[cities_index + 1] = right_bracket;
         assert values[cities_index + 2] = comma;
         // harbours
-        assert values[cities_index + 3] = trait_key;
-        assert values[cities_index + 4] = harbors_key;
-        assert values[cities_index + 5] = value_key;
+        assert values[cities_index + 3] = Utils.TraitKeys.Harbors;
+        assert values[cities_index + 4] = Utils.TraitKeys.ValueKey;
 
-        let (harbors_size) = append_felt_ascii(realm_data.harbours, values + cities_index + 6);
-        let harbors_index = cities_index + 6 + harbors_size;
+        let (harbors_size) = append_felt_ascii(realm_data.harbours, values + cities_index + 5);
+        let harbors_index = cities_index + 5 + harbors_size;
 
         assert values[harbors_index] = inverted_commas;
         assert values[harbors_index + 1] = right_bracket;
         assert values[harbors_index + 2] = comma;
         // rivers
-        assert values[harbors_index + 3] = trait_key;
-        assert values[harbors_index + 4] = rivers_key;
-        assert values[harbors_index + 5] = value_key;
+        assert values[harbors_index + 3] = Utils.TraitKeys.Rivers;
+        assert values[harbors_index + 4] = Utils.TraitKeys.ValueKey;
 
-        let (rivers_size) = append_felt_ascii(realm_data.rivers, values + harbors_index + 6);
-        let rivers_index = harbors_index + 6 + rivers_size;
+        let (rivers_size) = append_felt_ascii(realm_data.rivers, values + harbors_index + 5);
+        let rivers_index = harbors_index + 5 + rivers_size;
 
         assert values[rivers_index] = inverted_commas;
         assert values[rivers_index + 1] = right_bracket;
@@ -273,7 +286,13 @@ namespace Uri {
         return (encoded_len=order_index + 2, encoded=values);
     }
 
-    func loop_append_resource_names{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    // @notice append felts to uri array for order
+    // @implicit syscall_ptr
+    // @implicit range_check_ptr
+    // @param order: id of the order, if 0 nothing is appended
+    // @param values_index: index in the uri array
+    // @param values: uri array
+    func loop_append_resource_names{syscall_ptr: felt*, range_check_ptr}(
         index: felt, resources_len: felt, resources: felt*, values_index: felt, values: felt*
     ) -> (resources_index: felt) {
         alloc_locals;
@@ -285,160 +304,168 @@ namespace Uri {
             return (values_index,);
         }
         if (resource == 1) {
-            assert values[values_index + 3] = Utils.ResourceNames.Wood;
+            assert values[values_index + 2] = Utils.ResourceNames.Wood;
         }
         if (resource == 2) {
-            assert values[values_index + 3] = Utils.ResourceNames.Stone;
+            assert values[values_index + 2] = Utils.ResourceNames.Stone;
         }
         if (resource == 3) {
-            assert values[values_index + 3] = Utils.ResourceNames.Coal;
+            assert values[values_index + 2] = Utils.ResourceNames.Coal;
         }
         if (resource == 4) {
-            assert values[values_index + 3] = Utils.ResourceNames.Copper;
+            assert values[values_index + 2] = Utils.ResourceNames.Copper;
         }
         if (resource == 5) {
-            assert values[values_index + 3] = Utils.ResourceNames.Obsidian;
+            assert values[values_index + 2] = Utils.ResourceNames.Obsidian;
         }
         if (resource == 6) {
-            assert values[values_index + 3] = Utils.ResourceNames.Silver;
+            assert values[values_index + 2] = Utils.ResourceNames.Silver;
         }
         if (resource == 7) {
-            assert values[values_index + 3] = Utils.ResourceNames.Ironwood;
+            assert values[values_index + 2] = Utils.ResourceNames.Ironwood;
         }
         if (resource == 8) {
-            assert values[values_index + 3] = Utils.ResourceNames.ColdIron;
+            assert values[values_index + 2] = Utils.ResourceNames.ColdIron;
         }
         if (resource == 9) {
-            assert values[values_index + 3] = Utils.ResourceNames.Gold;
+            assert values[values_index + 2] = Utils.ResourceNames.Gold;
         }
         if (resource == 10) {
-            assert values[values_index + 3] = Utils.ResourceNames.Hartwood;
+            assert values[values_index + 2] = Utils.ResourceNames.Hartwood;
         }
         if (resource == 11) {
-            assert values[values_index + 3] = Utils.ResourceNames.Diamonds;
+            assert values[values_index + 2] = Utils.ResourceNames.Diamonds;
         }
         if (resource == 12) {
-            assert values[values_index + 3] = Utils.ResourceNames.Sapphire;
+            assert values[values_index + 2] = Utils.ResourceNames.Sapphire;
         }
         if (resource == 13) {
-            assert values[values_index + 3] = Utils.ResourceNames.Ruby;
+            assert values[values_index + 2] = Utils.ResourceNames.Ruby;
         }
         if (resource == 14) {
-            assert values[values_index + 3] = Utils.ResourceNames.DeepCrystal;
+            assert values[values_index + 2] = Utils.ResourceNames.DeepCrystal;
         }
         if (resource == 15) {
-            assert values[values_index + 3] = Utils.ResourceNames.Ignium;
+            assert values[values_index + 2] = Utils.ResourceNames.Ignium;
         }
         if (resource == 16) {
-            assert values[values_index + 3] = Utils.ResourceNames.EtherealSilica;
+            assert values[values_index + 2] = Utils.ResourceNames.EtherealSilica;
         }
         if (resource == 17) {
-            assert values[values_index + 3] = Utils.ResourceNames.TrueIce;
+            assert values[values_index + 2] = Utils.ResourceNames.TrueIce;
         }
         if (resource == 18) {
-            assert values[values_index + 3] = Utils.ResourceNames.TwilightQuartz;
+            assert values[values_index + 2] = Utils.ResourceNames.TwilightQuartz;
         }
         if (resource == 19) {
-            assert values[values_index + 3] = Utils.ResourceNames.AlchemicalSilver;
+            assert values[values_index + 2] = Utils.ResourceNames.AlchemicalSilver;
         }
         if (resource == 20) {
-            assert values[values_index + 3] = Utils.ResourceNames.Adamantine;
+            assert values[values_index + 2] = Utils.ResourceNames.Adamantine;
         }
         if (resource == 21) {
-            assert values[values_index + 3] = Utils.ResourceNames.Mithral;
+            assert values[values_index + 2] = Utils.ResourceNames.Mithral;
         }
         if (resource == 22) {
-            assert values[values_index + 3] = Utils.ResourceNames.Dragonhide;
+            assert values[values_index + 2] = Utils.ResourceNames.Dragonhide;
         }
 
-        let trait_key = 639351341392214529084052888304630306;  // {"trait_type":"
-        let resource_key = 389105490742926503125548;  // Resource",
-        let value_key = 635719516926804900386;  // "value":"
+        let resource_key = Utils.TraitKeys.Resource;
+        let value_key = Utils.TraitKeys.ValueKey;
         let right_bracket = Utils.Symbols.RightBracket;
         let inverted_commas = Utils.Symbols.InvertedCommas;
         let comma = Utils.Symbols.Comma;
 
-        assert values[values_index] = trait_key;
-        assert values[values_index + 1] = resource_key;
-        assert values[values_index + 2] = value_key;
-        assert values[values_index + 4] = inverted_commas;
-        assert values[values_index + 5] = right_bracket;
-        assert values[values_index + 6] = comma;
+        assert values[values_index] = resource_key;
+        assert values[values_index + 1] = value_key;
+        assert values[values_index + 3] = inverted_commas;
+        assert values[values_index + 4] = right_bracket;
+        assert values[values_index + 5] = comma;
 
-        return loop_append_resource_names(index + 1, resources_len, resources, values_index + 7, values);
+        return loop_append_resource_names(index + 1, resources_len, resources, values_index + 6, values);
     }
 
-    func append_order_name{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    // @notice append felts to uri array for order
+    // @implicit syscall_ptr
+    // @implicit range_check_ptr
+    // @param order: id of the order, if 0 nothing is appended
+    // @param values_index: index in the uri array
+    // @param values: uri array
+    func append_order_name{syscall_ptr: felt*, range_check_ptr}(
         order: felt, values_index: felt, values: felt*
     ) -> (order_index: felt) {
         if (order == 0) {
             return (values_index,);
         }
         if (order == 1) {
-            assert values[values_index + 3] = Utils.OrderNames.Power;
+            assert values[values_index + 2] = Utils.OrderNames.Power;
         }
         if (order == 2) {
-            assert values[values_index + 3] = Utils.OrderNames.Giants;
+            assert values[values_index + 2] = Utils.OrderNames.Giants;
         }
         if (order == 3) {
-            assert values[values_index + 3] = Utils.OrderNames.Titans;
+            assert values[values_index + 2] = Utils.OrderNames.Titans;
         }
         if (order == 4) {
-            assert values[values_index + 3] = Utils.OrderNames.Skill;
+            assert values[values_index + 2] = Utils.OrderNames.Skill;
         }
         if (order == 5) {
-            assert values[values_index + 3] = Utils.OrderNames.Perfection;
+            assert values[values_index + 2] = Utils.OrderNames.Perfection;
         }
         if (order == 6) {
-            assert values[values_index + 3] = Utils.OrderNames.Brilliance;
+            assert values[values_index + 2] = Utils.OrderNames.Brilliance;
         }
         if (order == 7) {
-            assert values[values_index + 3] = Utils.OrderNames.Enlightenment;
+            assert values[values_index + 2] = Utils.OrderNames.Enlightenment;
         }
         if (order == 8) {
-            assert values[values_index + 3] = Utils.OrderNames.Protection;
+            assert values[values_index + 2] = Utils.OrderNames.Protection;
         }
         if (order == 9) {
-            assert values[values_index + 3] = Utils.OrderNames.Twins;
+            assert values[values_index + 2] = Utils.OrderNames.Twins;
         }
         if (order == 10) {
-            assert values[values_index + 3] = Utils.OrderNames.Reflection;
+            assert values[values_index + 2] = Utils.OrderNames.Reflection;
         }
         if (order == 11) {
-            assert values[values_index + 3] = Utils.OrderNames.Detection;
+            assert values[values_index + 2] = Utils.OrderNames.Detection;
         }
         if (order == 12) {
-            assert values[values_index + 3] = Utils.OrderNames.Fox;
+            assert values[values_index + 2] = Utils.OrderNames.Fox;
         }
         if (order == 13) {
-            assert values[values_index + 3] = Utils.OrderNames.Vitriol;
+            assert values[values_index + 2] = Utils.OrderNames.Vitriol;
         }
         if (order == 14) {
-            assert values[values_index + 3] = Utils.OrderNames.Fury;
+            assert values[values_index + 2] = Utils.OrderNames.Fury;
         }
         if (order == 15) {
-            assert values[values_index + 3] = Utils.OrderNames.Rage;
+            assert values[values_index + 2] = Utils.OrderNames.Rage;
         }
         if (order == 16) {
-            assert values[values_index + 3] = Utils.OrderNames.Anger;
+            assert values[values_index + 2] = Utils.OrderNames.Anger;
         }
 
-        let trait_key = 639351341392214529084052888304630306;  // {"trait_type":"
-        let order_key = 22362298684416556;  // Order",
-        let value_key = 635719516926804900386;  // "value":"
+        let order_key = Utils.TraitKeys.Order;
+        let value_key = Utils.TraitKeys.ValueKey;
         let right_bracket = Utils.Symbols.RightBracket;
         let inverted_commas = Utils.Symbols.InvertedCommas;
 
-        assert values[values_index] = trait_key;
-        assert values[values_index + 1] = order_key;
-        assert values[values_index + 2] = value_key;
-        assert values[values_index + 4] = inverted_commas;
-        assert values[values_index + 5] = right_bracket;
+        assert values[values_index] = order_key;
+        assert values[values_index + 1] = value_key;
+        assert values[values_index + 3] = inverted_commas;
+        assert values[values_index + 4] = right_bracket;
 
-        return (values_index + 6,);
+        return (values_index + 5,);
     }
 
-    func append_wonder_name{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    // @notice append felts to uri array for wonder
+    // @implicit syscall_ptr
+    // @implicit range_check_ptr
+    // @param wonder: id of the wonder, if 0 nothing is appended
+    // @param values_index: index in the uri array
+    // @param values: uri array
+    func append_wonder_name{syscall_ptr: felt*, range_check_ptr}(
         wonder: felt, values_index: felt, values: felt*
     ) -> (wonder_index: felt) {
         if (wonder == 0) {
@@ -451,7 +478,7 @@ namespace Uri {
             assert values[values_index + 3] = Utils.WonderNames.wonder_2;
         }
         if (wonder == 3) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_3;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_2;
         }
         if (wonder == 4) {
             assert values[values_index + 3] = Utils.WonderNames.wonder_4;
@@ -481,7 +508,7 @@ namespace Uri {
             assert values[values_index + 3] = Utils.WonderNames.wonder_12;
         }
         if (wonder == 13) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_13;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_12;
         }
         if (wonder == 14) {
             assert values[values_index + 3] = Utils.WonderNames.wonder_14;
@@ -511,7 +538,7 @@ namespace Uri {
             assert values[values_index + 3] = Utils.WonderNames.wonder_22;
         }
         if (wonder == 23) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_23;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_22;
         }
         if (wonder == 24) {
             assert values[values_index + 3] = Utils.WonderNames.wonder_24;
@@ -532,34 +559,34 @@ namespace Uri {
             assert values[values_index + 3] = Utils.WonderNames.wonder_29;
         }
         if (wonder == 30) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_30;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_20;
         }
         if (wonder == 31) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_31;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_21;
         }
         if (wonder == 32) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_32;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_22;
         }
-        if (wonder == 33) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_33;
+        if (wonder == 32) {
+            assert values[values_index + 3] = Utils.WonderNames.wonder_22;
         }
         if (wonder == 34) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_34;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_24;
         }
         if (wonder == 35) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_35;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_25;
         }
         if (wonder == 36) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_36;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_26;
         }
         if (wonder == 37) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_37;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_27;
         }
         if (wonder == 38) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_38;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_28;
         }
         if (wonder == 39) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_39;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_29;
         }
         if (wonder == 40) {
             assert values[values_index + 3] = Utils.WonderNames.wonder_40;
@@ -570,8 +597,8 @@ namespace Uri {
         if (wonder == 42) {
             assert values[values_index + 3] = Utils.WonderNames.wonder_42;
         }
-        if (wonder == 43) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_43;
+        if (wonder == 42) {
+            assert values[values_index + 3] = Utils.WonderNames.wonder_42;
         }
         if (wonder == 44) {
             assert values[values_index + 3] = Utils.WonderNames.wonder_44;
@@ -595,9 +622,9 @@ namespace Uri {
             assert values[values_index + 3] = Utils.WonderNames.wonder_50;
         }
 
-        let trait_key = 639351341392214529084052888304630306;  // {"trait_type":"
-        let wonder_key = 127786802251070649640036681418183236865965976789548;  // Wonder (translated)",
-        let value_key = 635719516926804900386;  // "value":"
+        let trait_key = '{"trait_type":';
+        let wonder_key = '"Wonder (translated)",';
+        let value_key = Utils.TraitKeys.ValueKey;
         let right_bracket = Utils.Symbols.RightBracket;
         let inverted_commas = Utils.Symbols.InvertedCommas;
         let comma = Utils.Symbols.Comma;
@@ -611,7 +638,8 @@ namespace Uri {
 
         return (values_index + 7,);
     }
-    func append_felt_ascii{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+
+    func append_felt_ascii{range_check_ptr}(
         num: felt, arr: felt*
     ) -> (added_len: felt) {
         alloc_locals;
@@ -627,7 +655,8 @@ namespace Uri {
         assert arr[added_len] = digit;
         return (added_len + 1,);
     }
-    func append_uint256_ascii{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+
+    func append_uint256_ascii{range_check_ptr}(
         num: Uint256, arr: felt*
     ) -> (added_len: felt) {
         alloc_locals;

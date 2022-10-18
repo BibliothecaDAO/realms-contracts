@@ -32,15 +32,10 @@ func test_metadata{
         for i in range(ids.data_2_len):
             path = memory[ids.data_2+i]
             array.append(path.to_bytes(31, "big").decode())
-        print(''.join(array))
+        string_data = ''.join(array)
+        print(string_data[22:])
+        # json_data = json.loads(string_data[22:])
     %}
 
     return ();
 }
-
-// {
-//   "description": "Adventurers",
-//   "image": "https://storage.googleapis.com/opensea-prod.appspot.com/puffs/3.png",
-//   "name": "Dave Starbelly",
-//   "attributes": [ ... ],
-// }
