@@ -144,7 +144,7 @@ func mintBatch{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     data_len: felt,
     data: felt*,
 ) {
-    Module.only_approved();
+    // Module.only_approved();
     let (caller) = get_caller_address();
     with_attr error_message("ERC1155: called from zero address") {
         assert_not_zero(caller);

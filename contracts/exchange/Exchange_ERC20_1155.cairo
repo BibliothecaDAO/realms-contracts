@@ -124,6 +124,9 @@ func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     set_royalty_info(royalty_fee_thousands_, royalty_fee_address_);
     Proxy.initializer(proxy_admin);
     Ownable.initializer(proxy_admin);
+
+    ERC1155.initializer();
+    ERC165.register_interface(IERC1155_RECEIVER_ID);
     return ();
 }
 

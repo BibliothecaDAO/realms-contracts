@@ -19,10 +19,11 @@ Contracts = namedtuple('Contracts', 'alias contract_name address')
 # 6. Set token contract approval if needed - Resources etc
 
 NEW_MODULES = [
-    Contracts("Realms_ERC721_Mintable", "Realms_ERC721_Mintable", token_path +
-              "Realms_ERC721_Mintable", ),
+    # Contracts("Realms_ERC721_Mintable", "Realms_ERC721_Mintable", token_path +
+    #           "Realms_ERC721_Mintable", ),
     # Contracts("s_realms", "S_Realms_ERC721_Mintable"),
-    # Contracts("resources", "Resources_ERC1155_Mintable_Burnable"),
+    Contracts("Resources_ERC1155_Mintable_Burnable", "Resources_ERC1155_Mintable_Burnable", token_path +
+              "Realms_ERC721_Mintable"),
 ]
 
 
@@ -33,13 +34,13 @@ def run(nre):
     #---------------- SET MODULES  ----------------#
 
     for contract in NEW_MODULES:
-        # with open("goerli.deployments.txt", "r+") as f:
-        #     new_f = f.readlines()
-        #     f.seek(0)
-        #     for line in new_f:
-        #         if contract.contract_name + ".json:" + contract.alias not in line:
-        #             f.write(line)
-        #     f.truncate()
+        with open("goerli.deployments.txt", "r+") as f:
+            new_f = f.readlines()
+            f.seek(0)
+            for line in new_f:
+                if contract.contract_name + ".json:" + contract.alias not in line:
+                    f.write(line)
+            f.truncate()
 
         with open("goerli.declarations.txt", "r+") as f:
             new_f = f.readlines()
@@ -49,15 +50,17 @@ def run(nre):
                     f.write(line)
             f.truncate()
 
-        # compile(contract_alias="contracts/settling_game/tokens/" +
-        #         contract.contract_name + ".cairo")
+        compile(contract_alias="contracts/settling_game/tokens/" +
+                contract.contract_name + ".cairo")
 
-        # logged_deploy(
-        #     nre,
-        #     contract.contract_name,
-        #     alias=contract.alias,
-        #     arguments=[],
-        # )
+        logged_deploy(
+            nre,
+            contract.contract_name,
+            alias=contract.alias,
+            arguments=[],
+        )
+
+        time.sleep(60)
 
         class_hash = wrapped_declare(
             config.ADMIN_ALIAS, contract.address, nre.network, contract.alias)
