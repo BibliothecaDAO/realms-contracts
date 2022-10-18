@@ -97,7 +97,6 @@ func set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
 
     let (is_equal) = uint256_eq(current_relic_owner, loser_token_id);
 
-    let (loser_relics_len) = owned_relics_len.read(loser_token_id);
     let (old_owner_token_id) = storage_relic_holder.read(current_relic_owner);
 
     // If old owner exists, update array
@@ -109,9 +108,9 @@ func set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
     // If Relic is owned by loser, send to victor
     if (is_equal == TRUE) {
         if (check_exists == TRUE) {
+            let (loser_relics_len) = owned_relics_len.read(loser_token_id);
             assert remove_relics[0] = loser_token_id;
             loop_remove_relic(0, 0, loser_relics_len, old_owner_token_id, 1, remove_relics);
-            owned_relics_len.write(old_owner_token_id, loser_relics_len - 1);
             tempvar syscall_ptr = syscall_ptr;
             tempvar range_check_ptr = range_check_ptr;
             tempvar pedersen_ptr = pedersen_ptr;
@@ -136,13 +135,13 @@ func set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
 
     let (winner_realm_data: RealmData) = IRealms.fetch_realm_data(realms_address, winner_token_id);
 
+    let (loser_relics_len) = owned_relics_len.read(loser_token_id);
+
     let (remove_relics_len) = loop_claim_order_relic(
         0, realms_address, winner_realm_data, loser_token_id, loser_relics_len, 0, remove_relics
     );
 
-    loop_remove_relic(0, 0, loser_relics_len, old_owner_token_id, remove_relics_len, remove_relics);
-    owned_relics_len.write(old_owner_token_id, loser_relics_len - remove_relics_len);
-    return ();
+    return loop_remove_relic(0, 0, loser_relics_len, old_owner_token_id, remove_relics_len, remove_relics);
 }
 
 // @notice loop loser relic and return if order of winner matches holder
@@ -153,20 +152,21 @@ func set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
 // @param winner_realm_data: realm data of the winner
 // @param loser_token_id: realm id of loser
 // @param loser_relics_len: length of relics array of loser
-// @param remove_relics_len: length of relics to remove from loser
+// @param remove_relics_index: index of relics to remove
 // @param remove_relics: array of relics to remove from loser
+// @return remove_relics_len: length of relics to remove from loser 
 func loop_claim_order_relic{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
     index: felt,
     realms_address: felt,
     winner_realm_data: RealmData,
     loser_token_id: Uint256,
     loser_relics_len: felt,
-    remove_relics_len: felt,
+    remove_relics_index: felt,
     remove_relics: Uint256*,
 ) -> (remove_relics_len: felt) {
     alloc_locals;
     if (index == loser_relics_len) {
-        return (remove_relics_len,);
+        return (remove_relics_index,);
     }
 
     let (relic_id) = owned_relics.read(loser_token_id, index);
@@ -175,32 +175,24 @@ func loop_claim_order_relic{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, rang
 
     if (winner_realm_data.order == relic_owner_data.order) {
         _set_relic_holder(relic_id, relic_id);
-        assert remove_relics[index] = relic_id;
-        loop_claim_order_relic(
+        assert remove_relics[remove_relics_index] = relic_id;
+        return loop_claim_order_relic(
             index + 1,
             realms_address,
             winner_realm_data,
             loser_token_id,
             loser_relics_len,
-            remove_relics_len + 1,
+            remove_relics_index + 1,
             remove_relics,
         );
-        tempvar syscall_ptr = syscall_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar pedersen_ptr = pedersen_ptr;
-    } else {
-        tempvar syscall_ptr = syscall_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar pedersen_ptr = pedersen_ptr;
     }
-
     return loop_claim_order_relic(
         index + 1,
         realms_address,
         winner_realm_data,
         loser_token_id,
         loser_relics_len,
-        remove_relics_len,
+        remove_relics_index,
         remove_relics,
     );
 }
@@ -223,7 +215,7 @@ func return_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
     loop_return_relics(0, realms_token_id, relics_len, remove_relics);
 
     loop_remove_relic(0, 0, relics_len, realms_token_id, relics_len, remove_relics);
-    owned_relics_len.write(realms_token_id, 0);
+    
     return ();
 }
 
@@ -254,7 +246,7 @@ func loop_return_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_ch
 // SETTERS
 // -----------------------------------
 
-// @notice get index of relic in the array of relics held
+// @notice sets the relic against the new holder
 // @implicit syscall_ptr
 // @implicit range_check_ptr
 // @param owner_token_id: realm id of new owner
@@ -281,7 +273,7 @@ func _set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_che
 // SETTERS
 // -----------------------------------
 
-// @notice remove relic from array
+// @notice loop to remove relics from old owner array
 // @implicit syscall_ptr
 // @implicit range_check_ptr
 // @param old_index: index in old (current) owned relic array
@@ -301,6 +293,7 @@ func loop_remove_relic{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_che
     alloc_locals;
     let check = is_le(relics_len, old_index);
     if (check == TRUE) {
+        owned_relics_len.write(owner_token_id, relics_len - remove_relics_len);
         return ();
     }
     let (stored_relic_id) = owned_relics.read(owner_token_id, old_index);
