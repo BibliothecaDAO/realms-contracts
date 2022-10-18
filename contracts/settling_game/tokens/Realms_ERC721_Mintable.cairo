@@ -19,8 +19,6 @@ from openzeppelin.upgrades.library import Proxy
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.game_structs import RealmData
 from contracts.metadata.metadata import Uri, Utils
-from contracts.settling_game.library.library_module import Module
-from contracts.settling_game.interfaces.imodules import IModuleController
 
 //
 // Initializer

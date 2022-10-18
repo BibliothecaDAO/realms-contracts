@@ -16,8 +16,6 @@ from openzeppelin.access.ownable.library import Ownable
 
 from openzeppelin.upgrades.library import Proxy
 
-from contracts.settling_game.utils.general import unpack_data
-
 from contracts.metadata.metadata import Uri, Utils
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.interfaces.IRealms import IRealms

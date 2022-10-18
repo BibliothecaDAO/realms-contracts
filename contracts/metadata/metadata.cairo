@@ -10,11 +10,8 @@
 
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.common.uint256 import Uint256, uint256_unsigned_div_rem
 from starkware.cairo.common.math import unsigned_div_rem
-from starkware.cairo.common.math_cmp import is_not_zero
-from starkware.cairo.common.bool import TRUE, FALSE
 
 from contracts.settling_game.utils.game_structs import RealmData
 
