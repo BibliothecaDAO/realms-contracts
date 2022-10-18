@@ -318,13 +318,9 @@ func initiate_combat{
 
     // luck role and then outcome
     let (luck) = roll_dice();
-    let (
-        combat_outcome, ending_attacking_army_packed, ending_defending_army_packed
-    ) = Combat.calculate_winner(luck, attacking_realm_data.packed, defending_realm_data.packed);
-
-    // unpack
-    let (ending_attacking_army: Army) = Combat.unpack_army(ending_attacking_army_packed);
-    let (ending_defending_army: Army) = Combat.unpack_army(ending_defending_army_packed);
+    let (combat_outcome, ending_attacking_army, ending_defending_army) = Combat.calculate_winner(
+        luck, starting_attack_army, starting_defend_army
+    );
 
     // pillaging only if attacker wins
     let (now) = get_block_timestamp();
@@ -357,6 +353,9 @@ func initiate_combat{
 
     tempvar attacking_xp = attacking_xp;
     tempvar defending_xp = defending_xp;
+
+    let (ending_attacking_army_packed: felt) = Combat.pack_army(ending_attacking_army);
+    let (ending_defending_army_packed: felt) = Combat.pack_army(ending_defending_army);
 
     // store new values with added XP
     set_army_data_and_emit(

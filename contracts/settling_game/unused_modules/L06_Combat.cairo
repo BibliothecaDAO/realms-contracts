@@ -43,7 +43,6 @@ from contracts.settling_game.library.library_combat import Combat
 
 from contracts.settling_game.utils.constants import CCombat
 
-from contracts.settling_game.utils.constants import CCombat
 from contracts.settling_game.utils.game_structs import (
     ModuleIds,
     RealmData,
