@@ -8,7 +8,7 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_add
-
+from starkware.starknet.common.syscalls import get_caller_address
 from openzeppelin.token.erc721.library import ERC721
 from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
 from openzeppelin.introspection.erc165.library import ERC165
@@ -16,8 +16,14 @@ from openzeppelin.access.ownable.library import Ownable
 
 from openzeppelin.upgrades.library import Proxy
 
+from openzeppelin.token.erc20.IERC20 import IERC20
+
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.game_structs import RealmData
+
+const MINT = 10000000000000000;  // 0.01ETH
+const ETH_ADDRESS = 2087021424722619777119509474943472645767659996348769578120564519014510906823;  // ETH Address
+const TREASURY = 1584802405239796593546012235715999659321486632190062332526513799454310132850;
 
 //
 // Initializer
@@ -175,9 +181,13 @@ func safeTransferFrom{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
 
 @external
 func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: felt) {
+    // charge ETH
+    let (buyer) = get_caller_address();
+    IERC20.transferFrom(ETH_ADDRESS, buyer, TREASURY, Uint256(MINT, 0));
+
     let (current_id: Uint256) = totalSupply();
     let (next_realm_id, _) = uint256_add(current_id, Uint256(1, 0));
-    // Ownable.assert_only_owner()
+
     ERC721Enumerable._mint(to, next_realm_id);
     return ();
 }
