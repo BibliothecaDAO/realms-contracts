@@ -16,9 +16,11 @@ from openzeppelin.access.ownable.library import Ownable
 
 from openzeppelin.upgrades.library import Proxy
 
-from contracts.settling_game.utils.general import unpack_data
-
+from contracts.metadata.metadata import Uri, Utils
 from contracts.settling_game.library.library_module import Module
+from contracts.settling_game.interfaces.IRealms import IRealms
+from contracts.settling_game.interfaces.imodules import IModuleController
+from contracts.settling_game.utils.game_structs import ExternalContractIds, RealmData
 
 //
 // Initializer
@@ -126,11 +128,17 @@ func isApprovedForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 }
 
 @view
-func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*}(
     tokenId: Uint256
-) -> (tokenURI: felt) {
-    let (tokenURI: felt) = ERC721.token_uri(tokenId);
-    return (tokenURI,);
+) -> (tokenURI_len: felt, tokenURI: felt*) {
+    let (controller) = Module.controller_address();
+    let (realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Realms
+    );
+    let (realm_name) = IRealms.get_realm_name(realms_address, tokenId);
+    let (realm_data: RealmData) = IRealms.fetch_realm_data(realms_address, tokenId);
+    let (tokenURI_len, tokenURI) = Uri.build(tokenId, realm_name, realm_data, Utils.RealmType.S_Realm);
+    return (tokenURI_len, tokenURI);
 }
 
 @view
@@ -188,15 +196,6 @@ func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
 func burn{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(tokenId: Uint256) {
     Module.only_approved();
     ERC721Enumerable._burn(tokenId);
-    return ();
-}
-
-@external
-func setTokenURI{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    tokenId: Uint256, tokenURI: felt
-) {
-    Ownable.assert_only_owner();
-    ERC721._set_token_uri(tokenId, tokenURI);
     return ();
 }
 
