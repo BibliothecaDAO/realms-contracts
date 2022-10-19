@@ -20,6 +20,7 @@ from openzeppelin.token.erc20.IERC20 import IERC20
 
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.game_structs import RealmData
+from contracts.metadata.metadata import Uri, Utils
 
 const MINT = 10000000000000000;  // 0.01ETH
 const ETH_ADDRESS = 2087021424722619777119509474943472645767659996348769578120564519014510906823;  // ETH Address
@@ -130,11 +131,14 @@ func isApprovedForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 }
 
 @view
-func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*}(
     tokenId: Uint256
-) -> (tokenURI: felt) {
-    let (tokenURI: felt) = ERC721.token_uri(tokenId);
-    return (tokenURI,);
+) -> (tokenURI_len: felt, tokenURI: felt*) {
+    alloc_locals;
+    let (name) = get_realm_name(tokenId);
+    let (realm_data: RealmData) = fetch_realm_data(tokenId);
+    let (tokenURI_len, tokenURI) = Uri.build(tokenId, name, realm_data, Utils.RealmType.Realm);
+    return (tokenURI_len, tokenURI);
 }
 
 @view
@@ -200,15 +204,6 @@ func burn{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(token
 }
 
 @external
-func setTokenURI{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    tokenId: Uint256, tokenURI: felt
-) {
-    Ownable.assert_only_owner();
-    ERC721._set_token_uri(tokenId, tokenURI);
-    return ();
-}
-
-@external
 func transferOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     newOwner: felt
 ) {
@@ -236,11 +231,20 @@ func realm_data(token_id: Uint256) -> (data: felt) {
 
 @external
 func set_realm_data{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    tokenId: Uint256, _realm_data: felt
+    tokenId: Uint256, _realm_name: felt, _realm_data: felt
 ) {
     Ownable.assert_only_owner();
+    realm_name.write(tokenId, _realm_name);
     realm_data.write(tokenId, _realm_data);
     return ();
+}
+
+@external
+func get_realm_name{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    token_id: Uint256
+) -> (realm_name: felt) {
+    let (name) = realm_name.read(token_id);
+    return (name,);
 }
 
 @external
@@ -259,20 +263,21 @@ func fetch_realm_data{
 
     let (data) = realm_data.read(realm_id);
     // add name
-    let (regions) = unpack_data(data, 0, 255);
-    let (cities) = unpack_data(data, 8, 255);
-    let (harbours) = unpack_data(data, 16, 255);
-    let (rivers) = unpack_data(data, 24, 255);
-    let (resource_number) = unpack_data(data, 32, 255);
-    let (resource_1) = unpack_data(data, 40, 255);
-    let (resource_2) = unpack_data(data, 48, 255);
-    let (resource_3) = unpack_data(data, 56, 255);
-    let (resource_4) = unpack_data(data, 64, 255);
-    let (resource_5) = unpack_data(data, 72, 255);
-    let (resource_6) = unpack_data(data, 80, 255);
-    let (resource_7) = unpack_data(data, 88, 255);
-    let (wonder) = unpack_data(data, 96, 255);
-    let (order) = unpack_data(data, 104, 255);
+    let (name) = unpack_data(data, 0, 255);
+    let (regions) = unpack_data(data, 8, 255);
+    let (cities) = unpack_data(data, 16, 255);
+    let (harbours) = unpack_data(data, 24, 255);
+    let (rivers) = unpack_data(data, 32, 255);
+    let (resource_number) = unpack_data(data, 40, 255);
+    let (resource_1) = unpack_data(data, 48, 255);
+    let (resource_2) = unpack_data(data, 56, 255);
+    let (resource_3) = unpack_data(data, 64, 255);
+    let (resource_4) = unpack_data(data, 72, 255);
+    let (resource_5) = unpack_data(data, 80, 255);
+    let (resource_6) = unpack_data(data, 88, 255);
+    let (resource_7) = unpack_data(data, 96, 255);
+    let (wonder) = unpack_data(data, 104, 255);
+    let (order) = unpack_data(data, 112, 255);
 
     let realm_stats = RealmData(
         regions=regions,

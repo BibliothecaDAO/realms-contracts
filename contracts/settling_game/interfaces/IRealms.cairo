@@ -16,6 +16,8 @@ namespace IERC165 {
 
 @contract_interface
 namespace IRealms {
+    func get_realm_name(token_id: Uint256) -> (realm_name: felt) {
+    }
     func fetch_realm_data(token_id: Uint256) -> (realm_data: RealmData) {
     }
 }
