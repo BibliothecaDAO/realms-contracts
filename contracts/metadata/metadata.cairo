@@ -138,21 +138,15 @@ namespace Utils {
 
 namespace Uri {
     // @notice build uri array from stored realm data
-    // @implicit syscall_ptr
     // @implicit bitwise_ptr
     // @implicit range_check_ptr
     // @param realm_id: id of the realm
     // @param realm_name: encoded string of the realm name
     // @param realm_data: unpacked data for realm
     // @param realm_type: type of realm (Realm or S_Realm)
-    func build{
-        syscall_ptr: felt*,
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr,
-        bitwise_ptr: BitwiseBuiltin*,
-    }(realm_id: Uint256, realm_name: felt, realm_data: RealmData, realm_type: felt) -> (
-        encoded_len: felt, encoded: felt*
-    ) {
+    func build{pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*}(
+        realm_id: Uint256, realm_name: felt, realm_data: RealmData, realm_type: felt
+    ) -> (encoded_len: felt, encoded: felt*) {
         alloc_locals;
 
         // pre-defined for reusability
@@ -290,12 +284,11 @@ namespace Uri {
     }
 
     // @notice append felts to uri array for order
-    // @implicit syscall_ptr
     // @implicit range_check_ptr
     // @param order: id of the order, if 0 nothing is appended
     // @param values_index: index in the uri array
     // @param values: uri array
-    func loop_append_resource_names{syscall_ptr: felt*, range_check_ptr}(
+    func loop_append_resource_names{range_check_ptr}(
         index: felt, resources_len: felt, resources: felt*, values_index: felt, values: felt*
     ) -> (resources_index: felt) {
         alloc_locals;
@@ -391,14 +384,13 @@ namespace Uri {
     }
 
     // @notice append felts to uri array for order
-    // @implicit syscall_ptr
     // @implicit range_check_ptr
     // @param order: id of the order, if 0 nothing is appended
     // @param values_index: index in the uri array
     // @param values: uri array
-    func append_order_name{syscall_ptr: felt*, range_check_ptr}(
-        order: felt, values_index: felt, values: felt*
-    ) -> (order_index: felt) {
+    func append_order_name{range_check_ptr}(order: felt, values_index: felt, values: felt*) -> (
+        order_index: felt
+    ) {
         if (order == 0) {
             return (values_index,);
         }
@@ -465,14 +457,14 @@ namespace Uri {
     }
 
     // @notice append felts to uri array for wonder
-    // @implicit syscall_ptr
+
     // @implicit range_check_ptr
     // @param wonder: id of the wonder, if 0 nothing is appended
     // @param values_index: index in the uri array
     // @param values: uri array
-    func append_wonder_name{syscall_ptr: felt*, range_check_ptr}(
-        wonder: felt, values_index: felt, values: felt*
-    ) -> (wonder_index: felt) {
+    func append_wonder_name{range_check_ptr}(wonder: felt, values_index: felt, values: felt*) -> (
+        wonder_index: felt
+    ) {
         if (wonder == 0) {
             return (values_index,);
         }
@@ -483,7 +475,7 @@ namespace Uri {
             assert values[values_index + 3] = Utils.WonderNames.wonder_2;
         }
         if (wonder == 3) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_2;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_3;
         }
         if (wonder == 4) {
             assert values[values_index + 3] = Utils.WonderNames.wonder_4;
@@ -513,7 +505,7 @@ namespace Uri {
             assert values[values_index + 3] = Utils.WonderNames.wonder_12;
         }
         if (wonder == 13) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_12;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_13;
         }
         if (wonder == 14) {
             assert values[values_index + 3] = Utils.WonderNames.wonder_14;
@@ -543,7 +535,7 @@ namespace Uri {
             assert values[values_index + 3] = Utils.WonderNames.wonder_22;
         }
         if (wonder == 23) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_22;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_23;
         }
         if (wonder == 24) {
             assert values[values_index + 3] = Utils.WonderNames.wonder_24;
@@ -564,34 +556,34 @@ namespace Uri {
             assert values[values_index + 3] = Utils.WonderNames.wonder_29;
         }
         if (wonder == 30) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_20;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_30;
         }
         if (wonder == 31) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_21;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_31;
         }
         if (wonder == 32) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_22;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_32;
         }
-        if (wonder == 32) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_22;
+        if (wonder == 33) {
+            assert values[values_index + 3] = Utils.WonderNames.wonder_33;
         }
         if (wonder == 34) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_24;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_34;
         }
         if (wonder == 35) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_25;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_35;
         }
         if (wonder == 36) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_26;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_36;
         }
         if (wonder == 37) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_27;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_37;
         }
         if (wonder == 38) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_28;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_38;
         }
         if (wonder == 39) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_29;
+            assert values[values_index + 3] = Utils.WonderNames.wonder_39;
         }
         if (wonder == 40) {
             assert values[values_index + 3] = Utils.WonderNames.wonder_40;
@@ -602,8 +594,8 @@ namespace Uri {
         if (wonder == 42) {
             assert values[values_index + 3] = Utils.WonderNames.wonder_42;
         }
-        if (wonder == 42) {
-            assert values[values_index + 3] = Utils.WonderNames.wonder_42;
+        if (wonder == 43) {
+            assert values[values_index + 3] = Utils.WonderNames.wonder_43;
         }
         if (wonder == 44) {
             assert values[values_index + 3] = Utils.WonderNames.wonder_44;
@@ -645,7 +637,7 @@ namespace Uri {
     }
 
     // @notice append ascii encoding of each number in felt
-    // @implicit syscall_ptr
+
     // @implicit range_check_ptr
     // @param num: number to encode
     // @param arr: array to append encoding
@@ -666,7 +658,7 @@ namespace Uri {
     }
 
     // @notice append ascii encoding of each number in uint256
-    // @implicit syscall_ptr
+
     // @implicit range_check_ptr
     // @param num: number to encode
     // @param arr: array to append encoding
