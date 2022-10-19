@@ -12,17 +12,10 @@
 
 %lang starknet
 
-from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
+from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
-from starkware.cairo.common.math import assert_not_zero, assert_lt
-from starkware.cairo.common.uint256 import (
-    Uint256,
-    uint256_add,
-    uint256_sub,
-    uint256_le,
-    uint256_lt,
-    uint256_check,
-)
+from starkware.cairo.common.math import assert_not_zero
+from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.bool import TRUE, FALSE
 
 from openzeppelin.token.erc721.IERC721 import IERC721
@@ -64,24 +57,11 @@ namespace Module {
     func only_approved{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
         alloc_locals;
         let (success) = _only_approved();
-        let (self) = check_self();
-        assert_not_zero(success + self);
-        return ();
-    }
 
-    // @notice Checks if the caller address == contract address
-    // @return success: 1 if successful, 0 otherwise
-    func check_self{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
-        success: felt
-    ) {
-        let (caller) = get_caller_address();
-        let (contract_address) = get_contract_address();
-
-        if (caller == contract_address) {
-            return (TRUE,);
+        with_attr error_message("MODULE: No write access") {
+            assert success = TRUE;
         }
-
-        return (FALSE,);
+        return ();
     }
 
     // @notice Checks if the arbiter calls the module

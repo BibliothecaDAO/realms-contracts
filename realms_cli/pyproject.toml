@@ -105,6 +105,9 @@ cairo-nile = "^0.5.0"
 "transfer_to" = "realms_cli.admin.main.transfer_to"
 "set_xoroshiro" = "realms_cli.admin.main.set_xoroshiro"
 "zero_dead_squads" = "realms_cli.admin.main.zero_dead_squads"
+"check_module" = "realms_cli.admin.main.check_module"
+"check_address_module" = "realms_cli.admin.main.check_address_module"
+"get_write_access" = "realms_cli.admin.main.get_write_access"
 
 #-----------MARKET
 "set_initial_liq" = "realms_cli.exchange.admin.set_initial_liq"

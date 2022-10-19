@@ -4,7 +4,7 @@ from realms_cli.deployer import logged_deploy
 from realms_cli.config import Config
 import time
 
-token_path = 'settling_game/tokens/'
+token_path = 'settling_game/'
 
 
 Contracts = namedtuple('Contracts', 'alias contract_name address')
@@ -19,8 +19,8 @@ Contracts = namedtuple('Contracts', 'alias contract_name address')
 # 6. Set token contract approval if needed - Resources etc
 
 NEW_MODULES = [
-    Contracts("Realms_ERC721_Mintable", "Realms_ERC721_Mintable", token_path +
-              "Realms_ERC721_Mintable", ),
+    Contracts("ModuleController", "ModuleController", token_path +
+              "ModuleController", ),
     # Contracts("s_realms", "S_Realms_ERC721_Mintable"),
     # Contracts("Resources_ERC1155_Mintable_Burnable", "Resources_ERC1155_Mintable_Burnable", token_path +
     #           "Realms_ERC721_Mintable"),
@@ -50,7 +50,7 @@ def run(nre):
                     f.write(line)
             f.truncate()
 
-        compile(contract_alias="contracts/settling_game/tokens/" +
+        compile(contract_alias="contracts/settling_game/" +
                 contract.contract_name + ".cairo")
 
         logged_deploy(
@@ -60,12 +60,12 @@ def run(nre):
             arguments=[],
         )
 
-        time.sleep(60)
+        time.sleep(200)
 
         class_hash = wrapped_declare(
             config.ADMIN_ALIAS, contract.address, nre.network, contract.alias)
 
-        time.sleep(60)
+        time.sleep(200)
 
         wrapped_send(
             network=config.nile_network,

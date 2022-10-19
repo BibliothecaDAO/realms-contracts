@@ -1,5 +1,5 @@
 import click
-from realms_cli.caller_invoker import wrapped_send, compile, deploy, wrapped_declare
+from realms_cli.caller_invoker import wrapped_call, wrapped_send, compile, deploy, wrapped_declare
 from realms_cli.config import Config
 from realms_cli.utils import uint
 import time
@@ -83,12 +83,12 @@ def upgrade_module(module_name, network):
         alias=module_name
     )
 
-    time.sleep(60)
+    time.sleep(120)
 
     class_hash = wrapped_declare(
         config.ADMIN_ALIAS, name, network, module_name)
 
-    time.sleep(60)
+    time.sleep(120)
 
     wrapped_send(
         network=config.nile_network,
@@ -162,3 +162,65 @@ def zero_dead_squads(network, token_id):
         function="zero_dead_squads",
         arguments=[token_id, 0],
     )
+
+
+@click.command()
+@click.argument("token_id", nargs=1)
+@click.option("--network", default="goerli")
+def check_module(network, token_id):
+    """
+    Checks module address
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias=config.Module_Controller_alias,
+        function="get_module_address",
+        arguments=[
+            token_id,  # uint 1
+        ],
+    )
+    print(out)
+
+
+@click.command()
+@click.argument("address", nargs=1)
+@click.option("--network", default="goerli")
+def check_address_module(network, address):
+    """
+    Checks module address
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias=config.Module_Controller_alias,
+        function="get_module_id_of_address",
+        arguments=[
+            address,  # uint 1
+        ],
+    )
+    print(out)
+
+
+@click.command()
+@click.argument("address_from", nargs=1)
+@click.argument("address_to", nargs=1)
+@click.option("--network", default="goerli")
+def get_write_access(network, address_from, address_to):
+    """
+    Checks module address
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias=config.Module_Controller_alias,
+        function="get_write_access",
+        arguments=[
+            address_from,  # uint 1
+            address_to
+        ],
+    )
+    print(out)

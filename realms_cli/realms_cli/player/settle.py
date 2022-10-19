@@ -1,16 +1,10 @@
-# First, import click dependency
 import json
 import click
-
 from nile.core.account import Account
-
 from realms_cli.caller_invoker import call_multi, wrapped_call, wrapped_send
 from realms_cli.config import Config
 from realms_cli.utils import parse_multi_input
 from realms_cli.binary_converter import map_realm
-
-realms_alias = 'proxy_Realms_ERC721_Mintable'
-settling_alias = 'proxy_Settling'
 
 
 @click.command()
@@ -30,7 +24,7 @@ def mint_realm(quantity, network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias=realms_alias,
+        contract_alias=config.Realms_ERC721_Mintable_alias,
         function="mint",
         arguments=calldata
     )
@@ -47,7 +41,7 @@ def approve_realm(network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias=realms_alias,
+        contract_alias=config.Realms_ERC721_Mintable_alias,
         function="setApprovalForAll",
         arguments=[
             config.SETTLING_PROXY_ADDRESS,
@@ -74,7 +68,7 @@ def settle(realm_token_id, network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias=settling_alias,
+        contract_alias=config.Settling_alias,
         function="settle",
         arguments=calldata
     )
@@ -98,7 +92,7 @@ def unsettle(realm_token_id, network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias=settling_alias,
+        contract_alias=config.Settling_alias,
         function="unsettle",
         arguments=calldata,
     )
@@ -127,7 +121,7 @@ def set_realm_data(realm_token_id, network):
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
-        contract_alias=realms_alias,
+        contract_alias=config.Realms_ERC721_Mintable_alias,
         function="set_realm_data",
         arguments=calldata,
     )
@@ -148,7 +142,7 @@ def check_realms(address, network) -> str:
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_realms",
+        contract_alias=config.Realms_ERC721_Mintable_alias,
         function="balanceOf",
         arguments=[address],
     )
@@ -170,7 +164,7 @@ def check_s_realms(address, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_s_realms",
+        contract_alias=config.S_Realms_ERC721_Mintable_alias,
         function="balanceOf",
         arguments=[address],
     )
@@ -188,7 +182,7 @@ def check_owner_of_realm(realm_token_id, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_realms",
+        contract_alias=config.Realms_ERC721_Mintable_alias,
         function="ownerOf",
         arguments=[realm_token_id, 0],
     )
@@ -206,7 +200,7 @@ def check_owner_of_s_realm(realm_token_id, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_s_realms",
+        contract_alias=config.S_Realms_ERC721_Mintable_alias,
         function="ownerOf",
         arguments=[realm_token_id, 0],
     )
@@ -224,7 +218,7 @@ def get_realm_data(realm_token_id, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_realms",
+        contract_alias=config.Realms_ERC721_Mintable_alias,
         function="get_realm_info",
         arguments=[realm_token_id, 0],
     )
@@ -243,7 +237,7 @@ def get_owned(address, network):
     # out = check_realms(address, network)
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_realms",
+        contract_alias=config.Realms_ERC721_Mintable_alias,
         function="balanceOf",
         arguments=[int(address or config.USER_ADDRESS, 16)],
     )
@@ -260,7 +254,7 @@ def get_owned(address, network):
 
     stdout = call_multi(
         network=config.nile_network,
-        contract_alias="proxy_realms",
+        contract_alias=config.Realms_ERC721_Mintable_alias,
         function="tokenOfOwnerByIndex",
         calldata=calldata,
     )
@@ -275,7 +269,7 @@ def get_owned(address, network):
 
     out = wrapped_call(
         network=config.nile_network,
-        contract_alias="proxy_s_realms",
+        contract_alias=config.S_Realms_ERC721_Mintable_alias,
         function="balanceOf",
         arguments=[int(address or config.USER_ADDRESS, 16)],
     )
@@ -291,7 +285,7 @@ def get_owned(address, network):
 
     stdout = call_multi(
         network=config.nile_network,
-        contract_alias="proxy_s_realms",
+        contract_alias=config.S_Realms_ERC721_Mintable_alias,
         function="tokenOfOwnerByIndex",
         calldata=calldata,
     )

@@ -106,26 +106,26 @@ func claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     alloc_locals;
     let (caller) = get_caller_address();
 
-    // CONTRACT ADDRESSES
+    // contracts
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms);
     let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms);
     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources);
 
     // modules
     let (settling_logic_address) = Module.get_module_address(ModuleIds.Settling);
-    let (goblin_town_address) = Module.get_module_address(ModuleIds.GoblinTown);
+    // let (goblin_town_address) = Module.get_module_address(ModuleIds.GoblinTown);
 
     // check if there's no goblin town on realm
-    with_attr error_message("RESOURCES: Goblin Town present") {
-        let (_, spawn_ts) = IGoblinTown.get_strength_and_timestamp(goblin_town_address, token_id);
-        let (now) = get_block_timestamp();
-        assert_le(spawn_ts, now);
-    }
+    // with_attr error_message("RESOURCES: Goblin Town present") {
+    //     let (_, spawn_ts) = IGoblinTown.get_strength_and_timestamp(goblin_town_address, token_id);
+    //     let (now) = get_block_timestamp();
+    //     assert_le(spawn_ts, now);
+    // }
 
-    // FETCH OWNER
+    // owner
     let (owner) = IERC721.ownerOf(s_realms_address, token_id);
 
-    // ALLOW RESOURCE LOGIC ADDRESS TO CLAIM, BUT STILL RESTRICT
+    // only settling can claim
     if (caller != settling_logic_address) {
         Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms);
         tempvar syscall_ptr = syscall_ptr;
@@ -200,30 +200,30 @@ func claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
         data,
     );
 
-    let check_wonder = is_le(0, realms_data.wonder);
-    if (check_wonder == 1) {
-        let (wonder_resources_claim_ids: Uint256*) = alloc();
-        let (wonder_resources_claim_amounts: Uint256*) = alloc();
-        loop_wonder_resources_claim(
-            0, 22, total_days, wonder_resources_claim_ids, wonder_resources_claim_amounts
-        );
+    // let check_wonder = is_le(0, realms_data.wonder);
+    // if (check_wonder == 1) {
+    //     let (wonder_resources_claim_ids: Uint256*) = alloc();
+    //     let (wonder_resources_claim_amounts: Uint256*) = alloc();
+    //     loop_wonder_resources_claim(
+    //         0, 22, total_days, wonder_resources_claim_ids, wonder_resources_claim_amounts
+    //     );
 
-        let (local data: felt*) = alloc();
-        assert data[0] = 0;
+    // let (local data: felt*) = alloc();
+    //     assert data[0] = 0;
 
-        // MINT WONDER RESOURCES TO HOLDER
-        IERC1155.mintBatch(
-            resources_address,
-            owner,
-            22,
-            wonder_resources_claim_ids,
-            22,
-            wonder_resources_claim_amounts,
-            1,
-            data,
-        );
-        return ();
-    }
+    // // MINT WONDER RESOURCES TO HOLDER
+    //     IERC1155.mintBatch(
+    //         resources_address,
+    //         owner,
+    //         22,
+    //         wonder_resources_claim_ids,
+    //         22,
+    //         wonder_resources_claim_amounts,
+    //         1,
+    //         data,
+    //     );
+    //     return ();
+    // }
 
     return ();
 }

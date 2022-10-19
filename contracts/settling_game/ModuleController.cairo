@@ -177,6 +177,16 @@ func get_module_address{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_ch
     return address_of_module_id.read(module_id);
 }
 
+// @notice Get module address
+// @param module_id: Module id
+// @return address: Module address
+@view
+func get_module_id_of_address{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    address: felt
+) -> (module_id: felt) {
+    return module_id_of_address.read(address);
+}
+
 // @notice Get external contract address
 // @param external_contract_id: External contract id
 // @return address: External contract address
@@ -211,6 +221,17 @@ func get_xoroshiro{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
 ) {
     return xoroshiro_address.read();
 }
+
+// @notice Called to authorise write access of one module to another.
+// @param module_id_doing_writing: Writer module id
+// @param module_id_being_written_to: Module id being written to
+@external
+func get_write_access{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    module_id_doing_writing: felt, module_id_being_written_to: felt
+) -> (bool: felt) {
+    return can_write_to.read(module_id_doing_writing, module_id_being_written_to);
+}
+
 // -----------------------------------
 // INTERNALS
 // -----------------------------------

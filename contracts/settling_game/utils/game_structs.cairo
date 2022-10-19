@@ -5,6 +5,7 @@
 // MIT License
 %lang starknet
 from starkware.cairo.common.uint256 import Uint256
+from contracts.settling_game.utils.constants import DAY
 
 namespace TraitsIds {
     const Region = 1;
@@ -104,15 +105,15 @@ namespace BuildingsPopulation {
 }
 
 namespace BuildingsIntegrityLength {
-    const House = 3600;
+    const House = DAY * 3;
     const StoreHouse = 2000;
     const Granary = 2000;
     const Farm = 2000;
     const FishingVillage = 2000;
-    const Barracks = 37319;
-    const MageTower = 37319;
-    const ArcherTower = 37319;
-    const Castle = 37319;
+    const Barracks = DAY * 7;
+    const MageTower = DAY * 7;
+    const ArcherTower = DAY * 7;
+    const Castle = DAY * 7;
 }
 
 namespace BuildingsTroopIndustry {
