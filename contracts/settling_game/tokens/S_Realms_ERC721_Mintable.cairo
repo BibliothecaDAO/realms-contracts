@@ -131,6 +131,7 @@ func isApprovedForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*}(
     tokenId: Uint256
 ) -> (tokenURI_len: felt, tokenURI: felt*) {
+    alloc_locals;
     let (controller) = Module.controller_address();
     let (realms_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Realms
