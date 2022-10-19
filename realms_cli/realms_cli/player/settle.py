@@ -293,3 +293,23 @@ def get_owned(address, network):
     realm_ids = [int(realm_id.strip(" 0\n")) for realm_id in stdout]
     realm_ids.sort()
     print(",".join(map(str, realm_ids)))
+
+
+@click.command()
+@click.argument("realm_token_id", nargs=1)
+@click.option("--network", default="goerli")
+def claim_lords(realm_token_id, network):
+    """
+    Transfer Lords  2391140167327979619938051357136306508268704638528932947906243138584057924271
+    """
+    config = Config(nile_network=network)
+    wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias=config.GoblinTown_alias,
+        function="lords_faucet",
+        arguments=[
+            realm_token_id,
+            0,
+        ],
+    )

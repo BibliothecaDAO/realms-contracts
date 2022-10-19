@@ -5,6 +5,7 @@ import time
 import json
 from realms_cli.binary_converter import map_realm
 from realms_cli.utils import uint
+from realms_cli.utils import str_to_felt
 
 per_set = 50
 total = 8000
@@ -25,8 +26,8 @@ def run(nre):
         myList = list(range((i * per_set), (per_set * (i + 1))))
 
         calldata = [
-            [id + 1, 0, map_realm(realms[str(id + 1)],
-                                  resources, wonders, orders)]
+            [id + 1, 0, str_to_felt(realms[str(id + 1)]['name']), map_realm(realms[str(id + 1)],
+                                                                            resources, wonders, orders)]
             for id in myList
         ]
         print(calldata)

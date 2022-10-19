@@ -1,8 +1,8 @@
 from collections import namedtuple
-from realms_cli.caller_invoker import wrapped_send, wrapped_declare
+from realms_cli.caller_invoker import wrapped_send, wrapped_declare, compile
 from realms_cli.deployer import logged_deploy
 from realms_cli.config import Config, strhex_as_strfelt, safe_load_deployment
-
+import time
 
 ModuleContracts = namedtuple('Contracts', 'contract_name alias id')
 
@@ -29,24 +29,31 @@ def run(nre):
 
     #---------------- SET MODULES  ----------------#
 
-    for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
+    # for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
 
-        logged_deploy(
-            nre,
-            contract.alias,
-            alias=contract.alias,
-            arguments=[],
-        )
+    #     compile(
+    #         contract_alias="contracts/settling_game/modules/goblintown/GoblinTown.cairo")
 
-        class_hash = wrapped_declare(
-            config.ADMIN_ALIAS, contract.contract_name, nre.network, contract.alias)
+    #     logged_deploy(
+    #         nre,
+    #         contract.alias,
+    #         alias=contract.alias,
+    #         arguments=[],
+    #     )
 
-        logged_deploy(
-            nre,
-            'PROXY_Logic',
-            alias='proxy_' + contract.alias,
-            arguments=[class_hash],
-        )
+    #     time.sleep(150)
+
+    #     class_hash = wrapped_declare(
+    #         config.ADMIN_ALIAS, contract.contract_name, nre.network, contract.alias)
+
+    #     time.sleep(150)
+
+    #     logged_deploy(
+    #         nre,
+    #         'PROXY_Logic',
+    #         alias='proxy_' + contract.alias,
+    #         arguments=[class_hash],
+    #     )
 
     #---------------- INIT MODULES  ----------------#
 
@@ -61,19 +68,19 @@ def run(nre):
             contract_alias="proxy_" + contract.alias,
             function="initializer",
             arguments=[
-                config.CONTROLLER_ADDRESS, config.ADMIN_ADDRESS],
+                config.CONTROLLER_PROXY_ADDRESS, config.ADMIN_ADDRESS],
         )
 
-        wrapped_send(
-            network=config.nile_network,
-            signer_alias=config.ADMIN_ALIAS,
-            contract_alias="proxy_Arbiter",
-            function="appoint_contract_as_module",
-            arguments=[
-                module,
-                contract.id
-            ],
-        )
+        # wrapped_send(
+        #     network=config.nile_network,
+        #     signer_alias=config.ADMIN_ALIAS,
+        #     contract_alias=config.Arbiter_alias,
+        #     function="appoint_contract_as_module",
+        #     arguments=[
+        #         module,
+        #         contract.id
+        #     ],
+        # )
 
         # wrapped_send(
         #     network=config.nile_network,

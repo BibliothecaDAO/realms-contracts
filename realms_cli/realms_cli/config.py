@@ -22,6 +22,7 @@ class ContractAlias(auto):
     Travel = 'Travel'
     Food = 'Food'
     Relics = 'Relics'
+    GoblinTown = 'GoblinTown'
     Lords_ERC20_Mintable = 'Lords_ERC20_Mintable'
     Realms_ERC721_Mintable = 'Realms_ERC721_Mintable'
     S_Realms_ERC721_Mintable = 'S_Realms_ERC721_Mintable'
@@ -71,6 +72,7 @@ class Config:
         self.Food_alias = "proxy_" + ContractAlias.Food
         self.Travel_alias = "proxy_" + ContractAlias.Travel
         self.Relics_alias = "proxy_" + ContractAlias.Relics
+        self.GoblinTown_alias = "proxy_" + ContractAlias.GoblinTown
 
         self.Lords_ERC20_Mintable_alias = "proxy_" + ContractAlias.Lords_ERC20_Mintable
         self.Realms_ERC721_Mintable_alias = "proxy_" + \
@@ -96,6 +98,11 @@ class Config:
             ContractAlias.Arbiter, self.nile_network)
         self.CONTROLLER_ADDRESS, _ = safe_load_deployment(
             ContractAlias.ModuleController, self.nile_network)
+
+        self.ARBITER_PROXY_ADDRESS, _ = safe_load_deployment(
+            "proxy_" + ContractAlias.Arbiter, self.nile_network)
+        self.CONTROLLER_PROXY_ADDRESS, _ = safe_load_deployment(
+            "proxy_" + ContractAlias.ModuleController, self.nile_network)
 
         self.LORDS_ADDRESS, _ = safe_load_deployment(
             ContractAlias.Lords_ERC20_Mintable, self.nile_network)
