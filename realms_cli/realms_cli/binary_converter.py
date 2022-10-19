@@ -2,6 +2,7 @@
 
 import json
 
+
 def decimal_to_binary(n, chunksize):
     bit = []
 
@@ -59,7 +60,8 @@ def map_realm(value, resources, wonders, orders):
             for index, w in enumerate(wonders):
                 if w["trait"] == a['value']:
                     # adds index in arrary TODO: Hardcode Ids
-                    wonder.append(index + 1)
+                    wonder.append(w["value"])
+                    print(w["value"])
 
         # add order
         if a['trait_type'] == "Order":
@@ -104,11 +106,11 @@ def map_crypt(value, environments, affinities):
         if e["name"] == environment_name:
             environment.append(e["id"])
 
-    resourceIds = [23 + int(environment[0])]   # Crypts resources are 23->28. Environments start at id 0 in our json.
-    
+    # Crypts resources are 23->28. Environments start at id 0 in our json.
+    resourceIds = [23 + int(environment[0])]
+
     # resource length to help with iteration in app
     # resourceLength = [1]  # We only have 1 resource per dungeon
-
 
     # legendary is used as a multiplier for resource output
     legendary.append(value["legendary"])  # 1 is true, 0 is false
@@ -127,10 +129,12 @@ def map_crypt(value, environments, affinities):
             affinity[0] = a["id"]
 
     # concat all together
-    meta = resourceIds + environment + legendary + size + numDoors + numPoints + affinity
+    meta = resourceIds + environment + legendary + \
+        size + numDoors + numPoints + affinity
 
     # We pack the crypts with 6 bits as our largest number is 55
     return decimal_to_binary(meta, 6)
+
 
 if __name__ == '__main__':
 

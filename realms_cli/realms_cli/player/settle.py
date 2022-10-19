@@ -117,6 +117,7 @@ def set_realm_data(realm_token_id, network):
         [id, 0, map_realm(realms[str(id)], resources, wonders, orders)]
         for id in realm_token_ids
     ]
+    print(calldata)
 
     wrapped_send(
         network=config.nile_network,
