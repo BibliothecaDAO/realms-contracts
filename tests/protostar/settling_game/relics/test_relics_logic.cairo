@@ -158,6 +158,14 @@ func test_claim_order_relic{
     // check relic of same order was returned
     assert owner_id_1 = Uint256(1, 0);
     assert owner_id_4 = Uint256(4, 0);
+    // intitiate battles again to check array was updated correctly
+    Relics.set_relic_holder(Relics_address, Uint256(2, 0), Uint256(1, 0));
+    Relics.set_relic_holder(Relics_address, Uint256(2, 0), Uint256(4, 0));
+    Relics.set_relic_holder(Relics_address, Uint256(3, 0), Uint256(2, 0));
+    let (repeat_owner_id_1) = Relics.get_current_relic_holder(Relics_address, Uint256(1, 0));
+    let (repeat_owner_id_4) = Relics.get_current_relic_holder(Relics_address, Uint256(4, 0));
+    assert owner_id_1 = Uint256(1, 0);
+    assert owner_id_4 = Uint256(4, 0);
     return ();
 }
 

@@ -14,6 +14,7 @@ from starkware.cairo.common.default_dict import default_dict_new, default_dict_f
 from starkware.cairo.common.hash_state import hash_init, hash_update, HashState
 from starkware.cairo.common.math import assert_le, unsigned_div_rem
 from starkware.cairo.common.pow import pow
+from starkware.cairo.common.uint256 import Uint256
 
 from contracts.settling_game.utils.game_structs import Cost
 from contracts.settling_game.utils.pow2 import pow2

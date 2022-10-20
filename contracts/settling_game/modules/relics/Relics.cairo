@@ -102,15 +102,16 @@ func set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
     // If old owner exists, update array
     let (check_exists) = uint256_lt(Uint256(0, 0), old_owner_token_id);
 
-    let (remove_relics: Uint256*) = alloc();
+    let (remove_victory_relics: Uint256*) = alloc();
+    let (remove_order_relics: Uint256*) = alloc();
 
     // Capture Relic if owned by loser
     // If Relic is owned by loser, send to victor
     if (is_equal == TRUE) {
         if (check_exists == TRUE) {
             let (loser_relics_len) = owned_relics_len.read(loser_token_id);
-            assert remove_relics[0] = loser_token_id;
-            loop_remove_relic(0, 0, loser_relics_len, old_owner_token_id, 1, remove_relics);
+            assert remove_victory_relics[0] = loser_token_id;
+            loop_remove_relic(0, 0, loser_relics_len, loser_token_id, 1, remove_victory_relics);
             tempvar syscall_ptr = syscall_ptr;
             tempvar range_check_ptr = range_check_ptr;
             tempvar pedersen_ptr = pedersen_ptr;
@@ -138,10 +139,10 @@ func set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
     let (loser_relics_len) = owned_relics_len.read(loser_token_id);
 
     let (remove_relics_len) = loop_claim_order_relic(
-        0, realms_address, winner_realm_data, loser_token_id, loser_relics_len, 0, remove_relics
+        0, realms_address, winner_realm_data, loser_token_id, loser_relics_len, 0, remove_order_relics
     );
 
-    return loop_remove_relic(0, 0, loser_relics_len, old_owner_token_id, remove_relics_len, remove_relics);
+    return loop_remove_relic(0, 0, loser_relics_len, loser_token_id, remove_relics_len, remove_order_relics);
 }
 
 // @notice loop loser relic and return if order of winner matches holder
