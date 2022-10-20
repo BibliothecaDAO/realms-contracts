@@ -136,10 +136,17 @@ run_setup () {
     update_bashrc
 
     # compile contracts
-    nile compile
+    # nile compile
     nile compile lib/cairo_contracts/src/openzeppelin/account/presets/Account.cairo --account_contract
 
-cat <<EOT > goerli.deployments.txt
+    GOERLI_DEPLOYMENTS_FILE=goerli.deployments.txt
+    # If the system already has a goerli deployments file
+    if [ -f "$GOERLI_DEPLOYMENTS_FILE" ]; then
+        # back it up before we overwrite it just in case
+        cp $GOERLI_DEPLOYMENTS_FILE $GOERLI_DEPLOYMENTS_FILE.backup
+    fi
+
+cat <<EOT > $GOERLI_DEPLOYMENTS_FILE
 0x00155e87abe207e81645c236df829448268f636d41bf5851e5e39e27af5324ed:artifacts/abis/Lords_ERC20_Mintable.json:lords
 0x0448549cccff35dc6d5df90efceda3123e4cec9fa2faff21d392c4a92e95493c:artifacts/abis/Lords_ERC20_Mintable.json:proxy_lords
 0x076bb5a142fa1d9c5d3a46eefaec38cc32b44e093432b1eb46466ea124f848a5:artifacts/abis/Realms_ERC721_Mintable.json:proxy_realms
@@ -186,7 +193,14 @@ cat <<EOT > goerli.deployments.txt
 $STARKNET_ACCOUNT_ADDRESS:/usr/local/lib/python3.9/site-packages/nile/artifacts/abis/Account.json:account-0
 EOT
 
-cat <<EOT > goerli.accounts.json
+GOERLI_ACCOUNTS_JSON_FILE=goerli.accounts.json
+# if the system already has a goerli accoounts file
+if [ -f "$GOERLI_ACCOUNTS_JSON_FILE" ]; then
+    # back it up before we overwrite it just in case
+    cp $GOERLI_ACCOUNTS_JSON_FILE $GOERLI_ACCOUNTS_JSON_FILE.backup
+fi
+
+cat <<EOT > $GOERLI_ACCOUNTS_JSON_FILE
 {"$STARKNET_PUBLIC_KEY": {"address": "$STARKNET_ACCOUNT_ADDRESS", "index": 0, "alias": "STARKNET_PRIVATE_KEY"}}
 EOT
     pip install realms_cli/
