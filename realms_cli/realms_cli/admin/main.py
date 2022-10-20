@@ -33,15 +33,15 @@ def mint_resources(network):
     uints.append("0")
 
     for i in range(n_resources):
-        amounts.append(100000000 * 10 ** 18)
+        amounts.append(1000 * 10 ** 18)
         amounts.append(0)
 
     wrapped_send(
         network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_resources",
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias=config.Resources_ERC1155_Mintable_Burnable_alias,
         function="mintBatch",
-        arguments=[int('0x07Deb0dA237EE37276489278FE16EFF3E6A3d62F830446104D93C892df771cA2', 16), n_resources,
+        arguments=[int('0x04649766c7c55a0ca90F18b8c6a20f990e77dE5a5C65E369C75A001668f6726C', 16), n_resources,
                    *uints, n_resources, *amounts, 1, 1],
     )
 
@@ -83,12 +83,12 @@ def upgrade_module(module_name, network):
         alias=module_name
     )
 
-    time.sleep(120)
+    time.sleep(200)
 
     class_hash = wrapped_declare(
         config.ADMIN_ALIAS, name, network, module_name)
 
-    time.sleep(120)
+    time.sleep(200)
 
     wrapped_send(
         network=config.nile_network,

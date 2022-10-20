@@ -606,4 +606,50 @@ namespace Combat {
         dw BattalionStatistics.Attack.LightInfantry;
         dw BattalionStatistics.Attack.HeavyInfantry;
     }
+
+    func flatten_ids{range_check_ptr}(
+        battalion_ids_len: felt,
+        battalion_ids: felt*,
+        battalion_qty_len: felt,
+        battalion_qty: felt*,
+        all_ids: felt*,
+    ) {
+        alloc_locals;
+
+        if (battalion_ids_len == 0) {
+            return ();
+        }
+
+        flatten_recursive([battalion_qty], all_ids, [battalion_ids]);
+
+        return flatten_ids(
+            battalion_ids_len - 1,
+            battalion_ids + 1,
+            battalion_qty_len - 1,
+            battalion_qty + 1,
+            all_ids + [battalion_qty],
+        );
+    }
+
+    func flatten_recursive{range_check_ptr}(len_all_ids: felt, all_ids: felt*, id: felt) {
+        alloc_locals;
+
+        if (len_all_ids == 0) {
+            return ();
+        }
+
+        assert [all_ids] = id;
+
+        return flatten_recursive(len_all_ids - 1, all_ids + 1, id);
+    }
+
+    func id_length{range_check_ptr}(all_qtys_len: felt, all_qtys: felt*, id: felt) -> felt {
+        alloc_locals;
+
+        if (all_qtys_len == 0) {
+            return (id);
+        }
+
+        return id_length(all_qtys_len - 1, all_qtys + 1, id + [all_qtys]);
+    }
 }

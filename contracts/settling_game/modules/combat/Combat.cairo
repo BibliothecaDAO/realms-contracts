@@ -181,14 +181,20 @@ func build_army_from_battalions{
 
     Combat.assert_can_build_battalions(battalion_ids_len, battalion_ids, realm_buildings);
 
+    // convert ids to flattened array and get new length
+    let (ids_for_costs: felt*) = alloc();
+    Combat.flatten_ids(
+        battalion_ids_len, battalion_ids, battalion_quantity_len, battalion_quantity, ids_for_costs
+    );
+    let ids_for_costs_len = Combat.id_length(battalion_quantity_len, battalion_quantity, 0);
+
     // get the Cost for every Troop to build
-    // TODO: add in QUANTITY of battalions being built -> this is only getting 1 cost value
     let (battalion_costs: Cost*) = alloc();
-    load_battalion_costs(battalion_ids_len, battalion_ids, battalion_costs);
+    load_battalion_costs(ids_for_costs_len, ids_for_costs, battalion_costs);
 
     // transform costs into tokens
     let (token_len: felt, token_ids: Uint256*, token_values: Uint256*) = transform_costs_to_tokens(
-        battalion_ids_len, battalion_costs, 1
+        ids_for_costs_len, battalion_costs, 1
     );
 
     // pay for the battalions
