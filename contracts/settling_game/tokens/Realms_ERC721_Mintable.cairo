@@ -125,9 +125,9 @@ func isApprovedForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 }
 
 @view
-func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*}(
-    tokenId: Uint256
-) -> (tokenURI_len: felt, tokenURI: felt*) {
+func tokenURI{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(tokenId: Uint256) -> (tokenURI_len: felt, tokenURI: felt*) {
     alloc_locals;
     let (name) = get_realm_name(tokenId);
     let (realm_data: RealmData) = fetch_realm_data(tokenId);
@@ -253,21 +253,20 @@ func fetch_realm_data{
 
     let (data) = realm_data.read(realm_id);
     // add name
-    let (name) = unpack_data(data, 0, 255);
-    let (regions) = unpack_data(data, 8, 255);
-    let (cities) = unpack_data(data, 16, 255);
-    let (harbours) = unpack_data(data, 24, 255);
-    let (rivers) = unpack_data(data, 32, 255);
-    let (resource_number) = unpack_data(data, 40, 255);
-    let (resource_1) = unpack_data(data, 48, 255);
-    let (resource_2) = unpack_data(data, 56, 255);
-    let (resource_3) = unpack_data(data, 64, 255);
-    let (resource_4) = unpack_data(data, 72, 255);
-    let (resource_5) = unpack_data(data, 80, 255);
-    let (resource_6) = unpack_data(data, 88, 255);
-    let (resource_7) = unpack_data(data, 96, 255);
-    let (wonder) = unpack_data(data, 104, 255);
-    let (order) = unpack_data(data, 112, 255);
+    let (regions) = unpack_data(data, 0, 255);
+    let (cities) = unpack_data(data, 8, 255);
+    let (harbours) = unpack_data(data, 16, 255);
+    let (rivers) = unpack_data(data, 24, 255);
+    let (resource_number) = unpack_data(data, 32, 255);
+    let (resource_1) = unpack_data(data, 40, 255);
+    let (resource_2) = unpack_data(data, 48, 255);
+    let (resource_3) = unpack_data(data, 56, 255);
+    let (resource_4) = unpack_data(data, 64, 255);
+    let (resource_5) = unpack_data(data, 72, 255);
+    let (resource_6) = unpack_data(data, 80, 255);
+    let (resource_7) = unpack_data(data, 88, 255);
+    let (wonder) = unpack_data(data, 96, 255);
+    let (order) = unpack_data(data, 104, 255);
 
     let realm_stats = RealmData(
         regions=regions,

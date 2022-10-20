@@ -128,9 +128,9 @@ func isApprovedForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 }
 
 @view
-func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*}(
-    tokenId: Uint256
-) -> (tokenURI_len: felt, tokenURI: felt*) {
+func tokenURI{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(tokenId: Uint256) -> (tokenURI_len: felt, tokenURI: felt*) {
     alloc_locals;
     let (controller) = Module.controller_address();
     let (realms_address) = IModuleController.get_external_contract_address(
@@ -138,7 +138,9 @@ func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, b
     );
     let (realm_name) = IRealms.get_realm_name(realms_address, tokenId);
     let (realm_data: RealmData) = IRealms.fetch_realm_data(realms_address, tokenId);
-    let (tokenURI_len, tokenURI) = Uri.build(tokenId, realm_name, realm_data, Utils.RealmType.S_Realm);
+    let (tokenURI_len, tokenURI) = Uri.build(
+        tokenId, realm_name, realm_data, Utils.RealmType.S_Realm
+    );
     return (tokenURI_len, tokenURI);
 }
 

@@ -24,7 +24,9 @@ namespace Realms {
 
 @contract_interface
 namespace S_Realms {
-    func initializer(name: felt, symbol: felt, proxy_admin: felt, modeule_controller_address: felt) {
+    func initializer(
+        name: felt, symbol: felt, proxy_admin: felt, modeule_controller_address: felt
+    ) {
     }
 
     func tokenURI(tokenId: Uint256) -> (tokenUri_len: felt, tokenUri: felt*) {
