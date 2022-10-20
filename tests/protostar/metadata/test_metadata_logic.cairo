@@ -24,7 +24,9 @@ namespace Realms {
 
 @contract_interface
 namespace S_Realms {
-    func initializer(name: felt, symbol: felt, proxy_admin: felt, modeule_controller_address: felt) {
+    func initializer(
+        name: felt, symbol: felt, proxy_admin: felt, modeule_controller_address: felt
+    ) {
     }
 
     func tokenURI(tokenId: Uint256) -> (tokenUri_len: felt, tokenUri: felt*) {
@@ -100,7 +102,7 @@ func test_set_metadata{
             path = memory[ids.data_1+i]
             array.append(path.to_bytes(31, "big").decode())
         string_data = ''.join(array).replace('\x00', '')
-        assert string_data == 'data:application/json,{"description":"realms","name":Test 1,"image":"https://d23fdhqc1jb9no.cloudfront.net/_Realms/1.svg","attributes":[{"trait_type":"Regions","value":"5"},{"trait_type":"Cities","value":"2"},{"trait_type":"Harbors","value":"1"},{"trait_type":"Rivers","value":"4"},{"trait_type":"Resource","value":"ColdIron"},{"trait_type":"Resource","value":"Ruby"},{"trait_type":"Resource","value":"Silver"},{"trait_type":"Wonder (translated)","value":"The Crying Oak"},]}'
+        assert string_data == 'data:application/json,{"description":"realms","name":"Test 1","image":"https://d23fdhqc1jb9no.cloudfront.net/_Realms/1.svg","attributes":[{"trait_type":"Regions","value":"5"},{"trait_type":"Cities","value":"2"},{"trait_type":"Harbors","value":"1"},{"trait_type":"Rivers","value":"4"},{"trait_type":"Resource","value":"ColdIron"},{"trait_type":"Resource","value":"Ruby"},{"trait_type":"Resource","value":"Silver"},{"trait_type":"Wonder (translated)","value":"The Crying Oak"},]}'
     %}
     let (data_2_len, data_2) = S_Realms.tokenURI(S_Realms_token_address, Uint256(2, 0));
     %{
@@ -109,7 +111,7 @@ func test_set_metadata{
             path = memory[ids.data_2+i]
             array.append(path.to_bytes(31, "big").decode())
         string_data = ''.join(array).replace('\x00', '')
-        assert string_data == 'data:application/json,{"description":"realms","name":Test 2,"image":"https://realms-assets.s3.eu-west-3.amazonaws.com/renders/2.webp","attributes":[{"trait_type":"Regions","value":"3"},{"trait_type":"Cities","value":"6"},{"trait_type":"Harbors","value":"4"},{"trait_type":"Rivers","value":"6"},{"trait_type":"Resource","value":"Obsidian"},{"trait_type":"Resource","value":"Stone"},{"trait_type":"Resource","value":"Gold"},{"trait_type":"Resource","value":"DeepCrystal"},{"trait_type":"Resource","value":"Hartwood"},{"trait_type":"Wonder (translated)","value":"The Mother Grove"},]}'
+        assert string_data == 'data:application/json,{"description":"realms","name":"Test 2","image":"https://realms-assets.s3.eu-west-3.amazonaws.com/renders/2.webp","attributes":[{"trait_type":"Regions","value":"3"},{"trait_type":"Cities","value":"6"},{"trait_type":"Harbors","value":"4"},{"trait_type":"Rivers","value":"6"},{"trait_type":"Resource","value":"Obsidian"},{"trait_type":"Resource","value":"Stone"},{"trait_type":"Resource","value":"Gold"},{"trait_type":"Resource","value":"DeepCrystal"},{"trait_type":"Resource","value":"Hartwood"},{"trait_type":"Wonder (translated)","value":"The Mother Grove"},]}'
     %}
     return ();
 }
