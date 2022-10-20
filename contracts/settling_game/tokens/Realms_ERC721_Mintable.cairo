@@ -125,9 +125,9 @@ func isApprovedForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 }
 
 @view
-func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*}(
-    tokenId: Uint256
-) -> (tokenURI_len: felt, tokenURI: felt*) {
+func tokenURI{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(tokenId: Uint256) -> (tokenURI_len: felt, tokenURI: felt*) {
     alloc_locals;
     let (name) = get_realm_name(tokenId);
     let (realm_data: RealmData) = fetch_realm_data(tokenId);
