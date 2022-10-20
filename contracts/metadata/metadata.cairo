@@ -144,7 +144,7 @@ namespace Uri {
     // @param realm_name: encoded string of the realm name
     // @param realm_data: unpacked data for realm
     // @param realm_type: type of realm (Realm or S_Realm)
-    func build{pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*}(
+    func build{range_check_ptr}(
         realm_id: Uint256, realm_name: felt, realm_data: RealmData, realm_type: felt
     ) -> (encoded_len: felt, encoded: felt*) {
         alloc_locals;
