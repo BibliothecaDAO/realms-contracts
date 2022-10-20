@@ -8,7 +8,7 @@ from contracts.settling_game.utils.game_structs import RealmData
 @external
 func test_metadata{range_check_ptr}() {
     alloc_locals;
-    let realm_name = '"Test"';
+    let realm_name = 'Test';
     let realm_data_1 = RealmData(4, 5, 2, 1, 4, 2, 8, 13, 6, 0, 0, 0, 1, 4);
     let realm_data_2 = RealmData(2, 3, 6, 14, 6, 1, 5, 2, 9, 14, 10, 0, 0, 10);
     let (data_1_len, data_1) = Uri.build(Uint256(7, 0), realm_name, realm_data_1, 1);

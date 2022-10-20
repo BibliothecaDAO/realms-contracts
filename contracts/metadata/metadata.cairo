@@ -186,26 +186,26 @@ namespace Uri {
         assert values[4] = comma;
         // name value
         assert values[5] = name_key;
-
-        assert values[6] = realm_name;
-
-        assert values[7] = comma;
+        assert values[6] = inverted_commas;
+        assert values[7] = realm_name;
+        assert values[8] = inverted_commas;
+        assert values[9] = comma;
         // image value
-        assert values[8] = image_key;
-        assert values[9] = inverted_commas;
+        assert values[10] = image_key;
+        assert values[11] = inverted_commas;
 
         if (realm_type == Utils.RealmType.Realm) {
-            assert values[10] = realm_image_url_1;
-            assert values[11] = realm_image_url_2;
+            assert values[12] = realm_image_url_1;
+            assert values[13] = realm_image_url_2;
         }
 
         if (realm_type == Utils.RealmType.S_Realm) {
-            assert values[10] = s_realm_image_url_1;
-            assert values[11] = s_realm_image_url_2;
+            assert values[12] = s_realm_image_url_1;
+            assert values[13] = s_realm_image_url_2;
         }
 
-        let (id_size) = append_uint256_ascii(realm_id, values + 12);
-        let id_index = 12 + id_size;
+        let (id_size) = append_uint256_ascii(realm_id, values + 14);
+        let id_index = 14 + id_size;
 
         if (realm_type == Utils.RealmType.Realm) {
             assert values[id_index] = '.svg';
