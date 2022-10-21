@@ -7,14 +7,14 @@ from contracts.settling_game.modules.combat.library import Combat, Army, Battali
 from contracts.settling_game.modules.combat.constants import BattalionStatistics, BattalionIds
 
 func build_attacking_army() -> (a: Army) {
-    tempvar values = new (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 100, 5, 100,);
+    tempvar values = new (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 100, 3, 100,);
     let a = cast(values, Army*);
     return ([a],);
 }
 
 func build_defending_army() -> (a: Army) {
     // tempvar values = new (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 100, 3, 100,);
-    tempvar values = new (1, 100, 1, 100, 10, 100, 2, 100, 2, 100, 2, 100, 2, 100, 1, 100,);
+    tempvar values = new (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 100, 1, 100,);
     let a = cast(values, Army*);
     return ([a],);
 }

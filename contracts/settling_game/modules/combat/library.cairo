@@ -319,9 +319,7 @@ namespace Combat {
         new_health: felt, battalions: felt
     ) {
         alloc_locals;
-        if (TRUE == 1) {
-            return (hp_loss, battalion_attack);
-        }
+
         // get weight of attack over defence
         let (attack_over_defence, _) = unsigned_div_rem(
             battalion_attack * 1000 + 1, counter_defence + 1
@@ -350,7 +348,7 @@ namespace Combat {
         // if health 0 the battalion is dead. Return 0,0
         let is_dead = is_le(actual_health_remaining, 0);
         if (is_dead == TRUE) {
-            return (health_remaining, health_remaining);
+            return (0, 0);
         }
 
         // smallest amount of battalions is 1 - Battles reduce the Battalions.
@@ -382,15 +380,40 @@ namespace Combat {
 
             if (less_than == TRUE) {
                 let absolute_outcome = abs_value(outcome);
+
                 let (i, _) = unsigned_div_rem((absolute_outcome) * 1000, FIXED_DIV);
-                return (health_percentage=absolute_outcome);
+
+                // minus 1000 from abs outcome
+                let pre_calc = FULL_HEALTH - i;
+
+                // // check if greater than 1000
+                let check_killed = is_le(pre_calc, 0);
+
+                if (check_killed == TRUE) {
+                    return (health_percentage=100);
+                }
+
+                return (health_percentage=pre_calc);
             }
         } else {
-            let less_than = is_le(0, outcome);
+            let less_than = is_le_felt(outcome, 2 ** 128);
 
             if (less_than == TRUE) {
-                let (i, _) = unsigned_div_rem((outcome) * 1000, FIXED_DIV);
-                return (health_percentage=FULL_HEALTH - i);
+                let absolute_outcome = abs_value(outcome);
+
+                let (i, _) = unsigned_div_rem((absolute_outcome) * 1000, FIXED_DIV);
+
+                // minus 1000 from abs outcome
+                let pre_calc = FULL_HEALTH - i;
+
+                // // check if greater than 1000
+                let check_killed = is_le(pre_calc, 0);
+
+                if (check_killed == TRUE) {
+                    return (health_percentage=100);
+                }
+
+                return (health_percentage=pre_calc);
             }
         }
 
