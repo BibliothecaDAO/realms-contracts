@@ -11,8 +11,8 @@
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.registers import get_label_location
-from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_lt
-from starkware.cairo.common.math_cmp import is_nn, is_le
+from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_lt, abs_value
+from starkware.cairo.common.math_cmp import is_nn, is_le, is_le_felt
 from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
 from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.bool import TRUE, FALSE
@@ -319,10 +319,12 @@ namespace Combat {
         new_health: felt, battalions: felt
     ) {
         alloc_locals;
-
+        if (TRUE == 1) {
+            return (hp_loss, battalion_attack);
+        }
         // get weight of attack over defence
         let (attack_over_defence, _) = unsigned_div_rem(
-            battalion_attack * 1000, counter_defence + 1
+            battalion_attack * 1000 + 1, counter_defence + 1
         );
 
         // get base health remaining - divided by 1000000 as values coming in a bp
@@ -348,7 +350,7 @@ namespace Combat {
         // if health 0 the battalion is dead. Return 0,0
         let is_dead = is_le(actual_health_remaining, 0);
         if (is_dead == TRUE) {
-            return (0, 0);
+            return (health_remaining, health_remaining);
         }
 
         // smallest amount of battalions is 1 - Battles reduce the Battalions.
@@ -366,28 +368,33 @@ namespace Combat {
     // @notice calculates the health percentage loss of a battle. 450 is half the size of a fully maxxed Army
     // @param outcome: battle outcome
     // @return health_percentage: percentage loss
+
+    const FIXED_DIV = 450;
+    const FULL_HEALTH = 1000;
+
     func calculate_health_loss_percentage{
         syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     }(outcome: felt, is_attacking: felt) -> (health_percentage: felt) {
         alloc_locals;
 
         if (is_attacking == TRUE) {
-            let less_than = is_le(outcome, 0);
+            let less_than = is_le_felt(2 ** 128, outcome);
 
             if (less_than == TRUE) {
-                let (i, _) = unsigned_div_rem(((-outcome)) * 1000, 450);
-                return (health_percentage=1000 - i);
+                let absolute_outcome = abs_value(outcome);
+                let (i, _) = unsigned_div_rem((absolute_outcome) * 1000, FIXED_DIV);
+                return (health_percentage=absolute_outcome);
             }
         } else {
             let less_than = is_le(0, outcome);
 
             if (less_than == TRUE) {
-                let (i, _) = unsigned_div_rem(((-outcome)) * 1000, 450);
-                return (health_percentage=1000 - i);
+                let (i, _) = unsigned_div_rem((outcome) * 1000, FIXED_DIV);
+                return (health_percentage=FULL_HEALTH - i);
             }
         }
 
-        return (health_percentage=1000);
+        return (health_percentage=FULL_HEALTH);
     }
 
     // @notice updates Army
