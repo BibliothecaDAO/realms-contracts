@@ -159,4 +159,4 @@ const MAX_GOBLIN_TOWN_STRENGTH = 12;
 // -----------------------------------
 // Coordinates
 // -----------------------------------
-const SECONDS_PER_KM = 30;
+const SECONDS_PER_KM = 200;

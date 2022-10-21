@@ -275,10 +275,18 @@ namespace Combat {
 
         // update armies battlion health
         let (updated_attacking_army) = update_army(
-            attacking_army_statistics, defending_army_statistics, attacking_army, final_outcome
+            attacking_army_statistics,
+            defending_army_statistics,
+            attacking_army,
+            final_outcome,
+            TRUE,
         );
         let (updated_defending_army) = update_army(
-            defending_army_statistics, attacking_army_statistics, defending_army, final_outcome
+            defending_army_statistics,
+            attacking_army_statistics,
+            defending_army,
+            final_outcome,
+            FALSE,
         );
 
         return (successful, updated_attacking_army, updated_defending_army);
@@ -313,7 +321,9 @@ namespace Combat {
         alloc_locals;
 
         // get weight of attack over defence
-        let (attack_over_defence, _) = unsigned_div_rem(battalion_attack * 1000, counter_defence);
+        let (attack_over_defence, _) = unsigned_div_rem(
+            battalion_attack * 1000, counter_defence + 1
+        );
 
         // get base health remaining - divided by 1000000 as values coming in a bp
         let (health_remaining, _) = unsigned_div_rem(
@@ -353,6 +363,33 @@ namespace Combat {
         return (actual_health_remaining, battalions);
     }
 
+    // @notice calculates the health percentage loss of a battle. 450 is half the size of a fully maxxed Army
+    // @param outcome: battle outcome
+    // @return health_percentage: percentage loss
+    func calculate_health_loss_percentage{
+        syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+    }(outcome: felt, is_attacking: felt) -> (health_percentage: felt) {
+        alloc_locals;
+
+        if (is_attacking == TRUE) {
+            let less_than = is_le(outcome, 0);
+
+            if (less_than == TRUE) {
+                let (i, _) = unsigned_div_rem(((-outcome)) * 1000, 450);
+                return (health_percentage=1000 - i);
+            }
+        } else {
+            let less_than = is_le(0, outcome);
+
+            if (less_than == TRUE) {
+                let (i, _) = unsigned_div_rem(((-outcome)) * 1000, 450);
+                return (health_percentage=1000 - i);
+            }
+        }
+
+        return (health_percentage=1000);
+    }
+
     // @notice updates Army
     // @param attack_army_statistics: ArmyStatistics of attacking Army
     // @param defending_army_statistics: ArmyStatistics of defending Army
@@ -363,11 +400,12 @@ namespace Combat {
         defending_army_statistics: ArmyStatistics,
         attack_army: Army,
         outcome: felt,
+        is_attacking: felt,
     ) -> (updated_army: Army) {
         alloc_locals;
 
         // get HP loss
-        let (hp_loss) = calculate_health_loss_percentage(outcome);
+        let (hp_loss) = calculate_health_loss_percentage(outcome, is_attacking);
 
         // get health for each battalion type
         let (light_cavalry_health, light_cavalry_battalions) = calculate_health_remaining(
@@ -439,24 +477,6 @@ namespace Combat {
         );
 
         return (updated_attacking_army,);
-    }
-
-    // @notice calculates the health percentage loss of a battle. 450 is half the size of a fully maxxed Army
-    // @param outcome: battle outcome
-    // @return health_percentage: percentage loss
-    func calculate_health_loss_percentage{
-        syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
-    }(outcome: felt) -> (health_percentage: felt) {
-        alloc_locals;
-
-        let less_than = is_le(outcome, 0);
-
-        if (less_than == TRUE) {
-            let (i, _) = unsigned_div_rem(((-outcome)) * 1000, 450);
-            return (health_percentage=1000 - i);
-        }
-
-        return (health_percentage=1000);
     }
 
     // @notice Returns battalion building

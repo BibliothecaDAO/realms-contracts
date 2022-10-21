@@ -128,14 +128,14 @@ def set_xoroshiro(network):
     Sets Xoroshiro
     """
     config = Config(nile_network=network)
-
-    wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_Combat",
-        function="set_xoroshiro",
-        arguments=[int(config.XOROSHIRO_ADDRESS, 16)],
-    )
+    print(config.XOROSHIRO_ADDRESS)
+    # wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="proxy_Combat",
+    #     function="set_xoroshiro",
+    #     arguments=[config.XOROSHIRO_ADDRESS],
+    # )
 
     # wrapped_send(
     #     network=config.nile_network,
