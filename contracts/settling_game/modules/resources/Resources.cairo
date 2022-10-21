@@ -155,7 +155,6 @@ func claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
 
     // set vault time only if actually claiming vault
     if (total_vault_days != 0) {
-        // TODO: why is this here? same is called below, outside the if
         ISettling.set_time_vault_staked(settling_logic_address, token_id, vault_remainder);
         tempvar syscall_ptr = syscall_ptr;
         tempvar range_check_ptr = range_check_ptr;
@@ -167,7 +166,6 @@ func claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     }
 
     ISettling.set_time_staked(settling_logic_address, token_id, remainder);
-    ISettling.set_time_vault_staked(settling_logic_address, token_id, vault_remainder);
 
     // get current buildings on realm
     let (buildings_address) = Module.get_module_address(ModuleIds.Buildings);
