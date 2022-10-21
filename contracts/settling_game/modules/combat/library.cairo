@@ -12,7 +12,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_lt, abs_value
-from starkware.cairo.common.math_cmp import is_nn, is_le, is_le_felt
+from starkware.cairo.common.math_cmp import is_nn, is_le, is_le_felt, is_not_zero
 from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
 from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.bool import TRUE, FALSE
@@ -322,7 +322,7 @@ namespace Combat {
 
         // get weight of attack over defence
         let (attack_over_defence, _) = unsigned_div_rem(
-            battalion_attack * 1000 + 1, counter_defence + 1
+            (battalion_attack + 1) * 1000, counter_defence + 1
         );
 
         // get base health remaining - divided by 1000000 as values coming in a bp
@@ -351,16 +351,37 @@ namespace Combat {
             return (0, 0);
         }
 
-        // smallest amount of battalions is 1 - Battles reduce the Battalions.
-        let is_battalion_alive = is_le(actual_health_remaining, 100);
+        // adjust battalions to make health fixed figure per battalion
         let (adjusted_battalions, _) = unsigned_div_rem(actual_health_remaining, 100);
+
+        // if less than 1 battalion exists
+        let is_battalion_alive = is_le(actual_health_remaining, 100);
         if (is_battalion_alive == TRUE) {
-            tempvar battalions = 1;
-        } else {
-            tempvar battalions = adjusted_battalions;
+            return (actual_health_remaining, 1);
         }
 
-        return (actual_health_remaining, battalions);
+        let (health_per_battalion, remaining_health) = unsigned_div_rem(
+            actual_health_remaining, adjusted_battalions
+        );
+
+        // if only 1 battalion left - edge case
+        if (adjusted_battalions == 1) {
+            let (health_per_battalion, remaining_health) = unsigned_div_rem(
+                actual_health_remaining, adjusted_battalions + 1
+            );
+            return (health_per_battalion, adjusted_battalions + 1);
+        }
+
+        // if half battalions exist
+        let is_remaining_health = is_not_zero(remaining_health);
+        if (is_remaining_health == TRUE) {
+            let (health_per_battalion, remaining_health) = unsigned_div_rem(
+                actual_health_remaining, adjusted_battalions + 1
+            );
+            return (health_per_battalion, adjusted_battalions + 1);
+        }
+
+        return (health_per_battalion, adjusted_battalions);
     }
 
     // @notice calculates the health percentage loss of a battle. 450 is half the size of a fully maxxed Army
@@ -376,7 +397,7 @@ namespace Combat {
         alloc_locals;
 
         if (is_attacking == TRUE) {
-            let less_than = is_le_felt(2 ** 128, outcome);
+            let less_than = is_le(outcome, 0);
 
             if (less_than == TRUE) {
                 let absolute_outcome = abs_value(outcome);
@@ -396,7 +417,8 @@ namespace Combat {
                 return (health_percentage=pre_calc);
             }
         } else {
-            let less_than = is_le_felt(outcome, 2 ** 128);
+            let less_than = is_le(0, outcome);
+            // let less_than = is_le_felt(outcome, 2 ** 128);
 
             if (less_than == TRUE) {
                 let absolute_outcome = abs_value(outcome);

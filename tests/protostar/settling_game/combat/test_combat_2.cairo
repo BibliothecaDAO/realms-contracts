@@ -7,14 +7,18 @@ from contracts.settling_game.modules.combat.library import Combat, Army, Battali
 from contracts.settling_game.modules.combat.constants import BattalionStatistics, BattalionIds
 
 func build_attacking_army() -> (a: Army) {
-    tempvar values = new (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 100, 3, 100,);
+    tempvar values = new (2, 100, 2, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,);
+
+    // tempvar values = new (1, 100, 1, 100, 1, 100, 1, 100, 1, 100, 1, 100, 1, 100, 1, 100,);
     let a = cast(values, Army*);
     return ([a],);
 }
 
 func build_defending_army() -> (a: Army) {
     // tempvar values = new (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 100, 3, 100,);
-    tempvar values = new (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 100, 1, 100,);
+    // tempvar values = new (1, 100, 1, 100, 1, 100, 1, 100, 1, 100, 1, 100, 1, 100, 1, 100,);
+
+    tempvar values = new (10, 100, 10, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,);
     let a = cast(values, Army*);
     return ([a],);
 }
@@ -176,19 +180,23 @@ func test_winner{
     return ();
 }
 
-// @external
-// func test_calculate_health_loss_percentage{
-//     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-// }() {
-//     alloc_locals;
+@external
+func test_calculate_health_loss_percentage{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}() {
+    alloc_locals;
 
-// let (outcome) = Combat.calculate_health_loss_percentage(-138, 0);
+    let (a_outcome) = Combat.calculate_health_loss_percentage(0, 1);
 
-// // assert outcome = 694;
-//     %{ print(ids.outcome) %}
+    // assert outcome = 694;
+    %{ print('attacking', ids.a_outcome) %}
 
-// return ();
-// }
+    let (d_outcome) = Combat.calculate_health_loss_percentage(0, 0);
+
+    %{ print('defending', ids.d_outcome) %}
+
+    return ();
+}
 
 // @external
 // func test_calculate_total_battalions{
