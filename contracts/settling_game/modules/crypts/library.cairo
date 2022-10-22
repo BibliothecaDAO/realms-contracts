@@ -16,6 +16,7 @@ from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.memcpy import memcpy
 from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
+from starkware.cairo.common.registers import get_label_location
 
 from cairo_graphs.graph.graph import (
     add_neighbor,
@@ -27,6 +28,8 @@ from cairo_graphs.graph.graph import (
 from cairo_graphs.graph.dijkstra import Dijkstra
 from cairo_graphs.data_types.data_types import Edge, Vertex, AdjacentVertex, Graph
 from cairo_graphs.utils.array_utils import Stack
+
+from contracts.settling_game.modules.crypts.constants import Entity
 
 // Maximum length of a side edge
 const MAX_EDGE_LENGTH = 8;
@@ -288,5 +291,69 @@ namespace Crypts {
         }
 
         return check_entity_at_index(identifier, entity_ids_len - 1, entity_ids + 1);
+    }
+
+    func lookup_entity{syscall_ptr: felt*, range_check_ptr}(entity_id: felt) -> (entity: felt) {
+        alloc_locals;
+
+        let (label_location) = get_label_location(labels);
+        return ([label_location + entity_id - 1],);
+
+        labels:
+        dw Entity.Generic;
+        dw Entity.Adventurer;
+        dw Entity.Item.Generic;
+        dw Entity.Item.Key;
+        dw Entity.Item.Potion;
+        dw Entity.Item.Weapon;
+        dw Entity.Item.Armor;
+        dw Entity.Item.Jewlery;
+        dw Entity.Item.Artifact;
+        dw Entity.Enemy.Generic;
+        dw Entity.Enemy.Orc;
+        dw Entity.Enemy.GiantSpider;
+        dw Entity.Enemy.Troll;
+        dw Entity.Enemy.Zombie;
+        dw Entity.Enemy.GiantRat;
+        dw Entity.Enemy.Minotaur;
+        dw Entity.Enemy.Werewolf;
+        dw Entity.Enemy.Beserker;
+        dw Entity.Enemy.Goblin;
+        dw Entity.Enemy.Gnome;
+        dw Entity.Enemy.Ghoul;
+        dw Entity.Enemy.Wraith;
+        dw Entity.Enemy.Skeleton;
+        dw Entity.Enemy.Revenant;
+        dw Entity.Enemy.GoldenDragon;
+        dw Entity.Enemy.BlackDragon;
+        dw Entity.Enemy.BronzeDragon;
+        dw Entity.Enemy.RedDragon;
+        dw Entity.Enemy.Wyvern;
+        dw Entity.Enemy.FireGiant;
+        dw Entity.Enemy.StormGiant;
+        dw Entity.Enemy.IceGiant;
+        dw Entity.Enemy.FrostGiant;
+        dw Entity.Enemy.HillGiant;
+        dw Entity.Enemy.Ogre;
+        dw Entity.Enemy.SkeletonLord;
+        dw Entity.Enemy.KnightsOfChaos;
+        dw Entity.Enemy.LizardKing;
+        dw Entity.Enemy.Medusa;
+        dw Entity.Obstacle.Generic;
+        dw Entity.Obstacle.TrapDoor;
+        dw Entity.Obstacle.PoisonDart;
+        dw Entity.Obstacle.FlameJet;
+        dw Entity.Obstacle.PoisonWell;
+        dw Entity.Obstacle.FallingNet;
+        dw Entity.Obstacle.BlindingLight;
+        dw Entity.Obstacle.LightningBolt;
+        dw Entity.Obstacle.PendulumBlades;
+        dw Entity.Obstacle.SnakePit;
+        dw Entity.Obstacle.PoisonousGas;
+        dw Entity.Obstacle.LavaPit;
+        dw Entity.Obstacle.BurningOil;
+        dw Entity.Obstacle.FireBreathingGargoyle;
+        dw Entity.Obstacle.HiddenArrow;
+        dw Entity.Obstacle.SpikedPit;
     }
 }
