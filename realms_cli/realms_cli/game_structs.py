@@ -91,7 +91,7 @@ BUILDING_COSTS = {
         0
     ),
     BuildingId.Farm: CostWithLords(
-        9,
+        10,
         8,
         pack_values(
             [ResourceIds.Wood,
@@ -102,8 +102,9 @@ BUILDING_COSTS = {
              ResourceIds.Silver,
              ResourceIds.Ironwood,
              ResourceIds.ColdIron,
-             ResourceIds.Gold]),
-        pack_values([15, 10, 14, 7,	8, 4, 3, 2, 3]),
+             ResourceIds.Gold,
+             ResourceIds.Hartwood]),
+        pack_values([5, 4, 4, 3, 2, 2, 1, 1, 1, 1]),
         0
     ),
     BuildingId.FishingVillage: CostWithLords(
@@ -112,12 +113,15 @@ BUILDING_COSTS = {
         pack_values(
             [ResourceIds.Wood,
              ResourceIds.Stone,
+             ResourceIds.Coal,
              ResourceIds.Copper,
+             ResourceIds.Obsidian,
              ResourceIds.Silver,
              ResourceIds.Ironwood,
              ResourceIds.ColdIron,
+             ResourceIds.Gold,
              ResourceIds.Hartwood]),
-        pack_values([15, 13, 7, 8, 4, 3, 3]),
+        pack_values([6, 4, 4, 2, 3, 1, 2, 1, 1, 1]),
         0
     ),
     BuildingId.Barracks: CostWithLords(
@@ -131,7 +135,7 @@ BUILDING_COSTS = {
              ResourceIds.DeepCrystal,
              ResourceIds.TrueIce,
              ResourceIds.Dragonhide]),
-        pack_values([10, 7, 18, 20, 10, 12, 2]),
+        pack_values([5, 4, 18, 22, 10, 12, 2]),
         0
     ),
     BuildingId.MageTower: CostWithLords(
@@ -147,7 +151,7 @@ BUILDING_COSTS = {
              ResourceIds.TwilightQuartz,
              ResourceIds.AlchemicalSilver,
              ResourceIds.Mithral]),
-        pack_values([45, 12, 25, 6, 10, 5, 2, 3, 2]),
+        pack_values([3, 12, 25, 6, 10, 5, 2, 3, 2]),
         0
     ),
     BuildingId.ArcherTower: CostWithLords(
@@ -162,7 +166,7 @@ BUILDING_COSTS = {
              ResourceIds.DeepCrystal,
              ResourceIds.AlchemicalSilver,
              ResourceIds.Adamantine]),
-        pack_values([10, 5, 10, 7, 12, 12, 7, 6]),
+        pack_values([5, 2, 10, 7, 12, 12, 7, 6]),
         0
     ),
     BuildingId.Castle: CostWithLords(
@@ -177,7 +181,7 @@ BUILDING_COSTS = {
              ResourceIds.EtherealSilica,
              ResourceIds.TwilightQuartz,
              ResourceIds.Mithral]),
-        pack_values([5, 10, 10, 14, 10, 9, 10, 1]),
+        pack_values([1, 10, 10, 14, 10, 9, 10, 1]),
         0
     )
 }
