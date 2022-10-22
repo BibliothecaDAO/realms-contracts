@@ -1,26 +1,38 @@
+// -----------------------------------
+//   Module.Adventurer
+//   Adventurer logic
+//
+//
+//
+// -----------------------------------
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts for Cairo v0.3.2 (token/erc721/enumerable/presets/ERC721EnumerableMintableBurnable.cairo)
 
 %lang starknet
 from starkware.cairo.common.alloc import alloc
+from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_add
 from starkware.cairo.common.math import unsigned_div_rem, assert_lt_felt
 from starkware.starknet.common.syscalls import get_block_timestamp
-from starkware.starknet.common.syscalls import get_caller_address
+from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
 
 from openzeppelin.access.ownable.library import Ownable
 from openzeppelin.introspection.erc165.library import ERC165
+from openzeppelin.token.erc20.IERC20 import IERC20
 from openzeppelin.token.erc721.library import ERC721
 from openzeppelin.token.erc721.IERC721 import IERC721
 from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
 from openzeppelin.upgrades.library import Proxy
 
+from contracts.settling_game.library.library_module import Module
 from contracts.loot.adventurer.library import AdventurerLib
 from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
+from contracts.settling_game.interfaces.imodules import IModuleController
 
 from contracts.loot.loot.ILoot import ILoot
+from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
 
 // const MINT_COST = 5000000000000000000
 
@@ -44,6 +56,19 @@ func bag_address() -> (address: felt) {
 func lords_address() -> (address: felt) {
 }
 
+@storage_var
+func treasury_address() -> (address: felt) {
+}
+
+@storage_var
+func adventurer(tokenId: Uint256) -> (adventurer: PackedAdventurerState) {
+}
+
+// balance of $LORDS
+@storage_var
+func adventurer_balance(tokenId: Uint256) -> (balance: Uint256) {
+}
+
 // -----------------------------------
 // Initialize & upgrade
 // -----------------------------------
@@ -60,7 +85,12 @@ func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     item_address_: felt,
     bag_address_: felt,
     lords_address_: felt,
+    address_of_controller: felt,
 ) {
+    // set as module
+    Module.initializer(address_of_controller);
+
+    // 721 setup
     ERC721.initializer(name, symbol);
     ERC721Enumerable.initializer();
     Proxy.initializer(proxy_admin);
@@ -85,9 +115,220 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     return ();
 }
 
-//
+// -----------------------------
+// External Adventurer Specific
+// -----------------------------
+
+@external
+func mint{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(to: felt, race: felt, home_realm: felt, name: felt, order: felt) {
+    alloc_locals;
+
+    // birth
+    let (birth_time) = get_block_timestamp();
+    let (new_adventurer: AdventurerState) = AdventurerLib.birth(
+        race, home_realm, name, birth_time, order
+    );
+
+    // pack
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
+
+    // get current ID and add 1
+    let (current_id: Uint256) = totalSupply();
+    let (next_adventurer_id, _) = uint256_add(current_id, Uint256(1, 0));
+
+    // store
+    adventurer.write(next_adventurer_id, packed_new_adventurer);
+
+    // mint
+    ERC721Enumerable._mint(to, next_adventurer_id);
+
+    // lords
+    let (lords_address) = Module.get_external_contract_address(ExternalContractIds.Lords);
+
+    // send to Nexus
+    let (treasury) = get_treasury();
+    IERC20.transfer(lords_address, treasury, Uint256(50 * 10 ** 18, 0));
+
+    // send to this contract and set Balance of Adventurer
+    let (this) = get_contract_address();
+    IERC20.transfer(lords_address, this, Uint256(50 * 10 ** 18, 0));
+    adventurer_balance.write(next_adventurer_id, Uint256(50 * 10 ** 18, 0));
+
+    return ();
+}
+
+@external
+func equipItem{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(tokenId: Uint256, itemTokenId: Uint256) -> (success: felt) {
+    alloc_locals;
+
+    // only adventurer can equip ofc
+    ERC721.assert_only_token_owner(tokenId);
+
+    // unpack adventurer
+    let (unpacked_adventurer) = getAdventurerById(tokenId);
+
+    // Get Item from Loot contract
+    let (loot_address) = get_loot();
+    let (item) = ILoot.getItemByTokenId(loot_address, itemTokenId);
+
+    assert item.Adventurer = 0;
+    assert item.Bag = 0;
+
+    // Check item is owned by caller
+    let (owner) = IERC721.ownerOf(loot_address, itemTokenId);
+    let (caller) = get_caller_address();
+    assert owner = caller;
+
+    // Convert token to Felt
+    let (token_to_felt) = _uint_to_felt(itemTokenId);
+
+    // Equip Item
+    let (equiped_adventurer) = AdventurerLib.equip_item(token_to_felt, item, unpacked_adventurer);
+
+    // TODO: Move to function that emits adventurers state
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(equiped_adventurer);
+    adventurer.write(tokenId, packed_new_adventurer);
+
+    let (adventurer_to_felt) = _uint_to_felt(tokenId);
+
+    // update state
+    ILoot.updateAdventurer(loot_address, itemTokenId, adventurer_to_felt);
+
+    return (1,);
+}
+
+@external
+func deductHealth{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(tokenId: Uint256, amount: felt) -> (success: felt) {
+    alloc_locals;
+
+    // TODO: Determine who can deduct health from an adventurer
+    ERC721.assert_only_token_owner(tokenId);
+
+    // unpack adventurer
+    let (unpacked_adventurer) = getAdventurerById(tokenId);
+
+    // deduct health
+    let (equiped_adventurer) = AdventurerLib.adjust_health(amount, unpacked_adventurer);
+
+    // TODO: Move to function that emits adventurers state
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(equiped_adventurer);
+    adventurer.write(tokenId, packed_new_adventurer);
+
+    return (1,);
+}
+
+// --------------------
+// Setters
+// --------------------
+
+@external
+func set_xoroshiro{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    xoroshiro: felt
+) {
+    Proxy.assert_only_admin();
+    xoroshiro_address.write(xoroshiro);
+    return ();
+}
+
+@external
+func set_lords{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(address: felt) {
+    Proxy.assert_only_admin();
+    lords_address.write(address);
+    return ();
+}
+
+@external
+func set_loot{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(address: felt) {
+    Proxy.assert_only_admin();
+    item_address.write(address);
+    return ();
+}
+
+@external
+func set_treasury{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(address: felt) {
+    Proxy.assert_only_admin();
+    item_address.write(address);
+    return ();
+}
+
+// --------------------
 // Getters
-//
+// --------------------
+
+@view
+func get_xoroshiro{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
+    address: felt
+) {
+    return xoroshiro_address.read();
+}
+
+@view
+func get_loot{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
+    address: felt
+) {
+    return item_address.read();
+}
+
+@view
+func get_lords{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
+    address: felt
+) {
+    return lords_address.read();
+}
+
+@view
+func get_treasury{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
+    address: felt
+) {
+    return treasury_address.read();
+}
+
+@external
+func getAdventurerById{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(tokenId: Uint256) -> (adventurer: AdventurerState) {
+    alloc_locals;
+
+    let (packed_adventurer) = adventurer.read(tokenId);
+
+    // unpack
+    let (unpacked_adventurer: AdventurerState) = AdventurerLib.unpack(packed_adventurer);
+
+    return (unpacked_adventurer,);
+}
+
+// Checks if dead
+// Might be better as an assert....
+@external
+func is_dead{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(tokenId: Uint256) -> (is_dead: felt) {
+    let (adventurer: AdventurerState) = getAdventurerById(tokenId);
+
+    if (adventurer.Health == 0) {
+        return (is_dead=TRUE);
+    }
+
+    return (is_dead=FALSE);
+}
+
+// TODO: Move to Utils
+func _uint_to_felt{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    value: Uint256
+) -> (value: felt) {
+    assert_lt_felt(value.high, 2 ** 123);
+    return (value.high * (2 ** 128) + value.low,);
+}
+
+// --------------------
+// Base ERC721 Functions
+// --------------------
 
 @view
 func totalSupply{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}() -> (
@@ -243,145 +484,4 @@ func transferOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 func renounceOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     Ownable.renounce_ownership();
     return ();
-}
-
-// ------------ADVENTURERS
-
-@storage_var
-func adventurer(tokenId: Uint256) -> (adventurer: PackedAdventurerState) {
-}
-
-@external
-func mint{
-    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(to: felt, race: felt, home_realm: felt, name: felt, order: felt) {
-    alloc_locals;
-
-    // birth
-    let (birth_time) = get_block_timestamp();
-    let (new_adventurer: AdventurerState) = AdventurerLib.birth(
-        race, home_realm, name, birth_time, order
-    );
-
-    // pack
-    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
-
-    // get current ID and add 1
-    let (current_id: Uint256) = totalSupply();
-    let (next_adventurer_id, _) = uint256_add(current_id, Uint256(1, 0));
-
-    // store
-    adventurer.write(next_adventurer_id, packed_new_adventurer);
-
-    ERC721Enumerable._mint(to, next_adventurer_id);
-
-    return ();
-}
-
-@external
-func set_xoroshiro{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    xoroshiro: felt
-) {
-    Proxy.assert_only_admin();
-    xoroshiro_address.write(xoroshiro);
-    return ();
-}
-
-@view
-func get_xoroshiro{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
-    address: felt
-) {
-    return xoroshiro_address.read();
-}
-
-@external
-func set_lords{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(lords: felt) {
-    Proxy.assert_only_admin();
-    lords_address.write(lords);
-    return ();
-}
-
-@view
-func get_lords{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
-    address: felt
-) {
-    return lords_address.read();
-}
-
-@external
-func set_loot{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(loot: felt) {
-    Proxy.assert_only_admin();
-    item_address.write(loot);
-    return ();
-}
-
-@view
-func get_loot{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
-    address: felt
-) {
-    return item_address.read();
-}
-
-@external
-func getAdventurerById{
-    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(tokenId: Uint256) -> (adventurer: AdventurerState) {
-    alloc_locals;
-
-    let (packed_adventurer) = adventurer.read(tokenId);
-
-    // unpack
-    let (unpacked_adventurer: AdventurerState) = AdventurerLib.unpack(packed_adventurer);
-
-    return (unpacked_adventurer,);
-}
-
-@external
-func equipItem{
-    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(tokenId: Uint256, itemTokenId: Uint256) -> (success: felt) {
-    alloc_locals;
-
-    // only adventurer can equip ofc
-    ERC721.assert_only_token_owner(tokenId);
-
-    // unpack adventurer
-    let (unpacked_adventurer) = getAdventurerById(tokenId);
-
-    // Get Item from Loot contract
-    let (loot_address) = get_loot();
-    let (item) = ILoot.getItemByTokenId(loot_address, itemTokenId);
-
-    assert item.Adventurer = 0;
-    assert item.Bag = 0;
-
-    // Check item is owned by caller
-    let (owner) = IERC721.ownerOf(loot_address, itemTokenId);
-    let (caller) = get_caller_address();
-    assert owner = caller;
-
-    // Convert token to Felt
-    let (token_to_felt) = _uint_to_felt(itemTokenId);
-
-    // Equip Item
-    let (equiped_adventurer) = AdventurerLib.equip_item(token_to_felt, item, unpacked_adventurer);
-
-    // TODO: Move to function that emits adventurers state
-    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(equiped_adventurer);
-    adventurer.write(tokenId, packed_new_adventurer);
-
-    let (adventurer_to_felt) = _uint_to_felt(tokenId);
-
-    // update state
-    ILoot.updateAdventurer(loot_address, itemTokenId, adventurer_to_felt);
-
-    return (1,);
-}
-
-// TODO: Move to Utils
-func _uint_to_felt{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    value: Uint256
-) -> (value: felt) {
-    assert_lt_felt(value.high, 2 ** 123);
-    return (value.high * (2 ** 128) + value.low,);
 }

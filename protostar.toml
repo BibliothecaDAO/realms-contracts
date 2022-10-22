@@ -5,7 +5,7 @@ protostar_version = "0.5.0"
 libs_path = "./lib"
 
 ["protostar.shared_command_configs"]
-cairo-path = ["./lib/cairo_contracts/src", "./lib/cairo_math_64x61/contracts"]
+cairo-path = ["./lib/cairo_contracts/src", "./lib/cairo_math_64x61/contracts", "./lib/cairo_graphs/src",]
 stdout-on-success = true
 
 # This section is explained in the "Project compilation" guide.
@@ -13,7 +13,7 @@ stdout-on-success = true
 main = ["./contracts/settling_game/Arbiter.cairo"]
 
 ["protostar.build"]
-cairo-path = ["./lib/cairo_contracts/src"]
+cairo-path = ["./lib/cairo_contracts/src", "./lib/cairo_graphs/src"]
 
 ["protostar.test"]
 disable-hint-validation = true

@@ -268,19 +268,34 @@ namespace AdventurerLib {
         return (updated_adventurer,);
     }
 
-    func adjust_health{syscall_ptr: felt*, range_check_ptr}(
-        health_change: felt, unpacked_adventurer: AdventurerState
+    func deduct_health{syscall_ptr: felt*, range_check_ptr}(
+        damage: felt, unpacked_adventurer: AdventurerState
     ) -> (new_unpacked_adventurer: AdventurerState) {
         alloc_locals;
 
-        // check if negative unpacked_adventurer.Health - health_change
 
-        // if Negative then set 0 and KILL
+        // check if damage dealt is less than health remaining        
+        let still_alive = is_le(
+            damage, unpacked_adventurer.Health
+        );
+
+        // if adventurer is still alive
+        if (still_alive == TRUE) {
+        // set new health to previous health - damage dealt
         let (updated_adventurer: AdventurerState) = cast_state(
             AdventurerSlotIds.Health,
-            unpacked_adventurer.Health - health_change,
+            unpacked_adventurer.Health - damage,
             unpacked_adventurer,
-        );
+            );
+            
+        } else {
+            // if damage dealt exceeds health remaining, set health to 0
+            let (updated_adventurer: AdventurerState) = cast_state(
+                AdventurerSlotIds.Health,
+                0,
+                unpacked_adventurer,
+            );    
+        }
 
         return (updated_adventurer,);
     }

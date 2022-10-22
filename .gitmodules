@@ -7,4 +7,6 @@
 [submodule "cairo_contracts"]
 	url = https://github.com/OpenZeppelin/cairo-contracts
 	path = lib/cairo_contracts
-	branch = refs/heads/v0.4.0b
+[submodule "cairo_graphs"]
+	url = https://github.com/msaug/cairo-graphs
+	path = lib/cairo_graphs

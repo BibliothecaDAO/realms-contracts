@@ -106,6 +106,9 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 // SETTERS
 // -----------------------------------
 
+// -----------------------------------
+// SETTERS
+// -----------------------------------
 // @notice Called by the Arbiter to set new address mappings
 // @param external_contract_id: External contract id
 // @param contract_address: New contract address
