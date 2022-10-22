@@ -122,24 +122,12 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 @external
 func mint{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(to: felt, race: felt, home_realm: felt, name: felt, order: felt) {
+}(to: felt) {
     alloc_locals;
-
-    // birth
-    let (birth_time) = get_block_timestamp();
-    let (new_adventurer: AdventurerState) = AdventurerLib.birth(
-        race, home_realm, name, birth_time, order
-    );
-
-    // pack
-    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
 
     // get current ID and add 1
     let (current_id: Uint256) = totalSupply();
     let (next_adventurer_id, _) = uint256_add(current_id, Uint256(1, 0));
-
-    // store
-    adventurer.write(next_adventurer_id, packed_new_adventurer);
 
     // mint
     ERC721Enumerable._mint(to, next_adventurer_id);
@@ -155,6 +143,37 @@ func mint{
     let (this) = get_contract_address();
     IERC20.transfer(lords_address, this, Uint256(50 * 10 ** 18, 0));
     adventurer_balance.write(next_adventurer_id, Uint256(50 * 10 ** 18, 0));
+
+    return ();
+}
+
+// callled after mint
+@external
+func birth{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(id: Uint256, race: felt, home_realm: felt, name: felt, order: felt, image: felt) {
+    alloc_locals;
+
+    // check call is owner
+
+    let (owner) = ownerOf(id);
+    let (caller) = get_caller_address();
+
+    with_attr error_message("Adventurers: Cannot birth an ID that you don't own") {
+        owner = caller;
+    }
+
+    // birth
+    let (birth_time) = get_block_timestamp();
+    let (new_adventurer: AdventurerState) = AdventurerLib.birth(
+        race, home_realm, name, birth_time, order
+    );
+
+    // pack
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
+
+    // store
+    adventurer.write(id, packed_new_adventurer);
 
     return ();
 }
@@ -214,7 +233,7 @@ func deductHealth{
     let (unpacked_adventurer) = getAdventurerById(tokenId);
 
     // deduct health
-    let (equiped_adventurer) = AdventurerLib.adjust_health(amount, unpacked_adventurer);
+    let (equiped_adventurer) = AdventurerLib.deduct_health(amount, unpacked_adventurer);
 
     // TODO: Move to function that emits adventurers state
     let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(equiped_adventurer);
@@ -440,21 +459,21 @@ func setApprovalForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     return ();
 }
 
-// @external
-// func transferFrom{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-//     from_ : felt, to : felt, tokenId : Uint256
-// ):
-//     ERC721Enumerable.transfer_from(from_, to, tokenId)
-//     return ()
-// end
+@external
+func transferFrom{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    from_: felt, to: felt, tokenId: Uint256
+) {
+    ERC721Enumerable.transfer_from(from_, to, tokenId);
+    return ();
+}
 
-// @external
-// func safeTransferFrom{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-//     from_ : felt, to : felt, tokenId : Uint256, data_len : felt, data : felt*
-// ):
-//     ERC721Enumerable.safe_transfer_from(from_, to, tokenId, data_len, data)
-//     return ()
-// end
+@external
+func safeTransferFrom{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    from_: felt, to: felt, tokenId: Uint256, data_len: felt, data: felt*
+) {
+    ERC721Enumerable.safe_transfer_from(from_, to, tokenId, data_len, data);
+    return ();
+}
 
 @external
 func burn{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(tokenId: Uint256) {
