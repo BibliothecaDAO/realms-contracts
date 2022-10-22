@@ -69,6 +69,10 @@ func adventurer(tokenId: Uint256) -> (adventurer: PackedAdventurerState) {
 func adventurer_balance(tokenId: Uint256) -> (balance: Uint256) {
 }
 
+@storage_var
+func adventurer_image(tokenId: Uint256) -> (image: felt) {
+}
+
 // -----------------------------------
 // Initialize & upgrade
 // -----------------------------------
@@ -174,6 +178,9 @@ func birth{
 
     // store
     adventurer.write(id, packed_new_adventurer);
+
+    // write image
+    adventurer_image.write(id, image);
 
     return ();
 }
