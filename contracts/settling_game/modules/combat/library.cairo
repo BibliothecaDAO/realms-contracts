@@ -164,9 +164,17 @@ namespace Combat {
     ) -> (defence: felt) {
         alloc_locals;
 
+        let no_battalions = is_le(attacking_total_battalions, 1);
+
+        if (no_battalions == TRUE) {
+            tempvar new_battalions = 1;
+        } else {
+            tempvar new_battalions = attacking_total_battalions;
+        }
+
         // get ratio of battlions to whole Army
         let (percentage_of_battalions, _) = unsigned_div_rem(
-            (attacking_unit_battalions * 1000), attacking_total_battalions
+            (attacking_unit_battalions * 1000), new_battalions
         );
 
         let (values, _) = unsigned_div_rem(defence * percentage_of_battalions, 1000);

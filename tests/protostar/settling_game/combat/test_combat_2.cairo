@@ -18,7 +18,7 @@ func build_defending_army() -> (a: Army) {
     // tempvar values = new (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 100, 3, 100,);
     // tempvar values = new (1, 100, 1, 100, 1, 100, 1, 100, 1, 100, 1, 100, 1, 100, 1, 100,);
 
-    tempvar values = new (10, 100, 10, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,);
+    tempvar values = new (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,);
     let a = cast(values, Army*);
     return ([a],);
 }
