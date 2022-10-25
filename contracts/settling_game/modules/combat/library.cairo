@@ -732,4 +732,47 @@ namespace Combat {
 
         return id_length(all_qtys_len - 1, all_qtys + 1, id + [all_qtys]);
     }
+
+    // @notice Gets a population of a single packed Army
+    // @param battalion_id: population
+    // @ returns attack value
+    func population_of_army{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr,
+        bitwise_ptr: BitwiseBuiltin*,
+    }(army_packed: felt) -> felt {
+        let (unpacked_army) = unpack_army(army_packed);
+
+        let light_cavalry = unpacked_army.light_cavalry.quantity;
+        let heavy_cavalry = unpacked_army.heavy_cavalry.quantity;
+        let archer = unpacked_army.archer.quantity;
+        let longbow = unpacked_army.longbow.quantity;
+
+        let mage = unpacked_army.mage.quantity;
+        let arcanist = unpacked_army.arcanist.quantity;
+        let light_infantry = unpacked_army.light_infantry.quantity;
+        let heavy_infantry = unpacked_army.heavy_infantry.quantity;
+
+        return (light_cavalry + heavy_cavalry + archer + longbow + mage + arcanist + light_infantry + heavy_infantry);
+    }
+
+    func population_of_armies{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr,
+        bitwise_ptr: BitwiseBuiltin*,
+    }(armies_packed_len: felt, armies_packed: felt*, total_population: felt) -> felt {
+        // return population after sum
+        if (armies_packed_len == 0) {
+            return (total_population);
+        }
+
+        // get single population
+        let population_single_army = population_of_army([armies_packed]);
+
+        return population_of_armies(
+            armies_packed_len - 1, armies_packed + 1, total_population + population_single_army
+        );
+    }
 }

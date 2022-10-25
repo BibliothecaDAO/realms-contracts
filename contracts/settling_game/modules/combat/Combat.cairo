@@ -494,6 +494,53 @@ func get_realm_army_combat_data{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, 
     return army_data_by_id.read(army_id, realm_id);
 }
 
+// @notice Get All Armies on a Realm
+@view
+func get_all_armies{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    realm_id: Uint256
+) -> (armies_len: felt, armies: felt*) {
+    alloc_locals;
+
+    // loop and get armies
+    let (armies: felt*) = alloc();
+    let (all_armies_len) = loop_all_armies(0, realm_id, 0, armies);
+
+    return (all_armies_len, armies);
+}
+
+// @notice Loop over all armies and return
+func loop_all_armies{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    army_id: felt, realm_id: Uint256, armies_len: felt, armies: felt*
+) -> (armies_len: felt) {
+    alloc_locals;
+
+    // loop armies starting from 0 (defensive army)
+    let (army_data: ArmyData) = get_realm_army_combat_data(army_id, realm_id);
+
+    // if army.packed == 0 then no Armies have been made!
+    if (army_data.packed == 0) {
+        return (armies_len=army_id);
+    }
+
+    assert [armies] = army_data.packed;
+
+    return loop_all_armies(army_id + 1, realm_id, armies_len + 1, armies + 1);
+}
+
+// @notice Get all Population of Armies
+@view
+func get_population_of_armies{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(realm_id: Uint256) -> (population: felt) {
+    // get all armies
+    let (armies_len, armies) = get_all_armies(realm_id);
+
+    // get population
+    let population_of_armies = Combat.population_of_armies(armies_len, armies, 0);
+
+    return (population=population_of_armies);
+}
+
 // @notice Check if Realm an be attacked
 @view
 func Realm_can_be_attacked{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
