@@ -7,6 +7,15 @@ from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContra
 
 from contracts.settling_game.interfaces.imodules import IModuleController
 
+from contracts.token.constants import (
+    IERC1155_ID,
+    IERC1155_METADATA_ID,
+    IERC1155_RECEIVER_ID,
+    IACCOUNT_ID,
+    ON_ERC1155_RECEIVED_SELECTOR,
+    ON_ERC1155_BATCH_RECEIVED_SELECTOR,
+)
+
 @contract_interface
 namespace Controller {
     func initializer(arbiter: felt, proxy_admin: felt) {
@@ -15,7 +24,7 @@ namespace Controller {
 
 @contract_interface
 namespace Module {
-    func initializer(controller_address, proxy_admin) {
+    func initializer(controller_address: felt, proxy_admin: felt) {
     }
 }
 
@@ -46,7 +55,7 @@ namespace Realms {
 
 @contract_interface
 namespace ResourcesToken {
-    func initializer(uri: felt, proxy_admin: felt) {
+    func initializer(uri: felt, proxy_admin: felt, controller_address: felt) {
     }
 }
 
@@ -91,6 +100,19 @@ struct Contracts {
     Resources_Token: felt,
     S_Crypts_Token: felt,
     S_Realms_Token: felt,
+}
+
+func deploy_account{syscall_ptr: felt*, range_check_ptr}(private_key: felt) -> (account_address: felt) {
+    alloc_locals;
+    local account_address;
+    %{
+        ids.account_address = deploy_contract("./lib/cairo_contracts/src/openzeppelin/account/presets/Account.cairo", 
+            [ids.private_key]
+        ).contract_address
+        mock_start = mock_call(ids.account_address, 'supportsInterface', [1])
+        mock_start = mock_call(ids.account_address, 'onERC1155BatchReceived', [ids.ON_ERC1155_BATCH_RECEIVED_SELECTOR])
+    %}
+    return (account_address,);
 }
 
 func deploy_controller{syscall_ptr: felt*, range_check_ptr}(arbiter: felt, proxy_admin: felt) -> (controller_address: felt) {
@@ -150,6 +172,8 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
         Module.initializer(proxy_address, controller_address, proxy_admin);
         IModuleController.set_address_for_module_id(controller_address, ModuleIds.Resources, proxy_address);
         IModuleController.set_write_access(controller_address, ModuleIds.Resources, ModuleIds.Realms_Token);
+        IModuleController.set_write_access(controller_address, ModuleIds.Resources, ModuleIds.S_Realms_Token);
+        IModuleController.set_write_access(controller_address, ModuleIds.Resources, ModuleIds.Resources_Token);
         IModuleController.set_write_access(controller_address, ModuleIds.Resources, ModuleIds.Settling);
         IModuleController.set_write_access(controller_address, ModuleIds.Resources, ModuleIds.Buildings);
         IModuleController.set_write_access(controller_address, ModuleIds.Resources, ModuleIds.GoblinTown);
@@ -383,7 +407,7 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
             ).contract_address
             stop_prank = start_prank(ids.proxy_admin, ids.controller_address)
         %}
-        ResourcesToken.initializer(proxy_address, 1, proxy_admin);
+        ResourcesToken.initializer(proxy_address, 1, proxy_admin, controller_address);
         IModuleController.set_address_for_module_id(controller_address, ModuleIds.Resources_Token, proxy_address);
         IModuleController.set_address_for_external_contract(controller_address, ExternalContractIds.Resources, proxy_address);
         %{
