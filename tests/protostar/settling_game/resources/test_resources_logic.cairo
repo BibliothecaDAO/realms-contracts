@@ -135,10 +135,10 @@ func test_claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
         resources_token_address, accounts_len, accounts, 22, token_ids
     );
 
-    local resources: Uint256* = balances;
     %{
-        # realm_resources = reflect.resources.get()
-        # print(realm_resources)
+        for i in [1, 7, 12, 5]:
+            assert 18000000000000000000000 == memory[ids.balances._reference_value + 2*i]
+            assert 0 == memory[ids.balances._reference_value + 2*i + 1]
         stop_prank_resources()
     %}
     return ();
@@ -172,10 +172,10 @@ func test_pillage_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
         resources_token_address, accounts_len, accounts, 22, token_ids
     );
 
-    local resources: Uint256* = balances;
     %{
-        # realm_resources = reflect.resources.get()
-        # print(realm_resources)
+        for i in [1, 7, 12, 5]:
+            assert 4312000000000000000000 == memory[ids.balances._reference_value + 2*i]
+            assert 0 == memory[ids.balances._reference_value + 2*i + 1]
         stop_prank_resources()
     %}
     return ();
