@@ -111,7 +111,7 @@ namespace CCombat {
 
     // used to signal which side won the battle
     const COMBAT_OUTCOME_ATTACKER_WINS = 1;
-    const COMBAT_OUTCOME_DEFENDER_WINS = 2;
+    const COMBAT_OUTCOME_DEFENDER_WINS = 0;
 
     // used when adding or removing squads to Realms
     const ATTACKING_SQUAD_SLOT = 1;

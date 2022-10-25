@@ -354,15 +354,16 @@ namespace Combat {
         }
 
         // if health 0 the battalion is dead. Return 0,0
-        let is_dead = is_le(actual_health_remaining, 0);
+        let is_dead = is_le(actual_health_remaining - 10, 0);
         if (is_dead == TRUE) {
             return (0, 0);
         }
 
         // adjust battalions to make health fixed figure per battalion
+        // eg: 400 / 100 = 4 battalions
         let (adjusted_battalions, _) = unsigned_div_rem(actual_health_remaining, 100);
 
-        // if less than 1 battalion exists
+        // // if less than 1 battalion exists
         let is_battalion_alive = is_le(actual_health_remaining, 100);
         if (is_battalion_alive == TRUE) {
             return (actual_health_remaining, 1);

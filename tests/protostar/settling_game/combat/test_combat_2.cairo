@@ -7,7 +7,7 @@ from contracts.settling_game.modules.combat.library import Combat, Army, Battali
 from contracts.settling_game.modules.combat.constants import BattalionStatistics, BattalionIds
 
 func build_attacking_army() -> (a: Army) {
-    tempvar values = new (2, 100, 2, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,);
+    tempvar values = new (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,);
 
     // tempvar values = new (1, 100, 1, 100, 1, 100, 1, 100, 1, 100, 1, 100, 1, 100, 1, 100,);
     let a = cast(values, Army*);
@@ -18,7 +18,7 @@ func build_defending_army() -> (a: Army) {
     // tempvar values = new (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 100, 3, 100,);
     // tempvar values = new (1, 100, 1, 100, 1, 100, 1, 100, 1, 100, 1, 100, 1, 100, 1, 100,);
 
-    tempvar values = new (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,);
+    tempvar values = new (30, 100, 3, 52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,);
     let a = cast(values, Army*);
     return ([a],);
 }
@@ -140,84 +140,84 @@ func build_defending_army() -> (a: Army) {
 // return ();
 // }
 
-@external
-func test_single_population{
-    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}() {
-    alloc_locals;
-
-    let (attacking_army) = build_attacking_army();
-    let (packed_army) = Combat.pack_army(attacking_army);
-
-    // calc population
-    let population = Combat.population_of_army(packed_army);
-
-    assert population = 4;
-
-    return ();
-}
-
-@external
-func test_many_population{
-    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}() {
-    alloc_locals;
-
-    let (attacking_army) = build_attacking_army();
-    let (packed_army) = Combat.pack_army(attacking_army);
-
-    // calc population
-    let population_1 = Combat.population_of_army(packed_army);
-    let population_2 = Combat.population_of_army(packed_army);
-
-    tempvar armies = new (population_1, population_2,);
-
-    let population_of_armies = Combat.population_of_armies(2, armies, 0);
-
-    assert population_of_armies = population_2 + population_1;
-
-    return ();
-}
-
 // @external
-// func test_winner{
+// func test_single_population{
 //     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 // }() {
 //     alloc_locals;
 
 // let (attacking_army) = build_attacking_army();
-//     let (defending_army) = build_defending_army();
+//     let (packed_army) = Combat.pack_army(attacking_army);
 
-// let luck = 100;
+// // calc population
+//     let population = Combat.population_of_army(packed_army);
 
-// let (outcome, updated_attacker: Army, updated_defender: Army) = Combat.calculate_winner(
-//         luck, attacking_army, defending_army
-//     );
+// assert population = 4;
 
-// // assert outcome = 1;
-
-// let attacking_army = updated_attacker;
-//     let defending_army = updated_defender;
-
-// %{ print('light_cavalry Health:', ids.attacking_army.light_cavalry.health, ids.defending_army.light_cavalry.health) %}
-//     %{ print('heavy_cavalry Health:', ids.attacking_army.heavy_cavalry.health, ids.defending_army.heavy_cavalry.health) %}
-//     %{ print('archer Health:', ids.attacking_army.archer.health, ids.defending_army.archer.health) %}
-//     %{ print('longbow Health:', ids.attacking_army.longbow.health, ids.defending_army.longbow.health) %}
-//     %{ print('mage Health:', ids.attacking_army.mage.health, ids.defending_army.mage.health) %}
-//     %{ print('arcanist Health:', ids.attacking_army.arcanist.health, ids.defending_army.arcanist.health) %}
-//     %{ print('light_infantry Health:', ids.attacking_army.light_infantry.health, ids.defending_army.light_infantry.health) %}
-//     %{ print('heavy_infantry Health:', ids.attacking_army.heavy_infantry.health, ids.defending_army.heavy_infantry.health) %}
-
-// %{ print('light_cavalry quantity:', ids.attacking_army.light_cavalry.quantity, ids.defending_army.light_cavalry.quantity) %}
-//     %{ print('heavy_cavalry quantity:', ids.attacking_army.heavy_cavalry.quantity, ids.defending_army.heavy_cavalry.quantity) %}
-//     %{ print('archer quantity:', ids.attacking_army.archer.quantity, ids.defending_army.archer.quantity) %}
-//     %{ print('longbow quantity:', ids.attacking_army.longbow.quantity, ids.defending_army.longbow.quantity) %}
-//     %{ print('mage quantity:', ids.attacking_army.mage.quantity, ids.defending_army.mage.quantity) %}
-//     %{ print('arcanist quantity:', ids.attacking_army.arcanist.quantity, ids.defending_army.arcanist.quantity) %}
-//     %{ print('light_infantry quantity:', ids.attacking_army.light_infantry.quantity, ids.defending_army.light_infantry.quantity) %}
-//     %{ print('heavy_infantry quantity:', ids.attacking_army.heavy_infantry.quantity, ids.defending_army.heavy_infantry.quantity) %}
-//     return ();
+// return ();
 // }
+
+// @external
+// func test_many_population{
+//     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+// }() {
+//     alloc_locals;
+
+// let (attacking_army) = build_attacking_army();
+//     let (packed_army) = Combat.pack_army(attacking_army);
+
+// // calc population
+//     let population_1 = Combat.population_of_army(packed_army);
+//     let population_2 = Combat.population_of_army(packed_army);
+
+// tempvar armies = new (population_1, population_2,);
+
+// let population_of_armies = Combat.population_of_armies(2, armies, 0);
+
+// assert population_of_armies = population_2 + population_1;
+
+// return ();
+// }
+
+@external
+func test_winner{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}() {
+    alloc_locals;
+
+    let (attacking_army) = build_attacking_army();
+    let (defending_army) = build_defending_army();
+
+    let luck = 100;
+
+    let (outcome, updated_attacker: Army, updated_defender: Army) = Combat.calculate_winner(
+        luck, attacking_army, defending_army
+    );
+
+    // assert outcome = 1;
+
+    let attacking_army = updated_attacker;
+    let defending_army = updated_defender;
+
+    %{ print('light_cavalry Health:', ids.attacking_army.light_cavalry.health, ids.defending_army.light_cavalry.health) %}
+    %{ print('heavy_cavalry Health:', ids.attacking_army.heavy_cavalry.health, ids.defending_army.heavy_cavalry.health) %}
+    %{ print('archer Health:', ids.attacking_army.archer.health, ids.defending_army.archer.health) %}
+    %{ print('longbow Health:', ids.attacking_army.longbow.health, ids.defending_army.longbow.health) %}
+    %{ print('mage Health:', ids.attacking_army.mage.health, ids.defending_army.mage.health) %}
+    %{ print('arcanist Health:', ids.attacking_army.arcanist.health, ids.defending_army.arcanist.health) %}
+    %{ print('light_infantry Health:', ids.attacking_army.light_infantry.health, ids.defending_army.light_infantry.health) %}
+    %{ print('heavy_infantry Health:', ids.attacking_army.heavy_infantry.health, ids.defending_army.heavy_infantry.health) %}
+
+    %{ print('light_cavalry quantity:', ids.attacking_army.light_cavalry.quantity, ids.defending_army.light_cavalry.quantity) %}
+    %{ print('heavy_cavalry quantity:', ids.attacking_army.heavy_cavalry.quantity, ids.defending_army.heavy_cavalry.quantity) %}
+    %{ print('archer quantity:', ids.attacking_army.archer.quantity, ids.defending_army.archer.quantity) %}
+    %{ print('longbow quantity:', ids.attacking_army.longbow.quantity, ids.defending_army.longbow.quantity) %}
+    %{ print('mage quantity:', ids.attacking_army.mage.quantity, ids.defending_army.mage.quantity) %}
+    %{ print('arcanist quantity:', ids.attacking_army.arcanist.quantity, ids.defending_army.arcanist.quantity) %}
+    %{ print('light_infantry quantity:', ids.attacking_army.light_infantry.quantity, ids.defending_army.light_infantry.quantity) %}
+    %{ print('heavy_infantry quantity:', ids.attacking_army.heavy_infantry.quantity, ids.defending_army.heavy_infantry.quantity) %}
+    return ();
+}
 
 // @external
 // func test_calculate_health_loss_percentage{
