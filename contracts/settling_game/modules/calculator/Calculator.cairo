@@ -32,7 +32,7 @@ from contracts.settling_game.interfaces.imodules import IModuleController
 from contracts.settling_game.modules.combat.interface import IL06_Combat
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.modules.calculator.library import Calculator
-from contracts.settling_game.library.library_combat import Combat
+// from contracts.settling_game.unused_modules.library_combat import CCombat
 from contracts.settling_game.modules.buildings.interface import IBuildings
 
 // -----------------------------------

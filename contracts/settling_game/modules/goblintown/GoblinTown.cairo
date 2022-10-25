@@ -24,7 +24,7 @@ from contracts.settling_game.modules.goblintown.library import GoblinTown
 from contracts.settling_game.utils.constants import GOBLIN_WELCOME_PARTY_STRENGTH, DAY
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds, RealmData
 from contracts.settling_game.utils.game_structs import Squad
-from contracts.settling_game.library.library_combat import Combat
+from contracts.settling_game.unused_modules.library_combat import Combat
 
 // -----------------------------------
 // Events

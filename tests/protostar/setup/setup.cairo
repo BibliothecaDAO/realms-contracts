@@ -3,9 +3,15 @@
 from starkware.cairo.common.bool import TRUE
 from starkware.cairo.common.uint256 import Uint256
 
-from contracts.settling_game.utils.game_structs import ModuleIds
+from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
 
 from contracts.settling_game.interfaces.imodules import IModuleController
+
+@contract_interface
+namespace Controller {
+    func initializer(arbiter: felt, proxy_admin: felt) {
+    }
+}
 
 @contract_interface
 namespace Module {
@@ -87,6 +93,23 @@ struct Contracts {
     S_Realms_Token: felt,
 }
 
+func deploy_controller{syscall_ptr: felt*, range_check_ptr}(arbiter: felt, proxy_admin: felt) -> (controller_address: felt) {
+    alloc_locals;
+
+    local controller_class_hash;
+    local controller_address;
+
+    %{
+        declared = declare("./contracts/settling_game/ModuleController.cairo")
+        ids.controller_class_hash = declared.class_hash
+        ids.controller_address = deploy_contract("./contracts/settling_game/proxy/PROXY_logic.cairo", 
+            [ids.controller_class_hash]
+        ).contract_address
+    %}
+    Controller.initializer(controller_address, arbiter, proxy_admin); 
+    return (controller_address,);
+}
+
 func deploy_module{syscall_ptr: felt*, range_check_ptr}(
     module_id: felt, controller_address: felt, proxy_admin: felt
 ) -> (module_address: felt) {
@@ -102,13 +125,17 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
             ids.proxy_address = deploy_contract("./contracts/settling_game/proxy/PROXY_logic.cairo", 
                 [ids.module_class_hash]
             ).contract_address
+            stop_prank = start_prank(ids.proxy_admin, ids.controller_address)
         %}
         Module.initializer(proxy_address, controller_address, proxy_admin);
-        IModuleController.set_address_for_module_id(ModuleIds.Settling, proxy_address);
-        IModuleController.set_write_access(ModuleIds.Settling, ModuleIds.Realms_Token);
-        IModuleController.set_write_access(ModuleIds.Settling, ModuleIds.S_Realms_Token);
-        IModuleController.set_write_access(ModuleIds.Settling, ModuleIds.GoblinTown);
-        IModuleController.set_write_access(ModuleIds.Settling, ModuleIds.Resources);
+        IModuleController.set_address_for_module_id(controller_address, ModuleIds.Settling, proxy_address);
+        IModuleController.set_write_access(controller_address, ModuleIds.Settling, ModuleIds.Realms_Token);
+        IModuleController.set_write_access(controller_address, ModuleIds.Settling, ModuleIds.S_Realms_Token);
+        IModuleController.set_write_access(controller_address, ModuleIds.Settling, ModuleIds.GoblinTown);
+        IModuleController.set_write_access(controller_address, ModuleIds.Settling, ModuleIds.Resources);
+        %{
+            stop_prank()
+        %}
         return (proxy_address,);
     }
     if (module_id == ModuleIds.Resources) {
@@ -118,13 +145,17 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
             ids.proxy_address = deploy_contract("./contracts/settling_game/proxy/PROXY_logic.cairo", 
                 [ids.module_class_hash]
             ).contract_address
+            stop_prank = start_prank(ids.proxy_admin, ids.controller_address)
         %}
         Module.initializer(proxy_address, controller_address, proxy_admin);
-        IModuleController.set_address_for_module_id(ModuleIds.Resources, proxy_address);
-        IModuleController.set_write_access(ModuleIds.Resources, ModuleIds.Realms_Token);
-        IModuleController.set_write_access(ModuleIds.Resources, ModuleIds.Settling);
-        IModuleController.set_write_access(ModuleIds.Resources, ModuleIds.Buildings);
-        IModuleController.set_write_access(ModuleIds.Resources, ModuleIds.GoblinTown);
+        IModuleController.set_address_for_module_id(controller_address, ModuleIds.Resources, proxy_address);
+        IModuleController.set_write_access(controller_address, ModuleIds.Resources, ModuleIds.Realms_Token);
+        IModuleController.set_write_access(controller_address, ModuleIds.Resources, ModuleIds.Settling);
+        IModuleController.set_write_access(controller_address, ModuleIds.Resources, ModuleIds.Buildings);
+        IModuleController.set_write_access(controller_address, ModuleIds.Resources, ModuleIds.GoblinTown);
+        %{
+            stop_prank()
+        %}
         return (proxy_address,);
     }
     if (module_id == ModuleIds.Buildings) {
@@ -134,11 +165,15 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
             ids.proxy_address = deploy_contract("./contracts/settling_game/proxy/PROXY_logic.cairo", 
                 [ids.module_class_hash]
             ).contract_address
+            stop_prank = start_prank(ids.proxy_admin, ids.controller_address)
         %}
         Module.initializer(proxy_address, controller_address, proxy_admin);
-        IModuleController.set_address_for_module_id(ModuleIds.Buildings, proxy_address);
-        IModuleController.set_write_access(ModuleIds.Buildings, ModuleIds.Realms_Token);
-        IModuleController.set_write_access(ModuleIds.Buildings, ModuleIds.L10_Food);
+        IModuleController.set_address_for_module_id(controller_address, ModuleIds.Buildings, proxy_address);
+        IModuleController.set_write_access(controller_address, ModuleIds.Buildings, ModuleIds.Realms_Token);
+        IModuleController.set_write_access(controller_address, ModuleIds.Buildings, ModuleIds.L10_Food);
+        %{
+            stop_prank()
+        %}
         return (proxy_address,);
     }
     if (module_id == ModuleIds.Calculator) {
@@ -148,12 +183,16 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
             ids.proxy_address = deploy_contract("./contracts/settling_game/proxy/PROXY_logic.cairo", 
                 [ids.module_class_hash]
             ).contract_address
+            stop_prank = start_prank(ids.proxy_admin, ids.controller_address)
         %}
         Module.initializer(proxy_address, controller_address, proxy_admin);
-        IModuleController.set_address_for_module_id(ModuleIds.Calculator, proxy_address);
-        IModuleController.set_write_access(ModuleIds.Calculator, ModuleIds.Settling);
-        IModuleController.set_write_access(ModuleIds.Calculator, ModuleIds.L06_Combat);
-        IModuleController.set_write_access(ModuleIds.Calculator, ModuleIds.Buildings);
+        IModuleController.set_address_for_module_id(controller_address, ModuleIds.Calculator, proxy_address);
+        IModuleController.set_write_access(controller_address, ModuleIds.Calculator, ModuleIds.Settling);
+        IModuleController.set_write_access(controller_address, ModuleIds.Calculator, ModuleIds.L06_Combat);
+        IModuleController.set_write_access(controller_address, ModuleIds.Calculator, ModuleIds.Buildings);
+        %{
+            stop_prank()
+        %}
         return (proxy_address,);
     }
     if (module_id == ModuleIds.L06_Combat) {
@@ -163,16 +202,20 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
             ids.proxy_address = deploy_contract("./contracts/settling_game/proxy/PROXY_logic.cairo", 
                 [ids.module_class_hash]
             ).contract_address
+            stop_prank = start_prank(ids.proxy_admin, ids.controller_address)
         %}
         Module.initializer(proxy_address, controller_address, proxy_admin);
-        IModuleController.set_address_for_module_id(ModuleIds.L06_Combat, proxy_address);
-        IModuleController.set_write_access(ModuleIds.L06_Combat, ModuleIds.GoblinTown);
-        IModuleController.set_write_access(ModuleIds.L06_Combat, ModuleIds.L10_Food);
-        IModuleController.set_write_access(ModuleIds.L06_Combat, ModuleIds.L09_Relics);
-        IModuleController.set_write_access(ModuleIds.L06_Combat, ModuleIds.Travel);
-        IModuleController.set_write_access(ModuleIds.L06_Combat, ModuleIds.Resources);
-        IModuleController.set_write_access(ModuleIds.L06_Combat, ModuleIds.Buildings);
-        IModuleController.set_write_access(ModuleIds.L06_Combat, ModuleIds.Realms_Token);
+        IModuleController.set_address_for_module_id(controller_address, ModuleIds.L06_Combat, proxy_address);
+        IModuleController.set_write_access(controller_address, ModuleIds.L06_Combat, ModuleIds.GoblinTown);
+        IModuleController.set_write_access(controller_address, ModuleIds.L06_Combat, ModuleIds.L10_Food);
+        IModuleController.set_write_access(controller_address, ModuleIds.L06_Combat, ModuleIds.L09_Relics);
+        IModuleController.set_write_access(controller_address, ModuleIds.L06_Combat, ModuleIds.Travel);
+        IModuleController.set_write_access(controller_address, ModuleIds.L06_Combat, ModuleIds.Resources);
+        IModuleController.set_write_access(controller_address, ModuleIds.L06_Combat, ModuleIds.Buildings);
+        IModuleController.set_write_access(controller_address, ModuleIds.L06_Combat, ModuleIds.Realms_Token);
+        %{
+            stop_prank()
+        %}
         return (proxy_address,);
     }
     if (module_id == ModuleIds.L07_Crypts) {
@@ -182,10 +225,14 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
             ids.proxy_address = deploy_contract("./contracts/settling_game/proxy/PROXY_logic.cairo", 
                 [ids.module_class_hash]
             ).contract_address
+            stop_prank = start_prank(ids.proxy_admin, ids.controller_address)
         %}
         Module.initializer(proxy_address, controller_address, proxy_admin);
-        IModuleController.set_address_for_module_id(ModuleIds.L07_Crypts, proxy_address);
-        IModuleController.set_write_access(ModuleIds.L07_Crypts, ModuleIds.L08_Crypts_Resources);
+        IModuleController.set_address_for_module_id(controller_address, ModuleIds.L07_Crypts, proxy_address);
+        IModuleController.set_write_access(controller_address, ModuleIds.L07_Crypts, ModuleIds.L08_Crypts_Resources);
+        %{
+            stop_prank()
+        %}
         return (proxy_address,);
     }
     if (module_id == ModuleIds.L08_Crypts_Resources) {
@@ -195,10 +242,14 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
             ids.proxy_address = deploy_contract("./contracts/settling_game/proxy/PROXY_logic.cairo", 
                 [ids.module_class_hash]
             ).contract_address
+            stop_prank = start_prank(ids.proxy_admin, ids.controller_address)
         %}
         Module.initializer(proxy_address, controller_address, proxy_admin);
-        IModuleController.set_address_for_module_id(ModuleIds.L08_Crypts_Resources, proxy_address);
-        IModuleController.set_write_access(ModuleIds.L08_Crypts_Resources, ModuleIds.L07_Crypts);
+        IModuleController.set_address_for_module_id(controller_address, ModuleIds.L08_Crypts_Resources, proxy_address);
+        IModuleController.set_write_access(controller_address, ModuleIds.L08_Crypts_Resources, ModuleIds.L07_Crypts);
+        %{
+            stop_prank()
+        %}
         return (proxy_address,);
     }
     if (module_id == ModuleIds.L09_Relics) {
@@ -208,10 +259,14 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
             ids.proxy_address = deploy_contract("./contracts/settling_game/proxy/PROXY_logic.cairo", 
                 [ids.module_class_hash]
             ).contract_address
+            stop_prank = start_prank(ids.proxy_admin, ids.controller_address)
         %}
         Module.initializer(proxy_address, controller_address, proxy_admin);
-        IModuleController.set_address_for_module_id(ModuleIds.L09_Relics, proxy_address);
-        IModuleController.set_write_access(ModuleIds.L09_Relics, ModuleIds.Realms_Token);
+        IModuleController.set_address_for_module_id(controller_address, ModuleIds.L09_Relics, proxy_address);
+        IModuleController.set_write_access(controller_address, ModuleIds.L09_Relics, ModuleIds.Realms_Token);
+        %{
+            stop_prank()
+        %}
         return (proxy_address,);
     }
     if (module_id == ModuleIds.L10_Food) {
@@ -221,14 +276,18 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
             ids.proxy_address = deploy_contract("./contracts/settling_game/proxy/PROXY_logic.cairo", 
                 [ids.module_class_hash]
             ).contract_address
+            stop_prank = start_prank(ids.proxy_admin, ids.controller_address)
         %}
         Module.initializer(proxy_address, controller_address, proxy_admin);
-        IModuleController.set_address_for_module_id(ModuleIds.L10_Food, proxy_address);
-        IModuleController.set_write_access(ModuleIds.L10_Food, ModuleIds.Buildings);
-        IModuleController.set_write_access(ModuleIds.L10_Food, ModuleIds.Realms_Token);
-        IModuleController.set_write_access(ModuleIds.L10_Food, ModuleIds.Calculator);
-        IModuleController.set_write_access(ModuleIds.L10_Food, ModuleIds.S_Realms_Token);
-        IModuleController.set_write_access(ModuleIds.L10_Food, ModuleIds.Resources_Token);
+        IModuleController.set_address_for_module_id(controller_address, ModuleIds.L10_Food, proxy_address);
+        IModuleController.set_write_access(controller_address, ModuleIds.L10_Food, ModuleIds.Buildings);
+        IModuleController.set_write_access(controller_address, ModuleIds.L10_Food, ModuleIds.Realms_Token);
+        IModuleController.set_write_access(controller_address, ModuleIds.L10_Food, ModuleIds.Calculator);
+        IModuleController.set_write_access(controller_address, ModuleIds.L10_Food, ModuleIds.S_Realms_Token);
+        IModuleController.set_write_access(controller_address, ModuleIds.L10_Food, ModuleIds.Resources_Token);
+        %{
+            stop_prank()
+        %}
         return (proxy_address,);
     }
     if (module_id == ModuleIds.GoblinTown) {
@@ -238,10 +297,14 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
             ids.proxy_address = deploy_contract("./contracts/settling_game/proxy/PROXY_logic.cairo", 
                 [ids.module_class_hash]
             ).contract_address
+            stop_prank = start_prank(ids.proxy_admin, ids.controller_address)
         %}
         Module.initializer(proxy_address, controller_address, proxy_admin);
-        IModuleController.set_address_for_module_id(ModuleIds.GoblinTown, proxy_address);
-        IModuleController.set_write_access(ModuleIds.GoblinTown, ModuleIds.Realms_Token);
+        IModuleController.set_address_for_module_id(controller_address, ModuleIds.GoblinTown, proxy_address);
+        IModuleController.set_write_access(controller_address, ModuleIds.GoblinTown, ModuleIds.Realms_Token);
+        %{
+            stop_prank()
+        %}
         return (proxy_address,);
     }
     if (module_id == ModuleIds.Travel) {
@@ -251,9 +314,13 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
             ids.proxy_address = deploy_contract("./contracts/settling_game/proxy/PROXY_logic.cairo", 
                 [ids.module_class_hash]
             ).contract_address
+            stop_prank = start_prank(ids.proxy_admin, ids.controller_address)
         %}
         Module.initializer(proxy_address, controller_address, proxy_admin);
-        IModuleController.set_address_for_module_id(ModuleIds.Travel, proxy_address);
+        IModuleController.set_address_for_module_id(controller_address, ModuleIds.Travel, proxy_address);
+        %{
+            stop_prank()
+        %}
         return (proxy_address,);
     }
     if (module_id == ModuleIds.Crypts_Token) {
@@ -263,9 +330,14 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
             ids.proxy_address = deploy_contract("./contracts/settling_game/proxy/PROXY_logic.cairo", 
                 [ids.module_class_hash]
             ).contract_address
+            stop_prank = start_prank(ids.proxy_admin, ids.controller_address)
         %}
         Crypts.initializer(proxy_address, 1, 1, proxy_admin);
-        IModuleController.set_address_for_module_id(ModuleIds.Crypts_Token, proxy_address);
+        IModuleController.set_address_for_module_id(controller_address, ModuleIds.Crypts_Token, proxy_address);
+        IModuleController.set_address_for_external_contract(controller_address, ExternalContractIds.Crypts, proxy_address);
+        %{
+            stop_prank()
+        %}
         return (proxy_address,);
     }
     if (module_id == ModuleIds.Lords_Token) {
@@ -275,9 +347,14 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
             ids.proxy_address = deploy_contract("./contracts/settling_game/proxy/PROXY_logic.cairo", 
                 [ids.module_class_hash]
             ).contract_address
+            stop_prank = start_prank(ids.proxy_admin, ids.controller_address)
         %}
         Lords.initializer(proxy_address, 1, 1, 18, Uint256(10000, 0), 1, proxy_admin);
-        IModuleController.set_address_for_module_id(ModuleIds.Lords_Token, proxy_address);
+        IModuleController.set_address_for_module_id(controller_address, ModuleIds.Lords_Token, proxy_address);
+        IModuleController.set_address_for_external_contract(controller_address, ExternalContractIds.Lords, proxy_address);
+        %{
+            stop_prank()
+        %}
         return (proxy_address,);
     }
     if (module_id == ModuleIds.Realms_Token) {
@@ -287,9 +364,14 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
             ids.proxy_address = deploy_contract("./contracts/settling_game/proxy/PROXY_logic.cairo", 
                 [ids.module_class_hash]
             ).contract_address
+            stop_prank = start_prank(ids.proxy_admin, ids.controller_address)
         %}
         Realms.initializer(proxy_address, 1, 1, proxy_admin);
-        IModuleController.set_address_for_module_id(ModuleIds.Realms_Token, proxy_address);
+        IModuleController.set_address_for_module_id(controller_address, ModuleIds.Realms_Token, proxy_address);
+        IModuleController.set_address_for_external_contract(controller_address, ExternalContractIds.Realms, proxy_address);
+        %{
+            stop_prank()
+        %}
         return (proxy_address,);
     }
     if (module_id == ModuleIds.Resources_Token) {
@@ -299,9 +381,14 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
             ids.proxy_address = deploy_contract("./contracts/settling_game/proxy/PROXY_logic.cairo", 
                 [ids.module_class_hash]
             ).contract_address
+            stop_prank = start_prank(ids.proxy_admin, ids.controller_address)
         %}
         ResourcesToken.initializer(proxy_address, 1, proxy_admin);
-        IModuleController.set_address_for_module_id(ModuleIds.Resources_Token, proxy_address);
+        IModuleController.set_address_for_module_id(controller_address, ModuleIds.Resources_Token, proxy_address);
+        IModuleController.set_address_for_external_contract(controller_address, ExternalContractIds.Resources, proxy_address);
+        %{
+            stop_prank()
+        %}
         return (proxy_address,);
     }
     if (module_id == ModuleIds.S_Crypts_Token) {
@@ -311,9 +398,14 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
             ids.proxy_address = deploy_contract("./contracts/settling_game/proxy/PROXY_logic.cairo", 
                 [ids.module_class_hash]
             ).contract_address
+            stop_prank = start_prank(ids.proxy_admin, ids.controller_address)
         %}
         S_Crypts.initializer(proxy_address, 1, 1, proxy_admin);
-        IModuleController.set_address_for_module_id(ModuleIds.S_Crypts_Token, proxy_address);
+        IModuleController.set_address_for_module_id(controller_address, ModuleIds.S_Crypts_Token, proxy_address);
+        IModuleController.set_address_for_external_contract(controller_address, ExternalContractIds.S_Crypts, proxy_address);
+        %{
+            stop_prank()
+        %}
         return (proxy_address,);
     }
     if (module_id == ModuleIds.S_Realms_Token) {
@@ -323,10 +415,15 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
             ids.proxy_address = deploy_contract("./contracts/settling_game/proxy/PROXY_logic.cairo", 
                 [ids.module_class_hash]
             ).contract_address
+            stop_prank = start_prank(ids.proxy_admin, ids.controller_address)
         %}
         S_Realms.initializer(proxy_address, 1, 1, proxy_admin, controller_address);
-        IModuleController.set_address_for_module_id(ModuleIds.S_Realms_Token, proxy_address);
-        IModuleController.set_write_access(ModuleIds.S_Realms_Token, ModuleIds.Realms_Token);
+        IModuleController.set_address_for_module_id(controller_address, ModuleIds.S_Realms_Token, proxy_address);
+        IModuleController.set_write_access(controller_address, ModuleIds.S_Realms_Token, ModuleIds.Realms_Token);
+        IModuleController.set_address_for_external_contract(controller_address, ExternalContractIds.S_Realms, proxy_address);
+        %{
+            stop_prank()
+        %}
         return (proxy_address,);
     }
     return (proxy_address,);

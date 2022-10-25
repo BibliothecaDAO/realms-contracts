@@ -15,7 +15,7 @@ from starkware.cairo.common.memset import memset
 from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
 
-from contracts.settling_game.utils.constants import DEFENDING_SQUAD_SLOT
+from contracts.settling_game.utils.constants import CCombat
 from contracts.settling_game.utils.game_structs import (
     RealmBuildingsIds,
     RealmBuildings,
@@ -35,7 +35,7 @@ namespace Combat {
     // @param slot: An value of squad slot. Valid values are ATTACKING_SQUAD_SLOT and DEFENDING_SQUAD_SLOT
     func assert_slot{range_check_ptr}(slot: felt) {
         with_attr error_message("Combat: slot not valid") {
-            let is_valid_slot = is_le(slot, DEFENDING_SQUAD_SLOT);
+            let is_valid_slot = is_le(slot, CCombat.DEFENDING_SQUAD_SLOT);
             assert is_valid_slot = TRUE;
             let is_valid_slot = is_nn(slot);
             assert is_valid_slot = TRUE;
