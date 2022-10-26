@@ -209,3 +209,51 @@ func test_return_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_ch
 
     return ();
 }
+
+@external
+func test_stress_test{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+
+    local Relics_address;
+    local Realms_token_address;
+    local realms_1_data;
+    local realms_2_data;
+    local realms_3_data;
+    %{
+        from tests.protostar.utils import utils
+        ids.Relics_address = context.Relics_address
+        ids.Realms_token_address = context.Realms_token_address
+        mock_call(ids.MODULE_CONTROLLER_ADDR, "get_external_contract_address", [ids.Realms_token_address])
+        mock_call(ids.MODULE_CONTROLLER_ADDR, "has_write_access", [1])
+        ids.realms_1_data = utils.pack_realm(utils.build_realm_order(0,0,0,0,0,0,0,0,0,0,0,0,0,1))
+        ids.realms_2_data = utils.pack_realm(utils.build_realm_order(0,0,0,0,0,0,0,0,0,0,0,0,0,2))
+        ids.realms_3_data = utils.pack_realm(utils.build_realm_order(0,0,0,0,0,0,0,0,0,0,0,0,0,1))
+        store(ids.Realms_token_address, "Ownable_owner", [ids.FAKE_OWNER_ADDR])
+        stop_prank_callable = start_prank(ids.FAKE_OWNER_ADDR, ids.Realms_token_address)
+    %}
+    Realms.set_realm_data(Realms_token_address, Uint256(1, 0), realms_1_data);
+    Realms.set_realm_data(Realms_token_address, Uint256(2, 0), realms_2_data);
+    Realms.set_realm_data(Realms_token_address, Uint256(3, 0), realms_3_data);
+    %{
+        stop_prank_callable()
+        stop_prank_callable = start_prank(ids.FAKE_OWNER_ADDR, context.Relics_address)
+    %}
+    Relics.set_relic_holder(Relics_address, Uint256(1, 0), Uint256(2, 0));
+    Relics.set_relic_holder(Relics_address, Uint256(2, 0), Uint256(1, 0));
+    Relics.set_relic_holder(Relics_address, Uint256(3, 0), Uint256(2, 0));
+    Relics.return_relics(Relics_address, Uint256(3, 0));
+    Relics.set_relic_holder(Relics_address, Uint256(1, 0), Uint256(2, 0));
+    let (owner_id_1) = Relics.get_current_relic_holder(Relics_address, Uint256(1, 0));
+    let (owner_id_2) = Relics.get_current_relic_holder(Relics_address, Uint256(2, 0));
+    let (owner_id_3) = Relics.get_current_relic_holder(Relics_address, Uint256(3, 0));
+    assert owner_id_1 = Uint256(1, 0);
+    assert owner_id_2 = Uint256(1, 0);
+
+    %{
+        # get relic count for realm 2, expect 0
+        owner_2_relics_len = load(ids.Relics_address, "owned_relics_len", "felt", key=[2, 0])
+        assert owner_2_relics_len[0] == 0
+    %}
+
+    return ();
+}

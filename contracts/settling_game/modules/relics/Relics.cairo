@@ -91,26 +91,21 @@ func set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
     // Only combat
     Module.only_approved();
 
-    let (controller) = Module.controller_address();
-
     let (current_relic_owner) = get_current_relic_holder(loser_token_id);
 
-    let (is_equal) = uint256_eq(current_relic_owner, loser_token_id);
+    let (loser_has_own_relic) = uint256_eq(current_relic_owner, loser_token_id);
 
     let (old_owner_token_id) = storage_relic_holder.read(current_relic_owner);
 
     // If old owner exists, update array
-    let (check_exists) = uint256_lt(Uint256(0, 0), old_owner_token_id);
-
-    let (remove_victory_relics: Uint256*) = alloc();
-    let (remove_order_relics: Uint256*) = alloc();
+    let (old_owner_of_relic_exists) = uint256_lt(Uint256(0, 0), old_owner_token_id);
 
     // Capture Relic if owned by loser
     // If Relic is owned by loser, send to victor
-    if (is_equal == TRUE) {
-        if (check_exists == TRUE) {
+    if (loser_has_own_relic == TRUE) {
+        if (old_owner_of_relic_exists == TRUE) {
+            tempvar remove_victory_relics: Uint256* = new (loser_token_id);
             let (loser_relics_len) = owned_relics_len.read(loser_token_id);
-            assert remove_victory_relics[0] = loser_token_id;
             loop_remove_relic(0, 0, loser_relics_len, loser_token_id, 1, remove_victory_relics);
             tempvar syscall_ptr = syscall_ptr;
             tempvar range_check_ptr = range_check_ptr;
@@ -130,6 +125,8 @@ func set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
         tempvar pedersen_ptr = pedersen_ptr;
     }
 
+    let (controller) = Module.controller_address();
+
     let (realms_address) = IModuleController.get_external_contract_address(
         controller, ExternalContractIds.Realms
     );
@@ -137,6 +134,8 @@ func set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
     let (winner_realm_data: RealmData) = IRealms.fetch_realm_data(realms_address, winner_token_id);
 
     let (loser_relics_len) = owned_relics_len.read(loser_token_id);
+
+    let (remove_order_relics: Uint256*) = alloc();
 
     let (remove_relics_len) = loop_claim_order_relic(
         0, realms_address, winner_realm_data, loser_token_id, loser_relics_len, 0, remove_order_relics
