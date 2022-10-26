@@ -34,7 +34,4 @@ namespace IResources {
         total_vault_days_remaining: felt,
     ) {
     }
-
-    func wonder_claim(token_id: Uint256) {
-    }
 }

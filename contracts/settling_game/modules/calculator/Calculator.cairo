@@ -70,7 +70,7 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 // -----------------------------------
 
 // @notice Calculates epoch of game. On deployment of game a timestamp is set, an epoch is the length of the vault.
-// @returns epoch of game as a felt.
+// @returns epoch: of game as a felt.
 @view
 func calculate_epoch{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
     epoch: felt
@@ -85,7 +85,7 @@ func calculate_epoch{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
 }
 
 // @notice Calculates day number in the game. Used for deterministic values.
-// @returns day of the game.
+// @returns day: of the game.
 @view
 func calculate_day_number{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
     day: felt
@@ -103,7 +103,7 @@ func calculate_day_number{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
 // -----------------------------------
 
 // @notice Checks if the Realm is Happy or Not.
-// @returns Returns TRUE(1) for Happy, FALSE(0) if unhappy
+// @returns is_happy: TRUE(1) for Happy, FALSE(0) if unhappy
 @view
 func is_realm_happy{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     token_id: Uint256
@@ -119,7 +119,7 @@ func is_realm_happy{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_
 
 // @notice Calculates the total happiness on the Realm. This is a big number 0 - 200.
 // @param token_id: Realm ID
-// @returns actual happiness value as a number.
+// @returns happiness: actual happiness value as a number.
 @view
 func calculate_happiness{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     token_id: Uint256
@@ -166,7 +166,7 @@ func calculate_happiness{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
 
 // @notice Calculates the population of all the Armies that exist on a Realm.
 // @param token_id: Realm ID
-// @returns population of all the Armies on the Realm.
+// @returns population: of all the Armies on the Realm.
 @view
 func calculate_armies_population{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     token_id: Uint256
@@ -180,7 +180,7 @@ func calculate_armies_population{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*,
 
 // @notice Calculates the total population of the Realm. Armies + Buildings.
 // @param token_id: Realm ID
-// @returns population of entire Realm
+// @returns population: of entire Realm
 @view
 func calculate_population{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     token_id: Uint256
