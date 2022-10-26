@@ -152,7 +152,7 @@ namespace ModuleIds {
     const L06_Combat = 6;
     const L07_Crypts = 7;
     const L08_Crypts_Resources = 8;
-    const L09_Relics = 12;
+    const Relics = 12;
     const L10_Food = 13;
     const GoblinTown = 14;
     const Travel = 15;

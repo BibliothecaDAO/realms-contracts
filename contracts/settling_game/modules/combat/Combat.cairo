@@ -330,7 +330,7 @@ func initiate_combat{
             controller, ModuleIds.Resources
         );
         let (relic_address) = IModuleController.get_module_address(
-            controller, ModuleIds.L09_Relics
+            controller, ModuleIds.Relics
         );
         let (caller) = get_caller_address();
         IResources.pillage_resources(resources_logic_address, defending_realm_id, caller);
