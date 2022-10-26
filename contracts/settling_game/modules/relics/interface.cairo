@@ -9,4 +9,6 @@ from starkware.cairo.common.uint256 import Uint256
 namespace IRelics {
     func set_relic_holder(winner_token_id: Uint256, loser_token_id: Uint256) {
     }
+    func is_relic_at_home(token_id: Uint256) -> (yesno: felt) {
+    }
 }

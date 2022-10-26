@@ -44,5 +44,5 @@
 	"remoteEnv": {
 		"CAIRO_PATH": "/workspaces/realms-contracts/lib/cairo_graphs/src:/workspaces/realms-contracts/lib/cairo_contracts/src:/workspaces/realms-contracts/lib/cairo_math_64x61/contracts:/workspaces/realms-contracts/lib/guild_contracts:${containerEnv:PATH}"
 	},
-	"postStartCommand": "bash /workspaces/realms-contracts/scripts/setup_cli_env.sh"
+	// "postStartCommand": "bash /workspaces/realms-contracts/scripts/setup_cli_env.sh"
 }

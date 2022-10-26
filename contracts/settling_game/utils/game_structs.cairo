@@ -61,30 +61,6 @@ namespace RealmBuildingsSize {
     const Castle = 16;
 }
 
-namespace BuildingsFood {
-    const House = 2;
-    const StoreHouse = 3;
-    const Granary = 3;
-    const Farm = 3;
-    const FishingVillage = 3;
-    const Barracks = 6;
-    const MageTower = 6;
-    const ArcherTower = 6;
-    const Castle = 12;
-}
-
-namespace BuildingsCulture {
-    const House = 2;
-    const StoreHouse = 3;
-    const Granary = 3;
-    const Farm = 3;
-    const FishingVillage = 3;
-    const Barracks = 6;
-    const MageTower = 6;
-    const ArcherTower = 6;
-    const Castle = 12;
-}
-
 namespace BuildingsPopulation {
     const House = 12;
     const StoreHouse = 3;
@@ -470,16 +446,6 @@ struct Cost {
     packed_amounts: felt,
 }
 
-struct ResourceOutput {
-    resource_1: felt,
-    resource_2: felt,
-    resource_3: felt,
-    resource_4: felt,
-    resource_5: felt,
-    resource_6: felt,
-    resource_7: felt,
-}
-
 // Packed Military Buildings
 struct PackedBuildings {
     military: felt,
@@ -528,15 +494,15 @@ struct Army {
 }
 
 struct ArmyStatistics {
-    cavalry_attack: felt,  // (Light Cav Base Attack*Number of Attacking Light Cav Battalions)+(Heavy Cav Base Attack*Number of Attacking Heavy Cav Battalions)
-    archery_attack: felt,  // (Archer Base Attack*Number of Attacking Archer Battalions)+(Longbow Base Attack*Number of Attacking Longbow Battalions)
-    magic_attack: felt,  // (Mage Base Attack*Number of Attacking Mage Battalions)+(Arcanist Base Attack*Number of Attacking Arcanist Battalions)
-    infantry_attack: felt,  // (Light Inf Base Attack*Number of Attacking Light Inf Battalions)+(Heavy Inf Base Attack*Number of Attacking Heavy Inf Battalions)
+    cavalry_attack: felt,
+    archery_attack: felt,
+    magic_attack: felt,
+    infantry_attack: felt,
 
-    cavalry_defence: felt,  // (Sum of all units Cavalry Defence*Percentage of Attacking Cav Battalions)
-    archery_defence: felt,  // (Sum of all units Archery Defence*Percentage of Attacking Archery Battalions)
-    magic_defence: felt,  // (Sum of all units Magic Cav Defence*Percentage of Attacking Magic Battalions)
-    infantry_defence: felt,  // (Sum of all units Infantry Defence*Percentage of Attacking Infantry Battalions)
+    cavalry_defence: felt,
+    archery_defence: felt,
+    magic_defence: felt,
+    infantry_defence: felt,
 }
 
 struct ArmyData {

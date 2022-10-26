@@ -536,9 +536,9 @@ func get_population_of_armies{
     let (armies_len, armies) = get_all_armies(realm_id);
 
     // get population
-    let population_of_armies = Combat.population_of_armies(armies_len, armies, 0);
+    let population = Combat.population_of_armies(armies_len, armies, 0);
 
-    return (population=population_of_armies);
+    return (population=population);
 }
 
 // @notice Check if Realm an be attacked

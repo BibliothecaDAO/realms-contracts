@@ -71,27 +71,6 @@ def culture(realm_token_id, network):
 @click.command()
 @click.argument("realm_token_id", nargs=1)
 @click.option("--network", default="goerli")
-def food(realm_token_id, network):
-    """
-    Fetch food on a Realm
-    """
-    config = Config(nile_network=network)
-
-    out = wrapped_call(
-        network=config.nile_network,
-        contract_alias="proxy_Calculator",
-        function="calculate_food",
-        arguments=[
-            realm_token_id,                 # uint 1
-            0,
-        ],
-    )
-    print(out)
-
-
-@click.command()
-@click.argument("realm_token_id", nargs=1)
-@click.option("--network", default="goerli")
 def population(realm_token_id, network):
     """
     Fetch population on a Realm

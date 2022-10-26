@@ -148,3 +148,19 @@ func get_current_relic_holder{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, ra
 
     return (data,);
 }
+
+// @notice returns true if Relic exists
+@view
+func is_relic_at_home{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    relic_id: Uint256
+) -> (yesno: felt) {
+    alloc_locals;
+
+    let (holder_id) = storage_relic_holder.read(relic_id);
+
+    let (data) = Relics._current_relic_holder(relic_id, holder_id);
+
+    let (holds_relic) = uint256_eq(winners_relic_owner, loser_token_id);
+
+    return (yesno=holds_relic);
+}

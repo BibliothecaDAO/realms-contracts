@@ -160,3 +160,20 @@ const MAX_GOBLIN_TOWN_STRENGTH = 12;
 // Coordinates
 // -----------------------------------
 const SECONDS_PER_KM = 200;
+
+// -----------------------------------
+// Calculator
+// -----------------------------------
+
+namespace CCalculator {
+    // Base happiness level
+    const BASE_HAPPINESS = 100;
+
+    // Happiness loss effects
+    const NO_RELIC_LOSS = 12;
+    const NO_FOOD_LOSS = 5;
+    const NO_DEFENDING_ARMY_LOSS = 5;
+
+    // number of potentially random events
+    const NUMBER_OF_RANDOM_EVENTS = 9;
+}
