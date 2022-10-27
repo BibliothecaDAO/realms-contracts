@@ -236,6 +236,22 @@ has_valid_env_vars() {
     fi
 }
 
+# Checks if environment is already setup
+setup_already_run() {
+
+    # if bashrc does not contain the starknet private key
+    is_starknet_pk_in_bashrc=$(grep -c "export STARKNET_PRIVATE_KEY=" ~/.bashrc);
+    if [ $is_starknet_pk_in_bashrc -eq 0 ]; then
+        # the setup script hasn't been run so return false
+        false
+        return
+    fi
+
+    # if bashrc is setup, setup script has already run
+    true
+    return
+}
+
 main() {
 
     # source bashrc to pickup any preset starknet env vars
@@ -243,8 +259,12 @@ main() {
 
     # if system has valid env vars already set
     if has_valid_env_vars; then
-        # proceed to setup
-        run_setup;
+        # and is not already setup
+        if [ ! setup_already_run ]; then
+            run_setup;
+        else
+            echo "System already setup, nothing to do";
+        fi
     # else system does not have valid env vars
     else
         # so proceed to mode selection
