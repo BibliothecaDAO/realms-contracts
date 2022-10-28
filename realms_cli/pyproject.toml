@@ -69,7 +69,6 @@ cairo-nile = "^0.5.0"
 #-----------CALCULATOR
 "troop_population" = "realms_cli.player.calculator.troop_population"
 "happiness" = "realms_cli.player.calculator.happiness"
-"food" = "realms_cli.player.calculator.food"
 "culture" = "realms_cli.player.calculator.culture"
 "population" = "realms_cli.player.calculator.population"
 

@@ -29,31 +29,31 @@ def run(nre):
 
     #---------------- SET MODULES  ----------------#
 
-    # for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
+    for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
 
-    #     compile(
-    #         contract_alias="contracts/settling_game/modules/goblintown/GoblinTown.cairo")
+        compile(
+            contract_alias="contracts/settling_game/modules/goblintown/GoblinTown.cairo")
 
-    #     logged_deploy(
-    #         nre,
-    #         contract.alias,
-    #         alias=contract.alias,
-    #         arguments=[],
-    #     )
+        logged_deploy(
+            nre,
+            contract.alias,
+            alias=contract.alias,
+            arguments=[],
+        )
 
-    #     time.sleep(150)
+        time.sleep(150)
 
-    #     class_hash = wrapped_declare(
-    #         config.ADMIN_ALIAS, contract.contract_name, nre.network, contract.alias)
+        class_hash = wrapped_declare(
+            config.ADMIN_ALIAS, contract.contract_name, nre.network, contract.alias)
 
-    #     time.sleep(150)
+        time.sleep(150)
 
-    #     logged_deploy(
-    #         nre,
-    #         'PROXY_Logic',
-    #         alias='proxy_' + contract.alias,
-    #         arguments=[class_hash],
-    #     )
+        logged_deploy(
+            nre,
+            'PROXY_Logic',
+            alias='proxy_' + contract.alias,
+            arguments=[class_hash],
+        )
 
     #---------------- INIT MODULES  ----------------#
 
@@ -71,7 +71,7 @@ def run(nre):
                 config.CONTROLLER_PROXY_ADDRESS, config.ADMIN_ADDRESS],
         )
 
-        # wrapped_send(
+        # wrapped_send(x
         #     network=config.nile_network,
         #     signer_alias=config.ADMIN_ALIAS,
         #     contract_alias=config.Arbiter_alias,

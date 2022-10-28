@@ -82,7 +82,7 @@ def population(realm_token_id, network):
         contract_alias="proxy_Calculator",
         function="calculate_population",
         arguments=[
-            realm_token_id,                 # uint 1
+            realm_token_id,  # uint 1
             0,
         ],
     )

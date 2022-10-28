@@ -42,7 +42,6 @@ from contracts.settling_game.modules.settling.interface import ISettling
 from contracts.settling_game.modules.calculator.interface import ICalculator
 from contracts.settling_game.modules.buildings.interface import IBuildings
 from contracts.settling_game.modules.goblintown.interface import IGoblinTown
-from contracts.settling_game.modules.calculator.interface import ICalculator
 from contracts.settling_game.interfaces.IRealms import IRealms
 from contracts.settling_game.modules.resources.library import Resources
 
@@ -151,7 +150,7 @@ func claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
         tempvar pedersen_ptr = pedersen_ptr;
     }
 
-    // set time of claim to subtract from days
+    // set claim time
     ISettling.set_time_staked(settling_logic_address, token_id, remainder);
 
     // check happiness
@@ -165,10 +164,18 @@ func claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
             buildings_address, token_id
         );
         tempvar houses_built = current_buildings.House;
+        tempvar syscall_ptr = syscall_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar pedersen_ptr = pedersen_ptr;
     } else {
         // set 0 houses built if unhappy
         tempvar houses_built = 0;
+
+        tempvar syscall_ptr = syscall_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar pedersen_ptr = pedersen_ptr;
     }
+    tempvar houses_built = houses_built;
 
     // resources ids and mint
     let (resource_ids) = Resources._calculate_realm_resource_ids(realms_data);

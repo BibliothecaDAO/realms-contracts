@@ -49,7 +49,7 @@ namespace Calculator {
 
         let (type_label) = get_label_location(daily_value);
 
-        return ([type_label + randomness_value - 1],);
+        return ([type_label + randomness_value - 1]);
 
         // this length must == NUMBER_OF_RANDOM_EVENTS
         daily_value:

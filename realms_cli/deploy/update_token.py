@@ -19,10 +19,10 @@ Contracts = namedtuple('Contracts', 'alias contract_name address')
 # 6. Set token contract approval if needed - Resources etc
 
 NEW_MODULES = [
-    Contracts("Realms_ERC721_Mintable", "Realms_ERC721_Mintable", token_path +
-              "Realms_ERC721_Mintable", ),
-    Contracts("S_Realms_ERC721_Mintable", "S_Realms_ERC721_Mintable", token_path +
-              "S_Realms_ERC721_Mintable", ),
+    Contracts("LisbonCrown", "LisbonCrown",
+              "poaps/crowns/LisbonCrown", ),
+    # Contracts("S_Realms_ERC721_Mintable", "S_Realms_ERC721_Mintable", token_path +
+    #           "S_Realms_ERC721_Mintable", ),
     # Contracts("Resources_ERC1155_Mintable_Burnable", "Resources_ERC1155_Mintable_Burnable", token_path +
     #           "Realms_ERC721_Mintable"),
 ]
@@ -51,8 +51,7 @@ def run(nre):
                     f.write(line)
             f.truncate()
 
-        compile(contract_alias="contracts/settling_game/tokens/" +
-                contract.contract_name + ".cairo")
+        compile(contract_alias="contracts/poaps/crowns/LisbonCrown.cairo")
 
         logged_deploy(
             nre,
