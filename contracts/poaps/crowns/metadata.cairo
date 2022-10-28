@@ -118,12 +118,11 @@ namespace Uri {
 
         assert values[28] = inverted_commas;
         assert values[29] = right_bracket;
-        assert values[30] = comma;
 
-        assert values[31] = right_square_bracket;
-        assert values[32] = right_bracket;
+        assert values[30] = right_square_bracket;
+        assert values[31] = right_bracket;
 
-        return (encoded_len=33, encoded=values);
+        return (encoded_len=32, encoded=values);
     }
 
     // @notice append ascii encoding of each number in felt
