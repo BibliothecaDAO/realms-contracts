@@ -16,7 +16,7 @@ namespace Relics {
     // @implicit syscall_ptr
     // @implicit range_check_ptr
     // @param relic_id: id of relic, pass in realm id
-    // @return token_id: returns realm id of owning relic
+    // @return holder_id: returns realm id of owning relic
     func _current_relic_holder{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         relic_id: Uint256, holder_id: Uint256
     ) -> (token_id: Uint256) {

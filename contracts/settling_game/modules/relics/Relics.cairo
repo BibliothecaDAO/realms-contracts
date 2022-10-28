@@ -158,9 +158,9 @@ func is_relic_at_home{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 
     let (holder_id) = storage_relic_holder.read(relic_id);
 
-    let (data) = Relics._current_relic_holder(relic_id, holder_id);
+    let (current_holder) = Relics._current_relic_holder(relic_id, holder_id);
 
-    let (holds_relic) = uint256_eq(winners_relic_owner, loser_token_id);
+    let (holds_relic) = uint256_eq(holder_id, current_holder);
 
     return (yesno=holds_relic);
 }
