@@ -9,21 +9,20 @@ from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, asser
 from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.bool import TRUE, FALSE
-from starkware.cairo.common.math_cmp import is_le, is_not_zero
+from starkware.cairo.common.math_cmp import is_le, is_not_zero, is_le_felt
 from starkware.cairo.common.registers import get_label_location
 
-from contracts.loot.constants.item import Item, Type
+from contracts.loot.constants.item import Item, Type, ItemIds, Slot
 from contracts.loot.constants.combat import WeaponEfficacy, WeaponEfficiacyDamageMultiplier
 from contracts.loot.loot.stats.item import ItemStats
+from contracts.loot.constants.beast import Beast, BeastUtils
+from contracts.loot.constants.obstacle import Obstacle, ObstacleUtils
 
 namespace CombatStats {
     func weapon_vs_armor_efficacy{syscall_ptr: felt*, range_check_ptr}(
-        weapon_item_id: felt, armor_item_id: felt
+        weapon_type: felt, armor_type: felt
     ) -> (class: felt) {
         alloc_locals;
-
-        let (weapon_type) = ItemStats.item_type(weapon_item_id);
-        let (armor_type) = ItemStats.item_type(armor_item_id);
 
         let (blade_location) = get_label_location(blade_efficacy);
         let (bludgeon_location) = get_label_location(bludgeon_efficacy);
@@ -83,30 +82,107 @@ namespace CombatStats {
         return (0,);
     }
 
-    // calculate_damage calculates the damage a weapon does to an armor
-    // parameters: weapon Item, armor Item
+    // calculate_damage_from_weapon calculates the damage a weapon inflicts against a specific piece of armor
+    // parameters: Item weapon, Item armor
     // returns: damage
-    func calculate_damage{syscall_ptr: felt*, range_check_ptr}(weapon: Item, armor: Item) -> (
-        damage: felt
-    ) {
+    func calculate_damage{syscall_ptr: felt*, range_check_ptr}(
+        attack_type: felt,
+        attack_rank: felt,
+        attack_greatness: felt,
+        armor_type: felt,
+        armor_rank: felt,
+        armor_greatness: felt,
+    ) -> (damage: felt) {
         alloc_locals;
 
         const rank_ceiling = 6;
 
         // use weapon rank and greatness to give every item a damage rating of 0-100
-        let base_weapon_damage = (rank_ceiling - weapon.Rank) * weapon.Greatness;
+        let base_weapon_damage = (rank_ceiling - attack_rank) * attack_greatness;
 
         // Get effectiveness of weapon vs armor
-        let (attack_effectiveness) = weapon_vs_armor_efficacy(weapon.Id, armor.Id);
+        let (attack_effectiveness) = weapon_vs_armor_efficacy(attack_type, armor_type);
         let (total_weapon_damage) = get_attack_effectiveness(
             attack_effectiveness, base_weapon_damage
         );
 
-        // use armor rank and greatness to give every item a damage rating of 0-100
-        let armor_strength = (rank_ceiling - armor.Rank) * armor.Greatness;
+        // use armor rank and greatness to give armor a defense rating of 0-100
+        let armor_strength = (rank_ceiling - armor_rank) * armor_greatness;
 
-        let damage_dealt = total_weapon_damage - armor_strength;
+        // check if armor strength is less than or equal to weapon HP
+        let dealt_damage = is_le_felt(armor_strength, total_weapon_damage);
+        if (dealt_damage == 1) {
+            // if it is, damage dealt will be positive so return it
+            let damage_dealt = total_weapon_damage - armor_strength;
+            return (damage_dealt,);
+        } else {
+            // otherwise damage dealt will be negative so we return 0
+            return (0,);
+        }
+    }
 
+    // calculate_damage_from_weapon calculates the damage a weapon inflicts against a specific piece of armor
+    // parameters: Item weapon, Item armor
+    // returns: damage
+    func calculate_damage_from_weapon{syscall_ptr: felt*, range_check_ptr}(
+        weapon: Item, armor: Item
+    ) -> (damage: felt) {
+        alloc_locals;
+
+        // Get attack attributes
+        let (attack_type) = ItemStats.item_type(weapon.Id);
+
+        // Get armor attributes
+        let (armor_type) = ItemStats.item_type(armor.Id);
+
+        // pass details of attack and armor to core damage calculation function
+        let (damage_dealt) = calculate_damage(
+            attack_type, weapon.Rank, weapon.Greatness, armor_type, armor.Rank, armor.Greatness
+        );
+
+        // return damage
+        return (damage_dealt,);
+    }
+
+    // Calculates damage dealt from a beast by converting beast into a Loot weapon and calling calculate_damage_from_weapon
+    func calculate_damage_from_beast{syscall_ptr: felt*, range_check_ptr}(
+        beast: Beast, armor: Item
+    ) -> (damage: felt) {
+        alloc_locals;
+
+        // Get beast type
+        let (attack_type) = BeastUtils.get_type_from_id(beast.Id);
+
+        // Get armor type
+        let (armor_type) = ItemStats.item_type(armor.Id);
+
+        // pass details of attack and armor to core damage calculation function
+        let (damage_dealt) = calculate_damage(
+            attack_type, beast.Rank, beast.Greatness, armor_type, armor.Rank, armor.Greatness
+        );
+
+        // return damage
+        return (damage_dealt,);
+    }
+
+    // Calculate damage from an obstacle
+    func calculate_damage_from_obstacle{syscall_ptr: felt*, range_check_ptr}(
+        obstacle: Obstacle, armor: Item
+    ) -> (damage: felt) {
+        alloc_locals;
+
+        // Get beast type
+        let (attack_type) = ObstacleUtils.get_type_from_id(obstacle.Id);
+
+        // Get armor type
+        let (armor_type) = ItemStats.item_type(armor.Id);
+
+        // pass details of attack and armor to core damage calculation function
+        let (damage_dealt) = calculate_damage(
+            attack_type, obstacle.Rank, obstacle.Greatness, armor_type, armor.Rank, armor.Greatness
+        );
+
+        // return damage dealt
         return (damage_dealt,);
     }
 }

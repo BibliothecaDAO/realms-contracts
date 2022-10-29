@@ -4,6 +4,9 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState
 from contracts.loot.constants.item import Item, ItemIds, ItemType, ItemSlot, ItemMaterial, State
 from contracts.loot.constants.rankings import ItemRank
+from contracts.loot.constants.beast import Beast, BeastUtils
+from contracts.loot.constants.obstacle import Obstacle, ObstacleUtils
+from contracts.loot.loot.stats.item import ItemStats
 
 const TEST_WEAPON_TOKEN_ID = 20;
 const TEST_DAMAGE_HEALTH_REMAINING = 100;
@@ -85,24 +88,93 @@ func get_adventurer_state{syscall_ptr: felt*, range_check_ptr}() -> (
     );
 }
 
-func get_item{syscall_ptr: felt*, range_check_ptr}() -> (item: Item) {
-    alloc_locals;
+namespace TestUtils {
+    // create_item returns an Item corresponding to the provided item_id and greatness
+    // parameters: item_id, greatness
+    // returns: An Item
+    func create_item{syscall_ptr: felt*, range_check_ptr}(item_id: felt, greatness: felt) -> (
+        item: Item
+    ) {
+        alloc_locals;
 
-    return (
-        Item(
-        ItemIds.Katana,
-        ItemSlot.Katana,
-        ItemType.Katana,
-        ItemMaterial.Katana,
-        ItemRank.Katana,
-        1,
-        1,
-        1,
-        20,
-        1,
-        1,
-        0,
-        0
-        ),
-    );
+        let (slot) = ItemStats.item_slot(item_id);
+        let (type) = ItemStats.item_type(item_id);
+        let (material) = ItemStats.item_material(item_id);
+        let (rank) = ItemStats.item_rank(item_id);
+        let prefix_1 = 1;
+        let prefix_2 = 1;
+        let suffix = 1;
+        let created_block = 0;
+        let xp = 0;
+        let adventurer = 0;
+        let bag = 0;
+
+        return (
+            Item(
+            item_id,
+            slot,
+            type,
+            material,
+            rank,
+            prefix_1,
+            prefix_2,
+            suffix,
+            greatness,
+            created_block,
+            xp,
+            adventurer,
+            bag
+            ),
+        );
+    }
+
+    // create_beast returns a Beast corresponding to the provided beast_id and greatness
+    // parameters: beast_id, greatness
+    // returns: A Beast
+    func create_beast{syscall_ptr: felt*, range_check_ptr}(beast_id: felt, greatness: felt) -> (
+        beast: Beast
+    ) {
+        alloc_locals;
+
+        let (type) = BeastUtils.get_type_from_id(beast_id);
+        let (rank) = BeastUtils.get_rank_from_id(beast_id);
+        let prefix_1 = 1;
+        let prefix_2 = 1;
+
+        return (
+            Beast(
+            beast_id,
+            type,
+            rank,
+            prefix_1,
+            prefix_2,
+            greatness,
+            ),
+        );
+    }
+
+    // create_obstacle returns an Obstacle corresponding to the provided obstacle_id and greatness
+    // parameters: obstacle_id, greatness
+    // returns: An Obstacle
+    func create_obstacle{syscall_ptr: felt*, range_check_ptr}(
+        obstacle_id: felt, greatness: felt
+    ) -> (obstacle: Obstacle) {
+        alloc_locals;
+
+        let (type) = ObstacleUtils.get_type_from_id(obstacle_id);
+        let (rank) = ObstacleUtils.get_rank_from_id(obstacle_id);
+        let prefix_1 = 1;
+        let prefix_2 = 1;
+
+        return (
+            Obstacle(
+            obstacle_id,
+            type,
+            rank,
+            prefix_1,
+            prefix_2,
+            greatness,
+            ),
+        );
+    }
 }

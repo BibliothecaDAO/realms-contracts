@@ -15,7 +15,7 @@ from contracts.loot.adventurer.library import AdventurerLib
 from tests.protostar.loot.test_structs import (
     TestAdventurerState,
     get_adventurer_state,
-    get_item,
+    TestUtils,
     TEST_WEAPON_TOKEN_ID,
     TEST_DAMAGE_HEALTH_REMAINING,
     TEST_DAMAGE_OVERKILL,
@@ -129,7 +129,7 @@ func test_equip{
 
     let (state) = get_adventurer_state();
 
-    let (item) = get_item();
+    let (item) = TestUtils.create_item(ItemIds.Katana, 20);
 
     let (adventurer_state: PackedAdventurerState) = AdventurerLib.pack(state);
 
@@ -141,6 +141,7 @@ func test_equip{
 
     return ();
 }
+
 @external
 func test_deductHealth{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
@@ -148,8 +149,6 @@ func test_deductHealth{
     alloc_locals;
 
     let (state) = get_adventurer_state();
-
-    let (item) = get_item();
 
     let (adventurer_state: PackedAdventurerState) = AdventurerLib.pack(state);
 
