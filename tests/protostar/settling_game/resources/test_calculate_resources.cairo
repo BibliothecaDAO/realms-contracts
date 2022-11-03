@@ -184,3 +184,15 @@ func test_calculate_vault_time_remaining{
 
     return ();
 }
+
+@external
+func test_calculate_wonder_amounts{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+}() {
+    alloc_locals;
+
+    let (_, resources_mint: Uint256*) = Resources._calculate_wonder_amounts(3);
+
+    %{ print('Resource Mint:', ids.resources_mint[0]) %}
+    return ();
+}

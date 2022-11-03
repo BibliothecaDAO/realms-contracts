@@ -5,8 +5,9 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.uint256 import Uint256
 from starkware.starknet.common.syscalls import get_caller_address
 
-from tests.protostar.setup.helpers import get_resources, get_owners
-from tests.protostar.setup.setup import deploy_account, deploy_module, deploy_controller, time_warp
+from tests.protostar.settling_game.setup.helpers import get_resources, get_owners, settle_realm
+from tests.protostar.settling_game.setup.interfaces import Realms, ResourcesToken
+from tests.protostar.settling_game.setup.setup import deploy_account, deploy_module, deploy_controller, time_warp
 
 from contracts.settling_game.utils.game_structs import ModuleIds
 from contracts.settling_game.modules.resources.interface import IResources
@@ -24,31 +25,12 @@ from contracts.token.constants import (
 const PK = 11111;
 const PK2 = 22222;
 
-@contract_interface
-namespace IRealms {
-    func mint(to: felt, amount: Uint256) {
-    }
-    func approve(to: felt, tokenId: Uint256) {
-    }
-    func set_realm_data(tokenId: Uint256, realm_name: felt, realm_data: felt) {
-    }
-    func ownerOf(tokenId: Uint256) -> (owner: felt) {
-    }
-}
-
-@contract_interface
-namespace IResourcesToken {
-    func balanceOfBatch(accounts_len: felt, accounts: felt*, ids_len: felt, ids: Uint256*) -> (
-        balances_len: felt, balances: Uint256*
-    ) {
-    }
-}
-
 @external
 func __setup__{syscall_ptr: felt*, range_check_ptr}() {
     alloc_locals;
 
     local realms_1_data;
+    local realms_2_data;
 
     let (local account_1_address) = deploy_account(PK);
     let (local account_2_address) = deploy_account(PK2);
@@ -80,9 +62,9 @@ func __setup__{syscall_ptr: felt*, range_check_ptr}() {
     let (local calculator_address) = deploy_module(
         ModuleIds.Calculator, controller_address, account_1_address
     );
-
-    let realms_token_id: Uint256 = Uint256(1, 0);
-    let realms_name = 'Test 1';
+    let (local combat_address) = deploy_module(
+        ModuleIds.L06_Combat, controller_address, account_1_address
+    );
 
     %{
         from tests.protostar.utils import utils
@@ -94,13 +76,16 @@ func __setup__{syscall_ptr: felt*, range_check_ptr}() {
         context.resources_token_address = ids.resources_token_address
         context.realms_address = ids.realms_address
         context.settling_address = ids.settling_address
+        context.combat_address = ids.combat_address
         ids.realms_1_data = utils.pack_realm(utils.build_realm_order(4, 5, 2, 1, 4, 2, 8, 13, 6, 0, 0, 0, 0, 4))
+        ids.realms_2_data = utils.pack_realm(utils.build_realm_order(4, 5, 2, 1, 4, 2, 8, 13, 6, 0, 0, 0, 1, 4))
     %}
-    IRealms.set_realm_data(realms_address, realms_token_id, realms_name, realms_1_data);
-    IRealms.mint(realms_address, account_1_address, realms_token_id);
-    IRealms.approve(realms_address, settling_address, realms_token_id);
-    ISettling.settle(settling_address, realms_token_id);
-
+    Realms.set_realm_data(realms_address, Uint256(1, 0), 'Test 1', realms_1_data);
+    Realms.set_realm_data(realms_address, Uint256(2, 0), 'Test 2', realms_2_data);
+    settle_realm(realms_address, settling_address, account_1_address, Uint256(1, 0));
+    settle_realm(realms_address, settling_address, account_1_address, Uint256(2, 0));
+    time_warp(1000000, resources_address);
+    time_warp(1000000, settling_address);
     %{
         stop_prank_realms()
         stop_prank_settling()
@@ -126,15 +111,12 @@ func test_claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
         ids.account_1_address = context.account_1_address
         stop_prank_resources = start_prank(ids.account_1_address, target_contract_address=ids.resources_address)
     %}
-    time_warp(1000000, resources_address);
-    time_warp(1000000, settling_address);
     IResources.claim_resources(resources_address, realms_token_id);
     let (accounts_len, accounts) = get_owners(account_1_address);
     let (token_ids: Uint256*) = get_resources();
-    let (balances_len, balances: Uint256*) = IResourcesToken.balanceOfBatch(
+    let (balances_len, balances: Uint256*) = ResourcesToken.balanceOfBatch(
         resources_token_address, accounts_len, accounts, 22, token_ids
     );
-
     %{
         for i in [1, 7, 12, 5]:
             assert 18000000000000000000000 == memory[ids.balances._reference_value + 2*i]
@@ -152,26 +134,24 @@ func test_pillage_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
     local resources_address;
     local resources_token_address;
     local settling_address;
+    local combat_address;
     local realms_token_id: Uint256;
 
-    let combat_address = 123;
     let realms_token_id: Uint256 = Uint256(1, 0);
     %{
         ids.resources_address = context.resources_address
         ids.resources_token_address = context.resources_token_address
         ids.settling_address = context.settling_address
+        ids.combat_address = context.combat_address
         ids.account_2_address = context.account_2_address
         stop_prank_resources = start_prank(ids.combat_address, target_contract_address=ids.resources_address)
     %}
-    time_warp(1000000, resources_address);
-    time_warp(1000000, settling_address);
     IResources.pillage_resources(resources_address, realms_token_id, account_2_address);
     let (accounts_len, accounts) = get_owners(account_2_address);
     let (token_ids: Uint256*) = get_resources();
-    let (balances_len, balances: Uint256*) = IResourcesToken.balanceOfBatch(
+    let (balances_len, balances: Uint256*) = ResourcesToken.balanceOfBatch(
         resources_token_address, accounts_len, accounts, 22, token_ids
     );
-
     %{
         for i in [1, 7, 12, 5]:
             assert 4312000000000000000000 == memory[ids.balances._reference_value + 2*i]
@@ -181,5 +161,35 @@ func test_pillage_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
     return ();
 }
 
-// TODO
-// test wonder claim
+@external
+func test_wonder_claim{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+    local account_1_address;
+    local resources_address;
+    local resources_token_address;
+    local settling_address;
+    local realms_token_id: Uint256;
+
+    let realms_token_id: Uint256 = Uint256(2, 0);
+    %{
+        ids.resources_address = context.resources_address
+        ids.resources_token_address = context.resources_token_address
+        ids.settling_address = context.settling_address
+        ids.account_1_address = context.account_1_address
+        stop_prank_resources = start_prank(ids.account_1_address, target_contract_address=ids.resources_address)
+    %}
+    IResources.claim_resources(resources_address, realms_token_id);
+    let (accounts_len, accounts) = get_owners(account_1_address);
+    let (token_ids: Uint256*) = get_resources();
+    let (balances_len, balances: Uint256*) = ResourcesToken.balanceOfBatch(
+        resources_token_address, accounts_len, accounts, 22, token_ids
+    );
+
+    %{
+        for i in [1, 7, 12, 5]:
+            assert 19800000000000000000000 == memory[ids.balances._reference_value + 2*i]
+            assert 0 == memory[ids.balances._reference_value + 2*i + 1]
+        stop_prank_resources()
+    %}
+    return ();
+}

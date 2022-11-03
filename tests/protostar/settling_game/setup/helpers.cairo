@@ -5,9 +5,11 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.registers import get_label_location
 
-func get_resources{syscall_ptr: felt*, range_check_ptr}() -> (
-    resources: Uint256*
-) {
+from contracts.settling_game.modules.settling.interface import ISettling
+
+from tests.protostar.settling_game.setup.interfaces import Realms, ResourcesToken
+
+func get_resources{syscall_ptr: felt*, range_check_ptr}() -> (resources: Uint256*) {
     let (RESOURCES_ARR) = get_label_location(resource_start);
     return (resources=cast(RESOURCES_ARR, Uint256*));
 
@@ -85,4 +87,17 @@ func get_owners{syscall_ptr: felt*, range_check_ptr}(owner: felt) -> (
     assert [owners + 20] = owner;
     assert [owners + 21] = owner;
     return (owners_len=22, owners=owners);
+}
+
+@external
+func settle_realm{syscall_ptr: felt*, range_check_ptr}(
+    realms_address: felt,
+    settling_address: felt,
+    account_address: felt,
+    token_id: Uint256,
+) {
+    Realms.mint(realms_address, account_address, token_id);
+    Realms.approve(realms_address, settling_address, token_id);
+    ISettling.settle(settling_address, token_id);
+    return ();
 }

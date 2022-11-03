@@ -16,60 +16,17 @@ from contracts.token.constants import (
     ON_ERC1155_BATCH_RECEIVED_SELECTOR,
 )
 
-@contract_interface
-namespace Controller {
-    func initializer(arbiter: felt, proxy_admin: felt) {
-    }
-}
+from tests.protostar.settling_game.setup.interfaces import (
+    Controller,
+    Module,
+    Lords,
+    Realms,
+    S_Realms,
+    Crypts,
+    S_Crypts,
+    ResourcesToken
+)
 
-@contract_interface
-namespace Module {
-    func initializer(controller_address: felt, proxy_admin: felt) {
-    }
-}
-
-@contract_interface
-namespace Crypts {
-    func initializer(name: felt, symbol: felt, proxy_admin: felt) {
-    }
-}
-
-@contract_interface
-namespace Lords {
-    func initializer(
-        name: felt,
-        symbol: felt,
-        decimals: felt,
-        initial_supply: Uint256,
-        recipient: felt,
-        proxy_admin: felt,
-    ) {
-    }
-}
-
-@contract_interface
-namespace Realms {
-    func initializer(name: felt, symbol: felt, proxy_admin: felt) {
-    }
-}
-
-@contract_interface
-namespace ResourcesToken {
-    func initializer(uri: felt, proxy_admin: felt, controller_address: felt) {
-    }
-}
-
-@contract_interface
-namespace S_Crypts {
-    func initializer(name: felt, symbol: felt, proxy_admin: felt) {
-    }
-}
-
-@contract_interface
-namespace S_Realms {
-    func initializer(name: felt, symbol: felt, proxy_admin: felt, controller_address: felt) {
-    }
-}
 
 const E18 = 10 ** 18;
 
@@ -90,7 +47,7 @@ struct Contracts {
     L06_Combat: felt,
     L07_Crypts: felt,
     L08_Crypts_Resources: felt,
-    L09_Relics: felt,
+    Relics: felt,
     L10_Food: felt,
     GoblinTown: felt,
     Travel: felt,
@@ -232,7 +189,7 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
         IModuleController.set_address_for_module_id(controller_address, ModuleIds.L06_Combat, proxy_address);
         IModuleController.set_write_access(controller_address, ModuleIds.L06_Combat, ModuleIds.GoblinTown);
         IModuleController.set_write_access(controller_address, ModuleIds.L06_Combat, ModuleIds.L10_Food);
-        IModuleController.set_write_access(controller_address, ModuleIds.L06_Combat, ModuleIds.L09_Relics);
+        IModuleController.set_write_access(controller_address, ModuleIds.L06_Combat, ModuleIds.Relics);
         IModuleController.set_write_access(controller_address, ModuleIds.L06_Combat, ModuleIds.Travel);
         IModuleController.set_write_access(controller_address, ModuleIds.L06_Combat, ModuleIds.Resources);
         IModuleController.set_write_access(controller_address, ModuleIds.L06_Combat, ModuleIds.Buildings);
@@ -276,7 +233,7 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
         %}
         return (proxy_address,);
     }
-    if (module_id == ModuleIds.L09_Relics) {
+    if (module_id == ModuleIds.Relics) {
         %{
             declared = declare("./contracts/settling_game/modules/relics/Relics.cairo")
             ids.module_class_hash = declared.class_hash
@@ -286,8 +243,8 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
             stop_prank = start_prank(ids.proxy_admin, ids.controller_address)
         %}
         Module.initializer(proxy_address, controller_address, proxy_admin);
-        IModuleController.set_address_for_module_id(controller_address, ModuleIds.L09_Relics, proxy_address);
-        IModuleController.set_write_access(controller_address, ModuleIds.L09_Relics, ModuleIds.Realms_Token);
+        IModuleController.set_address_for_module_id(controller_address, ModuleIds.Relics, proxy_address);
+        IModuleController.set_write_access(controller_address, ModuleIds.Relics, ModuleIds.Realms_Token);
         %{
             stop_prank()
         %}

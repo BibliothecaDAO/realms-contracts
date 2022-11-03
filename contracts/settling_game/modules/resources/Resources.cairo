@@ -32,7 +32,7 @@ from contracts.settling_game.utils.constants import (
     DAY,
     BASE_RESOURCES_PER_DAY,
     BASE_LORDS_PER_DAY,
-    MAX_DAYS_ACCURED,
+    MAX_DAYS_ACCRUED,
     WONDER_RATE,
 )
 
@@ -106,26 +106,26 @@ func claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     alloc_locals;
     let (caller) = get_caller_address();
 
-    // contracts
+    // CONTRACT ADDRESSES
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms);
     let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms);
     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources);
 
     // modules
     let (settling_logic_address) = Module.get_module_address(ModuleIds.Settling);
-    // let (goblin_town_address) = Module.get_module_address(ModuleIds.GoblinTown);
+    let (goblin_town_address) = Module.get_module_address(ModuleIds.GoblinTown);
 
     // check if there's no goblin town on realm
-    // with_attr error_message("RESOURCES: Goblin Town present") {
-    //     let (_, spawn_ts) = IGoblinTown.get_strength_and_timestamp(goblin_town_address, token_id);
-    //     let (now) = get_block_timestamp();
-    //     assert_le(spawn_ts, now);
-    // }
+    with_attr error_message("RESOURCES: Goblin Town present") {
+        let (_, spawn_ts) = IGoblinTown.get_strength_and_timestamp(goblin_town_address, token_id);
+        let (now) = get_block_timestamp();
+        assert_le(spawn_ts, now);
+    }
 
-    // owner
+    // FETCH OWNER
     let (owner) = IERC721.ownerOf(s_realms_address, token_id);
 
-    // only settling can claim
+    // ALLOW RESOURCE LOGIC ADDRESS TO CLAIM, BUT STILL RESTRICT
     if (caller != settling_logic_address) {
         Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms);
         tempvar syscall_ptr = syscall_ptr;
@@ -153,19 +153,8 @@ func claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
         assert_not_zero(days);
     }
 
-    // set vault time only if actually claiming vault
-    if (total_vault_days != 0) {
-        ISettling.set_time_vault_staked(settling_logic_address, token_id, vault_remainder);
-        tempvar syscall_ptr = syscall_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar pedersen_ptr = pedersen_ptr;
-    } else {
-        tempvar syscall_ptr = syscall_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar pedersen_ptr = pedersen_ptr;
-    }
-
     ISettling.set_time_staked(settling_logic_address, token_id, remainder);
+    ISettling.set_time_vault_staked(settling_logic_address, token_id, vault_remainder);
 
     // get current buildings on realm
     let (buildings_address) = Module.get_module_address(ModuleIds.Buildings);
@@ -198,30 +187,28 @@ func claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
         data,
     );
 
-    // let check_wonder = is_le(0, realms_data.wonder);
-    // if (check_wonder == 1) {
-    //     let (wonder_resources_claim_ids: Uint256*) = alloc();
-    //     let (wonder_resources_claim_amounts: Uint256*) = alloc();
-    //     loop_wonder_resources_claim(
-    //         0, 22, total_days, wonder_resources_claim_ids, wonder_resources_claim_amounts
-    //     );
+    // IF REALM HAS WONDER PERFORM WONDER CLAIM
+    let check_wonder = is_le(1, realms_data.wonder);
+    if (check_wonder == 1) {
+        let (wonder_resources_claim_ids: Uint256*) = Resources._get_all_resource_ids();
+        let (_, wonder_resources_claim_amounts: Uint256*) = Resources._calculate_wonder_amounts(days);
 
-    // let (local data: felt*) = alloc();
-    //     assert data[0] = 0;
+        let (data: felt*) = alloc();
+        assert data[0] = 0;
 
-    // // MINT WONDER RESOURCES TO HOLDER
-    //     IERC1155.mintBatch(
-    //         resources_address,
-    //         owner,
-    //         22,
-    //         wonder_resources_claim_ids,
-    //         22,
-    //         wonder_resources_claim_amounts,
-    //         1,
-    //         data,
-    //     );
-    //     return ();
-    // }
+        // MINT WONDER RESOURCES TO HOLDER
+        IERC1155.mintBatch(
+            resources_address,
+            owner,
+            22,
+            wonder_resources_claim_ids,
+            22,
+            wonder_resources_claim_amounts,
+            1,
+            data,
+        );
+        return ();
+    }
 
     return ();
 }
@@ -234,15 +221,10 @@ func pillage_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     token_id: Uint256, claimer: felt
 ) {
     alloc_locals;
-    let (caller) = get_caller_address();
-    let (block_timestamp) = get_block_timestamp();
     // ONLY COMBAT CAN CALL
-    // TODO: Fix this to allow only combat to call.
-    // let (combat_address) = Module.get_module_address(ModuleIds.L06_Combat)
+    Module.only_approved();
 
-    // with_attr error_message("RESOURCES: ONLY COMBAT MODULE CAN CALL"):
-    //     assert caller = combat_address
-    // end
+    let (block_timestamp) = get_block_timestamp();
 
     // EXTERNAL CONTRACTS
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms);
@@ -310,13 +292,13 @@ func days_accrued{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
     let (last_update) = ISettling.get_time_staked(settling_logic_address, token_id);
     let (days_accrued, seconds_left_over) = unsigned_div_rem(block_timestamp - last_update, DAY);
 
-    let is_less_than_max = is_le(days_accrued, MAX_DAYS_ACCURED + 1);
+    let is_less_than_max = is_le(days_accrued, MAX_DAYS_ACCRUED + 1);
 
     if (is_less_than_max == TRUE) {
         return (days_accrued, seconds_left_over);
     }
 
-    return (MAX_DAYS_ACCURED, seconds_left_over);
+    return (MAX_DAYS_ACCRUED, seconds_left_over);
 }
 
 // @notice Gets the number of accrued days for the vault
@@ -433,6 +415,12 @@ func get_all_resource_claimable{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, 
     return (realms_data.resource_number, resource_mint);
 }
 
+// @notice Calculate all raidable resources
+// @param token_id: Staked realms token id
+// @return vault_mint_len: Lenght of vault_mint
+// @return vault_mint: List of resource amounts mintable
+// @return total_vault_days: Number of vault days accrued
+// @return total_vault_days_remaining: Number of vault days left
 @view
 func get_all_vault_raidable{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     token_id: Uint256
@@ -469,32 +457,4 @@ func get_all_vault_raidable{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
         total_vault_days,
         total_vault_days_remaining,
     );
-}
-
-// -----------------------------------
-// INTERNALS
-// -----------------------------------
-
-func loop_wonder_resources_claim{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    resources_index,
-    resources_len,
-    days,
-    wonder_resources_claim_ids: felt*,
-    wonder_resources_claim_amounts: Uint256*,
-) {
-    if (resources_index == resources_len) {
-        return ();
-    }
-
-    assert wonder_resources_claim_ids[resources_index] = resources_index + 1;
-    assert wonder_resources_claim_amounts[resources_index] = Uint256(WONDER_RATE * days, 0);
-
-    loop_wonder_resources_claim(
-        resources_index + 1,
-        resources_len,
-        days,
-        wonder_resources_claim_ids,
-        wonder_resources_claim_amounts,
-    );
-    return ();
 }
