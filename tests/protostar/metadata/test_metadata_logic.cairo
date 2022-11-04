@@ -86,8 +86,8 @@ func test_set_metadata{
         stop_mock_1 = mock_call(ids.MODULE_CONTROLLER_ADDR, "get_external_contract_address", [ids.Realms_token_address])
         stop_mock_2 = mock_call(ids.MODULE_CONTROLLER_ADDR, "has_write_access", [1])
         # bitwise mapping functions, set default data with custom order
-        ids.realms_1_data = utils.pack_realm(utils.build_realm_order(4, 5, 2, 1, 4, 2, 8, 13, 6, 0, 0, 0, 1, 4))
-        ids.realms_2_data = utils.pack_realm(utils.build_realm_order(2, 3, 6, 4, 6, 1, 5, 2, 9, 14, 10, 0, 0, 10))
+        ids.realms_1_data = utils.pack_realm(utils.build_realm_data(4, 5, 2, 1, 4, 2, 8, 13, 6, 0, 0, 0, 1, 4))
+        ids.realms_2_data = utils.pack_realm(utils.build_realm_data(2, 3, 6, 4, 6, 1, 5, 2, 9, 14, 10, 0, 0, 10))
         # fake owner of realm contract
         store(ids.Realms_token_address, "Ownable_owner", [ids.FAKE_OWNER_ADDR])
         # fake caller to owner

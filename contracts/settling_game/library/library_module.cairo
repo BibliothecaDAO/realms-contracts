@@ -65,7 +65,9 @@ namespace Module {
         alloc_locals;
         let (success) = _only_approved();
         let (self) = check_self();
-        assert_not_zero(success + self);
+        with_attr error_message("MODULE_ERROR: Caller not approved module") {
+            assert_not_zero(success + self);
+        }
         return ();
     }
 
@@ -89,7 +91,9 @@ namespace Module {
     func only_arbiter{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
         alloc_locals;
         let (success) = _only_arbiter();
-        assert_not_zero(success);
+        with_attr error_message("MODULE_ERROR: Caller is not arbiter") {
+            assert_not_zero(success);
+        }
         return ();
     }
 

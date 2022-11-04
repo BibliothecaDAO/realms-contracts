@@ -6,7 +6,7 @@ Realm = namedtuple(
 )
 
 
-def build_realm_order(regions, cities, harbours, rivers, resource_number, resource_1, resource_2, resource_3, resource_4, resource_5, resource_6, resource_7, wonder, order) -> Realm:
+def build_realm_data(regions, cities, harbours, rivers, resource_number, resource_1, resource_2, resource_3, resource_4, resource_5, resource_6, resource_7, wonder, order) -> Realm:
     return Realm(*[regions, cities, harbours, rivers, resource_number, resource_1, resource_2, resource_3, resource_4, resource_5, resource_6, resource_7, wonder, order])
 
 

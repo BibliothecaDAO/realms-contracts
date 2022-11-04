@@ -77,8 +77,8 @@ func __setup__{syscall_ptr: felt*, range_check_ptr}() {
         context.realms_address = ids.realms_address
         context.settling_address = ids.settling_address
         context.combat_address = ids.combat_address
-        ids.realms_1_data = utils.pack_realm(utils.build_realm_order(4, 5, 2, 1, 4, 2, 8, 13, 6, 0, 0, 0, 0, 4))
-        ids.realms_2_data = utils.pack_realm(utils.build_realm_order(4, 5, 2, 1, 4, 2, 8, 13, 6, 0, 0, 0, 1, 4))
+        ids.realms_1_data = utils.pack_realm(utils.build_realm_data(4, 5, 2, 1, 4, 2, 8, 13, 6, 0, 0, 0, 0, 4))
+        ids.realms_2_data = utils.pack_realm(utils.build_realm_data(4, 5, 2, 1, 4, 2, 8, 13, 6, 0, 0, 0, 1, 4))
     %}
     Realms.set_realm_data(realms_address, Uint256(1, 0), 'Test 1', realms_1_data);
     Realms.set_realm_data(realms_address, Uint256(2, 0), 'Test 2', realms_2_data);

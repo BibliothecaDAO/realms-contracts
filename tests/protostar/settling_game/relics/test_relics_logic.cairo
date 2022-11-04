@@ -36,10 +36,10 @@ func __setup__{syscall_ptr: felt*, range_check_ptr}() {
     %{
         from tests.protostar.utils import utils
         # bitwise mapping functions, set default data with custom order
-        ids.realms_1_data = utils.pack_realm(utils.build_realm_order(0,0,0,0,0,0,0,0,0,0,0,0,0,1))
-        ids.realms_2_data = utils.pack_realm(utils.build_realm_order(0,0,0,0,0,0,0,0,0,0,0,0,0,2))
-        ids.realms_3_data = utils.pack_realm(utils.build_realm_order(0,0,0,0,0,0,0,0,0,0,0,0,0,1))
-        ids.realms_4_data = utils.pack_realm(utils.build_realm_order(0,0,0,0,0,0,0,0,0,0,0,0,0,1))
+        ids.realms_1_data = utils.pack_realm(utils.build_realm_data(0,0,0,0,0,0,0,0,0,0,0,0,0,1))
+        ids.realms_2_data = utils.pack_realm(utils.build_realm_data(0,0,0,0,0,0,0,0,0,0,0,0,0,2))
+        ids.realms_3_data = utils.pack_realm(utils.build_realm_data(0,0,0,0,0,0,0,0,0,0,0,0,0,1))
+        ids.realms_4_data = utils.pack_realm(utils.build_realm_data(0,0,0,0,0,0,0,0,0,0,0,0,0,1))
         context.account_address = ids.account_address
         context.controller_address = ids.controller_address
         context.realms_address = ids.realms_address

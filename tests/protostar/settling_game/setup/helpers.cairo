@@ -2,10 +2,11 @@
 
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin
-from starkware.cairo.common.uint256 import Uint256
+from starkware.cairo.common.uint256 import Uint256, uint256_mul
 from starkware.cairo.common.registers import get_label_location
 
 from contracts.settling_game.modules.settling.interface import ISettling
+from contracts.settling_game.interfaces.IERC1155 import IERC1155
 
 from tests.protostar.settling_game.setup.interfaces import Realms, ResourcesToken
 
@@ -60,6 +61,35 @@ func get_resources{syscall_ptr: felt*, range_check_ptr}() -> (resources: Uint256
     dw 0;
 }
 
+func get_amounts{syscall_ptr: felt*, range_check_ptr}(amount: Uint256) -> (
+    amounts_len: felt, amounts: Uint256*
+) {
+    let (amounts: Uint256*) = alloc();
+        assert amounts[0] = amount;
+        assert amounts[1] = amount;
+        assert amounts[2] = amount;
+        assert amounts[3] = amount;
+        assert amounts[4] = amount;
+        assert amounts[5] = amount;
+        assert amounts[6] = amount;
+        assert amounts[7] = amount;
+        assert amounts[8] = amount;
+        assert amounts[9] = amount;
+        assert amounts[10] = amount;
+        assert amounts[11] = amount;
+        assert amounts[12] = amount;
+        assert amounts[13] = amount;
+        assert amounts[14] = amount;
+        assert amounts[15] = amount;
+        assert amounts[16] = amount;
+        assert amounts[17] = amount;
+        assert amounts[18] = amount;
+        assert amounts[19] = amount;
+        assert amounts[20] = amount;
+        assert amounts[21] = amount;
+    return (amounts_len=22, amounts=amounts);
+}
+
 func get_owners{syscall_ptr: felt*, range_check_ptr}(owner: felt) -> (
     owners_len: felt, owners: felt*
 ) {
@@ -99,5 +129,28 @@ func settle_realm{syscall_ptr: felt*, range_check_ptr}(
     Realms.mint(realms_address, account_address, token_id);
     Realms.approve(realms_address, settling_address, token_id);
     ISettling.settle(settling_address, token_id);
+    return ();
+}
+
+@external
+func mint_resources{syscall_ptr: felt*, range_check_ptr}(
+    resources_token: felt, amount: Uint256, to: felt
+) {
+    let (resource_ids) = get_resources();
+    let (decimal_amount, _) = uint256_mul(amount, Uint256(10 ** 18, 0));
+    let (_, resource_amounts) = get_amounts(decimal_amount);
+
+    let (data: felt*) = alloc();
+    assert data[0] = 1;
+    IERC1155.mintBatch(
+        resources_token,
+        to,
+        22,
+        resource_ids,
+        22,
+        resource_amounts,
+        1,
+        data
+    );
     return ();
 }

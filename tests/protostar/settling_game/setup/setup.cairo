@@ -27,17 +27,10 @@ from tests.protostar.settling_game.setup.interfaces import (
     ResourcesToken
 )
 
-
 const E18 = 10 ** 18;
 
 const ERC721_NAME = 0x4e6f47616d6520;
 const ERC721_SYMBOL = 0x4f474d302e31;
-
-const URI_LEN = 1;
-const URI = 10101010;
-
-const PK = 11111;
-const PK2 = 22222;
 
 struct Contracts {
     Settling: felt,
@@ -59,6 +52,9 @@ struct Contracts {
     S_Realms_Token: felt,
 }
 
+// @notice Deploy account
+// @param public_key: Public key of the account calling
+// @return account_address: Address of the deployed account
 func deploy_account{syscall_ptr: felt*, range_check_ptr}(private_key: felt) -> (account_address: felt) {
     alloc_locals;
     local account_address;
@@ -72,6 +68,10 @@ func deploy_account{syscall_ptr: felt*, range_check_ptr}(private_key: felt) -> (
     return (account_address,);
 }
 
+// @notice Deploy module controller
+// @param arbiter: Account mainatining controller
+// @param proxy_admin: Account maintaining upgrades
+// @return controller_address: Address of the deployed module controller
 func deploy_controller{syscall_ptr: felt*, range_check_ptr}(arbiter: felt, proxy_admin: felt) -> (controller_address: felt) {
     alloc_locals;
 
@@ -89,6 +89,11 @@ func deploy_controller{syscall_ptr: felt*, range_check_ptr}(arbiter: felt, proxy
     return (controller_address,);
 }
 
+// @notice Deploy module
+// @param module_id: Id of the module to deploy
+// @param controller_address: Address of the deployed module controller
+// @param proxy_admin: Account maintaining module upgrades
+// @return module_address: Address of the deployed module
 func deploy_module{syscall_ptr: felt*, range_check_ptr}(
     module_id: felt, controller_address: felt, proxy_admin: felt
 ) -> (module_address: felt) {
@@ -152,6 +157,7 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
         IModuleController.set_address_for_module_id(controller_address, ModuleIds.Buildings, proxy_address);
         IModuleController.set_write_access(controller_address, ModuleIds.Buildings, ModuleIds.Realms_Token);
         IModuleController.set_write_access(controller_address, ModuleIds.Buildings, ModuleIds.L10_Food);
+        IModuleController.set_write_access(controller_address, ModuleIds.Buildings, ModuleIds.Resources_Token);
         %{
             stop_prank()
         %}
@@ -410,6 +416,9 @@ func deploy_module{syscall_ptr: felt*, range_check_ptr}(
     return (proxy_address,);
 }
 
+// @notice Change block timestamp of contract
+// @param new_timestamp: Block timestamp to change contract to
+// @param target: Address of contract for which the timestamp is updated
 func time_warp{syscall_ptr: felt*, range_check_ptr}(new_timestamp: felt, target: felt) {
     %{ stop_warp = warp(ids.new_timestamp, target_contract_address=ids.target) %}
     return ();

@@ -84,3 +84,17 @@ namespace Relics {
     func get_current_relic_holder(relic_id: Uint256) -> (token_id: Uint256) {
     }
 }
+
+@contract_interface
+namespace Food {
+    func create(token_id: Uint256, qty: felt, food_building_id: felt) {
+    }
+    func harvest(token_id: Uint256, harvest_type: felt, food_building_id: felt) {
+    }
+}
+
+@contract_interface
+namespace Buildings {
+    func build(token_id: Uint256, building_id: felt, quantity: felt) -> (success: felt) {
+    }
+}
