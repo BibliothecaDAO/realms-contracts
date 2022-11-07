@@ -1,0 +1,29 @@
+{
+  "description": "Adventurer",
+  "name": "Test",
+  "image": "https://d23fdhqc1jb9no.cloudfront.net/Adventurer/1.webp",
+  "attributes": [
+    { "trait_type": "Race", "value": "Giant" },
+    { "trait_type": "Home Realm", "value": "Test Realm" },
+    { "trait_type": "Birthdate", "value": "1667831589" },
+    { "trait_type": "Health", "value": "100" },
+    { "trait_type": "Level", "value": "5" },
+    { "trait_type": "Order", "value": "Brilliance" },
+    { "trait_type": "Strength", "value": "20" },
+    { "trait_type": "Dexterity", "value": "10" },
+    { "trait_type": "Vitality", "value": "50" },
+    { "trait_type": "Intelligence", "value": "30" },
+    { "trait_type": "Wisdom", "value": "15" },
+    { "trait_type": "Charisma", "value": "40" },
+    { "trait_type": "Luck", "value": "20" },
+    { "trait_type": "XP", "value": "500" },
+    { "trait_type": "Weapon", "value": "Wand" },
+    { "trait_type": "Chest", "value": "Divine Robe" },
+    { "trait_type": "Head", "value": "Helm" },
+    { "trait_type": "Waist", "value": "Hard Leather Belt" },
+    { "trait_type": "Feet", "value": "Gauntlets" },
+    { "trait_type": "Hand", "value": "Gloves" },
+    { "trait_type": "Neck", "value": "Amulet" },
+    { "trait_type": "Ring", "value": "Gold Ring" }
+  ]
+}
