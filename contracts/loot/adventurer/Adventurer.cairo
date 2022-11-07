@@ -34,6 +34,8 @@ from contracts.settling_game.interfaces.imodules import IModuleController
 from contracts.loot.loot.ILoot import ILoot
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
 
+from contracts.loot.metadata import Uri
+
 // const MINT_COST = 5000000000000000000
 
 // -----------------------------------
@@ -436,7 +438,8 @@ func isApprovedForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256
 ) -> (tokenURI: felt) {
-    let (tokenURI: felt) = ERC721.token_uri(tokenId);
+    let (realm_data: AdventurerState) = getAdventurerById(tokenId);
+    let (tokenURI_len, tokenURI) = Uri.build(tokenId, name, realm_data, Utils.RealmType.Realm);
     return (tokenURI,);
 }
 
@@ -486,15 +489,6 @@ func safeTransferFrom{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
 func burn{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(tokenId: Uint256) {
     ERC721.assert_only_token_owner(tokenId);
     ERC721Enumerable._burn(tokenId);
-    return ();
-}
-
-@external
-func setTokenURI{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    tokenId: Uint256, tokenURI: felt
-) {
-    Ownable.assert_only_owner();
-    ERC721._set_token_uri(tokenId, tokenURI);
     return ();
 }
 
