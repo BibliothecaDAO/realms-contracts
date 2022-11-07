@@ -71,10 +71,6 @@ func adventurer(tokenId: Uint256) -> (adventurer: PackedAdventurerState) {
 func adventurer_balance(tokenId: Uint256) -> (balance: Uint256) {
 }
 
-@storage_var
-func adventurer_image(tokenId: Uint256) -> (image: felt) {
-}
-
 // -----------------------------------
 // Initialize & upgrade
 // -----------------------------------
@@ -157,7 +153,7 @@ func mint{
 @external
 func birth{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(id: Uint256, race: felt, home_realm: felt, name: felt, order: felt, image: felt) {
+}(id: Uint256, race: felt, home_realm: felt, name: felt, order: felt) {
     alloc_locals;
 
     // check call is owner
@@ -180,9 +176,6 @@ func birth{
 
     // store
     adventurer.write(id, packed_new_adventurer);
-
-    // write image
-    adventurer_image.write(id, image);
 
     return ();
 }
@@ -435,12 +428,14 @@ func isApprovedForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 }
 
 @view
-func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, bitwise_ptr: BitwiseBuiltin*, range_check_ptr}(
     tokenId: Uint256
-) -> (tokenURI: felt) {
-    let (realm_data: AdventurerState) = getAdventurerById(tokenId);
-    let (tokenURI_len, tokenURI) = Uri.build(tokenId, name, realm_data, Utils.RealmType.Realm);
-    return (tokenURI,);
+) -> (tokenURI_len: felt, tokenURI: felt*) {
+    alloc_locals;
+    let (controller) = Module.controller_address();
+    let (adventurer_data: AdventurerState) = getAdventurerById(tokenId);
+    let (tokenURI_len, tokenURI) = Uri.build(tokenId, adventurer_data, controller);
+    return (tokenURI_len, tokenURI);
 }
 
 @view

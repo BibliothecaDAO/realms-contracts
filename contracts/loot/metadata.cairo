@@ -15,6 +15,10 @@ from starkware.cairo.common.math import unsigned_div_rem
 
 from contracts.loot.constants.adventurer import AdventurerState
 from contracts.loot.constants.item import ItemIds
+from contracts.settling_game.utils.game_structs import ExternalContractIds
+
+from contracts.settling_game.interfaces.IRealms import IRealms
+from contracts.settling_game.interfaces.Imodules import IModuleController
 
 namespace Utils {
     namespace Symbols {
@@ -57,6 +61,38 @@ namespace Utils {
         const ValueKey = '"value":"';
     }
 
+    namespace OrderNames {
+        const Power = 345467479410;
+        const Giants = 78517931766899;
+        const Titans = 92811900841587;
+        const Skill = 358284356716;
+        const Perfection = 379660683168662059315054;
+        const Brilliance = 313786713259670802162533;
+        const Enlightenment = 5500917626309127724772157124212;
+        const Protection = 379900278609487843651438;
+        const Twins = 362780651123;
+        const Reflection = 389104553132122754871150;
+        const Detection = 1261689176585207902062;
+        const Fox = 4616056;
+        const Vitriol = 24322796853751660;
+        const Fury = 1182102137;
+        const Rage = 1382115173;
+        const Anger = 281025144178;
+    }
+
+    namespace RaceNames {
+        const Elf = 'Elf';
+        const Fox = 'Fox';
+        const Giant = 'Giant';
+        const Human = 'Human';
+        const Orc = 'Orc';
+        const Demon = 'Demon';
+        const Goblin = 'Goblin';
+        const Fish = 'Fish';
+        const Cat = 'Cat';
+        const Frog = 'Frog';
+    }
+
     namespace NeckItems {
         const Pendant = 'Pendant';
         const Necklace = 'Necklace';
@@ -68,7 +104,7 @@ namespace Utils {
         const BronzeRing = 'Bronze Ring';
         const PlatinumRing = 'Platinum Ring';
         const TitaniumRing = 'Titanium Ring';
-        const GoldRing = 'GoldRing';
+        const GoldRing = 'Gold Ring';
     }
 
     namespace Weapons {
@@ -188,10 +224,14 @@ namespace Uri {
     // @implicit range_check_ptr
     // @param adventurer_id: id of the adventurer
     // @param adventurer_data: unpacked data for adventurer
-    func build{range_check_ptr}(
-        adventurer_id: Uint256, adventurer_data: AdventurerState
+    func build{syscall_ptr: felt*, range_check_ptr}(
+        adventurer_id: Uint256, adventurer_data: AdventurerState, controller: felt
     ) -> (encoded_len: felt, encoded: felt*) {
         alloc_locals;
+
+        let (realms_address) = IModuleController.get_external_contract_address(
+            controller, ExternalContractIds.Realms
+        );
 
         // pre-defined for reusability
         let left_bracket = Utils.Symbols.LeftBracket;
@@ -215,7 +255,7 @@ namespace Uri {
 
         // adventurer image url values
         let image_url_1 = 'https://d23fdhqc1jb9no';
-        let image_url_2 = '.cloudfront.net/_Realms/';
+        let image_url_2 = '.cloudfront.net/Adventurer/';
 
         let (values: felt*) = alloc();
         assert values [0] = data_format;
@@ -243,130 +283,278 @@ namespace Uri {
         assert values[id_index + 3] = attributes_key;
         assert values[id_index + 4] = left_square_bracket;
         // race
-        assert values[id_index + 5] = Utils.TraitKeys.Race;
-        assert values[id_index + 6] = Utils.TraitKeys.ValueKey;
-        assert values[id_index + 7] = adventurer_data.Race;
-        assert values[id_index + 8] = inverted_commas;
-        assert values[id_index + 9] = right_bracket;
-        // home realm
-        assert values[id_index + 10] = Utils.TraitKeys.HomeRealm;
-        assert values[id_index + 11] = Utils.TraitKeys.ValueKey;
-        assert values[id_index + 12] = adventurer_data.HomeRealm;
-        assert values[id_index + 13] = inverted_commas;
-        assert values[id_index + 14] = right_bracket;
-        // birth date
-        assert values[id_index + 15] = Utils.TraitKeys.Birthdate;
-        assert values[id_index + 16] = Utils.TraitKeys.ValueKey;
-        assert values[id_index + 17] = adventurer_data.Birthdate;
-        assert values[id_index + 18] = inverted_commas;
-        assert values[id_index + 19] = right_bracket;
-        // health
-        assert values[id_index + 20] = Utils.TraitKeys.Health;
-        assert values[id_index + 21] = Utils.TraitKeys.ValueKey;
 
-        let (health_size) = append_felt_ascii(adventurer_data.Health, values + id_index + 22);
-        let health_index = id_index + 22 + health_size;
+        let (race_index) = append_race_name(adventurer_data.Race, id_index + 5, values);
+
+        // home realm
+        assert values[race_index] = Utils.TraitKeys.HomeRealm;
+        assert values[race_index + 1] = Utils.TraitKeys.ValueKey;
+
+        let (realm_name) = IRealms.get_realm_name(realms_address, Uint256(adventurer_data.HomeRealm, 0));
+
+        assert values[race_index + 2] = realm_name;
+        assert values[race_index + 3] = inverted_commas;
+        assert values[race_index + 4] = right_bracket;
+        assert values[race_index + 5] = comma;
+        // birth date
+        assert values[race_index + 6] = Utils.TraitKeys.Birthdate;
+        assert values[race_index + 7] = Utils.TraitKeys.ValueKey;
+
+        let (birthdate_size) = append_felt_ascii(adventurer_data.Birthdate, values + race_index + 8);
+        let birthdate_index = race_index + 8 + birthdate_size;
+
+        assert values[birthdate_index] = inverted_commas;
+        assert values[birthdate_index + 1] = right_bracket;
+        assert values[birthdate_index + 2] = comma;
+        // health
+        assert values[birthdate_index + 3] = Utils.TraitKeys.Health;
+        assert values[birthdate_index + 4] = Utils.TraitKeys.ValueKey;
+
+        let (health_size) = append_felt_ascii(adventurer_data.Health, values + birthdate_index + 5);
+        let health_index =  birthdate_index + 5 + health_size;
         
         assert values[health_index] = inverted_commas;
         assert values[health_index + 1] = right_bracket;
+        assert values[health_index + 2] = comma;
         // level
-        assert values[health_index + 2] = Utils.TraitKeys.Level;
-        assert values[health_index + 3] = Utils.TraitKeys.ValueKey;
+        assert values[health_index + 3] = Utils.TraitKeys.Level;
+        assert values[health_index + 4] = Utils.TraitKeys.ValueKey;
 
-        let (level_size) = append_felt_ascii(adventurer_data.Level, values + health_index + 4);
-        let level_index = health_index + 4 + level_size;
-        
+        let (level_size) = append_felt_ascii(adventurer_data.Level, values + health_index + 5);
+        let level_index = health_index + 5 + level_size;
+
         assert values[level_index] = inverted_commas;
         assert values[level_index + 1] = right_bracket;
-        // order
-        assert values[level_index + 2] = Utils.TraitKeys.Order;
-        assert values[level_index + 3] = Utils.TraitKeys.ValueKey;
+        assert values[level_index + 2] = comma;
 
-        let (order_size) = append_felt_ascii(adventurer_data.Order, values + level_index + 4);
-        let order_index = level_index + 4 + order_size;
+        let (order_index) = append_order_name(adventurer_data.Order, level_index + 3, values);
         
-        assert values[order_index] = inverted_commas;
-        assert values[order_index + 1] = right_bracket;
         // strength
-        assert values[order_index + 2] = Utils.TraitKeys.Strength;
-        assert values[order_index + 3] = Utils.TraitKeys.ValueKey;
+        assert values[order_index] = Utils.TraitKeys.Strength;
+        assert values[order_index + 1] = Utils.TraitKeys.ValueKey;
 
-        let (strength_size) = append_felt_ascii(adventurer_data.Strength, values + order_index + 4);
-        let strength_index = order_index + 4 + strength_size;
+        let (strength_size) = append_felt_ascii(adventurer_data.Strength, values + order_index + 2);
+        let strength_index = order_index + 2 + strength_size;
         
         assert values[strength_index] = inverted_commas;
         assert values[strength_index + 1] = right_bracket;
+        assert values[strength_index + 2] = comma;
         // dexterity
-        assert values[strength_index + 2] = Utils.TraitKeys.Dexterity;
-        assert values[strength_index + 3] = Utils.TraitKeys.ValueKey;
+        assert values[strength_index + 3] = Utils.TraitKeys.Dexterity;
+        assert values[strength_index + 4] = Utils.TraitKeys.ValueKey;
 
-        let (dexterity_size) = append_felt_ascii(adventurer_data.Dexterity, values + strength_index + 4);
-        let dexterity_index = strength_index + 4 + dexterity_size;
+        let (dexterity_size) = append_felt_ascii(adventurer_data.Dexterity, values + strength_index + 5);
+        let dexterity_index = strength_index + 5 + dexterity_size;
         
         assert values[dexterity_index] = inverted_commas;
         assert values[dexterity_index + 1] = right_bracket;
+        assert values[dexterity_index + 2] = comma;
         // vitality
-        assert values[dexterity_index + 2] = Utils.TraitKeys.Vitality;
-        assert values[dexterity_index + 3] = Utils.TraitKeys.ValueKey;
+        assert values[dexterity_index + 3] = Utils.TraitKeys.Vitality;
+        assert values[dexterity_index + 4] = Utils.TraitKeys.ValueKey;
 
-        let (vitality_size) = append_felt_ascii(adventurer_data.Vitality, values + dexterity_index + 4);
-        let vitality_index = dexterity_index + 4 + vitality_size;
+        let (vitality_size) = append_felt_ascii(adventurer_data.Vitality, values + dexterity_index + 5);
+        let vitality_index = dexterity_index + 5 + vitality_size;
         
         assert values[vitality_index] = inverted_commas;
         assert values[vitality_index + 1] = right_bracket;
+        assert values[vitality_index + 2] = comma;
         // intelligence
-        assert values[vitality_index + 2] = Utils.TraitKeys.Intelligence;
-        assert values[vitality_index + 3] = Utils.TraitKeys.ValueKey;
+        assert values[vitality_index + 3] = Utils.TraitKeys.Intelligence;
+        assert values[vitality_index + 4] = Utils.TraitKeys.ValueKey;
 
-        let (intelligence_size) = append_felt_ascii(adventurer_data.Intelligence, values + vitality_index + 4);
-        let intelligence_index = vitality_index + 4 + intelligence_size;
+        let (intelligence_size) = append_felt_ascii(adventurer_data.Intelligence, values + vitality_index + 5);
+        let intelligence_index = vitality_index + 5 + intelligence_size;
         
         assert values[intelligence_index] = inverted_commas;
         assert values[intelligence_index + 1] = right_bracket;
+        assert values[intelligence_index + 2] = comma;
         // wisdom
-        assert values[intelligence_index + 2] = Utils.TraitKeys.Wisdom;
-        assert values[intelligence_index + 3] = Utils.TraitKeys.ValueKey;
+        assert values[intelligence_index + 3] = Utils.TraitKeys.Wisdom;
+        assert values[intelligence_index + 4] = Utils.TraitKeys.ValueKey;
 
-        let (wisdom_size) = append_felt_ascii(adventurer_data.Wisdom, values + intelligence_index + 4);
-        let wisdom_index = intelligence_index + 4 + wisdom_size;
+        let (wisdom_size) = append_felt_ascii(adventurer_data.Wisdom, values + intelligence_index + 5);
+        let wisdom_index = intelligence_index + 5 + wisdom_size;
         
         assert values[wisdom_index] = inverted_commas;
         assert values[wisdom_index + 1] = right_bracket;
+        assert values[wisdom_index + 2] = comma;
         // charisma
-        assert values[wisdom_index + 2] = Utils.TraitKeys.Charisma;
-        assert values[wisdom_index + 3] = Utils.TraitKeys.ValueKey;
+        assert values[wisdom_index + 3] = Utils.TraitKeys.Charisma;
+        assert values[wisdom_index + 4] = Utils.TraitKeys.ValueKey;
 
-        let (charisma_size) = append_felt_ascii(adventurer_data.Charisma, values + wisdom_index + 4);
-        let charisma_index = wisdom_index + 4 + charisma_size;
+        let (charisma_size) = append_felt_ascii(adventurer_data.Charisma, values + wisdom_index + 5);
+        let charisma_index = wisdom_index + 5 + charisma_size;
         
         assert values[charisma_index] = inverted_commas;
         assert values[charisma_index + 1] = right_bracket;
+        assert values[charisma_index + 2] = comma;
         // luck
-        assert values[charisma_index + 2] = Utils.TraitKeys.Luck;
-        assert values[charisma_index + 3] = Utils.TraitKeys.ValueKey;
+        assert values[charisma_index + 3] = Utils.TraitKeys.Luck;
+        assert values[charisma_index + 4] = Utils.TraitKeys.ValueKey;
 
-        let (luck_size) = append_felt_ascii(adventurer_data.Luck, values + charisma_index + 4);
-        let luck_index = charisma_index + 4 + luck_size;
+        let (luck_size) = append_felt_ascii(adventurer_data.Luck, values + charisma_index + 5);
+        let luck_index = charisma_index + 5 + luck_size;
         
         assert values[luck_index] = inverted_commas;
         assert values[luck_index + 1] = right_bracket;
+        assert values[luck_index + 2] = comma;
         // XP
-        assert values[luck_index + 2] = Utils.TraitKeys.XP;
-        assert values[luck_index + 3] = Utils.TraitKeys.ValueKey;
+        assert values[luck_index + 3] = Utils.TraitKeys.XP;
+        assert values[luck_index + 4] = Utils.TraitKeys.ValueKey;
 
-        let (xp_size) = append_felt_ascii(adventurer_data.XP, values + luck_index + 4);
-        let xp_index = luck_index + 4 + xp_size;
+        let (xp_size) = append_felt_ascii(adventurer_data.XP, values + luck_index + 5);
+        let xp_index = luck_index + 5 + xp_size;
         
         assert values[xp_index] = inverted_commas;
         assert values[xp_index + 1] = right_bracket;
+        assert values[xp_index + 2] = comma;
 
-        // Weapon
-        let (weapon_index) = append_weapon(adventurer_data.WeaponId, xp_index + 2, values);
-
-        // Chest
+        let (weapon_index) = append_weapon(adventurer_data.WeaponId, xp_index + 3, values);
         let (chest_index) = append_chest_item(adventurer_data.ChestId, weapon_index, values);
+        let (head_index) = append_head_item(adventurer_data.HeadId, chest_index, values);
+        let (waist_index) = append_waist_item(adventurer_data.WaistId, head_index, values);
+        let (foot_index) = append_foot_item(adventurer_data.FeetId, waist_index, values);
+        let (hand_index) = append_hand_item(adventurer_data.HandsId, foot_index, values);
+        let (neck_index) = append_neck_item(adventurer_data.NeckId, hand_index, values);
+        let (ring_index) = append_ring_item(adventurer_data.RingId, neck_index, values);
 
-        return (encoded_len=chest_index, encoded=values);
+        assert values[ring_index] = right_square_bracket;
+        assert values[ring_index + 1] = right_bracket;
+
+        return (encoded_len=ring_index + 2, encoded=values);
+    }
+
+    // @notice append felts to uri array for race
+    // @implicit range_check_ptr
+    // @param race: id of the race, if 0 nothing is appended
+    // @param values_index: index in the uri array
+    // @param values: uri array
+    func append_race_name{range_check_ptr}(race: felt, values_index: felt, values: felt*) -> (
+        race_index: felt
+    ) {
+        if (race == 0) {
+            return (values_index,);
+        }
+        if (race == 1) {
+            assert values[values_index + 2] = Utils.RaceNames.Elf;
+        }
+        if (race == 2) {
+            assert values[values_index + 2] = Utils.RaceNames.Fox;
+        }
+        if (race == 3) {
+            assert values[values_index + 2] = Utils.RaceNames.Giant;
+        }
+        if (race == 4) {
+            assert values[values_index + 2] = Utils.RaceNames.Human;
+        }
+        if (race == 5) {
+            assert values[values_index + 2] = Utils.RaceNames.Orc;
+        }
+        if (race == 6) {
+            assert values[values_index + 2] = Utils.RaceNames.Demon;
+        }
+        if (race == 7) {
+            assert values[values_index + 2] = Utils.RaceNames.Goblin;
+        }
+        if (race == 8) {
+            assert values[values_index + 2] = Utils.RaceNames.Fish;
+        }
+        if (race == 9) {
+            assert values[values_index + 2] = Utils.RaceNames.Cat;
+        }
+        if (race == 10) {
+            assert values[values_index + 2] = Utils.RaceNames.Frog;
+        }
+
+        let race_key = Utils.TraitKeys.Race;
+        let value_key = Utils.TraitKeys.ValueKey;
+        let right_bracket = Utils.Symbols.RightBracket;
+        let inverted_commas = Utils.Symbols.InvertedCommas;
+        let comma = Utils.Symbols.Comma;
+
+        assert values[values_index] = race_key;
+        assert values[values_index + 1] = value_key;
+        assert values[values_index + 3] = inverted_commas;
+        assert values[values_index + 4] = right_bracket;
+        assert values[values_index + 5] = comma;
+
+        return (values_index + 6,);
+    }
+    
+    // @notice append felts to uri array for order
+    // @implicit range_check_ptr
+    // @param order: id of the order, if 0 nothing is appended
+    // @param values_index: index in the uri array
+    // @param values: uri array
+    func append_order_name{range_check_ptr}(order: felt, values_index: felt, values: felt*) -> (
+        order_index: felt
+    ) {
+        if (order == 0) {
+            return (values_index,);
+        }
+        if (order == 1) {
+            assert values[values_index + 2] = Utils.OrderNames.Power;
+        }
+        if (order == 2) {
+            assert values[values_index + 2] = Utils.OrderNames.Giants;
+        }
+        if (order == 3) {
+            assert values[values_index + 2] = Utils.OrderNames.Titans;
+        }
+        if (order == 4) {
+            assert values[values_index + 2] = Utils.OrderNames.Skill;
+        }
+        if (order == 5) {
+            assert values[values_index + 2] = Utils.OrderNames.Perfection;
+        }
+        if (order == 6) {
+            assert values[values_index + 2] = Utils.OrderNames.Brilliance;
+        }
+        if (order == 7) {
+            assert values[values_index + 2] = Utils.OrderNames.Enlightenment;
+        }
+        if (order == 8) {
+            assert values[values_index + 2] = Utils.OrderNames.Protection;
+        }
+        if (order == 9) {
+            assert values[values_index + 2] = Utils.OrderNames.Twins;
+        }
+        if (order == 10) {
+            assert values[values_index + 2] = Utils.OrderNames.Reflection;
+        }
+        if (order == 11) {
+            assert values[values_index + 2] = Utils.OrderNames.Detection;
+        }
+        if (order == 12) {
+            assert values[values_index + 2] = Utils.OrderNames.Fox;
+        }
+        if (order == 13) {
+            assert values[values_index + 2] = Utils.OrderNames.Vitriol;
+        }
+        if (order == 14) {
+            assert values[values_index + 2] = Utils.OrderNames.Fury;
+        }
+        if (order == 15) {
+            assert values[values_index + 2] = Utils.OrderNames.Rage;
+        }
+        if (order == 16) {
+            assert values[values_index + 2] = Utils.OrderNames.Anger;
+        }
+
+        let order_key = Utils.TraitKeys.Order;
+        let value_key = Utils.TraitKeys.ValueKey;
+        let right_bracket = Utils.Symbols.RightBracket;
+        let inverted_commas = Utils.Symbols.InvertedCommas;
+        let comma = Utils.Symbols.Comma;
+
+        assert values[values_index] = order_key;
+        assert values[values_index + 1] = value_key;
+        assert values[values_index + 3] = inverted_commas;
+        assert values[values_index + 4] = right_bracket;
+        assert values[values_index + 5] = comma;
+
+        return (values_index + 6,);
     }
 
     // @notice append felts to uri array for weapon
@@ -440,13 +628,15 @@ namespace Uri {
         let value_key = Utils.TraitKeys.ValueKey;
         let right_bracket = Utils.Symbols.RightBracket;
         let inverted_commas = Utils.Symbols.InvertedCommas;
+        let comma = Utils.Symbols.Comma;
 
         assert values[values_index] = weapon_key;
         assert values[values_index + 1] = value_key;
         assert values[values_index + 3] = inverted_commas;
         assert values[values_index + 4] = right_bracket;
+        assert values[values_index + 5] = comma;
 
-        return (values_index + 5,);
+        return (values_index + 6,);
     }
 
     // @notice append felts to uri array for chest item
@@ -454,7 +644,7 @@ namespace Uri {
     // @param chest_id: id of the chest item, if 0 nothing is appended
     // @param values_index: index in the uri array
     // @param values: uri array
-    // @return weapon_index: new index of the array
+    // @return chest_index: new index of the array
     func append_chest_item{range_check_ptr}(chest_id: felt, values_index: felt, values: felt*) -> (
         chest_index: felt
     ) {
@@ -511,13 +701,387 @@ namespace Uri {
         let value_key = Utils.TraitKeys.ValueKey;
         let right_bracket = Utils.Symbols.RightBracket;
         let inverted_commas = Utils.Symbols.InvertedCommas;
+        let comma = Utils.Symbols.Comma;
 
         assert values[values_index] = chest_key;
         assert values[values_index + 1] = value_key;
         assert values[values_index + 3] = inverted_commas;
         assert values[values_index + 4] = right_bracket;
+        assert values[values_index + 5] = comma;
 
-        return (values_index + 5,);
+        return (values_index + 6,);
+    }
+
+    // @notice append felts to uri array for head item
+    // @implicit range_check_ptr
+    // @param head_id: id of the head item, if 0 nothing is appended
+    // @param values_index: index in the uri array
+    // @param values: uri array
+    // @return head_index: new index of the array
+    func append_head_item{range_check_ptr}(head_id: felt, values_index: felt, values: felt*) -> (
+        head_index: felt
+    ) {
+        if (head_id == 0) {
+            return (values_index,);
+        }
+        if (head_id == ItemIds.Crown) {
+            assert values[values_index + 2] = Utils.HeadItems.Crown;
+        }
+        if (head_id == ItemIds.DivineHood) {
+            assert values[values_index + 2] = Utils.HeadItems.DivineHood;
+        }
+        if (head_id == ItemIds.SilkHood) {
+            assert values[values_index + 2] = Utils.HeadItems.SilkHood;
+        }
+        if (head_id == ItemIds.LinenHood) {
+            assert values[values_index + 2] = Utils.HeadItems.LinenHood;
+        }
+        if (head_id == ItemIds.Hood) {
+            assert values[values_index + 2] = Utils.HeadItems.Hood;
+        }
+        if (head_id == ItemIds.DemonCrown) {
+            assert values[values_index + 2] = Utils.HeadItems.DemonCrown;
+        }
+        if (head_id == ItemIds.DragonsCrown) {
+            assert values[values_index + 2] = Utils.HeadItems.DragonsCrown;
+        }
+        if (head_id == ItemIds.WarCap) {
+            assert values[values_index + 2] = Utils.HeadItems.WarCap;
+        }
+        if (head_id == ItemIds.LeatherCap) {
+            assert values[values_index + 2] = Utils.HeadItems.LeatherCap;
+        }
+        if (head_id == ItemIds.Cap) {
+            assert values[values_index + 2] = Utils.HeadItems.Cap;
+        }
+        if (head_id == ItemIds.AncientHelm) {
+            assert values[values_index + 2] = Utils.HeadItems.AncientHelm;
+        }
+        if (head_id == ItemIds.OrnateHelm) {
+            assert values[values_index + 2] = Utils.HeadItems.OrnateHelm;
+        }
+        if (head_id == ItemIds.GreatHelm) {
+            assert values[values_index + 2] = Utils.HeadItems.GreatHelm;
+        }
+        if (head_id == ItemIds.FullHelm) {
+            assert values[values_index + 2] = Utils.HeadItems.FullHelm;
+        }
+        if (head_id == ItemIds.Helm) {
+            assert values[values_index + 2] = Utils.HeadItems.Helm;
+        }
+
+        let head_key = Utils.TraitKeys.Head;
+        let value_key = Utils.TraitKeys.ValueKey;
+        let right_bracket = Utils.Symbols.RightBracket;
+        let inverted_commas = Utils.Symbols.InvertedCommas;
+        let comma = Utils.Symbols.Comma;
+
+        assert values[values_index] = head_key;
+        assert values[values_index + 1] = value_key;
+        assert values[values_index + 3] = inverted_commas;
+        assert values[values_index + 4] = right_bracket;
+        assert values[values_index + 5] = comma;
+
+        return (values_index + 6,);
+    }
+
+    // @notice append felts to uri array for waist item
+    // @implicit range_check_ptr
+    // @param waist_id: id of the waist item, if 0 nothing is appended
+    // @param values_index: index in the uri array
+    // @param values: uri array
+    // @return waist_index: new index of the array
+    func append_waist_item{range_check_ptr}(waist_id: felt, values_index: felt, values: felt*) -> (
+        waist_index: felt
+    ) {
+        if (waist_id == 0) {
+            return (values_index,);
+        }
+        if (waist_id == ItemIds.BrightsilkSash) {
+            assert values[values_index + 2] = Utils.WaistItems.BrightsilkSash;
+        }
+        if (waist_id == ItemIds.SilkSash) {
+            assert values[values_index + 2] = Utils.WaistItems.SilkSash;
+        }
+        if (waist_id == ItemIds.WoolSash) {
+            assert values[values_index + 2] = Utils.WaistItems.WoolSash;
+        }
+        if (waist_id == ItemIds.LinenSash) {
+            assert values[values_index + 2] = Utils.WaistItems.LinenSash;
+        }
+        if (waist_id == ItemIds.Sash) {
+            assert values[values_index + 2] = Utils.WaistItems.Sash;
+        }
+        if (waist_id == ItemIds.DemonhideBelt) {
+            assert values[values_index + 2] = Utils.WaistItems.DemonhideBelt;
+        }
+        if (waist_id == ItemIds.DragonskinBelt) {
+            assert values[values_index + 2] = Utils.WaistItems.DragonskinBelt;
+        }
+        if (waist_id == ItemIds.StuddedLeatherBelt) {
+            assert values[values_index + 2] = Utils.WaistItems.StuddedLeatherBelt;
+        }
+        if (waist_id == ItemIds.HardLeatherBelt) {
+            assert values[values_index + 2] = Utils.WaistItems.HardLeatherBelt;
+        }
+        if (waist_id == ItemIds.LeatherBelt) {
+            assert values[values_index + 2] = Utils.WaistItems.LeatherBelt;
+        }
+        if (waist_id == ItemIds.OrnateBelt) {
+            assert values[values_index + 2] = Utils.WaistItems.OrnateBelt;
+        }
+        if (waist_id == ItemIds.WarBelt) {
+            assert values[values_index + 2] = Utils.WaistItems.WarBelt;
+        }
+        if (waist_id == ItemIds.PlatedBelt) {
+            assert values[values_index + 2] = Utils.WaistItems.PlatedBelt;
+        }
+        if (waist_id == ItemIds.MeshBelt) {
+            assert values[values_index + 2] = Utils.WaistItems.MeshBelt;
+        }
+        if (waist_id == ItemIds.HeavyBelt) {
+            assert values[values_index + 2] = Utils.WaistItems.HeavyBelt;
+        }
+
+        let waist_key = Utils.TraitKeys.Waist;
+        let value_key = Utils.TraitKeys.ValueKey;
+        let right_bracket = Utils.Symbols.RightBracket;
+        let inverted_commas = Utils.Symbols.InvertedCommas;
+        let comma = Utils.Symbols.Comma;
+
+        assert values[values_index] = waist_key;
+        assert values[values_index + 1] = value_key;
+        assert values[values_index + 3] = inverted_commas;
+        assert values[values_index + 4] = right_bracket;
+        assert values[values_index + 5] = comma;
+
+        return (values_index + 6,);
+    }
+
+    // @notice append felts to uri array for foot item
+    // @implicit range_check_ptr
+    // @param foot_id: id of the foot item, if 0 nothing is appended
+    // @param values_index: index in the uri array
+    // @param values: uri array
+    // @return foot_index: new index of the array
+    func append_foot_item{range_check_ptr}(foot_id: felt, values_index: felt, values: felt*) -> (
+        foot_index: felt
+    ) {
+        if (foot_id == 0) {
+            return (values_index,);
+        }
+        if (foot_id == ItemIds.DivineSlippers) {
+            assert values[values_index + 2] = Utils.FootItems.DivineSlippers;
+        }
+        if (foot_id == ItemIds.SilkSlippers) {
+            assert values[values_index + 2] = Utils.FootItems.SilkSlippers;
+        }
+        if (foot_id == ItemIds.WoolShoes) {
+            assert values[values_index + 2] = Utils.FootItems.WoolShoes;
+        }
+        if (foot_id == ItemIds.LinenShoes) {
+            assert values[values_index + 2] = Utils.FootItems.LinenShoes;
+        }
+        if (foot_id == ItemIds.Shoes) {
+            assert values[values_index + 2] = Utils.FootItems.Shoes;
+        }
+        if (foot_id == ItemIds.DemonhideBoots) {
+            assert values[values_index + 2] = Utils.FootItems.DemonhideBoots;
+        }
+        if (foot_id == ItemIds.DragonskinBoots) {
+            assert values[values_index + 2] = Utils.FootItems.DragonskinBoots;
+        }
+        if (foot_id == ItemIds.StuddedLeatherBoots) {
+            assert values[values_index + 2] = Utils.FootItems.StuddedLeatherBoots;
+        }
+        if (foot_id == ItemIds.HardLeatherBoots) {
+            assert values[values_index + 2] = Utils.FootItems.HardLeatherBoots;
+        }
+        if (foot_id == ItemIds.LeatherBoots) {
+            assert values[values_index + 2] = Utils.FootItems.LeatherBoots;
+        }
+        if (foot_id == ItemIds.ChainBoots) {
+            assert values[values_index + 2] = Utils.FootItems.ChainBoots;
+        }
+        if (foot_id == ItemIds.HeavyBoots) {
+            assert values[values_index + 2] = Utils.FootItems.HeavyBoots;
+        }
+        if (foot_id == ItemIds.HolyGauntlets) {
+            assert values[values_index + 2] = Utils.FootItems.HolyGauntlets;
+        }
+        if (foot_id == ItemIds.OrnateGauntlets) {
+            assert values[values_index + 2] = Utils.FootItems.OrnateGauntlets;
+        }
+        if (foot_id == ItemIds.Gauntlets) {
+            assert values[values_index + 2] = Utils.FootItems.Gauntlets;
+        }
+
+        let foot_key = Utils.TraitKeys.Feet;
+        let value_key = Utils.TraitKeys.ValueKey;
+        let right_bracket = Utils.Symbols.RightBracket;
+        let inverted_commas = Utils.Symbols.InvertedCommas;
+        let comma = Utils.Symbols.Comma;
+
+        assert values[values_index] = foot_key;
+        assert values[values_index + 1] = value_key;
+        assert values[values_index + 3] = inverted_commas;
+        assert values[values_index + 4] = right_bracket;
+        assert values[values_index + 5] = comma;
+
+        return (values_index + 6,);
+    }
+
+    // @notice append felts to uri array for hand item
+    // @implicit range_check_ptr
+    // @param hand_id: id of the hand item, if 0 nothing is appended
+    // @param values_index: index in the uri array
+    // @param values: uri array
+    // @return hand_index: new index of the array
+    func append_hand_item{range_check_ptr}(hand_id: felt, values_index: felt, values: felt*) -> (
+        hand_index: felt
+    ) {
+        if (hand_id == 0) {
+            return (values_index,);
+        }
+        if (hand_id == ItemIds.DivineGloves) {
+            assert values[values_index + 2] = Utils.HandItems.DivineGloves;
+        }
+        if (hand_id == ItemIds.SilkGloves) {
+            assert values[values_index + 2] = Utils.HandItems.SilkGloves;
+        }
+        if (hand_id == ItemIds.WoolGloves) {
+            assert values[values_index + 2] = Utils.HandItems.WoolGloves;
+        }
+        if (hand_id == ItemIds.LinenGloves) {
+            assert values[values_index + 2] = Utils.HandItems.LinenGloves;
+        }
+        if (hand_id == ItemIds.Gloves) {
+            assert values[values_index + 2] = Utils.HandItems.Gloves;
+        }
+        if (hand_id == ItemIds.DemonsHands) {
+            assert values[values_index + 2] = Utils.HandItems.DemonsHands;
+        }
+        if (hand_id == ItemIds.DragonskinGloves) {
+            assert values[values_index + 2] = Utils.HandItems.DragonskinGloves;
+        }
+        if (hand_id == ItemIds.StuddedLeatherGloves) {
+            assert values[values_index + 2] = Utils.HandItems.StuddedLeatherGloves;
+        }
+        if (hand_id == ItemIds.HardLeatherGloves) {
+            assert values[values_index + 2] = Utils.HandItems.HardLeatherGloves;
+        }
+        if (hand_id == ItemIds.LeatherGloves) {
+            assert values[values_index + 2] = Utils.HandItems.LeatherGloves;
+        }
+        if (hand_id == ItemIds.HolyGreaves) {
+            assert values[values_index + 2] = Utils.HandItems.HolyGreaves;
+        }
+        if (hand_id == ItemIds.OrnateGreaves) {
+            assert values[values_index + 2] = Utils.HandItems.OrnateGreaves;
+        }
+        if (hand_id == ItemIds.Greaves) {
+            assert values[values_index + 2] = Utils.HandItems.Greaves;
+        }
+        if (hand_id == ItemIds.ChainGloves) {
+            assert values[values_index + 2] = Utils.HandItems.ChainGloves;
+        }
+        if (hand_id == ItemIds.HeavyGloves) {
+            assert values[values_index + 2] = Utils.HandItems.HeavyGloves;
+        }
+
+        let hand_key = Utils.TraitKeys.Hands;
+        let value_key = Utils.TraitKeys.ValueKey;
+        let right_bracket = Utils.Symbols.RightBracket;
+        let inverted_commas = Utils.Symbols.InvertedCommas;
+        let comma = Utils.Symbols.Comma;
+
+        assert values[values_index] = hand_key;
+        assert values[values_index + 1] = value_key;
+        assert values[values_index + 3] = inverted_commas;
+        assert values[values_index + 4] = right_bracket;
+        assert values[values_index + 5] = comma;
+
+        return (values_index + 6,);
+    }
+
+    // @notice append felts to uri array for neck item
+    // @implicit range_check_ptr
+    // @param neck_id: id of the neck item, if 0 nothing is appended
+    // @param values_index: index in the uri array
+    // @param values: uri array
+    // @return neck_index: new index of the array
+    func append_neck_item{range_check_ptr}(neck_id: felt, values_index: felt, values: felt*) -> (
+        neck_index: felt
+    ) {
+        if (neck_id == 0) {
+            return (values_index,);
+        }
+        if (neck_id == ItemIds.Pendant) {
+            assert values[values_index + 2] = Utils.NeckItems.Pendant;
+        }
+        if (neck_id == ItemIds.Necklace) {
+            assert values[values_index + 2] = Utils.NeckItems.Necklace;
+        }
+        if (neck_id == ItemIds.Amulet) {
+            assert values[values_index + 2] = Utils.NeckItems.Amulet;
+        }
+
+        let neck_key = Utils.TraitKeys.Neck;
+        let value_key = Utils.TraitKeys.ValueKey;
+        let right_bracket = Utils.Symbols.RightBracket;
+        let inverted_commas = Utils.Symbols.InvertedCommas;
+        let comma = Utils.Symbols.Comma;
+
+        assert values[values_index] = neck_key;
+        assert values[values_index + 1] = value_key;
+        assert values[values_index + 3] = inverted_commas;
+        assert values[values_index + 4] = right_bracket;
+        assert values[values_index + 5] = comma;
+
+        return (values_index + 6,);
+    }
+
+    // @notice append felts to uri array for ring item
+    // @implicit range_check_ptr
+    // @param ring_id: id of the ring, if 0 nothing is appended
+    // @param values_index: index in the uri array
+    // @param values: uri array
+    // @return ring_index: new index of the array
+    func append_ring_item{range_check_ptr}(ring_id: felt, values_index: felt, values: felt*) -> (
+        ring_index: felt
+    ) {
+        if (ring_id == 0) {
+            return (values_index,);
+        }
+        if (ring_id == ItemIds.SilverRing) {
+            assert values[values_index + 2] = Utils.Rings.SilverRing;
+        }
+        if (ring_id == ItemIds.BronzeRing) {
+            assert values[values_index + 2] = Utils.Rings.BronzeRing;
+        }
+        if (ring_id == ItemIds.PlatinumRing) {
+            assert values[values_index + 2] = Utils.Rings.PlatinumRing;
+        }
+        if (ring_id == ItemIds.TitaniumRing) {
+            assert values[values_index + 2] = Utils.Rings.TitaniumRing;
+        }
+        if (ring_id == ItemIds.GoldRing) {
+            assert values[values_index + 2] = Utils.Rings.GoldRing;
+        }
+
+        let ring_key = Utils.TraitKeys.Ring;
+        let value_key = Utils.TraitKeys.ValueKey;
+        let right_bracket = Utils.Symbols.RightBracket;
+        let inverted_commas = Utils.Symbols.InvertedCommas;
+        let comma = Utils.Symbols.Comma;
+
+        assert values[values_index] = ring_key;
+        assert values[values_index + 1] = value_key;
+        assert values[values_index + 3] = inverted_commas;
+        assert values[values_index + 4] = right_bracket;
+        assert values[values_index + 5] = comma;
+
+        return (values_index + 6,);
     }
 
     // @notice append ascii encoding of each number in felt
