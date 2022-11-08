@@ -133,7 +133,7 @@ func test_metadata{syscall_ptr: felt*, range_check_ptr}() {
             path = memory[ids.data+i]
             array.append(path.to_bytes(31, "big").decode())
         string_data = ''.join(array).replace('\x00', '')
-        print(string_data)
+        assert string_data == 'data:application/json,{"description":"Adventurer","name":"Test","image":"https://d23fdhqc1jb9no.cloudfront.net/Adventurer/1.webp","attributes":[{"trait_type":"Race","value":"Human"},{"trait_type":"Home Realm","value":""},{"trait_type":"Birthdate","value":"0"},{"trait_type":"Health","value":"100"},{"trait_type":"Level","value":"0"},{"trait_type":"Order","value":"Protection"},{"trait_type":"Strength","value":"0"},{"trait_type":"Dexterity","value":"0"},{"trait_type":"Vitality","value":"0"},{"trait_type":"Intelligence","value":"0"},{"trait_type":"Wisdom","value":"0"},{"trait_type":"Charisma","value":"0"},{"trait_type":"Luck","value":"0"},{"trait_type":"XP","value":"0"},]}'
     %}
 
     return ();
