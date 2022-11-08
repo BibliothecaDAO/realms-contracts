@@ -49,9 +49,7 @@ namespace Adventurer {
         address_of_controller: felt,
     ) {
     }
-    func mint(to: felt) {
-    }
-    func birth(id: Uint256, race: felt, home_realm: felt, name: felt, order: felt) {
+    func mint(to: felt, race: felt, home_realm: felt, name: felt, order: felt) {
     }
     func tokenURI(tokenId: Uint256) -> (tokenURI_len: felt, tokenURI: felt*) {
     }
@@ -126,8 +124,7 @@ func test_metadata{syscall_ptr: felt*, range_check_ptr}() {
         stop_prank = start_prank(ids.FAKE_OWNER_ADDR, ids.adventurer_address)
     %}
     let id = Uint256(1, 0);
-    Adventurer.mint(adventurer_address, FAKE_OWNER_ADDR);
-    Adventurer.birth(adventurer_address, id, 4, 10, 'Test', 8);
+    Adventurer.mint(adventurer_address, FAKE_OWNER_ADDR, 4, 10, 'Test', 8);
     let (data_len, data) = Adventurer.tokenURI(adventurer_address, id);
 
     %{

@@ -16,9 +16,12 @@ from openzeppelin.token.erc721.IERC721 import IERC721
 from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
 from openzeppelin.upgrades.library import Proxy
 
+from contracts.settling_game.library.library_module import Module
 from contracts.loot.adventurer.library import AdventurerLib
 from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
+
+from contracts.loot.metadata import Uri
 
 from contracts.loot.loot.ILoot import ILoot
 
@@ -60,7 +63,11 @@ func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     item_address_: felt,
     bag_address_: felt,
     lords_address_: felt,
+    address_of_controller: felt
 ) {
+    // set as module
+    Module.initializer(address_of_controller);
+
     ERC721.initializer(name, symbol);
     ERC721Enumerable.initializer();
     Proxy.initializer(proxy_admin);
@@ -166,11 +173,14 @@ func isApprovedForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 }
 
 @view
-func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, bitwise_ptr: BitwiseBuiltin*, range_check_ptr}(
     tokenId: Uint256
-) -> (tokenURI: felt) {
-    let (tokenURI: felt) = ERC721.token_uri(tokenId);
-    return (tokenURI,);
+) -> (tokenURI_len: felt, tokenURI: felt*) {
+    alloc_locals;
+    let (controller) = Module.controller_address();
+    let (adventurer_data: AdventurerState) = getAdventurerById(tokenId);
+    let (tokenURI_len, tokenURI: felt*) = Uri.build(tokenId, adventurer_data, controller);
+    return (tokenURI_len, tokenURI);
 }
 
 @view
@@ -219,15 +229,6 @@ func setApprovalForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 func burn{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(tokenId: Uint256) {
     ERC721.assert_only_token_owner(tokenId);
     ERC721Enumerable._burn(tokenId);
-    return ();
-}
-
-@external
-func setTokenURI{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    tokenId: Uint256, tokenURI: felt
-) {
-    Ownable.assert_only_owner();
-    ERC721._set_token_uri(tokenId, tokenURI);
     return ();
 }
 
