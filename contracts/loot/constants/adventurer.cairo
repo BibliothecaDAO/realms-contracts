@@ -159,38 +159,38 @@ namespace SHIFT_P_1 {
 
 namespace AdventurerSlotIds {
     // evolving stats
-    const Health = 1;  //
-    const Level = 2;  //
+    const Health = 0;  //
+    const Level = 1;  //
 
     // Physical
-    const Strength = 3;
-    const Dexterity = 4;
-    const Vitality = 5;
+    const Strength = 2;
+    const Dexterity = 3;
+    const Vitality = 4;
 
     // Mental
-    const Intelligence = 6;
-    const Wisdom = 7;
-    const Charisma = 8;
+    const Intelligence = 5;
+    const Wisdom = 6;
+    const Charisma = 7;
 
     // Meta Physical
-    const Luck = 9;
+    const Luck = 8;
 
     // XP
-    const XP = 10;  //
+    const XP = 9;  //
     // store item NFT id when equiped
     // Packed Stats p2
-    const WeaponId = 11;
-    const ChestId = 12;
-    const HeadId = 13;
-    const WaistId = 14;
+    const WeaponId = 10;
+    const ChestId = 11;
+    const HeadId = 12;
+    const WaistId = 13;
 
     // Packed Stats p3
-    const FeetId = 15;
-    const HandsId = 16;
-    const NeckId = 17;
-    const RingId = 18;
+    const FeetId = 14;
+    const HandsId = 15;
+    const NeckId = 16;
+    const RingId = 17;
 }
 
 // index for items - used in cast function to set values
-const ItemShift = AdventurerSlotIds.WeaponId - 2;
+const ItemShift = AdventurerSlotIds.WeaponId - 1;
 const StatisticShift = AdventurerSlotIds.Strength - 1;
