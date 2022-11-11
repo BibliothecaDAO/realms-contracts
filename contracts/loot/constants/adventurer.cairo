@@ -53,6 +53,50 @@ struct Adventurer {
 // @notice This is immutable information stored on-chain
 // We pack all this information tightly into felts
 //    to save on storage costs.
+
+// immutable stats
+struct AdventurerStatic {
+    Race: felt,
+    HomeRealm: felt,
+    Birthdate: felt,
+    Name: felt,
+    Order: felt,
+}
+
+// evolving stats
+struct AdventurerDynamic {
+    Health: felt,
+    Level: felt,
+
+    // Physical
+    Strength: felt,
+    Dexterity: felt,
+    Vitality: felt,
+
+    // Mental
+    Intelligence: felt,
+    Wisdom: felt,
+    Charisma: felt,
+
+    // Meta Physical
+    Luck: felt,
+
+    // XP
+    XP: felt,
+    // store item NFT id when equiped
+    // Packed Stats p2
+    WeaponId: felt,
+    ChestId: felt,
+    HeadId: felt,
+    WaistId: felt,
+
+    // Packed Stats p3
+    FeetId: felt,
+    HandsId: felt,
+    NeckId: felt,
+    RingId: felt,
+}
+
 struct AdventurerState {
     // immutable stats
     Race: felt,  // 3
@@ -98,73 +142,55 @@ struct PackedAdventurerState {
     p1: felt,
     p2: felt,
     p3: felt,
-    p4: felt,
 }
 
 namespace SHIFT_P_1 {
     const _1 = 2 ** 0;
-    const _2 = 2 ** 3;
-    const _3 = 2 ** 16;
-    const _4 = 2 ** 65;
-}
-
-namespace SHIFT_P_2 {
-    const _1 = 2 ** 0;
     const _2 = 2 ** 13;
     const _3 = 2 ** 22;
-    const _4 = 2 ** 27;
-    const _5 = 2 ** 37;
-    const _6 = 2 ** 47;
-    const _7 = 2 ** 57;
-    const _8 = 2 ** 67;
-    const _9 = 2 ** 77;
-    const _10 = 2 ** 87;
-    const _11 = 2 ** 97;
-    const _12 = 2 ** 107;
-    const _13 = 2 ** 117;
+    const _4 = 2 ** 32;
+    const _5 = 2 ** 42;
+    const _6 = 2 ** 52;
+    const _7 = 2 ** 62;
+    const _8 = 2 ** 72;
+    const _9 = 2 ** 82;
+    const _10 = 2 ** 92;
 }
 
 namespace AdventurerSlotIds {
-    // immutable stats
-    const Race = 0;  // 3
-    const HomeRealm = 1;  // 13
-    const Birthdate = 2;
-    const Name = 3;
-
     // evolving stats
-    const Health = 4;  //
-    const Level = 5;  //
-    const Order = 6;  //
+    const Health = 1;  //
+    const Level = 2;  //
 
     // Physical
-    const Strength = 7;
-    const Dexterity = 8;
-    const Vitality = 9;
+    const Strength = 3;
+    const Dexterity = 4;
+    const Vitality = 5;
 
     // Mental
-    const Intelligence = 10;
-    const Wisdom = 11;
-    const Charisma = 12;
+    const Intelligence = 6;
+    const Wisdom = 7;
+    const Charisma = 8;
 
     // Meta Physical
-    const Luck = 13;
+    const Luck = 9;
 
     // XP
-    const XP = 14;  //
+    const XP = 10;  //
     // store item NFT id when equiped
     // Packed Stats p2
-    const WeaponId = 15;
-    const ChestId = 16;
-    const HeadId = 17;
-    const WaistId = 18;
+    const WeaponId = 11;
+    const ChestId = 12;
+    const HeadId = 13;
+    const WaistId = 14;
 
     // Packed Stats p3
-    const FeetId = 19;
-    const HandsId = 20;
-    const NeckId = 21;
-    const RingId = 22;
+    const FeetId = 15;
+    const HandsId = 16;
+    const NeckId = 17;
+    const RingId = 18;
 }
 
 // index for items - used in cast function to set values
-const ItemShift = AdventurerSlotIds.WeaponId - 1;
+const ItemShift = AdventurerSlotIds.WeaponId - 2;
 const StatisticShift = AdventurerSlotIds.Strength - 1;

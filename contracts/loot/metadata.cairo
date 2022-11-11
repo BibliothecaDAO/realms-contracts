@@ -14,9 +14,10 @@ from starkware.cairo.common.uint256 import Uint256, uint256_unsigned_div_rem
 from starkware.cairo.common.math import unsigned_div_rem
 
 from contracts.loot.constants.adventurer import AdventurerState
-from contracts.loot.constants.item import ItemIds
+from contracts.loot.constants.item import Item, ItemIds
 from contracts.settling_game.utils.game_structs import ExternalContractIds
 
+from contracts.loot.loot.ILoot import ILoot
 from contracts.settling_game.interfaces.IRealms import IRealms
 from contracts.settling_game.interfaces.Imodules import IModuleController
 
@@ -225,12 +226,37 @@ namespace Uri {
     // @param adventurer_id: id of the adventurer
     // @param adventurer_data: unpacked data for adventurer
     func build{syscall_ptr: felt*, range_check_ptr}(
-        adventurer_id: Uint256, adventurer_data: AdventurerState, controller: felt
+        adventurer_id: Uint256, adventurer_data: AdventurerState, controller: felt, item_address: felt
     ) -> (encoded_len: felt, encoded: felt*) {
         alloc_locals;
 
         let (realms_address) = IModuleController.get_external_contract_address(
             controller, ExternalContractIds.Realms
+        );
+
+        let (weapon_item: Item) = ILoot.getItemByTokenId(
+            item_address, Uint256(adventurer_data.WeaponId, 0)
+        );
+        let (chest_item: Item) = ILoot.getItemByTokenId(
+            item_address, Uint256(adventurer_data.ChestId, 0)
+        );
+        let (head_item: Item) = ILoot.getItemByTokenId(
+            item_address, Uint256(adventurer_data.HeadId, 0)
+        );
+        let (waist_item: Item) = ILoot.getItemByTokenId(
+            item_address, Uint256(adventurer_data.WaistId, 0)
+        );
+        let (feet_item: Item) = ILoot.getItemByTokenId(
+            item_address, Uint256(adventurer_data.FeetId, 0)
+        );
+        let (hands_item: Item) = ILoot.getItemByTokenId(
+            item_address, Uint256(adventurer_data.HandsId, 0)
+        );
+        let (neck_item: Item) = ILoot.getItemByTokenId(
+            item_address, Uint256(adventurer_data.NeckId, 0)
+        );
+        let (ring_item: Item) = ILoot.getItemByTokenId(
+            item_address, Uint256(adventurer_data.RingId, 0)
         );
 
         // pre-defined for reusability
@@ -410,14 +436,14 @@ namespace Uri {
         assert values[xp_index + 1] = right_bracket;
         assert values[xp_index + 2] = comma;
 
-        let (weapon_index) = append_weapon(adventurer_data.WeaponId, xp_index + 3, values);
-        let (chest_index) = append_chest_item(adventurer_data.ChestId, weapon_index, values);
-        let (head_index) = append_head_item(adventurer_data.HeadId, chest_index, values);
-        let (waist_index) = append_waist_item(adventurer_data.WaistId, head_index, values);
-        let (foot_index) = append_foot_item(adventurer_data.FeetId, waist_index, values);
-        let (hand_index) = append_hand_item(adventurer_data.HandsId, foot_index, values);
-        let (neck_index) = append_neck_item(adventurer_data.NeckId, hand_index, values);
-        let (ring_index) = append_ring_item(adventurer_data.RingId, neck_index, values);
+        let (weapon_index) = append_weapon(weapon_item.Id, xp_index + 3, values);
+        let (chest_index) = append_chest_item(chest_item.Id, weapon_index, values);
+        let (head_index) = append_head_item(head_item.Id, chest_index, values);
+        let (waist_index) = append_waist_item(waist_item.Id, head_index, values);
+        let (foot_index) = append_foot_item(feet_item.Id, waist_index, values);
+        let (hand_index) = append_hand_item(hands_item.Id, foot_index, values);
+        let (neck_index) = append_neck_item(neck_item.Id, hand_index, values);
+        let (ring_index) = append_ring_item(ring_item.Id, neck_index, values);
 
         assert values[ring_index] = right_square_bracket;
         assert values[ring_index + 1] = right_bracket;

@@ -263,11 +263,11 @@ func getItemByTokenId{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     let (Prefix_1) = ItemStats.item_name_prefix(1);  // stored state
     let (Prefix_2) = ItemStats.item_name_suffix(1);  // stored state
     let (Suffix) = ItemStats.item_suffix(1);  // stored state
-    let Greatness = 0;  // stored state
+    let Greatness = storedItem.Greatness;  // stored state
     let CreatedBlock = storedItem.CreatedBlock;  // timestamp
-    let XP = 0;  // stored state
-    let Adventurer = 0;
-    let Bag = 0;
+    let XP = storedItem.XP;  // stored state
+    let Adventurer = storedItem.Adventurer;
+    let Bag = storedItem.Bag;
 
     return (
         Item(

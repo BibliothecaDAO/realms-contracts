@@ -1,7 +1,13 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState
+from contracts.loot.constants.adventurer import (
+    Adventurer, 
+    AdventurerStatic, 
+    AdventurerDynamic, 
+    AdventurerState, 
+    PackedAdventurerState
+)
 from contracts.loot.constants.item import Item, ItemIds, ItemType, ItemSlot, ItemMaterial, State
 from contracts.loot.constants.rankings import ItemRank
 
@@ -50,36 +56,38 @@ namespace TestAdventurerState {
 }
 
 func get_adventurer_state{syscall_ptr: felt*, range_check_ptr}() -> (
-    adventurer_state: AdventurerState
+    adventurer_static: AdventurerStatic, adventurer_dynamic: AdventurerDynamic
 ) {
     alloc_locals;
 
     return (
-        AdventurerState(
-        TestAdventurerState.Race,
-        TestAdventurerState.HomeRealm,
-        TestAdventurerState.Birthdate,
-        TestAdventurerState.Name,
-        TestAdventurerState.Health,
-        TestAdventurerState.Level,
-        TestAdventurerState.Order,
-        TestAdventurerState.Strength,
-        TestAdventurerState.Dexterity,
-        TestAdventurerState.Vitality,
-        TestAdventurerState.Intelligence,
-        TestAdventurerState.Wisdom,
-        TestAdventurerState.Charisma,
-        TestAdventurerState.Luck,
-        TestAdventurerState.XP,
-        TestAdventurerState.WeaponId,
-        TestAdventurerState.ChestId,
-        TestAdventurerState.HeadId,
-        TestAdventurerState.WaistId,
-        TestAdventurerState.FeetId,
-        TestAdventurerState.HandsId,
-        TestAdventurerState.NeckId,
-        TestAdventurerState.RingId,
+        AdventurerStatic(
+            TestAdventurerState.Race,
+            TestAdventurerState.HomeRealm,
+            TestAdventurerState.Birthdate,
+            TestAdventurerState.Name,
+            TestAdventurerState.Order,
         ),
+        AdventurerDynamic(
+            TestAdventurerState.Health,
+            TestAdventurerState.Level,
+            TestAdventurerState.Strength,
+            TestAdventurerState.Dexterity,
+            TestAdventurerState.Vitality,
+            TestAdventurerState.Intelligence,
+            TestAdventurerState.Wisdom,
+            TestAdventurerState.Charisma,
+            TestAdventurerState.Luck,
+            TestAdventurerState.XP,
+            TestAdventurerState.WeaponId,
+            TestAdventurerState.ChestId,
+            TestAdventurerState.HeadId,
+            TestAdventurerState.WaistId,
+            TestAdventurerState.FeetId,
+            TestAdventurerState.HandsId,
+            TestAdventurerState.NeckId,
+            TestAdventurerState.RingId,
+        )
     );
 }
 

@@ -9,7 +9,7 @@ from contracts.loot.constants.item import ItemIds, ItemSlot, ItemType, ItemMater
 from contracts.loot.constants.rankings import ItemRank
 from contracts.loot.loot.stats.item import ItemStats
 from contracts.loot.constants.physics import MaterialDensity
-from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState
+from contracts.loot.constants.adventurer import Adventurer, AdventurerStatic, AdventurerDynamic, AdventurerState, PackedAdventurerState
 from contracts.loot.adventurer.library import AdventurerLib
 
 from tests.protostar.loot.test_structs import (
@@ -25,7 +25,10 @@ func test_birth{
 }() {
     alloc_locals;
 
-    let (adventurer: AdventurerState) = AdventurerLib.birth(
+    let (
+        adventurer_static: AdventurerStatic, 
+        adventurer_dynamic: AdventurerDynamic
+    ) = AdventurerLib.birth(
         TestAdventurerState.Race,
         TestAdventurerState.HomeRealm,
         TestAdventurerState.Name,
@@ -33,15 +36,11 @@ func test_birth{
         TestAdventurerState.Order,
     );
 
-    let (adventurer_state: PackedAdventurerState) = AdventurerLib.pack(adventurer);
-
-    let (adventurer: AdventurerState) = AdventurerLib.unpack(adventurer_state);
-
-    assert TestAdventurerState.Race = adventurer.Race;
-    assert TestAdventurerState.HomeRealm = adventurer.HomeRealm;
-    assert TestAdventurerState.Name = adventurer.Name;
-    assert TestAdventurerState.Birthdate = adventurer.Birthdate;
-    assert TestAdventurerState.Order = adventurer.Order;
+    assert TestAdventurerState.Race = adventurer_static.Race;
+    assert TestAdventurerState.HomeRealm = adventurer_static.HomeRealm;
+    assert TestAdventurerState.Name = adventurer_static.Name;
+    assert TestAdventurerState.Birthdate = adventurer_static.Birthdate;
+    assert TestAdventurerState.Order = adventurer_static.Order;
 
     return ();
 }
@@ -52,50 +51,51 @@ func test_pack{
 }() {
     alloc_locals;
 
-    let (state) = get_adventurer_state();
+    let (
+        adventurer_static: AdventurerStatic, 
+        adventurer_dynamic: AdventurerDynamic
+    ) = get_adventurer_state();
 
-    let (adventurer_state: PackedAdventurerState) = AdventurerLib.pack(state);
+    let (packed_adventurer: PackedAdventurerState) = AdventurerLib.pack(adventurer_dynamic);
 
-    let (adventurer: AdventurerState) = AdventurerLib.unpack(adventurer_state);
+    let (unpacked_adventurer: AdventurerDynamic) = AdventurerLib.unpack(packed_adventurer);
 
-    assert TestAdventurerState.Race = adventurer.Race;  // 3
-    assert TestAdventurerState.HomeRealm = adventurer.HomeRealm;  // 13
-    assert TestAdventurerState.Birthdate = adventurer.Birthdate;
-    assert TestAdventurerState.Name = adventurer.Name;
+    assert TestAdventurerState.Race = adventurer_static.Race;  // 3
+    assert TestAdventurerState.HomeRealm = adventurer_static.HomeRealm;  // 13
+    assert TestAdventurerState.Birthdate = adventurer_static.Birthdate;
+    assert TestAdventurerState.Name = adventurer_static.Name;
+    assert TestAdventurerState.Order = adventurer_static.Order;  //
 
     // evolving stats
-    assert TestAdventurerState.Health = adventurer.Health;  //
-
-    assert TestAdventurerState.Level = adventurer.Level;  //
-    assert TestAdventurerState.Order = adventurer.Order;  //
+    assert TestAdventurerState.Health = unpacked_adventurer.Health;  //
+    assert TestAdventurerState.Level = unpacked_adventurer.Level;  //
 
     // Physical
-    assert TestAdventurerState.Strength = adventurer.Strength;
-    assert TestAdventurerState.Dexterity = adventurer.Dexterity;
-    assert TestAdventurerState.Vitality = adventurer.Vitality;
+    assert TestAdventurerState.Strength = unpacked_adventurer.Strength;
+    assert TestAdventurerState.Dexterity = unpacked_adventurer.Dexterity;
+    assert TestAdventurerState.Vitality = unpacked_adventurer.Vitality;
 
     // Mental
-    assert TestAdventurerState.Intelligence = adventurer.Intelligence;
-    assert TestAdventurerState.Wisdom = adventurer.Wisdom;
-    assert TestAdventurerState.Charisma = adventurer.Charisma;
+    assert TestAdventurerState.Intelligence = unpacked_adventurer.Intelligence;
+    assert TestAdventurerState.Wisdom = unpacked_adventurer.Wisdom;
+    assert TestAdventurerState.Charisma = unpacked_adventurer.Charisma;
 
     // Meta Physical
-    assert TestAdventurerState.Luck = adventurer.Luck;
-
-    assert TestAdventurerState.XP = adventurer.XP;  //
+    assert TestAdventurerState.Luck = unpacked_adventurer.Luck;
+    assert TestAdventurerState.XP = unpacked_adventurer.XP;  //
 
     // store item NFT id when equiped
     // Packed Stats p2
-    assert TestAdventurerState.NeckId = adventurer.NeckId;
-    assert TestAdventurerState.WeaponId = adventurer.WeaponId;
-    assert TestAdventurerState.RingId = adventurer.RingId;
-    assert TestAdventurerState.ChestId = adventurer.ChestId;
+    assert TestAdventurerState.NeckId = unpacked_adventurer.NeckId;
+    assert TestAdventurerState.WeaponId = unpacked_adventurer.WeaponId;
+    assert TestAdventurerState.RingId = unpacked_adventurer.RingId;
+    assert TestAdventurerState.ChestId = unpacked_adventurer.ChestId;
 
     // Packed Stats p3
-    assert TestAdventurerState.HeadId = adventurer.HeadId;
-    assert TestAdventurerState.WaistId = adventurer.WaistId;
-    assert TestAdventurerState.FeetId = adventurer.FeetId;
-    assert TestAdventurerState.HandsId = adventurer.HandsId;
+    assert TestAdventurerState.HeadId = unpacked_adventurer.HeadId;
+    assert TestAdventurerState.WaistId = unpacked_adventurer.WaistId;
+    assert TestAdventurerState.FeetId = unpacked_adventurer.FeetId;
+    assert TestAdventurerState.HandsId = unpacked_adventurer.HandsId;
 
     return ();
 }
@@ -106,15 +106,18 @@ func test_cast{
 }() {
     alloc_locals;
 
-    let (state) = get_adventurer_state();
+    let (
+        adventurer_static: AdventurerStatic, 
+        adventurer_dynamic: AdventurerDynamic
+    ) = get_adventurer_state();
 
-    let (adventurer_state: PackedAdventurerState) = AdventurerLib.pack(state);
+    let (packed_adventurer: PackedAdventurerState) = AdventurerLib.pack(adventurer_dynamic);
 
-    let (adventurer: AdventurerState) = AdventurerLib.unpack(adventurer_state);
+    let (unpacked_adventurer: AdventurerDynamic) = AdventurerLib.unpack(packed_adventurer);
 
-    let (c) = AdventurerLib.cast_state(0, 3, adventurer);
+    let (c) = AdventurerLib.cast_dynamic(0, 3, unpacked_adventurer);
 
-    %{ print('Race', ids.c.Race) %}
+    %{ print('Level', ids.c.Level) %}
 
     return ();
 }
@@ -125,15 +128,18 @@ func test_equip{
 }() {
     alloc_locals;
 
-    let (state) = get_adventurer_state();
+    let (
+        adventurer_static: AdventurerStatic, 
+        adventurer_dynamic: AdventurerDynamic
+    ) = get_adventurer_state();
 
     let (item) = get_item();
 
-    let (adventurer_state: PackedAdventurerState) = AdventurerLib.pack(state);
+    let (packed_adventurer: PackedAdventurerState) = AdventurerLib.pack(adventurer_dynamic);
 
-    let (adventurer: AdventurerState) = AdventurerLib.unpack(adventurer_state);
+    let (unpacked_adventurer: AdventurerDynamic) = AdventurerLib.unpack(packed_adventurer);
 
-    let (c) = AdventurerLib.equip_item(TEST_WEAPON_TOKEN_ID, item, adventurer);
+    let (c) = AdventurerLib.equip_item(TEST_WEAPON_TOKEN_ID, item, unpacked_adventurer);
 
     assert c.WeaponId = TEST_WEAPON_TOKEN_ID;
 

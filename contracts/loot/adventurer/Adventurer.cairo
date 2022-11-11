@@ -18,7 +18,13 @@ from openzeppelin.upgrades.library import Proxy
 
 from contracts.settling_game.library.library_module import Module
 from contracts.loot.adventurer.library import AdventurerLib
-from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState
+from contracts.loot.constants.adventurer import (
+    Adventurer, 
+    AdventurerStatic, 
+    AdventurerDynamic, 
+    AdventurerState, 
+    PackedAdventurerState
+)
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 
 from contracts.loot.metadata import Uri
@@ -178,8 +184,16 @@ func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, bitwise_ptr: Bitwi
 ) -> (tokenURI_len: felt, tokenURI: felt*) {
     alloc_locals;
     let (controller) = Module.controller_address();
-    let (adventurer_data: AdventurerState) = getAdventurerById(tokenId);
-    let (tokenURI_len, tokenURI: felt*) = Uri.build(tokenId, adventurer_data, controller);
+    let (item_address_) = item_address.read();
+    let (
+        adventurer_static: AdventurerStatic, 
+        adventurer_dynamic: AdventurerDynamic
+    ) = getAdventurerById(tokenId);
+    let (adventurer_data: AdventurerState) = AdventurerLib.cast_state(
+        adventurer_static, 
+        adventurer_dynamic
+    );
+    let (tokenURI_len, tokenURI: felt*) = Uri.build(tokenId, adventurer_data, controller, item_address_);
     return (tokenURI_len, tokenURI);
 }
 
@@ -249,7 +263,11 @@ func renounceOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 // ------------ADVENTURERS
 
 @storage_var
-func adventurer(tokenId: Uint256) -> (adventurer: PackedAdventurerState) {
+func adventurer_static(tokenId: Uint256) -> (adventurer_static: AdventurerStatic) {
+}
+
+@storage_var
+func adventurer_dynamic(tokenId: Uint256) -> (adventurer_dynamic: PackedAdventurerState) {
 }
 
 @external
@@ -260,19 +278,23 @@ func mint{
 
     // birth
     let (birth_time) = get_block_timestamp();
-    let (new_adventurer: AdventurerState) = AdventurerLib.birth(
+    let (
+        adventurer_static_: AdventurerStatic, 
+        adventurer_dynamic_: AdventurerDynamic
+    ) = AdventurerLib.birth(
         race, home_realm, name, birth_time, order
     );
 
     // pack
-    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
+    let (packed_adventurer: PackedAdventurerState) = AdventurerLib.pack(adventurer_dynamic_);
 
     // get current ID and add 1
     let (current_id: Uint256) = totalSupply();
     let (next_adventurer_id, _) = uint256_add(current_id, Uint256(1, 0));
 
     // store
-    adventurer.write(next_adventurer_id, packed_new_adventurer);
+    adventurer_static.write(next_adventurer_id, adventurer_static_);
+    adventurer_dynamic.write(next_adventurer_id, packed_adventurer);
 
     ERC721Enumerable._mint(to, next_adventurer_id);
 
@@ -326,15 +348,17 @@ func get_loot{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}()
 @external
 func getAdventurerById{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(tokenId: Uint256) -> (adventurer: AdventurerState) {
+}(tokenId: Uint256) -> (adventurer_static: AdventurerStatic, adventurer_dynamic: AdventurerDynamic) {
     alloc_locals;
 
-    let (packed_adventurer) = adventurer.read(tokenId);
+    let (adventurer_static_: AdventurerStatic) = adventurer_static.read(tokenId);
+    let (packed_adventurer) = adventurer_dynamic.read(tokenId);
 
     // unpack
-    let (unpacked_adventurer: AdventurerState) = AdventurerLib.unpack(packed_adventurer);
+    let (unpacked_dynamic: AdventurerDynamic) = AdventurerLib.unpack(packed_adventurer);
 
-    return (unpacked_adventurer,);
+    return (adventurer_static_, unpacked_dynamic);
+
 }
 
 @external
@@ -347,7 +371,7 @@ func equipItem{
     ERC721.assert_only_token_owner(tokenId);
 
     // unpack adventurer
-    let (unpacked_adventurer) = getAdventurerById(tokenId);
+    let (_, unpacked_adventurer: AdventurerDynamic) = getAdventurerById(tokenId);
 
     // Get Item from Loot contract
     let (loot_address) = get_loot();
@@ -365,11 +389,11 @@ func equipItem{
     let (token_to_felt) = _uint_to_felt(itemTokenId);
 
     // Equip Item
-    let (equiped_adventurer) = AdventurerLib.equip_item(token_to_felt, item, unpacked_adventurer);
+    let (equiped_adventurer: AdventurerDynamic) = AdventurerLib.equip_item(token_to_felt, item, unpacked_adventurer);
 
     // TODO: Move to function that emits adventurers state
     let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(equiped_adventurer);
-    adventurer.write(tokenId, packed_new_adventurer);
+    adventurer_dynamic.write(tokenId, packed_new_adventurer);
 
     let (adventurer_to_felt) = _uint_to_felt(tokenId);
 
