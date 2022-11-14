@@ -510,13 +510,13 @@ namespace Type {
     }
 
     const ring = 300;
-    const neckalce = 400;
+    const necklace = 400;
 }
 
 namespace ItemType {
-    const Pendant = Type.neckalce;
-    const Necklace = Type.neckalce;
-    const Amulet = Type.neckalce;
+    const Pendant = Type.necklace;
+    const Necklace = Type.necklace;
+    const Amulet = Type.necklace;
     const SilverRing = Type.ring;
     const BronzeRing = Type.ring;
     const PlatinumRing = Type.ring;

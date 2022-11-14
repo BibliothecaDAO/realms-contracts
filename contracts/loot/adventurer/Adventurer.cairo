@@ -27,7 +27,7 @@ from contracts.loot.constants.adventurer import (
 )
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 
-from contracts.loot.metadata import Uri
+from contracts.loot.adventurer.metadata import Uri
 
 from contracts.loot.loot.ILoot import ILoot
 

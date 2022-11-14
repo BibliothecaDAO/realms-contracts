@@ -43,6 +43,8 @@ namespace Loot {
     }
     func getItemByTokenId(tokenId: Uint256) -> (item: Item) {
     }
+    func tokenURI(tokenId: Uint256) -> (tokenURI_len: felt, tokenURI: felt*) {
+    }
 }
 
 @contract_interface
@@ -134,33 +136,25 @@ func __setup__{syscall_ptr: felt*, range_check_ptr}() {
     Adventurer.initializer(
         adventurer_address, 1, 1, FAKE_OWNER_ADDR, 1, loot_address, 1, lords_address, controller_address
     );
-    Loot.initializer(loot_address, 1, 1, FAKE_OWNER_ADDR, 1, 1);
+    Controller.set_address_for_external_contract(
+        controller_address, ExternalContractIds.Adventurer, adventurer_address
+    );    
+    Loot.initializer(loot_address, 1, 1, FAKE_OWNER_ADDR, 1, controller_address);
+    Controller.set_address_for_external_contract(
+        controller_address, ExternalContractIds.Loot, loot_address
+    );
     Lords.initializer(lords_address, 1, 1, 18, Uint256(1000, 0), FAKE_OWNER_ADDR, FAKE_OWNER_ADDR);
 
     // Store item ids and equip to adventurer
 
     let (timestamp) = get_block_timestamp();
 
-    let weapon_id: Item = Item(ItemIds.Wand, 0, 0, 0, 0, 0, 0, 0, 0, timestamp, 0, 0, 0); // Wand
-    let chest_id: Item = Item(ItemIds.DivineRobe, 0, 0, 0, 0, 0, 0, 0, 0, timestamp, 0, 0, 0); // Divine Robe
-    let head_id: Item = Item(ItemIds.LinenHood, 0, 0, 0, 0, 0, 0, 0, 0, timestamp, 0, 0, 0); // Linen Hood
-    let waist_id: Item = Item(ItemIds.SilkSash, 0, 0, 0, 0, 0, 0, 0, 0, timestamp, 0, 0, 0); // SilkSash
-    let feet_id: Item = Item(ItemIds.DivineSlippers, 0, 0, 0, 0, 0, 0, 0, 0, timestamp, 0, 0, 0); // Divine Slippers
-    let hands_id: Item = Item(ItemIds.WoolGloves, 0, 0, 0, 0, 0, 0, 0, 0, timestamp, 0, 0, 0); // Wool Gloves
-    let neck_id: Item = Item(ItemIds.Amulet, 0, 0, 0, 0, 0, 0, 0, 0, timestamp, 0, 0, 0); // Amulet
-    let ring_id: Item = Item(ItemIds.PlatinumRing, 0, 0, 0, 0, 0, 0, 0, 0, timestamp, 0, 0, 0); // Platinum Ring
+    let weapon_id: Item = Item(ItemIds.Wand, 0, 0, 0, 0, 0, 0, 0, 40, timestamp, 100, 0, 0); // Wand
 
     %{
         stop_mock = mock_call(1, 'next', [1])
     %}
-    // Mint 8 tokens
-    Loot.mint(loot_address, FAKE_OWNER_ADDR);
-    Loot.mint(loot_address, FAKE_OWNER_ADDR);
-    Loot.mint(loot_address, FAKE_OWNER_ADDR);
-    Loot.mint(loot_address, FAKE_OWNER_ADDR);
-    Loot.mint(loot_address, FAKE_OWNER_ADDR);
-    Loot.mint(loot_address, FAKE_OWNER_ADDR);
-    Loot.mint(loot_address, FAKE_OWNER_ADDR);
+    // Mint a token
     Loot.mint(loot_address, FAKE_OWNER_ADDR);
     %{
         stop_mock()
@@ -168,25 +162,11 @@ func __setup__{syscall_ptr: felt*, range_check_ptr}() {
 
     // Set tokens to ids above for testing
     Loot.setItemById(loot_address, Uint256(0,0), weapon_id);
-    Loot.setItemById(loot_address, Uint256(1,0), chest_id);
-    Loot.setItemById(loot_address, Uint256(2,0), head_id);
-    Loot.setItemById(loot_address, Uint256(3,0), waist_id);
-    Loot.setItemById(loot_address, Uint256(4,0), feet_id);
-    Loot.setItemById(loot_address, Uint256(5,0), hands_id);
-    Loot.setItemById(loot_address, Uint256(6,0), neck_id);
-    Loot.setItemById(loot_address, Uint256(7,0), ring_id);
 
     // Mint adventurer with random params
     Adventurer.mint(adventurer_address, FAKE_OWNER_ADDR, 4, 10, 'Test', 8);
 
     Adventurer.equipItem(adventurer_address, Uint256(1,0), Uint256(0,0));
-    Adventurer.equipItem(adventurer_address, Uint256(1,0), Uint256(1,0));
-    Adventurer.equipItem(adventurer_address, Uint256(1,0), Uint256(2,0));
-    Adventurer.equipItem(adventurer_address, Uint256(1,0), Uint256(3,0));
-    Adventurer.equipItem(adventurer_address, Uint256(1,0), Uint256(4,0));
-    Adventurer.equipItem(adventurer_address, Uint256(1,0), Uint256(5,0));
-    Adventurer.equipItem(adventurer_address, Uint256(1,0), Uint256(6,0));
-    Adventurer.equipItem(adventurer_address, Uint256(1,0), Uint256(7,0));
 
     %{
         stop_prank_realms()
@@ -195,28 +175,6 @@ func __setup__{syscall_ptr: felt*, range_check_ptr}() {
         stop_prank_loot()
         stop_prank_lords()
     %}
-    return ();
-}
-
-@external
-func test_get_item{syscall_ptr: felt*, range_check_ptr}() {
-    alloc_locals;
-
-    local adventurer_address;
-    local realms_address;
-    local loot_address;
-
-    %{
-        ids.adventurer_address = context.adventurer_address
-        ids.realms_address = context.realms_address
-        ids.loot_address = context.loot_address
-        stop_prank = start_prank(ids.FAKE_OWNER_ADDR, ids.adventurer_address)
-    %}
-    let id = Uint256(1, 0);
-    let (local item: Item) = Loot.getItemByTokenId(loot_address, Uint256(7,0));
-
-    assert item.Id = ItemIds.PlatinumRing;
-
     return ();
 }
 
@@ -234,8 +192,7 @@ func test_metadata{syscall_ptr: felt*, range_check_ptr}() {
         ids.loot_address = context.loot_address
         stop_prank = start_prank(ids.FAKE_OWNER_ADDR, ids.adventurer_address)
     %}
-    let id = Uint256(1, 0);
-    let (data_len, data) = Adventurer.tokenURI(adventurer_address, id);
+    let (data_len, data) = Loot.tokenURI(loot_address, Uint256(0,0));
 
     %{
         array = []
@@ -243,7 +200,7 @@ func test_metadata{syscall_ptr: felt*, range_check_ptr}() {
             path = memory[ids.data+i]
             array.append(path.to_bytes(31, "big").decode())
         string_data = ''.join(array).replace('\x00', '')
-        assert string_data == 'data:application/json,{"description":"Adventurer","name":"Test","image":"https://d23fdhqc1jb9no.cloudfront.net/Adventurer/1.webp","attributes":[{"trait_type":"Race","value":"Human"},{"trait_type":"Home Realm","value":""},{"trait_type":"Birthdate","value":"0"},{"trait_type":"Health","value":"100"},{"trait_type":"Level","value":"0"},{"trait_type":"Order","value":"Protection"},{"trait_type":"Strength","value":"0"},{"trait_type":"Dexterity","value":"0"},{"trait_type":"Vitality","value":"0"},{"trait_type":"Intelligence","value":"0"},{"trait_type":"Wisdom","value":"0"},{"trait_type":"Charisma","value":"0"},{"trait_type":"Luck","value":"0"},{"trait_type":"XP","value":"0"},{"trait_type":"Weapon","value":"Wand"},{"trait_type":"Chest","value":"Divine Robe"},{"trait_type":"Head","value":"Linen Hood"},{"trait_type":"Waist","value":"Silk Sash"},{"trait_type":"Feet","value":"Divine Slippers"},{"trait_type":"Hand","value":"Wool Gloves"},{"trait_type":"Neck","value":"Amulet"},{"trait_type":"Ring","value":"Platinum Ring"},]}'
+        assert string_data == 'data:application/json,{"description":"Loot","name":"Agony Bane Wand Of Power","image":"https://d23fdhqc1jb9no.cloudfront.net/Item/12.webp","attributes":[{"trait_type":"Slot","value":"Weapon"},{"trait_type":"Type","value":"Magic Weapon"},{"trait_type":"Material","value":"Oak Hard Wood"},{"trait_type":"Rank","value":"4"},{"trait_type":"Greatness","value":"40"},{"trait_type":"Created Block","value":"0"},{"trait_type":"XP","value":"100"},{"trait_type":"Adventurer","value":"Test"},{"trait_type":"Bag","value":"0"},]}'
     %}
 
     return ();

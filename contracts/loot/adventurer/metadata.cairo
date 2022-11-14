@@ -1,7 +1,7 @@
 // amarna: disable=arithmetic-add,arithmetic-div,arithmetic-mul,arithmetic-sub
 // -----------------------------------
-//   module.Uri Library
-//   Builds a JSON array which to represent Realm metadata
+//   loot.adventurer.Uri Library
+//   Builds a JSON array which to represent Adventurer metadata
 //
 // MIT License
 // -----------------------------------
