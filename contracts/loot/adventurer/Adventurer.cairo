@@ -27,7 +27,7 @@ from openzeppelin.upgrades.library import Proxy
 
 from contracts.settling_game.library.library_module import Module
 from contracts.loot.adventurer.library import AdventurerLib
-from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState
+from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState, AdventurerMode
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.interfaces.imodules import IModuleController
 
@@ -214,7 +214,7 @@ func deductHealth{
     let (unpacked_adventurer) = getAdventurerById(tokenId);
 
     // deduct health
-    let (equiped_adventurer) = AdventurerLib.adjust_health(amount, unpacked_adventurer);
+    let (equiped_adventurer) = AdventurerLib.deduct_health(amount, unpacked_adventurer);
 
     // TODO: Move to function that emits adventurers state
     let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(equiped_adventurer);

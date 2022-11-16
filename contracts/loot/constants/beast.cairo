@@ -1,6 +1,6 @@
 // -----------------------------------
-//   CryptRun.BeastConstants
-//   CryptRun
+//   Loot.BeastConstants
+//   Loot
 //
 // MIT License
 // -----------------------------------
@@ -9,10 +9,12 @@
 
 from starkware.cairo.common.registers import get_label_location
 from contracts.loot.constants.item import Type
+from starkware.cairo.common.cairo_builtins import HashBuiltin
 
 // Structure for the adventurer Beast primitive
 struct Beast {
     Id: felt,  // item id 1 - 100
+    Health: felt, // health of the beast
     Type: felt,  // same as Loot weapons: magic, bludgeon, blade
     Rank: felt,  // same as Loot weapons: 1 is the strongest
     Prefix_1: felt,  // First part of the name prefix (i.e Tear)

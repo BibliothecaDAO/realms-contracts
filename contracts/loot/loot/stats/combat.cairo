@@ -165,6 +165,21 @@ namespace CombatStats {
         return (damage_dealt,);
     }
 
+        // Calculates damage dealt from a beast by converting beast into a Loot weapon and calling calculate_damage_from_weapon
+    func calculate_damage_to_beast{syscall_ptr: felt*, range_check_ptr}(
+        beast: Beast, weapon: Item
+    ) -> (damage: felt) {
+        alloc_locals;
+
+        // pass details of attack and armor to core damage calculation function
+        let (damage_dealt) = calculate_damage(
+            weapon.Type, weapon.Rank, weapon.Greatness, beast.Type, beast.Rank, beast.Greatness
+        );
+
+        // return damage
+        return (damage_dealt,);
+    }
+
     // Calculate damage from an obstacle
     func calculate_damage_from_obstacle{syscall_ptr: felt*, range_check_ptr}(
         obstacle: Obstacle, armor: Item

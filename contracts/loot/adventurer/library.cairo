@@ -29,11 +29,14 @@ from contracts.loot.constants.adventurer import (
     ItemShift,
     StatisticShift,
     AdventurerSlotIds,
+    AdventurerMode,
 )
 
 from contracts.loot.constants.item import Item
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.constants import SHIFT_41
+from contracts.loot.constants.beast import Beast, BeastUtils
+from contracts.loot.loot.stats.combat import CombatStats
 
 namespace AdventurerLib {
     func birth{syscall_ptr: felt*, range_check_ptr}(
@@ -268,48 +271,135 @@ namespace AdventurerLib {
         return (updated_adventurer,);
     }
 
+    func attack_beast{syscall_ptr: felt*, range_check_ptr}(
+        unpacked_adventurer: AdventurerState, beast: Beast
+    ) -> (new_unpacked_adventurer: AdventurerState) {
+        alloc_locals;
+
+        let (damage_dealt) = CombatStats.calculate_damage_to_beast(beast, Adventurer.WeaponId);
+
+        // check if damage dealt is less than health remaining
+        let still_alive = is_le(damage_dealt, beast.Health);
+
+        // if the beast is alive
+        if (still_alive == TRUE) {
+            // having been attacked, it automatically attacks back
+            let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, Adventurer.ChestId);
+            let (updated_adventurer: AdventurerState) = deduct_health(
+                damage_taken, unpacked_adventurer
+            );
+
+            // TODO: store beasts updated health on-chain. ideally beasts gain xp and auto-heal just like adventurers
+        } else {
+            // if beast has been slain, grant adventurer xp
+            let (xp_gained) = beast.Rank * beast.Greatness;
+            let (updated_adventurer: AdventurerState) = increase_xp(xp_gained, unpacked_adventurer);
+        }
+
+        return (updated_adventurer,);
+    }
+
+    // When fleeing from a beast, the following three outcomes are possible:
+    // 1. Adventurer is significantly faster than the beast and is able to flee without suffering any damage
+    // 2. Adventurer is ambushed by the Beast. If the Adventurer survives the attack, they flee.
+    // 3. Adventurer is significantly slower than the beast and thus fleeing is not an option. Adventurer suffers damage
+    func flee_from_beast{syscall_ptr: felt*, range_check_ptr}(
+        unpacked_adventurer: AdventurerState, beast: Beast
+    ) -> (new_unpacked_adventurer: AdventurerState) {
+        alloc_locals;
+
+        // Adventurer Speed is Dexterity - Weight of all equipped items
+        // TODO: Provide utility function that takes in an adventurer and returns net weight of gear
+        //       For now just hard_code this weight:
+        let (weight_of_equipment) = 3;
+        let (adventurer_speed) = unpacked_adventurer.Dexterity - weight_of_equipment;
+
+        // Adventurer ambush resistance is based on wisdom plus luck
+        let (ambush_resistance) = unpacked_adventurer.Wisdom + unpacked_adventurer.Luck;
+
+
+        // Keep ambush characteristic for beasts simple for now and make it rng
+        local ambush_rng;
+        %{
+             import random
+             ids.ambush_rng = random.randint(0, 20)
+         %}
+
+        // if adventurer ambush resistance is less than beast ambush ability
+        let is_ambushed = is_le(ambush_resistance, ambush_rng);
+
+        // default damage when fleeing is 0
+        let damage_taken = 0;
+        // unless ambush occurs
+        if (is_ambushed == TRUE) {
+            // then calculate damage based on beast
+            let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, Adventurer.ChestId);
+
+                let (ambushed_adventurer: AdventurerState) = deduct_health(
+                    damage_taken, unpacked_adventurer
+                );
+        }
+
+        let (can_flee) = is_le(ambush_rng, adventurer_speed);
+        if (can_flee == TRUE) {
+            // if the adventurer is able to flee, set their state back to idle
+
+            let (was_ambushed) = is_le(damage_taken, 0);
+
+            if (was_ambushed == TRUE) {
+                let (adventurer_fled: AdventurerState) = cast_state(
+                    AdventurerSlotIds.Mode, AdventurerMode.Idle, ambushed_adventurer
+                );
+            } else {
+                let (adventurer_fled: AdventurerState) = cast_state(
+                    AdventurerSlotIds.Mode, AdventurerMode.Idle, unpacked_adventurer
+                );
+            }
+
+            return (adventurer_fled,);
+
+        } else {
+            // if adventurer is not able to flee, their state stays same (battle)
+            return (unpacked_adventurer,);
+        }
+    }
+
     func deduct_health{syscall_ptr: felt*, range_check_ptr}(
         damage: felt, unpacked_adventurer: AdventurerState
     ) -> (new_unpacked_adventurer: AdventurerState) {
         alloc_locals;
 
-
-        // check if damage dealt is less than health remaining        
-        let still_alive = is_le(
-            damage, unpacked_adventurer.Health
-        );
+        // check if damage dealt is less than health remaining
+        let still_alive = is_le(damage, unpacked_adventurer.Health);
 
         // if adventurer is still alive
         if (still_alive == TRUE) {
-        // set new health to previous health - damage dealt
-        let (updated_adventurer: AdventurerState) = cast_state(
-            AdventurerSlotIds.Health,
-            unpacked_adventurer.Health - damage,
-            unpacked_adventurer,
+            // set new health to previous health - damage dealt
+            let (updated_adventurer: AdventurerState) = cast_state(
+                AdventurerSlotIds.Health, unpacked_adventurer.Health - damage, unpacked_adventurer
             );
-            
         } else {
             // if damage dealt exceeds health remaining, set health to 0
             let (updated_adventurer: AdventurerState) = cast_state(
-                AdventurerSlotIds.Health,
-                0,
-                unpacked_adventurer,
-            );    
+                AdventurerSlotIds.Health, 0, unpacked_adventurer
+            );
         }
 
         return (updated_adventurer,);
     }
 
     func increase_xp{syscall_ptr: felt*, range_check_ptr}(
-        item_token_id: felt, item: Item, unpacked_adventurer: AdventurerState
+        unpacked_adventurer: AdventurerState, xp: felt
     ) -> (new_unpacked_adventurer: AdventurerState) {
         alloc_locals;
 
-        // cast state into felt array
-        // make adjustment to felt at index
-        // cast back into adventuerState
+        // update adventurer xp
+        let (updated_adventurer: AdventurerState) = cast_state(
+            AdventurerSlotIds.XP, xp, unpacked_adventurer
+        );
 
-        return (0,);
+        // return updated adventurer
+        return (updated_adventurer,);
     }
 
     func update_statistics{syscall_ptr: felt*, range_check_ptr}(
@@ -324,3 +414,22 @@ namespace AdventurerLib {
         return (0,);
     }
 }
+
+// Stopping point/thought-holder:
+// The basic (v0.1) adventurer flow is going to be:
+// 1. Mint Adventurer (Done)
+// 2. Equip Items (Done)
+// 3. Explore (TODO)
+// 4. If a Beast is discovered, option to attack_beast or flee_from_beast (Done)
+// 5. If you defeat beast/obstacle, increase_xp (done)
+//    If you flee, reset adventurer state to idle. (TODO)
+//    If you die, set adventurer state to dead. (TODO)
+
+// List of TODO for this file/lib:
+// 1. Test Cases for attack_beast and flee_from_beast
+// 2. All calls to calculate_damage_from_beast() in this file currently pass in ChestId for the armor. 
+//    We should come up with a way to make this dynamic. Beast could attack/bite your leg, or arm for example
+//    When battling with adventurers, they will intentionally try to attack your weak spot, with beasts however
+//    I think this makes sense to be a property of the beast/obstacle.
+// 3. Increase sophistication of the ambush system for beasts/obstacles by giving beasts same stats as adventurers
+//    and basing their ambush chance on their stats.
