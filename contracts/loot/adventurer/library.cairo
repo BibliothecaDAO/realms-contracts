@@ -1,3 +1,4 @@
+// amarna: disable=arithmetic-add,arithmetic-div,arithmetic-mul,arithmetic-sub
 // BUILDINGS LIBRARY
 //   functions for
 //
@@ -21,7 +22,6 @@ from starkware.cairo.common.memset import memset
 from contracts.loot.loot.stats.item import ItemStats
 
 from contracts.loot.constants.adventurer import (
-    Adventurer,
     AdventurerState,
     AdventurerStatic,
     AdventurerDynamic,

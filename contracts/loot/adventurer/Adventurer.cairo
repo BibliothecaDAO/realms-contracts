@@ -19,7 +19,6 @@ from openzeppelin.upgrades.library import Proxy
 from contracts.settling_game.library.library_module import Module
 from contracts.loot.adventurer.library import AdventurerLib
 from contracts.loot.constants.adventurer import (
-    Adventurer, 
     AdventurerStatic, 
     AdventurerDynamic, 
     AdventurerState, 
