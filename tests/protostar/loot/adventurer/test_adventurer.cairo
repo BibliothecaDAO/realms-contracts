@@ -5,7 +5,7 @@ from starkware.cairo.common.math_cmp import is_nn, is_le
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
 from starkware.cairo.common.pow import pow
 
-from contracts.loot.constants.item import ItemIds, ItemSlot, ItemType, ItemMaterial, Material
+from contracts.loot.constants.item import Item, ItemIds, ItemSlot, ItemType, ItemMaterial, Material
 from contracts.loot.constants.rankings import ItemRank
 from contracts.loot.loot.stats.item import ItemStats
 from contracts.loot.constants.physics import MaterialDensity
@@ -139,6 +139,31 @@ func test_equip{
 
     assert c.WeaponId = TEST_WEAPON_TOKEN_ID;
 
+    return ();
+}
+
+@external
+func test_unequip{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}() {
+    alloc_locals;
+
+    let (state) = get_adventurer_state();
+
+    let (item) = TestUtils.create_item(ItemIds.Katana, 20);
+
+    let (adventurer_state: PackedAdventurerState) = AdventurerLib.pack(state);
+
+    let (adventurer: AdventurerState) = AdventurerLib.unpack(adventurer_state);
+
+    let (c) = AdventurerLib.equip_item(TEST_WEAPON_TOKEN_ID, item, adventurer);
+
+    assert c.WeaponId = TEST_WEAPON_TOKEN_ID;
+
+    let (new_c) = AdventurerLib.unequip_item(item, c);
+
+    assert new_c.WeaponId = 0;
+    
     return ();
 }
 

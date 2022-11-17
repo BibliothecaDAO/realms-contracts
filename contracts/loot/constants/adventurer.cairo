@@ -163,6 +163,13 @@ namespace AdventurerSlotIds {
     const HandsId = 20;
     const NeckId = 21;
     const RingId = 22;
+    const Mode = 23;
+}
+
+namespace AdventurerMode {
+    const Idle = 1;
+    const Alive = 2;
+    const Dead = 3;
 }
 
 // index for items - used in cast function to set values

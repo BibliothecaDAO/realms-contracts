@@ -270,6 +270,18 @@ namespace AdventurerLib {
 
         return (updated_adventurer,);
     }
+    
+    func unequip_item{syscall_ptr: felt*, range_check_ptr}(
+        item: Item, unpacked_adventurer: AdventurerState
+    ) -> (new_unpacked_adventurer: AdventurerState){
+
+        // pass index shift and Item slot to find what item to update
+        let (updated_adventurer: AdventurerState) = cast_state(
+            ItemShift + item.Slot, 0, unpacked_adventurer
+        );
+
+        return (updated_adventurer,);
+    }
 
     func attack_beast{syscall_ptr: felt*, range_check_ptr}(
         unpacked_adventurer: AdventurerState, beast: Beast
