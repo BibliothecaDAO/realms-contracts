@@ -18,6 +18,7 @@ from openzeppelin.upgrades.library import Proxy
 
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.game_structs import RealmData
+from contracts.metadata.metadata import Uri, Utils
 
 //
 // Initializer
@@ -124,11 +125,14 @@ func isApprovedForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 }
 
 @view
-func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    tokenId: Uint256
-) -> (tokenURI: felt) {
-    let (tokenURI: felt) = ERC721.token_uri(tokenId);
-    return (tokenURI,);
+func tokenURI{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(tokenId: Uint256) -> (tokenURI_len: felt, tokenURI: felt*) {
+    alloc_locals;
+    let (name) = get_realm_name(tokenId);
+    let (realm_data: RealmData) = fetch_realm_data(tokenId);
+    let (tokenURI_len, tokenURI) = Uri.build(tokenId, name, realm_data, Utils.RealmType.Realm);
+    return (tokenURI_len, tokenURI);
 }
 
 @view
@@ -190,15 +194,6 @@ func burn{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(token
 }
 
 @external
-func setTokenURI{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    tokenId: Uint256, tokenURI: felt
-) {
-    Ownable.assert_only_owner();
-    ERC721._set_token_uri(tokenId, tokenURI);
-    return ();
-}
-
-@external
 func transferOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     newOwner: felt
 ) {
@@ -226,11 +221,20 @@ func realm_data(token_id: Uint256) -> (data: felt) {
 
 @external
 func set_realm_data{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    tokenId: Uint256, _realm_data: felt
+    tokenId: Uint256, _realm_name: felt, _realm_data: felt
 ) {
     Ownable.assert_only_owner();
+    realm_name.write(tokenId, _realm_name);
     realm_data.write(tokenId, _realm_data);
     return ();
+}
+
+@external
+func get_realm_name{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    token_id: Uint256
+) -> (realm_name: felt) {
+    let (name) = realm_name.read(token_id);
+    return (name,);
 }
 
 @external
