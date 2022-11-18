@@ -69,6 +69,8 @@ namespace IAdventurer {
     }
     func getAdventurerById(tokenId: Uint256) -> (adventurer: AdventurerState) {
     }
+    func deductHealth(tokenId: Uint256, amount: felt) -> (success: felt) {
+    }
 }
 
 @contract_interface

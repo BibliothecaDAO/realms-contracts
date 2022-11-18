@@ -14,6 +14,7 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_add
 from starkware.cairo.common.math import unsigned_div_rem, assert_lt_felt
+from starkware.cairo.common.math_cmp import is_le
 from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
 
@@ -28,7 +29,9 @@ from openzeppelin.upgrades.library import Proxy
 from contracts.settling_game.library.library_module import Module
 from contracts.loot.adventurer.library import AdventurerLib
 from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState, AdventurerMode
+from contracts.loot.constants.beast import Beast
 from contracts.loot.interfaces.imodules import IModuleController
+from contracts.loot.loot.stats.combat import CombatStats
 from contracts.loot.utils.general import _uint_to_felt
 
 from contracts.loot.loot.ILoot import ILoot
@@ -236,7 +239,6 @@ func deductHealth{
     alloc_locals;
 
     Module.only_approved();
-    // ERC721.assert_only_token_owner(tokenId);
 
     // unpack adventurer
     let (unpacked_adventurer) = getAdventurerById(tokenId);
@@ -244,14 +246,17 @@ func deductHealth{
     // deduct health
     let (equiped_adventurer) = AdventurerLib.deduct_health(amount, unpacked_adventurer);
 
-    // TODO: Move to function that emits adventurers state
     let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(equiped_adventurer);
     adventurer.write(tokenId, packed_new_adventurer);
 
-    // Get new adventurer
     emit_adventurer_state(tokenId);
 
     return (1,);
+}
+
+@external
+func explore{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    
 }
 
 // -----------------------------
@@ -415,22 +420,6 @@ func setApprovalForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     ERC721.set_approval_for_all(operator, approved);
     return ();
 }
-
-// @external
-// func transferFrom{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-//     from_ : felt, to : felt, tokenId : Uint256
-// ):
-//     ERC721Enumerable.transfer_from(from_, to, tokenId)
-//     return ()
-// end
-
-// @external
-// func safeTransferFrom{pedersen_ptr : HashBuiltin*, syscall_ptr : felt*, range_check_ptr}(
-//     from_ : felt, to : felt, tokenId : Uint256, data_len : felt, data : felt*
-// ):
-//     ERC721Enumerable.safe_transfer_from(from_, to, tokenId, data_len, data)
-//     return ()
-// end
 
 @external
 func burn{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(tokenId: Uint256) {

@@ -165,7 +165,7 @@ namespace CombatStats {
         return (damage_dealt,);
     }
 
-        // Calculates damage dealt from a beast by converting beast into a Loot weapon and calling calculate_damage_from_weapon
+    // Calculates damage dealt from a beast by converting beast into a Loot weapon and calling calculate_damage_from_weapon
     func calculate_damage_to_beast{syscall_ptr: felt*, range_check_ptr}(
         beast: Beast, weapon: Item
     ) -> (damage: felt) {

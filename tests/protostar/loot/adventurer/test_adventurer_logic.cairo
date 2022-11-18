@@ -156,7 +156,45 @@ func test_unequip_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     return ();
 }
 
+@external
+func test_deduct_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+
+    local account_1_address;
+    local realms_address;
+    local adventurer_address;
+    local loot_address;
+    local lords_address;
+
+    %{
+        ids.account_1_address = context.account_1
+        ids.realms_address = context.realms
+        ids.adventurer_address = context.adventurer
+        ids.loot_address = context.loot
+        ids.lords_address = context.lords
+        stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
+        stop_prank_adventurer = start_prank(ids.loot_address, ids.adventurer_address)
+        stop_prank_lords = start_prank(ids.account_1_address, ids.lords_address)
+    %}
+
+    IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
+    ILords.approve(lords_address, adventurer_address, Uint256(200 * 10 ** 18, 0));
+    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8);
+    IAdventurer.deductHealth(adventurer_address, Uint256(1,0), 50);
+    let (adventurer) = IAdventurer.getAdventurerById(adventurer_address, Uint256(1,0));
+    assert adventurer.Health = 50;
+    %{
+        stop_prank_realms()
+        stop_prank_adventurer()
+        stop_prank_lords()
+    %}
+
+    return ();
+}
+
 // @external
-// func test_deduct_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+// func test_is_dead{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+//     arguments
+// ) {
     
 // }

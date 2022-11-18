@@ -15,6 +15,7 @@ from openzeppelin.upgrades.library import Proxy
 
 from contracts.loot.constants.item import Item
 from contracts.loot.interfaces.imodules import IModuleController
+from contracts.loot.loot.library import ItemLib
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library.library_module import Module
 
@@ -299,23 +300,25 @@ func updateAdventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     let (item_: Item) = item.read(tokenId);
 
     // TODO: Move library
-    let update_item = Item(
-        Id=item_.Id,
-        Slot=item_.Slot,
-        Type=item_.Type,
-        Material=item_.Material,
-        Rank=item_.Rank,
-        Prefix_1=item_.Prefix_1,
-        Prefix_2=item_.Prefix_2,
-        Suffix=item_.Suffix,
-        Greatness=item_.Greatness,
-        CreatedBlock=item_.CreatedBlock,
-        XP=item_.XP,
-        Adventurer=adventurerId,
-        Bag=item_.Bag,
-    );
+    // let update_item = Item(
+    //     Id=item_.Id,
+    //     Slot=item_.Slot,
+    //     Type=item_.Type,
+    //     Material=item_.Material,
+    //     Rank=item_.Rank,
+    //     Prefix_1=item_.Prefix_1,
+    //     Prefix_2=item_.Prefix_2,
+    //     Suffix=item_.Suffix,
+    //     Greatness=item_.Greatness,
+    //     CreatedBlock=item_.CreatedBlock,
+    //     XP=item_.XP,
+    //     Adventurer=adventurerId,
+    //     Bag=item_.Bag,
+    // );
 
-    setItemById(tokenId, update_item);
+    let updated_item = ItemLib.update_adventurer(item_, adventurerId);
+
+    setItemById(tokenId, updated_item);
     return ();
 }
 
@@ -374,13 +377,6 @@ func roll_dice{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
     let (controller) = Module.controller_address();
     let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
     let (rnd) = IXoroshiro.next(xoroshiro_address_);
-
-    // useful for testing:
-    // local rnd
-    // %{
-    //     import random
-    //     ids.rnd = random.randint(0, 5000)
-    // %}
     let (_, r) = unsigned_div_rem(rnd, 101);
     return (r + 1,);  // values from 1 to 101 inclusive
 }
