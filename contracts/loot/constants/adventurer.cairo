@@ -7,6 +7,7 @@
 // import item consts
 from contracts.loot.constants.item import Item
 from contracts.loot.constants.bag import Bag
+from contracts.loot.constants.beast import Beast
 
 // @notice This is viewable information of the Adventurer. We DO NOT store this on-chain.
 //         This is the object that is returned when requesting the Adventurer by ID.
@@ -48,6 +49,12 @@ struct Adventurer {
     XP: felt,  // 1 - 10000000
     Level: felt,  // 1- 100
     Order: felt,  // 1 - 16
+
+    // TODO: Update adventurer pack/unpack to include this new attribute
+    Status: felt,  // {Idle, Battling, Traveling, Questing, Dead}
+    Beast: felt, // tokenId of the beast the adventurer is battling
+
+    // TODO: Consider storing adventurer location information
 }
 
 // @notice This is immutable information stored on-chain
@@ -92,6 +99,9 @@ struct AdventurerState {
     HandsId: felt,
     NeckId: felt,
     RingId: felt,
+
+    Status: felt,
+    Beast: felt,
 }
 
 struct PackedAdventurerState {
@@ -126,15 +136,15 @@ namespace SHIFT_P_2 {
 
 namespace AdventurerSlotIds {
     // immutable stats
-    const Race = 0;  // 3
-    const HomeRealm = 1;  // 13
+    const Race = 0;
+    const HomeRealm = 1;
     const Birthdate = 2;
     const Name = 3;
 
     // evolving stats
-    const Health = 4;  //
-    const Level = 5;  //
-    const Order = 6;  //
+    const Health = 4;
+    const Level = 5;
+    const Order = 6;
 
     // Physical
     const Strength = 7;
@@ -150,7 +160,8 @@ namespace AdventurerSlotIds {
     const Luck = 13;
 
     // XP
-    const XP = 14;  //
+    const XP = 14;
+
     // store item NFT id when equiped
     // Packed Stats p2
     const WeaponId = 15;
@@ -163,6 +174,25 @@ namespace AdventurerSlotIds {
     const HandsId = 20;
     const NeckId = 21;
     const RingId = 22;
+
+    const Status = 23;
+    const Beast = 24;
+}
+
+namespace AdventurerStatus {
+    const Idle = 0;
+    const Battle = 1;
+    const Travel = 2;
+    const Quest = 3;
+    const Dead = 4;
+}
+
+namespace DiscoveryType {
+    const Nothing = 0;
+    const Beast = 1;
+    const Obstacle = 2;
+    const Adventurer = 3;
+    const Item = 4;
 }
 
 // index for items - used in cast function to set values

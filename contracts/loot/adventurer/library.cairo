@@ -30,6 +30,7 @@ from contracts.loot.constants.adventurer import (
     StatisticShift,
     AdventurerSlotIds,
     AdventurerMode,
+    DiscoveryType,
 )
 
 from contracts.loot.constants.item import Item
@@ -271,10 +272,49 @@ namespace AdventurerLib {
         return (updated_adventurer,);
     }
 
-    func attack_beast{syscall_ptr: felt*, range_check_ptr}(
-        unpacked_adventurer: AdventurerState, beast: Beast
+    
+    func explore{syscall_ptr: felt*, range_check_ptr}(
+        unpacked_adventurer: AdventurerState
     ) -> (new_unpacked_adventurer: AdventurerState) {
         alloc_locals;
+
+        // Only idle explorers can explore
+        assert unpacked_adventurer.Status = AdventurerStatus.Idle;
+
+        // TODO: replace this with xorshiro rng
+        local encounter;
+        %{
+             import random
+             ids.encounter = random.randint(0, 4)
+         %}
+
+         // If the adventurer encounter a beast 
+         if (encounter == DiscoveryType.Beast) {
+            // we set their status to battle
+            let (unpacked_adventurer: AdventurerState) = update_status(AdventurerMode.Battle, unpacked_adventurer);
+
+            let (beast : Beast) = BeastUtils.get_random_beast();
+
+            // Todo generate a beast token
+            // let (beastTokenId) = BeastModule.birth(greatness=1, rank=5, etc)
+            unpacked_adventurer.Beast = beastTokenId;
+
+            // I think here we need to mint a Beast and store it on-chain. 
+         }
+
+        return (unpacked_adventurer,);
+    }
+
+    func attack_beast{syscall_ptr: felt*, range_check_ptr}(
+        unpacked_adventurer: AdventurerState
+    ) -> (new_unpacked_adventurer: AdventurerState) {
+        alloc_locals;
+
+        // Only adventurers in battle state can attack beasts
+        assert unpacked_adventurer.Status = AdventurerStatus.Battle;
+
+        // TODO: Call Beast Module to retrieve the beast token id attached to the adventurer
+        // let (beast : Beast) = BeastModule.getBeastForAdventurer(unpacked_adventurer.tokenId)
 
         let (damage_dealt) = CombatStats.calculate_damage_to_beast(beast, Adventurer.WeaponId);
 
@@ -304,7 +344,7 @@ namespace AdventurerLib {
     // 2. Adventurer is ambushed by the Beast. If the Adventurer survives the attack, they flee.
     // 3. Adventurer is significantly slower than the beast and thus fleeing is not an option. Adventurer suffers damage
     func flee_from_beast{syscall_ptr: felt*, range_check_ptr}(
-        unpacked_adventurer: AdventurerState, beast: Beast
+        unpacked_adventurer: AdventurerState)
     ) -> (new_unpacked_adventurer: AdventurerState) {
         alloc_locals;
 
@@ -330,37 +370,68 @@ namespace AdventurerLib {
 
         // default damage when fleeing is 0
         let damage_taken = 0;
-        // unless ambush occurs
+
+        // unless ambush occurs at which point adventurer takes damage
         if (is_ambushed == TRUE) {
-            // then calculate damage based on beast
+
+            // calculate that damage
             let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, Adventurer.ChestId);
 
-                let (ambushed_adventurer: AdventurerState) = deduct_health(
-                    damage_taken, unpacked_adventurer
-                );
+            // and deduct it from the adventurers health
+            let (ambushed_adventurer: AdventurerState) = deduct_health(damage_taken, unpacked_adventurer);
+
+            // check if adventurer survived the attack
+            let (adventurer_survived) = is_not_zero(ambushed_adventurer.Health);
+
+            // if they did not survive
+            if (adventurer_survived == FALSE) {
+                // update status to dead and return (gg)
+                let (dead_adventurer: AdventurerState) = update_status(AdventurerMode.Dead, ambushed_adventurer);
+                return (dead_adventurer,);
+            }
         }
 
+        // adventurers ability to flee is based on their speed
         let (can_flee) = is_le(ambush_rng, adventurer_speed);
+
+        // if they are able to flee, we'll need to update their status
         if (can_flee == TRUE) {
-            // if the adventurer is able to flee, set their state back to idle
+            
+            // but first we need to know if they were ambushed or not
+            let (was_not_ambushed) = is_not_zero(damage_taken, 0);
 
-            let (was_ambushed) = is_le(damage_taken, 0);
+            // if they were not ambushed
+            if (was_not_ambushed == TRUE) {
+                // we use the original/unaltered adventurer for update status call
+                let (adventurer_fled: AdventurerState) = update_status(AdventurerMode.Idle, unpacked_adventurer);
 
-            if (was_ambushed == TRUE) {
-                let (adventurer_fled: AdventurerState) = cast_state(
-                    AdventurerSlotIds.Mode, AdventurerMode.Idle, ambushed_adventurer
-                );
+            // if they were ambushed    
             } else {
-                let (adventurer_fled: AdventurerState) = cast_state(
-                    AdventurerSlotIds.Mode, AdventurerMode.Idle, unpacked_adventurer
-                );
+                // we use the ambushed adventurer (has health deducted) for update status call
+                let (adventurer_fled: AdventurerState) = update_status(AdventurerMode.Idle, ambushed_adventurer);
             }
 
             return (adventurer_fled,);
 
+        // if they aren't able to flee
         } else {
-            // if adventurer is not able to flee, their state stays same (battle)
-            return (unpacked_adventurer,);
+            // we don't need to update their status
+
+            // but we need to know if they were ambushed so we know which unpacked adventurer to return
+            let (was_not_ambushed) = is_not_zero(damage_taken, 0);
+
+            // if they were not ambushed
+            if (was_not_ambushed == TRUE) {
+                // return the unmodified adventurer. This return path consists of the
+                // adventurer not getting ambushed but being unable to flee. As a result,
+                // no state change was made to the adventurer, it's a noop
+                return (unpacked_adventurer,);
+
+            // if they were ambushed    
+            } else {
+                // we return the ambushed adventurer which will have less health
+                return (ambushed_adventurer,);
+            }
         }
     }
 
@@ -396,6 +467,50 @@ namespace AdventurerLib {
         // update adventurer xp
         let (updated_adventurer: AdventurerState) = cast_state(
             AdventurerSlotIds.XP, xp, unpacked_adventurer
+        );
+
+        // return updated adventurer
+        return (updated_adventurer,);
+    }
+
+    func update_status{syscall_ptr: felt*, range_check_ptr}(
+        unpacked_adventurer: AdventurerState, status: felt
+    ) -> (new_unpacked_adventurer: AdventurerState) {
+        alloc_locals;
+
+        // Make sure status is within allowable range
+        assert_le(status, AdventurerStatus.Dead +1);
+
+        // update adventurer status
+        let (updated_adventurer: AdventurerState) = cast_state(
+            AdventurerSlotIds.Status, status, unpacked_adventurer
+        );
+
+        // return updated adventurer
+        return (updated_adventurer,);
+    }
+
+    func assign_beast{syscall_ptr: felt*, range_check_ptr}(
+        unpacked_adventurer: AdventurerState, Beast: beast
+    ) -> (new_unpacked_adventurer: AdventurerState) {
+        alloc_locals;
+
+        // Make sure beast is within allowable range
+        // Stopping point:
+        // 1. Trying to figure out how to handle the beast
+        // When one is discovered, it seems like we need to persist it (write to chain)
+        // THe most efficient approach I think is to attack it to the adventurer, thus allowing
+        // the adventurer to carry the beast with it. When the adventurer calls a function like
+        // attack_beast, we won't have to do any separate lookups, because the beast details will be right there.
+        // The weakness in this approach though is what happens if the beast kills the adventurer? 
+        // ideally, in this 
+
+        // Adventurers can only battle one beast at a time (for now)
+        assert_le(unpacked_adventurer.Beast, 0);
+
+        // update adventurer beast
+        let (updated_adventurer: AdventurerState) = cast_state(
+            AdventurerSlotIds.Beast, beast, unpacked_adventurer
         );
 
         // return updated adventurer

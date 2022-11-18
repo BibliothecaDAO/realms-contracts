@@ -1,6 +1,6 @@
 // -----------------------------------
-//   CryptRun.ObstacleConstants
-//   CryptRun
+//   Loot.ObstacleConstants
+//   Loot
 //
 // MIT License
 // -----------------------------------

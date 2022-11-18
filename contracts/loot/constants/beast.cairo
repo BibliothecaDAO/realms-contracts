@@ -14,13 +14,17 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 // Structure for the adventurer Beast primitive
 struct Beast {
     Id: felt,  // item id 1 - 100
-    Health: felt, // health of the beast
+    Health: felt,  // health of the beast
     Type: felt,  // same as Loot weapons: magic, bludgeon, blade
     Rank: felt,  // same as Loot weapons: 1 is the strongest
     Prefix_1: felt,  // First part of the name prefix (i.e Tear)
     Prefix_2: felt,  // Second part of the name prefix (i.e Bearer)
-    Greatness: felt,  // same as Loot weapons 0-20
+    Adventurer: felt, // The token id of the adventurer the beast is battling
+    XP: felt,  // the xp of the beast
+    SlainBy: felt, // the tokenId of the adventurer that slayed this beast
+    SlainOnDate: felt, // unix timestamp when the beast was slain
 }
+
 namespace BeastConstants {
     namespace BeastIds {
         const Phoenix = 1;
@@ -148,5 +152,37 @@ namespace BeastUtils {
         dw BeastConstants.BeastType.Werewolf;
         dw BeastConstants.BeastType.Spider;
         dw BeastConstants.BeastType.Rat;
+    }
+
+    // TODO: 
+    // 1. Make this actually random
+    // 2. Provide options to specify greatness, rank, and/or type
+    //    i.e allow someone to pick a weak magical beast when needed
+    func get_random_beast{syscall_ptr: felt*, range_check_ptr}() -> (beast: Beast, health: felt,
+    type: felt, rank: felt, greatness: felt) {
+        alloc_locals;
+
+
+        // if input parameters are zero, generate random values
+        // our forest beasts will be rank=5, greatness 1, type random, health 100, prefix 0
+
+
+        // TODO: replace this with xorshiro rng
+        local beastId;
+        %{
+             import random
+             ids.beastId = random.randint(1, Rat)
+         %}
+
+        return (
+            Beast(
+            Id=beastId,
+            Health=100,
+            Type=1,
+            Rank=1,
+            Prefix_1=0,
+            Greatness=10,
+            ),
+        );
     }
 }
