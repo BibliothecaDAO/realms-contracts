@@ -69,12 +69,12 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     return ();
 }
 
-@external
-func birth{
-    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(rank: felt, greatness: felt) {
+// @external
+// func birth{
+//     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+// }(rank: felt, greatness: felt) {
 
-}
+// }
 
 @external
 func attack_beast{syscall_ptr: felt*,  range_check_ptr}(
