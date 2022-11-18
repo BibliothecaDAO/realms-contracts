@@ -140,8 +140,13 @@ artifacts
 
 # nile specific
 goerli.deployments.txt
+goerli.deployments.txt.backup
 goerli.declarations.txt
 goerli.accounts.json
+goerli.accounts.json.backup
 
 #we create this file if user opts to create new account via our setup script
 account_details.txt
+
+# adhoc
+scripts/ascii_converter.py

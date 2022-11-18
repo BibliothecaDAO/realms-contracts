@@ -6,13 +6,6 @@
 %lang starknet
 from starkware.cairo.common.uint256 import Uint256
 
-namespace TraitsIds {
-    const Region = 1;
-    const City = 2;
-    const Harbour = 3;
-    const River = 4;
-}
-
 struct RealmData {
     regions: felt,
     cities: felt,
@@ -159,7 +152,7 @@ namespace ModuleIds {
     const L06_Combat = 6;
     const L07_Crypts = 7;
     const L08_Crypts_Resources = 8;
-    const L09_Relics = 12;
+    const Relics = 12;
     const L10_Food = 13;
     const GoblinTown = 14;
     const Travel = 15;

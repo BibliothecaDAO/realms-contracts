@@ -1,4 +1,4 @@
-//   Module.TRAVEL
+// Module.TRAVEL
 //   Logic for travel
 //   Assets must exist on the same point in space in order to interact with each other.
 //   Assets have nested selectors allowing (n) number of potential assets to spawn from a single asset.

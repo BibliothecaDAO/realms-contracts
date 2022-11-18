@@ -14,7 +14,10 @@ from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
 from openzeppelin.upgrades.library import Proxy
 
 from contracts.loot.constants.item import Item
+from contracts.loot.interfaces.imodules import IModuleController
+from contracts.loot.loot.library import ItemLib
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
+from contracts.settling_game.library.library_module import Module
 
 from starkware.starknet.common.syscalls import (
     get_block_timestamp,
@@ -30,10 +33,6 @@ from contracts.loot.loot.stats.item import ItemStats
 // -----------------------------------
 
 @storage_var
-func xoroshiro_address() -> (address: felt) {
-}
-
-@storage_var
 func counter() -> (count: felt) {
 }
 // -----------------------------------
@@ -45,12 +44,12 @@ func counter() -> (count: felt) {
 // @return proxy_admin: Proxy admin address
 @external
 func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    name: felt, symbol: felt, proxy_admin: felt, xoroshiro_address_: felt
+    name: felt, symbol: felt, proxy_admin: felt, controller_address: felt
 ) {
+    Module.initializer(controller_address);
     ERC721.initializer(name, symbol);
     ERC721Enumerable.initializer();
     Proxy.initializer(proxy_admin);
-    xoroshiro_address.write(xoroshiro_address_);
     return ();
 }
 
@@ -230,6 +229,8 @@ func renounceOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 func item(tokenId: Uint256) -> (item: Item) {
 }
 
+// @notice Mint random item
+// @param to: Address to mint the item to
 @external
 func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: felt) {
     alloc_locals;
@@ -239,9 +240,9 @@ func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: f
 
     let (next_id) = counter.read();
 
-    item.write(Uint256(next_id, 0), new_item);
+    item.write(Uint256(next_id + 1, 0), new_item);
 
-    ERC721Enumerable._mint(to, Uint256(next_id, 0));
+    ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
 
     counter.write(next_id + 1);
     return ();
@@ -249,6 +250,9 @@ func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: f
 
 // ------------new
 
+// @notice Get item data by the token id
+// @param tokenId: Id of the item token
+// @return item: Item data
 @view
 func getItemByTokenId{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256
@@ -263,11 +267,11 @@ func getItemByTokenId{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     let (Prefix_1) = ItemStats.item_name_prefix(1);  // stored state
     let (Prefix_2) = ItemStats.item_name_suffix(1);  // stored state
     let (Suffix) = ItemStats.item_suffix(1);  // stored state
-    let Greatness = 0;  // stored state
+    let Greatness = storedItem.Greatness;  // stored state
     let CreatedBlock = storedItem.CreatedBlock;  // timestamp
-    let XP = 0;  // stored state
-    let Adventurer = 0;
-    let Bag = 0;
+    let XP = storedItem.XP;  // stored state
+    let Adventurer = storedItem.Adventurer;
+    let Bag = storedItem.Bag;
 
     return (
         Item(
@@ -288,33 +292,29 @@ func getItemByTokenId{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     );
 }
 
-// TODO: Unequip Item
-
 @external
 func updateAdventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256, adventurerId: felt
 ) {
-    // TODO: Only allow calling by Adventurer Contract
+    Module.only_approved();
     let (item_: Item) = item.read(tokenId);
 
-    // TODO: Move library
-    let update_item = Item(
-        Id=item_.Id,
-        Slot=item_.Slot,
-        Type=item_.Type,
-        Material=item_.Material,
-        Rank=item_.Rank,
-        Prefix_1=item_.Prefix_1,
-        Prefix_2=item_.Prefix_2,
-        Suffix=item_.Suffix,
-        Greatness=item_.Greatness,
-        CreatedBlock=item_.CreatedBlock,
-        XP=item_.XP,
-        Adventurer=adventurerId,
-        Bag=item_.Bag,
-    );
+    let updated_item = ItemLib.update_adventurer(item_, adventurerId);
 
-    setItemById(tokenId, update_item);
+    setItemById(tokenId, updated_item);
+    return ();
+}
+
+@external
+func updateXP{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    tokenId: Uint256, xp: felt
+) {
+    Module.only_approved();
+    let (item_: Item) = item.read(tokenId);
+
+    let updated_item = ItemLib.update_xp(item_, xp);
+
+    setItemById(tokenId, updated_item);
     return ();
 }
 
@@ -323,6 +323,7 @@ func setItemById{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     tokenId: Uint256, item_: Item
 ) {
     // TODO: Security
+
     item.write(tokenId, item_);
     return ();
 }
@@ -364,35 +365,14 @@ func generateRandomItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_ch
     );
 }
 
-@external
-func set_xoroshiro{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    xoroshiro: felt
-) {
-    // TODO:
-    Proxy.assert_only_admin();
-    xoroshiro_address.write(xoroshiro);
-    return ();
-}
-
-@view
-func get_xoroshiro{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (x: felt) {
-    let (xoroshiro) = xoroshiro_address.read();
-    return (xoroshiro,);
-}
-
 func roll_dice{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}() -> (
     dice_roll: felt
 ) {
     alloc_locals;
-    let (xoroshiro_address_) = xoroshiro_address.read();
-    let (rnd) = IXoroshiro.next(xoroshiro_address_);
 
-    // useful for testing:
-    // local rnd
-    // %{
-    //     import random
-    //     ids.rnd = random.randint(0, 5000)
-    // %}
+    let (controller) = Module.controller_address();
+    let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
+    let (rnd) = IXoroshiro.next(xoroshiro_address_);
     let (_, r) = unsigned_div_rem(rnd, 101);
     return (r + 1,);  // values from 1 to 101 inclusive
 }

@@ -25,6 +25,16 @@ struct Beast {
     SlainOnDate: felt, // unix timestamp when the beast was slain
 }
 
+namespace SHIFT_P {
+    const _1 = 2 ** 0;
+    const _2 = 2 ** 7;
+    const _3 = 2 ** 17;
+    const _4 = 2 ** 28;
+    const _5 = 2 ** 31;
+    const _6 = 2 ** 38;
+    const _7 = 2 ** 43;
+}
+
 namespace BeastConstants {
     namespace BeastIds {
         const Phoenix = 1;
@@ -185,4 +195,14 @@ namespace BeastUtils {
             ),
         );
     }
+}
+
+namespace BeastSlotIds {
+    const Id = 0;
+    const Health = 1;
+    const Type = 2;
+    const Rank = 3;
+    const Prefix_1 = 4;
+    const Prefix_2 = 5;
+    const Greatness = 6;
 }

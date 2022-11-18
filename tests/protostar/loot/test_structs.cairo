@@ -128,6 +128,30 @@ namespace TestUtils {
         );
     }
 
+    // @notice creates an empty item object
+    // @return item: empty item
+    func create_zero_item{syscall_ptr: felt*, range_check_ptr}() -> (
+        item: Item
+    ) {
+        let zero_item = Item(
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        );
+
+        return (zero_item,);
+    }
+
     // create_beast returns a Beast corresponding to the provided beast_id and greatness
     // parameters: beast_id, greatness
     // returns: A Beast
@@ -136,6 +160,7 @@ namespace TestUtils {
     ) {
         alloc_locals;
 
+        let health = 100;
         let (type) = BeastUtils.get_type_from_id(beast_id);
         let (rank) = BeastUtils.get_rank_from_id(beast_id);
         let prefix_1 = 1;
@@ -143,12 +168,13 @@ namespace TestUtils {
 
         return (
             Beast(
-            beast_id,
-            type,
-            rank,
-            prefix_1,
-            prefix_2,
-            greatness,
+                beast_id,
+                health,
+                type,
+                rank,
+                prefix_1,
+                prefix_2,
+                greatness,
             ),
         );
     }
