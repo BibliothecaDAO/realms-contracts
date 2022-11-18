@@ -29,7 +29,7 @@ from contracts.loot.constants.adventurer import (
     ItemShift,
     StatisticShift,
     AdventurerSlotIds,
-    AdventurerMode,
+    AdventurerStatus,
     DiscoveryType,
 )
 
@@ -284,169 +284,6 @@ namespace AdventurerLib {
         return (updated_adventurer,);
     }
 
-    
-    func explore{syscall_ptr: felt*, range_check_ptr}(
-        unpacked_adventurer: AdventurerState
-    ) -> (new_unpacked_adventurer: AdventurerState) {
-        alloc_locals;
-
-        // Only idle explorers can explore
-        assert unpacked_adventurer.Status = AdventurerStatus.Idle;
-
-        // TODO: replace this with xorshiro rng
-        local encounter;
-        %{
-             import random
-             ids.encounter = random.randint(0, 4)
-         %}
-
-         // If the adventurer encounter a beast 
-         if (encounter == DiscoveryType.Beast) {
-            // we set their status to battle
-            let (unpacked_adventurer: AdventurerState) = update_status(AdventurerMode.Battle, unpacked_adventurer);
-
-            let (beast : Beast) = BeastUtils.get_random_beast();
-
-            // Todo generate a beast token
-            // let (beastTokenId) = BeastModule.birth(greatness=1, rank=5, etc)
-            unpacked_adventurer.Beast = beastTokenId;
-
-            // I think here we need to mint a Beast and store it on-chain. 
-         }
-
-        return (unpacked_adventurer,);
-    }
-
-    func attack_beast{syscall_ptr: felt*, range_check_ptr}(
-        unpacked_adventurer: AdventurerState
-    ) -> (new_unpacked_adventurer: AdventurerState) {
-        alloc_locals;
-
-        // Only adventurers in battle state can attack beasts
-        assert unpacked_adventurer.Status = AdventurerStatus.Battle;
-
-        // TODO: Call Beast Module to retrieve the beast token id attached to the adventurer
-        // let (beast : Beast) = BeastModule.getBeastForAdventurer(unpacked_adventurer.tokenId)
-
-        let (damage_dealt) = CombatStats.calculate_damage_to_beast(beast, Adventurer.WeaponId);
-
-        // check if damage dealt is less than health remaining
-        let still_alive = is_le(damage_dealt, beast.Health);
-
-        // if the beast is alive
-        if (still_alive == TRUE) {
-            // having been attacked, it automatically attacks back
-            let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, Adventurer.ChestId);
-            let (updated_adventurer: AdventurerState) = deduct_health(
-                damage_taken, unpacked_adventurer
-            );
-
-            // TODO: store beasts updated health on-chain. ideally beasts gain xp and auto-heal just like adventurers
-        } else {
-            // if beast has been slain, grant adventurer xp
-            let (xp_gained) = beast.Rank * beast.Greatness;
-            let (updated_adventurer: AdventurerState) = increase_xp(xp_gained, unpacked_adventurer);
-        }
-
-        return (updated_adventurer,);
-    }
-
-    // When fleeing from a beast, the following three outcomes are possible:
-    // 1. Adventurer is significantly faster than the beast and is able to flee without suffering any damage
-    // 2. Adventurer is ambushed by the Beast. If the Adventurer survives the attack, they flee.
-    // 3. Adventurer is significantly slower than the beast and thus fleeing is not an option. Adventurer suffers damage
-    func flee_from_beast{syscall_ptr: felt*, range_check_ptr}(
-        unpacked_adventurer: AdventurerState)
-    ) -> (new_unpacked_adventurer: AdventurerState) {
-        alloc_locals;
-
-        // Adventurer Speed is Dexterity - Weight of all equipped items
-        // TODO: Provide utility function that takes in an adventurer and returns net weight of gear
-        //       For now just hard_code this weight:
-        let (weight_of_equipment) = 3;
-        let (adventurer_speed) = unpacked_adventurer.Dexterity - weight_of_equipment;
-
-        // Adventurer ambush resistance is based on wisdom plus luck
-        let (ambush_resistance) = unpacked_adventurer.Wisdom + unpacked_adventurer.Luck;
-
-
-        // Keep ambush characteristic for beasts simple for now and make it rng
-        local ambush_rng;
-        %{
-             import random
-             ids.ambush_rng = random.randint(0, 20)
-         %}
-
-        // if adventurer ambush resistance is less than beast ambush ability
-        let is_ambushed = is_le(ambush_resistance, ambush_rng);
-
-        // default damage when fleeing is 0
-        let damage_taken = 0;
-
-        // unless ambush occurs at which point adventurer takes damage
-        if (is_ambushed == TRUE) {
-
-            // calculate that damage
-            let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, Adventurer.ChestId);
-
-            // and deduct it from the adventurers health
-            let (ambushed_adventurer: AdventurerState) = deduct_health(damage_taken, unpacked_adventurer);
-
-            // check if adventurer survived the attack
-            let (adventurer_survived) = is_not_zero(ambushed_adventurer.Health);
-
-            // if they did not survive
-            if (adventurer_survived == FALSE) {
-                // update status to dead and return (gg)
-                let (dead_adventurer: AdventurerState) = update_status(AdventurerMode.Dead, ambushed_adventurer);
-                return (dead_adventurer,);
-            }
-        }
-
-        // adventurers ability to flee is based on their speed
-        let (can_flee) = is_le(ambush_rng, adventurer_speed);
-
-        // if they are able to flee, we'll need to update their status
-        if (can_flee == TRUE) {
-            
-            // but first we need to know if they were ambushed or not
-            let (was_not_ambushed) = is_not_zero(damage_taken, 0);
-
-            // if they were not ambushed
-            if (was_not_ambushed == TRUE) {
-                // we use the original/unaltered adventurer for update status call
-                let (adventurer_fled: AdventurerState) = update_status(AdventurerMode.Idle, unpacked_adventurer);
-
-            // if they were ambushed    
-            } else {
-                // we use the ambushed adventurer (has health deducted) for update status call
-                let (adventurer_fled: AdventurerState) = update_status(AdventurerMode.Idle, ambushed_adventurer);
-            }
-
-            return (adventurer_fled,);
-
-        // if they aren't able to flee
-        } else {
-            // we don't need to update their status
-
-            // but we need to know if they were ambushed so we know which unpacked adventurer to return
-            let (was_not_ambushed) = is_not_zero(damage_taken, 0);
-
-            // if they were not ambushed
-            if (was_not_ambushed == TRUE) {
-                // return the unmodified adventurer. This return path consists of the
-                // adventurer not getting ambushed but being unable to flee. As a result,
-                // no state change was made to the adventurer, it's a noop
-                return (unpacked_adventurer,);
-
-            // if they were ambushed    
-            } else {
-                // we return the ambushed adventurer which will have less health
-                return (ambushed_adventurer,);
-            }
-        }
-    }
-
     func deduct_health{syscall_ptr: felt*, range_check_ptr}(
         damage: felt, unpacked_adventurer: AdventurerState
     ) -> (new_unpacked_adventurer: AdventurerState) {
@@ -503,7 +340,7 @@ namespace AdventurerLib {
     }
 
     func assign_beast{syscall_ptr: felt*, range_check_ptr}(
-        unpacked_adventurer: AdventurerState, Beast: beast
+        unpacked_adventurer: AdventurerState, beast: Beast
     ) -> (new_unpacked_adventurer: AdventurerState) {
         alloc_locals;
 

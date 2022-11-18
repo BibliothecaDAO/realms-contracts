@@ -11,14 +11,18 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.uint256 import Uint256
+from starkware.starknet.common.syscalls import get_caller_address
 
 from openzeppelin.upgrades.library import Proxy
 
+from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library.library_module import Module
 from contracts.loot.adventurer.interface import IAdventurer
+from contracts.loot.adventurer.library import AdventurerLib
 from contracts.loot.beast.library import BeastLib
-from contracts.loot.constants.adventurer import AdventurerState
+from contracts.loot.constants.adventurer import Adventurer, AdventurerState, AdventurerStatus
 from contracts.loot.constants.beast import Beast
+from contracts.loot.interfaces.imodules import IModuleController
 from contracts.loot.loot.stats.combat import CombatStats
 from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
 
@@ -32,7 +36,7 @@ from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
 // -----------------------------------
 
 @storage_var
-func beast(beastId: felt, adventurerTokenId: Uint256) -> (beast: felt) {
+func beast(tokenId: felt) -> (packed_beast: felt) {
 }
 
 // -----------------------------------
@@ -66,18 +70,34 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 }
 
 @external
-func attack_beast{syscall_ptr: felt*, range_check_ptr}(
+func birth{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(rank: felt, greatness: felt) {
+
+}
+
+@external
+func attack_beast{syscall_ptr: felt*,  range_check_ptr}(
     adventurer_id: Uint256
-) -> (new_unpacked_adventurer: AdventurerState) {
+) {
     alloc_locals;
 
-    Module.only_approved();
+    let (caller) = get_caller_address();
+    let (owner) = IAdventurer.ownerOf(adventurer_id);
 
-    assert unpacked_adventurer.Status = AdventurerStatus.Battle;
-
-    let (beast: Beast) = getBeastForAdventurer(adventurer_id);
+    with_attr error_message("Beast: Only adventurer owner can attack") {
+        assert caller = owner;
+    }
 
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
+
+    let (unpacked_adventurer) = IAdventurer.getAdventurerById(adventurer_address, adventurer_id);
+
+    with_attr error_message("Beast: Adventurer must be in a battle") {
+        assert unpacked_adventurer.Status = AdventurerStatus.Battle;
+    }
+
+    let (beast: Beast) = getBeastById(unpacked_adventurer.beast);
 
     let (damage_dealt) = CombatStats.calculate_damage_to_beast(beast, unpacked_adventurer.WeaponId);
 
@@ -98,19 +118,32 @@ func attack_beast{syscall_ptr: felt*, range_check_ptr}(
     } else {
         // if beast has been slain, grant adventurer xp
         let (xp_gained) = beast.Rank * beast.Greatness;
-        let (updated_adventurer: AdventurerState) = increase_xp(xp_gained, unpacked_adventurer);
+        let (updated_adventurer: AdventurerState) = AdventurerLib.increase_xp(xp_gained, unpacked_adventurer);
     }
 
-    return (updated_adventurer,);
+    return ();
 }
 
 @external
 func flee_from_beast{syscall_ptr: felt*, range_check_ptr}(
-    unpacked_adventurer: AdventurerState, beast: Beast
-) -> (new_unpacked_adventurer: AdventurerState) {
+    adventurer_id: Uint256
+) {
     alloc_locals;
 
-    Module.only_approved();
+    let (caller) = get_caller_address();
+    let (owner) = IAdventurer.ownerOf(adventurer_id);
+
+    with_attr error_message("Beast: Only adventurer owner can flee") {
+        assert caller = owner;
+    }
+
+    let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
+
+    let (unpacked_adventurer) = IAdventurer.getAdventurerById(adventurer_address, adventurer_id);
+
+    with_attr error_message("Beast: Adventurer must be in a battle") {
+        assert unpacked_adventurer.Status = AdventurerStatus.Battle;
+    }
 
     // Adventurer Speed is Dexterity - Weight of all equipped items
     // TODO: Provide utility function that takes in an adventurer and returns net weight of gear
@@ -136,9 +169,9 @@ func flee_from_beast{syscall_ptr: felt*, range_check_ptr}(
         // then calculate damage based on beast
         let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, Adventurer.ChestId);
 
-            let (ambushed_adventurer: AdventurerState) = deduct_health(
-                damage_taken, unpacked_adventurer
-            );
+        let (ambushed_adventurer: AdventurerState) = IAdventurer.deductHealth(
+            adventurer_address, adventurer_id, damage_taken
+        );
     }
 
     let (can_flee) = is_le(ambush_rng, adventurer_speed);
@@ -148,11 +181,11 @@ func flee_from_beast{syscall_ptr: felt*, range_check_ptr}(
         let (was_ambushed) = is_le(damage_taken, 0);
 
         if (was_ambushed == TRUE) {
-            let (adventurer_fled: AdventurerState) = cast_state(
+            let (adventurer_fled: AdventurerState) = AdventurerLib.cast_state(
                 AdventurerSlotIds.Mode, AdventurerMode.Idle, ambushed_adventurer
             );
         } else {
-            let (adventurer_fled: AdventurerState) = cast_state(
+            let (adventurer_fled: AdventurerState) = AdventurerLib.cast_state(
                 AdventurerSlotIds.Mode, AdventurerMode.Idle, unpacked_adventurer
             );
         }
@@ -182,6 +215,13 @@ func getBeastById{
 
     return (unpacked_beast,);
 }
+
+// @view
+// func getBeastForAdventurer{
+//         pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+// }(adventurer_id: Uint256) -> (unpacked_beast: Beast) {
+//     let (adventurer_data) = IAdventurer
+// }
 
 
 

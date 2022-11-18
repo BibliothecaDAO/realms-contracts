@@ -15,8 +15,7 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_add
 from starkware.cairo.common.math import unsigned_div_rem, assert_lt_felt
 from starkware.cairo.common.math_cmp import is_le
-from starkware.starknet.common.syscalls import get_block_timestamp
-from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
+from starkware.starknet.common.syscalls import get_caller_address, get_contract_address, get_block_timestamp
 
 from openzeppelin.access.ownable.library import Ownable
 from openzeppelin.introspection.erc165.library import ERC165
@@ -28,7 +27,7 @@ from openzeppelin.upgrades.library import Proxy
 
 from contracts.settling_game.library.library_module import Module
 from contracts.loot.adventurer.library import AdventurerLib
-from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState, AdventurerMode
+from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState, AdventurerStatus
 from contracts.loot.constants.beast import Beast
 from contracts.loot.interfaces.imodules import IModuleController
 from contracts.loot.loot.stats.combat import CombatStats
@@ -254,11 +253,39 @@ func deductHealth{
     return (1,);
 }
 
-// @external
-// func explore{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
-    
-// }
+@external
+func explore{syscall_ptr: felt*, range_check_ptr}(tokenId: Uint256) {
+    alloc_locals;
 
+    // unpack adventurer
+    let (unpacked_adventurer) = getAdventurerById(tokenId);
+
+    // Only idle explorers can explore
+    assert unpacked_adventurer.Status = AdventurerStatus.Idle;
+
+    // TODO: replace this with xorshiro rng
+    local encounter;
+    %{
+            import random
+            ids.encounter = random.randint(0, 4)
+        %}
+
+        // If the adventurer encounter a beast 
+        if (encounter == DiscoveryType.Beast) {
+        // we set their status to battle
+        let (unpacked_adventurer: AdventurerState) = update_status(AdventurerStatus.Battle, unpacked_adventurer);
+
+        let (beast : Beast) = BeastUtils.get_random_beast();
+
+        // Todo generate a beast token
+        // let (beastTokenId) = BeastModule.birth(greatness=1, rank=5, etc)
+        unpacked_adventurer.Beast = beastTokenId;
+
+        // I think here we need to mint a Beast and store it on-chain. 
+        }
+
+    return (unpacked_adventurer,);
+}
 // -----------------------------
 // Internal Adventurer Specific
 // -----------------------------

@@ -33,6 +33,10 @@ namespace SHIFT_P {
     const _5 = 2 ** 31;
     const _6 = 2 ** 38;
     const _7 = 2 ** 43;
+    const _8 = 2 ** 48;
+    const _9 = 2 ** 89;
+    const _10 = 2 ** 99;
+    const _11 = 2 ** 140;
 }
 
 namespace BeastConstants {
@@ -205,4 +209,8 @@ namespace BeastSlotIds {
     const Prefix_1 = 4;
     const Prefix_2 = 5;
     const Greatness = 6;
+    const Adventurer = 7;
+    const XP = 8;
+    const Slain_By = 9;
+    const Slain_On_Date = 10;
 }
