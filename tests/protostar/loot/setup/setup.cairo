@@ -6,7 +6,8 @@ from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
 
 from tests.protostar.loot.setup.interfaces import (
     IController, 
-    IAdventurer, 
+    IAdventurer,
+    IBeast,
     ILoot, 
     IRealms, 
     ILords
@@ -17,6 +18,7 @@ struct Contracts {
     controller: felt,
     treasury: felt,
     adventurer: felt,
+    beast: felt,
     loot: felt,
     realms: felt,
     lords: felt,
@@ -89,6 +91,10 @@ func deploy_all{
         ids.contracts.adventurer = deploy_contract("./contracts/settling_game/proxy/PROXY_LOGIC.cairo",
             [declared.class_hash]
         ).contract_address
+        declared = declare("./contracts/loot/beast/Beast.cairo")
+        ids.contracts.beast = deploy_contract("./contracts/settling_game/proxy/PROXY_LOGIC.cairo",
+            [declared.class_hash]
+        ).contract_address
         declared = declare("./contracts/loot/loot/Loot.cairo")
         ids.contracts.loot = deploy_contract("./contracts/settling_game/proxy/PROXY_LOGIC.cairo",
             [declared.class_hash]
@@ -110,6 +116,10 @@ func deploy_all{
     IAdventurer.initializer(contracts.adventurer, 1, 1, contracts.account_1, contracts.controller);
     IController.set_address_for_module_id(contracts.controller, ModuleIds.Adventurer, contracts.adventurer);
     IController.set_write_access(contracts.controller, ModuleIds.Adventurer, ModuleIds.Loot);
+
+    IBeast.initializer(contracts.beast, contracts.account_1, contracts.account_1);
+    IController.set_address_for_module_id(contracts.controller, ModuleIds.Beast, contracts.beast);
+    IController.set_write_access(contracts.controller, ModuleIds.Beast, ModuleIds.Adventurer);
 
     ILoot.initializer(contracts.loot, 1, 1, contracts.account_1, contracts.controller);
     IController.set_address_for_module_id(contracts.controller, ModuleIds.Loot, contracts.loot);

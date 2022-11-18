@@ -1,6 +1,7 @@
 namespace ModuleIds {
     const Adventurer = 1;
     const Loot = 2;
+    const Beast = 3;
 }
 
 namespace ExternalContractIds {

@@ -6,8 +6,21 @@
 //
 // -----------------------------------
 
-from starkware.cairo.common.uint256 import Uint256
+%lang starknet
+from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.math import unsigned_div_rem
+from starkware.cairo.common.math_cmp import is_le
+from starkware.cairo.common.uint256 import Uint256
+
+from openzeppelin.upgrades.library import Proxy
+
+from contracts.settling_game.library.library_module import Module
+from contracts.loot.adventurer.interface import IAdventurer
+from contracts.loot.beast.library import BeastLib
+from contracts.loot.constants.adventurer import AdventurerState
+from contracts.loot.constants.beast import Beast
+from contracts.loot.loot.stats.combat import CombatStats
+from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
 
 
 // -----------------------------------
@@ -19,7 +32,7 @@ from starkware.cairo.common.math import unsigned_div_rem
 // -----------------------------------
 
 @storage_var
-func beast(tokenId: Uint256) -> (beast: felt) {
+func beast(beastId: felt, adventurerTokenId: Uint256) -> (beast: felt) {
 }
 
 // -----------------------------------
@@ -54,13 +67,19 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
 @external
 func attack_beast{syscall_ptr: felt*, range_check_ptr}(
-    unpacked_adventurer: AdventurerState, beast: Beast
+    adventurer_id: Uint256
 ) -> (new_unpacked_adventurer: AdventurerState) {
     alloc_locals;
 
     Module.only_approved();
 
-    let (damage_dealt) = CombatStats.calculate_damage_to_beast(beast, Adventurer.WeaponId);
+    assert unpacked_adventurer.Status = AdventurerStatus.Battle;
+
+    let (beast: Beast) = getBeastForAdventurer(adventurer_id);
+
+    let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
+
+    let (damage_dealt) = CombatStats.calculate_damage_to_beast(beast, unpacked_adventurer.WeaponId);
 
     // check if damage dealt is less than health remaining
     let still_alive = is_le(damage_dealt, beast.Health);
@@ -71,9 +90,9 @@ func attack_beast{syscall_ptr: felt*, range_check_ptr}(
     // if the beast is alive
     if (still_alive == TRUE) {
         // having been attacked, it automatically attacks back
-        let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, Adventurer.ChestId);
-        let (updated_adventurer: AdventurerState) = deductHealth(
-            damage_taken, unpacked_adventurer
+        let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, unpacked_adventurer.ChestId);
+        let (updated_adventurer: AdventurerState) = IAdventurer.deductHealth(
+            adventurer_address, unpacked_adventurer, damage_taken
         );
         // beast.write(updated_beast);
     } else {
@@ -145,6 +164,25 @@ func flee_from_beast{syscall_ptr: felt*, range_check_ptr}(
         return (unpacked_adventurer,);
     }
 }
+
+// --------------------
+// Getters
+// --------------------
+
+@view
+func getBeastById{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(tokenId: Uint256) -> (beast: Beast) {
+    alloc_locals;
+
+    let (packed_beast) = beast.read(tokenId);
+
+    // unpack
+    let (unpacked_beast: Beast) = BeastLib.unpack(packed_beast);
+
+    return (unpacked_beast,);
+}
+
 
 
 

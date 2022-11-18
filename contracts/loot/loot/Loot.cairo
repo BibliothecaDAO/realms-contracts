@@ -299,24 +299,20 @@ func updateAdventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     Module.only_approved();
     let (item_: Item) = item.read(tokenId);
 
-    // TODO: Move library
-    // let update_item = Item(
-    //     Id=item_.Id,
-    //     Slot=item_.Slot,
-    //     Type=item_.Type,
-    //     Material=item_.Material,
-    //     Rank=item_.Rank,
-    //     Prefix_1=item_.Prefix_1,
-    //     Prefix_2=item_.Prefix_2,
-    //     Suffix=item_.Suffix,
-    //     Greatness=item_.Greatness,
-    //     CreatedBlock=item_.CreatedBlock,
-    //     XP=item_.XP,
-    //     Adventurer=adventurerId,
-    //     Bag=item_.Bag,
-    // );
-
     let updated_item = ItemLib.update_adventurer(item_, adventurerId);
+
+    setItemById(tokenId, updated_item);
+    return ();
+}
+
+@external
+func updateXP{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    tokenId: Uint256, xp: felt
+) {
+    Module.only_approved();
+    let (item_: Item) = item.read(tokenId);
+
+    let updated_item = ItemLib.update_xp(item_, xp);
 
     setItemById(tokenId, updated_item);
     return ();

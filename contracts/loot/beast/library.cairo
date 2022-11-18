@@ -19,7 +19,6 @@ namespace BeastLib {
         bitwise_ptr: BitwiseBuiltin*,
     }(unpacked_beast: Beast) -> (packed_beast: felt) {
         
-        // ---------- p1 ---------#
         let Id = unpacked_beast.Id * SHIFT_P._1;
         let Health = unpacked_beast.Health * SHIFT_P._2;
         let Type = unpacked_beast.Type * SHIFT_P._3;
@@ -47,6 +46,8 @@ namespace BeastLib {
         let (Prefix_1) = unpack_data(packed_beast, 31, 127);
         let (Prefix_2) = unpack_data(packed_beast, 38, 31);
         let (Greatness) = unpack_data(packed_beast, 43, 31);
+        // let (Adventurer) = unpack_data(packed_beast, 43, 31);
+        // let (Slain_By) = unpack_data(packed_beast, 43, 31);
 
         return (
             Beast(

@@ -254,10 +254,10 @@ func deductHealth{
     return (1,);
 }
 
-@external
-func explore{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+// @external
+// func explore{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     
-}
+// }
 
 // -----------------------------
 // Internal Adventurer Specific
