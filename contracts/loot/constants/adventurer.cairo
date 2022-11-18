@@ -193,13 +193,6 @@ namespace DiscoveryType {
     const Obstacle = 2;
     const Adventurer = 3;
     const Item = 4;
-    const Mode = 23;
-}
-
-namespace AdventurerMode {
-    const Idle = 1;
-    const Alive = 2;
-    const Dead = 3;
 }
 
 // index for items - used in cast function to set values
