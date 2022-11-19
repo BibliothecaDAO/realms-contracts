@@ -144,7 +144,7 @@ func calculate_happiness{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
     }
 
     // check if relic is owned - if not subtract
-    let (relic_addr) = IModuleController.get_module_address(controller, ModuleIds.L09_Relics);
+    let (relic_addr) = IModuleController.get_module_address(controller, ModuleIds.Relics);
     let (is_relic_at_home) = IRelics.is_relic_at_home(relic_addr, token_id);
 
     if (is_relic_at_home == FALSE) {
@@ -166,7 +166,7 @@ func calculate_happiness{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
     }
 
     return (
-        CCalculator.BASE_HAPPINESS + daily_randomness_value + no_defending_army_loss + no_food_loss + no_relic_loss,
+        CCalculator.BASE_HAPPINESS - daily_randomness_value - no_defending_army_loss - no_food_loss - no_relic_loss,
     );
 }
 
@@ -230,7 +230,7 @@ func calculate_daily_randomness{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, 
 
     // returns ID of event - a number between 0 - NUMBER_OF_RANDOM_EVENTS
     let (_, random_number) = unsigned_div_rem(
-        owner + token_id.low * day_number, CCalculator.NUMBER_OF_RANDOM_EVENTS
+        10000 + token_id.low * day_number, CCalculator.NUMBER_OF_RANDOM_EVENTS
     );
 
     // get actual value using the random ID

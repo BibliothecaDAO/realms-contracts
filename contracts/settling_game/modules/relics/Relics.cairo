@@ -21,6 +21,7 @@ from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.interfaces.IRealms import IRealms
 from contracts.settling_game.interfaces.imodules import IModuleController
 from contracts.settling_game.utils.game_structs import RealmData, ExternalContractIds
+from contracts.settling_game.modules.relics.library import Relics
 
 // -----------------------------------
 // Events
@@ -138,10 +139,18 @@ func set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
     let (remove_order_relics: Uint256*) = alloc();
 
     let (remove_relics_len) = loop_claim_order_relic(
-        0, realms_address, winner_realm_data, loser_token_id, loser_relics_len, 0, remove_order_relics
+        0,
+        realms_address,
+        winner_realm_data,
+        loser_token_id,
+        loser_relics_len,
+        0,
+        remove_order_relics,
     );
 
-    return loop_remove_relic(0, 0, loser_relics_len, loser_token_id, remove_relics_len, remove_order_relics);
+    return loop_remove_relic(
+        0, 0, loser_relics_len, loser_token_id, remove_relics_len, remove_order_relics
+    );
 }
 
 // @notice loop loser relic and return if order of winner matches holder
@@ -154,7 +163,7 @@ func set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
 // @param loser_relics_len: length of relics array of loser
 // @param remove_relics_index: index of relics to remove
 // @param remove_relics: array of relics to remove from loser
-// @return remove_relics_len: length of relics to remove from loser 
+// @return remove_relics_len: length of relics to remove from loser
 func loop_claim_order_relic{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
     index: felt,
     realms_address: felt,
@@ -215,7 +224,7 @@ func return_relics{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
     loop_return_relics(0, realms_token_id, relics_len, remove_relics);
 
     loop_remove_relic(0, 0, relics_len, realms_token_id, relics_len, remove_relics);
-    
+
     return ();
 }
 

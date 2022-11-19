@@ -71,6 +71,8 @@ cairo-nile = "^0.5.0"
 "happiness" = "realms_cli.player.calculator.happiness"
 "culture" = "realms_cli.player.calculator.culture"
 "population" = "realms_cli.player.calculator.population"
+"daily_randomness" = "realms_cli.player.calculator.daily_randomness"
+"day_number" = "realms_cli.player.calculator.day_number"
 
 #-----------BUILDINGS
 "build" = "realms_cli.player.buildings.build"

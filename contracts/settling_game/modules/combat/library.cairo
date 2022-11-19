@@ -776,4 +776,37 @@ namespace Combat {
             armies_packed_len - 1, armies_packed + 1, total_population + population_single_army
         );
     }
+
+    func apply_hunger_penalty{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        unpacked_army: Army
+    ) -> (unpacked_army: Army) {
+        alloc_locals;
+        let light_cavalry_health = reduce_health(unpacked_army.light_cavalry.health);
+        let heavy_cavalry_health = reduce_health(unpacked_army.heavy_cavalry.health);
+        let archer_health = reduce_health(unpacked_army.archer.health);
+        let longbow_health = reduce_health(unpacked_army.longbow.health);
+
+        let mage_health = reduce_health(unpacked_army.mage.health);
+        let arcanist_health = reduce_health(unpacked_army.arcanist.health);
+        let light_infantry_health = reduce_health(unpacked_army.light_infantry.health);
+        let heavy_infantry_health = reduce_health(unpacked_army.heavy_infantry.health);
+
+        return (
+            Army(Battalion(unpacked_army.light_cavalry.quantity, light_cavalry_health), Battalion(unpacked_army.heavy_cavalry.quantity, heavy_cavalry_health), Battalion(unpacked_army.archer.quantity, archer_health), Battalion(unpacked_army.longbow.quantity, longbow_health), Battalion(unpacked_army.mage.quantity, mage_health), Battalion(unpacked_army.arcanist.quantity, arcanist_health), Battalion(unpacked_army.light_infantry.quantity, light_infantry_health), Battalion(unpacked_army.heavy_infantry.quantity, heavy_infantry_health)),
+        );
+    }
+
+    func reduce_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        battalion_health: felt
+    ) -> felt {
+        let battalion_has_no_health = is_le(battalion_health, 0);
+
+        if (battalion_has_no_health == TRUE) {
+            return (0);
+        }
+
+        let (values, _) = unsigned_div_rem(battalion_health, 2);
+
+        return (values);
+    }
 }

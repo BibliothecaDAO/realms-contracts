@@ -186,7 +186,7 @@ def reset(realm_token_id, network):
 @click.option("--network", default="goerli")
 def full_store_houses(realm_token_id, network):
     """
-    Get harvests_left on a Realm
+    Get full store houses 
     """
     config = Config(nile_network=network)
 

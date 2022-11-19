@@ -273,33 +273,6 @@ func initiate_combat{
         defending_army_id,
     );
 
-    // check if the fighting realms have enough food, otherwise
-    // decrease whole squad vitality by 50%
-
-    // TODO: Food penalty with new module @NEW
-
-    // let (food_module) = Module.get_module_address(ModuleIds.L10_Food)
-    // let (attacker_food_store) = IFood.available_food_in_store(food_module, attacking_realm_id)
-    // let (defender_food_store) = IFood.available_food_in_store(food_module, defending_realm_id)
-
-    // if attacker_food_store == 0:
-    //     let (attacker) = Combat.apply_hunger_penalty(attacker)
-    //     tempvar range_check_ptr = range_check_ptr
-    // else:
-    //     tempvar attacker = attacker
-    //     tempvar range_check_ptr = range_check_ptr
-    // end
-    // tempvar attacker = attacker
-
-    // if defender_food_store == 0:
-    //     let (defender) = Combat.apply_hunger_penalty(defender)
-    //     tempvar range_check_ptr = range_check_ptr
-    // else:
-    //     tempvar defender = defender
-    //     tempvar range_check_ptr = range_check_ptr
-    // end
-    // tempvar defender = defender
-
     // fetch combat data
     let (attacking_realm_data: ArmyData) = get_realm_army_combat_data(
         attacking_army_id, attacking_realm_id
@@ -312,20 +285,55 @@ func initiate_combat{
     let (starting_attack_army: Army) = Combat.unpack_army(attacking_realm_data.packed);
     let (starting_defend_army: Army) = Combat.unpack_army(defending_realm_data.packed);
 
+    // check if the fighting realms have enough food, otherwise
+    // decrease whole squad vitality by 50%
+
+    // TODO: Food penalty with new module
+
+    let (food_module) = Module.get_module_address(ModuleIds.L10_Food);
+    let (attacker_food_store) = IFood.available_food_in_store(food_module, attacking_realm_id);
+    let (defender_food_store) = IFood.available_food_in_store(food_module, defending_realm_id);
+
+    if (attacker_food_store == 0) {
+        let (attacker) = Combat.apply_hunger_penalty(starting_attack_army);
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar pedersen_ptr = pedersen_ptr;
+        tempvar syscall_ptr = syscall_ptr;
+    } else {
+        tempvar attacker = starting_attack_army;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar pedersen_ptr = pedersen_ptr;
+        tempvar syscall_ptr = syscall_ptr;
+    }
+    tempvar attacker = attacker;
+
+    if (defender_food_store == 0) {
+        let (defender) = Combat.apply_hunger_penalty(starting_defend_army);
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar pedersen_ptr = pedersen_ptr;
+        tempvar syscall_ptr = syscall_ptr;
+    } else {
+        tempvar defender = starting_defend_army;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar pedersen_ptr = pedersen_ptr;
+        tempvar syscall_ptr = syscall_ptr;
+    }
+    tempvar defender = defender;
+
     // emit starting
     CombatStart_4.emit(
         attacking_army_id,
         attacking_realm_id,
-        starting_attack_army,
+        attacker,
         defending_army_id,
         defending_realm_id,
-        starting_defend_army,
+        defender,
     );
 
     // luck role and then outcome
     let (luck) = roll_dice();
     let (combat_outcome, ending_attacking_army, ending_defending_army) = Combat.calculate_winner(
-        luck, starting_attack_army, starting_defend_army
+        luck, attacker, defender
     );
 
     // pillaging only if attacker wins
@@ -335,9 +343,7 @@ func initiate_combat{
         let (resources_logic_address) = IModuleController.get_module_address(
             controller, ModuleIds.Resources
         );
-        let (relic_address) = IModuleController.get_module_address(
-            controller, ModuleIds.Relics
-        );
+        let (relic_address) = IModuleController.get_module_address(controller, ModuleIds.Relics);
         let (caller) = get_caller_address();
         IResources.pillage_resources(resources_logic_address, defending_realm_id, caller);
         IRelics.set_relic_holder(relic_address, attacking_realm_id, defending_realm_id);
