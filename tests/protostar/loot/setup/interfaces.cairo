@@ -82,7 +82,7 @@ namespace IBeast {
     }
     func attack_beast(unpacked_adventurer: AdventurerState, beast: Beast) {
     }
-    func get_beast_by_id(beast_id: Uint256) -> (beast_static: BeastStatic, beast_dynamic: BeastDynamic) {
+    func get_beast_by_id(beast_id: Uint256) -> (beast: Beast) {
     }
 }
 

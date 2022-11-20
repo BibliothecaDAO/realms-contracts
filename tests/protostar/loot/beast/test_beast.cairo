@@ -60,20 +60,13 @@ func test_pack{
 }() {
     alloc_locals;
 
-    let beast_static = BeastStatic(
-        1,
-        1,
-        1,
-        1,
-        0,
-        0
-    );
-
     let beast_dynamic = BeastDynamic(
         100,
         5,
         0,
-        0
+        0,
+        1,
+        1000
     );
 
     let (packed_beast) = BeastLib.pack(beast_dynamic);
@@ -84,6 +77,8 @@ func test_pack{
     assert unpacked_beast.Rank = 5;
     assert unpacked_beast.Adventurer = 0;
     assert unpacked_beast.XP = 0;
+    assert unpacked_beast.SlainBy = 1;
+    assert unpacked_beast.SlainOnDate = 1000;
 
     return ();
 }
@@ -124,6 +119,44 @@ func test_deduct_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, bitwise_
     let (c) = BeastLib.deduct_health(TEST_DAMAGE_OVERKILL, beast);
 
     assert c.Health = 0;
+    
+    return ();
+}
+
+@external
+func test_set_adventurer{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, bitwise_ptr: BitwiseBuiltin*, range_check_ptr
+}() {
+    alloc_locals;
+    
+    let (beast_static, beast_dynamic) = TestUtils.create_beast(1);
+
+    let (packed_beast) = BeastLib.pack(beast_dynamic);
+
+    let (beast: BeastDynamic) = BeastLib.unpack(packed_beast);
+
+    let (c) = BeastLib.set_adventurer(1, beast);
+
+    assert c.Adventurer = 1;
+    
+    return ();
+}
+
+@external
+func test_slain{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, bitwise_ptr: BitwiseBuiltin*, range_check_ptr
+}() {
+    alloc_locals;
+    let (beast_static, beast_dynamic) = TestUtils.create_beast(1);
+
+    let (packed_beast) = BeastLib.pack(beast_dynamic);
+
+    let (beast: BeastDynamic) = BeastLib.unpack(packed_beast);
+
+    let (c) = BeastLib.slay(1, 1000, beast);
+
+    assert c.SlainBy = 1;
+    assert c.SlainOnDate = 1000;
     
     return ();
 }

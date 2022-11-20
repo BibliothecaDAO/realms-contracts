@@ -26,7 +26,7 @@ namespace BeastLib {
 
     func create{syscall_ptr: felt*, range_check_ptr}(xoroshiro_random: felt, adventurer_id: felt) -> (beast_static: BeastStatic, beast_dynamic: BeastDynamic) {
 
-        let (_, r) = unsigned_div_rem(xoroshiro_random, 17);
+        let (_, r) = unsigned_div_rem(xoroshiro_random, 17); // number of beast ids
         let beast_id = r + 1;
 
         let BeastId = beast_id;
@@ -46,14 +46,14 @@ namespace BeastLib {
                 Type=Type,
                 Prefix_1=Prefix_1,
                 Prefix_2=Prefix_2,
-                SlainBy=SlainBy,
-                SlainOnDate=SlainOnDate,
             ),
             BeastDynamic(
                 Health=Health,
                 Rank=Rank,
                 Adventurer=Adventurer,
-                XP=XP
+                XP=XP,
+                SlainBy=SlainBy,
+                SlainOnDate=SlainOnDate,
             )
         );
     }
@@ -66,12 +66,12 @@ namespace BeastLib {
             beast_static.Type,
             beast_static.Prefix_1,
             beast_static.Prefix_2,
-            beast_static.SlainBy,
-            beast_static.SlainOnDate,
             beast_dynamic.Health,
             beast_dynamic.Rank,
             beast_dynamic.Adventurer,
-            beast_dynamic.XP
+            beast_dynamic.XP,
+            beast_dynamic.SlainBy,
+            beast_dynamic.SlainOnDate,
         );
 
         return (beast,);
@@ -86,15 +86,15 @@ namespace BeastLib {
             beast.Type,
             beast.Prefix_1,
             beast.Prefix_2,
-            beast.SlainBy,
-            beast.SlainOnDate,
         );
 
         let beast_dynamic = BeastDynamic(
             beast.Health,
             beast.Rank,
             beast.Adventurer,
-            beast.XP
+            beast.XP,
+            beast.SlainBy,
+            beast.SlainOnDate,
         );
 
         return (beast_static, beast_dynamic);
@@ -110,9 +110,11 @@ namespace BeastLib {
         let Rank = unpacked_beast.Rank * SHIFT_P._2;
         let Adventurer = unpacked_beast.Adventurer * SHIFT_P._3;
         let XP = unpacked_beast.XP * SHIFT_P._4;
+        let Slain_By = unpacked_beast.SlainBy * SHIFT_P._5;
+        let Slain_On_Date = unpacked_beast.SlainOnDate * SHIFT_P._6;
         
 
-        let packed_beast = Health + Rank + Adventurer + XP;
+        let packed_beast = Health + Rank + Adventurer + XP + Slain_By + Slain_On_Date;
 
         return (packed_beast,);
     }
@@ -128,13 +130,17 @@ namespace BeastLib {
         let (Rank) = unpack_data(packed_beast, 10, 7);
         let (Adventurer) = unpack_data(packed_beast, 13, 2199023255551);
         let (XP) = unpack_data(packed_beast, 54, 134217727);
+        let (Slain_By) = unpack_data(packed_beast, 81, 2199023255551);
+        let (Slain_On_Date) = unpack_data(packed_beast, 122, 8589934591);
 
         return (
             BeastDynamic(
                 Health,
                 Rank,
                 Adventurer,
-                XP,
+                XP, 
+                Slain_By,
+                Slain_On_Date
             ),
         );
     }
@@ -178,6 +184,7 @@ namespace BeastLib {
 
         return (updated_beast,);
     }
+
     func set_adventurer{syscall_ptr: felt*, range_check_ptr}(
         adventurer_id: felt, unpacked_beast: BeastDynamic
     ) -> (new_unpacked_beast: BeastDynamic) {
@@ -189,6 +196,23 @@ namespace BeastLib {
         );
 
         return (updated_beast,);
+    }
+
+    func slay{syscall_ptr: felt*, range_check_ptr}(
+        slain_by: felt, slain_on_date: felt, unpacked_beast: BeastDynamic
+    ) -> (new_beast: BeastDynamic) {
+
+        // set slain by on the beast to the provided adventurer id
+        let (updated_slain_by_beast: BeastDynamic) = cast_state(
+            BeastSlotIds.SlainBy, slain_by, unpacked_beast
+        );
+
+        // set slain on date on the beast to the provided adventurer id
+        let (updated_slain_on_beast: BeastDynamic) = cast_state(
+            BeastSlotIds.SlainOnDate, slain_on_date, updated_slain_by_beast
+        );
+
+        return (updated_slain_on_beast,);
     }
 
     func calculate_greatness{syscall_ptr: felt*, range_check_ptr}(xp: felt) -> (greatness: felt) {

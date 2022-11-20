@@ -179,15 +179,15 @@ namespace TestUtils {
                 beast_id,
                 type,
                 prefix_1,
-                prefix_2,
-                slain_by,
-                slain_on_date
+                prefix_2
             ),
             BeastDynamic(
                 health,
                 rank,
                 adventurer,
-                xp
+                xp,
+                slain_by,
+                slain_on_date
             )
         );
     }

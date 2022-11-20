@@ -41,13 +41,6 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     IAdventurer.mint(addresses.adventurer, addresses.account_1, 4, 10, 'Test', 8);
     IAdventurer.equip_item(addresses.adventurer, Uint256(1,0), Uint256(1,0));
     %{
-        print(ids.addresses.account_1)
-        print(ids.addresses.realms)
-        print(ids.addresses.adventurer)
-        print(ids.addresses.loot)
-        print(ids.addresses.beast)
-        print(ids.addresses.lords)
-        print(ids.addresses.xoroshiro)
         stop_prank_realms()
         stop_prank_adventurer()
         stop_prank_lords()
@@ -72,18 +65,18 @@ func test_create{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 
     let (beast_id) = IBeast.create(beast_address, Uint256(1,0));
 
-    let (beast_static, beast_dynamic) = IBeast.get_beast_by_id(beast_address, beast_id);
+    let (beast) = IBeast.get_beast_by_id(beast_address, beast_id);
 
-    assert beast_static.Id = 1;
-    assert beast_dynamic.Health = 100;
+    assert beast.Id = 1;
+    assert beast.Health = 100;
     // assert beast_static.Type = 1;
     // assert beast_dynamic.Rank = 5;
-    assert beast_static.Prefix_1 = 1;
-    assert beast_static.Prefix_2 = 1;
-    assert beast_dynamic.Adventurer = 0;
-    assert beast_dynamic.XP = 0;
-    assert beast_static.SlainBy = 0;
-    assert beast_static.SlainOnDate = 0;
+    assert beast.Prefix_1 = 1;
+    assert beast.Prefix_2 = 1;
+    assert beast.Adventurer = 0;
+    assert beast.XP = 0;
+    assert beast.SlainBy = 0;
+    assert beast.SlainOnDate = 0;
 
     %{
         print('Rank', ids.beast.Rank)
@@ -94,7 +87,7 @@ func test_create{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 }
 
 // @external
-// func test_attack_beast{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+// func test_attack{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
 //     alloc_locals;
     
 //     local beast_address;
@@ -119,4 +112,8 @@ func test_create{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 //     %}
 
 //     return ();
+// }
+
+// @external
+// func test_flee{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
 // }

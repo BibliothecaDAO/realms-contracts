@@ -12,7 +12,7 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_not_equal
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.uint256 import Uint256, uint256_add
-from starkware.starknet.common.syscalls import get_caller_address
+from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 
 from openzeppelin.upgrades.library import Proxy
 from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
@@ -84,20 +84,14 @@ func create{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(adventurer_id: Uint256) -> (beast_id: Uint256) {
     Module.only_approved();
-    let (controller) = Module.controller_address();
-    let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
-    let (rnd) = IXoroshiro.next(xoroshiro_address_);
+    let (rnd) = get_random_number();
     let (beast_static_, beast_dynamic_) = BeastLib.create(rnd, adventurer_id.low);
     let (packed_beast) = BeastLib.pack(beast_dynamic_);
-
-    with_attr error_message("Beast: Can't set beast adventurer to same value as current") {
-        assert_not_equal(adventurer_id.low, beast_dynamic_.Adventurer);
-    }
-
     let (current_id) = total_supply.read();
     let (next_id, _) = uint256_add(current_id, Uint256(1,0));
     beast_static.write(next_id, beast_static_);
     beast_dynamic.write(next_id, packed_beast);
+    total_supply.write(next_id);
     return (next_id,);
 }
 
@@ -111,14 +105,11 @@ func attack{
 
     let (beast) = get_beast_by_id(beast_id);
 
-    let (caller) = get_caller_address();
-    let (owner) = IAdventurer.ownerOf(adventurer_address, Uint256(beast.Adventurer, 0));
+    let adventurer_id = Uint256(beast.Adventurer, 0);
 
-    with_attr error_message("Beast: Only adventurer owner can attack") {
-        assert caller = owner;
-    }
+    assert_adventurer_owner(adventurer_id);
 
-    let (unpacked_adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(beast.Adventurer, 0));
+    let (unpacked_adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_id);
 
     with_attr error_message("Beast: Adventurer must be in a battle") {
         assert unpacked_adventurer.Status = AdventurerStatus.Battle;
@@ -141,28 +132,30 @@ func attack{
     let (beast_static_, beast_dynamic_) = BeastLib.split_data(beast);
 
     // deduct health from beast
-    let (updated_beast) = BeastLib.deduct_health(damage_dealt, beast_dynamic_);
+    let (updated_health_beast) = BeastLib.deduct_health(damage_dealt, beast_dynamic_);
 
-    let (packed_beast) = BeastLib.pack(updated_beast);
+    let (packed_beast) = BeastLib.pack(updated_health_beast);
 
-    beast_dynamic.write(Uint256(unpacked_adventurer.Beast, 0), packed_beast);
-
-    let (new_beast_) = BeastLib.aggregate_data(beast_static_, updated_beast);
+    let (new_beast_) = BeastLib.aggregate_data(beast_static_, updated_health_beast);
 
     // if the beast is alive
     if (still_alive == TRUE) {
         // having been attacked, it automatically attacks back
         let (chest) = ILoot.getItemByTokenId(item_address, Uint256(unpacked_adventurer.ChestId, 0));
         let (damage_taken) = CombatStats.calculate_damage_from_beast(new_beast_, chest);
-        IAdventurer.deduct_health(adventurer_address, Uint256(new_beast_.Adventurer, 0), damage_taken);
+        IAdventurer.deduct_health(adventurer_address, adventurer_id, damage_taken);
+        return ();
     } else {
         // if beast has been slain, grant adventurer xp
-        let (beast_greatness) = BeastLib.calculate_greatness(updated_beast.XP);
-        let xp_gained = updated_beast.Rank * beast_greatness;
-        IAdventurer.increase_xp(adventurer_address, Uint256(new_beast_.Adventurer, 0), xp_gained);
+        let (current_time) = get_block_timestamp();
+        let (slain_updated_beast) = BeastLib.slay(adventurer_id.low, current_time, updated_health_beast); 
+        let (new_packed_beast) = BeastLib.pack(updated_health_beast);
+        beast_dynamic.write(beast_id, new_packed_beast);
+        let (beast_greatness) = BeastLib.calculate_greatness(slain_updated_beast.XP);
+        let xp_gained = slain_updated_beast.Rank * beast_greatness;
+        IAdventurer.increase_xp(adventurer_address, adventurer_id, xp_gained);
+        return ();
     }
-
-    return ();
 }
 
 @external
@@ -175,12 +168,7 @@ func flee{
 
     let (beast) = get_beast_by_id(beast_id);
 
-    let (caller) = get_caller_address();
-    let (owner) = IAdventurer.ownerOf(adventurer_address, Uint256(beast.Adventurer, 0));
-
-    with_attr error_message("Beast: Only adventurer owner can flee") {
-        assert caller = owner;
-    }
+    assert_adventurer_owner(Uint256(beast.Adventurer, 0));
 
     let (unpacked_adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(beast.Adventurer, 0));
 
@@ -195,10 +183,7 @@ func flee{
     // Adventurer ambush resistance is based on wisdom plus luck
     let ambush_resistance = unpacked_adventurer.Wisdom + unpacked_adventurer.Luck;
 
-    // Generate random number which will determine:
-    let (controller) = Module.controller_address();
-    let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
-    let (rnd) = IXoroshiro.next(xoroshiro_address_);
+    let (rnd) = get_random_number();
     let (_, r) = unsigned_div_rem(rnd, 20);
 
     // TODO Milestone2: Factor in beast health for the ambush chance and for flee chance
@@ -257,13 +242,24 @@ func set_beast_by_id{
 // Internal
 // --------------------
 
+func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}() -> (
+    dice_roll: felt
+) {
+    alloc_locals;
+
+    let (controller) = Module.controller_address();
+    let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
+    let (rnd) = IXoroshiro.next(xoroshiro_address_);
+    return (rnd,);
+}
+
 func assert_adventurer_owner{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(beast: Beast) {
+}(adventurer_id: Uint256) {
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
 
     let (caller) = get_caller_address();
-    let (owner) = IAdventurer.ownerOf(adventurer_address, Uint256(beast.Adventurer, 0));
+    let (owner) = IAdventurer.ownerOf(adventurer_address, adventurer_id);
 
     with_attr error_message("Beast: Only adventurer owner can attack") {
         assert caller = owner;

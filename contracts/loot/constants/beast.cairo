@@ -16,12 +16,12 @@ struct Beast {
     Type: felt,  // same as Loot weapons: magic, bludgeon, blade
     Prefix_1: felt,  // First part of the name prefix (i.e Tear)
     Prefix_2: felt,  // Second part of the name prefix (i.e Bearer)
-    SlainBy: felt, // the tokenId of the adventurer that slayed this beast
-    SlainOnDate: felt, // unix timestamp when the beast was slain
     Health: felt,  // health of the beast
     Rank: felt,  // same as Loot weapons: 1 is the strongest
     Adventurer: felt, // The token id of the adventurer the beast is battling
     XP: felt,  // the xp of the beast
+    SlainBy: felt, // the tokenId of the adventurer that slayed this beast
+    SlainOnDate: felt, // unix timestamp when the beast was slain
 }
 
 // Structure for the adventurer Beast primitive
@@ -30,8 +30,6 @@ struct BeastStatic {
     Type: felt,  // same as Loot weapons: magic, bludgeon, blade
     Prefix_1: felt,  // First part of the name prefix (i.e Tear)
     Prefix_2: felt,  // Second part of the name prefix (i.e Bearer)
-    SlainBy: felt, // the tokenId of the adventurer that slayed this beast
-    SlainOnDate: felt, // unix timestamp when the beast was slain
 }
 
 struct BeastDynamic {
@@ -39,14 +37,17 @@ struct BeastDynamic {
     Rank: felt,  // same as Loot weapons: 1 is the strongest
     Adventurer: felt, // The token id of the adventurer the beast is battling
     XP: felt,  // the xp of the beast
+    SlainBy: felt, // the tokenId of the adventurer that slayed this beast
+    SlainOnDate: felt, // unix timestamp when the beast was slain
 }
-
 
 namespace SHIFT_P {
     const _1 = 2 ** 0;
     const _2 = 2 ** 10;
     const _3 = 2 ** 13;
     const _4 = 2 ** 54;
+    const _5 = 2 ** 81;
+    const _6 = 2 ** 122;
 }
 
 namespace BeastIds {
@@ -126,4 +127,6 @@ namespace BeastSlotIds {
     const Rank = 1;
     const Adventurer = 2;
     const XP = 3;
+    const SlainBy = 4;
+    const SlainOnDate = 5;
 }
