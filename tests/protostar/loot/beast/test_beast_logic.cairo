@@ -126,6 +126,8 @@ func test_attack{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     );
     IBeast.set_beast_by_id(beast_address, Uint256(1,0), beast);
 
+    IAdventurer.explore(adventurer_address);
+
     %{
         stop_prank_beast()
         stop_prank_beast = start_prank(ids.account_1_address, ids.beast_address)

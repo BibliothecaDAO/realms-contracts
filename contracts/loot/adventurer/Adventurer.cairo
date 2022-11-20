@@ -157,7 +157,7 @@ func equip_item{
 }(tokenId: Uint256, itemTokenId: Uint256) -> (success: felt) {
     alloc_locals;
 
-    // only adventurer can equip ofc
+    // only adventurer owner can equip
     ERC721.assert_only_token_owner(tokenId);
 
     // unpack adventurer
@@ -203,7 +203,7 @@ func unequip_item{
 }(tokenId: Uint256, itemTokenId: Uint256) -> (success: felt) {
     alloc_locals;
 
-    // only adventurer can unequip ofc
+    // only adventurer owner can unequip
     ERC721.assert_only_token_owner(tokenId);
 
     // unpack adventurer
@@ -308,12 +308,17 @@ func explore{
 }(token_id: Uint256) -> (success: felt) {
     alloc_locals;
 
+    // only adventurer owner can explore
+    ERC721.assert_only_token_owner(tokenId);
+
     // unpack adventurer
     let (unpacked_adventurer) = get_adventurer_by_id(token_id);
 
     // Only idle explorers can explore
-    assert unpacked_adventurer.Status = AdventurerStatus.Idle;
-    
+    with_attr error_message("Adventurer: Adventurer must be idle") {
+        assert unpacked_adventurer.Status = AdventurerStatus.Idle;
+    }
+
     let (rnd) = get_random_number();
     let (_, encounter) = unsigned_div_rem(rnd, 4);
 
