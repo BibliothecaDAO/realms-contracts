@@ -21,6 +21,7 @@ from contracts.loot.constants.beast import (
     BeastSlotIds
 )
 from contracts.loot.beast.stats.beast import BeastStats
+from contracts.loot.loot.stats.item import ItemStats
 
 namespace BeastLib {
 
@@ -33,8 +34,8 @@ namespace BeastLib {
         let Health = 100;
         let (Type) = BeastStats.get_type_from_id(beast_id);
         let (Rank) = BeastStats.get_rank_from_id(beast_id);
-        let Prefix_1 = 0;
-        let Prefix_2 = 0;
+        let (Prefix_1) = ItemStats.item_name_prefix(1);
+        let (Prefix_2) = ItemStats.item_name_suffix(1);
         let Adventurer = adventurer_id;
         let XP = 0;
         let SlainBy = 0;

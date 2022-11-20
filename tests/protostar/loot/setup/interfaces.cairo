@@ -80,9 +80,11 @@ namespace IBeast {
     }
     func create(adventurer_id: Uint256) -> (beast_id: Uint256) {
     }
-    func attack_beast(unpacked_adventurer: AdventurerState, beast: Beast) {
+    func attack(beast_id: Uint256) {
     }
     func get_beast_by_id(beast_id: Uint256) -> (beast: Beast) {
+    }
+    func set_beast_by_id(beast_id: Uint256, beast: Beast) {
     }
 }
 

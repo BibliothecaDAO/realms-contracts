@@ -229,6 +229,7 @@ func flee{
 func set_beast_by_id{
         pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(token_id: Uint256, beast: Beast) {
+    Module.only_approved();
     let (beast_static_, beast_dynamic_) = BeastLib.split_data(beast);
     let (packed_beast: felt) = BeastLib.pack(beast_dynamic_);
     beast_static.write(token_id, beast_static_);

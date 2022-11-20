@@ -313,11 +313,8 @@ func explore{
 
     // Only idle explorers can explore
     assert unpacked_adventurer.Status = AdventurerStatus.Idle;
-
-    let (controller) = Module.controller_address();
-
-    let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
-    let (rnd) = IXoroshiro.next(xoroshiro_address_);
+    
+    let (rnd) = get_random_number();
     let (_, encounter) = unsigned_div_rem(rnd, 4);
 
     // If the adventurer encounter a beast
@@ -351,6 +348,17 @@ func explore{
 // -----------------------------
 // Internal Adventurer Specific
 // -----------------------------
+
+func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}() -> (
+    dice_roll: felt
+) {
+    alloc_locals;
+
+    let (controller) = Module.controller_address();
+    let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
+    let (rnd) = IXoroshiro.next(xoroshiro_address_);
+    return (rnd,);
+}
 
 func emit_adventurer_state{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
