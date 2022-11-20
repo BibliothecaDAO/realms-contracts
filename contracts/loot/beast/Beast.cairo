@@ -21,6 +21,7 @@ from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library.library_module import Module
 from contracts.loot.adventurer.interface import IAdventurer
 from contracts.loot.adventurer.library import AdventurerLib
+from contracts.loot.beast.stats.beast import BeastStats
 from contracts.loot.beast.library import BeastLib
 from contracts.loot.constants.adventurer import Adventurer, AdventurerState, AdventurerStatus, AdventurerSlotIds
 from contracts.loot.constants.beast import Beast, BeastStatic, BeastDynamic
@@ -150,7 +151,8 @@ func attack{
         beast_dynamic.write(beast_id, new_packed_beast);
         // grant adventurer xp
         let (beast_greatness) = BeastLib.calculate_greatness(slain_updated_beast.XP);
-        let xp_gained = slain_updated_beast.Rank * beast_greatness;
+        let (rank) = BeastStats.get_rank_from_id(new_beast_.Id);
+        let xp_gained = rank * beast_greatness;
         IAdventurer.increase_xp(adventurer_address, adventurer_id, xp_gained);
         return ();
     }
