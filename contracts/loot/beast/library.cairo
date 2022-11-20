@@ -32,8 +32,6 @@ namespace BeastLib {
 
         let BeastId = beast_id;
         let Health = 100;
-        let (Type) = BeastStats.get_type_from_id(beast_id);
-        let (Rank) = BeastStats.get_rank_from_id(beast_id);
         let (Prefix_1) = ItemStats.item_name_prefix(1);
         let (Prefix_2) = ItemStats.item_name_suffix(1);
         let Adventurer = adventurer_id;
@@ -44,13 +42,11 @@ namespace BeastLib {
         return (
             BeastStatic(
                 Id=BeastId,
-                Type=Type,
                 Prefix_1=Prefix_1,
                 Prefix_2=Prefix_2,
             ),
             BeastDynamic(
                 Health=Health,
-                Rank=Rank,
                 Adventurer=Adventurer,
                 XP=XP,
                 SlainBy=SlainBy,
@@ -62,13 +58,17 @@ namespace BeastLib {
     func aggregate_data{
         syscall_ptr: felt*, range_check_ptr
     }(beast_static: BeastStatic, beast_dynamic: BeastDynamic) -> (beast: Beast) {
+
+        let (Type) = BeastStats.get_type_from_id(beast_static.Id);
+        let (Rank) = BeastStats.get_rank_from_id(beast_static.Id);
+
         let beast = Beast(
             beast_static.Id,
-            beast_static.Type,
+            Type,
+            Rank,
             beast_static.Prefix_1,
             beast_static.Prefix_2,
             beast_dynamic.Health,
-            beast_dynamic.Rank,
             beast_dynamic.Adventurer,
             beast_dynamic.XP,
             beast_dynamic.SlainBy,
@@ -84,14 +84,12 @@ namespace BeastLib {
 
         let beast_static = BeastStatic(
             beast.Id,
-            beast.Type,
             beast.Prefix_1,
             beast.Prefix_2,
         );
 
         let beast_dynamic = BeastDynamic(
             beast.Health,
-            beast.Rank,
             beast.Adventurer,
             beast.XP,
             beast.SlainBy,
@@ -108,14 +106,13 @@ namespace BeastLib {
         bitwise_ptr: BitwiseBuiltin*,
     }(unpacked_beast: BeastDynamic) -> (packed_beast: felt) {
         let Health = unpacked_beast.Health * SHIFT_P._1;
-        let Rank = unpacked_beast.Rank * SHIFT_P._2;
-        let Adventurer = unpacked_beast.Adventurer * SHIFT_P._3;
-        let XP = unpacked_beast.XP * SHIFT_P._4;
-        let Slain_By = unpacked_beast.SlainBy * SHIFT_P._5;
-        let Slain_On_Date = unpacked_beast.SlainOnDate * SHIFT_P._6;
+        let Adventurer = unpacked_beast.Adventurer * SHIFT_P._2;
+        let XP = unpacked_beast.XP * SHIFT_P._3;
+        let Slain_By = unpacked_beast.SlainBy * SHIFT_P._4;
+        let Slain_On_Date = unpacked_beast.SlainOnDate * SHIFT_P._5;
         
 
-        let packed_beast = Health + Rank + Adventurer + XP + Slain_By + Slain_On_Date;
+        let packed_beast = Health + Adventurer + XP + Slain_By + Slain_On_Date;
 
         return (packed_beast,);
     }
@@ -127,17 +124,15 @@ namespace BeastLib {
         bitwise_ptr: BitwiseBuiltin*,
     }(packed_beast: felt) -> (packed_beast: BeastDynamic) {
         alloc_locals;
-        let (Health) = unpack_data(packed_beast, 0, 1023);
-        let (Rank) = unpack_data(packed_beast, 10, 7);
-        let (Adventurer) = unpack_data(packed_beast, 13, 2199023255551);
-        let (XP) = unpack_data(packed_beast, 54, 134217727);
-        let (Slain_By) = unpack_data(packed_beast, 81, 2199023255551);
-        let (Slain_On_Date) = unpack_data(packed_beast, 122, 8589934591);
+        let (Health) = unpack_data(packed_beast, 0, 1023); // 10
+        let (Adventurer) = unpack_data(packed_beast, 10, 2199023255551); // 41
+        let (XP) = unpack_data(packed_beast, 51, 134217727); // 27
+        let (Slain_By) = unpack_data(packed_beast, 78, 2199023255551); // 41
+        let (Slain_On_Date) = unpack_data(packed_beast, 119, 8589934591); // 33
 
         return (
             BeastDynamic(
                 Health,
-                Rank,
                 Adventurer,
                 XP, 
                 Slain_By,

@@ -372,6 +372,15 @@ namespace AdventurerLib {
         return (updated_adventurer,);
     }
 
+    func get_random_discovery{
+        range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
+    }(xoroshiro_random: felt) -> (diiscovery: felt) {
+        alloc_locals;
+
+        let (_, r) = unsigned_div_rem(xoroshiro_random, 4);
+        return (r,);  // values from 0 to 4 inclusive
+    }
+
     func update_statistics{syscall_ptr: felt*, range_check_ptr}(
         item_token_id: felt, item: Item, unpacked_adventurer: AdventurerState
     ) -> (new_unpacked_adventurer: AdventurerState) {

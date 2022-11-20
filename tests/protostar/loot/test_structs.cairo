@@ -166,8 +166,6 @@ namespace TestUtils {
         alloc_locals;
 
         let health = 100;
-        let (type) = BeastStats.get_type_from_id(beast_id);
-        let (rank) = BeastStats.get_rank_from_id(beast_id);
         let prefix_1 = 1;
         let prefix_2 = 1;
         let adventurer = 0;
@@ -177,13 +175,11 @@ namespace TestUtils {
         return (
             BeastStatic(
                 beast_id,
-                type,
                 prefix_1,
                 prefix_2
             ),
             BeastDynamic(
                 health,
-                rank,
                 adventurer,
                 xp,
                 slain_by,

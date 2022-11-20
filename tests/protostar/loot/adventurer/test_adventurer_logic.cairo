@@ -191,10 +191,3 @@ func test_deduct_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_ch
 
     return ();
 }
-
-// @external
-// func test_is_dead{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-//     arguments
-// ) {
-    
-// }

@@ -13,7 +13,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_add
-from starkware.cairo.common.math import unsigned_div_rem, assert_not_equal
+from starkware.cairo.common.math import unsigned_div_rem, assert_not_equal, assert_not_zero
 from starkware.cairo.common.math_cmp import is_le
 from starkware.starknet.common.syscalls import (
     get_caller_address,
@@ -309,10 +309,12 @@ func explore{
     alloc_locals;
 
     // only adventurer owner can explore
-    ERC721.assert_only_token_owner(tokenId);
+    ERC721.assert_only_token_owner(token_id);
 
     // unpack adventurer
     let (unpacked_adventurer) = get_adventurer_by_id(token_id);
+
+    assert_not_dead(token_id);
 
     // Only idle explorers can explore
     with_attr error_message("Adventurer: Adventurer must be idle") {
@@ -320,20 +322,19 @@ func explore{
     }
 
     let (rnd) = get_random_number();
-    let (_, encounter) = unsigned_div_rem(rnd, 4);
+    let (discovery) = AdventurerLib.get_random_discovery(rnd);
 
     // If the adventurer encounter a beast
-    if (encounter == DiscoveryType.Beast) {
+    if (discovery == DiscoveryType.Beast) {
         // we set their status to battle
         let (unpacked_adventurer: AdventurerState) = AdventurerLib.update_status(
             AdventurerStatus.Battle, unpacked_adventurer
         );
-
+        // create beast
         let (beast_address) = Module.get_module_address(ModuleIds.Beast);
-
         let (beast_id: Uint256) = IBeast.create(beast_address, token_id);
         
-        with_attr error_message("Beast: Can't set beast adventurer to same value as current") {
+        with_attr error_message("Adventurer: Cannot set adventurer beast to same value as current") {
             assert_not_equal(beast_id.low, unpacked_adventurer.Beast);
         }
 
@@ -353,6 +354,18 @@ func explore{
 // -----------------------------
 // Internal Adventurer Specific
 // -----------------------------
+
+func assert_not_dead{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(tokenId: Uint256) {
+    let (adventurer: AdventurerState) = get_adventurer_by_id(tokenId);
+
+    with_attr error_message("Adventurer: Adventurer is dead") {
+        assert_not_zero(adventurer.Health);
+    }
+
+    return ();
+}
 
 func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}() -> (
     dice_roll: felt

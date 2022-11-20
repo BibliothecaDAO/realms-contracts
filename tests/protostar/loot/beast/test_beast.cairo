@@ -62,7 +62,6 @@ func test_pack{
 
     let beast_dynamic = BeastDynamic(
         100,
-        5,
         0,
         0,
         1,
@@ -74,7 +73,6 @@ func test_pack{
     let (unpacked_beast: BeastDynamic) = BeastLib.unpack(packed_beast);
 
     assert unpacked_beast.Health = 100;
-    assert unpacked_beast.Rank = 5;
     assert unpacked_beast.Adventurer = 0;
     assert unpacked_beast.XP = 0;
     assert unpacked_beast.SlainBy = 1;
@@ -131,9 +129,13 @@ func test_set_adventurer{
     
     let (beast_static, beast_dynamic) = TestUtils.create_beast(1);
 
+    assert beast_dynamic.Adventurer = 0;
+
     let (packed_beast) = BeastLib.pack(beast_dynamic);
 
     let (beast: BeastDynamic) = BeastLib.unpack(packed_beast);
+
+    assert beast.Adventurer = 0;
 
     let (c) = BeastLib.set_adventurer(1, beast);
 

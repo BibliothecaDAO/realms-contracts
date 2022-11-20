@@ -4,6 +4,7 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256
 from starkware.starknet.common.syscalls import get_block_timestamp
 
+from contracts.loot.constants.adventurer import AdventurerState, AdventurerStatus
 from contracts.loot.constants.beast import Beast
 from contracts.loot.constants.item import Item, ItemIds
 
@@ -91,7 +92,7 @@ func test_create{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 }
 
 @external
-func test_attack{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+func test_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
     
     local account_1_address;
@@ -104,14 +105,22 @@ func test_attack{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
         ids.xoroshiro_address = context.xoroshiro
         ids.adventurer_address = context.adventurer
         ids.beast_address = context.beast
-        stop_mock = mock_call(ids.beast_address, 'calculate_damage_to_beast', [50])
-        stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
+        stop_mock_damage = mock_call(ids.beast_address, 'calculate_damage_to_beast', [150])
+        stop_mock_adventurer_random = mock_call(ids.xoroshiro_address, 'next', [1])
+        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+    %}
+    // discover and create beast
+    IAdventurer.explore(adventurer_address, Uint256(1,0));
+
+    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
+
+    assert adventurer.Status = AdventurerStatus.Battle;
+
+    %{ 
+        stop_mock_adventurer_random()
+        stop_prank_beast = start_prank(ids.account_1_address, ids.beast_address)
     %}
 
-    // Create beast
-    let (beast_id) = IBeast.create(beast_address, Uint256(1,0));
-
-    // set beast to rank 5
     let beast = Beast(
         1,
         100,
@@ -124,19 +133,13 @@ func test_attack{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
         0,
         0
     );
+
     IBeast.set_beast_by_id(beast_address, Uint256(1,0), beast);
-
-    IAdventurer.explore(adventurer_address);
-
-    %{
-        stop_prank_beast()
-        stop_prank_beast = start_prank(ids.account_1_address, ids.beast_address)
-    %}
 
     IBeast.attack(beast_address, Uint256(1,0));
 
     %{
-        stop_mock()
+        stop_mock_damage()
         stop_prank_beast()
     %}
 
@@ -144,5 +147,5 @@ func test_attack{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 }
 
 // @external
-// func test_flee{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+// func test_not_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
 // }

@@ -12,12 +12,12 @@ from contracts.loot.constants.item import Type
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 
 struct Beast {
-    Id: felt,  // item id 1 - 100
+    Id: felt,  // beast id 1 - 100
     Type: felt,  // same as Loot weapons: magic, bludgeon, blade
+    Rank: felt,  // same as Loot weapons: 1 is the strongest
     Prefix_1: felt,  // First part of the name prefix (i.e Tear)
     Prefix_2: felt,  // Second part of the name prefix (i.e Bearer)
     Health: felt,  // health of the beast
-    Rank: felt,  // same as Loot weapons: 1 is the strongest
     Adventurer: felt, // The token id of the adventurer the beast is battling
     XP: felt,  // the xp of the beast
     SlainBy: felt, // the tokenId of the adventurer that slayed this beast
@@ -26,15 +26,13 @@ struct Beast {
 
 // Structure for the adventurer Beast primitive
 struct BeastStatic {
-    Id: felt,  // item id 1 - 100
-    Type: felt,  // same as Loot weapons: magic, bludgeon, blade
+    Id: felt,  // beast id 1 - 100
     Prefix_1: felt,  // First part of the name prefix (i.e Tear)
     Prefix_2: felt,  // Second part of the name prefix (i.e Bearer)
 }
 
 struct BeastDynamic {
     Health: felt,  // health of the beast
-    Rank: felt,  // same as Loot weapons: 1 is the strongest
     Adventurer: felt, // The token id of the adventurer the beast is battling
     XP: felt,  // the xp of the beast
     SlainBy: felt, // the tokenId of the adventurer that slayed this beast
@@ -44,10 +42,9 @@ struct BeastDynamic {
 namespace SHIFT_P {
     const _1 = 2 ** 0;
     const _2 = 2 ** 10;
-    const _3 = 2 ** 13;
-    const _4 = 2 ** 54;
-    const _5 = 2 ** 81;
-    const _6 = 2 ** 122;
+    const _3 = 2 ** 51;
+    const _4 = 2 ** 78;
+    const _5 = 2 ** 119;
 }
 
 namespace BeastIds {
@@ -124,9 +121,8 @@ namespace BeastType {
 
 namespace BeastSlotIds {
     const Health = 0;
-    const Rank = 1;
-    const Adventurer = 2;
-    const XP = 3;
-    const SlainBy = 4;
-    const SlainOnDate = 5;
+    const Adventurer = 1;
+    const XP = 2;
+    const SlainBy = 3;
+    const SlainOnDate = 4;
 }

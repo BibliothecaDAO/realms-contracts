@@ -66,6 +66,8 @@ namespace IAdventurer {
     }
     func unequip_item(tokenId: Uint256, itemTokenId: Uint256) -> (success: felt) {
     }
+    func explore(token_id: Uint256) -> (success: felt) {
+    }
     func tokenURI(tokenId: Uint256) -> (tokenURI_len: felt, tokenURI: felt*) {
     }
     func get_adventurer_by_id(tokenId: Uint256) -> (adventurer: AdventurerState) {
