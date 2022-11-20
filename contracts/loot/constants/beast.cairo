@@ -11,9 +11,10 @@ from starkware.cairo.common.registers import get_label_location
 from contracts.loot.constants.item import Type
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 
-// Structure for the adventurer Beast primitive
+// @notice This is viewable information of the Beast. We DO NOT store this on-chain.
+//         This is the object that is returned when requesting the Beast by ID.
 struct Beast {
-    Id: felt,  // item id 1 - 100
+    Id: felt,  // beast id 1 - 100
     Health: felt,  // health of the beast
     Type: felt,  // same as Loot weapons: magic, bludgeon, blade
     Rank: felt,  // same as Loot weapons: 1 is the strongest
@@ -25,6 +26,23 @@ struct Beast {
     SlainOnDate: felt, // unix timestamp when the beast was slain
 }
 
+// @notice This is immutable information stored on-chain
+// We pack all this information tightly into felts
+//    to save on storage costs.
+struct BeastState {
+    Id: felt,  // beast id 1 - 18 
+    Health: felt,  // health of the beast
+    Prefix_1: felt,  // First part of the name prefix (i.e Tear)
+    Prefix_2: felt,  // Second part of the name prefix (i.e Bearer)
+    Adventurer: felt, // The token id of the adventurer the beast is battling
+    XP: felt,  // the xp of the beast
+    SlainBy: felt, // the tokenId of the adventurer that slayed this beast
+    SlainOnDate: felt, // unix timestamp when the beast was slain
+    // Type (Derived from BeastId so we don't need to store this)
+    // Rank (Derived from BeastId so we don't need to store this)
+}
+
+// TODO MILESTONE1: Remove greatness from shift constant
 namespace SHIFT_P {
     const _1 = 2 ** 0;
     const _2 = 2 ** 7;
@@ -40,6 +58,8 @@ namespace SHIFT_P {
 }
 
 namespace BeastConstants {
+    const MaxBeastId = 18;
+
     namespace BeastIds {
         const Phoenix = 1;
         const Griffin = 2;
@@ -62,6 +82,8 @@ namespace BeastConstants {
         const Werewolf = 16;
         const Spider = 17;
         const Rat = 18;
+
+        // if you add more beasts make sure you update MaxBeastId at top of BeastConstants
     }
 
     namespace BeastRank {

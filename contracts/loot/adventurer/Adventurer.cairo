@@ -13,9 +13,13 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_add
-from starkware.cairo.common.math import unsigned_div_rem, assert_lt_felt
+from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le
-from starkware.starknet.common.syscalls import get_caller_address, get_contract_address, get_block_timestamp
+from starkware.starknet.common.syscalls import (
+    get_caller_address,
+    get_contract_address,
+    get_block_timestamp,
+)
 
 from openzeppelin.access.ownable.library import Ownable
 from openzeppelin.introspection.erc165.library import ERC165
@@ -27,14 +31,22 @@ from openzeppelin.upgrades.library import Proxy
 
 from contracts.settling_game.library.library_module import Module
 from contracts.loot.adventurer.library import AdventurerLib
-from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState, AdventurerStatus
+from contracts.loot.constants.adventurer import (
+    Adventurer,
+    AdventurerState,
+    PackedAdventurerState,
+    AdventurerStatus,
+)
 from contracts.loot.constants.beast import Beast
+from contracts.loot.beast.Beast import createBeast
 from contracts.loot.interfaces.imodules import IModuleController
 from contracts.loot.loot.stats.combat import CombatStats
 from contracts.loot.utils.general import _uint_to_felt
 
 from contracts.loot.loot.ILoot import ILoot
 from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
+
+from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 
 // const MINT_COST = 5000000000000000000
 
@@ -68,10 +80,7 @@ func adventurer_balance(tokenId: Uint256) -> (balance: Uint256) {
 // @return proxy_admin: Proxy admin address
 @external
 func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    name: felt,
-    symbol: felt,
-    proxy_admin: felt,
-    address_of_controller: felt,
+    name: felt, symbol: felt, proxy_admin: felt, address_of_controller: felt
 ) {
     // set as module
     Module.initializer(address_of_controller);
@@ -191,7 +200,7 @@ func equipItem{
 
 @external
 func unequipItem{
-        pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(tokenId: Uint256, itemTokenId: Uint256) -> (success: felt) {
     alloc_locals;
 
@@ -263,26 +272,42 @@ func explore{syscall_ptr: felt*, range_check_ptr}(tokenId: Uint256) {
     // Only idle explorers can explore
     assert unpacked_adventurer.Status = AdventurerStatus.Idle;
 
-    // TODO: replace this with xorshiro rng
-    local encounter;
-    %{
-            import random
-            ids.encounter = random.randint(0, 4)
-        %}
+    // Generate random discovery
+    let (discovery) = get_random_discovery();
 
-        // If the adventurer encounter a beast 
-        if (encounter == DiscoveryType.Beast) {
-        // we set their status to battle
-        let (unpacked_adventurer: AdventurerState) = update_status(AdventurerStatus.Battle, unpacked_adventurer);
+    // If the adventurer encounter a beast
+    if (discovery == DiscoveryType.Beast) {
+        // set their status to battle
+        let (unpacked_adventurer: AdventurerState) = AdventurerLib.update_status(
+            AdventurerStatus.Battle, unpacked_adventurer
+        );
 
-        let (beast : Beast) = BeastUtils.get_random_beast();
+        // pack and write adventurer to chain with the update to battle status
+        let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(
+            unpacked_adventurer
+        );
+        adventurer.write(tokenId, packed_new_adventurer);
 
-        // Todo generate a beast token
-        // let (beastTokenId) = BeastModule.birth(greatness=1, rank=5, etc)
-        unpacked_adventurer.Beast = beastTokenId;
+        // TODO MILESTONE1: Progressively increase difficulty of beasts via their xp setting
+        // for now they'll all be fairly weak
+        let beast_xp = 1;
+        let (newBeastTokenId) = createBeast(tokenId, beast_xp);
 
-        // I think here we need to mint a Beast and store it on-chain. 
-        }
+        // associate the beast with our adventurer
+        unpacked_adventurer.Beast = newBeastTokenId;
+
+        // pack and write adventurer to chain with the beast association
+        let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(
+            unpacked_adventurer
+        );
+        adventurer.write(tokenId, packed_new_adventurer);
+
+        // TODO MILESTONE1: @DistractedDev My rationale for doing two updates to adventurer above is to prevent
+        // adventurers from bypassing the explore function and calling Beast.create directly. To prevent this
+        // the explore updates status to battle, writes that to chain, and the Beast.create checks to make sure
+        // the adventurer status is battle which is only set by explore. There may be a better way to accomplish this
+        // though. Can you give it a few brain cycles and if you are okay with this approach, delete this comment?
+    }
 
     return (unpacked_adventurer,);
 }
@@ -476,4 +501,16 @@ func transferOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 func renounceOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     Ownable.renounce_ownership();
     return ();
+}
+
+func get_random_discovery{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}() -> (
+    dice_roll: felt
+) {
+    alloc_locals;
+
+    let (controller) = Module.controller_address();
+    let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
+    let (rnd) = IXoroshiro.next(xoroshiro_address_);
+    let (_, r) = unsigned_div_rem(rnd, 4);
+    return (r,);  // values from 0 to 4 inclusive
 }

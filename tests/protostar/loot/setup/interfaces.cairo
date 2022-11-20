@@ -78,7 +78,9 @@ namespace IAdventurer {
 namespace IBeast {
     func initializer(proxy_admin: felt, address_of_controller: felt) {
     }
-    func attack_beast(unpacked_adventurer: AdventurerState, beast: Beast) {
+    func attack(tokenId: Uint256) {
+    }
+    func flee(tokenId: Uint256) {
     }
 }
 

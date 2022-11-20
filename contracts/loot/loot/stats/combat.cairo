@@ -158,7 +158,7 @@ namespace CombatStats {
 
         // pass details of attack and armor to core damage calculation function
         let (damage_dealt) = calculate_damage(
-            attack_type, beast.Rank, beast.Greatness, armor_type, armor.Rank, armor.Greatness
+            attack_type, beast.Rank, beast.XP, armor_type, armor.Rank, armor.Greatness
         );
 
         // return damage
@@ -173,7 +173,7 @@ namespace CombatStats {
 
         // pass details of attack and armor to core damage calculation function
         let (damage_dealt) = calculate_damage(
-            weapon.Type, weapon.Rank, weapon.Greatness, beast.Type, beast.Rank, beast.Greatness
+            weapon.Type, weapon.Rank, weapon.Greatness, beast.Type, beast.Rank, beast.XP
         );
 
         // return damage

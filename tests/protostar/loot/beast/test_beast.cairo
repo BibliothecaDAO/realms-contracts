@@ -52,7 +52,7 @@ func test_pack{
 }() {
     alloc_locals;
 
-    let beast = Beast(1, 100, 1, 1, 1, 1, 0);
+    let beast = Beast(1, 100, 1, 1, 0, 0, 0, 0, 0, 0);
 
     let (packed_beast) = BeastLib.pack(beast);
 
@@ -64,7 +64,7 @@ func test_pack{
     assert beast.Rank = 1;
     assert beast.Prefix_1 = 1;
     assert beast.Prefix_2 = 1;
-    assert beast.Greatness = 0;
+    assert beast.XP = 0;
 
     return ();
 }

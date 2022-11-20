@@ -3,16 +3,56 @@
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
+from starkware.cairo.common.math import assert_not_zero, assert_not_equal, assert_le
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.memcpy import memcpy
 from starkware.cairo.common.memset import memset
 from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
+from starkware.cairo.common.uint256 import uint256_eq
 
 from contracts.settling_game.utils.general import unpack_data
+
 from contracts.loot.constants.adventurer import Adventurer
-from contracts.loot.constants.beast import Beast, SHIFT_P, BeastSlotIds
+from contracts.loot.constants.beast import Beast, SHIFT_P, BeastSlotIds, BeastState, BeastConstants
 
 namespace BeastLib {
+
+    func create{syscall_ptr: felt*, range_check_ptr}(
+        beast_id: felt, adventurer_token_id: felt, xp: felt) -> (beast: BeastState) {
+        alloc_locals;
+
+        with_attr error_message("BeastLib: Can't generate beast with Beast ID 0") {
+            assert_not_zero(beast_id);
+        }
+
+        with_attr error_message("BeastLib: Can't generate a beast with Beast ID greater than MaxBeastId") {
+            assert_le(beast_id, BeastConstants.MaxBeastId);
+        }
+
+        let BeastId = beast_id;
+        let Health = 100;
+        let Prefix_1 = 0;
+        let Prefix_2 = 0;
+        let Adventurer = adventurer_token_id;
+        let XP = xp;
+        let SlainBy = 0;
+        let SlainOnDate = 0;
+
+        return (
+            BeastState(
+            Id=BeastId,
+            Health=Health,
+            Prefix_1=Prefix_1,
+            Prefix_2=Prefix_2,
+            Adventurer=Adventurer,
+            XP=XP,
+            SlainBy=SlainBy,
+            SlainOnDate=SlainOnDate,
+            ),
+        );
+    }
+
+    // TODO MILESTONE1: Remove greatness from this function
     func pack{
         syscall_ptr: felt*,
         pedersen_ptr: HashBuiltin*,
@@ -36,6 +76,7 @@ namespace BeastLib {
         return (packed_beast,);
     }
 
+    // TODO MILESTONE1: Remove greatness from this function
     func unpack{
         syscall_ptr: felt*,
         pedersen_ptr: HashBuiltin*,
@@ -108,6 +149,22 @@ namespace BeastLib {
             // if damage dealt exceeds health remaining, set health to 0
             let (updated_beast: Beast) = cast_state(BeastSlotIds.Health, 0, unpacked_beast);
         }
+
+        return (updated_beast,);
+    }
+    func set_adventurer{syscall_ptr: felt*, range_check_ptr}(
+        adventurerTokenId: felt, unpacked_beast: Beast
+    ) -> (new_unpacked_beast: Beast) {
+        alloc_locals;
+
+        with_attr error_message("Beast: Can't set beast adventurer to same value as current") {
+            assert_not_equal(adventurerTokenId, unpacked_beast.adventurer);
+        }
+
+        // set adventurer (tokenId) on the beast to the provided adventurerTokenId 
+        let (updated_beast: Beast) = cast_state(
+            BeastSlotIds.Adventurer, adventurerTokenId, unpacked_beast
+        );
 
         return (updated_beast,);
     }
