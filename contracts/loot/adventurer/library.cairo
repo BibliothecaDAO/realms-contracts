@@ -389,14 +389,14 @@ namespace AdventurerLib {
 // The basic (v0.1) adventurer flow is going to be:
 // 1. Mint Adventurer (Done)
 // 2. Equip Items (Done)
-// 3. Explore (TODO)
-// 4. If a Beast is discovered, option to attack_beast or flee_from_beast (Done)
-// 5. If you defeat beast/obstacle, increase_xp (done)
-//    If you flee, reset adventurer state to idle. (TODO)
+// 3. Explore (In Progress)
+// 4. If a Beast is discovered, option to Beast.attack or Beast.flee (Done)
+// 5. If you defeat beast/obstacle, increase_xp (Done)
+//    If you flee, reset adventurer state to idle. (Done)
 //    If you die, set adventurer state to dead. (TODO)
 
 // List of TODO for this file/lib:
-// 1. Test Cases for attack_beast and flee_from_beast
+// 1. Test Cases for Beast.attack and Beast.flee
 // 2. All calls to calculate_damage_from_beast() in this file currently pass in ChestId for the armor. 
 //    We should come up with a way to make this dynamic. Beast could attack/bite your leg, or arm for example
 //    When battling with adventurers, they will intentionally try to attack your weak spot, with beasts however

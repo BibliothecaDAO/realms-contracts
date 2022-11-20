@@ -13,7 +13,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_add
-from starkware.cairo.common.math import unsigned_div_rem, assert_lt_felt
+from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le
 from starkware.starknet.common.syscalls import (
     get_caller_address,
@@ -40,12 +40,15 @@ from contracts.loot.constants.adventurer import (
     DiscoveryType
 )
 from contracts.loot.constants.beast import Beast
+from contracts.loot.beast.Beast import createBeast
 from contracts.loot.interfaces.imodules import IModuleController
 from contracts.loot.loot.stats.combat import CombatStats
 from contracts.loot.utils.general import _uint_to_felt
 from contracts.loot.beast.interface import IBeast
 from contracts.loot.loot.ILoot import ILoot
 from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
+
+from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 
 // const MINT_COST = 5000000000000000000
 
@@ -535,4 +538,16 @@ func transferOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 func renounceOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     Ownable.renounce_ownership();
     return ();
+}
+
+func get_random_discovery{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}() -> (
+    dice_roll: felt
+) {
+    alloc_locals;
+
+    let (controller) = Module.controller_address();
+    let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
+    let (rnd) = IXoroshiro.next(xoroshiro_address_);
+    let (_, r) = unsigned_div_rem(rnd, 4);
+    return (r,);  // values from 0 to 4 inclusive
 }

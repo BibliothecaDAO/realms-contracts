@@ -9,12 +9,13 @@
 %lang starknet
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from starkware.cairo.common.math import unsigned_div_rem
+from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero
 from starkware.cairo.common.math_cmp import is_le
-from starkware.cairo.common.uint256 import Uint256
+from starkware.cairo.common.uint256 import Uint256, uint256_add
 from starkware.starknet.common.syscalls import get_caller_address
 
 from openzeppelin.upgrades.library import Proxy
+from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
 
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library.library_module import Module
@@ -54,8 +55,7 @@ func counter() -> (res: felt) {
 // @return proxy_admin: Proxy admin address
 @external
 func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    proxy_admin: felt,
-    address_of_controller: felt,
+    proxy_admin: felt, address_of_controller: felt
 ) {
     // set as module
     Module.initializer(address_of_controller);
@@ -92,6 +92,11 @@ func birth{
     return (next_id,);
 }
 
+    return (next_beast_id,);
+}
+
+// TODO MILESTONE2: Change this function to take in beast tokenId instead of adventurer tokenId
+//                  as its more intuitive from a client perspective
 @external
 func attack_beast{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
@@ -144,9 +149,17 @@ func attack_beast{
         IAdventurer.increase_xp(adventurer_address, adventurer_id, xp_gained);
     }
 
+
+    // TODO for Milestone1
+    // write beast update to chain
+    // write adventurer update to chain
+
     return ();
 }
 
+
+// TODO MILESTONE1: Change this function to take in beast tokenId instead of adventurer tokenId
+//                  as its more intuitive from a client perspective
 @external
 func flee_from_beast{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
@@ -170,6 +183,8 @@ func flee_from_beast{
         assert unpacked_adventurer.Status = AdventurerStatus.Battle;
     }
 
+    let (beast: Beast) = getBeastById(unpacked_adventurer.beast);   
+
     // Adventurer Speed is Dexterity - Weight of all equipped items
     // TODO: Provide utility function that takes in an adventurer and returns net weight of gear
     //       For now just hard_code this weight:
@@ -179,12 +194,20 @@ func flee_from_beast{
     // Adventurer ambush resistance is based on wisdom plus luck
     let ambush_resistance = unpacked_adventurer.Wisdom + unpacked_adventurer.Luck;
 
+    // Generate random number which will determine:
+    // 1. Chance of adventurer getting ambushed (i.e attacked before they can start to flee)
+    // 2. Chance of adventurer successfully fleeing
     let (controller) = Module.controller_address();
     let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
     let (rnd) = IXoroshiro.next(xoroshiro_address_);
     let (_, r) = unsigned_div_rem(rnd, 20);
 
-    // if adventurer ambush resistance is less than beast ambush ability
+    // TODO Milestone2: Factor in beast health for the ambush chance and for flee chance
+    // Short-term (while we are using rng) would be to base rng on beast health. The 
+    // lower the beast health, the lower the chance it will ambush and the easier
+    // it will be to flee.
+
+    // adventurer is ambushed if their ambush resistance is less than random number
     let is_ambushed = is_le(ambush_resistance, r);
 
     let (item_address) = Module.get_module_address(ModuleIds.Loot);
@@ -255,7 +278,26 @@ func get_beast_by_id{
 //     let (adventurer_data) = IAdventurer
 // }
 
+func get_random_beast_id{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}() -> (
+    dice_roll: felt
+) {
+    alloc_locals;
 
+    let (controller) = Module.controller_address();
+    let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
+    let (rnd) = IXoroshiro.next(xoroshiro_address_);
+    let (_, r) = unsigned_div_rem(rnd, BeastConstants.MaxBeastId);
+    return (r + 1,);  // values from 1 to 18 inclusive
+}
 
+// --------------------
+// Base ERC721 Functions
+// --------------------
 
-
+@view
+func totalSupply{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}() -> (
+    totalSupply: Uint256
+) {
+    let (totalSupply: Uint256) = ERC721Enumerable.total_supply();
+    return (totalSupply,);
+}
