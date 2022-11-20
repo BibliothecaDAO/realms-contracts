@@ -111,31 +111,28 @@ func attack{
 
     let (unpacked_adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_id);
 
+    // verify adventurer is in battle mode
     with_attr error_message("Beast: Adventurer must be in a battle") {
         assert unpacked_adventurer.Status = AdventurerStatus.Battle;
     }
 
-    // and verify it's not already dead
+    // verify it's not already dead
     with_attr error_message("Beast: Can't attack a dead beast") {
         assert_not_zero(beast.Health);
     }
 
+    // calculate damage
     let (item_address) = Module.get_module_address(ModuleIds.Loot);
-
     let (weapon) = ILoot.getItemByTokenId(item_address, Uint256(unpacked_adventurer.WeaponId, 0));
-
     let (damage_dealt) = CombatStats.calculate_damage_to_beast(beast, weapon);
 
     // check if damage dealt is less than health remaining
     let still_alive = is_le(damage_dealt, beast.Health);
-
     let (beast_static_, beast_dynamic_) = BeastLib.split_data(beast);
 
     // deduct health from beast
     let (updated_health_beast) = BeastLib.deduct_health(damage_dealt, beast_dynamic_);
-
     let (packed_beast) = BeastLib.pack(updated_health_beast);
-
     let (new_beast_) = BeastLib.aggregate_data(beast_static_, updated_health_beast);
 
     // if the beast is alive
@@ -146,11 +143,12 @@ func attack{
         IAdventurer.deduct_health(adventurer_address, adventurer_id, damage_taken);
         return ();
     } else {
-        // if beast has been slain, grant adventurer xp
+        // update beast with slain details
         let (current_time) = get_block_timestamp();
         let (slain_updated_beast) = BeastLib.slay(adventurer_id.low, current_time, updated_health_beast); 
         let (new_packed_beast) = BeastLib.pack(updated_health_beast);
         beast_dynamic.write(beast_id, new_packed_beast);
+        // grant adventurer xp
         let (beast_greatness) = BeastLib.calculate_greatness(slain_updated_beast.XP);
         let xp_gained = slain_updated_beast.Rank * beast_greatness;
         IAdventurer.increase_xp(adventurer_address, adventurer_id, xp_gained);
