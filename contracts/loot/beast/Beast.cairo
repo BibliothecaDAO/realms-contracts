@@ -176,6 +176,8 @@ func flee{
         assert unpacked_adventurer.Status = AdventurerStatus.Battle;
     }  
 
+    // TODO: calculate accurate rng for fleeing
+
     // Adventurer Speed is Dexterity - Weight of all equipped items
     let weight_of_equipment = 3;
     let adventurer_speed = unpacked_adventurer.Dexterity - weight_of_equipment;
