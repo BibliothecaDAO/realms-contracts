@@ -11,6 +11,19 @@ from starkware.cairo.common.registers import get_label_location
 from contracts.loot.constants.item import Type
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 
+struct Beast {
+    Id: felt,  // item id 1 - 100
+    Type: felt,  // same as Loot weapons: magic, bludgeon, blade
+    Prefix_1: felt,  // First part of the name prefix (i.e Tear)
+    Prefix_2: felt,  // Second part of the name prefix (i.e Bearer)
+    SlainBy: felt, // the tokenId of the adventurer that slayed this beast
+    SlainOnDate: felt, // unix timestamp when the beast was slain
+    Health: felt,  // health of the beast
+    Rank: felt,  // same as Loot weapons: 1 is the strongest
+    Adventurer: felt, // The token id of the adventurer the beast is battling
+    XP: felt,  // the xp of the beast
+}
+
 // Structure for the adventurer Beast primitive
 struct BeastStatic {
     Id: felt,  // item id 1 - 100
@@ -23,7 +36,6 @@ struct BeastStatic {
 
 struct BeastDynamic {
     Health: felt,  // health of the beast
-    Type: felt,  // same as Loot weapons: magic, bludgeon, blade
     Rank: felt,  // same as Loot weapons: 1 is the strongest
     Adventurer: felt, // The token id of the adventurer the beast is battling
     XP: felt,  // the xp of the beast
@@ -32,15 +44,9 @@ struct BeastDynamic {
 
 namespace SHIFT_P {
     const _1 = 2 ** 0;
-    const _2 = 2 ** 7;
-    const _3 = 2 ** 17;
-    const _4 = 2 ** 28;
-    const _5 = 2 ** 31;
-    const _6 = 2 ** 38;
-    const _7 = 2 ** 43;
-    const _8 = 2 ** 84;
-    const _9 = 2 ** 94;
-    const _10 = 2 ** 135;
+    const _2 = 2 ** 10;
+    const _3 = 2 ** 13;
+    const _4 = 2 ** 54;
 }
 
 namespace BeastIds {
@@ -116,15 +122,8 @@ namespace BeastType {
 }
 
 namespace BeastSlotIds {
-    const Id = 0;
-    const Health = 1;
-    const Type = 2;
-    const Rank = 3;
-    const Prefix_1 = 4;
-    const Prefix_2 = 5;
-    const Greatness = 6;
-    const Adventurer = 7;
-    const XP = 8;
-    const Slain_By = 9;
-    const Slain_On_Date = 10;
+    const Health = 0;
+    const Rank = 1;
+    const Adventurer = 2;
+    const XP = 3;
 }

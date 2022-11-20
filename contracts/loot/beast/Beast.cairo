@@ -9,7 +9,7 @@
 %lang starknet
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero
+from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_not_equal
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.uint256 import Uint256, uint256_add
 from starkware.starknet.common.syscalls import get_caller_address
@@ -39,11 +39,15 @@ from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
 // -----------------------------------
 
 @storage_var
-func beast(tokenId: felt) -> (packed_beast: felt) {
+func beast_static(tokenId: Uint256) -> (beast: BeastStatic) {
 }
 
 @storage_var
-func counter() -> (res: felt) {
+func beast_dynamic(tokenId: Uint256) -> (packed_beast: felt) {
+}
+
+@storage_var
+func total_supply() -> (res: Uint256) {
 }
 
 // -----------------------------------
@@ -76,31 +80,31 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 }
 
 @external
-func birth{
+func create{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}() -> (beast_id: felt) {
+}(adventurer_id: Uint256) -> (beast_id: Uint256) {
     Module.only_approved();
     let (controller) = Module.controller_address();
     let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
     let (rnd) = IXoroshiro.next(xoroshiro_address_);
-    let (unpacked_beast) = BeastLib.generate_random_beast(rnd);
-    let (packed_beast) = BeastLib.pack(unpacked_beast);
+    let (beast_static, beast_dynamic) = BeastLib.create(rnd);
+    let (packed_beast) = BeastLib.pack(beast_dynamic);
 
-    let (current_id) = counter.read();
-    let next_id = current_id + 1;
-    beast.write(next_id, packed_beast);
+    with_attr error_message("Beast: Can't set beast adventurer to same value as current") {
+        assert_not_equal(adventurer_id, unpacked_beast.adventurer);
+    }
+
+    let (current_id) = total_supply.read();
+    let next_id = uint256_add(current_id, Uint256(1,0));
+    beast_static.write(next_id, beast_static);
+    beast_dynamic.write(next_id, beast_dynamic);
     return (next_id,);
 }
 
-    return (next_beast_id,);
-}
-
-// TODO MILESTONE2: Change this function to take in beast tokenId instead of adventurer tokenId
-//                  as its more intuitive from a client perspective
 @external
-func attack_beast{
+func attack{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(adventurer_id: Uint256) {
+}(beast_id: Uint256) {
     alloc_locals;
 
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
@@ -118,7 +122,7 @@ func attack_beast{
         assert unpacked_adventurer.Status = AdventurerStatus.Battle;
     }
 
-    let (beast_: Beast) = get_beast_by_id(unpacked_adventurer.Beast);
+    let (beast_: Beast) = get_beast_by_id(beast_id);
 
     let (item_address) = Module.get_module_address(ModuleIds.Loot);
 
@@ -149,23 +153,14 @@ func attack_beast{
         IAdventurer.increase_xp(adventurer_address, adventurer_id, xp_gained);
     }
 
-
-    // TODO for Milestone1
-    // write beast update to chain
-    // write adventurer update to chain
-
     return ();
 }
 
 
-// TODO MILESTONE1: Change this function to take in beast tokenId instead of adventurer tokenId
-//                  as its more intuitive from a client perspective
 @external
-func flee_from_beast{
+func flee{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(
-    adventurer_id: Uint256
-) {
+}(beast_id: Uint256) {
     alloc_locals;
 
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
@@ -183,11 +178,9 @@ func flee_from_beast{
         assert unpacked_adventurer.Status = AdventurerStatus.Battle;
     }
 
-    let (beast: Beast) = getBeastById(unpacked_adventurer.beast);   
+    let (beast: Beast) = getBeastById(beast_id);   
 
     // Adventurer Speed is Dexterity - Weight of all equipped items
-    // TODO: Provide utility function that takes in an adventurer and returns net weight of gear
-    //       For now just hard_code this weight:
     let weight_of_equipment = 3;
     let adventurer_speed = unpacked_adventurer.Dexterity - weight_of_equipment;
 
@@ -195,8 +188,6 @@ func flee_from_beast{
     let ambush_resistance = unpacked_adventurer.Wisdom + unpacked_adventurer.Luck;
 
     // Generate random number which will determine:
-    // 1. Chance of adventurer getting ambushed (i.e attacked before they can start to flee)
-    // 2. Chance of adventurer successfully fleeing
     let (controller) = Module.controller_address();
     let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
     let (rnd) = IXoroshiro.next(xoroshiro_address_);

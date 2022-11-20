@@ -4,7 +4,7 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState, AdventurerStatus
 from contracts.loot.constants.item import Item, ItemIds, ItemType, ItemSlot, ItemMaterial, State
 from contracts.loot.constants.rankings import ItemRank
-from contracts.loot.constants.beast import Beast
+from contracts.loot.constants.beast import Beast, BeastStatic, BeastDynamic
 from contracts.loot.constants.obstacle import Obstacle, ObstacleUtils
 from contracts.loot.beast.stats.beast import BeastStats
 from contracts.loot.loot.stats.item import ItemStats
@@ -157,11 +157,11 @@ namespace TestUtils {
         return (zero_item,);
     }
 
-    // create_beast returns a Beast corresponding to the provided beast_id and greatness
-    // parameters: beast_id, greatness
+    // create_beast returns a Beast corresponding to the provided beast_id
+    // parameters: beast_id
     // returns: A Beast
-    func create_beast{syscall_ptr: felt*, range_check_ptr}(beast_id: felt, greatness: felt) -> (
-        beast: Beast
+    func create_beast{syscall_ptr: felt*, range_check_ptr}(beast_id: felt) -> (
+        beast_static: BeastStatic, beast_dynamic: BeastDynamic
     ) {
         alloc_locals;
 
@@ -175,18 +175,20 @@ namespace TestUtils {
         let slain_by = 0;
         let slain_on_date = 0;
         return (
-            Beast(
+            BeastStatic(
                 beast_id,
-                health,
                 type,
-                rank,
                 prefix_1,
                 prefix_2,
-                adventurer,
-                xp,
                 slain_by,
                 slain_on_date
             ),
+            BeastDynamic(
+                health,
+                rank,
+                adventurer,
+                xp
+            )
         );
     }
 

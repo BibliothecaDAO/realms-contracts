@@ -56,7 +56,7 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 }
 
 @external
-func test_birth{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+func test_create{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
 
     local account_1_address;
@@ -70,18 +70,20 @@ func test_birth{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
     %}
 
-    let (beast_id) = IBeast.birth(beast_address);
+    let (beast_id) = IBeast.create(beast_address, Uint256(1,0));
 
-    let (local beast) = IBeast.get_beast_by_id(beast_address, beast_id);
+    let (beast_static, beast_dynamic) = IBeast.get_beast_by_id(beast_address, beast_id);
 
-    assert beast.Id = 1;
-    assert beast.Health = 100;
-    assert beast.Prefix_1 = 1;
-    assert beast.Prefix_2 = 1;
-    assert beast.Adventurer = 0;
-    assert beast.XP = 0;
-    assert beast.SlainBy = 0;
-    assert beast.SlainOnDate = 0;
+    assert beast_static.Id = 1;
+    assert beast_dynamic.Health = 100;
+    assert beast_static.Type = 1;
+    assert beast_dynamic.Rank = 5;
+    assert beast_staticeast.Prefix_1 = 1;
+    assert beast_static.Prefix_2 = 1;
+    assert beast_dynamic.Adventurer = 0;
+    assert beast_dynamic.XP = 0;
+    assert beast_static.SlainBy = 0;
+    assert beast_static.SlainOnDate = 0;
 
     %{
         print('Rank', ids.beast.Rank)

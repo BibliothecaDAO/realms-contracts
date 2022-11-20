@@ -3,7 +3,7 @@
 from starkware.cairo.common.uint256 import Uint256
 
 from contracts.loot.constants.adventurer import AdventurerState, PackedAdventurerState
-from contracts.loot.constants.beast import Beast
+from contracts.loot.constants.beast import Beast, BeastStatic, BeastDynamic
 from contracts.loot.constants.item import Item
 
 @contract_interface
@@ -78,11 +78,11 @@ namespace IAdventurer {
 namespace IBeast {
     func initializer(proxy_admin: felt, address_of_controller: felt) {
     }
-    func birth() -> (beast_id: felt) {
+    func create(adventurer_id: Uint256) -> (beast_id: Uint256) {
     }
     func attack_beast(unpacked_adventurer: AdventurerState, beast: Beast) {
     }
-    func get_beast_by_id(beast_id: felt) -> (beast: Beast) {
+    func get_beast_by_id(beast_id: Uint256) -> (beast_static: BeastStatic, beast_dynamic: BeastDynamic) {
     }
 }
 

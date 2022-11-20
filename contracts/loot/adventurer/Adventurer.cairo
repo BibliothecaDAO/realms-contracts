@@ -319,7 +319,6 @@ func explore{
 
     let (controller) = Module.controller_address();
 
-    // TODO: replace this with xorshiro rng
     let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
     let (rnd) = IXoroshiro.next(xoroshiro_address_);
     let (_, encounter) = unsigned_div_rem(rnd, 4);
@@ -333,7 +332,11 @@ func explore{
 
         let (beast_address) = Module.get_module_address(ModuleIds.Beast);
 
-        let (beast_id: felt) = IBeast.birth(beast_address);
+        let (beast_id: felt) = IBeast.birth(beast_address)
+        
+        with_attr error_message("Beast: Can't set beast adventurer to same value as current") {
+            assert_not_equal(adventurerTokenId, unpacked_beast.adventurer);
+        };
 
         let (updated_adventurer) = AdventurerLib.assign_beast(beast_id, unpacked_adventurer);
 

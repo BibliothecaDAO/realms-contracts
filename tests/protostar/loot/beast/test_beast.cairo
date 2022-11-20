@@ -4,7 +4,14 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 
 from contracts.loot.beast.stats.beast import BeastStats
 from contracts.loot.beast.library import BeastLib
-from contracts.loot.constants.beast import Beast, BeastIds, BeastRank, BeastType
+from contracts.loot.constants.beast import (
+    Beast,
+    BeastStatic,
+    BeastDynamic,
+    BeastIds, 
+    BeastRank, 
+    BeastType
+)
 from tests.protostar.loot.test_structs import (
     TestUtils,
     TEST_DAMAGE_HEALTH_REMAINING,
@@ -53,32 +60,30 @@ func test_pack{
 }() {
     alloc_locals;
 
-    let beast = Beast(
-        1, 
-        100, 
-        1, 
-        5, 
-        1, 
-        1, 
+    let beast_static = BeastStatic(
+        1,
+        1,
+        1,
+        1,
         0,
+        0
+    );
+
+    let beast_dynamic = BeastDynamic(
+        100,
+        5,
         0,
-        0,
-        0);
+        0
+    );
 
-    let (packed_beast) = BeastLib.pack(beast);
+    let (packed_beast) = BeastLib.pack(beast_dynamic);
 
-    let (beast: Beast) = BeastLib.unpack(packed_beast);
+    let (unpacked_beast: BeastDynamic) = BeastLib.unpack(packed_beast);
 
-    assert beast.Id = 1;
-    assert beast.Health = 100;
-    assert beast.Type = 1;
-    assert beast.Rank = 1;
-    assert beast.Prefix_1 = 1;
-    assert beast.Prefix_2 = 1;
-    assert beast.Adventurer = 0;
-    assert beast.XP = 0;
-    assert beast.SlainBy = 0;
-    assert beast.SlainOnDate = 0;
+    assert unpacked_beast.Health = 100;
+    assert unpacked_beast.Rank = 5;
+    assert unpacked_beast.Adventurer = 0;
+    assert unpacked_beast.XP = 0;
 
     return ();
 }
@@ -89,11 +94,11 @@ func test_cast{
 }() {
     alloc_locals;
 
-    let (beast) = TestUtils.create_beast(1, 0);
+    let (beast_static, beast_dynamic) = TestUtils.create_beast(1);
 
-    let (packed_beast) = BeastLib.pack(beast);
+    let (packed_beast) = BeastLib.pack(beast_dynamic);
 
-    let (beast: Beast) = BeastLib.unpack(packed_beast);
+    let (beast: BeastDynamic) = BeastLib.unpack(packed_beast);
 
     let (c) = BeastLib.cast_state(1, 50, beast);
 
@@ -106,15 +111,15 @@ func test_cast{
 func test_deduct_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, bitwise_ptr: BitwiseBuiltin*, range_check_ptr}() {
     alloc_locals;
     
-    let (state) = TestUtils.create_beast(1, 0);
+    let (beast_static, beast_dynamic) = TestUtils.create_beast(1);
 
-    let (packed_beast) = BeastLib.pack(state);
+    let (packed_beast) = BeastLib.pack(beast_dynamic);
 
-    let (beast: Beast) = BeastLib.unpack(packed_beast);
+    let (beast: BeastDynamic) = BeastLib.unpack(packed_beast);
 
     let (c) = BeastLib.deduct_health(TEST_DAMAGE_HEALTH_REMAINING, beast);
 
-    assert c.Health = state.Health - TEST_DAMAGE_HEALTH_REMAINING;
+    assert c.Health = beast.Health - TEST_DAMAGE_HEALTH_REMAINING;
 
     let (c) = BeastLib.deduct_health(TEST_DAMAGE_OVERKILL, beast);
 
