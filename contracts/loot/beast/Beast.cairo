@@ -124,6 +124,11 @@ func attack{
         assert unpacked_adventurer.Status = AdventurerStatus.Battle;
     }
 
+    // and verify it's not already dead
+    with_attr error_message("Beast: Can't attack a dead beast") {
+        assert_not_zero(beast.Health);
+    }
+
     let (item_address) = Module.get_module_address(ModuleIds.Loot);
 
     let (weapon) = ILoot.getItemByTokenId(item_address, Uint256(unpacked_adventurer.WeaponId, 0));
@@ -133,28 +138,28 @@ func attack{
     // check if damage dealt is less than health remaining
     let still_alive = is_le(damage_dealt, beast.Health);
 
-    let (beast_static, beast_dynamic) = BeastLib.split_data(beast);
+    let (beast_static_, beast_dynamic_) = BeastLib.split_data(beast);
 
     // deduct health from beast
-    let (updated_beast) = BeastLib.deduct_health(damage_dealt, beast_dynamic);
+    let (updated_beast) = BeastLib.deduct_health(damage_dealt, beast_dynamic_);
 
     let (packed_beast) = BeastLib.pack(updated_beast);
 
-    beast_dynamic.write(unpacked_adventurer.Beast, packed_beast);
+    beast_dynamic.write(Uint256(unpacked_adventurer.Beast, 0), packed_beast);
 
-    let (new_beast_) = BeastLib.aggregate_data(beast_static, updated_beast);
+    let (new_beast_) = BeastLib.aggregate_data(beast_static_, updated_beast);
 
     // if the beast is alive
     if (still_alive == TRUE) {
         // having been attacked, it automatically attacks back
         let (chest) = ILoot.getItemByTokenId(item_address, Uint256(unpacked_adventurer.ChestId, 0));
         let (damage_taken) = CombatStats.calculate_damage_from_beast(new_beast_, chest);
-        IAdventurer.deduct_health(adventurer_address, beast_dynamic.Adventurer, damage_taken);
+        IAdventurer.deduct_health(adventurer_address, Uint256(new_beast_.Adventurer, 0), damage_taken);
     } else {
         // if beast has been slain, grant adventurer xp
         let (beast_greatness) = BeastLib.calculate_greatness(updated_beast.XP);
         let xp_gained = updated_beast.Rank * beast_greatness;
-        IAdventurer.increase_xp(adventurer_address, beast_dynamic.Adventurer, xp_gained);
+        IAdventurer.increase_xp(adventurer_address, Uint256(new_beast_.Adventurer, 0), xp_gained);
     }
 
     return ();
@@ -181,9 +186,7 @@ func flee{
 
     with_attr error_message("Beast: Adventurer must be in a battle") {
         assert unpacked_adventurer.Status = AdventurerStatus.Battle;
-    }
-
-    let (beast: Beast) = get_beast_by_id(unpacked_adventurer.Beast);   
+    }  
 
     // Adventurer Speed is Dexterity - Weight of all equipped items
     let weight_of_equipment = 3;
@@ -210,11 +213,10 @@ func flee{
 
     // unless ambush occurs
     if (is_ambushed == TRUE) {
-        let (beast_: Beast) = get_beast_by_id(unpacked_adventurer.Beast);
         let (chest) = ILoot.getItemByTokenId(item_address, Uint256(unpacked_adventurer.ChestId, 0));
         // then calculate damage based on beast
-        let (damage_taken) = CombatStats.calculate_damage_from_beast(beast_, chest);
-        IAdventurer.deduct_health(adventurer_address, beast.Adventurer, damage_taken);
+        let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, chest);
+        IAdventurer.deduct_health(adventurer_address, Uint256(beast.Adventurer, 0), damage_taken);
 
         tempvar syscall_ptr: felt* = syscall_ptr;
         tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
@@ -229,7 +231,7 @@ func flee{
 
     let can_flee = is_le(rnd, adventurer_speed);
     if (can_flee == TRUE) {
-        IAdventurer.update_status(adventurer_address, beast.Adventurer, AdventurerStatus.Idle);
+        IAdventurer.update_status(adventurer_address, Uint256(beast.Adventurer, 0), AdventurerStatus.Idle);
         return ();
     }
 
@@ -243,7 +245,8 @@ func flee{
 @external
 func set_beast_by_id{
         pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(token_id: felt, beast_static_: BeastStatic, beast_dynamic_: BeastDynamic) {
+}(token_id: Uint256, beast: Beast) {
+    let (beast_static_, beast_dynamic_) = BeastLib.split_data(beast);
     let (packed_beast: felt) = BeastLib.pack(beast_dynamic_);
     beast_static.write(token_id, beast_static_);
     beast_dynamic.write(token_id, packed_beast);
@@ -286,7 +289,7 @@ func get_beast_by_id{
 
     let (beast) = BeastLib.aggregate_data(beast_static_, unpacked_beast);
 
-    return (beast);
+    return (beast,);
 }
 
 // @view
