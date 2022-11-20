@@ -13,7 +13,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_add
-from starkware.cairo.common.math import unsigned_div_rem
+from starkware.cairo.common.math import unsigned_div_rem, assert_not_equal
 from starkware.cairo.common.math_cmp import is_le
 from starkware.starknet.common.syscalls import (
     get_caller_address,
@@ -40,15 +40,12 @@ from contracts.loot.constants.adventurer import (
     DiscoveryType
 )
 from contracts.loot.constants.beast import Beast
-from contracts.loot.beast.Beast import createBeast
 from contracts.loot.interfaces.imodules import IModuleController
 from contracts.loot.loot.stats.combat import CombatStats
 from contracts.loot.utils.general import _uint_to_felt
 from contracts.loot.beast.interface import IBeast
 from contracts.loot.loot.ILoot import ILoot
 from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
-
-from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 
 // const MINT_COST = 5000000000000000000
 
@@ -308,11 +305,11 @@ func increase_xp{
 @external
 func explore{
         pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(tokenId: Uint256) -> (success: felt) {
+}(token_id: Uint256) -> (success: felt) {
     alloc_locals;
 
     // unpack adventurer
-    let (unpacked_adventurer) = get_adventurer_by_id(tokenId);
+    let (unpacked_adventurer) = get_adventurer_by_id(token_id);
 
     // Only idle explorers can explore
     assert unpacked_adventurer.Status = AdventurerStatus.Idle;
@@ -332,19 +329,19 @@ func explore{
 
         let (beast_address) = Module.get_module_address(ModuleIds.Beast);
 
-        let (beast_id: felt) = IBeast.birth(beast_address)
+        let (beast_id: Uint256) = IBeast.create(beast_address, token_id);
         
         with_attr error_message("Beast: Can't set beast adventurer to same value as current") {
-            assert_not_equal(adventurerTokenId, unpacked_beast.adventurer);
-        };
+            assert_not_equal(beast_id.low, unpacked_adventurer.Beast);
+        }
 
-        let (updated_adventurer) = AdventurerLib.assign_beast(beast_id, unpacked_adventurer);
+        let (updated_adventurer) = AdventurerLib.assign_beast(beast_id.low, unpacked_adventurer);
 
         let (packed_adventurer) = AdventurerLib.pack(updated_adventurer);
             
-        adventurer.write(tokenId, packed_adventurer);
+        adventurer.write(token_id, packed_adventurer);
 
-        emit_adventurer_state(tokenId);
+        emit_adventurer_state(token_id);
 
         return (TRUE,);
     }

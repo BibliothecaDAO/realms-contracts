@@ -6,8 +6,8 @@ from contracts.loot.constants.beast import Beast
 
 @contract_interface
 namespace IBeast {
-    func birth() -> (beast_id: felt) {
+    func create(adventurer_id: Uint256) -> (beast_id: Uint256) {
     }
-    func get_beast_by_id(tokenId: felt) -> (beast: Beast) {
+    func get_beast_by_id(token_id: Uint256) -> (beast: Beast) {
     }
 }

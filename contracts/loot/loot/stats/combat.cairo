@@ -16,7 +16,7 @@ from contracts.loot.constants.item import Item, Type, ItemIds, Slot
 from contracts.loot.constants.combat import WeaponEfficacy, WeaponEfficiacyDamageMultiplier
 from contracts.loot.beast.stats.beast import BeastStats
 from contracts.loot.loot.stats.item import ItemStats
-from contracts.loot.constants.beast import Beast
+from contracts.loot.constants.beast import Beast, BeastStatic, BeastDynamic
 from contracts.loot.constants.obstacle import Obstacle, ObstacleUtils
 
 namespace CombatStats {

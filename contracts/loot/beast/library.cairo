@@ -58,6 +58,48 @@ namespace BeastLib {
         );
     }
 
+    func aggregate_data{
+        syscall_ptr: felt*, range_check_ptr
+    }(beast_static: BeastStatic, beast_dynamic: BeastDynamic) -> (beast: Beast) {
+        let beast = Beast(
+            beast_static.Id,
+            beast_static.Type,
+            beast_static.Prefix_1,
+            beast_static.Prefix_2,
+            beast_static.SlainBy,
+            beast_static.SlainOnDate,
+            beast_dynamic.Health,
+            beast_dynamic.Rank,
+            beast_dynamic.Adventurer,
+            beast_dynamic.XP
+        );
+
+        return (beast,);
+    }
+
+    func split_data{
+        syscall_ptr: felt*, range_check_ptr
+    }(beast: Beast) -> (beast_static: BeastStatic, beast_dynamic: BeastDynamic) {
+
+        let beast_static = BeastStatic(
+            beast.Id,
+            beast.Type,
+            beast.Prefix_1,
+            beast.Prefix_2,
+            beast.SlainBy,
+            beast.SlainOnDate,
+        );
+
+        let beast_dynamic = BeastDynamic(
+            beast.Health,
+            beast.Rank,
+            beast.Adventurer,
+            beast.XP
+        );
+
+        return (beast_static, beast_dynamic);
+    }
+
     func pack{
         syscall_ptr: felt*,
         pedersen_ptr: HashBuiltin*,
