@@ -2,8 +2,9 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 
+from contracts.loot.beast.stats.beast import BeastStats
 from contracts.loot.beast.library import BeastLib
-from contracts.loot.constants.beast import Beast, BeastConstants, BeastUtils
+from contracts.loot.constants.beast import Beast, BeastIds, BeastRank, BeastType
 from tests.protostar.loot.test_structs import (
     TestUtils,
     TEST_DAMAGE_HEALTH_REMAINING,
@@ -16,14 +17,14 @@ func test_beast_rank{
 }() {
     alloc_locals;
 
-    let (phoenix_rank) = BeastUtils.get_rank_from_id(BeastConstants.BeastIds.Phoenix);
-    assert phoenix_rank = BeastConstants.BeastRank.Phoenix;
+    let (phoenix_rank) = BeastStats.get_rank_from_id(BeastIds.Phoenix);
+    assert phoenix_rank = BeastRank.Phoenix;
 
-    let (orc_rank) = BeastUtils.get_rank_from_id(BeastConstants.BeastIds.Orc);
-    assert orc_rank = BeastConstants.BeastRank.Orc;
+    let (orc_rank) = BeastStats.get_rank_from_id(BeastIds.Orc);
+    assert orc_rank = BeastRank.Orc;
 
-    let (rat_rank) = BeastUtils.get_rank_from_id(BeastConstants.BeastIds.Rat);
-    assert rat_rank = BeastConstants.BeastRank.Rat;
+    let (rat_rank) = BeastStats.get_rank_from_id(BeastIds.Rat);
+    assert rat_rank = BeastRank.Rat;
 
     return ();
 }
@@ -34,14 +35,14 @@ func test_beast_type{
 }() {
     alloc_locals;
 
-    let (phoenix_type) = BeastUtils.get_type_from_id(BeastConstants.BeastIds.Phoenix);
-    assert phoenix_type = BeastConstants.BeastType.Phoenix;
+    let (phoenix_type) = BeastStats.get_type_from_id(BeastIds.Phoenix);
+    assert phoenix_type = BeastType.Phoenix;
 
-    let (orc_type) = BeastUtils.get_type_from_id(BeastConstants.BeastIds.Orc);
-    assert orc_type = BeastConstants.BeastType.Orc;
+    let (orc_type) = BeastStats.get_type_from_id(BeastIds.Orc);
+    assert orc_type = BeastType.Orc;
 
-    let (rat_type) = BeastUtils.get_type_from_id(BeastConstants.BeastIds.Rat);
-    assert rat_type = BeastConstants.BeastType.Rat;
+    let (rat_type) = BeastStats.get_type_from_id(BeastIds.Rat);
+    assert rat_type = BeastType.Rat;
 
     return ();
 }
@@ -52,7 +53,17 @@ func test_pack{
 }() {
     alloc_locals;
 
-    let beast = Beast(1, 100, 1, 1, 1, 1, 0);
+    let beast = Beast(
+        1, 
+        100, 
+        1, 
+        5, 
+        1, 
+        1, 
+        0,
+        0,
+        0,
+        0);
 
     let (packed_beast) = BeastLib.pack(beast);
 
@@ -64,7 +75,10 @@ func test_pack{
     assert beast.Rank = 1;
     assert beast.Prefix_1 = 1;
     assert beast.Prefix_2 = 1;
-    assert beast.Greatness = 0;
+    assert beast.Adventurer = 0;
+    assert beast.XP = 0;
+    assert beast.SlainBy = 0;
+    assert beast.SlainOnDate = 0;
 
     return ();
 }

@@ -62,15 +62,15 @@ namespace IAdventurer {
     }
     func mint(to: felt, race: felt, home_realm: felt, name: felt, order: felt) {
     }
-    func equipItem(tokenId: Uint256, itemTokenId: Uint256) -> (success: felt) {
+    func equip_item(tokenId: Uint256, itemTokenId: Uint256) -> (success: felt) {
     }
-    func unequipItem(tokenId: Uint256, itemTokenId: Uint256) -> (success: felt) {
+    func unequip_item(tokenId: Uint256, itemTokenId: Uint256) -> (success: felt) {
     }
     func tokenURI(tokenId: Uint256) -> (tokenURI_len: felt, tokenURI: felt*) {
     }
-    func getAdventurerById(tokenId: Uint256) -> (adventurer: AdventurerState) {
+    func get_adventurer_by_id(tokenId: Uint256) -> (adventurer: AdventurerState) {
     }
-    func deductHealth(tokenId: Uint256, amount: felt) -> (success: felt) {
+    func deduct_health(tokenId: Uint256, amount: felt) -> (success: felt) {
     }
 }
 
@@ -78,7 +78,11 @@ namespace IAdventurer {
 namespace IBeast {
     func initializer(proxy_admin: felt, address_of_controller: felt) {
     }
+    func birth() -> (beast_id: felt) {
+    }
     func attack_beast(unpacked_adventurer: AdventurerState, beast: Beast) {
+    }
+    func get_beast_by_id(beast_id: felt) -> (beast: Beast) {
     }
 }
 

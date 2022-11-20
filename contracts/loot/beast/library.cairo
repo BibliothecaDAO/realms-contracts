@@ -3,6 +3,7 @@
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
+from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.memcpy import memcpy
 from starkware.cairo.common.memset import memset
@@ -11,6 +12,7 @@ from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
 from contracts.settling_game.utils.general import unpack_data
 from contracts.loot.constants.adventurer import Adventurer
 from contracts.loot.constants.beast import Beast, SHIFT_P, BeastSlotIds
+from contracts.loot.beast.stats.beast import BeastStats
 
 namespace BeastLib {
     func pack{
@@ -25,13 +27,12 @@ namespace BeastLib {
         let Rank = unpacked_beast.Rank * SHIFT_P._4;
         let Prefix_1 = unpacked_beast.Prefix_1 * SHIFT_P._5;
         let Prefix_2 = unpacked_beast.Prefix_2 * SHIFT_P._6;
-        let Greatness = unpacked_beast.Greatness * SHIFT_P._7;
-        let Adventurer = unpacked_beast.Adventurer * SHIFT_P._8;
-        let XP = unpacked_beast.XP * SHIFT_P._9;
-        let SlainBy = unpacked_beast.Adventurer * SHIFT_P._10;
-        let SlainOnDate = unpacked_beast.Adventurer * SHIFT_P._11;
+        let Adventurer = unpacked_beast.Adventurer * SHIFT_P._7;
+        let XP = unpacked_beast.XP * SHIFT_P._8;
+        let SlainBy = unpacked_beast.Adventurer * SHIFT_P._9;
+        let SlainOnDate = unpacked_beast.Adventurer * SHIFT_P._10;
 
-        let packed_beast = Id + Health + Type + Rank + Prefix_1 + Prefix_2 + Greatness + Adventurer + XP + SlainBy + SlainOnDate;
+        let packed_beast = Id + Health + Type + Rank + Prefix_1 + Prefix_2 + Adventurer + XP + SlainBy + SlainOnDate;
 
         return (packed_beast,);
     }
@@ -49,11 +50,10 @@ namespace BeastLib {
         let (Rank) = unpack_data(packed_beast, 28, 7);
         let (Prefix_1) = unpack_data(packed_beast, 31, 127);
         let (Prefix_2) = unpack_data(packed_beast, 38, 31);
-        let (Greatness) = unpack_data(packed_beast, 43, 31);
-        let (Adventurer) = unpack_data(packed_beast, 48, 2199023255551);
-        let (XP) = unpack_data(packed_beast, 89, 134217727);
-        let (Slain_By) = unpack_data(packed_beast, 99, 2199023255551);
-        let (Slain_On_Date) = unpack_data(packed_beast, 140, 8589934591);
+        let (Adventurer) = unpack_data(packed_beast, 43, 2199023255551);
+        let (XP) = unpack_data(packed_beast, 84, 134217727);
+        let (Slain_By) = unpack_data(packed_beast, 94, 2199023255551);
+        let (Slain_On_Date) = unpack_data(packed_beast, 135, 8589934591);
 
         return (
             Beast(
@@ -63,7 +63,6 @@ namespace BeastLib {
             Rank,
             Prefix_1,
             Prefix_2,
-            Greatness,
             Adventurer,
             XP,
             Slain_By,
@@ -110,5 +109,37 @@ namespace BeastLib {
         }
 
         return (updated_beast,);
+    }
+
+    func generate_random_beast{syscall_ptr: felt*, range_check_ptr}(xoroshiro_random: felt) -> (beast: Beast) {
+        alloc_locals;
+
+        let (_, r) = unsigned_div_rem(xoroshiro_random, 17);
+        let rnd = r + 1;
+
+        let (Type) = BeastStats.get_type_from_id(rnd);
+        let (Rank) = BeastStats.get_rank_from_id(rnd);
+
+        return (
+            Beast(
+                Id=rnd,
+                Health=100,
+                Type=Type,
+                Rank=Rank,
+                Prefix_1=1,
+                Prefix_2=1,
+                Adventurer=0,
+                XP=0,
+                SlainBy=0,
+                SlainOnDate=0
+            ),
+        );
+    }
+
+    func calculate_greatness{syscall_ptr: felt*, range_check_ptr}(xp: felt) -> (greatness: felt) {
+
+        let (greatness, _) = unsigned_div_rem(xp, 1000);
+
+        return (greatness,);
     }
 }

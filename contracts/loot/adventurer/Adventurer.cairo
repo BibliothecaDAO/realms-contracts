@@ -15,7 +15,11 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_add
 from starkware.cairo.common.math import unsigned_div_rem, assert_lt_felt
 from starkware.cairo.common.math_cmp import is_le
-from starkware.starknet.common.syscalls import get_caller_address, get_contract_address, get_block_timestamp
+from starkware.starknet.common.syscalls import (
+    get_caller_address,
+    get_contract_address,
+    get_block_timestamp,
+)
 
 from openzeppelin.access.ownable.library import Ownable
 from openzeppelin.introspection.erc165.library import ERC165
@@ -25,14 +29,21 @@ from openzeppelin.token.erc721.IERC721 import IERC721
 from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
 from openzeppelin.upgrades.library import Proxy
 
+from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library.library_module import Module
 from contracts.loot.adventurer.library import AdventurerLib
-from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState, AdventurerStatus
+from contracts.loot.constants.adventurer import (
+    Adventurer,
+    AdventurerState,
+    PackedAdventurerState,
+    AdventurerStatus,
+    DiscoveryType
+)
 from contracts.loot.constants.beast import Beast
 from contracts.loot.interfaces.imodules import IModuleController
 from contracts.loot.loot.stats.combat import CombatStats
 from contracts.loot.utils.general import _uint_to_felt
-
+from contracts.loot.beast.interface import IBeast
 from contracts.loot.loot.ILoot import ILoot
 from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
 
@@ -68,10 +79,7 @@ func adventurer_balance(tokenId: Uint256) -> (balance: Uint256) {
 // @return proxy_admin: Proxy admin address
 @external
 func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    name: felt,
-    symbol: felt,
-    proxy_admin: felt,
-    address_of_controller: felt,
+    name: felt, symbol: felt, proxy_admin: felt, address_of_controller: felt
 ) {
     // set as module
     Module.initializer(address_of_controller);
@@ -144,7 +152,7 @@ func mint{
 }
 
 @external
-func equipItem{
+func equip_item{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(tokenId: Uint256, itemTokenId: Uint256) -> (success: felt) {
     alloc_locals;
@@ -153,7 +161,7 @@ func equipItem{
     ERC721.assert_only_token_owner(tokenId);
 
     // unpack adventurer
-    let (unpacked_adventurer) = getAdventurerById(tokenId);
+    let (unpacked_adventurer) = get_adventurer_by_id(tokenId);
 
     // Get Item from Loot contract
     let (loot_address) = Module.get_module_address(ModuleIds.Loot);
@@ -186,12 +194,12 @@ func equipItem{
 
     emit_adventurer_state(tokenId);
 
-    return (1,);
+    return (TRUE,);
 }
 
 @external
-func unequipItem{
-        pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+func unequip_item{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(tokenId: Uint256, itemTokenId: Uint256) -> (success: felt) {
     alloc_locals;
 
@@ -199,7 +207,7 @@ func unequipItem{
     ERC721.assert_only_token_owner(tokenId);
 
     // unpack adventurer
-    let (unpacked_adventurer) = getAdventurerById(tokenId);
+    let (unpacked_adventurer) = get_adventurer_by_id(tokenId);
 
     // Get Item from Loot contract
     let (loot_address) = Module.get_module_address(ModuleIds.Loot);
@@ -228,11 +236,30 @@ func unequipItem{
 
     emit_adventurer_state(tokenId);
 
-    return (1,);
+    return (TRUE,);
 }
 
 @external
-func deductHealth{
+func update_status{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(tokenId: Uint256, status: felt) -> (success: felt) {
+    alloc_locals;
+    Module.only_approved();
+
+    let (unpacked_adventurer) = get_adventurer_by_id(tokenId);
+
+    let (new_adventurer) = AdventurerLib.update_status(status, unpacked_adventurer);
+
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
+    adventurer.write(tokenId, packed_new_adventurer);
+
+    emit_adventurer_state(tokenId);
+
+    return (TRUE,);
+}
+
+@external
+func deduct_health{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(tokenId: Uint256, amount: felt) -> (success: felt) {
     alloc_locals;
@@ -240,51 +267,83 @@ func deductHealth{
     Module.only_approved();
 
     // unpack adventurer
-    let (unpacked_adventurer) = getAdventurerById(tokenId);
+    let (unpacked_adventurer) = get_adventurer_by_id(tokenId);
 
     // deduct health
-    let (equiped_adventurer) = AdventurerLib.deduct_health(amount, unpacked_adventurer);
+    let (new_adventurer) = AdventurerLib.deduct_health(amount, unpacked_adventurer);
 
-    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(equiped_adventurer);
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
     adventurer.write(tokenId, packed_new_adventurer);
 
     emit_adventurer_state(tokenId);
 
-    return (1,);
+    return (TRUE,);
 }
 
 @external
-func explore{syscall_ptr: felt*, range_check_ptr}(tokenId: Uint256) {
+func increase_xp{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(tokenId: Uint256, amount: felt) -> (success: felt) {
+    alloc_locals;
+
+    Module.only_approved();
+
+    // unpack adventurer
+    let (unpacked_adventurer) = get_adventurer_by_id(tokenId);
+
+    // increase xp
+    let (new_adventurer) = AdventurerLib.increase_xp(amount, unpacked_adventurer);
+
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
+    adventurer.write(tokenId, packed_new_adventurer);
+
+    emit_adventurer_state(tokenId);
+
+    return (TRUE,);
+}
+
+@external
+func explore{
+        pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(tokenId: Uint256) -> (success: felt) {
     alloc_locals;
 
     // unpack adventurer
-    let (unpacked_adventurer) = getAdventurerById(tokenId);
+    let (unpacked_adventurer) = get_adventurer_by_id(tokenId);
 
     // Only idle explorers can explore
     assert unpacked_adventurer.Status = AdventurerStatus.Idle;
 
+    let (controller) = Module.controller_address();
+
     // TODO: replace this with xorshiro rng
-    local encounter;
-    %{
-            import random
-            ids.encounter = random.randint(0, 4)
-        %}
+    let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
+    let (rnd) = IXoroshiro.next(xoroshiro_address_);
+    let (_, encounter) = unsigned_div_rem(rnd, 4);
 
-        // If the adventurer encounter a beast 
-        if (encounter == DiscoveryType.Beast) {
+    // If the adventurer encounter a beast
+    if (encounter == DiscoveryType.Beast) {
         // we set their status to battle
-        let (unpacked_adventurer: AdventurerState) = update_status(AdventurerStatus.Battle, unpacked_adventurer);
+        let (unpacked_adventurer: AdventurerState) = AdventurerLib.update_status(
+            AdventurerStatus.Battle, unpacked_adventurer
+        );
 
-        let (beast : Beast) = BeastUtils.get_random_beast();
+        let (beast_address) = Module.get_module_address(ModuleIds.Beast);
 
-        // Todo generate a beast token
-        // let (beastTokenId) = BeastModule.birth(greatness=1, rank=5, etc)
-        unpacked_adventurer.Beast = beastTokenId;
+        let (beast_id: felt) = IBeast.birth(beast_address);
 
-        // I think here we need to mint a Beast and store it on-chain. 
-        }
+        let (updated_adventurer) = AdventurerLib.assign_beast(beast_id, unpacked_adventurer);
 
-    return (unpacked_adventurer,);
+        let (packed_adventurer) = AdventurerLib.pack(updated_adventurer);
+            
+        adventurer.write(tokenId, packed_adventurer);
+
+        emit_adventurer_state(tokenId);
+
+        return (TRUE,);
+    }
+
+    return (TRUE,);
 }
 // -----------------------------
 // Internal Adventurer Specific
@@ -294,7 +353,7 @@ func emit_adventurer_state{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(tokenId: Uint256) {
     // Get new adventurer
-    let (new_adventurer) = getAdventurerById(tokenId);
+    let (new_adventurer) = get_adventurer_by_id(tokenId);
 
     NewAdventurerState.emit(tokenId, new_adventurer);
 
@@ -306,7 +365,7 @@ func emit_adventurer_state{
 // --------------------
 
 @view
-func getAdventurerById{
+func get_adventurer_by_id{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(tokenId: Uint256) -> (adventurer: AdventurerState) {
     alloc_locals;
@@ -325,7 +384,7 @@ func getAdventurerById{
 func is_dead{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(tokenId: Uint256) -> (is_dead: felt) {
-    let (adventurer: AdventurerState) = getAdventurerById(tokenId);
+    let (adventurer: AdventurerState) = get_adventurer_by_id(tokenId);
 
     if (adventurer.Health == 0) {
         return (is_dead=TRUE);

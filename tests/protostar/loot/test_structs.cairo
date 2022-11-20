@@ -1,11 +1,12 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState
+from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState, AdventurerStatus
 from contracts.loot.constants.item import Item, ItemIds, ItemType, ItemSlot, ItemMaterial, State
 from contracts.loot.constants.rankings import ItemRank
-from contracts.loot.constants.beast import Beast, BeastUtils
+from contracts.loot.constants.beast import Beast
 from contracts.loot.constants.obstacle import Obstacle, ObstacleUtils
+from contracts.loot.beast.stats.beast import BeastStats
 from contracts.loot.loot.stats.item import ItemStats
 
 const TEST_WEAPON_TOKEN_ID = 20;
@@ -52,6 +53,8 @@ namespace TestAdventurerState {
     const RingId = 1008;
 
     // Packed Stats p3
+    const Status = AdventurerStatus.Idle;
+    const Beast = 0;
 }
 
 func get_adventurer_state{syscall_ptr: felt*, range_check_ptr}() -> (
@@ -84,6 +87,8 @@ func get_adventurer_state{syscall_ptr: felt*, range_check_ptr}() -> (
         TestAdventurerState.HandsId,
         TestAdventurerState.NeckId,
         TestAdventurerState.RingId,
+        TestAdventurerState.Status,
+        TestAdventurerState.Beast,
         ),
     );
 }
@@ -161,11 +166,14 @@ namespace TestUtils {
         alloc_locals;
 
         let health = 100;
-        let (type) = BeastUtils.get_type_from_id(beast_id);
-        let (rank) = BeastUtils.get_rank_from_id(beast_id);
+        let (type) = BeastStats.get_type_from_id(beast_id);
+        let (rank) = BeastStats.get_rank_from_id(beast_id);
         let prefix_1 = 1;
         let prefix_2 = 1;
-
+        let adventurer = 0;
+        let xp = 0;
+        let slain_by = 0;
+        let slain_on_date = 0;
         return (
             Beast(
                 beast_id,
@@ -174,7 +182,10 @@ namespace TestUtils {
                 rank,
                 prefix_1,
                 prefix_2,
-                greatness,
+                adventurer,
+                xp,
+                slain_by,
+                slain_on_date
             ),
         );
     }

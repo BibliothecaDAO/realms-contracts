@@ -101,8 +101,8 @@ func test_equip_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     ILoot.setItemById(loot_address, Uint256(1,0), weapon_id);
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8);
-    IAdventurer.equipItem(adventurer_address, Uint256(1,0), Uint256(1,0));
-    let (adventurer) = IAdventurer.getAdventurerById(adventurer_address, Uint256(1,0));
+    IAdventurer.equip_item(adventurer_address, Uint256(1,0), Uint256(1,0));
+    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
     let (adventurer_item) = ILoot.getItemByTokenId(loot_address, Uint256(adventurer.WeaponId, 0));
     assert adventurer_item.Id = ItemIds.Wand;
 
@@ -141,9 +141,9 @@ func test_unequip_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     ILoot.setItemById(loot_address, Uint256(1,0), weapon_id);
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8);
-    IAdventurer.equipItem(adventurer_address, Uint256(1,0), Uint256(1,0));
-    IAdventurer.unequipItem(adventurer_address, Uint256(1,0), Uint256(1,0));
-    let (adventurer) = IAdventurer.getAdventurerById(adventurer_address, Uint256(1,0));
+    IAdventurer.equip_item(adventurer_address, Uint256(1,0), Uint256(1,0));
+    IAdventurer.unequip_item(adventurer_address, Uint256(1,0), Uint256(1,0));
+    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
     let (adventurer_item) = ILoot.getItemByTokenId(loot_address, Uint256(adventurer.WeaponId, 0));
     assert adventurer_item.Id = 0;
 
@@ -180,8 +180,8 @@ func test_deduct_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_ch
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
     ILords.approve(lords_address, adventurer_address, Uint256(200 * 10 ** 18, 0));
     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8);
-    IAdventurer.deductHealth(adventurer_address, Uint256(1,0), 50);
-    let (adventurer) = IAdventurer.getAdventurerById(adventurer_address, Uint256(1,0));
+    IAdventurer.deduct_health(adventurer_address, Uint256(1,0), 50);
+    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
     assert adventurer.Health = 50;
     %{
         stop_prank_realms()

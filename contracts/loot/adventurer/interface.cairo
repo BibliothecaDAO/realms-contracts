@@ -8,8 +8,14 @@ from contracts.loot.constants.adventurer import AdventurerState
 namespace IAdventurer {
     func ownerOf(tokenId: Uint256) -> (owner: felt) {
     }
-    func getAdventurerById(tokenId: Uint256) -> (adventurer: AdventurerState) {
+    func get_adventurer_by_id(tokenId: Uint256) -> (adventurer: AdventurerState) {
     }
-    func deductHealth(tokenId: Uint256, amount: felt) -> (success: felt) {
+    func deduct_health(tokenId: Uint256, amount: felt) -> (success: felt) {
+    }
+    func increase_xp(tokenId: Uint256, amount: felt) -> (success: felt) {
+    }
+    func update_status(tokenId: Uint256, status: felt) -> (success: felt) {
+    }
+    func explore(tokenId: Uint256) -> (success: felt) {
     }
 }

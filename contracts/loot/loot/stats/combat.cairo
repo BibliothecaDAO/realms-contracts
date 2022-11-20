@@ -14,8 +14,9 @@ from starkware.cairo.common.registers import get_label_location
 
 from contracts.loot.constants.item import Item, Type, ItemIds, Slot
 from contracts.loot.constants.combat import WeaponEfficacy, WeaponEfficiacyDamageMultiplier
+from contracts.loot.beast.stats.beast import BeastStats
 from contracts.loot.loot.stats.item import ItemStats
-from contracts.loot.constants.beast import Beast, BeastUtils
+from contracts.loot.constants.beast import Beast
 from contracts.loot.constants.obstacle import Obstacle, ObstacleUtils
 
 namespace CombatStats {
@@ -151,14 +152,14 @@ namespace CombatStats {
         alloc_locals;
 
         // Get beast type
-        let (attack_type) = BeastUtils.get_type_from_id(beast.Id);
+        let (attack_type) = BeastStats.get_type_from_id(beast.Id);
 
         // Get armor type
         let (armor_type) = ItemStats.item_type(armor.Id);
 
         // pass details of attack and armor to core damage calculation function
         let (damage_dealt) = calculate_damage(
-            attack_type, beast.Rank, beast.Greatness, armor_type, armor.Rank, armor.Greatness
+            attack_type, beast.Rank, beast.XP, armor_type, armor.Rank, armor.Greatness
         );
 
         // return damage
@@ -173,7 +174,7 @@ namespace CombatStats {
 
         // pass details of attack and armor to core damage calculation function
         let (damage_dealt) = calculate_damage(
-            weapon.Type, weapon.Rank, weapon.Greatness, beast.Type, beast.Rank, beast.Greatness
+            weapon.Type, weapon.Rank, weapon.Greatness, beast.Type, beast.Rank, beast.XP
         );
 
         // return damage

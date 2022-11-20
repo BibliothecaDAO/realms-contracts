@@ -29,6 +29,9 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         context.loot = ids.addresses.loot
         context.beast = ids.addresses.beast
         context.lords = ids.addresses.lords
+        stop_prank_realms = start_prank(ids.addresses.account_1, ids.addresses.realms)
+        stop_prank_adventurer = start_prank(ids.addresses.account_1, ids.addresses.adventurer)
+        stop_prank_lords = start_prank(ids.addresses.account_1, ids.addresses.lords)
     %}
     let (timestamp) = get_block_timestamp();
     let weapon_id: Item = Item(ItemIds.Wand, 0, 0, 0, 0, 0, 0, 0, 0, timestamp, 0, 0, 0); // Wand
@@ -36,27 +39,82 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     ILoot.setItemById(addresses.loot, Uint256(1,0), weapon_id);
     IRealms.set_realm_data(addresses.realms, Uint256(13, 0), 'Test Realm', 1);
     IAdventurer.mint(addresses.adventurer, addresses.account_1, 4, 10, 'Test', 8);
-    IAdventurer.equipItem(addresses.adventurer, Uint256(1,0), Uint256(1,0));
+    IAdventurer.equip_item(addresses.adventurer, Uint256(1,0), Uint256(1,0));
+    %{
+        print(ids.addresses.account_1)
+        print(ids.addresses.realms)
+        print(ids.addresses.adventurer)
+        print(ids.addresses.loot)
+        print(ids.addresses.beast)
+        print(ids.addresses.lords)
+        print(ids.addresses.xoroshiro)
+        stop_prank_realms()
+        stop_prank_adventurer()
+        stop_prank_lords()
+    %}
     return ();
 }
 
 @external
-func test_attack_beast{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+func test_birth{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
-    
+
+    local account_1_address;
+    local adventurer_address;
     local beast_address;
 
     %{
+        ids.account_1_address = context.account_1
+        ids.adventurer_address = context.adventurer
         ids.beast_address = context.beast
-        stop_mock = mock_call(ids.beast, 'calculate_damage_to_beast', [50])
+        stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
     %}
 
-    let (adventurer) = get_adventurer_state();
-    let (beast) = TestUtils.create_beast(1, 0);
+    let (beast_id) = IBeast.birth(beast_address);
 
-    IBeast.attack_beast(beast_address, adventurer, beast);
+    let (local beast) = IBeast.get_beast_by_id(beast_address, beast_id);
 
-    assert beast.Health = beast.Health - TEST_DAMAGE_HEALTH_REMAINING;
+    assert beast.Id = 1;
+    assert beast.Health = 100;
+    assert beast.Prefix_1 = 1;
+    assert beast.Prefix_2 = 1;
+    assert beast.Adventurer = 0;
+    assert beast.XP = 0;
+    assert beast.SlainBy = 0;
+    assert beast.SlainOnDate = 0;
+
+    %{
+        print('Rank', ids.beast.Rank)
+        print('Type', ids.beast.Type)
+    %}
 
     return ();
 }
+
+// @external
+// func test_attack_beast{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+//     alloc_locals;
+    
+//     local beast_address;
+
+//     %{
+//         ids.beast_address = context.beast
+//         stop_mock = mock_call(ids.beast_address, 'calculate_damage_to_beast', [50])
+//         stop_prank_beast = start_prank(ids.account_1_address, ids.beast_address)
+//     %}
+
+//     let (adventurer) = get_adventurer_state();
+//     let (beast) = TestUtils.create_beast(1, 0);
+
+//     IBeast.attack_beast(beast_address, adventurer, beast);
+
+//     let (updated_beast) = IBeast.get_beast_by_id(beast_address, 1);
+
+//     assert updated_beast.Health = beast.Health - TEST_DAMAGE_HEALTH_REMAINING;
+
+//     %{
+//         stop_prank_beast()
+//     %}
+
+//     return ();
+// }

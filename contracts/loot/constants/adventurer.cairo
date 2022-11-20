@@ -109,6 +109,7 @@ struct PackedAdventurerState {
     p2: felt,
     p3: felt,
     p4: felt,
+    p5: felt,
 }
 
 namespace SHIFT_P_1 {
@@ -133,6 +134,12 @@ namespace SHIFT_P_2 {
     const _12 = 2 ** 107;
     const _13 = 2 ** 117;
 }
+
+namespace SHIFT_P_5 {
+    const _1 = 2 ** 0;
+    const _2 = 2 ** 3;
+}
+
 
 namespace AdventurerSlotIds {
     // immutable stats

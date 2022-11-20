@@ -16,6 +16,7 @@ from tests.protostar.loot.setup.interfaces import (
 struct Contracts {
     account_1: felt,
     controller: felt,
+    xoroshiro: felt,
     treasury: felt,
     adventurer: felt,
     beast: felt,
@@ -70,7 +71,6 @@ func deploy_all{
     alloc_locals;
 
     tempvar contracts: Contracts;
-    local xoroshiro;
 
     %{
         ids.contracts.account_1 = deploy_contract("./lib/cairo_contracts/src/openzeppelin/account/presets/Account.cairo", 
@@ -81,7 +81,7 @@ func deploy_all{
             [declared.class_hash]
         ).contract_address
         ids
-        ids.xoroshiro = deploy_contract("./contracts/utils/xoroshiro128_starstar.cairo", 
+        ids.contracts.xoroshiro = deploy_contract("./contracts/utils/xoroshiro128_starstar.cairo", 
             [123]
         ).contract_address
         ids.contracts.treasury = deploy_contract("./lib/cairo_contracts/src/openzeppelin/account/presets/Account.cairo", 
@@ -110,7 +110,7 @@ func deploy_all{
         stop_prank_controller = start_prank(ids.contracts.account_1, ids.contracts.controller)
     %}
     IController.initializer(contracts.controller, contracts.account_1, contracts.account_1);
-    IController.set_xoroshiro(contracts.controller, xoroshiro);
+    IController.set_xoroshiro(contracts.controller, contracts.xoroshiro);
     IController.set_address_for_external_contract(contracts.controller, ExternalContractIds.Treasury, contracts.treasury);
 
     IAdventurer.initializer(contracts.adventurer, 1, 1, contracts.account_1, contracts.controller);

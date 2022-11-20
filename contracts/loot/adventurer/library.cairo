@@ -26,6 +26,7 @@ from contracts.loot.constants.adventurer import (
     PackedAdventurerState,
     SHIFT_P_1,
     SHIFT_P_2,
+    SHIFT_P_5,
     ItemShift,
     StatisticShift,
     AdventurerSlotIds,
@@ -36,7 +37,7 @@ from contracts.loot.constants.adventurer import (
 from contracts.loot.constants.item import Item
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.constants import SHIFT_41
-from contracts.loot.constants.beast import Beast, BeastUtils
+from contracts.loot.constants.beast import Beast
 from contracts.loot.loot.stats.combat import CombatStats
 
 namespace AdventurerLib {
@@ -76,31 +77,36 @@ namespace AdventurerLib {
         let FeetId = 0;
         let HandsId = 0;
 
+        let Status = AdventurerStatus.Idle;
+        let Beast = 0;
+
         return (
             AdventurerState(
-            Race=Race,
-            HomeRealm=HomeRealm,
-            Birthdate=Birthdate,
-            Name=Name,
-            Health=Health,
-            Level=Level,
-            Order=Order,
-            Strength=Strength,
-            Dexterity=Dexterity,
-            Vitality=Vitality,
-            Intelligence=Intelligence,
-            Wisdom=Wisdom,
-            Charisma=Charisma,
-            Luck=Luck,
-            XP=XP,
-            WeaponId=WeaponId,
-            ChestId=ChestId,
-            HeadId=HeadId,
-            WaistId=WaistId,
-            FeetId=FeetId,
-            HandsId=HandsId,
-            NeckId=NeckId,
-            RingId=RingId,
+                Race=Race,
+                HomeRealm=HomeRealm,
+                Birthdate=Birthdate,
+                Name=Name,
+                Health=Health,
+                Level=Level,
+                Order=Order,
+                Strength=Strength,
+                Dexterity=Dexterity,
+                Vitality=Vitality,
+                Intelligence=Intelligence,
+                Wisdom=Wisdom,
+                Charisma=Charisma,
+                Luck=Luck,
+                XP=XP,
+                WeaponId=WeaponId,
+                ChestId=ChestId,
+                HeadId=HeadId,
+                WaistId=WaistId,
+                FeetId=FeetId,
+                HandsId=HandsId,
+                NeckId=NeckId,
+                RingId=RingId,
+                Status=Status,
+                Beast=Beast
             ),
         );
     }
@@ -147,13 +153,17 @@ namespace AdventurerLib {
         let Neck = unpacked_adventurer_state.NeckId * SHIFT_41._3;
         let Ring = unpacked_adventurer_state.RingId * SHIFT_41._4;
 
+        let Status = unpacked_adventurer_state.Status * SHIFT_P_5._1;
+        let Beast = unpacked_adventurer_state.Beast * SHIFT_P_5._2;
+
         // packing
         let p1 = Name + Birthdate + HomeRealm + Race;
         let p2 = XP + Luck + Charisma + Wisdom + Intelligence + Vitality + Dexterity + Strength + Order + Level + Health;
         let p3 = Waist + Head + Chest + Weapon;
         let p4 = Ring + Neck + Hands + Feet;
+        let p5 = Status + Beast;
 
-        let packedAdventurer = PackedAdventurerState(p1, p2, p3, p4);
+        let packedAdventurer = PackedAdventurerState(p1, p2, p3, p4, p5);
 
         return (packedAdventurer,);
     }
@@ -205,31 +215,37 @@ namespace AdventurerLib {
         let (NeckId) = unpack_data(packed_adventurer.p4, 82, 2199023255551);  // 41
         let (RingId) = unpack_data(packed_adventurer.p4, 123, 2199023255551);  // 41
 
+        // ---------- p5 ---------#
+        let (Status) = unpack_data(packed_adventurer.p4, 0, 7);  // 3
+        let (Beast) = unpack_data(packed_adventurer.p4, 3, 2199023255551);  // 41
+
         return (
             AdventurerState(
-            Race=Race,
-            HomeRealm=HomeRealm,
-            Birthdate=Birthdate,
-            Name=Name,
-            Health=Health,
-            Level=Level,
-            Order=Order,
-            Strength=Strength,
-            Dexterity=Dexterity,
-            Vitality=Vitality,
-            Intelligence=Intelligence,
-            Wisdom=Wisdom,
-            Charisma=Charisma,
-            Luck=Luck,
-            XP=XP,
-            WeaponId=WeaponId,
-            ChestId=ChestId,
-            HeadId=HeadId,
-            WaistId=WaistId,
-            FeetId=FeetId,
-            HandsId=HandsId,
-            NeckId=NeckId,
-            RingId=RingId,
+                Race=Race,
+                HomeRealm=HomeRealm,
+                Birthdate=Birthdate,
+                Name=Name,
+                Health=Health,
+                Level=Level,
+                Order=Order,
+                Strength=Strength,
+                Dexterity=Dexterity,
+                Vitality=Vitality,
+                Intelligence=Intelligence,
+                Wisdom=Wisdom,
+                Charisma=Charisma,
+                Luck=Luck,
+                XP=XP,
+                WeaponId=WeaponId,
+                ChestId=ChestId,
+                HeadId=HeadId,
+                WaistId=WaistId,
+                FeetId=FeetId,
+                HandsId=HandsId,
+                NeckId=NeckId,
+                RingId=RingId,
+                Status=Status,
+                Beast=Beast
             ),
         );
     }
@@ -309,7 +325,7 @@ namespace AdventurerLib {
     }
 
     func increase_xp{syscall_ptr: felt*, range_check_ptr}(
-        unpacked_adventurer: AdventurerState, xp: felt
+        xp: felt, unpacked_adventurer: AdventurerState
     ) -> (new_unpacked_adventurer: AdventurerState) {
         alloc_locals;
 
@@ -323,7 +339,7 @@ namespace AdventurerLib {
     }
 
     func update_status{syscall_ptr: felt*, range_check_ptr}(
-        unpacked_adventurer: AdventurerState, status: felt
+       status: felt, unpacked_adventurer: AdventurerState
     ) -> (new_unpacked_adventurer: AdventurerState) {
         alloc_locals;
 
@@ -340,26 +356,16 @@ namespace AdventurerLib {
     }
 
     func assign_beast{syscall_ptr: felt*, range_check_ptr}(
-        unpacked_adventurer: AdventurerState, beast: Beast
+        beast_id: felt, unpacked_adventurer: AdventurerState
     ) -> (new_unpacked_adventurer: AdventurerState) {
         alloc_locals;
 
-        // Make sure beast is within allowable range
-        // Stopping point:
-        // 1. Trying to figure out how to handle the beast
-        // When one is discovered, it seems like we need to persist it (write to chain)
-        // THe most efficient approach I think is to attack it to the adventurer, thus allowing
-        // the adventurer to carry the beast with it. When the adventurer calls a function like
-        // attack_beast, we won't have to do any separate lookups, because the beast details will be right there.
-        // The weakness in this approach though is what happens if the beast kills the adventurer? 
-        // ideally, in this 
-
         // Adventurers can only battle one beast at a time (for now)
-        assert_le(unpacked_adventurer.Beast, 0);
+        assert unpacked_adventurer.Beast = 0;
 
         // update adventurer beast
         let (updated_adventurer: AdventurerState) = cast_state(
-            AdventurerSlotIds.Beast, beast, unpacked_adventurer
+            AdventurerSlotIds.Beast, beast_id, unpacked_adventurer
         );
 
         // return updated adventurer
