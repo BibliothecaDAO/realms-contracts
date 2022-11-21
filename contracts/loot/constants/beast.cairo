@@ -13,7 +13,8 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 
 struct Beast {
     Id: felt,  // beast id 1 - 100
-    Type: felt,  // same as Loot weapons: magic, bludgeon, blade
+    AttackType: felt,  // same as Loot weapons: magic, bludgeon, blade
+    ArmorType: felt,  // same as Loot weapons: cloth, metal, hide
     Rank: felt,  // same as Loot weapons: 1 is the strongest
     Prefix_1: felt,  // First part of the name prefix (i.e Tear)
     Prefix_2: felt,  // Second part of the name prefix (i.e Bearer)
@@ -95,7 +96,7 @@ namespace BeastRank {
     const Rat = 5;
 }
 
-namespace BeastType {
+namespace BeastAttackType {
     const Phoenix = Type.Weapon.magic;
     const Griffin = Type.Weapon.magic;
     const Minotaur = Type.Weapon.magic;
@@ -117,6 +118,30 @@ namespace BeastType {
     const Werewolf = Type.Weapon.blade;
     const Spider = Type.Weapon.blade;
     const Rat = Type.Weapon.blade;
+}
+
+namespace BeastArmorType {
+    const Phoenix = Type.Armor.cloth;
+    const Griffin = Type.Armor.cloth;
+    const Minotaur = Type.Armor.cloth;
+    const Basilisk = Type.Armor.cloth;
+
+    const Wraith = Type.Armor.cloth;
+    const Ghoul = Type.Armor.cloth;
+    const Goblin = Type.Armor.cloth;
+    const Skeleton = Type.Armor.cloth;
+
+    const Giant = Type.Armor.metal;
+    const Yeti = Type.Armor.metal;
+    const Orc = Type.Armor.metal;
+    const Beserker = Type.Armor.metal;
+    const Ogre = Type.Armor.metal;
+
+    const Dragon = Type.Armor.hide;
+    const Vampire = Type.Armor.hide;
+    const Werewolf = Type.Armor.hide;
+    const Spider = Type.Armor.hide;
+    const Rat = Type.Armor.hide;
 }
 
 namespace BeastSlotIds {

@@ -13,7 +13,8 @@ from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.registers import get_label_location
 
 from contracts.loot.constants.beast import (
-    BeastType,
+    BeastAttackType,
+    BeastArmorType,
     BeastRank
 )
 from contracts.loot.constants.rankings import ItemRank
@@ -21,31 +22,58 @@ from contracts.loot.constants.physics import MaterialDensity
 
 namespace BeastStats {
 
-    func get_type_from_id{syscall_ptr: felt*, range_check_ptr}(beast_id: felt) -> (type: felt) {
+    func get_attack_type_from_id{syscall_ptr: felt*, range_check_ptr}(beast_id: felt) -> (type: felt) {
         alloc_locals;
 
         let (label_location) = get_label_location(labels);
         return ([label_location + beast_id - 1],);
 
         labels:
-        dw BeastType.Phoenix;
-        dw BeastType.Griffin;
-        dw BeastType.Minotaur;
-        dw BeastType.Basilisk;
-        dw BeastType.Wraith;
-        dw BeastType.Ghoul;
-        dw BeastType.Goblin;
-        dw BeastType.Skeleton;
-        dw BeastType.Giant;
-        dw BeastType.Yeti;
-        dw BeastType.Orc;
-        dw BeastType.Beserker;
-        dw BeastType.Ogre;
-        dw BeastType.Dragon;
-        dw BeastType.Vampire;
-        dw BeastType.Werewolf;
-        dw BeastType.Spider;
-        dw BeastType.Rat;
+        dw BeastAttackType.Phoenix;
+        dw BeastAttackType.Griffin;
+        dw BeastAttackType.Minotaur;
+        dw BeastAttackType.Basilisk;
+        dw BeastAttackType.Wraith;
+        dw BeastAttackType.Ghoul;
+        dw BeastAttackType.Goblin;
+        dw BeastAttackType.Skeleton;
+        dw BeastAttackType.Giant;
+        dw BeastAttackType.Yeti;
+        dw BeastAttackType.Orc;
+        dw BeastAttackType.Beserker;
+        dw BeastAttackType.Ogre;
+        dw BeastAttackType.Dragon;
+        dw BeastAttackType.Vampire;
+        dw BeastAttackType.Werewolf;
+        dw BeastAttackType.Spider;
+        dw BeastAttackType.Rat;
+    }
+
+    func get_armor_type_from_id{syscall_ptr: felt*, range_check_ptr}(beast_id: felt) -> (type: felt) {
+        alloc_locals;
+
+        let (label_location) = get_label_location(labels);
+        return ([label_location + beast_id - 1],);
+
+        labels:
+        dw BeastArmorType.Phoenix;
+        dw BeastArmorType.Griffin;
+        dw BeastArmorType.Minotaur;
+        dw BeastArmorType.Basilisk;
+        dw BeastArmorType.Wraith;
+        dw BeastArmorType.Ghoul;
+        dw BeastArmorType.Goblin;
+        dw BeastArmorType.Skeleton;
+        dw BeastArmorType.Giant;
+        dw BeastArmorType.Yeti;
+        dw BeastArmorType.Orc;
+        dw BeastArmorType.Beserker;
+        dw BeastArmorType.Ogre;
+        dw BeastArmorType.Dragon;
+        dw BeastArmorType.Vampire;
+        dw BeastArmorType.Werewolf;
+        dw BeastArmorType.Spider;
+        dw BeastArmorType.Rat;
     }
 
     func get_rank_from_id{syscall_ptr: felt*, range_check_ptr}(beast_id: felt) -> (rank: felt) {

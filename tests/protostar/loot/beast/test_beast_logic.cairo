@@ -74,7 +74,8 @@ func test_create{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 
     assert beast.Id = 1;
     assert beast.Health = 100;
-    assert beast.Type = 103;
+    assert beast.AttackType = 103;
+    assert beast.ArmorType = 203;
     assert beast.Rank = 1;
     assert beast.Prefix_1 = 1;
     assert beast.Prefix_2 = 1;

@@ -59,12 +59,14 @@ namespace BeastLib {
         syscall_ptr: felt*, range_check_ptr
     }(beast_static: BeastStatic, beast_dynamic: BeastDynamic) -> (beast: Beast) {
 
-        let (Type) = BeastStats.get_type_from_id(beast_static.Id);
+        let (AttackType) = BeastStats.get_attack_type_from_id(beast_static.Id);
+        let (ArmorType) = BeastStats.get_armor_type_from_id(beast_static.Id);
         let (Rank) = BeastStats.get_rank_from_id(beast_static.Id);
 
         let beast = Beast(
             beast_static.Id,
-            Type,
+            AttackType,
+            ArmorType,
             Rank,
             beast_static.Prefix_1,
             beast_static.Prefix_2,

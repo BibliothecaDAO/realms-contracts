@@ -10,7 +10,8 @@ from contracts.loot.constants.beast import (
     BeastDynamic,
     BeastIds, 
     BeastRank, 
-    BeastType
+    BeastAttackType,
+    BeastArmorType,
 )
 from contracts.loot.loot.stats.combat import CombatStats
 from tests.protostar.loot.test_structs import (
@@ -38,19 +39,37 @@ func test_beast_rank{
 }
 
 @external
-func test_beast_type{
+func test_beast_attack_type{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }() {
     alloc_locals;
 
-    let (phoenix_type) = BeastStats.get_type_from_id(BeastIds.Phoenix);
-    assert phoenix_type = BeastType.Phoenix;
+    let (phoenix_attack_type) = BeastStats.get_attack_type_from_id(BeastIds.Phoenix);
+    assert phoenix_attack_type = BeastAttackType.Phoenix;
 
-    let (orc_type) = BeastStats.get_type_from_id(BeastIds.Orc);
-    assert orc_type = BeastType.Orc;
+    let (orc_attack_type) = BeastStats.get_attack_type_from_id(BeastIds.Orc);
+    assert orc_attack_type = BeastAttackType.Orc;
 
-    let (rat_type) = BeastStats.get_type_from_id(BeastIds.Rat);
-    assert rat_type = BeastType.Rat;
+    let (rat_attack_type) = BeastStats.get_attack_type_from_id(BeastIds.Rat);
+    assert rat_attack_type = BeastAttackType.Rat;
+
+    return ();
+}
+
+@external
+func test_beast_armor_type{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}() {
+    alloc_locals;
+
+    let (phoenix_armor_type) = BeastStats.get_armor_type_from_id(BeastIds.Phoenix);
+    assert phoenix_armor_type = BeastArmorType.Phoenix;
+
+    let (orc_armor_type) = BeastStats.get_armor_type_from_id(BeastIds.Orc);
+    assert orc_armor_type = BeastArmorType.Orc;
+
+    let (rat_armor_type) = BeastStats.get_armor_type_from_id(BeastIds.Rat);
+    assert rat_armor_type = BeastArmorType.Rat;
 
     return ();
 }
@@ -155,17 +174,18 @@ func test_slain{
 @external
 func test_calculate_damage_to_beast{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
-    let (beast) = TestUtils.create_beast(1, 0);
+    let (beast) = TestUtils.create_beast(4, 0);
 
     // let (local weapon) = TestUtils.create_item(75, 1); // Mace
 
-    let (weapon) = TestUtils.create_zero_item();
+    let (weapon) = TestUtils.create_zero_item(); // no weapon (melee attack)
 
     %{
         print('Weapon Type:', ids.weapon.Type) # bludgeon
         print('Weapon Rank:', ids.weapon.Rank) # 4
         print('Weapon Greatness:', ids.weapon.Greatness) # 1
-        print('Beast Type:', ids.beast.Type) # magic
+        print('Beast Attack Type:', ids.beast.AttackType) # magic
+        print('Beast Armor Type:', ids.beast.ArmorType) # cloth
         print('Beast Rank:', ids.beast.Rank) # 1
         print('Beast XP:', ids.beast.XP) # 0
     %}
@@ -185,17 +205,18 @@ func test_calculate_damage_to_beast{syscall_ptr: felt*, pedersen_ptr: HashBuilti
 @external
 func test_calculate_damage_from_beast{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
-    let (beast) = TestUtils.create_beast(1, 2);
+    let (beast) = TestUtils.create_beast(1, 2); // Creates a Pheonix
 
-    // let (armor) = TestUtils.create_item(50, 1); // Hard Leather Armor
+    let (armor) = TestUtils.create_item(50, 1); // Hard Leather Armor
 
-    let (armor) = TestUtils.create_zero_item();
+    // let (armor) = TestUtils.create_zero_item();
 
     %{
         print('Armor Type:', ids.armor.Type) # hide
         print('Armor Rank:', ids.armor.Rank) # 4
         print('Armor Greatness:', ids.armor.Greatness) # 1
-        print('Beast Type:', ids.beast.Type) # magic
+        print('Beast Attack Type:', ids.beast.AttackType) # magic
+        print('Beast Armor Type:', ids.beast.ArmorType) # cloth
         print('Beast Rank:', ids.beast.Rank) # 1
         print('Beast XP:', ids.beast.XP) # 0
     %}

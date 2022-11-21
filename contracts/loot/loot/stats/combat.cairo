@@ -29,35 +29,43 @@ namespace CombatStats {
         let (bludgeon_location) = get_label_location(bludgeon_efficacy);
         let (magic_location) = get_label_location(magic_efficacy);
 
+        // This section of code determines which of the lookup tables get referenced
         if (weapon_type == Type.Weapon.blade) {
+            // Use the blade_efficacy lookup table
             [ap] = blade_location, ap++;
         } else {
             if (weapon_type == Type.Weapon.bludgeon) {
+                 // Use the bludgeon_efficacy lookup table
                 [ap] = bludgeon_location, ap++;
             } else {
                 if (weapon_type == Type.Weapon.magic) {
+                    // Use the magic_efficacy lookup table
                     [ap] = magic_location, ap++;
+                } else {
+                    // This is the generic weapon (melee) fall through, always does low
+                    return (WeaponEfficacy.Low,);
                 }
             }
         }
-
         let label_location = [ap - 1];
+
+        // This determines which index we use in the selected lookup table
         return ([label_location + armor_type - Type.Armor.generic],);
 
         blade_efficacy:
-        dw WeaponEfficacy.Low;
+        dw WeaponEfficacy.High;
         dw WeaponEfficacy.Low;
         dw WeaponEfficacy.Medium;
         dw WeaponEfficacy.High;
 
         bludgeon_efficacy:
-        dw WeaponEfficacy.Low;
+        dw WeaponEfficacy.High;
         dw WeaponEfficacy.Medium;
         dw WeaponEfficacy.High;
         dw WeaponEfficacy.Low;
 
         magic_efficacy:
-        dw WeaponEfficacy.Low;
+        dw WeaponEfficacy.High;
         dw WeaponEfficacy.High;
         dw WeaponEfficacy.Low;
         dw WeaponEfficacy.Medium;
@@ -151,8 +159,8 @@ namespace CombatStats {
     ) -> (damage: felt) {
         alloc_locals;
 
-        // Get beast type
-        let (attack_type) = BeastStats.get_type_from_id(beast.Id);
+        // Get beast attack type
+        let (attack_type) = BeastStats.get_attack_type_from_id(beast.Id);
 
         // Get armor type
         // NOTE: @loothero if no armor then armor type is generic
@@ -183,22 +191,30 @@ namespace CombatStats {
     ) -> (damage: felt) {
         alloc_locals;
 
+        // Get beast attack type
+        let (armor_type) = BeastStats.get_armor_type_from_id(beast.Id);
+
         // NOTE: @loothero if no weapon then type is generic
         if (weapon.Id == 0) {
             let weapon_type = Type.Weapon.generic;
+            let weapon_greatness = 1;
             tempvar syscall_ptr: felt* = syscall_ptr;
             tempvar range_check_ptr = range_check_ptr;
             tempvar weapon_type = weapon_type;
+            tempvar weapon_greatness = weapon_greatness;
         } else {
             let weapon_type = weapon.Type;
+            let weapon_greatness = weapon.Greatness;
             tempvar syscall_ptr: felt* = syscall_ptr;
             tempvar range_check_ptr = range_check_ptr;
             tempvar weapon_type = weapon_type;
+            tempvar weapon_greatness = weapon_greatness;
         }
         // pass details of attack and armor to core damage calculation function
         // NOTE: for now beast armor is set as generic (they don't have armor)
+        // TODO MILESTONE1 (LH): Give every beast an explicit armor type in beast consts
         let (damage_dealt) = calculate_damage(
-            weapon_type, weapon.Rank, weapon.Greatness, Type.Armor.generic, beast.Rank, beast.XP
+            weapon_type, weapon.Rank, weapon_greatness, armor_type, beast.Rank, beast.XP
         );
 
         // return damage

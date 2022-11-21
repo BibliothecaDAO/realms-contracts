@@ -11,7 +11,7 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_not_equal
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
-from starkware.cairo.common.uint256 import Uint256, uint256_add
+from starkware.cairo.common.uint256 import Uint256, uint256_add, uint256_eq
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 
 from openzeppelin.upgrades.library import Proxy
@@ -23,13 +23,17 @@ from contracts.loot.adventurer.interface import IAdventurer
 from contracts.loot.adventurer.library import AdventurerLib
 from contracts.loot.beast.stats.beast import BeastStats
 from contracts.loot.beast.library import BeastLib
-from contracts.loot.constants.adventurer import Adventurer, AdventurerState, AdventurerStatus, AdventurerSlotIds
+from contracts.loot.constants.adventurer import (
+    Adventurer,
+    AdventurerState,
+    AdventurerStatus,
+    AdventurerSlotIds,
+)
 from contracts.loot.constants.beast import Beast, BeastStatic, BeastDynamic
 from contracts.loot.interfaces.imodules import IModuleController
 from contracts.loot.loot.ILoot import ILoot
 from contracts.loot.loot.stats.combat import CombatStats
 from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
-
 
 // -----------------------------------
 // Events
@@ -83,13 +87,13 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 @external
 func create{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(adventurer_id: Uint256) -> (beast_id: Uint256) {
+}(adventurer_id: Uint256) -> (beast_token_id: Uint256) {
     Module.only_approved();
     let (rnd) = get_random_number();
     let (beast_static_, beast_dynamic_) = BeastLib.create(rnd, adventurer_id.low);
     let (packed_beast) = BeastLib.pack(beast_dynamic_);
     let (current_id) = total_supply.read();
-    let (next_id, _) = uint256_add(current_id, Uint256(1,0));
+    let (next_id, _) = uint256_add(current_id, Uint256(1, 0));
     beast_static.write(next_id, beast_static_);
     beast_dynamic.write(next_id, packed_beast);
     total_supply.write(next_id);
@@ -99,15 +103,15 @@ func create{
 @external
 func attack{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(beast_id: Uint256) {
+}(beast_token_id: Uint256) {
     alloc_locals;
 
-    let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
-    let (beast) = get_beast_by_id(beast_id);
+    let (beast) = get_beast_by_id(beast_token_id);
     let adventurer_id = Uint256(beast.Adventurer, 0);
     assert_adventurer_owner(adventurer_id);
 
-    let (unpacked_adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_id);
+    let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
+    let (unpacked_adventurer) = get_adventurer_from_beast(beast_token_id);
 
     // verify adventurer is in battle mode
     with_attr error_message("Beast: Adventurer must be in a battle") {
@@ -135,60 +139,102 @@ func attack{
     // if the beast is alive
     if (still_alive == TRUE) {
         // having been attacked, it automatically attacks back
-        let (chest) = ILoot.getItemByTokenId(item_address, Uint256(unpacked_adventurer.ChestId, 0));
-        let (damage_taken) = CombatStats.calculate_damage_from_beast(new_beast_, chest);
-        IAdventurer.deduct_health(adventurer_address, adventurer_id, damage_taken);
+        counter_attack(beast_token_id);
         return ();
-    // } else {
-    //     // update beast with slain details
-    //     let (current_time) = get_block_timestamp();
-    //     let (slain_updated_beast) = BeastLib.slay(adventurer_id.low, current_time, updated_health_beast); 
-    //     let (new_packed_beast) = BeastLib.pack(updated_health_beast);
-    //     beast_dynamic.write(beast_id, new_packed_beast);
-    //     // grant adventurer xp
-    //     let (beast_greatness) = BeastLib.calculate_greatness(slain_updated_beast.XP);
-    //     let (rank) = BeastStats.get_rank_from_id(new_beast_.Id);
-    //     let xp_gained = rank * beast_greatness;
-    //     IAdventurer.increase_xp(adventurer_address, adventurer_id, xp_gained);
-    //     return ();
-    // }
+    } else {
+        // update beast with slain details
+        let (current_time) = get_block_timestamp();
+        let (slain_updated_beast) = BeastLib.slay(
+            adventurer_id.low, current_time, updated_health_beast
+        );
+        let (new_packed_beast) = BeastLib.pack(updated_health_beast);
+        beast_dynamic.write(beast_token_id, new_packed_beast);
+        // grant adventurer xp
+        let (beast_greatness) = BeastLib.calculate_greatness(slain_updated_beast.XP);
+        let (rank) = BeastStats.get_rank_from_id(new_beast_.Id);
+        let xp_gained = rank * beast_greatness;
+        IAdventurer.increase_xp(adventurer_address, adventurer_id, xp_gained);
+        return ();
+    }
+}
+
+@external
+func counter_attack{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(beast_token_id: Uint256) {
+    alloc_locals;
+
+    Module.only_approved();
+
+    let ZERO = Uint256(0, 0);
+
+    with_attr error_message("Beast: Must provide non-zero beast token id") {
+        let (is_beast_token_zero) = uint256_eq(beast_token_id, ZERO);
+        assert is_beast_token_zero = FALSE;
     }
 
+    // get address for Loot items
+    let (item_address) = Module.get_module_address(ModuleIds.Loot);
+    // get address for Adventurer
+    let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
+
+    // get beast from token id
+    let (beast) = get_beast_by_id(beast_token_id);
+    // get the adventurer token id associated with the beast
+    let adventurer_token_id = Uint256(beast.Adventurer, 0);
+
+    // verify adventurer is in battle mode
+    with_attr error_message("Beast: Adventurer token id is zero") {
+        let (is_adventurer_token_zero) = uint256_eq(adventurer_token_id, ZERO);
+        assert is_adventurer_token_zero = FALSE;
+    }
+
+    // retreive unpacked adventurer
+    let (unpacked_adventurer) = get_adventurer_from_beast(beast_token_id);
+    let (chest) = ILoot.getItemByTokenId(item_address, Uint256(unpacked_adventurer.ChestId, 0));
+    let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, chest);
+
+    IAdventurer.deduct_health(adventurer_address, adventurer_token_id, damage_taken);
     return ();
 }
 
 @external
 func flee{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(beast_id: Uint256) {
+}(beast_token_id: Uint256) {
     alloc_locals;
 
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
 
-    let (beast) = get_beast_by_id(beast_id);
+    let (beast) = get_beast_by_id(beast_token_id);
 
     assert_adventurer_owner(Uint256(beast.Adventurer, 0));
 
-    let (unpacked_adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(beast.Adventurer, 0));
+    let (unpacked_adventurer) = IAdventurer.get_adventurer_by_id(
+        adventurer_address, Uint256(beast.Adventurer, 0)
+    );
 
     with_attr error_message("Beast: Adventurer must be in a battle") {
         assert unpacked_adventurer.Status = AdventurerStatus.Battle;
-    }  
+    }
 
     // TODO: calculate accurate rng for ambush and fleeing
 
     // Adventurer Speed is Dexterity - Weight of all equipped items
-    let weight_of_equipment = 3;
+    // TODO: We need a function to calculate the weight of all the adventurer equipment
+    let weight_of_equipment = 0;
+
+    // TODO: Wrap this with overflow protection
     let adventurer_speed = unpacked_adventurer.Dexterity - weight_of_equipment;
 
     // Adventurer ambush resistance is based on wisdom plus luck
     let ambush_resistance = unpacked_adventurer.Wisdom + unpacked_adventurer.Luck;
 
     let (rnd) = get_random_number();
-    let (_, r) = unsigned_div_rem(rnd, 20);
+    let (_, r) = unsigned_div_rem(rnd, 2);
 
     // TODO Milestone2: Factor in beast health for the ambush chance and for flee chance
-    // Short-term (while we are using rng) would be to base rng on beast health. The 
+    // Short-term (while we are using rng) would be to base rng on beast health. The
     // lower the beast health, the lower the chance it will ambush and the easier
     // it will be to flee.
 
@@ -215,9 +261,12 @@ func flee{
         tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
     }
 
-    let can_flee = is_le(rnd, adventurer_speed);
+    // TODO: MILESTONE2 Use Beast Speed Stats
+    let can_flee = is_le(r, adventurer_speed);
     if (can_flee == TRUE) {
-        IAdventurer.update_status(adventurer_address, Uint256(beast.Adventurer, 0), AdventurerStatus.Idle);
+        IAdventurer.update_status(
+            adventurer_address, Uint256(beast.Adventurer, 0), AdventurerStatus.Idle
+        );
         return ();
     }
 
@@ -230,7 +279,7 @@ func flee{
 
 @external
 func set_beast_by_id{
-        pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(token_id: Uint256, beast: Beast) {
     // Module.only_approved();
     let (beast_static_, beast_dynamic_) = BeastLib.split_data(beast);
@@ -288,6 +337,22 @@ func get_beast_by_id{
     let (beast) = BeastLib.aggregate_data(beast_static_, unpacked_beast);
 
     return (beast,);
+}
+
+// @notice Module initializer
+// @param beast_token_id: The token id for the beast you want the adventurer for
+// @return adventurer_state: The unpacked adventurer state associated with the beast token id
+@view
+func get_adventurer_from_beast{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(beast_token_id: Uint256) -> (adventurerState: AdventurerState) {
+    alloc_locals;
+
+    let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
+    let (beast) = get_beast_by_id(beast_token_id);
+    let adventurer_id = Uint256(beast.Adventurer, 0);
+    let (adventurer_state) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_id);
+    return (adventurer_state,);
 }
 
 @view

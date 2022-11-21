@@ -121,6 +121,7 @@ func deploy_all{
     IBeast.initializer(contracts.beast, contracts.account_1, contracts.controller);
     IController.set_address_for_module_id(contracts.controller, ModuleIds.Beast, contracts.beast);
     IController.set_write_access(contracts.controller, ModuleIds.Beast, ModuleIds.Adventurer);
+    IController.set_write_access(contracts.controller, ModuleIds.Beast, ModuleIds.Loot);
 
     ILoot.initializer(contracts.loot, 1, 1, contracts.account_1, contracts.controller);
     IController.set_address_for_module_id(contracts.controller, ModuleIds.Loot, contracts.loot);

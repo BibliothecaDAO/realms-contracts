@@ -10,4 +10,12 @@ namespace IBeast {
     }
     func get_beast_by_id(token_id: Uint256) -> (beast: Beast) {
     }
+    func attack(beast_token_id: Uint256) {
+    }
+    func counter_attack(beast_token_id: Uint256) {
+    }
+    func flee(beast_token_id: Uint256) {
+    }
+    func get_adventurer_from_beast(beast_token_id: Uint256) -> () {
+    }
 }

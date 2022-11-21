@@ -165,7 +165,8 @@ namespace TestUtils {
     ) {
         alloc_locals;
 
-        let (type) = BeastStats.get_type_from_id(beast_id);
+        let (attack_type) = BeastStats.get_attack_type_from_id(beast_id);
+        let (armor_type) = BeastStats.get_armor_type_from_id(beast_id);
         let (rank) = BeastStats.get_rank_from_id(beast_id);
         let health = 100;
         let prefix_1 = 1;
@@ -177,7 +178,8 @@ namespace TestUtils {
         return (
             Beast(
                 beast_id,
-                type,
+                attack_type,
+                armor_type,
                 rank,
                 prefix_1,
                 prefix_2,

@@ -194,6 +194,16 @@ func equip_item{
 
     emit_adventurer_state(tokenId);
 
+    // After equipping your item
+    // if the adventurer is in battle (currently just beasts)
+    if (equiped_adventurer.Status == AdventurerStatus.Battle) {
+         // The beast will counter attack
+        let (beast_address) = Module.get_module_address(ModuleIds.Beast);
+        let beast_token_id = Uint256(equiped_adventurer.Beast,0);
+        IBeast.counter_attack(beast_address, beast_token_id);
+        return (TRUE,);
+    }
+
     return (TRUE,);
 }
 
@@ -235,6 +245,16 @@ func unequip_item{
     ILoot.updateAdventurer(loot_address, itemTokenId, 0);
 
     emit_adventurer_state(tokenId);
+
+    // After unequipping your item
+    // if the adventurer is in battle (currently just beasts)
+    if (unequiped_adventurer.Status == AdventurerStatus.Battle) {
+         // The beast will counter attack
+        let (beast_address) = Module.get_module_address(ModuleIds.Beast);
+        let beast_token_id = Uint256(unequiped_adventurer.Beast,0);
+        IBeast.counter_attack(beast_address, beast_token_id);
+        return (TRUE,);
+    }
 
     return (TRUE,);
 }
