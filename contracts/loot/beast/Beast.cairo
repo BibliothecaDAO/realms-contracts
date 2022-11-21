@@ -10,7 +10,7 @@
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_not_equal
-from starkware.cairo.common.math_cmp import is_le
+from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.uint256 import Uint256, uint256_add
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
 
@@ -103,11 +103,8 @@ func attack{
     alloc_locals;
 
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
-
     let (beast) = get_beast_by_id(beast_id);
-
     let adventurer_id = Uint256(beast.Adventurer, 0);
-
     assert_adventurer_owner(adventurer_id);
 
     let (unpacked_adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_id);
@@ -118,7 +115,7 @@ func attack{
     }
 
     // verify it's not already dead
-    with_attr error_message("Beast: Can't attack a dead beast") {
+    with_attr error_message("Beast: Cannot attack a dead beast") {
         assert_not_zero(beast.Health);
     }
 
@@ -126,15 +123,14 @@ func attack{
     let (item_address) = Module.get_module_address(ModuleIds.Loot);
     let (weapon) = ILoot.getItemByTokenId(item_address, Uint256(unpacked_adventurer.WeaponId, 0));
     let (damage_dealt) = CombatStats.calculate_damage_to_beast(beast, weapon);
-
-    // check if damage dealt is less than health remaining
-    let still_alive = is_le(damage_dealt, beast.Health);
-    let (beast_static_, beast_dynamic_) = BeastLib.split_data(beast);
-
     // deduct health from beast
+    let (beast_static_, beast_dynamic_) = BeastLib.split_data(beast);
     let (updated_health_beast) = BeastLib.deduct_health(damage_dealt, beast_dynamic_);
     let (packed_beast) = BeastLib.pack(updated_health_beast);
     let (new_beast_) = BeastLib.aggregate_data(beast_static_, updated_health_beast);
+
+    // check if beast is still alive after the attack
+    let still_alive = is_not_zero(updated_health_beast.Health);
 
     // if the beast is alive
     if (still_alive == TRUE) {
@@ -143,19 +139,22 @@ func attack{
         let (damage_taken) = CombatStats.calculate_damage_from_beast(new_beast_, chest);
         IAdventurer.deduct_health(adventurer_address, adventurer_id, damage_taken);
         return ();
-    } else {
-        // update beast with slain details
-        let (current_time) = get_block_timestamp();
-        let (slain_updated_beast) = BeastLib.slay(adventurer_id.low, current_time, updated_health_beast); 
-        let (new_packed_beast) = BeastLib.pack(updated_health_beast);
-        beast_dynamic.write(beast_id, new_packed_beast);
-        // grant adventurer xp
-        let (beast_greatness) = BeastLib.calculate_greatness(slain_updated_beast.XP);
-        let (rank) = BeastStats.get_rank_from_id(new_beast_.Id);
-        let xp_gained = rank * beast_greatness;
-        IAdventurer.increase_xp(adventurer_address, adventurer_id, xp_gained);
-        return ();
+    // } else {
+    //     // update beast with slain details
+    //     let (current_time) = get_block_timestamp();
+    //     let (slain_updated_beast) = BeastLib.slay(adventurer_id.low, current_time, updated_health_beast); 
+    //     let (new_packed_beast) = BeastLib.pack(updated_health_beast);
+    //     beast_dynamic.write(beast_id, new_packed_beast);
+    //     // grant adventurer xp
+    //     let (beast_greatness) = BeastLib.calculate_greatness(slain_updated_beast.XP);
+    //     let (rank) = BeastStats.get_rank_from_id(new_beast_.Id);
+    //     let xp_gained = rank * beast_greatness;
+    //     IAdventurer.increase_xp(adventurer_address, adventurer_id, xp_gained);
+    //     return ();
+    // }
     }
+
+    return ();
 }
 
 @external

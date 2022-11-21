@@ -216,8 +216,8 @@ namespace AdventurerLib {
         let (RingId) = unpack_data(packed_adventurer.p4, 123, 2199023255551);  // 41
 
         // ---------- p5 ---------#
-        let (Status) = unpack_data(packed_adventurer.p4, 0, 7);  // 3
-        let (Beast) = unpack_data(packed_adventurer.p4, 3, 2199023255551);  // 41
+        let (Status) = unpack_data(packed_adventurer.p5, 0, 7);  // 3
+        let (Beast) = unpack_data(packed_adventurer.p5, 3, 2199023255551);  // 41
 
         return (
             AdventurerState(
@@ -374,7 +374,7 @@ namespace AdventurerLib {
 
     func get_random_discovery{
         range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
-    }(xoroshiro_random: felt) -> (diiscovery: felt) {
+    }(xoroshiro_random: felt) -> (discovery: felt) {
         alloc_locals;
 
         let (_, r) = unsigned_div_rem(xoroshiro_random, 4);

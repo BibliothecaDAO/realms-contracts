@@ -12,6 +12,7 @@ from contracts.loot.constants.beast import (
     BeastRank, 
     BeastType
 )
+from contracts.loot.loot.stats.combat import CombatStats
 from tests.protostar.loot.test_structs import (
     TestUtils,
     TEST_DAMAGE_HEALTH_REMAINING,
@@ -95,7 +96,7 @@ func test_cast{
 
     let (c) = BeastLib.cast_state(1, 50, beast);
 
-    %{ print('Health', ids.c.Health) %}
+    %{ print('Health:', ids.c.Health) %}
 
     return ();
 }
@@ -161,4 +162,55 @@ func test_slain{
     assert c.SlainOnDate = 1000;
     
     return ();
+}
+
+@external
+func test_calculate_damage_to_beast{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+    let (beast_static, beast_dynamic) = TestUtils.create_beast(1);
+
+    let (beast) = BeastLib.aggregate_data(beast_static, beast_dynamic);
+
+    let (local weapon) = TestUtils.create_item(75, 1); // Mace
+
+    %{
+        print('Weapon Type:', ids.weapon.Type) # bludgeon
+        print('Weapon Rank:', ids.weapon.Rank) # 4
+        print('Weapon Greatness:', ids.weapon.Greatness) # 1
+        print('Beast Type:', ids.beast.Type) # magic
+        print('Beast Rank:', ids.beast.Rank) # 1
+        print('Beast XP:', ids.beast.XP) # 0
+    %}
+
+    let (local damage) = CombatStats.calculate_damage_to_beast(beast, weapon);
+
+    // assert damage = 
+
+    %{
+        print('Damage To Beast:', ids.damage)
+    %}
+
+    return ();
+    
+}
+
+@external
+func test_calculate_damage_from_beast{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+    let (beast_static, beast_dynamic) = TestUtils.create_beast(1);
+
+    let (armor) = TestUtils.create_item(50, 1); // Hard Leather Armor
+
+    let (beast) = BeastLib.aggregate_data(beast_static, beast_dynamic);
+
+    let (local damage) = CombatStats.calculate_damage_from_beast(beast, armor);
+
+    // assert damage = 
+
+    %{
+        print('Damage From Beast:', ids.damage)
+    %}
+
+    return ();
+    
 }

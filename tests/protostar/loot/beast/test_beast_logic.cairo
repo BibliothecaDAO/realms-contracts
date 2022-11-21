@@ -105,16 +105,11 @@ func test_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         ids.xoroshiro_address = context.xoroshiro
         ids.adventurer_address = context.adventurer
         ids.beast_address = context.beast
-        stop_mock_damage = mock_call(ids.beast_address, 'calculate_damage_to_beast', [150])
         stop_mock_adventurer_random = mock_call(ids.xoroshiro_address, 'next', [1])
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
     %}
     // discover and create beast
     IAdventurer.explore(adventurer_address, Uint256(1,0));
-
-    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
-
-    assert adventurer.Status = AdventurerStatus.Battle;
 
     %{ 
         stop_mock_adventurer_random()

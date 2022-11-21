@@ -9,7 +9,13 @@ from contracts.loot.constants.item import Item, ItemIds, ItemSlot, ItemType, Ite
 from contracts.loot.constants.rankings import ItemRank
 from contracts.loot.loot.stats.item import ItemStats
 from contracts.loot.constants.physics import MaterialDensity
-from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState
+from contracts.loot.constants.adventurer import (
+    Adventurer, 
+    AdventurerState, 
+    PackedAdventurerState, 
+    AdventurerStatus,
+    DiscoveryType
+)
 from contracts.loot.adventurer.library import AdventurerLib
 
 from tests.protostar.loot.test_structs import (
@@ -186,6 +192,35 @@ func test_deductHealth{
     let (c) = AdventurerLib.deduct_health(TEST_DAMAGE_OVERKILL, adventurer);
 
     assert c.Health = 0;
+
+    return ();
+}
+
+@external
+func test_assign_beast{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}() {
+    alloc_locals;
+    
+    let (state) = get_adventurer_state();
+
+    let (adventurer_state: PackedAdventurerState) = AdventurerLib.pack(state);
+
+    let (adventurer: AdventurerState) = AdventurerLib.unpack(adventurer_state);
+
+    let (c) = AdventurerLib.assign_beast(1, adventurer);
+
+    assert c.Beast = 1;
+
+    return ();
+}
+
+@external
+func test_discovery{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+
+    let (r) = AdventurerLib.get_random_discovery(1);
+
+    assert r = DiscoveryType.Beast;
 
     return ();
 }

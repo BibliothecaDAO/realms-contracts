@@ -10,7 +10,12 @@ from contracts.loot.constants.item import Item, ItemIds, ItemSlot, ItemType, Ite
 from contracts.loot.constants.rankings import ItemRank
 from contracts.loot.loot.stats.item import ItemStats
 from contracts.loot.constants.physics import MaterialDensity
-from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState
+from contracts.loot.constants.adventurer import (
+    Adventurer, 
+    AdventurerState, 
+    PackedAdventurerState, 
+    AdventurerStatus
+)
 from contracts.loot.adventurer.library import AdventurerLib
 
 from tests.protostar.loot.setup.interfaces import IAdventurer, ILoot, ILords, IRealms
@@ -33,6 +38,7 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     %{
         context.account_1 = ids.addresses.account_1
+        context.xoroshiro = ids.addresses.xoroshiro
         context.realms = ids.addresses.realms
         context.adventurer = ids.addresses.adventurer
         context.loot = ids.addresses.loot
@@ -187,6 +193,84 @@ func test_deduct_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_ch
         stop_prank_realms()
         stop_prank_adventurer()
         stop_prank_lords()
+    %}
+
+    return ();
+}
+
+@external
+func test_increase_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+
+    local account_1_address;
+    local realms_address;
+    local adventurer_address;
+    local loot_address;
+    local lords_address;
+
+    %{
+        ids.account_1_address = context.account_1
+        ids.realms_address = context.realms
+        ids.adventurer_address = context.adventurer
+        ids.loot_address = context.loot
+        ids.lords_address = context.lords
+        stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
+        stop_prank_adventurer = start_prank(ids.loot_address, ids.adventurer_address)
+        stop_prank_lords = start_prank(ids.account_1_address, ids.lords_address)
+    %}
+
+    IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
+    ILords.approve(lords_address, adventurer_address, Uint256(200 * 10 ** 18, 0));
+    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8);
+    IAdventurer.increase_xp(adventurer_address, Uint256(1,0), 1000);
+    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
+    assert adventurer.XP = 1000;
+    %{
+        stop_prank_realms()
+        stop_prank_adventurer()
+        stop_prank_lords()
+    %}
+    return ();
+}
+
+@external
+func test_explore{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+
+    local account_1_address;
+    local xoroshiro_address;
+    local realms_address;
+    local adventurer_address;
+    local loot_address;
+    local lords_address;
+
+    %{
+        ids.account_1_address = context.account_1
+        ids.xoroshiro_address = context.xoroshiro
+        ids.realms_address = context.realms
+        ids.adventurer_address = context.adventurer
+        ids.loot_address = context.loot
+        ids.lords_address = context.lords
+        stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
+        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+        stop_prank_lords = start_prank(ids.account_1_address, ids.lords_address)
+        stop_mock_adventurer_random = mock_call(ids.xoroshiro_address, 'next', [1])
+    %}
+
+    IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
+    ILords.approve(lords_address, adventurer_address, Uint256(200 * 10 ** 18, 0));
+    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8);
+    IAdventurer.explore(adventurer_address, Uint256(1,0));
+
+    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
+
+    assert adventurer.Status = AdventurerStatus.Battle;
+
+    %{
+        stop_prank_realms()
+        stop_prank_adventurer()
+        stop_prank_lords()
+        stop_mock_adventurer_random()
     %}
 
     return ();

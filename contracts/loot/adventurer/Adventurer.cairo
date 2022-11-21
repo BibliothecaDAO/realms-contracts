@@ -321,6 +321,11 @@ func explore{
         assert unpacked_adventurer.Status = AdventurerStatus.Idle;
     }
 
+    // Only adventurers without assigned beast
+    with_attr error_message("Adventurer: Cannot explore while assigned beast") {
+        assert unpacked_adventurer.Beast = 0;
+    }
+
     let (rnd) = get_random_number();
     let (discovery) = AdventurerLib.get_random_discovery(rnd);
 
@@ -332,14 +337,8 @@ func explore{
         );
         // create beast
         let (beast_address) = Module.get_module_address(ModuleIds.Beast);
-        let (beast_id: Uint256) = IBeast.create(beast_address, token_id);
-        
-        with_attr error_message("Adventurer: Cannot set adventurer beast to same value as current") {
-            assert_not_equal(beast_id.low, unpacked_adventurer.Beast);
-        }
-
+        let (beast_id: Uint256) = IBeast.create(beast_address, token_id);        
         let (updated_adventurer) = AdventurerLib.assign_beast(beast_id.low, unpacked_adventurer);
-
         let (packed_adventurer) = AdventurerLib.pack(updated_adventurer);
             
         adventurer.write(token_id, packed_adventurer);

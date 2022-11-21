@@ -66,13 +66,15 @@ namespace IAdventurer {
     }
     func unequip_item(tokenId: Uint256, itemTokenId: Uint256) -> (success: felt) {
     }
+    func deduct_health(tokenId: Uint256, amount: felt) -> (success: felt) {
+    }
+    func increase_xp(tokenId: Uint256, amount: felt) -> (success: felt) {
+    }
     func explore(token_id: Uint256) -> (success: felt) {
     }
     func tokenURI(tokenId: Uint256) -> (tokenURI_len: felt, tokenURI: felt*) {
     }
     func get_adventurer_by_id(tokenId: Uint256) -> (adventurer: AdventurerState) {
-    }
-    func deduct_health(tokenId: Uint256, amount: felt) -> (success: felt) {
     }
 }
 
