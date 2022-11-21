@@ -160,31 +160,33 @@ namespace TestUtils {
     // create_beast returns a Beast corresponding to the provided beast_id
     // parameters: beast_id
     // returns: A Beast
-    func create_beast{syscall_ptr: felt*, range_check_ptr}(beast_id: felt) -> (
-        beast_static: BeastStatic, beast_dynamic: BeastDynamic
+    func create_beast{syscall_ptr: felt*, range_check_ptr}(beast_id: felt, xp: felt) -> (
+        beast: Beast
     ) {
         alloc_locals;
 
+        let (type) = BeastStats.get_type_from_id(beast_id);
+        let (rank) = BeastStats.get_rank_from_id(beast_id);
         let health = 100;
         let prefix_1 = 1;
         let prefix_2 = 1;
         let adventurer = 0;
-        let xp = 0;
+        let xp = xp;
         let slain_by = 0;
         let slain_on_date = 0;
         return (
-            BeastStatic(
+            Beast(
                 beast_id,
+                type,
+                rank,
                 prefix_1,
-                prefix_2
-            ),
-            BeastDynamic(
+                prefix_2,
                 health,
                 adventurer,
                 xp,
                 slain_by,
                 slain_on_date
-            )
+            ),
         );
     }
 

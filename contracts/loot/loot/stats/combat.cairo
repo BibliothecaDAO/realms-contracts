@@ -103,25 +103,23 @@ namespace CombatStats {
 
         // Get effectiveness of weapon vs armor
         let (attack_effectiveness) = weapon_vs_armor_efficacy(attack_type, armor_type);
-        // let (total_weapon_damage) = get_attack_effectiveness(
-        //     attack_effectiveness, base_weapon_damage
-        // );
+        let (total_weapon_damage) = get_attack_effectiveness(
+            attack_effectiveness, base_weapon_damage
+        );
 
-        // // use armor rank and greatness to give armor a defense rating of 0-100
-        // let armor_strength = (rank_ceiling - armor_rank) * armor_greatness;
+        // use armor rank and greatness to give armor a defense rating of 0-100
+        let armor_strength = (rank_ceiling - armor_rank) * armor_greatness;
 
-        // // check if armor strength is less than or equal to weapon damage
-        // let dealt_damage = is_le_felt(armor_strength, total_weapon_damage);
-        // if (dealt_damage == 1) {
-        //     // if it is, damage dealt will be positive so return it
-        //     let damage_dealt = total_weapon_damage - armor_strength;
-        //     return (damage_dealt,);
-        // } else {
-        //     // otherwise damage dealt will be negative so we return 0
-        //     return (0,);
-        // }
-
-        return (attack_effectiveness,);
+        // check if armor strength is less than or equal to weapon damage
+        let dealt_damage = is_le_felt(armor_strength, total_weapon_damage);
+        if (dealt_damage == 1) {
+            // if it is, damage dealt will be positive so return it
+            let damage_dealt = total_weapon_damage - armor_strength;
+            return (damage_dealt,);
+        } else {
+            // otherwise damage dealt will be negative so we return 0
+            return (0,);
+        }
     }
 
     // calculate_damage_from_weapon calculates the damage a weapon inflicts against a specific piece of armor
@@ -157,7 +155,18 @@ namespace CombatStats {
         let (attack_type) = BeastStats.get_type_from_id(beast.Id);
 
         // Get armor type
-        let (armor_type) = ItemStats.item_type(armor.Id);
+        // NOTE: @loothero if no armor then armor type is generic
+        if (armor.Id == 0) {
+            let armor_type = Type.Armor.generic;
+            tempvar syscall_ptr: felt* = syscall_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+            tempvar armor_type = armor_type;
+        } else {
+            let (armor_type) = ItemStats.item_type(armor.Id);
+            tempvar syscall_ptr: felt* = syscall_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+            tempvar armor_type = armor_type;
+        }
 
         // pass details of attack and armor to core damage calculation function
         let (damage_dealt) = calculate_damage(
@@ -174,10 +183,22 @@ namespace CombatStats {
     ) -> (damage: felt) {
         alloc_locals;
 
+        // NOTE: @loothero if no weapon then type is generic
+        if (weapon.Id == 0) {
+            let weapon_type = Type.Weapon.generic;
+            tempvar syscall_ptr: felt* = syscall_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+            tempvar weapon_type = weapon_type;
+        } else {
+            let weapon_type = weapon.Type;
+            tempvar syscall_ptr: felt* = syscall_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+            tempvar weapon_type = weapon_type;
+        }
         // pass details of attack and armor to core damage calculation function
         // NOTE: for now beast armor is set as generic (they don't have armor)
         let (damage_dealt) = calculate_damage(
-            weapon.Type, weapon.Rank, weapon.Greatness, Type.Armor.generic, beast.Rank, beast.XP
+            weapon_type, weapon.Rank, weapon.Greatness, Type.Armor.generic, beast.Rank, beast.XP
         );
 
         // return damage

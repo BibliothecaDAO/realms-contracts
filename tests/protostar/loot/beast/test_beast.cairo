@@ -88,13 +88,11 @@ func test_cast{
 }() {
     alloc_locals;
 
-    let (beast_static, beast_dynamic) = TestUtils.create_beast(1);
+    let (beast: Beast) = TestUtils.create_beast(1, 0);
 
-    let (packed_beast) = BeastLib.pack(beast_dynamic);
+    let (_, beast_dynamic: BeastDynamic) = BeastLib.split_data(beast);
 
-    let (beast: BeastDynamic) = BeastLib.unpack(packed_beast);
-
-    let (c) = BeastLib.cast_state(1, 50, beast);
+    let (c) = BeastLib.cast_state(1, 50, beast_dynamic);
 
     %{ print('Health:', ids.c.Health) %}
 
@@ -105,17 +103,15 @@ func test_cast{
 func test_deduct_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, bitwise_ptr: BitwiseBuiltin*, range_check_ptr}() {
     alloc_locals;
     
-    let (beast_static, beast_dynamic) = TestUtils.create_beast(1);
+    let (beast) = TestUtils.create_beast(1, 0);
 
-    let (packed_beast) = BeastLib.pack(beast_dynamic);
+    let (_, beast_dynamic: BeastDynamic) = BeastLib.split_data(beast);
 
-    let (beast: BeastDynamic) = BeastLib.unpack(packed_beast);
-
-    let (c) = BeastLib.deduct_health(TEST_DAMAGE_HEALTH_REMAINING, beast);
+    let (c) = BeastLib.deduct_health(TEST_DAMAGE_HEALTH_REMAINING, beast_dynamic);
 
     assert c.Health = beast.Health - TEST_DAMAGE_HEALTH_REMAINING;
 
-    let (c) = BeastLib.deduct_health(TEST_DAMAGE_OVERKILL, beast);
+    let (c) = BeastLib.deduct_health(TEST_DAMAGE_OVERKILL, beast_dynamic);
 
     assert c.Health = 0;
     
@@ -128,17 +124,11 @@ func test_set_adventurer{
 }() {
     alloc_locals;
     
-    let (beast_static, beast_dynamic) = TestUtils.create_beast(1);
+    let (beast) = TestUtils.create_beast(1, 0);
 
-    assert beast_dynamic.Adventurer = 0;
+    let (_, beast_dynamic: BeastDynamic) = BeastLib.split_data(beast);
 
-    let (packed_beast) = BeastLib.pack(beast_dynamic);
-
-    let (beast: BeastDynamic) = BeastLib.unpack(packed_beast);
-
-    assert beast.Adventurer = 0;
-
-    let (c) = BeastLib.set_adventurer(1, beast);
+    let (c) = BeastLib.set_adventurer(1, beast_dynamic);
 
     assert c.Adventurer = 1;
     
@@ -150,13 +140,11 @@ func test_slain{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, bitwise_ptr: BitwiseBuiltin*, range_check_ptr
 }() {
     alloc_locals;
-    let (beast_static, beast_dynamic) = TestUtils.create_beast(1);
+    let (beast) = TestUtils.create_beast(1, 0);
 
-    let (packed_beast) = BeastLib.pack(beast_dynamic);
+    let (_, beast_dynamic: BeastDynamic) = BeastLib.split_data(beast);
 
-    let (beast: BeastDynamic) = BeastLib.unpack(packed_beast);
-
-    let (c) = BeastLib.slay(1, 1000, beast);
+    let (c) = BeastLib.slay(1, 1000, beast_dynamic);
 
     assert c.SlainBy = 1;
     assert c.SlainOnDate = 1000;
@@ -167,11 +155,11 @@ func test_slain{
 @external
 func test_calculate_damage_to_beast{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
-    let (beast_static, beast_dynamic) = TestUtils.create_beast(1);
+    let (beast) = TestUtils.create_beast(1, 0);
 
-    let (beast) = BeastLib.aggregate_data(beast_static, beast_dynamic);
+    // let (local weapon) = TestUtils.create_item(75, 1); // Mace
 
-    let (local weapon) = TestUtils.create_item(75, 1); // Mace
+    let (weapon) = TestUtils.create_zero_item();
 
     %{
         print('Weapon Type:', ids.weapon.Type) # bludgeon
@@ -184,7 +172,7 @@ func test_calculate_damage_to_beast{syscall_ptr: felt*, pedersen_ptr: HashBuilti
 
     let (local damage) = CombatStats.calculate_damage_to_beast(beast, weapon);
 
-    // assert damage = 
+    // assert damage = 2;
 
     %{
         print('Damage To Beast:', ids.damage)
@@ -197,15 +185,27 @@ func test_calculate_damage_to_beast{syscall_ptr: felt*, pedersen_ptr: HashBuilti
 @external
 func test_calculate_damage_from_beast{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
-    let (beast_static, beast_dynamic) = TestUtils.create_beast(1);
+    let (beast) = TestUtils.create_beast(1, 2);
 
-    let (armor) = TestUtils.create_item(50, 1); // Hard Leather Armor
+    // let (armor) = TestUtils.create_item(50, 1); // Hard Leather Armor
 
-    let (beast) = BeastLib.aggregate_data(beast_static, beast_dynamic);
+    let (armor) = TestUtils.create_zero_item();
+
+    %{
+        print('Armor Type:', ids.armor.Type) # hide
+        print('Armor Rank:', ids.armor.Rank) # 4
+        print('Armor Greatness:', ids.armor.Greatness) # 1
+        print('Beast Type:', ids.beast.Type) # magic
+        print('Beast Rank:', ids.beast.Rank) # 1
+        print('Beast XP:', ids.beast.XP) # 0
+    %}
 
     let (local damage) = CombatStats.calculate_damage_from_beast(beast, armor);
+    // base_weapon_damage = 5 * 2 = 10
+    // magic v hide = low = 1
+    // armor_strength = 6-4 * 1 = 2
 
-    // assert damage = 
+    // assert damage = 8;
 
     %{
         print('Damage From Beast:', ids.damage)

@@ -8,7 +8,7 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from contracts.loot.constants.item import Item, ItemIds, ItemType, ItemSlot, ItemMaterial, State
 from contracts.loot.constants.rankings import ItemRank
 from contracts.loot.constants.combat import WeaponEfficacy
-from contracts.loot.constants.beast import Beast, BeastConstants
+from contracts.loot.constants.beast import Beast, BeastType, BeastIds
 from contracts.loot.constants.obstacle import Obstacle, ObstacleConstants
 from contracts.loot.loot.stats.combat import CombatStats
 from tests.protostar.loot.test_structs import TestUtils
@@ -94,19 +94,19 @@ func test_weapon_vs_armor_efficacy{syscall_ptr: felt*, range_check_ptr}() {
     // ---------------------------------------------------------
     // Sharp beasts vs cloth is highly effective
     let (sharp_beast_vs_cloth) = CombatStats.weapon_vs_armor_efficacy(
-        BeastConstants.BeastType.Vampire, ItemType.DivineRobe
+        BeastType.Vampire, ItemType.DivineRobe
     );
     assert sharp_beast_vs_cloth = WeaponEfficacy.High;
 
     // Sharp beasts vs metal is minimally effective
     let (sharp_beast_vs_metal) = CombatStats.weapon_vs_armor_efficacy(
-        BeastConstants.BeastType.Spider, ItemType.RingMail
+        BeastType.Spider, ItemType.RingMail
     );
     assert sharp_beast_vs_metal = WeaponEfficacy.Low;
 
     // Sharp beasts vs hide deals normal damage
     let (sharp_beast_vs_hide) = CombatStats.weapon_vs_armor_efficacy(
-        BeastConstants.BeastType.Werewolf, ItemType.DragonskinArmor
+        BeastType.Werewolf, ItemType.DragonskinArmor
     );
     assert sharp_beast_vs_hide = WeaponEfficacy.Medium;
     // ---------------------------------------------------------
@@ -144,14 +144,14 @@ func test_calculate_damage_from_beast{
     alloc_locals;
 
     // greatness 20 orc vs greatness 0 shirt (oof)
-    let (orc) = TestUtils.create_beast(BeastConstants.BeastIds.Orc, 20);
+    let (orc) = TestUtils.create_beast(BeastIds.Orc, 20);
     let (shirt) = TestUtils.create_item(ItemIds.Shirt, 0);
     let (orc_vs_shirt) = CombatStats.calculate_damage_from_beast(orc, shirt);
     assert orc_vs_shirt = 0;
 
     // greatness 10 giant vs greatness 10 leather armor
     let (leather) = TestUtils.create_item(ItemIds.LeatherArmor, 10);
-    let (giant) = TestUtils.create_beast(BeastConstants.BeastIds.Giant, 10);
+    let (giant) = TestUtils.create_beast(BeastIds.Giant, 10);
     let (giant_vs_leather) = CombatStats.calculate_damage_from_beast(orc, leather);
     assert giant_vs_leather = 110;
 
