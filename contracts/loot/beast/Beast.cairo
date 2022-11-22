@@ -88,6 +88,11 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     return ();
 }
 
+// -----------------------------
+// External
+// -----------------------------
+
+
 // @notice Create a beast and attach to adventurer
 // @param adventurer_id: Id of adventurer
 // @return beast_token_id: Id of beast
@@ -295,6 +300,9 @@ func flee{
 // Setters
 // --------------------
 
+// @notice Set beast data by id
+// @param token_id: Id of beast
+// @param beast: Beast data from id
 @external
 func set_beast_by_id{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
@@ -311,6 +319,8 @@ func set_beast_by_id{
 // Internal
 // --------------------
 
+// @notice Get xiroshiro random number
+// @return dice_roll: Random number
 func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}() -> (
     dice_roll: felt
 ) {
@@ -322,6 +332,8 @@ func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBu
     return (rnd,);
 }
 
+// @notice Revert if caller is not adventurer owner
+// @param: adventurer_id: Id of adventurer 
 func assert_adventurer_owner{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(adventurer_id: Uint256) {
@@ -336,6 +348,8 @@ func assert_adventurer_owner{
     return ();
 }
 
+// @notice Emit beast data
+// @param: token_id: Id of beast
 func emit_beast_state{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(token_id: Uint256) {
@@ -346,7 +360,6 @@ func emit_beast_state{
 
     return ();
 }
-
 
 // --------------------
 // Getters
