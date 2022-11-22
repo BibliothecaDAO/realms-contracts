@@ -42,7 +42,6 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         stop_prank_lords = start_prank(ids.addresses.account_1, ids.addresses.lords)
         stop_prank_loot = start_prank(ids.addresses.account_1, ids.addresses.loot)
     %}
-    let (timestamp) = get_block_timestamp();
     let weapon_id: Item = Item(
         ItemIds.Wand,
         ItemSlot.Wand, 
@@ -55,19 +54,21 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         0, 
         0, 
         0, 
-        0, 
+        0,
         0
     ); // Wand
     ILoot.mint(addresses.loot, addresses.account_1);
     ILoot.setItemById(addresses.loot, Uint256(1,0), weapon_id);
     IRealms.set_realm_data(addresses.realms, Uint256(13, 0), 'Test Realm', 1);
     IAdventurer.mint(addresses.adventurer, addresses.account_1, 4, 10, 'Test', 8);
+    %{
+        stop_prank_loot()
+    %}
     IAdventurer.equip_item(addresses.adventurer, Uint256(1,0), Uint256(1,0));
     %{
         stop_prank_realms()
         stop_prank_adventurer()
         stop_prank_lords()
-        stop_prank_loot()
     %}
     return ();
 }
@@ -199,7 +200,7 @@ func test_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     let (updated_beast) = IBeast.get_beast_by_id(beast_address, Uint256(1,0));
 
-    let (local adventurer) = IAdventurer.get_adventurer_by_id(beast_address, Uint256(1,0));
+    let (local adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
 
     %{
         print(ids.adventurer.Health)
