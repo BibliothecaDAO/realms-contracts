@@ -86,6 +86,8 @@ namespace IBeast {
     }
     func attack(beast_id: Uint256) {
     }
+    func flee(beast_id: Uint256) {
+    }
     func get_beast_by_id(beast_id: Uint256) -> (beast: Beast) {
     }
     func set_beast_by_id(beast_id: Uint256, beast: Beast) {

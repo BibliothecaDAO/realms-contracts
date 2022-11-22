@@ -378,7 +378,7 @@ namespace AdventurerLib {
         alloc_locals;
 
         let (_, r) = unsigned_div_rem(xoroshiro_random, 4);
-        return (r,);  // values from 0 to 4 inclusive
+        return (r,);  // values from 0 to 3 inclusive
     }
 
     func update_statistics{syscall_ptr: felt*, range_check_ptr}(

@@ -213,9 +213,28 @@ namespace BeastLib {
         return (updated_slain_on_beast,);
     }
 
-    func calculate_greatness{syscall_ptr: felt*, range_check_ptr}(xp: felt) -> (greatness: felt) {
+    func get_random_ambush{
+        range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
+    }(xoroshiro_random: felt) -> (discovery: felt) {
+        alloc_locals;
 
-        let (greatness, _) = unsigned_div_rem(xp, 1000);
+        let (_, r) = unsigned_div_rem(xoroshiro_random, 2);
+        return (r,);  // values from 0 to 1 inclusive
+    }
+
+    func get_random_flee{
+        range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
+    }(xoroshiro_random: felt) -> (discovery: felt) {
+        alloc_locals;
+
+        let (_, r) = unsigned_div_rem(xoroshiro_random, 2);
+        return (r,);  // values from 0 to 1 inclusive
+    }
+
+    func calculate_greatness{syscall_ptr: felt*, range_check_ptr}(xp: felt) -> (greatness: felt) {
+        // TODO: Some calculation of greatness based on xp
+        // let (greatness, _) = unsigned_div_rem(xp, 1000);
+        let greatness = xp;
 
         return (greatness,);
     }

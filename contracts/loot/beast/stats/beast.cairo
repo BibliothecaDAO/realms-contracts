@@ -21,7 +21,6 @@ from contracts.loot.constants.rankings import ItemRank
 from contracts.loot.constants.physics import MaterialDensity
 
 namespace BeastStats {
-
     func get_attack_type_from_id{syscall_ptr: felt*, range_check_ptr}(beast_id: felt) -> (type: felt) {
         alloc_locals;
 
@@ -101,6 +100,15 @@ namespace BeastStats {
         dw BeastRank.Werewolf;
         dw BeastRank.Spider;
         dw BeastRank.Rat;
+    }
+
+    func calculate_xp_gained{syscall_ptr: felt*, range_check_ptr}(
+        beast_rank: felt,
+        beast_greatness: felt
+    ) -> (xp_gained: felt) {
+        const rank_ceiling = 6; 
+        let xp_gained = (rank_ceiling - beast_rank) * beast_greatness;
+        return (xp_gained,);
     }
 
 }

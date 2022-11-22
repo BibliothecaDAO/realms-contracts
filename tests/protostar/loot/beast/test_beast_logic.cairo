@@ -93,7 +93,101 @@ func test_create{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 }
 
 @external
+func test_not_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+    
+    local account_1_address;
+    local xoroshiro_address;
+    local adventurer_address;
+    local beast_address;
+
+    %{
+        ids.account_1_address = context.account_1
+        ids.xoroshiro_address = context.xoroshiro
+        ids.adventurer_address = context.adventurer
+        ids.beast_address = context.beast
+        stop_mock_adventurer_random = mock_call(ids.xoroshiro_address, 'next', [1])
+        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+    %}
+    // discover and create beast
+    IAdventurer.explore(adventurer_address, Uint256(1,0));
+
+    %{ 
+        stop_prank_adventurer()
+        stop_prank_beast = start_prank(ids.account_1_address, ids.beast_address)
+    %}
+
+    IBeast.attack(beast_address, Uint256(1,0));
+
+    %{
+        stop_mock_adventurer_random()
+        stop_prank_beast()
+    %}
+
+    return ();
+}
+
+@external
 func test_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+    
+    local account_1_address;
+    local xoroshiro_address;
+    local adventurer_address;
+    local beast_address;
+    local loot_address;
+
+    %{
+        ids.account_1_address = context.account_1
+        ids.xoroshiro_address = context.xoroshiro
+        ids.adventurer_address = context.adventurer
+        ids.beast_address = context.beast
+        ids.loot_address = context.loot
+        stop_mock_adventurer_random = mock_call(ids.xoroshiro_address, 'next', [1])
+        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+    %}
+    // discover and create beast
+    IAdventurer.explore(adventurer_address, Uint256(1,0));
+
+    %{ 
+        stop_prank_adventurer()
+        stop_prank_beast = start_prank(ids.account_1_address, ids.beast_address)
+    %}
+
+    let strong_item = Item(
+        ItemIds.Mace, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0, 
+        20, 
+        0, 
+        0, 
+        1, 
+        0
+    ); 
+
+    ILoot.setItemById(loot_address, Uint256(1,0), strong_item);
+
+    IBeast.attack(beast_address, Uint256(1,0));
+
+    let (updated_beast) = IBeast.get_beast_by_id(beast_address, Uint256(1,0));
+
+    assert updated_beast.Health = 0;
+
+    %{
+        stop_mock_adventurer_random()
+        stop_prank_beast()
+    %}
+
+    return ();
+}
+
+@external
+func test_ambushed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
     
     local account_1_address;
@@ -114,18 +208,62 @@ func test_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     %{ 
         stop_mock_adventurer_random()
+        stop_prank_adventurer()
         stop_prank_beast = start_prank(ids.account_1_address, ids.beast_address)
+        stop_mock_flee_random = mock_call(ids.xoroshiro_address, 'next', [2])
     %}
 
-    IBeast.attack(beast_address, Uint256(1,0));
+    IBeast.flee(beast_address, Uint256(1,0));
+
+    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
+
+    assert adventurer.Status = AdventurerStatus.Battle;
 
     %{
+        stop_mock_flee_random()
         stop_prank_beast()
     %}
 
     return ();
 }
 
-// @external
-// func test_not_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
-// }
+@external
+func test_flee{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+    
+    local account_1_address;
+    local xoroshiro_address;
+    local adventurer_address;
+    local beast_address;
+
+    %{
+        ids.account_1_address = context.account_1
+        ids.xoroshiro_address = context.xoroshiro
+        ids.adventurer_address = context.adventurer
+        ids.beast_address = context.beast
+        stop_mock_adventurer_random = mock_call(ids.xoroshiro_address, 'next', [1])
+        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+    %}
+    // discover and create beast
+    IAdventurer.explore(adventurer_address, Uint256(1,0));
+
+    %{ 
+        stop_mock_adventurer_random()
+        stop_prank_adventurer()
+        stop_prank_beast = start_prank(ids.account_1_address, ids.beast_address)
+        stop_mock_flee_random = mock_call(ids.xoroshiro_address, 'next', [3])
+    %}
+
+    IBeast.flee(beast_address, Uint256(1,0));
+
+    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
+
+    assert adventurer.Status = AdventurerStatus.Idle;
+
+    %{
+        stop_mock_flee_random()
+        stop_prank_beast()
+    %}
+
+    return ();
+}

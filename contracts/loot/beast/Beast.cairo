@@ -39,6 +39,10 @@ from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
 // Events
 // -----------------------------------
 
+@event
+func NewBeastState(beast_token_id: Uint256, beast_state: Beast) {
+}
+
 // -----------------------------------
 // Storage
 // -----------------------------------
@@ -139,7 +143,12 @@ func attack{
     // if the beast is alive
     if (still_alive == TRUE) {
         // having been attacked, it automatically attacks back
-        counter_attack(beast_token_id);
+        let (chest) = ILoot.getItemByTokenId(item_address, Uint256(unpacked_adventurer.ChestId, 0));
+        let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, chest);
+        IAdventurer.deduct_health(adventurer_address, adventurer_id, damage_taken);
+        let (new_packed_beast) = BeastLib.pack(updated_health_beast);
+        beast_dynamic.write(beast_token_id, new_packed_beast);
+        emit_beast_state(beast_token_id);
         return ();
     } else {
         // update beast with slain details
@@ -152,8 +161,9 @@ func attack{
         // grant adventurer xp
         let (beast_greatness) = BeastLib.calculate_greatness(slain_updated_beast.XP);
         let (rank) = BeastStats.get_rank_from_id(new_beast_.Id);
-        let xp_gained = rank * beast_greatness;
+        let (xp_gained) = BeastStats.calculate_xp_gained(rank, beast_greatness);
         IAdventurer.increase_xp(adventurer_address, adventurer_id, xp_gained);
+        emit_beast_state(beast_token_id);
         return ();
     }
 }
@@ -218,8 +228,6 @@ func flee{
         assert unpacked_adventurer.Status = AdventurerStatus.Battle;
     }
 
-    // TODO: calculate accurate rng for ambush and fleeing
-
     // Adventurer Speed is Dexterity - Weight of all equipped items
     // TODO: We need a function to calculate the weight of all the adventurer equipment
     let weight_of_equipment = 0;
@@ -231,7 +239,7 @@ func flee{
     let ambush_resistance = unpacked_adventurer.Wisdom + unpacked_adventurer.Luck;
 
     let (rnd) = get_random_number();
-    let (_, r) = unsigned_div_rem(rnd, 2);
+    let (ambush_chance) = BeastLib.get_random_ambush(rnd);
 
     // TODO Milestone2: Factor in beast health for the ambush chance and for flee chance
     // Short-term (while we are using rng) would be to base rng on beast health. The
@@ -239,7 +247,7 @@ func flee{
     // it will be to flee.
 
     // adventurer is ambushed if their ambush resistance is less than random number
-    let is_ambushed = is_le(ambush_resistance, r);
+    let is_ambushed = is_le(ambush_chance, ambush_resistance);
 
     let (item_address) = Module.get_module_address(ModuleIds.Loot);
 
@@ -262,7 +270,8 @@ func flee{
     }
 
     // TODO: MILESTONE2 Use Beast Speed Stats
-    let can_flee = is_le(r, adventurer_speed);
+    let (flee_chance) = BeastLib.get_random_flee(rnd);
+    let can_flee = is_le(adventurer_speed + 1, flee_chance);
     if (can_flee == TRUE) {
         IAdventurer.update_status(
             adventurer_address, Uint256(beast.Adventurer, 0), AdventurerStatus.Idle
@@ -317,6 +326,18 @@ func assert_adventurer_owner{
     }
     return ();
 }
+
+func emit_beast_state{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(token_id: Uint256) {
+    // Get new adventurer
+    let (new_beast) = get_beast_by_id(token_id);
+
+    NewBeastState.emit(token_id, new_beast);
+
+    return ();
+}
+
 
 // --------------------
 // Getters
