@@ -372,6 +372,20 @@ namespace AdventurerLib {
         return (updated_adventurer,);
     }
 
+    func remove_beast{syscall_ptr: felt*, range_check_ptr}(
+        unpacked_adventurer: AdventurerState
+    ) -> (new_unpacked_adventurer: AdventurerState) {
+        alloc_locals;
+
+        // zero out the beast associated with the adventurer
+        let (updated_adventurer: AdventurerState) = cast_state(
+            AdventurerSlotIds.Beast, 0, unpacked_adventurer
+        );
+
+        // return updated adventurer
+        return (updated_adventurer,);
+    }
+
     func get_random_discovery{
         range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
     }(xoroshiro_random: felt) -> (discovery: felt) {
