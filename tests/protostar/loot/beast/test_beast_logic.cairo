@@ -34,6 +34,7 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         stop_prank_realms = start_prank(ids.addresses.account_1, ids.addresses.realms)
         stop_prank_adventurer = start_prank(ids.addresses.account_1, ids.addresses.adventurer)
         stop_prank_lords = start_prank(ids.addresses.account_1, ids.addresses.lords)
+        stop_prank_loot = start_prank(ids.addresses.account_1, ids.addresses.loot)
     %}
     let (timestamp) = get_block_timestamp();
     let weapon_id: Item = Item(ItemIds.Wand, 0, 0, 0, 0, 0, 0, 0, 0, timestamp, 0, 0, 0); // Wand
@@ -46,6 +47,7 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         stop_prank_realms()
         stop_prank_adventurer()
         stop_prank_lords()
+        stop_prank_loot()
     %}
     return ();
 }
@@ -145,6 +147,7 @@ func test_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         ids.loot_address = context.loot
         stop_mock_adventurer_random = mock_call(ids.xoroshiro_address, 'next', [1])
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+        stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
     %}
     // discover and create beast
     IAdventurer.explore(adventurer_address, Uint256(1,0));

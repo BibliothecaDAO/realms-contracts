@@ -79,7 +79,7 @@ func adventurer_balance(tokenId: Uint256) -> (balance: Uint256) {
 // @return proxy_admin: Proxy admin address
 @external
 func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    name: felt, symbol: felt, proxy_admin: felt, address_of_controller: felt
+    name: felt, symbol: felt, address_of_controller: felt, proxy_admin: felt
 ) {
     // set as module
     Module.initializer(address_of_controller);
@@ -583,16 +583,4 @@ func transferOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 func renounceOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     Ownable.renounce_ownership();
     return ();
-}
-
-func get_random_discovery{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}() -> (
-    dice_roll: felt
-) {
-    alloc_locals;
-
-    let (controller) = Module.controller_address();
-    let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
-    let (rnd) = IXoroshiro.next(xoroshiro_address_);
-    let (_, r) = unsigned_div_rem(rnd, 4);
-    return (r,);  // values from 0 to 4 inclusive
 }

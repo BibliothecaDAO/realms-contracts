@@ -44,7 +44,7 @@ func counter() -> (count: felt) {
 // @return proxy_admin: Proxy admin address
 @external
 func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    name: felt, symbol: felt, proxy_admin: felt, controller_address: felt
+    name: felt, symbol: felt, address_of_controller: felt, proxy_admin: felt
 ) {
     Module.initializer(controller_address);
     ERC721.initializer(name, symbol);
@@ -322,8 +322,7 @@ func updateXP{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 func setItemById{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256, item_: Item
 ) {
-    // TODO: Security
-
+    Module.only_arbiter();
     item.write(tokenId, item_);
     return ();
 }

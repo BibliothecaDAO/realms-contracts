@@ -68,7 +68,7 @@ func total_supply() -> (res: Uint256) {
 // @return proxy_admin: Proxy admin address
 @external
 func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    proxy_admin: felt, address_of_controller: felt
+    address_of_controller: felt, proxy_admin: felt
 ) {
     // set as module
     Module.initializer(address_of_controller);

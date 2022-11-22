@@ -40,6 +40,8 @@ namespace ILoot {
     }
     func mint(to: felt) {
     }
+    func updateAdventurer(tokenId: Uint256, adventurerId: felt) {
+    }
     func setItemById(
         tokenId: Uint256,
         item: Item

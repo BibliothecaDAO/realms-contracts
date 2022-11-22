@@ -113,17 +113,17 @@ func deploy_all{
     IController.set_xoroshiro(contracts.controller, contracts.xoroshiro);
     IController.set_address_for_external_contract(contracts.controller, ExternalContractIds.Treasury, contracts.treasury);
 
-    IAdventurer.initializer(contracts.adventurer, 1, 1, contracts.account_1, contracts.controller);
+    IAdventurer.initializer(contracts.adventurer, 1, 1, contracts.controller, contracts.account_1);
     IController.set_address_for_module_id(contracts.controller, ModuleIds.Adventurer, contracts.adventurer);
     IController.set_write_access(contracts.controller, ModuleIds.Adventurer, ModuleIds.Loot);
     IController.set_write_access(contracts.controller, ModuleIds.Adventurer, ModuleIds.Beast);
 
-    IBeast.initializer(contracts.beast, contracts.account_1, contracts.controller);
+    IBeast.initializer(contracts.beast, contracts.controller, contracts.account_1);
     IController.set_address_for_module_id(contracts.controller, ModuleIds.Beast, contracts.beast);
     IController.set_write_access(contracts.controller, ModuleIds.Beast, ModuleIds.Adventurer);
     IController.set_write_access(contracts.controller, ModuleIds.Beast, ModuleIds.Loot);
 
-    ILoot.initializer(contracts.loot, 1, 1, contracts.account_1, contracts.controller);
+    ILoot.initializer(contracts.loot, 1, 1, contracts.controller, contracts.account_1);
     IController.set_address_for_module_id(contracts.controller, ModuleIds.Loot, contracts.loot);
     IController.set_write_access(contracts.controller, ModuleIds.Loot, ModuleIds.Adventurer);
 
