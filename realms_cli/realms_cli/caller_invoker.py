@@ -197,19 +197,6 @@ def compile(contract_alias) -> str:
     return subprocess.check_output(command).strip().decode("utf-8")
 
 
-# def declare(contract_name, alias) -> str:
-#     """Nile declare function."""
-#     command = [
-#         "nile",
-#         "declare",
-#         account,
-#         contract_name,
-#         "--alias",
-#         alias,
-#     ]
-#     return subprocess.check_output(command).strip().decode("utf-8")
-
-
 def wrapped_declare(account, contract_name, network, alias):
 
     account = Account(account, network)

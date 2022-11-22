@@ -15,19 +15,22 @@ class ModuleId(IntEnum):
     Adventurer = 2
     Beast = 3
 
-Contracts = namedtuple('Contracts', 'alias contract_name')
-ModuleContracts = namedtuple('Contracts', 'alias contract_name id')
+Contracts = namedtuple('Contracts', 'contract_name alias')
+ModuleContracts = namedtuple('Contracts', 'contract_name alias id')
 
 CONTROLLER_CONTRACT_IMPLEMENTATIONS = [
-    Contracts("Arbiter", "Arbiter"),
-    Contracts("ModuleController", "ModuleController")
+    Contracts("settling_game/Arbiter", "Arbiter"),
+    Contracts("loot/ModuleController", "ModuleController")
 ]
+
+module_path = 'loot/'
+token_path = 'settling_game/tokens/'
 
 # token tuples
 MODULE_CONTRACT_IMPLEMENTATIONS = [
-    ModuleContracts("Loot", "Loot", ModuleId.Loot),
-    ModuleContracts("Adventurer", "Adventurer", ModuleId.Adventurer),
-    ModuleContracts("Beast", "Beast", ModuleId.Beast),
+    ModuleContracts(module_path + "loot/Loot", "Loot", ModuleId.Loot),
+    ModuleContracts(module_path + "adventurer/Adventurer", "Adventurer", ModuleId.Adventurer),
+    ModuleContracts(module_path + "beast/Beast", "Beast", ModuleId.Beast),
 ]
 
 # Lords
@@ -69,7 +72,7 @@ def run(nre):
         signer_alias=config.ADMIN_ALIAS,
         contract_alias="proxy_Arbiter",
         function="initializer",
-        arguments=[strhex_as_strfelt(config.ADMIN_ADDRESS)],
+        arguments=[config.ADMIN_ADDRESS],
     )
 
     # wait 120s - this will reduce on mainnet
@@ -82,8 +85,7 @@ def run(nre):
         signer_alias=config.ADMIN_ALIAS,
         contract_alias="proxy_ModuleController",
         function="initializer",
-        arguments=[strhex_as_strfelt(
-            module), strhex_as_strfelt(config.ADMIN_ADDRESS)],
+        arguments=[module, config.ADMIN_ADDRESS],
     )
 
     logged_deploy(
@@ -102,7 +104,7 @@ def run(nre):
         signer_alias=config.ADMIN_ALIAS,
         contract_alias="proxy_ModuleController",
         function="set_xoroshiro",
-        arguments=[strhex_as_strfelt(module)],
+        arguments=[module],
     )
 
     #---------------- MODULE IMPLEMENTATIONS  ----------------#
@@ -136,7 +138,7 @@ def run(nre):
         arguments=[
             LOOT,
             LOOT_SYMBOL,
-            strhex_as_strfelt(config.CONTROLLER_ADDRESS), 
+            config.CONTROLLER_ADDRESS, 
             config.ADMIN_ADDRESS
         ],
     )
@@ -149,7 +151,7 @@ def run(nre):
         arguments=[
             ADVENTURER,
             ADVENTURER_SYMBOL,
-            strhex_as_strfelt(config.CONTROLLER_ADDRESS), 
+            config.CONTROLLER_ADDRESS, 
             config.ADMIN_ADDRESS
         ],
     )
@@ -160,7 +162,7 @@ def run(nre):
         contract_alias="proxy_Beast",
         function="initializer",
         arguments=[
-            strhex_as_strfelt(config.CONTROLLER_ADDRESS), 
+            config.CONTROLLER_ADDRESS, 
             config.ADMIN_ADDRESS
         ],
     )
