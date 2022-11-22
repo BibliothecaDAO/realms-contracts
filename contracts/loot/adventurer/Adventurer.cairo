@@ -107,6 +107,13 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 // External Adventurer Specific
 // -----------------------------
 
+
+// @notice Mint an adventurer with null attributes
+// @param to: Recipient of adventurer
+// @param race: Race of adventurer
+// @param home_realm: Home Realm of adventurer
+// @param name: Name of adventurer
+// @param order: Order of adventurer
 @external
 func mint{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
@@ -140,9 +147,7 @@ func mint{
 
     // send to Nexus
     let (treasury) = Module.get_external_contract_address(ExternalContractIds.Treasury);
-
     // IERC20.transferFrom(lords_address, caller, treasury, Uint256(50 * 10 ** 18, 0));
-
     // send to this contract and set Balance of Adventurer
     let (this) = get_contract_address();
     // IERC20.transferFrom(lords_address, caller, this, Uint256(50 * 10 ** 18, 0));
@@ -151,6 +156,9 @@ func mint{
     return ();
 }
 
+// @notice Equip loot item to adventurer
+// @param tokenId: Id of adventurer
+// @param itemTokenId: Id of loot item
 @external
 func equip_item{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
@@ -207,6 +215,9 @@ func equip_item{
     return (TRUE,);
 }
 
+// @notice Unquip loot item from adventurer
+// @param tokenId: Id of adventurer
+// @param itemTokenId: Id of loot item
 @external
 func unequip_item{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
@@ -259,6 +270,9 @@ func unequip_item{
     return (TRUE,);
 }
 
+// @notice Update status of adventurer
+// @param tokenId: Id of adventurer
+// @param status: Status value
 @external
 func update_status{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
@@ -278,6 +292,10 @@ func update_status{
     return (TRUE,);
 }
 
+// @notice Deduct health from adventurer
+// @param tokenId: Id of adventurer
+// @param amount: Health amount to deduct
+// @return success: Value indicating success
 @external
 func deduct_health{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
@@ -300,6 +318,10 @@ func deduct_health{
     return (TRUE,);
 }
 
+// @notice Increase xp of adventurer
+// @param tokenId: Id of adventurer
+// @param amount: Amount of xp to increase
+// @return success: Value indicating success
 @external
 func increase_xp{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
@@ -322,6 +344,9 @@ func increase_xp{
     return (TRUE,);
 }
 
+// @notice Explore for discoveries
+// @param tokenId: Id of adventurer
+// @return success: Value indicating success
 @external
 func explore{
         pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
@@ -374,6 +399,8 @@ func explore{
 // Internal Adventurer Specific
 // -----------------------------
 
+// @notice Revert if adventurer is dead
+// @param tokenId: Id of adventurer
 func assert_not_dead{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(tokenId: Uint256) {
@@ -386,6 +413,8 @@ func assert_not_dead{
     return ();
 }
 
+// @notice Get xoroshiro random number
+// @return dice_roll: Xoroshiro random number
 func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}() -> (
     dice_roll: felt
 ) {
@@ -397,6 +426,8 @@ func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBu
     return (rnd,);
 }
 
+// @notice Emit state of adventurer
+// @param tokenId: Id of adventurer
 func emit_adventurer_state{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(tokenId: Uint256) {
@@ -412,6 +443,9 @@ func emit_adventurer_state{
 // Getters
 // --------------------
 
+// @notice Get adventurer data from id
+// @param tokenId: Id of adventurer
+// @return adventurer: Data of adventurer
 @view
 func get_adventurer_by_id{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
@@ -424,21 +458,6 @@ func get_adventurer_by_id{
     let (unpacked_adventurer: AdventurerState) = AdventurerLib.unpack(packed_adventurer);
 
     return (unpacked_adventurer,);
-}
-
-// Checks if dead
-// Might be better as an assert....
-@external
-func is_dead{
-    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(tokenId: Uint256) -> (is_dead: felt) {
-    let (adventurer: AdventurerState) = get_adventurer_by_id(tokenId);
-
-    if (adventurer.Health == 0) {
-        return (is_dead=TRUE);
-    }
-
-    return (is_dead=FALSE);
 }
 
 // --------------------

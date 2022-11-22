@@ -67,11 +67,15 @@ func test_mint{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     %}
 
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
-    ILords.approve(lords_address, adventurer_address, Uint256(200 * 10 ** 18, 0));
+    ILords.approve(lords_address, adventurer_address, Uint256(100 * 10 ** 18, 0));
+    let (local allowance: Uint256) = ILords.allowance(lords_address, account_1_address, adventurer_address);
+    %{
+        print(ids.allowance.low)
+    %}
     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8);
-    let (balance: Uint256) = ILords.balanceOf(lords_address, account_1_address);
+    let (new_balance: Uint256) = ILords.balanceOf(lords_address, account_1_address);
 
-    // assert balance = Uint256(950 * 10 ** 18, 0);
+    assert new_balance = Uint256(900 * 10 ** 18, 0);
     %{
         stop_prank_realms()
         stop_prank_adventurer()

@@ -88,6 +88,9 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     return ();
 }
 
+// @notice Create a beast and attach to adventurer
+// @param adventurer_id: Id of adventurer
+// @return beast_token_id: Id of beast
 @external
 func create{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*

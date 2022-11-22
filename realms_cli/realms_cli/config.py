@@ -212,5 +212,27 @@ class Config:
             "HeadId",
             "WaistId",
             "FeetId",
-            "HandsId"
+            "HandsId",
+            "Status",
+            "Beast"
         ]
+
+        self.ADVENTURER_PROXY_ADDRESS, _ = safe_load_deployment(
+            "proxy_Adventurer", self.nile_network)
+
+        self.BEAST = [
+            "Id",
+            "AttackType",
+            "ArmorType",
+            "Rank",
+            "Prefix_1",
+            "Prefix_2",
+            "Health",
+            "Adventurer",
+            "XP",
+            "SlainBy",
+            "SlainOnDate",
+        ]
+
+        self.BEAST_PROXY_ADDRESS, _ = safe_load_deployment(
+            "proxy_Beast", self.nile_network)

@@ -46,7 +46,7 @@ func counter() -> (count: felt) {
 func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     name: felt, symbol: felt, address_of_controller: felt, proxy_admin: felt
 ) {
-    Module.initializer(controller_address);
+    Module.initializer(address_of_controller);
     ERC721.initializer(name, symbol);
     ERC721Enumerable.initializer();
     Proxy.initializer(proxy_admin);

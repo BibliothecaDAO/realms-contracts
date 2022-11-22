@@ -1,6 +1,6 @@
 from collections import namedtuple
 from realms_cli.deployer import logged_deploy
-from realms_cli.caller_invoker import wrapped_send, declare
+from realms_cli.caller_invoker import wrapped_send, wrapped_declare
 from realms_cli.config import Config, strhex_as_strfelt, safe_load_deployment
 from realms_cli.utils import str_to_felt
 import time
@@ -54,15 +54,14 @@ def run(nre):
     #---------------- CONTROLLERS  ----------------#
     for contract in CONTROLLER_CONTRACT_IMPLEMENTATIONS:
 
-        declare(contract.contract_name, contract.alias)
-
-        predeclared_class = nre.get_declaration(contract.alias)
+        class_hash = wrapped_declare(
+            config.ADMIN_ALIAS, contract.contract_name, nre.network, contract.alias)
 
         logged_deploy(
             nre,
             'PROXY_Logic',
             alias='proxy_' + contract.alias,
-            arguments=[strhex_as_strfelt(predeclared_class)],
+            arguments=[class_hash],
         )
 
     wrapped_send(
@@ -106,9 +105,7 @@ def run(nre):
         arguments=[strhex_as_strfelt(module)],
     )
 
-    module, _ = safe_load_deployment("arbiter", nre.network)
-
-    #---------------- IMPLEMENTATIONS  ----------------#
+    #---------------- MODULE IMPLEMENTATIONS  ----------------#
     for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
         logged_deploy(
             nre,
@@ -116,17 +113,14 @@ def run(nre):
             alias=contract.alias,
             arguments=[],
         )
-        declare(contract.contract_name, contract.alias)
-
-    #---------------- PROXY  ----------------#
-    for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
-        predeclared_class = nre.get_declaration(contract.alias)
+        class_hash = wrapped_declare(
+            config.ADMIN_ALIAS, contract.contract_name, nre.network, contract.alias)
 
         logged_deploy(
             nre,
             'PROXY_Logic',
             alias='proxy_' + contract.alias,
-            arguments=[strhex_as_strfelt(predeclared_class)],
+            arguments=[class_hash],
         )
 
     # # wait 120s - this will reduce on mainnet

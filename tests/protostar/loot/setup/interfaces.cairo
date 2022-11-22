@@ -111,4 +111,6 @@ namespace ILords {
     }
     func approve(spender: felt, amount: Uint256) -> (success: felt) {
     }
+    func allowance(owner: felt, spender: felt) -> (allowance: Uint256) {
+    }
 }

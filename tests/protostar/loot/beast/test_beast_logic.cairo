@@ -179,6 +179,12 @@ func test_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     let (updated_beast) = IBeast.get_beast_by_id(beast_address, Uint256(1,0));
 
+    let (local adventurer) = IAdventurer.get_adventurer_by_id(beast_address, Uint256(1,0));
+
+    %{
+        print(ids.adventurer.Health)
+    %}
+
     assert updated_beast.Health = 0;
 
     %{
