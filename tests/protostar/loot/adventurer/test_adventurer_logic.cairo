@@ -106,7 +106,21 @@ func test_equip_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
         stop_prank_lords = start_prank(ids.account_1_address, ids.lords_address)
     %}
     let (timestamp) = get_block_timestamp();
-    let weapon_id: Item = Item(ItemIds.Wand, 0, 0, 0, 0, 0, 0, 0, 0, timestamp, 0, 0, 0); // Wand
+    let weapon_id: Item = Item(
+        ItemIds.Wand,
+        ItemSlot.Wand, 
+        ItemType.Wand, 
+        ItemMaterial.Wand, 
+        ItemRank.Wand, 
+        1, 
+        1, 
+        1, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0
+    ); // Wand
     ILoot.mint(loot_address, account_1_address);
     ILoot.setItemById(loot_address, Uint256(1,0), weapon_id);
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);

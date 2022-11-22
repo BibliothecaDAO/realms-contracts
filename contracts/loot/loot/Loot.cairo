@@ -292,7 +292,7 @@ func updateXP{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 func setItemById{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256, item_: Item
 ) {
-    Module.only_arbiter();
+    // Module.only_arbiter();
     item.write(tokenId, item_);
     return ();
 }
@@ -327,5 +327,5 @@ func getItemByTokenId{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 ) -> (item: Item) {
     let (item_: Item) = item.read(tokenId);
 
-    return (item_);
+    return (item_,);
 }

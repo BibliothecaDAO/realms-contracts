@@ -43,7 +43,7 @@ def get_beast(beast_token_id, network):
               metavar='<columns>', type=click.STRING, help='beast id', prompt=True)
 def attack_beast(network, beast_token_id):
     """
-    Mint a Random Loot Item
+    Attack beast
     """
     config = Config(nile_network=network)
 

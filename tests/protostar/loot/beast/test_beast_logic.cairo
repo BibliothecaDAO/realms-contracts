@@ -6,8 +6,14 @@ from starkware.starknet.common.syscalls import get_block_timestamp
 
 from contracts.loot.constants.adventurer import AdventurerState, AdventurerStatus
 from contracts.loot.constants.beast import Beast
-from contracts.loot.constants.item import Item, ItemIds
-
+from contracts.loot.constants.item import (
+    Item, 
+    ItemIds, 
+    ItemType, 
+    ItemMaterial, 
+    ItemSlot
+)
+from contracts.loot.constants.rankings import ItemRank
 from tests.protostar.loot.setup.interfaces import ILoot, IRealms, IAdventurer, IBeast
 from tests.protostar.loot.setup.setup import Contracts, deploy_all
 from tests.protostar.loot.test_structs import (
@@ -37,7 +43,21 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         stop_prank_loot = start_prank(ids.addresses.account_1, ids.addresses.loot)
     %}
     let (timestamp) = get_block_timestamp();
-    let weapon_id: Item = Item(ItemIds.Wand, 0, 0, 0, 0, 0, 0, 0, 0, timestamp, 0, 0, 0); // Wand
+    let weapon_id: Item = Item(
+        ItemIds.Wand,
+        ItemSlot.Wand, 
+        ItemType.Wand, 
+        ItemMaterial.Wand, 
+        ItemRank.Wand, 
+        1, 
+        1, 
+        1, 
+        0, 
+        0, 
+        0, 
+        0, 
+        0
+    ); // Wand
     ILoot.mint(addresses.loot, addresses.account_1);
     ILoot.setItemById(addresses.loot, Uint256(1,0), weapon_id);
     IRealms.set_realm_data(addresses.realms, Uint256(13, 0), 'Test Realm', 1);
@@ -157,21 +177,21 @@ func test_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         stop_prank_beast = start_prank(ids.account_1_address, ids.beast_address)
     %}
 
-    let strong_item = Item(
-        ItemIds.Mace, 
-        0, 
-        0, 
-        0, 
-        0, 
-        0, 
-        0, 
-        0, 
-        20, 
-        0, 
-        0, 
+    let strong_item: Item = Item(
+        ItemIds.Mace,
+        ItemSlot.Mace, 
+        ItemType.Mace, 
+        ItemMaterial.Mace, 
+        ItemRank.Mace, 
         1, 
+        1, 
+        1, 
+        20,  // high greatness
+        0, 
+        0, 
+        0, 
         0
-    ); 
+    ); // Mace
 
     ILoot.setItemById(loot_address, Uint256(1,0), strong_item);
 

@@ -90,7 +90,7 @@ def equip(network, adventurer, item):
               metavar='<columns>', type=click.STRING, help='adventurer id', prompt=True)
 @click.option('--item', is_flag=False,
               metavar='<columns>', type=click.STRING, help='item id', prompt=True)
-def equip(network, adventurer, item):
+def unequip(network, adventurer, item):
     """
     Unequip loot item
     """

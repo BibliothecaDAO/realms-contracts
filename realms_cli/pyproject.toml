@@ -169,6 +169,13 @@ cairo-nile = "^0.5.0"
 "mint_adventurer"  =  "realms_cli.loot.adventurer.mint_adventurer"
 "get_adventurer"  =  "realms_cli.loot.adventurer.get_adventurer"
 "equip"  =  "realms_cli.loot.adventurer.equip"
+"unequip" = "realms_cli.loot.adventurer.unequip"
+"explore" = "realms_cli.loot.adventurer.explore
+
+#-----------BEAST
+"get_beast" = "realms_cli.loot.beast.get_beast"
+"attack_beast" = "realms_cli.loot.beast.attack_beast"
+"flee_from_beast" = "realms_cli.loot.beast.flee_from_beast"
 
 #-----------TRAVEL
 "set_coordinates" = "realms_cli.player.travel.set_coordinates"

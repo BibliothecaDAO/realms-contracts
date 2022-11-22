@@ -374,8 +374,8 @@ func get_beast_by_id{
 }(beast_token_id: Uint256) -> (beast: Beast) {
     alloc_locals;
 
-    let (beast_static_) = beast_static.read(token_id);
-    let (packed_beast) = beast_dynamic.read(token_id);
+    let (beast_static_) = beast_static.read(beast_token_id);
+    let (packed_beast) = beast_dynamic.read(beast_token_id);
 
     // unpack
     let (unpacked_beast: BeastDynamic) = BeastLib.unpack(packed_beast);
