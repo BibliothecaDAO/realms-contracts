@@ -107,6 +107,8 @@ func create{
     return (next_id,);
 }
 
+// @notice Attack a beast with an adventurer, if beast not killed counter attack
+// @param beast_token_id: Id of beast
 @external
 func attack{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
@@ -171,6 +173,8 @@ func attack{
     }
 }
 
+// @notice Counter attack an adventurer
+// @param beast_token_id: Id of beast
 @external
 func counter_attack{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
@@ -211,6 +215,8 @@ func counter_attack{
     return ();
 }
 
+// @notice Flee adventurer from beast
+// @param beast_token_id: Id of beast
 @external
 func flee{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
@@ -346,10 +352,13 @@ func emit_beast_state{
 // Getters
 // --------------------
 
+// @notice Get beast data from id
+// @param beast_token_id: The token id for the beast
+// @return beast: The data of the beast
 @view
 func get_beast_by_id{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(token_id: Uint256) -> (beast: Beast) {
+}(beast_token_id: Uint256) -> (beast: Beast) {
     alloc_locals;
 
     let (beast_static_) = beast_static.read(token_id);
@@ -363,7 +372,7 @@ func get_beast_by_id{
     return (beast,);
 }
 
-// @notice Module initializer
+// @notice Get adventurer from beast id
 // @param beast_token_id: The token id for the beast you want the adventurer for
 // @return adventurer_state: The unpacked adventurer state associated with the beast token id
 @view
