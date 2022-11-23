@@ -14,7 +14,7 @@ from contracts.loot.constants.item import (
     ItemSlot
 )
 from contracts.loot.constants.rankings import ItemRank
-from tests.protostar.loot.setup.interfaces import ILoot, IRealms, IAdventurer, IBeast
+from tests.protostar.loot.setup.interfaces import ILoot, IRealms, IAdventurer, IBeast, ILords
 from tests.protostar.loot.setup.setup import Contracts, deploy_all
 from tests.protostar.loot.test_structs import (
     TestAdventurerState,
@@ -42,6 +42,9 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         stop_prank_lords = start_prank(ids.addresses.account_1, ids.addresses.lords)
         stop_prank_loot = start_prank(ids.addresses.account_1, ids.addresses.loot)
     %}
+
+    ILords.approve(addresses.lords, addresses.adventurer, Uint256(10000, 0));
+
     let weapon_id: Item = Item(
         ItemIds.Wand,
         ItemSlot.Wand, 
@@ -51,7 +54,7 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         1, 
         1, 
         1, 
-        0, 
+        10, 
         0, 
         0, 
         0,
@@ -60,6 +63,11 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     ILoot.mint(addresses.loot, addresses.account_1);
     ILoot.setItemById(addresses.loot, Uint256(1,0), weapon_id);
     IRealms.set_realm_data(addresses.realms, Uint256(13, 0), 'Test Realm', 1);
+
+    %{
+        stop_prank_lords()
+    %}
+
     IAdventurer.mint(addresses.adventurer, addresses.account_1, 4, 10, 'Test', 8);
     %{
         stop_prank_loot()
@@ -68,7 +76,6 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     %{
         stop_prank_realms()
         stop_prank_adventurer()
-        stop_prank_lords()
     %}
     return ();
 }
@@ -103,7 +110,7 @@ func test_create{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     assert beast.Prefix_1 = 1;
     assert beast.Prefix_2 = 1;
     assert beast.Adventurer = 1;
-    assert beast.XP = 0;
+    assert beast.XP = 1;
     assert beast.SlainBy = 0;
     assert beast.SlainOnDate = 0;
 
@@ -133,19 +140,31 @@ func test_not_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
     %}
     // discover and create beast
-    IAdventurer.explore(adventurer_address, Uint256(1,0));
+    let adventurer_token_id_1 = Uint256(1,0);
+    let beast_token_id_1 = Uint256(1,0);
+    
+    IAdventurer.explore(adventurer_address, adventurer_token_id_1);
 
     %{ 
         stop_prank_adventurer()
         stop_prank_beast = start_prank(ids.account_1_address, ids.beast_address)
     %}
 
-    IBeast.attack(beast_address, Uint256(1,0));
+    IBeast.attack(beast_address, beast_token_id_1);
+
+    let (local updated_beast) = IBeast.get_beast_by_id(beast_address,beast_token_id_1);
+    let (local updated_adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_token_id_1);
 
     %{
         stop_mock_adventurer_random()
         stop_prank_beast()
     %}
+
+    // As part of attacking the Beast, the adventurer takes 12hp of damage
+    assert updated_beast.Health = 64;
+    assert updated_adventurer.Health = 88;
+
+
 
     return ();
 }
@@ -179,11 +198,11 @@ func test_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     %}
 
     let strong_item: Item = Item(
-        ItemIds.Mace,
-        ItemSlot.Mace, 
-        ItemType.Mace, 
-        ItemMaterial.Mace, 
-        ItemRank.Mace, 
+        ItemIds.Katana,
+        ItemSlot.Katana, 
+        ItemType.Katana, 
+        ItemMaterial.Katana, 
+        ItemRank.Katana, 
         1, 
         1, 
         1, 
@@ -198,15 +217,15 @@ func test_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     IBeast.attack(beast_address, Uint256(1,0));
 
-    let (updated_beast) = IBeast.get_beast_by_id(beast_address, Uint256(1,0));
+    let (local updated_beast) = IBeast.get_beast_by_id(beast_address, Uint256(1,0));
 
     let (local adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
 
-    %{
-        print(ids.adventurer.Health)
-    %}
-
+    // Beast should be dead
     assert updated_beast.Health = 0;
+
+    // Since it was a one-hit kill, adventurer didn't take damage
+    assert adventurer.Health = 100;
 
     %{
         stop_mock_adventurer_random()

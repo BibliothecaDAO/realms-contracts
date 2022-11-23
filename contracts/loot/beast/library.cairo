@@ -35,7 +35,7 @@ namespace BeastLib {
         let (Prefix_1) = ItemStats.item_name_prefix(1);
         let (Prefix_2) = ItemStats.item_name_suffix(1);
         let Adventurer = adventurer_id;
-        let XP = 0;
+        let XP = 1;
         let SlainBy = 0;
         let SlainOnDate = 0;
 

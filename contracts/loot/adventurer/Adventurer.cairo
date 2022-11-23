@@ -14,7 +14,7 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_add
 from starkware.cairo.common.math import unsigned_div_rem, assert_not_equal, assert_not_zero
-from starkware.cairo.common.math_cmp import is_le
+from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.starknet.common.syscalls import (
     get_caller_address,
     get_contract_address,
@@ -147,11 +147,11 @@ func mint{
 
     // send to Nexus
     let (treasury) = Module.get_external_contract_address(ExternalContractIds.Treasury);
-    // IERC20.transferFrom(lords_address, caller, treasury, Uint256(50 * 10 ** 18, 0));
+    IERC20.transferFrom(lords_address, caller, treasury, Uint256(50, 0));
     // send to this contract and set Balance of Adventurer
     let (this) = get_contract_address();
-    // IERC20.transferFrom(lords_address, caller, this, Uint256(50 * 10 ** 18, 0));
-    adventurer_balance.write(next_adventurer_id, Uint256(50 * 10 ** 18, 0));
+    IERC20.transferFrom(lords_address, caller, this, Uint256(50, 0));
+    adventurer_balance.write(next_adventurer_id, Uint256(50, 0));
 
     return ();
 }
@@ -299,21 +299,43 @@ func update_status{
 @external
 func deduct_health{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(tokenId: Uint256, amount: felt) -> (success: felt) {
+}(adventurer_token_id: Uint256, amount: felt) -> (success: felt) {
     alloc_locals;
 
     Module.only_approved();
 
     // unpack adventurer
-    let (unpacked_adventurer) = get_adventurer_by_id(tokenId);
+    let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
 
     // deduct health
     let (new_adventurer) = AdventurerLib.deduct_health(amount, unpacked_adventurer);
 
-    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
-    adventurer.write(tokenId, packed_new_adventurer);
+    // if the adventurer is dead
+    if (new_adventurer.Health == 0) {
+        // transfer all their LORDS to the beast address
+        let (lords_address) = Module.get_external_contract_address(ExternalContractIds.Lords);
+        let (beast_address) = Module.get_module_address(ModuleIds.Beast);
+        let (adventurer_balance_) = adventurer_balance.read(adventurer_token_id);
+        IERC20.transfer(lords_address, beast_address, adventurer_balance_);
+        adventurer_balance.write(adventurer_token_id, Uint256(0,0));
 
-    emit_adventurer_state(tokenId);
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+
+        //TODO MILESTONE2: Figure out how to assign the LORDS tokens to the beast that killed the adventurer
+    } else {
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+    }
+ 
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
+    adventurer.write(adventurer_token_id, packed_new_adventurer);
+
+    emit_adventurer_state(adventurer_token_id);
 
     return (TRUE,);
 }

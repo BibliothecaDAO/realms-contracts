@@ -176,9 +176,9 @@ func test_calculate_damage_to_beast{syscall_ptr: felt*, pedersen_ptr: HashBuilti
     alloc_locals;
     let (beast) = TestUtils.create_beast(4, 0);
 
-    // let (local weapon) = TestUtils.create_item(75, 1); // Mace
+    let (local weapon) = TestUtils.create_item(75, 1); // Mace
 
-    let (weapon) = TestUtils.create_zero_item(); // no weapon (melee attack)
+    // let (weapon) = TestUtils.create_zero_item(); // no weapon (melee attack)
 
     %{
         print('Weapon Type:', ids.weapon.Type) # bludgeon
