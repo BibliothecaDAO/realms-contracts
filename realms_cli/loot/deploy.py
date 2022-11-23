@@ -33,6 +33,13 @@ MODULE_CONTRACT_IMPLEMENTATIONS = [
     ModuleContracts(module_path + "beast/Beast", "Beast", ModuleId.Beast),
 ]
 
+TOKEN_CONTRACT_IMPLEMENTATIONS = [
+    ModuleContracts(token_path +
+                    "Lords_ERC20_Mintable", "Lords_ERC20_Mintable", ExternalContractIds.Lords_ERC20_Mintable),
+    ModuleContracts(token_path +
+                    "Realms_ERC721_Mintable", "Realms_ERC721_Mintable", ExternalContractIds.Realms_ERC721_Mintable),
+]
+
 # Lords
 LORDS = str_to_felt("Lords")
 LORDS_SYMBOL = str_to_felt("LORDS")
@@ -67,6 +74,19 @@ def run(nre):
             arguments=[class_hash],
         )
 
+    logged_deploy(
+        nre,
+        "xoroshiro128_starstar",
+        alias="xoroshiro128_starstar",
+        arguments=[
+            '0x10AF',
+        ],
+    )
+
+    # wait 120s - this will reduce on mainnet
+    print('🕒 Waiting for deploy before invoking')
+    time.sleep(120)
+
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
@@ -74,9 +94,6 @@ def run(nre):
         function="initializer",
         arguments=[config.ADMIN_ADDRESS],
     )
-
-    # wait 120s - this will reduce on mainnet
-    print('🕒 Waiting for deploy before invoking')
 
     module, _ = safe_load_deployment("proxy_Arbiter", nre.network)
 
@@ -86,15 +103,6 @@ def run(nre):
         contract_alias="proxy_ModuleController",
         function="initializer",
         arguments=[module, config.ADMIN_ADDRESS],
-    )
-
-    logged_deploy(
-        nre,
-        "xoroshiro128_starstar",
-        alias="xoroshiro128_starstar",
-        arguments=[
-            '0x10AF',
-        ],
     )
 
     module, _ = safe_load_deployment("xoroshiro128_starstar", nre.network)
@@ -109,12 +117,18 @@ def run(nre):
 
     #---------------- MODULE IMPLEMENTATIONS  ----------------#
     for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
+        class_hash = wrapped_declare(
+            config.ADMIN_ALIAS, contract.contract_name, nre.network, contract.alias)
+
         logged_deploy(
             nre,
-            contract.contract_name,
-            alias=contract.alias,
-            arguments=[],
+            'PROXY_Logic',
+            alias='proxy_' + contract.alias,
+            arguments=[class_hash],
         )
+
+    # #---------------- TOKEN IMPLEMENTATIONS  ----------------#
+    for contract in TOKEN_CONTRACT_IMPLEMENTATIONS:
         class_hash = wrapped_declare(
             config.ADMIN_ALIAS, contract.contract_name, nre.network, contract.alias)
 
