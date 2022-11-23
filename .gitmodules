@@ -4,9 +4,9 @@
 [submodule "guild_contracts"]
 	url = https://github.com/Guildly/contracts
 	path = lib/guild_contracts
-[submodule "cairo_contracts"]
-	url = https://github.com/OpenZeppelin/cairo-contracts
-	path = lib/cairo_contracts
 [submodule "cairo_graphs"]
 	url = https://github.com/msaug/cairo-graphs
 	path = lib/cairo_graphs
+[submodule "cairo_contracts"]
+	path = lib/cairo_contracts
+	url = https://github.com/OpenZeppelin/cairo-contracts
