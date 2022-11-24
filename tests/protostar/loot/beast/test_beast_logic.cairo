@@ -154,18 +154,20 @@ func test_not_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
 
     IBeast.attack(beast_address, beast_token_id_1);
 
-    let (local updated_beast) = IBeast.get_beast_by_id(beast_address,beast_token_id_1);
-    let (local updated_adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_token_id_1);
+    let (updated_beast) = IBeast.get_beast_by_id(beast_address,beast_token_id_1);
+    let (updated_adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_token_id_1);
 
     %{
         stop_mock_adventurer_random()
         stop_prank_beast()
     %}
 
-    // adventurer did 40hp to the beast
-    assert updated_beast.Health = 60;
+    // adventurer did 36hp to the beast
+    assert updated_beast.Health = 64;
     // adventurer took 12 damage from the beasts counter attack
     assert updated_adventurer.Health = 88;
+
+    // TODO LH: verify neither beast nor adventurer gained xp
 
     return ();
 }
