@@ -6,7 +6,7 @@ from nile.core.account import Account
 
 from realms_cli.caller_invoker import call_multi, wrapped_call, wrapped_send
 from realms_cli.config import Config
-from realms_cli.utils import parse_multi_input
+from realms_cli.utils import parse_multi_input, str_to_felt
 from realms_cli.binary_converter import map_realm
 
 
@@ -117,15 +117,16 @@ def set_realm_data(realm_token_id, network):
     wonders = json.load(open("data/wonders.json", ))
 
     realm_token_ids = parse_multi_input(realm_token_id)
+    realm_name = str_to_felt(realms[str(realm_token_id)]['name'])
     calldata = [
-        [id, 0, map_realm(realms[str(id)], resources, wonders, orders)]
+        [id, 0, realm_name, map_realm(realms[str(id)], resources, wonders, orders)]
         for id in realm_token_ids
     ]
 
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_realms",
+        contract_alias="proxy_Realms_ERC721_Mintable",
         function="set_realm_data",
         arguments=calldata,
     )

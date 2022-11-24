@@ -7,12 +7,13 @@ import time
 from enum import IntEnum
 
 class ExternalContractIds(IntEnum):
-    Lords_ERC20_Mintable = 1
-    Realms_ERC721_Mintable = 2
+    Realms_ERC721_Mintable = 1
+    Lords_ERC20_Mintable = 2
+    Treasury = 3
 
 class ModuleId(IntEnum):
-    Loot = 1
-    Adventurer = 2
+    Adventurer = 1
+    Loot = 2
     Beast = 3
 
 Contracts = namedtuple('Contracts', 'contract_name alias')
@@ -28,16 +29,16 @@ token_path = 'settling_game/tokens/'
 
 # token tuples
 MODULE_CONTRACT_IMPLEMENTATIONS = [
-    ModuleContracts(module_path + "loot/Loot", "Loot", ModuleId.Loot),
     ModuleContracts(module_path + "adventurer/Adventurer", "Adventurer", ModuleId.Adventurer),
+    ModuleContracts(module_path + "loot/Loot", "Loot", ModuleId.Loot),
     ModuleContracts(module_path + "beast/Beast", "Beast", ModuleId.Beast),
 ]
 
 TOKEN_CONTRACT_IMPLEMENTATIONS = [
     ModuleContracts(token_path +
-                    "Lords_ERC20_Mintable", "Lords_ERC20_Mintable", ExternalContractIds.Lords_ERC20_Mintable),
-    ModuleContracts(token_path +
                     "Realms_ERC721_Mintable", "Realms_ERC721_Mintable", ExternalContractIds.Realms_ERC721_Mintable),
+    ModuleContracts(token_path +
+                    "Lords_ERC20_Mintable", "Lords_ERC20_Mintable", ExternalContractIds.Lords_ERC20_Mintable),
 ]
 
 # Lords
@@ -273,7 +274,8 @@ def run(nre):
         contract_alias="proxy_Arbiter",
         function="set_external_contract_address",
         arguments=[
-            [lords_deployment, ExternalContractIds.Lords_ERC20_Mintable.value], 
-            [realms_deployment, ExternalContractIds.Realms_ERC721_Mintable.value]
+            [realms_deployment, ExternalContractIds.Realms_ERC721_Mintable.value],
+            [lords_deployment, ExternalContractIds.Lords_ERC20_Mintable.value],
+            [config.ADMIN_ADDRESS ,ExternalContractIds.Treasury.value]
         ]
     )

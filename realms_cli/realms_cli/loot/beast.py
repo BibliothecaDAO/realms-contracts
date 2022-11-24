@@ -1,7 +1,7 @@
 import click
 from realms_cli.caller_invoker import wrapped_call, wrapped_send
 from realms_cli.config import Config
-from realms_cli.utils import print_over_colums,  uint, felt_to_str, str_to_felt
+from realms_cli.utils import print_over_colums, uint, felt_to_str, str_to_felt
 
 @click.command()
 @click.argument("beast_token_id", nargs=1)
@@ -38,10 +38,10 @@ def get_beast(beast_token_id, network):
 
 
 @click.command()
-@click.option("--network", default="goerli")
 @click.option('--beast', is_flag=False,
               metavar='<columns>', type=click.STRING, help='beast id', prompt=True)
-def attack_beast(network, beast_token_id):
+@click.option("--network", default="goerli")
+def attack_beast(beast, network):
     """
     Attack beast
     """
@@ -52,14 +52,14 @@ def attack_beast(network, beast_token_id):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Beast",
         function="attack",
-        arguments=[int(config.USER_ADDRESS, 16), beast_token_id]
+        arguments=[config.USER_ADDRESS, *uint(beast)]
     )
 
 @click.command()
-@click.option("--network", default="goerli")
 @click.option('--beast', is_flag=False,
               metavar='<columns>', type=click.STRING, help='beast id', prompt=True)
-def flee_from_beast(network, beast_token_id):
+@click.option("--network", default="goerli")
+def flee_from_beast(beast_token_id, network):
     """
     Flee from beast
     """

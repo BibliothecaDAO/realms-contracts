@@ -25,8 +25,7 @@ def mint_adventurer(network, race, home_realm, name, order):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Adventurer",
         function="mint",
-        arguments=[int(config.USER_ADDRESS, 16), race,
-                   home_realm, str_to_felt(name), order]
+        arguments=[config.USER_ADDRESS, int(race), int(home_realm), str_to_felt(name), int(order)]
     )
 
 
@@ -45,23 +44,24 @@ def get_adventurer(adventurer_token_id, network):
         function="get_adventurer_by_id",
         arguments=[*uint(adventurer_token_id)],
     )
-    out = out.split(" ")
+    print(out)
+    # out = out.split(" ")
 
-    pretty_out = []
-    for i, key in enumerate(config.ADVENTURER):
+    # pretty_out = []
+    # for i, key in enumerate(config.ADVENTURER):
 
-        # Output names for item name prefix1, prefix2, and suffix
-        if i in [3]:
-            pretty_out.append(
-                f"{key} : {felt_to_str(int(out[i]))}")
-        else:
-            pretty_out.append(
-                f"{key} : {int(out[i])}")
-    print("_____________________________________________________")
-    print("_____________________*+ " +
-          felt_to_str(int(out[3])) + " +*______________________")
-    print("_____________________________________________________")
-    print_over_colums(pretty_out)
+    #     # Output names for item name prefix1, prefix2, and suffix
+    #     if i in [3]:
+    #         pretty_out.append(
+    #             f"{key} : {felt_to_str(int(out[i]))}")
+    #     else:
+    #         pretty_out.append(
+    #             f"{key} : {int(out[i])}")
+    # print("_____________________________________________________")
+    # print("_____________________*+ " +
+    #       felt_to_str(int(out[3])) + " +*______________________")
+    # print("_____________________________________________________")
+    # print_over_colums(pretty_out)
 
 
 @click.command()
@@ -121,4 +121,3 @@ def explore(network, adventurer):
         function="explore",
         arguments=[*uint(adventurer)]
     )
-

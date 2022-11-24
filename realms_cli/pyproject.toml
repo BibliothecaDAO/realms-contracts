@@ -51,6 +51,8 @@ cairo-nile = "^0.5.0"
 
 #-----------LORDS
 "check_lords" = "realms_cli.player.lords.check_lords"
+"approve_lords" = "realms_cli.player.lords.approve_lords"
+"mint_lords" = "realms_cli.player.lords.mint_lords"
 
 #-----------SETTLING
 "approve_realm" = "realms_cli.player.settle.approve_realm"
@@ -161,9 +163,9 @@ cairo-nile = "^0.5.0"
 
 
 #-----------LOOT
-"mint_loot"  =  "realms_cli.loot.loot.mint_loot"
-"get_loot"  =  "realms_cli.loot.loot.get_loot"
-
+"mint_loot" = "realms_cli.loot.loot.mint_loot"
+"get_loot" = "realms_cli.loot.loot.get_loot"
+"set_loot" = "realms_cli.loot.loot.set_loot"
 
 #-----------ADVENTURER
 "mint_adventurer"  =  "realms_cli.loot.adventurer.mint_adventurer"

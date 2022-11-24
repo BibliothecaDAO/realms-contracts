@@ -17,7 +17,7 @@ def mint_loot(network):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Loot",
         function="mint",
-        arguments=[int(config.USER_ADDRESS, 16)]
+        arguments=[config.USER_ADDRESS]
     )
 
 
@@ -34,6 +34,56 @@ def get_loot(loot_token_id, network):
         network=config.nile_network,
         contract_alias="proxy_Loot",
         function="getItemByTokenId",
+        arguments=[*uint(loot_token_id)],
+    )
+    out = out.split(" ")
+    pretty_out = []
+    for i, key in enumerate(config.LOOT):
+
+        # Output names for item name prefix1, prefix2, and suffix
+        if i in [5, 6, 7]:
+            pretty_out.append(
+                f"{key} : {felt_to_str(int(out[i]))}")
+        else:
+            pretty_out.append(
+                f"{key} : {int(out[i])}")
+
+    print("_________ LOOT ITEM - " + str(out[0]) + "___________")
+    print_over_colums(pretty_out)
+
+@click.command()
+@click.argument("loot_token_id", nargs=1)
+@click.option("--network", default="goerli")
+@click.option('--item', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='item id', prompt=True)
+@click.option('--slot', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='slot id', prompt=True)
+@click.option('--type', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='type id', prompt=True)
+@click.option('--material', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='material id', prompt=True)
+@click.option('--rank', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='rank id', prompt=True)
+@click.option('--prefix', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='prefix id', prompt=True)
+@click.option('--greatness', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='greatness', prompt=True)
+@click.option('--xp', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='xp', prompt=True)
+@click.option('--adventurer', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='adventurer', prompt=True)
+@click.option('--bag', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='bag', prompt=True)
+def set_loot(loot_token_id, network):
+    """
+    Set Loot Item metadata
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias="proxy_Loot",
+        function="setItemById",
         arguments=[*uint(loot_token_id)],
     )
     out = out.split(" ")
