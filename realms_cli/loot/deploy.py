@@ -50,7 +50,7 @@ REALMS = str_to_felt("Realms")
 REALMS_SYMBOL = str_to_felt("REALMS")
 
 # Adventurer
-ADVENTURER = str_to_felt("ADVENTURER")
+ADVENTURER = str_to_felt("Adventurer")
 ADVENTURER_SYMBOL = str_to_felt("ADVENTURER")
 
 # Loot
@@ -61,59 +61,71 @@ def run(nre):
 
     config = Config(nre.network)
 
-    #---------------- CONTROLLERS  ----------------#
-    for contract in CONTROLLER_CONTRACT_IMPLEMENTATIONS:
+    # #---------------- CONTROLLERS  ----------------#
+    # for contract in CONTROLLER_CONTRACT_IMPLEMENTATIONS:
 
-        class_hash = wrapped_declare(
-            config.ADMIN_ALIAS, contract.contract_name, nre.network, contract.alias)
+    #     class_hash = wrapped_declare(
+    #         config.ADMIN_ALIAS, contract.contract_name, nre.network, contract.alias)
 
-        logged_deploy(
-            nre,
-            'PROXY_Logic',
-            alias='proxy_' + contract.alias,
-            arguments=[class_hash],
-        )
+    #     logged_deploy(
+    #         nre,
+    #         'PROXY_Logic',
+    #         alias='proxy_' + contract.alias,
+    #         arguments=[class_hash],
+    #     )
 
-    logged_deploy(
-        nre,
-        "xoroshiro128_starstar",
-        alias="xoroshiro128_starstar",
-        arguments=[
-            '0x10AF',
-        ],
-    )
+    # logged_deploy(
+    #     nre,
+    #     "xoroshiro128_starstar",
+    #     alias="xoroshiro128_starstar",
+    #     arguments=[
+    #         '0x10AF',
+    #     ],
+    # )
 
-    # wait 120s - this will reduce on mainnet
-    print('🕒 Waiting for deploy before invoking')
-    time.sleep(120)
+    # # wait 120s - this will reduce on mainnet
+    # print('🕒 Waiting for deploy before invoking')
+    # time.sleep(300)
 
-    wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_Arbiter",
-        function="initializer",
-        arguments=[config.ADMIN_ADDRESS],
-    )
+    # wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="proxy_Arbiter",
+    #     function="initializer",
+    #     arguments=[config.ADMIN_ADDRESS],
+    # )
 
-    module, _ = safe_load_deployment("proxy_Arbiter", nre.network)
+    # module, _ = safe_load_deployment("proxy_Arbiter", nre.network)
 
-    wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_ModuleController",
-        function="initializer",
-        arguments=[module, config.ADMIN_ADDRESS],
-    )
+    # wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="proxy_ModuleController",
+    #     function="initializer",
+    #     arguments=[module, config.ADMIN_ADDRESS],
+    # )
 
-    module, _ = safe_load_deployment("xoroshiro128_starstar", nre.network)
+    # module, _ = safe_load_deployment("proxy_ModuleController", nre.network)
 
-    wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_ModuleController",
-        function="set_xoroshiro",
-        arguments=[module],
-    )
+    # wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="proxy_Arbiter",
+    #     function="set_address_of_controller",
+    #     arguments=[
+    #         module,
+    #     ]
+    # )
+
+    # xoroshiro, _ = safe_load_deployment("xoroshiro128_starstar", nre.network)
+
+    # wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="proxy_Arbiter",
+    #     function="set_xoroshiro",
+    #     arguments=[xoroshiro],
+    # )
 
     #---------------- MODULE IMPLEMENTATIONS  ----------------#
     for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
@@ -141,7 +153,7 @@ def run(nre):
 
     # # wait 120s - this will reduce on mainnet
     print('🕒 Waiting for deploy before invoking')
-    time.sleep(120)
+    time.sleep(300)
 
     #---------------- INIT MODULES  ----------------#
     wrapped_send(
@@ -152,8 +164,8 @@ def run(nre):
         arguments=[
             LOOT,
             LOOT_SYMBOL,
-            config.CONTROLLER_ADDRESS, 
-            config.ADMIN_ADDRESS
+            config.CONTROLLER_PROXY_ADDRESS,
+            config.ADMIN_ADDRESS,
         ],
     )
 
@@ -165,8 +177,8 @@ def run(nre):
         arguments=[
             ADVENTURER,
             ADVENTURER_SYMBOL,
-            config.CONTROLLER_ADDRESS, 
-            config.ADMIN_ADDRESS
+            config.CONTROLLER_PROXY_ADDRESS,
+            config.ADMIN_ADDRESS,
         ],
     )
 
@@ -176,8 +188,8 @@ def run(nre):
         contract_alias="proxy_Beast",
         function="initializer",
         arguments=[
-            config.CONTROLLER_ADDRESS, 
-            config.ADMIN_ADDRESS
+            config.CONTROLLER_PROXY_ADDRESS,
+            config.ADMIN_ADDRESS,
         ],
     )
 
@@ -192,8 +204,8 @@ def run(nre):
             LORDS,
             LORDS_SYMBOL,
             DECIMALS,
-            str(config.INITIAL_LORDS_SUPPLY),
-            "0",
+            config.INITIAL_LORDS_SUPPLY,
+            0,
             config.ADMIN_ADDRESS,
             config.ADMIN_ADDRESS
         ],
