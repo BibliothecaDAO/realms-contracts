@@ -181,7 +181,7 @@ func test_calculate_damage_to_beast{syscall_ptr: felt*, pedersen_ptr: HashBuilti
     alloc_locals;
 
     let (greatness_8_mace) = TestUtils.create_item(75, 8); // Greatness 8 Mace (Bludgeon) vs
-    let (xp_1_basilisk) = TestUtils.create_beast(4, 1); // 1XP Basilisk (Magic)
+    let (xp_1_basilisk) = TestUtils.create_beast(4, 1); // Level 1 Basilisk (Magic)
 
     // attack = 8 * (6-4) * 1 = 16
     // defense = 1 * (6-4) = 2

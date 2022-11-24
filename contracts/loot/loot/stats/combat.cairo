@@ -216,7 +216,7 @@ namespace CombatStats {
         }
 
         let (damage_dealt) = calculate_damage(
-            weapon_type, weapon.Rank, weapon_greatness, armor_type, beast.Level, beast.XP
+            weapon_type, weapon.Rank, weapon_greatness, armor_type, beast.Rank, beast.Level
         );
 
         // return damage
