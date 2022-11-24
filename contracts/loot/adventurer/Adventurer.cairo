@@ -596,22 +596,11 @@ func isApprovedForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 }
 
 @view
-func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, bitwise_ptr: BitwiseBuiltin*, range_check_ptr}(
-    tokenId: Uint256
-) -> (tokenURI_len: felt, tokenURI: felt*) {
-    alloc_locals;
-    let (controller) = Module.controller_address();
-    let (item_address_) = item_address.read();
-    let (
-        adventurer_static: AdventurerStatic, 
-        adventurer_dynamic: AdventurerDynamic
-    ) = getAdventurerById(tokenId);
-    let (adventurer_data: AdventurerState) = AdventurerLib.cast_state(
-        adventurer_static, 
-        adventurer_dynamic
-    );
-    let (tokenURI_len, tokenURI: felt*) = Uri.build(tokenId, adventurer_data, controller, item_address_);
-    return (tokenURI_len, tokenURI);
+func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    adventurer_token_id: Uint256
+) -> (tokenURI: felt) {
+    let (tokenURI: felt) = ERC721.token_uri(adventurer_token_id);
+    return (tokenURI,);
 }
 
 @view
@@ -646,6 +635,15 @@ func burn{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
 ) {
     ERC721.assert_only_token_owner(adventurer_token_id);
     ERC721Enumerable._burn(adventurer_token_id);
+    return ();
+}
+
+@external
+func setTokenURI{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    adventurer_token_id: Uint256, tokenURI: felt
+) {
+    Ownable.assert_only_owner();
+    ERC721._set_token_uri(adventurer_token_id, tokenURI);
     return ();
 }
 

@@ -13,8 +13,6 @@ from openzeppelin.token.erc721.library import ERC721
 from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
 from openzeppelin.upgrades.library import Proxy
 
-from contracts.settling_game.library.library_module import Module
-from contracts.settling_game.utils.game_structs import ExternalContractIds
 from contracts.loot.constants.item import Item
 from contracts.loot.interfaces.imodules import IModuleController
 from contracts.loot.loot.library import ItemLib
@@ -29,7 +27,6 @@ from starkware.starknet.common.syscalls import (
 )
 
 from contracts.loot.loot.stats.item import ItemStats
-from contracts.loot.loot.metadata import Uri
 
 // -----------------------------------
 // Storage
@@ -151,12 +148,9 @@ func isApprovedForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 @view
 func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256
-) -> (tokenURI_len: felt, tokenURI: felt*) {
-    alloc_locals;
-    let (adventurer_address) = Module.get_external_contract_address(ExternalContractIds.Adventurer);
-    let (item_data: Item) = getItemByTokenId(tokenId);
-    let (tokenURI_len: felt, tokenURI: felt*) = Uri.build(tokenId, item_data, adventurer_address);
-    return (tokenURI_len, tokenURI,);
+) -> (tokenURI: felt) {
+    let (tokenURI: felt) = ERC721.token_uri(tokenId);
+    return (tokenURI,);
 }
 
 @view
@@ -205,6 +199,15 @@ func safeTransferFrom{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
 func burn{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(tokenId: Uint256) {
     ERC721.assert_only_token_owner(tokenId);
     ERC721Enumerable._burn(tokenId);
+    return ();
+}
+
+@external
+func setTokenURI{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    tokenId: Uint256, tokenURI: felt
+) {
+    Ownable.assert_only_owner();
+    ERC721._set_token_uri(tokenId, tokenURI);
     return ();
 }
 

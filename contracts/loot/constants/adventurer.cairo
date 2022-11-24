@@ -158,18 +158,12 @@ struct PackedAdventurerState {
 
 namespace SHIFT_P_1 {
     const _1 = 2 ** 0;
-    const _2 = 2 ** 13;
-    const _3 = 2 ** 22;
-    const _4 = 2 ** 32;
-    const _5 = 2 ** 42;
-    const _6 = 2 ** 52;
-    const _7 = 2 ** 62;
-    const _8 = 2 ** 72;
-    const _9 = 2 ** 82;
-    const _10 = 2 ** 92;
+    const _2 = 2 ** 3;
+    const _3 = 2 ** 16;
+    const _4 = 2 ** 65;
 }
 
-namespace SHIFT_P_5 {
+namespace SHIFT_P_2 {
     const _1 = 2 ** 0;
     const _2 = 2 ** 13;
     const _3 = 2 ** 22;
@@ -183,6 +177,11 @@ namespace SHIFT_P_5 {
     const _11 = 2 ** 97;
     const _12 = 2 ** 107;
     const _13 = 2 ** 117;
+}
+
+namespace SHIFT_P_5 {
+    const _1 = 2 ** 0;
+    const _2 = 2 ** 3;
 }
 
 

@@ -58,7 +58,7 @@ namespace TestAdventurerState {
 }
 
 func get_adventurer_state{syscall_ptr: felt*, range_check_ptr}() -> (
-    adventurer_static: AdventurerStatic, adventurer_dynamic: AdventurerDynamic
+    adventurer_state: AdventurerState
 ) {
     alloc_locals;
 
