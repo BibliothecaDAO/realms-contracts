@@ -43,6 +43,7 @@ from contracts.settling_game.utils.game_structs import (
     HarvestType,
     RealmBuildingsIds,
     FoodBuildings,
+    StoreHouse,
 )
 
 from contracts.settling_game.modules.food.library import Food
@@ -81,6 +82,10 @@ func fishing_villages(token_id: Uint256) -> (fishing_villages: felt) {
 // -------STORE HOUSE-------#
 @storage_var
 func store_house(token_id: Uint256) -> (available_food: felt) {
+}
+
+@storage_var
+func temp_store_house_clear(token_id: Uint256) -> (has_upgraded: felt) {
 }
 
 // -----------------------------------
@@ -239,37 +244,27 @@ func harvest{
     assert data[0] = 0;
 
     // mint food
-    if (harvest_type == HarvestType.Export) {
-        if (food_building_id == RealmBuildingsIds.Farm) {
-            // wheat
-            IERC1155.mint(
-                resources_address,
-                owner,
-                Uint256(ResourceIds.wheat, 0),
-                Uint256(total_food * 10 ** 18, 0),
-                1,
-                data,
-            );
-        } else {
-            // fish
-            IERC1155.mint(
-                resources_address,
-                owner,
-                Uint256(ResourceIds.fish, 0),
-                Uint256(total_food * 10 ** 18, 0),
-                1,
-                data,
-            );
-        }
-        tempvar syscall_ptr = syscall_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar pedersen_ptr = pedersen_ptr;
+
+    if (food_building_id == RealmBuildingsIds.Farm) {
+        // wheat
+        IERC1155.mint(
+            resources_address,
+            owner,
+            Uint256(ResourceIds.wheat, 0),
+            Uint256(total_food * 10 ** 18, 0),
+            1,
+            data,
+        );
     } else {
-        // turn directly into useable food
-        convert_to_store(token_id, total_food);
-        tempvar syscall_ptr = syscall_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar pedersen_ptr = pedersen_ptr;
+        // fish
+        IERC1155.mint(
+            resources_address,
+            owner,
+            Uint256(ResourceIds.fish, 0),
+            Uint256(total_food * 10 ** 18, 0),
+            1,
+            data,
+        );
     }
 
     return ();
@@ -280,9 +275,9 @@ func harvest{
 // @param quantity: quantity of food to store
 // @param resource_id: id of food to be stored (FISH or WHEAT)
 @external
-func convert_food_tokens_to_store{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    token_id: Uint256, quantity: felt, resource_id: felt
-) {
+func convert_food_tokens_to_store{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(token_id: Uint256, quantity: felt, resource_id: felt) {
     alloc_locals;
     let (caller) = get_caller_address();
 
@@ -369,15 +364,32 @@ func update{
 // @notice Converts harvest directly into food store
 // @param token_id: Staked Realm id (S_Realm)
 // @param quantity: quantity of food to store
-func convert_to_store{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    token_id: Uint256, quantity: felt
-) {
+func convert_to_store{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(token_id: Uint256, quantity: felt) {
     alloc_locals;
+
+    // TODO: Remove this temp
+    let (has_updated) = temp_store_house_clear.read(token_id);
+
     let (block_timestamp) = get_block_timestamp();
+    let (current_food) = available_food_in_store(token_id);
 
-    let (current) = food_in_store(token_id);
+    if (has_updated == TRUE) {
+        let (packed_store_balance) = Food.pack_store_house(
+            StoreHouse(block_timestamp, quantity + current_food)
+        );
 
-    store_house.write(token_id, current + quantity + block_timestamp);
+        store_house.write(token_id, packed_store_balance);
+
+        return ();
+    }
+
+    let (packed_store_balance) = Food.pack_store_house(StoreHouse(block_timestamp, quantity));
+
+    store_house.write(token_id, packed_store_balance);
+
+    temp_store_house_clear.write(token_id, 1);
 
     return ();
 }
@@ -386,17 +398,16 @@ func convert_to_store{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 // @param token_id: Staked Realm id (S_Realm)
 // @return total_harvest: Total food in storehouse
 @view
-func food_in_store{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    token_id: Uint256
-) -> (available: felt) {
+func food_in_store{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(token_id: Uint256) -> (store_house: StoreHouse) {
     alloc_locals;
-    let (block_timestamp) = get_block_timestamp();
 
-    let (current_food_supply) = store_house.read(token_id);
+    let (packed_store_house) = store_house.read(token_id);
 
-    let (available) = Food.calculate_food_in_store_house(current_food_supply - block_timestamp);
+    let (unpacked_store_house: StoreHouse) = Food.unpack_store_house(packed_store_house);
 
-    return (available,);
+    return (store_house=unpacked_store_house);
 }
 
 // -----------------------------------
@@ -407,22 +418,25 @@ func food_in_store{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
 // @param token_id: Staked Realm id (S_Realm)
 // @return total_harvest: Total food in storehouse
 @view
-func available_food_in_store{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    token_id: Uint256
-) -> (available: felt) {
+func available_food_in_store{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(token_id: Uint256) -> (available: felt) {
     alloc_locals;
+
+    let (block_timestamp) = get_block_timestamp();
 
     let (calculator_address) = Module.get_module_address(ModuleIds.Calculator);
 
-    // get raw amount
-    let (current) = food_in_store(token_id);
+    // get raw amount food amount - this is the raw value that is only used in calculations
+    let (current_store_house: StoreHouse) = food_in_store(token_id);
 
     // get population
     let (population) = ICalculator.calculate_population(calculator_address, token_id);
 
-    // get actual food
-    // TODO: Get Population
-    let (available) = Food.calculate_available_food(current, population);
+    // deducte population from the current food every second
+    let (available) = Food.calculate_available_food(
+        current_store_house, population, block_timestamp
+    );
 
     return (available,);
 }
@@ -574,9 +588,9 @@ func get_full_store_houses{
 // this stops food ever returning to a greater value than what it was
 // @param token_id: Staked Realm id (S_Realm)
 @external
-func update_food_hook{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    token_id: Uint256
-) {
+func update_food_hook{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(token_id: Uint256) {
     alloc_locals;
     Module.only_approved();
 
@@ -584,12 +598,16 @@ func update_food_hook{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 
     let (current_food_supply) = available_food_in_store(token_id);
 
+    let (packed_store_balance) = Food.pack_store_house(
+        StoreHouse(block_timestamp, current_food_supply)
+    );
+
     let is_empty = is_le(current_food_supply, 0);
 
     if (is_empty == TRUE) {
         store_house.write(token_id, 0);
     } else {
-        store_house.write(token_id, current_food_supply + block_timestamp);
+        store_house.write(token_id, packed_store_balance);
     }
 
     return ();

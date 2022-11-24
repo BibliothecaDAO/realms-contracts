@@ -25,6 +25,7 @@ from contracts.settling_game.utils.game_structs import (
     HarvestType,
     FoodBuildings,
     ResourceIds,
+    StoreHouse,
 )
 from contracts.settling_game.utils.general import unpack_data
 
@@ -71,20 +72,29 @@ namespace Food {
     }
 
     // @notice This returns the real value of food available by taking into account the population
-    func calculate_available_food{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-        current_food_supply: felt, population: felt
-    ) -> (available_food: felt) {
+    func calculate_available_food{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr,
+        bitwise_ptr: BitwiseBuiltin*,
+    }(store_house_unpacked: StoreHouse, population: felt, time_stamp: felt) -> (
+        available_food: felt
+    ) {
         alloc_locals;
 
-        let (true_food_supply, _) = unsigned_div_rem(current_food_supply, population + 1);
+        let time_since_construction = time_stamp - store_house_unpacked.time_built;
 
-        let is_empty = is_le(true_food_supply, 0);
+        let consumption = population * time_since_construction;
+
+        let remaining = store_house_unpacked.total_food_stored - consumption;
+
+        let is_empty = is_le(remaining, 0);
 
         if (is_empty == TRUE) {
             return (0,);
         }
 
-        return (true_food_supply,);
+        return (remaining,);
     }
 
     // @notice asserts correct building ids
@@ -212,5 +222,41 @@ namespace Food {
         }
 
         return (total_store_house,);
+    }
+
+    // @notice
+    // @param
+    // @return
+    func pack_store_house{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        store_house_unpacked: StoreHouse
+    ) -> (store_house_packed: felt) {
+        alloc_locals;
+
+        let time_built = store_house_unpacked.time_built * SHIFT_41._1;
+        let total_food_stored = store_house_unpacked.total_food_stored * SHIFT_41._2;
+
+        tempvar packed_value = total_food_stored + time_built;
+
+        return (packed_value,);
+    }
+
+    // @notice
+    // @param
+    // @return
+    func unpack_store_house{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr,
+        bitwise_ptr: BitwiseBuiltin*,
+    }(packed_store_house: felt) -> (store_house_unpacked: StoreHouse) {
+        alloc_locals;
+
+        let (time_built) = unpack_data(packed_store_house, 0, 2199023255551);
+        let (total_food_stored) = unpack_data(packed_store_house, 41, 2199023255551);
+
+        return (store_house_unpacked=StoreHouse(
+            time_built,
+            total_food_stored,
+            ));
     }
 }

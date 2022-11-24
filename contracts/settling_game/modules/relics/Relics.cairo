@@ -90,7 +90,7 @@ func set_relic_holder{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
 ) {
     alloc_locals;
     // Only combat
-    Module.only_approved();
+    // Module.only_approved();
 
     let (current_relic_owner) = get_current_relic_holder(loser_token_id);
 

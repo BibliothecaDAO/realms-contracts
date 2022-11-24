@@ -512,3 +512,8 @@ struct ArmyData {
     level: felt,
     call_sign: felt,
 }
+
+struct StoreHouse {
+    time_built: felt,
+    total_food_stored: felt,
+}
