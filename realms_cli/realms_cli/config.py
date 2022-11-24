@@ -278,7 +278,7 @@ class Config:
             "Health",
             "Adventurer",
             "XP",
-            "SlainBy",
+            "Level",
             "SlainOnDate",
         ]
 

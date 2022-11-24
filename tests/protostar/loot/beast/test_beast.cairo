@@ -12,6 +12,7 @@ from contracts.loot.constants.beast import (
     BeastRank, 
     BeastAttackType,
     BeastArmorType,
+    BeastSlotIds,
 )
 from contracts.loot.loot.stats.combat import CombatStats
 from tests.protostar.loot.test_structs import (
@@ -95,7 +96,7 @@ func test_pack{
     assert unpacked_beast.Health = 100;
     assert unpacked_beast.Adventurer = 0;
     assert unpacked_beast.XP = 0;
-    assert unpacked_beast.SlainBy = 1;
+    assert unpacked_beast.Level = 1;
     assert unpacked_beast.SlainOnDate = 1000;
 
     return ();
@@ -111,9 +112,9 @@ func test_cast{
 
     let (_, beast_dynamic: BeastDynamic) = BeastLib.split_data(beast);
 
-    let (c) = BeastLib.cast_state(1, 50, beast_dynamic);
+    let (c) = BeastLib.cast_state(BeastSlotIds.Health, 50, beast_dynamic);
 
-    %{ print('Health:', ids.c.Health) %}
+    assert c.Health = 50;
 
     return ();
 }
@@ -163,75 +164,59 @@ func test_slain{
 
     let (_, beast_dynamic: BeastDynamic) = BeastLib.split_data(beast);
 
-    let (c) = BeastLib.slay(1, 1000, beast_dynamic);
+    let (c) = BeastLib.slay(1000, beast_dynamic);
 
-    assert c.SlainBy = 1;
     assert c.SlainOnDate = 1000;
     
     return ();
 }
 
+// @notice Tests damage to beast calculation
+// Damage Calculation is:
+// Attack = Greatness * (6 - item_rank) * attack_effectiveness
+// Armor = Greatness * (6 - item_rank)
+// Damage Given = Attack - Armor (can't be negative)
 @external
 func test_calculate_damage_to_beast{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
-    let (beast) = TestUtils.create_beast(4, 0);
 
-    let (local weapon) = TestUtils.create_item(75, 1); // Mace
+    let (greatness_8_mace) = TestUtils.create_item(75, 8); // Greatness 8 Mace (Bludgeon) vs
+    let (xp_1_basilisk) = TestUtils.create_beast(4, 1); // 1XP Basilisk (Magic)
 
-    // let (weapon) = TestUtils.create_zero_item(); // no weapon (melee attack)
+    // attack = 8 * (6-4) * 1 = 16
+    // defense = 1 * (6-4) = 2
+    // 16 - 2 = 14HP damage
+    let (mace_vs_basilik) = CombatStats.calculate_damage_to_beast(xp_1_basilisk, greatness_8_mace);
+    assert mace_vs_basilik = 14;
 
-    %{
-        print('Weapon Type:', ids.weapon.Type) # bludgeon
-        print('Weapon Rank:', ids.weapon.Rank) # 4
-        print('Weapon Greatness:', ids.weapon.Greatness) # 1
-        print('Beast Attack Type:', ids.beast.AttackType) # magic
-        print('Beast Armor Type:', ids.beast.ArmorType) # cloth
-        print('Beast Rank:', ids.beast.Rank) # 1
-        print('Beast XP:', ids.beast.XP) # 0
-    %}
-
-    let (local damage) = CombatStats.calculate_damage_to_beast(beast, weapon);
-
-    // assert damage = 2;
-
-    %{
-        print('Damage To Beast:', ids.damage)
-    %}
+    // TODO: Test attacking without weapon (melee)
+     // let (weapon) = TestUtils.create_zero_item(); // no weapon (melee attack)
 
     return ();
     
 }
 
+// @notice Tests damage from beast calculation
+// Damage Calculation is:
+// Attack = Greatness * (6 - item_rank) * attack_effectiveness
+// Armor = Greatness * (6 - item_rank)
+// Damage Taken = Attack - Armor (can't be negative)
 @external
 func test_calculate_damage_from_beast{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
-    let (beast) = TestUtils.create_beast(1, 2); // Creates a Pheonix
 
-    let (armor) = TestUtils.create_item(50, 1); // Hard Leather Armor
+    let (beast) = TestUtils.create_beast(1, 2); // 2XP Pheonix vs
+    let (armor) = TestUtils.create_item(50, 1); // Greatness 1 Hard Leather Armor
+    
+    
+    // beast_attack = 2 * (6-1) * 1 = 10
+    // armor_defense = 1 * (6-4) = 2
+    // 10 attack - 2 defense = 8hp damage
+    let (local damage) = CombatStats.calculate_damage_from_beast(beast, armor);
+    assert damage = 8;
 
+    // TODO: Test defending without armor
     // let (armor) = TestUtils.create_zero_item();
 
-    %{
-        print('Armor Type:', ids.armor.Type) # hide
-        print('Armor Rank:', ids.armor.Rank) # 4
-        print('Armor Greatness:', ids.armor.Greatness) # 1
-        print('Beast Attack Type:', ids.beast.AttackType) # magic
-        print('Beast Armor Type:', ids.beast.ArmorType) # cloth
-        print('Beast Rank:', ids.beast.Rank) # 1
-        print('Beast XP:', ids.beast.XP) # 0
-    %}
-
-    let (local damage) = CombatStats.calculate_damage_from_beast(beast, armor);
-    // base_weapon_damage = 5 * 2 = 10
-    // magic v hide = low = 1
-    // armor_strength = 6-4 * 1 = 2
-
-    // assert damage = 8;
-
-    %{
-        print('Damage From Beast:', ids.damage)
-    %}
-
     return ();
-    
 }

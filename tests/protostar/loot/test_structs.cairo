@@ -160,7 +160,7 @@ namespace TestUtils {
     // create_beast returns a Beast corresponding to the provided beast_id
     // parameters: beast_id
     // returns: A Beast
-    func create_beast{syscall_ptr: felt*, range_check_ptr}(beast_id: felt, xp: felt) -> (
+    func create_beast{syscall_ptr: felt*, range_check_ptr}(beast_id: felt, level: felt) -> (
         beast: Beast
     ) {
         alloc_locals;
@@ -172,8 +172,8 @@ namespace TestUtils {
         let prefix_1 = 1;
         let prefix_2 = 1;
         let adventurer = 0;
-        let xp = xp;
-        let slain_by = 0;
+        let xp = 0;
+        let level = level;
         let slain_on_date = 0;
         return (
             Beast(
@@ -186,7 +186,7 @@ namespace TestUtils {
                 health,
                 adventurer,
                 xp,
-                slain_by,
+                level,
                 slain_on_date
             ),
         );

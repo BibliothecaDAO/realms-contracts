@@ -84,15 +84,23 @@ namespace IAdventurer {
 namespace IBeast {
     func initializer(proxy_admin: felt, address_of_controller: felt) {
     }
-    func create(adventurer_id: Uint256) -> (beast_id: Uint256) {
+    func create(adventurer_token_id: Uint256) -> (beast_token_id: Uint256) {
     }
-    func attack(beast_id: Uint256) {
+    func attack(beast_token_id: Uint256) {
     }
-    func flee(beast_id: Uint256) {
+    func counter_attack(beast_token_id: Uint256) -> (damage: felt) {
     }
-    func get_beast_by_id(beast_id: Uint256) -> (beast: Beast) {
+    func flee(beast_token_id: Uint256) {
     }
-    func set_beast_by_id(beast_id: Uint256, beast: Beast) {
+    func set_beast_by_id(beast_token_id: Uint256, beast: Beast) {
+    }
+    func get_beast_by_id(beast_token_id: Uint256) -> (beast: Beast) {
+    }
+    func increase_xp(beast_token_id: Uint256, beast_dynamic: BeastDynamic, amount: felt) -> (
+        returned_beast_dynamic: BeastDynamic
+    ) {
+    }
+    func get_adventurer_from_beast(beast_token_id: Uint256) -> () {
     }
 }
 

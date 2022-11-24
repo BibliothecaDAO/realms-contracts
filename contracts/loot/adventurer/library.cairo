@@ -53,7 +53,7 @@ namespace AdventurerLib {
 
         let Health = 100;  // stored state
         let XP = 0;  // stored state
-        let Level = 0;  // stored state
+        let Level = 1;  // stored state
         let Order = order;  // stored state
 
         // Physical
@@ -332,6 +332,20 @@ namespace AdventurerLib {
         // update adventurer xp
         let (updated_adventurer: AdventurerState) = cast_state(
             AdventurerSlotIds.XP, xp, unpacked_adventurer
+        );
+
+        // return updated adventurer
+        return (updated_adventurer,);
+    }
+
+    func update_level{syscall_ptr: felt*, range_check_ptr}(
+        level: felt, unpacked_adventurer: AdventurerState
+    ) -> (new_unpacked_adventurer: AdventurerState) {
+        alloc_locals;
+
+        // update adventurer level
+        let (updated_adventurer: AdventurerState) = cast_state(
+            AdventurerSlotIds.Level, level, unpacked_adventurer
         );
 
         // return updated adventurer

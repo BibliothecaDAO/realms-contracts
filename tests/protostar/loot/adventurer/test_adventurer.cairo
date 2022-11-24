@@ -122,7 +122,7 @@ func test_cast{
 
     let (c) = AdventurerLib.cast_state(0, 3, adventurer);
 
-    %{ print('Race', ids.c.Race) %}
+    assert c.Race = 3;
 
     return ();
 }
