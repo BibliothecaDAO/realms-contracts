@@ -101,14 +101,4 @@ namespace BeastStats {
         dw BeastRank.Spider;
         dw BeastRank.Rat;
     }
-
-    func calculate_xp_gained{syscall_ptr: felt*, range_check_ptr}(
-        beast_rank: felt,
-        beast_greatness: felt
-    ) -> (xp_gained: felt) {
-        const rank_ceiling = 6; 
-        let xp_gained = (rank_ceiling - beast_rank) * beast_greatness;
-        return (xp_gained,);
-    }
-
 }

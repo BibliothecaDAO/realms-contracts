@@ -11,10 +11,12 @@ from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math_cmp import is_le, is_not_zero, is_le_felt
 from starkware.cairo.common.registers import get_label_location
+from starkware.cairo.common.pow import pow
 
 from contracts.loot.constants.item import Item, Type, ItemIds, Slot
 from contracts.loot.constants.combat import WeaponEfficacy, WeaponEfficiacyDamageMultiplier
 from contracts.loot.beast.stats.beast import BeastStats
+from contracts.loot.beast.library import BeastLib
 from contracts.loot.loot.stats.item import ItemStats
 from contracts.loot.constants.beast import Beast, BeastStatic, BeastDynamic
 from contracts.loot.constants.obstacle import Obstacle, ObstacleUtils
@@ -35,7 +37,7 @@ namespace CombatStats {
             [ap] = blade_location, ap++;
         } else {
             if (weapon_type == Type.Weapon.bludgeon) {
-                 // Use the bludgeon_efficacy lookup table
+                // Use the bludgeon_efficacy lookup table
                 [ap] = bludgeon_location, ap++;
             } else {
                 if (weapon_type == Type.Weapon.magic) {
@@ -178,7 +180,7 @@ namespace CombatStats {
 
         // pass details of attack and armor to core damage calculation function
         let (damage_dealt) = calculate_damage(
-            attack_type, beast.Rank, beast.XP, armor_type, armor.Rank, armor.Greatness
+            attack_type, beast.Rank, beast.Level, armor_type, armor.Rank, armor.Greatness
         );
 
         // return damage
@@ -194,9 +196,11 @@ namespace CombatStats {
         // Get beast attack type
         let (armor_type) = BeastStats.get_armor_type_from_id(beast.Id);
 
-        // NOTE: @loothero if no weapon then type is generic
+        // If adventurer has no weapon, they get get generic (melee)
         if (weapon.Id == 0) {
+            // Generic will have low effectiveness
             let weapon_type = Type.Weapon.generic;
+            // and low greatness
             let weapon_greatness = 1;
             tempvar syscall_ptr: felt* = syscall_ptr;
             tempvar range_check_ptr = range_check_ptr;
@@ -210,11 +214,9 @@ namespace CombatStats {
             tempvar weapon_type = weapon_type;
             tempvar weapon_greatness = weapon_greatness;
         }
-        // pass details of attack and armor to core damage calculation function
-        // NOTE: for now beast armor is set as generic (they don't have armor)
-        // TODO MILESTONE1 (LH): Give every beast an explicit armor type in beast consts
+
         let (damage_dealt) = calculate_damage(
-            weapon_type, weapon.Rank, weapon_greatness, armor_type, beast.Rank, beast.XP
+            weapon_type, weapon.Rank, weapon_greatness, armor_type, beast.Level, beast.XP
         );
 
         // return damage
@@ -240,5 +242,56 @@ namespace CombatStats {
 
         // return damage dealt
         return (damage_dealt,);
+    }
+
+    func calculate_xp_earned{syscall_ptr: felt*, range_check_ptr}(rank: felt, level: felt) -> (
+        xp_earned: felt
+    ) {
+        const rank_ceiling = 6;
+        let xp_earned = (rank_ceiling - rank) * level;
+        return (xp_earned,);
+    }
+
+    // @notice Checks xp to see if adventurer, or NPC has reached next level
+    // The formula for reaching the next level is approximately: ((current_level*10)/x)^y
+    // X: 3, Y: 2
+    // Level	XP
+    //     0    0
+    //     1	9
+    //     2	36
+    //     3	100
+    //     4	169
+    //     5	256
+    //     6	400
+    //     7	529
+    //     8	676
+    //     9	900
+    // @param: xp: The XP of the adventurer or NPC
+    // @param: level: The level of the adventurer or NPC
+    // @return success: true or false
+
+    // TODO: Enable this to handle multi-level situations by returning number of levels increased
+    func check_for_level_increase{syscall_ptr: felt*, range_check_ptr}(xp: felt, level: felt) -> (
+        level_increase: felt
+    ) {
+        alloc_locals;
+
+        // multiply current level by 10 to keep function greater than 1
+        let level_times_ten = level * 10;
+
+        // divide current level by 3 and ignore the remainder
+        let (level_divided_by_x, _) = unsigned_div_rem(level_times_ten, 3);
+
+        // square the integer portion to get xp required for next level
+        let (xp_required_for_next_level) = pow(level_divided_by_x, 2);
+
+        // amount of xp required is less than current xp, the adventurer/npc has leveled up
+        let leveled_up = is_le(xp_required_for_next_level, xp);
+
+        if (leveled_up == TRUE) {
+            return (TRUE,);
+        } else {
+            return (FALSE,);
+        }
     }
 }

@@ -43,6 +43,10 @@ from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
 func NewBeastState(beast_token_id: Uint256, beast_state: Beast) {
 }
 
+@event
+func BeastLevelUp(beast_token_id: Uint256, beast_state: Beast) {
+}
+
 // -----------------------------------
 // Storage
 // -----------------------------------
@@ -92,7 +96,6 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 // External
 // -----------------------------
 
-
 // @notice Create a beast and attach to adventurer
 // @param adventurer_id: Id of adventurer
 // @return beast_token_id: Id of beast
@@ -117,7 +120,7 @@ func create{
 @external
 func attack{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(beast_token_id: Uint256) {
+}(beast_token_id: Uint256) -> (damage_to_beast: felt, damage_from_beast: felt) {
     alloc_locals;
 
     let (beast) = get_beast_by_id(beast_token_id);
@@ -145,36 +148,51 @@ func attack{
     let (beast_static_, beast_dynamic_) = BeastLib.split_data(beast);
     let (updated_health_beast) = BeastLib.deduct_health(damage_dealt, beast_dynamic_);
     let (packed_beast) = BeastLib.pack(updated_health_beast);
-    let (new_beast_) = BeastLib.aggregate_data(beast_static_, updated_health_beast);
+    beast_dynamic.write(beast_token_id, packed_beast);
+    emit_beast_state(beast_token_id);
 
     // check if beast is still alive after the attack
-    let still_alive = is_not_zero(updated_health_beast.Health);
+    let beast_is_alive = is_not_zero(updated_health_beast.Health);
 
     // if the beast is alive
-    if (still_alive == TRUE) {
+    if (beast_is_alive == TRUE) {
         // having been attacked, it automatically attacks back
         let (chest) = ILoot.getItemByTokenId(item_address, Uint256(unpacked_adventurer.ChestId, 0));
         let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, chest);
         IAdventurer.deduct_health(adventurer_address, adventurer_id, damage_taken);
-        let (new_packed_beast) = BeastLib.pack(updated_health_beast);
-        beast_dynamic.write(beast_token_id, new_packed_beast);
-        emit_beast_state(beast_token_id);
-        return ();
+
+        // check if beast counter attack killed adventurer
+        let (updated_adventurer) = get_adventurer_from_beast(beast_token_id);
+        // if the adventurer is dead
+        if (updated_adventurer.Health == 0) {
+            // calculate xp earned from killing adventurer (adventurers are rank 1)
+            let (xp_gained) = CombatStats.calculate_xp_earned(1, updated_adventurer.Level);
+            // increase beast xp and writes
+            increase_xp(beast_token_id, updated_health_beast, xp_gained);
+            tempvar syscall_ptr: felt* = syscall_ptr;
+            tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+            tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+        } else {
+            tempvar syscall_ptr: felt* = syscall_ptr;
+            tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+            tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+        }
+
+        return (damage_dealt, damage_taken);
     } else {
         // update beast with slain details
         let (current_time) = get_block_timestamp();
-        let (slain_updated_beast) = BeastLib.slay(
-            adventurer_id.low, current_time, updated_health_beast
-        );
-        let (new_packed_beast) = BeastLib.pack(updated_health_beast);
-        beast_dynamic.write(beast_token_id, new_packed_beast);
+        let (slain_updated_beast) = BeastLib.slay(current_time, updated_health_beast);
+
         // grant adventurer xp
-        let (beast_greatness) = BeastLib.calculate_greatness(slain_updated_beast.XP);
-        let (rank) = BeastStats.get_rank_from_id(new_beast_.Id);
-        let (xp_gained) = BeastStats.calculate_xp_gained(rank, beast_greatness);
+        let (beast_level) = BeastLib.calculate_greatness(slain_updated_beast.Level);
+        let (beast_rank) = BeastStats.get_rank_from_id(beast.Id);
+        let (xp_gained) = CombatStats.calculate_xp_earned(beast_rank, beast_level);
+
         IAdventurer.increase_xp(adventurer_address, adventurer_id, xp_gained);
-        emit_beast_state(beast_token_id);
-        return ();
+        return (damage_dealt, 0);
     }
 }
 
@@ -183,7 +201,7 @@ func attack{
 @external
 func counter_attack{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(beast_token_id: Uint256) {
+}(beast_token_id: Uint256) -> (damage: felt) {
     alloc_locals;
 
     Module.only_approved();
@@ -217,11 +235,33 @@ func counter_attack{
     let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, chest);
 
     IAdventurer.deduct_health(adventurer_address, adventurer_token_id, damage_taken);
-    return ();
+    // check if beast counter attack killed adventurer
+    let (updated_adventurer) = get_adventurer_from_beast(beast_token_id);
+    // if the adventurer is dead
+    if (updated_adventurer.Health == 0) {
+        // calculate xp earned from killing adventurer (adventurers are rank 1)
+        let (xp_gained) = CombatStats.calculate_xp_earned(1, updated_adventurer.Level);
+        // increase beast xp and writes
+        let (_, beast_dynamic_) = BeastLib.split_data(beast);
+        increase_xp(beast_token_id, beast_dynamic_, xp_gained);
+
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+    } else {
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+    }
+
+    return (damage_taken,);
 }
 
 // @notice Flee adventurer from beast
 // @param beast_token_id: Id of beast
+// TODO: return boolean to indicate if user was able to flee
 @external
 func flee{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
@@ -271,6 +311,26 @@ func flee{
         // then calculate damage based on beast
         let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, chest);
         IAdventurer.deduct_health(adventurer_address, Uint256(beast.Adventurer, 0), damage_taken);
+        // check if beast counter attack killed adventurer
+        let (updated_adventurer) = get_adventurer_from_beast(beast_token_id);
+        // if the adventurer is dead
+        if (updated_adventurer.Health == 0) {
+            // calculate xp earned from killing adventurer (adventurers are rank 1)
+            let (xp_gained) = CombatStats.calculate_xp_earned(1, updated_adventurer.Level);
+            // increase beast xp and writes
+            let (_, beast_dynamic_) = BeastLib.split_data(beast);
+            increase_xp(beast_token_id, beast_dynamic_, xp_gained);
+
+            tempvar syscall_ptr: felt* = syscall_ptr;
+            tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+            tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+        } else {
+            tempvar syscall_ptr: felt* = syscall_ptr;
+            tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+            tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+        }
 
         tempvar syscall_ptr: felt* = syscall_ptr;
         tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
@@ -290,10 +350,12 @@ func flee{
         IAdventurer.update_status(
             adventurer_address, Uint256(beast.Adventurer, 0), AdventurerStatus.Idle
         );
+        // adventurer was able to flee
+        return ();
+    } else {
+        // adventurer was not able to flee
         return ();
     }
-
-    return ();
 }
 
 // --------------------
@@ -307,7 +369,7 @@ func flee{
 func set_beast_by_id{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(token_id: Uint256, beast: Beast) {
-    // Module.only_approved();
+    Module.only_approved();
     let (beast_static_, beast_dynamic_) = BeastLib.split_data(beast);
     let (packed_beast: felt) = BeastLib.pack(beast_dynamic_);
     beast_static.write(token_id, beast_static_);
@@ -318,6 +380,48 @@ func set_beast_by_id{
 // --------------------
 // Internal
 // --------------------
+
+// @notice increases the xp of the beast and increases level if appropriate
+// @param: beast_token_id: token id of the beast
+// @param: beast_dynamic_: of the beast you want to increase xp
+// @return returned_beast_dynamic: an updated version of the provided beast
+@external
+func increase_xp{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(beast_token_id: Uint256, beast_dynamic_: BeastDynamic, amount: felt) -> (
+    returned_beast_dynamic: BeastDynamic
+) {
+    alloc_locals;
+
+    Module.only_approved();
+
+    // increase beast xp
+    let (updated_xp_beast) = BeastLib.increase_xp(amount, beast_dynamic_);
+
+    // check if beast has reached the next level
+    let (leveled_up) = CombatStats.check_for_level_increase(updated_xp_beast.XP, updated_xp_beast.Level);
+    // if so
+    if (leveled_up == TRUE) {
+        let (updated_level_beast) = BeastLib.update_level(updated_xp_beast.Level + 1, updated_xp_beast);
+        // pack beast for storage
+        let (packed_beast) = BeastLib.pack(updated_level_beast);
+        // write beast to chain
+        beast_dynamic.write(beast_token_id, packed_beast);
+        // emit beast level up event
+        emit_beast_level_up(beast_token_id);
+        // return the updated beast
+        return (updated_level_beast,);
+    } else {
+        // pack beast for storage
+        let (packed_beast) = BeastLib.pack(updated_xp_beast);
+        // write beast to chain
+        beast_dynamic.write(beast_token_id, packed_beast);
+        // emit beast level up event
+        emit_beast_state(beast_token_id);
+        // return the updated beast
+        return (updated_xp_beast,);
+    }
+}
 
 // @notice Get xiroshiro random number
 // @return dice_roll: Random number
@@ -333,7 +437,7 @@ func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBu
 }
 
 // @notice Revert if caller is not adventurer owner
-// @param: adventurer_id: Id of adventurer 
+// @param: adventurer_id: Id of adventurer
 func assert_adventurer_owner{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(adventurer_id: Uint256) {
@@ -352,12 +456,21 @@ func assert_adventurer_owner{
 // @param: token_id: Id of beast
 func emit_beast_state{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(token_id: Uint256) {
-    // Get new adventurer
-    let (new_beast) = get_beast_by_id(token_id);
+}(beast_token_id: Uint256) {
+    // Get the beast
+    let (beast) = get_beast_by_id(beast_token_id);
+    NewBeastState.emit(beast_token_id, beast);
+    return ();
+}
 
-    NewBeastState.emit(token_id, new_beast);
-
+// @notice Emit beast data
+// @param: token_id: Id of beast
+func emit_beast_level_up{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(beast_token_id: Uint256) {
+    // Get beast and emit level up event with beast details
+    let (beast) = get_beast_by_id(beast_token_id);
+    BeastLevelUp.emit(beast_token_id, beast);
     return ();
 }
 

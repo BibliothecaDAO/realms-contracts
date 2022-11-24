@@ -184,3 +184,49 @@ func test_calculate_damage_from_obstacle{
 
     return ();
 }
+
+// @notice: forumla for xp is:
+//          XP = (6-rank) * level
+@external
+func test_calculate_xp_earned{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+
+    // rank 1 on level 1 should yield 5 XP
+    let (xp_earned_rank1_level1) = CombatStats.calculate_xp_earned(1, 1);
+    assert xp_earned_rank1_level1 = 5;
+
+    // rank 5 on level 1 should yield 1 XP
+    let (xp_earned_rank5_level1) = CombatStats.calculate_xp_earned(5, 1);
+    assert xp_earned_rank5_level1 = 1;
+
+    // rank 5 on level 1 should yield 1 XP
+    let (xp_earned_rank1_level10) = CombatStats.calculate_xp_earned(1, 10);
+    assert xp_earned_rank1_level10 = 50;
+
+    return ();
+}
+
+@external
+func test_check_for_level_increase{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+
+    // 0 xp is enough to level up off of level 0
+    let (zero_xp_zero_level) = CombatStats.check_for_level_increase(0, 0);
+    assert zero_xp_zero_level = 1;
+
+    // 4xp is not enough to level up from level 1 to level 2
+    let (no_level_up) = CombatStats.check_for_level_increase(4, 1);
+    assert no_level_up = 0;
+
+    // 9xp is exactly enough to level up from level 1 to level 2
+    let (level_up_1_to_2) = CombatStats.check_for_level_increase(10, 1);
+    assert level_up_1_to_2 = 1;
+
+    // 675xp is one xp short of being able to level up from level 8 to 9
+    let (no_level_up_8_to_9) = CombatStats.check_for_level_increase(675, 8);
+    assert no_level_up_8_to_9 = 0;
+
+    // 700xp is enough to level up from level 8 to 9
+    let (level_up_8_to_9) = CombatStats.check_for_level_increase(700, 8);
+    assert level_up_8_to_9 = 1;
+
+    return ();
+}

@@ -21,7 +21,7 @@ struct Beast {
     Health: felt,  // health of the beast
     Adventurer: felt, // The token id of the adventurer the beast is battling
     XP: felt,  // the xp of the beast
-    SlainBy: felt, // the tokenId of the adventurer that slayed this beast
+    Level: felt, // the level of the beast
     SlainOnDate: felt, // unix timestamp when the beast was slain
 }
 
@@ -36,16 +36,16 @@ struct BeastDynamic {
     Health: felt,  // health of the beast
     Adventurer: felt, // The token id of the adventurer the beast is battling
     XP: felt,  // the xp of the beast
-    SlainBy: felt, // the tokenId of the adventurer that slayed this beast
+    Level: felt, // the level of the beast
     SlainOnDate: felt, // unix timestamp when the beast was slain
 }
 
 namespace SHIFT_P {
-    const _1 = 2 ** 0;
-    const _2 = 2 ** 10;
-    const _3 = 2 ** 51;
-    const _4 = 2 ** 78;
-    const _5 = 2 ** 119;
+    const _1 = 2 ** 0; // Health
+    const _2 = 2 ** 10; // Adventurer Token Id
+    const _3 = 2 ** 51; // XP
+    const _4 = 2 ** 78; // Level
+    const _5 = 2 ** 88; // Slain On Date
 }
 
 namespace BeastIds {
@@ -148,6 +148,6 @@ namespace BeastSlotIds {
     const Health = 0;
     const Adventurer = 1;
     const XP = 2;
-    const SlainBy = 3;
+    const Level = 3;
     const SlainOnDate = 4;
 }

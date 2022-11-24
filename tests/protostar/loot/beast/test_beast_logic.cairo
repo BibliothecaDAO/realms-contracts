@@ -6,6 +6,7 @@ from starkware.starknet.common.syscalls import get_block_timestamp
 
 from contracts.loot.constants.adventurer import AdventurerState, AdventurerStatus
 from contracts.loot.constants.beast import Beast
+from contracts.loot.beast.library import BeastLib
 from contracts.loot.constants.item import (
     Item, 
     ItemIds, 
@@ -14,6 +15,7 @@ from contracts.loot.constants.item import (
     ItemSlot
 )
 from contracts.loot.constants.rankings import ItemRank
+from contracts.loot.loot.stats.combat import CombatStats
 from tests.protostar.loot.setup.interfaces import ILoot, IRealms, IAdventurer, IBeast, ILords
 from tests.protostar.loot.setup.setup import Contracts, deploy_all
 from tests.protostar.loot.test_structs import (
@@ -110,8 +112,8 @@ func test_create{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     assert beast.Prefix_1 = 1;
     assert beast.Prefix_2 = 1;
     assert beast.Adventurer = 1;
-    assert beast.XP = 1;
-    assert beast.SlainBy = 0;
+    assert beast.XP = 0;
+    assert beast.Level = 1;
     assert beast.SlainOnDate = 0;
 
     %{
@@ -160,11 +162,10 @@ func test_not_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
         stop_prank_beast()
     %}
 
-    // As part of attacking the Beast, the adventurer takes 12hp of damage
-    assert updated_beast.Health = 64;
+    // adventurer did 40hp to the beast
+    assert updated_beast.Health = 60;
+    // adventurer took 12 damage from the beasts counter attack
     assert updated_adventurer.Health = 88;
-
-
 
     return ();
 }
@@ -190,7 +191,8 @@ func test_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
     %}
     // discover and create beast
-    IAdventurer.explore(adventurer_address, Uint256(1,0));
+    let adventurer_token_id = Uint256(1,0);
+    IAdventurer.explore(adventurer_address, adventurer_token_id);
 
     %{ 
         stop_prank_adventurer()
@@ -213,19 +215,26 @@ func test_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         0
     ); // Mace
 
-    ILoot.setItemById(loot_address, Uint256(1,0), strong_item);
+    let loot_token_id = Uint256(1,0);
+    ILoot.setItemById(loot_address, loot_token_id, strong_item);
 
-    IBeast.attack(beast_address, Uint256(1,0));
+    let beast_token_id = Uint256(1,0);
+    IBeast.attack(beast_address, beast_token_id);
 
-    let (local updated_beast) = IBeast.get_beast_by_id(beast_address, Uint256(1,0));
+    let (local updated_beast) = IBeast.get_beast_by_id(beast_address, beast_token_id);
 
-    let (local adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
+    let (local adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_token_id);
 
     // Beast should be dead
     assert updated_beast.Health = 0;
 
     // Since it was a one-hit kill, adventurer didn't take damage
     assert adventurer.Health = 100;
+
+    // check our adventurer earned xp for the kill
+    let (expected_xp) = CombatStats.calculate_xp_earned(updated_beast.Rank, updated_beast.Level);
+    // Since we used a new adventurer, this should be the only xp they have gained
+    assert adventurer.XP = expected_xp;
 
     %{
         stop_mock_adventurer_random()
@@ -312,6 +321,47 @@ func test_flee{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     %{
         stop_mock_flee_random()
         stop_prank_beast()
+    %}
+
+    return ();
+}
+
+@external
+func test_increase_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+    
+    local account_1_address;
+    local xoroshiro_address;
+    local beast_address;
+    local adventurer_address;
+
+    %{
+        ids.account_1_address = context.account_1
+        ids.xoroshiro_address = context.xoroshiro
+        ids.beast_address = context.beast
+        ids.adventurer_address = context.adventurer
+        stop_mock = mock_call(ids.xoroshiro_address, 'next', [0])
+        stop_prank_adventurer = start_prank(ids.adventurer_address, ids.beast_address)
+    %}
+
+    let beast_token_id = Uint256(1,0);
+    let (beast_id) = IBeast.create(beast_address, beast_token_id);
+    let (beast) = IBeast.get_beast_by_id(beast_address, beast_token_id);
+    let (_, beast_dynamic) = BeastLib.split_data(beast);
+
+    // Give our level 1 beast 10 XP (started with 1XP)
+    let (returned_beast_plus_10xp) = IBeast.increase_xp(beast_address, beast_token_id, beast_dynamic, 10);
+    let (onchain_beast_plus_10xp) = IBeast.get_beast_by_id(beast_address, beast_token_id);
+
+    // verify it's now level 2 with 11xp
+    // both in the returned beast and on-chain
+    assert returned_beast_plus_10xp.XP = 10;
+    assert returned_beast_plus_10xp.Level = 2;
+    assert onchain_beast_plus_10xp.XP = returned_beast_plus_10xp.XP;
+    assert onchain_beast_plus_10xp.Level = returned_beast_plus_10xp.Level;
+    
+    %{
+        stop_prank_adventurer()
     %}
 
     return ();
