@@ -7,6 +7,7 @@
 // import item consts
 from contracts.loot.constants.item import Item
 from contracts.loot.constants.bag import Bag
+from contracts.loot.constants.beast import Beast
 
 // @notice This is viewable information of the Adventurer. We DO NOT store this on-chain.
 //         This is the object that is returned when requesting the Adventurer by ID.
@@ -48,6 +49,12 @@ struct Adventurer {
     XP: felt,  // 1 - 10000000
     Level: felt,  // 1- 100
     Order: felt,  // 1 - 16
+
+    // TODO: Update adventurer pack/unpack to include this new attribute
+    Status: felt,  // {Idle, Battling, Traveling, Questing, Dead}
+    Beast: felt, // tokenId of the beast the adventurer is battling
+
+    // TODO: Consider storing adventurer location information
 }
 
 // @notice This is immutable information stored on-chain
@@ -136,12 +143,17 @@ struct AdventurerState {
     HandsId: felt,
     NeckId: felt,
     RingId: felt,
+
+    Status: felt,
+    Beast: felt,
 }
 
 struct PackedAdventurerState {
     p1: felt,
     p2: felt,
     p3: felt,
+    p4: felt,
+    p5: felt,
 }
 
 namespace SHIFT_P_1 {
@@ -157,10 +169,34 @@ namespace SHIFT_P_1 {
     const _10 = 2 ** 92;
 }
 
+namespace SHIFT_P_5 {
+    const _1 = 2 ** 0;
+    const _2 = 2 ** 13;
+    const _3 = 2 ** 22;
+    const _4 = 2 ** 27;
+    const _5 = 2 ** 37;
+    const _6 = 2 ** 47;
+    const _7 = 2 ** 57;
+    const _8 = 2 ** 67;
+    const _9 = 2 ** 77;
+    const _10 = 2 ** 87;
+    const _11 = 2 ** 97;
+    const _12 = 2 ** 107;
+    const _13 = 2 ** 117;
+}
+
+
 namespace AdventurerSlotIds {
+    // immutable stats
+    const Race = 0;
+    const HomeRealm = 1;
+    const Birthdate = 2;
+    const Name = 3;
+
     // evolving stats
-    const Health = 0;  //
-    const Level = 1;  //
+    const Health = 4;
+    const Level = 5;
+    const Order = 6;
 
     // Physical
     const Strength = 2;
@@ -176,7 +212,8 @@ namespace AdventurerSlotIds {
     const Luck = 8;
 
     // XP
-    const XP = 9;  //
+    const XP = 14;
+
     // store item NFT id when equiped
     // Packed Stats p2
     const WeaponId = 10;
@@ -185,10 +222,29 @@ namespace AdventurerSlotIds {
     const WaistId = 13;
 
     // Packed Stats p3
-    const FeetId = 14;
-    const HandsId = 15;
-    const NeckId = 16;
-    const RingId = 17;
+    const FeetId = 19;
+    const HandsId = 20;
+    const NeckId = 21;
+    const RingId = 22;
+
+    const Status = 23;
+    const Beast = 24;
+}
+
+namespace AdventurerStatus {
+    const Idle = 0;
+    const Battle = 1;
+    const Travel = 2;
+    const Quest = 3;
+    const Dead = 4;
+}
+
+namespace DiscoveryType {
+    const Nothing = 0;
+    const Beast = 1;
+    const Obstacle = 2;
+    const Adventurer = 3;
+    const Item = 4;
 }
 
 // index for items - used in cast function to set values

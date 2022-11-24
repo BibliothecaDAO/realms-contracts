@@ -7,10 +7,12 @@ import re
 import subprocess
 import asyncio
 
+from nile.core.declare import declare
 from nile.core.account import Account, get_nonce
 from nile import deployments
 from nile.core.call_or_invoke import call_or_invoke
 from realms_cli.config import Config
+from starkware.starknet.compiler.compile import compile_starknet_files
 
 
 def send_multi(self, to, method, calldata, nonce=None):
@@ -195,13 +197,26 @@ def compile(contract_alias) -> str:
     return subprocess.check_output(command).strip().decode("utf-8")
 
 
-def declare(contract_name, alias) -> str:
-    """Nile declare function."""
-    command = [
-        "nile",
-        "declare",
-        contract_name,
-        "--alias",
-        alias,
-    ]
-    return subprocess.check_output(command).strip().decode("utf-8")
+def wrapped_declare(account, contract_name, network, alias):
+
+    account = Account(account, network)
+
+    config = Config(nile_network=network)
+
+    contract_class = compile_starknet_files(
+        files=[f"{'contracts'}/{contract_name}.cairo"], debug_info=True, cairo_path=["/workspaces/realms-contracts/lib/cairo_contracts/src"]
+    )
+    nonce = get_nonce(account.address, network)
+    sig_r, sig_s = account.signer.sign_declare(
+        sender=account.address,
+        contract_class=contract_class,
+        nonce=nonce,
+        max_fee=999994390139630,
+    )
+
+    class_hash = declare(sender=account.address, contract_name=alias, signature=[
+                         sig_r, sig_s], alias=alias, network=network, max_fee=999994390139630)
+    return class_hash
+
+
+Account.wrapped_declare = wrapped_declare
