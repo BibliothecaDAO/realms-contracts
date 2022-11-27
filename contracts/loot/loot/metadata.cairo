@@ -9,9 +9,11 @@
 %lang starknet
 
 from starkware.cairo.common.alloc import alloc
+from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_unsigned_div_rem
 from starkware.cairo.common.math import unsigned_div_rem
+from starkware.cairo.common.math_cmp import is_le
 
 from contracts.loot.constants.adventurer import AdventurerState, AdventurerStatic
 from contracts.loot.adventurer.interface import IAdventurer
@@ -432,16 +434,17 @@ namespace LootUri {
         let (name_suffix_index) = append_item_name_suffix(item_data.Prefix_2, name_prefix_index, values);
         let (name_index) =  append_item_name(item_data.Id, name_suffix_index, values);
         let (suffix_index) = append_item_suffix(item_data.Suffix, name_index, values);
+        let (greatness_suffix_index) = append_item_greatness_suffix(item_data.Greatness, suffix_index, values);
 
-        assert values[suffix_index] = inverted_commas;
-        assert values[suffix_index + 1] = comma;
+        assert values[greatness_suffix_index] = inverted_commas;
+        assert values[greatness_suffix_index + 1] = comma;
         // image value
-        assert values[suffix_index + 2] = image_key;
-        assert values[suffix_index + 3] = inverted_commas;
-        assert values[suffix_index + 4] = image_url_1;
-        assert values[suffix_index + 5] = image_url_2;
-        let (id_size) = append_felt_ascii(item_data.Id, values + suffix_index + 6);
-        let id_index = suffix_index + 6 + id_size;
+        assert values[greatness_suffix_index + 2] = image_key;
+        assert values[greatness_suffix_index + 3] = inverted_commas;
+        assert values[greatness_suffix_index + 4] = image_url_1;
+        assert values[greatness_suffix_index + 5] = image_url_2;
+        let (id_size) = append_felt_ascii(item_data.Id, values + greatness_suffix_index + 6);
+        let id_index = greatness_suffix_index + 6 + id_size;
         assert values[id_index] = '.webp';
         assert values[id_index + 1] = inverted_commas;
         assert values[id_index + 2] = comma;
@@ -1395,6 +1398,24 @@ namespace LootUri {
             return (values_index + 1,);
         }
         return (values_index,);
+    }
+
+    // @notice append felts to uri array for item suffix
+    // @implicit range_check_ptr
+    // @param greatness: greatness score
+    // @param values_index: index in the uri array
+    // @param values: uri array
+    // @return greatness_suffix_index: new index of array
+    func append_item_greatness_suffix{range_check_ptr}(greatness: felt, values_index: felt, values: felt*) -> (
+        greatness_suffix_index: felt
+    ) {
+        let check_ge_20 = is_le(20, greatness);
+        if (check_ge_20 == TRUE) {
+            assert values[values_index] = ' +1';
+            return (values_index + 1,);
+        } else {
+            return (values_index,);
+        }
     }
 
     // @notice append felts to uri array for item slot

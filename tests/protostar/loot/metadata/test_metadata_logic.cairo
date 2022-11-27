@@ -59,14 +59,14 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     %}
 
     // Set tokens to ids above for testing
-    ILoot.setItemById(addresses.loot, Uint256(1,0), ItemIds.Wand, 15, 0, 0, 0);
-    ILoot.setItemById(addresses.loot, Uint256(2,0), ItemIds.DivineRobe, 15, 0, 0, 0);
-    ILoot.setItemById(addresses.loot, Uint256(3,0), ItemIds.LinenHood, 15, 0, 0, 0);
-    ILoot.setItemById(addresses.loot, Uint256(4,0), ItemIds.SilkSash, 15, 0, 0, 0);
-    ILoot.setItemById(addresses.loot, Uint256(5,0), ItemIds.DivineSlippers, 15, 0, 0, 0);
-    ILoot.setItemById(addresses.loot, Uint256(6,0), ItemIds.WoolGloves, 15, 0, 0, 0);
-    ILoot.setItemById(addresses.loot, Uint256(7,0), ItemIds.Amulet, 15, 0, 0, 0);
-    ILoot.setItemById(addresses.loot, Uint256(8,0), ItemIds.PlatinumRing, 15, 0, 0, 0);
+    ILoot.setItemById(addresses.loot, Uint256(1,0), ItemIds.Wand, 20, 0, 0, 0);
+    ILoot.setItemById(addresses.loot, Uint256(2,0), ItemIds.DivineRobe, 20, 0, 0, 0);
+    ILoot.setItemById(addresses.loot, Uint256(3,0), ItemIds.LinenHood, 20, 0, 0, 0);
+    ILoot.setItemById(addresses.loot, Uint256(4,0), ItemIds.SilkSash, 20, 0, 0, 0);
+    ILoot.setItemById(addresses.loot, Uint256(5,0), ItemIds.DivineSlippers, 20, 0, 0, 0);
+    ILoot.setItemById(addresses.loot, Uint256(6,0), ItemIds.WoolGloves, 20, 0, 0, 0);
+    ILoot.setItemById(addresses.loot, Uint256(7,0), ItemIds.Amulet, 20, 0, 0, 0);
+    ILoot.setItemById(addresses.loot, Uint256(8,0), ItemIds.PlatinumRing, 20, 0, 0, 0);
 
     // Mint adventurer with random params
     IAdventurer.mint(
@@ -120,8 +120,7 @@ func test_metadata{syscall_ptr: felt*, range_check_ptr}() {
             path = memory[ids.data+i]
             array.append(path.to_bytes(31, "big").decode())
         string_data = ''.join(array).replace('\x00', '')
-        print(string_data)
-        # assert string_data == 'data:application/json,{"description":"Adventurer","name":"Test","image":"https://ipfs.io/ipfs/QmUn4BZtz4tw3rzpZHpT2oEo6guw2FxsiPEyvfRFnUJWzZ.webp","attributes":[{"trait_type":"Race","value":"Human"},{"trait_type":"Home Realm","value":"Test Realm"},{"trait_type":"Birthdate","value":"0"},{"trait_type":"Health","value":"100"},{"trait_type":"Level","value":"1"},{"trait_type":"Order","value":"Protection"},{"trait_type":"Strength","value":"0"},{"trait_type":"Dexterity","value":"0"},{"trait_type":"Vitality","value":"0"},{"trait_type":"Intelligence","value":"0"},{"trait_type":"Wisdom","value":"0"},{"trait_type":"Charisma","value":"0"},{"trait_type":"Luck","value":"0"},{"trait_type":"XP","value":"0"},{"trait_type":"Weapon","value":"Wand"},{"trait_type":"Chest","value":"Divine Robe"},{"trait_type":"Head","value":"Linen Hood"},{"trait_type":"Waist","value":"Silk Sash"},{"trait_type":"Feet","value":"Divine Slippers"},{"trait_type":"Hand","value":"Wool Gloves"},{"trait_type":"Neck","value":"Amulet"},{"trait_type":"Ring","value":"Platinum Ring"},{"trait_type":"Status","value":"Idle"},]}'
+        assert string_data == 'data:application/json,{"description":"Adventurer","name":"Test","image":"https://ipfs.io/ipfs/QmUn4BZtz4tw3rzpZHpT2oEo6guw2FxsiPEyvfRFnUJWzZ.webp","attributes":[{"trait_type":"Race","value":"Human"},{"trait_type":"Home Realm","value":"Test Realm"},{"trait_type":"Order","value":"Protection"},{"trait_type":"Birthdate","value":"0"},{"trait_type":"Health","value":"100"},{"trait_type":"Level","value":"1"},{"trait_type":"Strength","value":"0"},{"trait_type":"Dexterity","value":"0"},{"trait_type":"Vitality","value":"0"},{"trait_type":"Intelligence","value":"0"},{"trait_type":"Wisdom","value":"0"},{"trait_type":"Charisma","value":"0"},{"trait_type":"Luck","value":"0"},{"trait_type":"XP","value":"0"},{"trait_type":"Weapon","value":"Agony Bane Wand Of Power +1"},{"trait_type":"Chest","value":"Agony Bane Divine Robe Of Power +1"},{"trait_type":"Head","value":"Agony Bane Linen Hood Of Power +1"},{"trait_type":"Waist","value":"Agony Bane Silk Sash Of Power +1"},{"trait_type":"Feet","value":"Agony Bane Divine Slippers Of Power +1"},{"trait_type":"Hands","value":"Agony Bane Wool Gloves Of Power +1"},{"trait_type":"Neck","value":"Agony Bane Amulet Of Power +1"},{"trait_type":"Ring","value":"Agony Bane Platinum Ring Of Power +1"},{"trait_type":"Status","value":"Idle"},]}'
     %}
 
     return ();

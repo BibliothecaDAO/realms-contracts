@@ -235,12 +235,15 @@ namespace AdventurerUri {
         assert values[race_index + 3] = inverted_commas;
         assert values[race_index + 4] = right_bracket;
         assert values[race_index + 5] = comma;
-        // birth date
-        assert values[race_index + 6] = AdventurerUriUtils.TraitKeys.Birthdate;
-        assert values[race_index + 7] = AdventurerUriUtils.TraitKeys.ValueKey;
 
-        let (birthdate_size) = append_felt_ascii(adventurer_data.Birthdate, values + race_index + 8);
-        let birthdate_index = race_index + 8 + birthdate_size;
+        let (order_index) = append_order_name(adventurer_data.Order, race_index + 6, values);
+        
+        // birth date
+        assert values[order_index] = AdventurerUriUtils.TraitKeys.Birthdate;
+        assert values[order_index + 1] = AdventurerUriUtils.TraitKeys.ValueKey;
+
+        let (birthdate_size) = append_felt_ascii(adventurer_data.Birthdate, values + order_index + 2);
+        let birthdate_index = order_index + 2 + birthdate_size;
 
         assert values[birthdate_index] = inverted_commas;
         assert values[birthdate_index + 1] = right_bracket;
@@ -265,15 +268,13 @@ namespace AdventurerUri {
         assert values[level_index] = inverted_commas;
         assert values[level_index + 1] = right_bracket;
         assert values[level_index + 2] = comma;
-
-        let (order_index) = append_order_name(adventurer_data.Order, level_index + 3, values);
         
         // strength
-        assert values[order_index] = AdventurerUriUtils.TraitKeys.Strength;
-        assert values[order_index + 1] = AdventurerUriUtils.TraitKeys.ValueKey;
+        assert values[level_index + 3] = AdventurerUriUtils.TraitKeys.Strength;
+        assert values[level_index + 4] = AdventurerUriUtils.TraitKeys.ValueKey;
 
-        let (strength_size) = append_felt_ascii(adventurer_data.Strength, values + order_index + 2);
-        let strength_index = order_index + 2 + strength_size;
+        let (strength_size) = append_felt_ascii(adventurer_data.Strength, values + level_index + 5);
+        let strength_index = level_index + 5 + strength_size;
         
         assert values[strength_index] = inverted_commas;
         assert values[strength_index + 1] = right_bracket;
@@ -540,10 +541,19 @@ namespace AdventurerUri {
             LootUri.append_item_name_suffix(weapon_data.Prefix_2, values_index + 3, values);
             LootUri.append_item_name(weapon_data.Id, values_index + 4, values);
             LootUri.append_item_suffix(weapon_data.Suffix, values_index + 5, values);
-            assert values[values_index + 6] = inverted_commas;
-            assert values[values_index + 7] = right_bracket;
-            assert values[values_index + 8] = comma;
-            return (values_index + 9,);
+            let check_ge_20 = is_le(20, weapon_data.Greatness);
+            if (check_ge_20 == TRUE) {
+                assert values[values_index + 6] = ' +1';
+                assert values[values_index + 7] = inverted_commas;
+                assert values[values_index + 8] = right_bracket;
+                assert values[values_index + 9] = comma;
+                return (values_index + 10,);
+            } else {
+                assert values[values_index + 6] = inverted_commas;
+                assert values[values_index + 7] = right_bracket;
+                assert values[values_index + 8] = comma;
+                return (values_index + 9,);
+            }
         }
     }
 
@@ -581,10 +591,19 @@ namespace AdventurerUri {
             LootUri.append_item_name_suffix(chest_data.Prefix_2, values_index + 3, values);
             LootUri.append_item_name(chest_data.Id, values_index + 4, values);
             LootUri.append_item_suffix(chest_data.Suffix, values_index + 5, values);
-            assert values[values_index + 6] = inverted_commas;
-            assert values[values_index + 7] = right_bracket;
-            assert values[values_index + 8] = comma;
-            return (values_index + 9,);
+            let check_ge_20 = is_le(20, chest_data.Greatness);
+            if (check_ge_20 == TRUE) {
+                assert values[values_index + 6] = ' +1';
+                assert values[values_index + 7] = inverted_commas;
+                assert values[values_index + 8] = right_bracket;
+                assert values[values_index + 9] = comma;
+                return (values_index + 10,);
+            } else {
+                assert values[values_index + 6] = inverted_commas;
+                assert values[values_index + 7] = right_bracket;
+                assert values[values_index + 8] = comma;
+                return (values_index + 9,);
+            }
         }
     }
 
@@ -621,10 +640,19 @@ namespace AdventurerUri {
             LootUri.append_item_name_suffix(head_data.Prefix_2, values_index + 3, values);
             LootUri.append_item_name(head_data.Id, values_index + 4, values);
             LootUri.append_item_suffix(head_data.Suffix, values_index + 5, values);
-            assert values[values_index + 6] = inverted_commas;
-            assert values[values_index + 7] = right_bracket;
-            assert values[values_index + 8] = comma;
-            return (values_index + 9,);
+            let check_ge_20 = is_le(20, head_data.Greatness);
+            if (check_ge_20 == TRUE) {
+                assert values[values_index + 6] = ' +1';
+                assert values[values_index + 7] = inverted_commas;
+                assert values[values_index + 8] = right_bracket;
+                assert values[values_index + 9] = comma;
+                return (values_index + 10,);
+            } else {
+                assert values[values_index + 6] = inverted_commas;
+                assert values[values_index + 7] = right_bracket;
+                assert values[values_index + 8] = comma;
+                return (values_index + 9,);
+            }
         }
     }
 
@@ -661,10 +689,19 @@ namespace AdventurerUri {
             LootUri.append_item_name_suffix(waist_data.Prefix_2, values_index + 3, values);
             LootUri.append_item_name(waist_data.Id, values_index + 4, values);
             LootUri.append_item_suffix(waist_data.Suffix, values_index + 5, values);
-            assert values[values_index + 6] = inverted_commas;
-            assert values[values_index + 7] = right_bracket;
-            assert values[values_index + 8] = comma;
-            return (values_index + 9,);
+            let check_ge_20 = is_le(20, waist_data.Greatness);
+            if (check_ge_20 == TRUE) {
+                assert values[values_index + 6] = ' +1';
+                assert values[values_index + 7] = inverted_commas;
+                assert values[values_index + 8] = right_bracket;
+                assert values[values_index + 9] = comma;
+                return (values_index + 10,);
+            } else {
+                assert values[values_index + 6] = inverted_commas;
+                assert values[values_index + 7] = right_bracket;
+                assert values[values_index + 8] = comma;
+                return (values_index + 9,);
+            }
         }
     }
 
@@ -701,10 +738,19 @@ namespace AdventurerUri {
             LootUri.append_item_name_suffix(feet_data.Prefix_2, values_index + 3, values);
             LootUri.append_item_name(feet_data.Id, values_index + 4, values);
             LootUri.append_item_suffix(feet_data.Suffix, values_index + 5, values);
-            assert values[values_index + 6] = inverted_commas;
-            assert values[values_index + 7] = right_bracket;
-            assert values[values_index + 8] = comma;
-            return (values_index + 9,);
+            let check_ge_20 = is_le(20, feet_data.Greatness);
+            if (check_ge_20 == TRUE) {
+                assert values[values_index + 6] = ' +1';
+                assert values[values_index + 7] = inverted_commas;
+                assert values[values_index + 8] = right_bracket;
+                assert values[values_index + 9] = comma;
+                return (values_index + 10,);
+            } else {
+                assert values[values_index + 6] = inverted_commas;
+                assert values[values_index + 7] = right_bracket;
+                assert values[values_index + 8] = comma;
+                return (values_index + 9,);
+            }
         }
     }
 
@@ -741,10 +787,19 @@ namespace AdventurerUri {
             LootUri.append_item_name_suffix(hands_data.Prefix_2, values_index + 3, values);
             LootUri.append_item_name(hands_data.Id, values_index + 4, values);
             LootUri.append_item_suffix(hands_data.Suffix, values_index + 5, values);
-            assert values[values_index + 6] = inverted_commas;
-            assert values[values_index + 7] = right_bracket;
-            assert values[values_index + 8] = comma;
-            return (values_index + 9,);
+            let check_ge_20 = is_le(20, hands_data.Greatness);
+            if (check_ge_20 == TRUE) {
+                assert values[values_index + 6] = ' +1';
+                assert values[values_index + 7] = inverted_commas;
+                assert values[values_index + 8] = right_bracket;
+                assert values[values_index + 9] = comma;
+                return (values_index + 10,);
+            } else {
+                assert values[values_index + 6] = inverted_commas;
+                assert values[values_index + 7] = right_bracket;
+                assert values[values_index + 8] = comma;
+                return (values_index + 9,);
+            }
         }
     }
 
@@ -781,10 +836,19 @@ namespace AdventurerUri {
             LootUri.append_item_name_suffix(neck_data.Prefix_2, values_index + 3, values);
             LootUri.append_item_name(neck_data.Id, values_index + 4, values);
             LootUri.append_item_suffix(neck_data.Suffix, values_index + 5, values);
-            assert values[values_index + 6] = inverted_commas;
-            assert values[values_index + 7] = right_bracket;
-            assert values[values_index + 8] = comma;
-            return (values_index + 9,);
+            let check_ge_20 = is_le(20, neck_data.Greatness);
+            if (check_ge_20 == TRUE) {
+                assert values[values_index + 6] = ' +1';
+                assert values[values_index + 7] = inverted_commas;
+                assert values[values_index + 8] = right_bracket;
+                assert values[values_index + 9] = comma;
+                return (values_index + 10,);
+            } else {
+                assert values[values_index + 6] = inverted_commas;
+                assert values[values_index + 7] = right_bracket;
+                assert values[values_index + 8] = comma;
+                return (values_index + 9,);
+            }
         }
     }
 
@@ -821,10 +885,19 @@ namespace AdventurerUri {
             LootUri.append_item_name_suffix(ring_data.Prefix_2, values_index + 3, values);
             LootUri.append_item_name(ring_data.Id, values_index + 4, values);
             LootUri.append_item_suffix(ring_data.Suffix, values_index + 5, values);
-            assert values[values_index + 6] = inverted_commas;
-            assert values[values_index + 7] = right_bracket;
-            assert values[values_index + 8] = comma;
-            return (values_index + 9,);
+            let check_ge_20 = is_le(20, ring_data.Greatness);
+            if (check_ge_20 == TRUE) {
+                assert values[values_index + 6] = ' +1';
+                assert values[values_index + 7] = inverted_commas;
+                assert values[values_index + 8] = right_bracket;
+                assert values[values_index + 9] = comma;
+                return (values_index + 10,);
+            } else {
+                assert values[values_index + 6] = inverted_commas;
+                assert values[values_index + 7] = right_bracket;
+                assert values[values_index + 8] = comma;
+                return (values_index + 9,);
+            }
         }
     }
 
