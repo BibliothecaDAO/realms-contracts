@@ -32,9 +32,12 @@ from openzeppelin.upgrades.library import Proxy
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library.library_module import Module
 from contracts.loot.adventurer.library import AdventurerLib
+from contracts.loot.adventurer.metadata import AdventurerUri
 from contracts.loot.constants.adventurer import (
     Adventurer,
     AdventurerState,
+    AdventurerStatic,
+    AdventurerDynamic,
     PackedAdventurerState,
     AdventurerStatus,
     DiscoveryType,
@@ -46,6 +49,7 @@ from contracts.loot.utils.general import _uint_to_felt
 from contracts.loot.beast.interface import IBeast
 from contracts.loot.loot.ILoot import ILoot
 from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
+
 
 // const MINT_COST = 5000000000000000000
 
@@ -66,7 +70,11 @@ func AdventurerLeveledUp(adventurer_id: Uint256, adveturer_state: AdventurerStat
 // -----------------------------------
 
 @storage_var
-func adventurer(adventurer_token_id: Uint256) -> (adventurer: PackedAdventurerState) {
+func adventurer_static(adventurer_token_id: Uint256) -> (adventurer: AdventurerStatic) {
+}
+
+@storage_var
+func adventurer_dynamic(adventurer_token_id: Uint256) -> (adventurer: PackedAdventurerState) {
 }
 
 // balance of $LORDS
@@ -120,7 +128,15 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 @external
 func mint{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(to: felt, race: felt, home_realm: felt, name: felt, order: felt) {
+}(
+    to: felt, 
+    race: felt, 
+    home_realm: felt, 
+    name: felt, 
+    order: felt, 
+    image_hash_1: felt, 
+    image_hash_2: felt
+) {
     alloc_locals;
 
     let (controller) = Module.controller_address();
@@ -128,19 +144,23 @@ func mint{
 
     // birth
     let (birth_time) = get_block_timestamp();
-    let (new_adventurer: AdventurerState) = AdventurerLib.birth(
-        race, home_realm, name, birth_time, order
+    let (
+        adventurer_static_, 
+        adventurer_dynamic_
+    ) = AdventurerLib.birth(
+        race, home_realm, name, birth_time, order, image_hash_1, image_hash_2
     );
 
     // pack
-    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(adventurer_dynamic_);
 
     // get current ID and add 1
     let (current_id: Uint256) = totalSupply();
     let (next_adventurer_id, _) = uint256_add(current_id, Uint256(1, 0));
 
     // store
-    adventurer.write(next_adventurer_id, packed_new_adventurer);
+    adventurer_static.write(next_adventurer_id, adventurer_static_);
+    adventurer_dynamic.write(next_adventurer_id, packed_new_adventurer);
 
     // mint
     ERC721Enumerable._mint(to, next_adventurer_id);
@@ -173,6 +193,7 @@ func equip_item{
 
     // unpack adventurer
     let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
+    let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
 
     // Get Item from Loot contract
     let (loot_address) = Module.get_module_address(ModuleIds.Loot);
@@ -192,11 +213,11 @@ func equip_item{
     let (token_to_felt) = _uint_to_felt(item_token_id);
 
     // Equip Item
-    let (equiped_adventurer) = AdventurerLib.equip_item(token_to_felt, item, unpacked_adventurer);
+    let (equiped_adventurer) = AdventurerLib.equip_item(token_to_felt, item, adventurer_dynamic_);
 
     // Pack adventurer and write to chain
     let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(equiped_adventurer);
-    adventurer.write(adventurer_token_id, packed_new_adventurer);
+    adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
 
     let (adventurer_to_felt) = _uint_to_felt(adventurer_token_id);
 
@@ -232,6 +253,7 @@ func unequip_item{
 
     // unpack adventurer
     let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
+    let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
 
     // Get Item from Loot contract
     let (loot_address) = Module.get_module_address(ModuleIds.Loot);
@@ -249,11 +271,11 @@ func unequip_item{
     let (token_to_felt) = _uint_to_felt(item_token_id);
 
     // Unequip Item
-    let (unequiped_adventurer) = AdventurerLib.unequip_item(item, unpacked_adventurer);
+    let (unequiped_adventurer) = AdventurerLib.unequip_item(item, adventurer_dynamic_);
 
     // Pack adventurer
     let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(unequiped_adventurer);
-    adventurer.write(adventurer_token_id, packed_new_adventurer);
+    adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
 
     // Update item
     ILoot.updateAdventurer(loot_address, item_token_id, 0);
@@ -284,11 +306,12 @@ func update_status{
     Module.only_approved();
 
     let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
+    let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
 
-    let (new_adventurer) = AdventurerLib.update_status(status, unpacked_adventurer);
+    let (new_adventurer) = AdventurerLib.update_status(status, adventurer_dynamic_);
 
     let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
-    adventurer.write(adventurer_token_id, packed_new_adventurer);
+    adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
 
     emit_adventurer_state(adventurer_token_id);
 
@@ -309,9 +332,10 @@ func deduct_health{
 
     // unpack adventurer
     let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
+    let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
 
     // deduct health
-    let (new_adventurer) = AdventurerLib.deduct_health(amount, unpacked_adventurer);
+    let (new_adventurer) = AdventurerLib.deduct_health(amount, adventurer_dynamic_);
 
     // if the adventurer is dead
     if (new_adventurer.Health == 0) {
@@ -335,7 +359,7 @@ func deduct_health{
     }
 
     let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
-    adventurer.write(adventurer_token_id, packed_new_adventurer);
+    adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
 
     emit_adventurer_state(adventurer_token_id);
 
@@ -356,9 +380,10 @@ func increase_xp{
 
     // unpack adventurer
     let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
+    let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
 
     // increase xp
-    let (updated_xp_adventurer) = AdventurerLib.increase_xp(amount, unpacked_adventurer);
+    let (updated_xp_adventurer) = AdventurerLib.increase_xp(amount, adventurer_dynamic_);
 
     // check if the adventurer  reached the next level
     let (leveled_up) = CombatStats.check_for_level_increase(
@@ -374,14 +399,14 @@ func increase_xp{
         let (packed_updated_adventurer: PackedAdventurerState) = AdventurerLib.pack(
             updated_level_adventurer
         );
-        adventurer.write(adventurer_token_id, packed_updated_adventurer);
+        adventurer_dynamic.write(adventurer_token_id, packed_updated_adventurer);
         emit_adventurer_leveled_up(adventurer_token_id);
         return (TRUE,);
     } else {
         let (packed_updated_adventurer: PackedAdventurerState) = AdventurerLib.pack(
             updated_xp_adventurer
         );
-        adventurer.write(adventurer_token_id, packed_updated_adventurer);
+        adventurer_dynamic.write(adventurer_token_id, packed_updated_adventurer);
         emit_adventurer_state(adventurer_token_id);
         return (TRUE,);
     }
@@ -401,6 +426,7 @@ func explore{
 
     // unpack adventurer
     let (unpacked_adventurer) = get_adventurer_by_id(token_id);
+    let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
 
     assert_not_dead(token_id);
 
@@ -420,16 +446,16 @@ func explore{
     // If the adventurer encounter a beast
     if (discovery == DiscoveryType.Beast) {
         // we set their status to battle
-        let (unpacked_adventurer: AdventurerState) = AdventurerLib.update_status(
-            AdventurerStatus.Battle, unpacked_adventurer
+        let (new_unpacked_adventurer) = AdventurerLib.update_status(
+            AdventurerStatus.Battle, adventurer_dynamic_
         );
         // create beast
         let (beast_address) = Module.get_module_address(ModuleIds.Beast);
         let (beast_id: Uint256) = IBeast.create(beast_address, token_id);
-        let (updated_adventurer) = AdventurerLib.assign_beast(beast_id.low, unpacked_adventurer);
+        let (updated_adventurer) = AdventurerLib.assign_beast(beast_id.low, new_unpacked_adventurer);
         let (packed_adventurer) = AdventurerLib.pack(updated_adventurer);
 
-        adventurer.write(token_id, packed_adventurer);
+        adventurer_dynamic.write(token_id, packed_adventurer);
 
         emit_adventurer_state(token_id);
 
@@ -507,12 +533,15 @@ func get_adventurer_by_id{
 }(adventurer_token_id: Uint256) -> (adventurer: AdventurerState) {
     alloc_locals;
 
-    let (packed_adventurer) = adventurer.read(adventurer_token_id);
+    let (adventurer_static_) = adventurer_static.read(adventurer_token_id);
+    let (packed_adventurer) = adventurer_dynamic.read(adventurer_token_id);
 
     // unpack
-    let (unpacked_adventurer: AdventurerState) = AdventurerLib.unpack(packed_adventurer);
+    let (unpacked_adventurer: AdventurerDynamic) = AdventurerLib.unpack(packed_adventurer);
+    let (adventurer) = AdventurerLib.aggregate_data(adventurer_static_, unpacked_adventurer);
 
-    return (unpacked_adventurer,);
+
+    return (adventurer,);
 }
 
 // --------------------
@@ -596,11 +625,19 @@ func isApprovedForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 }
 
 @view
-func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    adventurer_token_id: Uint256
-) -> (tokenURI: felt) {
-    let (tokenURI: felt) = ERC721.token_uri(adventurer_token_id);
-    return (tokenURI,);
+func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, bitwise_ptr: BitwiseBuiltin*, range_check_ptr}(
+    tokenId: Uint256
+) -> (tokenURI_len: felt, tokenURI: felt*) {
+    alloc_locals;
+    let (controller) = Module.controller_address();
+    let (item_address) = Module.get_module_address(ModuleIds.Loot);
+    let (beast_address) = Module.get_module_address(ModuleIds.Beast);
+    let (realms_address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.Realms
+    );
+    let (adventurer_data) = get_adventurer_by_id(tokenId);
+    let (tokenURI_len, tokenURI: felt*) = AdventurerUri.build(tokenId, adventurer_data, item_address, beast_address, realms_address);
+    return (tokenURI_len, tokenURI);
 }
 
 @view
@@ -635,15 +672,6 @@ func burn{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
 ) {
     ERC721.assert_only_token_owner(adventurer_token_id);
     ERC721Enumerable._burn(adventurer_token_id);
-    return ();
-}
-
-@external
-func setTokenURI{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    adventurer_token_id: Uint256, tokenURI: felt
-) {
-    Ownable.assert_only_owner();
-    ERC721._set_token_uri(adventurer_token_id, tokenURI);
     return ();
 }
 

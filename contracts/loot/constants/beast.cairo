@@ -12,7 +12,7 @@ from contracts.loot.constants.item import Type
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 
 struct Beast {
-    Id: felt,  // beast id 1 - 100
+    Id: felt,  // beast id 1 - 18
     AttackType: felt,  // same as Loot weapons: magic, bludgeon, blade
     ArmorType: felt,  // same as Loot weapons: cloth, metal, hide
     Rank: felt,  // same as Loot weapons: 1 is the strongest

@@ -46,31 +46,15 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     %}
 
     ILords.approve(addresses.lords, addresses.adventurer, Uint256(10000, 0));
-
-    let weapon_id: Item = Item(
-        ItemIds.Wand,
-        ItemSlot.Wand, 
-        ItemType.Wand, 
-        ItemMaterial.Wand, 
-        ItemRank.Wand, 
-        1, 
-        1, 
-        1, 
-        10, 
-        0, 
-        0, 
-        0,
-        0
-    ); // Wand
     ILoot.mint(addresses.loot, addresses.account_1);
-    ILoot.setItemById(addresses.loot, Uint256(1,0), weapon_id);
+    ILoot.setItemById(addresses.loot, Uint256(1,0), ItemIds.Wand, 10, 0, 0, 0);
     IRealms.set_realm_data(addresses.realms, Uint256(13, 0), 'Test Realm', 1);
 
     %{
         stop_prank_lords()
     %}
 
-    IAdventurer.mint(addresses.adventurer, addresses.account_1, 4, 10, 'Test', 8);
+    IAdventurer.mint(addresses.adventurer, addresses.account_1, 4, 10, 'Test', 8, 1, 1);
     %{
         stop_prank_loot()
     %}
@@ -201,24 +185,8 @@ func test_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         stop_prank_beast = start_prank(ids.account_1_address, ids.beast_address)
     %}
 
-    let strong_item: Item = Item(
-        ItemIds.Katana,
-        ItemSlot.Katana, 
-        ItemType.Katana, 
-        ItemMaterial.Katana, 
-        ItemRank.Katana, 
-        1, 
-        1, 
-        1, 
-        20,  // high greatness
-        0, 
-        0, 
-        0, 
-        0
-    ); // Mace
-
     let loot_token_id = Uint256(1,0);
-    ILoot.setItemById(loot_address, loot_token_id, strong_item);
+    ILoot.setItemById(loot_address, loot_token_id, ItemIds.Katana, 20, 0, 0, 0);
 
     let beast_token_id = Uint256(1,0);
     IBeast.attack(beast_address, beast_token_id);

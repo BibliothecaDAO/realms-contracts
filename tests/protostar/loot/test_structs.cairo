@@ -10,8 +10,8 @@ from contracts.loot.beast.stats.beast import BeastStats
 from contracts.loot.loot.stats.item import ItemStats
 
 const TEST_WEAPON_TOKEN_ID = 20;
-const TEST_DAMAGE_HEALTH_REMAINING = 100;
-const TEST_DAMAGE_OVERKILL = 10000;
+const TEST_DAMAGE_HEALTH_REMAINING = 50;
+const TEST_DAMAGE_OVERKILL = 100;
 
 namespace TestAdventurerState {
     // immutable stats
@@ -19,12 +19,14 @@ namespace TestAdventurerState {
     const HomeRealm = 2;  // 13
     const Birthdate = 1662888731;
     const Name = 'loaf';
+    const Order = 12;  //
+    const ImageHash1 = 'QmUn4BZtz4tw3rzpZHpT2oE';
+    const ImageHash2 = 'o6guw2FxsiPEyvfRFnUJWzZ';
 
     // evolving stats
-    const Health = 5000;  //
+    const Health = 100;  //
 
     const Level = 500;  //
-    const Order = 12;  //
 
     // Physical
     const Strength = 1000;
@@ -60,35 +62,36 @@ namespace TestAdventurerState {
 func get_adventurer_state{syscall_ptr: felt*, range_check_ptr}() -> (
     adventurer_state: AdventurerState
 ) {
-    alloc_locals;
 
     return (
         AdventurerState(
-        TestAdventurerState.Race,
-        TestAdventurerState.HomeRealm,
-        TestAdventurerState.Birthdate,
-        TestAdventurerState.Name,
-        TestAdventurerState.Health,
-        TestAdventurerState.Level,
-        TestAdventurerState.Order,
-        TestAdventurerState.Strength,
-        TestAdventurerState.Dexterity,
-        TestAdventurerState.Vitality,
-        TestAdventurerState.Intelligence,
-        TestAdventurerState.Wisdom,
-        TestAdventurerState.Charisma,
-        TestAdventurerState.Luck,
-        TestAdventurerState.XP,
-        TestAdventurerState.WeaponId,
-        TestAdventurerState.ChestId,
-        TestAdventurerState.HeadId,
-        TestAdventurerState.WaistId,
-        TestAdventurerState.FeetId,
-        TestAdventurerState.HandsId,
-        TestAdventurerState.NeckId,
-        TestAdventurerState.RingId,
-        TestAdventurerState.Status,
-        TestAdventurerState.Beast,
+            TestAdventurerState.Race,
+            TestAdventurerState.HomeRealm,
+            TestAdventurerState.Birthdate,
+            TestAdventurerState.Name,
+            TestAdventurerState.Order,
+            TestAdventurerState.ImageHash1,
+            TestAdventurerState.ImageHash2,
+            TestAdventurerState.Health,
+            TestAdventurerState.Level,
+            TestAdventurerState.Strength,
+            TestAdventurerState.Dexterity,
+            TestAdventurerState.Vitality,
+            TestAdventurerState.Intelligence,
+            TestAdventurerState.Wisdom,
+            TestAdventurerState.Charisma,
+            TestAdventurerState.Luck,
+            TestAdventurerState.XP,
+            TestAdventurerState.WeaponId,
+            TestAdventurerState.ChestId,
+            TestAdventurerState.HeadId,
+            TestAdventurerState.WaistId,
+            TestAdventurerState.FeetId,
+            TestAdventurerState.HandsId,
+            TestAdventurerState.NeckId,
+            TestAdventurerState.RingId,
+            TestAdventurerState.Status,
+            TestAdventurerState.Beast,
         ),
     );
 }

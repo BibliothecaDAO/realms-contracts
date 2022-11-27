@@ -60,20 +60,19 @@ struct Adventurer {
 // @notice This is immutable information stored on-chain
 // We pack all this information tightly into felts
 //    to save on storage costs.
-
-// immutable stats
-struct AdventurerStatic {
+struct AdventurerState {
+    // immutable stats
     Race: felt,
     HomeRealm: felt,
     Birthdate: felt,
     Name: felt,
     Order: felt,
-}
+    ImageHash1: felt,
+    ImageHash2: felt,
 
-// evolving stats
-struct AdventurerDynamic {
-    Health: felt,
-    Level: felt,
+    // evolving stats
+    Health: felt,  //
+    Level: felt,  //
 
     // Physical
     Strength: felt,
@@ -89,7 +88,7 @@ struct AdventurerDynamic {
     Luck: felt,
 
     // XP
-    XP: felt,
+    XP: felt,  //
     // store item NFT id when equiped
     // Packed Stats p2
     WeaponId: felt,
@@ -102,19 +101,32 @@ struct AdventurerDynamic {
     HandsId: felt,
     NeckId: felt,
     RingId: felt,
+
+    Status: felt,
+    Beast: felt,
 }
 
-struct AdventurerState {
+// @notice This is immutable information stored on-chain
+// We pack all this information tightly into felts
+//    to save on storage costs.
+struct AdventurerStatic {
     // immutable stats
-    Race: felt,  // 3
-    HomeRealm: felt,  // 13
+    Race: felt,
+    HomeRealm: felt,
     Birthdate: felt,
     Name: felt,
+    Order: felt,
+    ImageHash1: felt,
+    ImageHash2: felt,
+}
 
+// @notice This is immutable information stored on-chain
+// We pack all this information tightly into felts
+//    to save on storage costs.
+struct AdventurerDynamic {
     // evolving stats
     Health: felt,  //
     Level: felt,  //
-    Order: felt,  //
 
     // Physical
     Strength: felt,
@@ -153,49 +165,31 @@ struct PackedAdventurerState {
     p2: felt,
     p3: felt,
     p4: felt,
-    p5: felt,
 }
 
 namespace SHIFT_P_1 {
     const _1 = 2 ** 0;
-    const _2 = 2 ** 3;
-    const _3 = 2 ** 16;
-    const _4 = 2 ** 65;
+    const _2 = 2 ** 10;
+    const _3 = 2 ** 20;
+    const _4 = 2 ** 30;
+    const _5 = 2 ** 40;
+    const _6 = 2 ** 50;
+    const _7 = 2 ** 60;
+    const _8 = 2 ** 70;
+    const _9 = 2 ** 80;
+    const _10 = 2 ** 90;
 }
 
-namespace SHIFT_P_2 {
-    const _1 = 2 ** 0;
-    const _2 = 2 ** 13;
-    const _3 = 2 ** 22;
-    const _4 = 2 ** 27;
-    const _5 = 2 ** 37;
-    const _6 = 2 ** 47;
-    const _7 = 2 ** 57;
-    const _8 = 2 ** 67;
-    const _9 = 2 ** 77;
-    const _10 = 2 ** 87;
-    const _11 = 2 ** 97;
-    const _12 = 2 ** 107;
-    const _13 = 2 ** 117;
-}
-
-namespace SHIFT_P_5 {
+namespace SHIFT_P_4 {
     const _1 = 2 ** 0;
     const _2 = 2 ** 3;
 }
 
 
 namespace AdventurerSlotIds {
-    // immutable stats
-    const Race = 0;
-    const HomeRealm = 1;
-    const Birthdate = 2;
-    const Name = 3;
-
     // evolving stats
-    const Health = 4;
-    const Level = 5;
-    const Order = 6;
+    const Health = 0;
+    const Level = 1;
 
     // Physical
     const Strength = 2;
@@ -211,7 +205,7 @@ namespace AdventurerSlotIds {
     const Luck = 8;
 
     // XP
-    const XP = 14;
+    const XP = 9;
 
     // store item NFT id when equiped
     // Packed Stats p2
@@ -221,13 +215,14 @@ namespace AdventurerSlotIds {
     const WaistId = 13;
 
     // Packed Stats p3
-    const FeetId = 19;
-    const HandsId = 20;
-    const NeckId = 21;
-    const RingId = 22;
+    const FeetId = 14;
+    const HandsId = 15;
+    const NeckId = 16;
+    const RingId = 17;
 
-    const Status = 23;
-    const Beast = 24;
+    // Packed Stats p4
+    const Status = 18;
+    const Beast = 19;
 }
 
 namespace AdventurerStatus {

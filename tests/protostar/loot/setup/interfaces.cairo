@@ -44,7 +44,11 @@ namespace ILoot {
     }
     func setItemById(
         tokenId: Uint256,
-        item: Item
+        item_id: felt, 
+        greatness: felt, 
+        xp: felt, 
+        adventurer: felt, 
+        bag_id: felt
     ) {
     }
     func getItemByTokenId(tokenId: Uint256) -> (item: Item) {
@@ -62,7 +66,15 @@ namespace IAdventurer {
         address_of_controller: felt,
     ) {
     }
-    func mint(to: felt, race: felt, home_realm: felt, name: felt, order: felt) {
+    func mint(
+        to: felt, 
+        race: felt, 
+        home_realm: felt, 
+        name: felt, 
+        order: felt, 
+        image_hash_1: felt, 
+        image_hash_2: felt
+    ) {
     }
     func equip_item(tokenId: Uint256, itemTokenId: Uint256) -> (success: felt) {
     }

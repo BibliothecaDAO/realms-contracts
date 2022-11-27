@@ -14,7 +14,7 @@ from starkware.cairo.common.uint256 import Uint256, uint256_unsigned_div_rem
 from starkware.cairo.common.math import unsigned_div_rem
 
 from contracts.loot.constants.adventurer import AdventurerState, AdventurerStatic
-from contracts.loot.adventurer.IAdventurer import IAdventurer
+from contracts.loot.adventurer.interface import IAdventurer
 from contracts.loot.constants.item import (
     Item, 
     ItemIds,
@@ -29,7 +29,7 @@ from contracts.settling_game.utils.game_structs import ExternalContractIds
 
 from contracts.loot.loot.ILoot import ILoot
 
-namespace Utils {
+namespace LootUriUtils {
     namespace Symbols {
         const LeftBracket = 123;
         const RightBracket = 125;
@@ -383,7 +383,7 @@ namespace Utils {
     }
 }
 
-namespace Uri {
+namespace LootUri {
     // @notice build uri array from stored item data
     // @implicit range_check_ptr
     // @param item_id: id of the item
@@ -394,10 +394,10 @@ namespace Uri {
         alloc_locals;
 
         // pre-defined for reusability
-        let left_bracket = Utils.Symbols.LeftBracket;
-        let right_bracket = Utils.Symbols.RightBracket;
-        let inverted_commas = Utils.Symbols.InvertedCommas;
-        let comma = Utils.Symbols.Comma;
+        let left_bracket = LootUriUtils.Symbols.LeftBracket;
+        let right_bracket = LootUriUtils.Symbols.RightBracket;
+        let inverted_commas = LootUriUtils.Symbols.InvertedCommas;
+        let comma = LootUriUtils.Symbols.Comma;
 
         let data_format = 'data:application/json,';
 
@@ -456,8 +456,8 @@ namespace Uri {
         let (type_index) = append_type(item_data.Type, slot_index, values);
 
         // material
-        assert values[type_index] = Utils.TraitKeys.Material;
-        assert values[type_index + 1] = Utils.TraitKeys.ValueKey;
+        assert values[type_index] = LootUriUtils.TraitKeys.Material;
+        assert values[type_index + 1] = LootUriUtils.TraitKeys.ValueKey;
 
         let (material_index) = append_material(item_data.Material, type_index + 2, values);
         
@@ -466,15 +466,15 @@ namespace Uri {
         assert values[material_index + 2] = comma;
 
         // rank
-        assert values[material_index + 3] = Utils.TraitKeys.Rank;
-        assert values[material_index + 4] = Utils.TraitKeys.ValueKey;
+        assert values[material_index + 3] = LootUriUtils.TraitKeys.Rank;
+        assert values[material_index + 4] = LootUriUtils.TraitKeys.ValueKey;
         assert values[material_index + 5] = item_data.Rank + 48;
         assert values[material_index + 6] = inverted_commas;
         assert values[material_index + 7] = right_bracket;
         assert values[material_index + 8] = comma;
         // greatness
-        assert values[material_index + 9] = Utils.TraitKeys.Greatness;
-        assert values[material_index + 10] = Utils.TraitKeys.ValueKey;
+        assert values[material_index + 9] = LootUriUtils.TraitKeys.Greatness;
+        assert values[material_index + 10] = LootUriUtils.TraitKeys.ValueKey;
 
         let (greatness_size) = append_felt_ascii(item_data.Greatness, values + material_index + 11);
         let greatness_index = material_index + 11 + greatness_size;
@@ -483,8 +483,8 @@ namespace Uri {
         assert values[greatness_index + 1] = right_bracket;
         assert values[greatness_index + 2] = comma;
         // created
-        assert values[greatness_index + 3] = Utils.TraitKeys.CreatedBlock;
-        assert values[greatness_index + 4] = Utils.TraitKeys.ValueKey;
+        assert values[greatness_index + 3] = LootUriUtils.TraitKeys.CreatedBlock;
+        assert values[greatness_index + 4] = LootUriUtils.TraitKeys.ValueKey;
 
         let (created_size) = append_felt_ascii(item_data.CreatedBlock, values + greatness_index + 5);
         let created_index = greatness_index + 5 + created_size;
@@ -493,8 +493,8 @@ namespace Uri {
         assert values[created_index + 1] = right_bracket;
         assert values[created_index + 2] = comma;
         // XP
-        assert values[created_index + 3] = Utils.TraitKeys.XP;
-        assert values[created_index + 4] = Utils.TraitKeys.ValueKey;
+        assert values[created_index + 3] = LootUriUtils.TraitKeys.XP;
+        assert values[created_index + 4] = LootUriUtils.TraitKeys.ValueKey;
 
         let (xp_size) = append_felt_ascii(item_data.XP, values + created_index + 5);
         let xp_index = created_index + 5 + xp_size;
@@ -503,18 +503,18 @@ namespace Uri {
         assert values[xp_index + 1] = right_bracket;
         assert values[xp_index + 2] = comma;
         // adventurer
-        assert values[xp_index + 3] = Utils.TraitKeys.Adventurer;
-        assert values[xp_index + 4] = Utils.TraitKeys.ValueKey;
+        assert values[xp_index + 3] = LootUriUtils.TraitKeys.Adventurer;
+        assert values[xp_index + 4] = LootUriUtils.TraitKeys.ValueKey;
 
-        let (adventurer_static: AdventurerStatic, _) = IAdventurer.getAdventurerById(adventurer_address, Uint256(item_data.Adventurer, 0));
-        assert values[xp_index + 5] = adventurer_static.Name;
+        let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(item_data.Adventurer, 0));
+        assert values[xp_index + 5] = adventurer.Name;
         
         assert values[xp_index + 6] = inverted_commas;
         assert values[xp_index + 7] = right_bracket;
         assert values[xp_index + 8] = comma;
         // bag
-        assert values[xp_index + 9] = Utils.TraitKeys.Bag;
-        assert values[xp_index + 10] = Utils.TraitKeys.ValueKey;
+        assert values[xp_index + 9] = LootUriUtils.TraitKeys.Bag;
+        assert values[xp_index + 10] = LootUriUtils.TraitKeys.ValueKey;
 
         let (bag_size) = append_felt_ascii(item_data.Bag, values + xp_index + 11);
         let bag_index = xp_index + 11 + bag_size;
@@ -541,279 +541,279 @@ namespace Uri {
             return (values_index,);
         }
         if (name_prefix_id == ItemNamePrefixes.Agony) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Agony;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Agony;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Apocalypse) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Apocalypse;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Apocalypse;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Armageddon) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Armageddon;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Armageddon;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Beast) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Beast;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Beast;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Behemoth) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Behemoth;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Behemoth;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Blight) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Blight;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Blight;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Blood) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Blood;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Blood;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Bramble) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Bramble;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Bramble;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Brimstone) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Brimstone;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Brimstone;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Brood) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Brood;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Brood;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Carrion) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Carrion;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Carrion;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Cataclysm) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Cataclysm;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Cataclysm;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Chimeric) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Chimeric;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Chimeric;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Corpse) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Corpse;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Corpse;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Corruption) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Corruption;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Corruption;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Damnation) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Damnation;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Damnation;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Death) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Death;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Death;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Demon) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Demon;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Demon;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Dire) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Dire;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Dire;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Dragon) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Dragon;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Dragon;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Dread) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Dread;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Dread;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Doom) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Doom;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Doom;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Dusk) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Dusk;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Dusk;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Eagle) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Eagle;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Eagle;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Empyrean) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Empyrean;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Empyrean;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Fate) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Fate;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Fate;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Foe) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Foe;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Foe;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Gale) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Gale;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Gale;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Ghoul) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Ghoul;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Ghoul;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Gloom) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Gloom;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Gloom;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Glyph) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Glyph;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Glyph;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Golem) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Golem;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Golem;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Grim) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Grim;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Grim;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Hate) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Hate;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Hate;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Havoc) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Havoc;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Havoc;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Honour) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Honour;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Honour;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Horror) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Horror;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Horror;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Hypnotic) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Hypnotic;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Hypnotic;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Kraken) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Kraken;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Kraken;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Loath) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Loath;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Loath;
             return (values_index + 1,);
         }
          if (name_prefix_id == ItemNamePrefixes.Maelstrom) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Maelstrom;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Maelstrom;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Mind) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Mind;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Mind;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Miracle) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Miracle;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Miracle;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Morbid) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Morbid;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Morbid;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Oblivion) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Oblivion;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Oblivion;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Onslaught) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Onslaught;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Onslaught;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Pain) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Pain;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Pain;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Pandemonium) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Pandemonium;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Pandemonium;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Phoenix) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Phoenix;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Phoenix;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Plague) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Plague;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Plague;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Rage) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Rage;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Rage;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Rapture) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Rapture;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Rapture;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Rune) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Rune;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Rune;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Skull) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Skull;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Skull;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Sol) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Sol;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Sol;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Soul) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Soul;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Soul;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Sorrow) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Sorrow;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Sorrow;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Spirit) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Spirit;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Spirit;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Storm) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Storm;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Storm;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Tempest) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Tempest;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Tempest;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Torment) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Torment;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Torment;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Vengeance) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Vengeance;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Vengeance;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Victory) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Victory;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Victory;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Viper) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Viper;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Viper;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Vortex) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Vortex;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Vortex;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Woe) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Woe;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Woe;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Wrath) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Wrath;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Wrath;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Lights) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Lights;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Lights;
             return (values_index + 1,);
         }
         if (name_prefix_id == ItemNamePrefixes.Shimmering) {
-            assert values[values_index] = Utils.ItemNamePrefixes.Shimmering;
+            assert values[values_index] = LootUriUtils.ItemNamePrefixes.Shimmering;
             return (values_index + 1,);
         }
         return (values_index,);
@@ -831,75 +831,75 @@ namespace Uri {
             return (values_index,);
         }
         if (name_suffix_id == ItemNameSuffixes.Bane) {
-            assert values[values_index] = Utils.ItemNameSuffixes.Bane;
+            assert values[values_index] = LootUriUtils.ItemNameSuffixes.Bane;
             return (values_index + 1,);
         }
         if (name_suffix_id == ItemNameSuffixes.Root) {
-            assert values[values_index] = Utils.ItemNameSuffixes.Root;
+            assert values[values_index] = LootUriUtils.ItemNameSuffixes.Root;
             return (values_index + 1,);
         }
         if (name_suffix_id == ItemNameSuffixes.Bite) {
-            assert values[values_index] = Utils.ItemNameSuffixes.Bite;
+            assert values[values_index] = LootUriUtils.ItemNameSuffixes.Bite;
             return (values_index + 1,);
         }
         if (name_suffix_id == ItemNameSuffixes.Song) {
-            assert values[values_index] = Utils.ItemNameSuffixes.Song;
+            assert values[values_index] = LootUriUtils.ItemNameSuffixes.Song;
             return (values_index + 1,);
         }
         if (name_suffix_id == ItemNameSuffixes.Roar) {
-            assert values[values_index] = Utils.ItemNameSuffixes.Roar;
+            assert values[values_index] = LootUriUtils.ItemNameSuffixes.Roar;
             return (values_index + 1,);
         }
         if (name_suffix_id == ItemNameSuffixes.Grasp) {
-            assert values[values_index] = Utils.ItemNameSuffixes.Grasp;
+            assert values[values_index] = LootUriUtils.ItemNameSuffixes.Grasp;
             return (values_index + 1,);
         }
         if (name_suffix_id == ItemNameSuffixes.Instrument) {
-            assert values[values_index] = Utils.ItemNameSuffixes.Instrument;
+            assert values[values_index] = LootUriUtils.ItemNameSuffixes.Instrument;
             return (values_index + 1,);
         }
         if (name_suffix_id == ItemNameSuffixes.Glow) {
-            assert values[values_index] = Utils.ItemNameSuffixes.Glow;
+            assert values[values_index] = LootUriUtils.ItemNameSuffixes.Glow;
             return (values_index + 1,);
         }
         if (name_suffix_id == ItemNameSuffixes.Bender) {
-            assert values[values_index] = Utils.ItemNameSuffixes.Bender;
+            assert values[values_index] = LootUriUtils.ItemNameSuffixes.Bender;
             return (values_index + 1,);
         }
         if (name_suffix_id == ItemNameSuffixes.Shadow) {
-            assert values[values_index] = Utils.ItemNameSuffixes.Shadow;
+            assert values[values_index] = LootUriUtils.ItemNameSuffixes.Shadow;
             return (values_index + 1,);
         }
         if (name_suffix_id == ItemNameSuffixes.Whisper) {
-            assert values[values_index] = Utils.ItemNameSuffixes.Whisper;
+            assert values[values_index] = LootUriUtils.ItemNameSuffixes.Whisper;
             return (values_index + 1,);
         }
         if (name_suffix_id == ItemNameSuffixes.Shout) {
-            assert values[values_index] = Utils.ItemNameSuffixes.Shout;
+            assert values[values_index] = LootUriUtils.ItemNameSuffixes.Shout;
             return (values_index + 1,);
         }
         if (name_suffix_id == ItemNameSuffixes.Growl) {
-            assert values[values_index] = Utils.ItemNameSuffixes.Growl;
+            assert values[values_index] = LootUriUtils.ItemNameSuffixes.Growl;
             return (values_index + 1,);
         }
         if (name_suffix_id == ItemNameSuffixes.Tear) {
-            assert values[values_index] = Utils.ItemNameSuffixes.Tear;
+            assert values[values_index] = LootUriUtils.ItemNameSuffixes.Tear;
             return (values_index + 1,);
         }
         if (name_suffix_id == ItemNameSuffixes.Peak) {
-            assert values[values_index] = Utils.ItemNameSuffixes.Peak;
+            assert values[values_index] = LootUriUtils.ItemNameSuffixes.Peak;
             return (values_index + 1,);
         }
         if (name_suffix_id == ItemNameSuffixes.Form) {
-            assert values[values_index] = Utils.ItemNameSuffixes.Form;
+            assert values[values_index] = LootUriUtils.ItemNameSuffixes.Form;
             return (values_index + 1,);
         }
         if (name_suffix_id == ItemNameSuffixes.Sun) {
-            assert values[values_index] = Utils.ItemNameSuffixes.Sun;
+            assert values[values_index] = LootUriUtils.ItemNameSuffixes.Sun;
             return (values_index + 1,);
         }
         if (name_suffix_id == ItemNameSuffixes.Moon) {
-            assert values[values_index] = Utils.ItemNameSuffixes.Moon;
+            assert values[values_index] = LootUriUtils.ItemNameSuffixes.Moon;
             return (values_index + 1,);
         }
         return (values_index,);
@@ -917,403 +917,403 @@ namespace Uri {
             return (values_index,);
         }
         if (name_id == ItemIds.Pendant) {
-            assert values[values_index] = Utils.ItemNames.Pendant;
+            assert values[values_index] = LootUriUtils.ItemNames.Pendant;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Necklace) {
-            assert values[values_index] = Utils.ItemNames.Necklace;
+            assert values[values_index] = LootUriUtils.ItemNames.Necklace;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Amulet) {
-            assert values[values_index] = Utils.ItemNames.Amulet;
+            assert values[values_index] = LootUriUtils.ItemNames.Amulet;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.SilverRing) {
-            assert values[values_index] = Utils.ItemNames.SilverRing;
+            assert values[values_index] = LootUriUtils.ItemNames.SilverRing;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.BronzeRing) {
-            assert values[values_index] = Utils.ItemNames.BronzeRing;
+            assert values[values_index] = LootUriUtils.ItemNames.BronzeRing;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.PlatinumRing) {
-            assert values[values_index] = Utils.ItemNames.PlatinumRing;
+            assert values[values_index] = LootUriUtils.ItemNames.PlatinumRing;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.TitaniumRing) {
-            assert values[values_index] = Utils.ItemNames.TitaniumRing;
+            assert values[values_index] = LootUriUtils.ItemNames.TitaniumRing;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.GoldRing) {
-            assert values[values_index] = Utils.ItemNames.GoldRing;
+            assert values[values_index] = LootUriUtils.ItemNames.GoldRing;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.GhostWand) {
-            assert values[values_index] = Utils.ItemNames.GhostWand;
+            assert values[values_index] = LootUriUtils.ItemNames.GhostWand;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.GraveWand) {
-            assert values[values_index] = Utils.ItemNames.GraveWand;
+            assert values[values_index] = LootUriUtils.ItemNames.GraveWand;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.BoneWand) {
-            assert values[values_index] = Utils.ItemNames.BoneWand;
+            assert values[values_index] = LootUriUtils.ItemNames.BoneWand;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Wand) {
-            assert values[values_index] = Utils.ItemNames.Wand;
+            assert values[values_index] = LootUriUtils.ItemNames.Wand;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Grimoire) {
-            assert values[values_index] = Utils.ItemNames.Grimoire;
+            assert values[values_index] = LootUriUtils.ItemNames.Grimoire;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Chronicle) {
-            assert values[values_index] = Utils.ItemNames.Chronicle;
+            assert values[values_index] = LootUriUtils.ItemNames.Chronicle;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Tome) {
-            assert values[values_index] = Utils.ItemNames.Tome;
+            assert values[values_index] = LootUriUtils.ItemNames.Tome;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Book) {
-            assert values[values_index] = Utils.ItemNames.Book;
+            assert values[values_index] = LootUriUtils.ItemNames.Book;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Katana) {
-            assert values[values_index] = Utils.ItemNames.Katana;
+            assert values[values_index] = LootUriUtils.ItemNames.Katana;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Falchion) {
-            assert values[values_index] = Utils.ItemNames.Falchion;
+            assert values[values_index] = LootUriUtils.ItemNames.Falchion;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Scimitar) {
-            assert values[values_index] = Utils.ItemNames.Scimitar;
+            assert values[values_index] = LootUriUtils.ItemNames.Scimitar;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.LongSword) {
-            assert values[values_index] = Utils.ItemNames.LongSword;
+            assert values[values_index] = LootUriUtils.ItemNames.LongSword;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.ShortSword) {
-            assert values[values_index] = Utils.ItemNames.ShortSword;
+            assert values[values_index] = LootUriUtils.ItemNames.ShortSword;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Warhammer) {
-            assert values[values_index] = Utils.ItemNames.Warhammer;
+            assert values[values_index] = LootUriUtils.ItemNames.Warhammer;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Quarterstaff) {
-            assert values[values_index] = Utils.ItemNames.Quarterstaff;
+            assert values[values_index] = LootUriUtils.ItemNames.Quarterstaff;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Maul) {
-            assert values[values_index] = Utils.ItemNames.Maul;
+            assert values[values_index] = LootUriUtils.ItemNames.Maul;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Mace) {
-            assert values[values_index] = Utils.ItemNames.Mace;
+            assert values[values_index] = LootUriUtils.ItemNames.Mace;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Club) {
-            assert values[values_index] = Utils.ItemNames.Club;
+            assert values[values_index] = LootUriUtils.ItemNames.Club;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.DivineRobe) {
-            assert values[values_index] = Utils.ItemNames.DivineRobe;
+            assert values[values_index] = LootUriUtils.ItemNames.DivineRobe;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.SilkRobe) {
-            assert values[values_index] = Utils.ItemNames.SilkRobe;
+            assert values[values_index] = LootUriUtils.ItemNames.SilkRobe;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.LinenRobe) {
-            assert values[values_index] = Utils.ItemNames.LinenRobe;
+            assert values[values_index] = LootUriUtils.ItemNames.LinenRobe;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Robe) {
-            assert values[values_index] = Utils.ItemNames.Robe;
+            assert values[values_index] = LootUriUtils.ItemNames.Robe;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.DemonHusk) {
-            assert values[values_index] = Utils.ItemNames.DemonHusk;
+            assert values[values_index] = LootUriUtils.ItemNames.DemonHusk;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.DragonskinArmor) {
-            assert values[values_index] = Utils.ItemNames.DragonskinArmor;
+            assert values[values_index] = LootUriUtils.ItemNames.DragonskinArmor;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.StuddedLeatherArmor) {
-            assert values[values_index] = Utils.ItemNames.StuddedLeatherArmor;
+            assert values[values_index] = LootUriUtils.ItemNames.StuddedLeatherArmor;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.HardLeatherArmor) {
-            assert values[values_index] = Utils.ItemNames.HardLeatherArmor;
+            assert values[values_index] = LootUriUtils.ItemNames.HardLeatherArmor;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.LeatherArmor) {
-            assert values[values_index] = Utils.ItemNames.LeatherArmor;
+            assert values[values_index] = LootUriUtils.ItemNames.LeatherArmor;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.HolyChestplate) {
-            assert values[values_index] = Utils.ItemNames.HolyChestplate;
+            assert values[values_index] = LootUriUtils.ItemNames.HolyChestplate;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.OrnateChestplate) {
-            assert values[values_index] = Utils.ItemNames.OrnateChestplate;
+            assert values[values_index] = LootUriUtils.ItemNames.OrnateChestplate;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.PlateMail) {
-            assert values[values_index] = Utils.ItemNames.PlateMail;
+            assert values[values_index] = LootUriUtils.ItemNames.PlateMail;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.ChainMail) {
-            assert values[values_index] = Utils.ItemNames.ChainMail;
+            assert values[values_index] = LootUriUtils.ItemNames.ChainMail;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.RingMail) {
-            assert values[values_index] = Utils.ItemNames.RingMail;
+            assert values[values_index] = LootUriUtils.ItemNames.RingMail;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Crown) {
-            assert values[values_index] = Utils.ItemNames.Crown;
+            assert values[values_index] = LootUriUtils.ItemNames.Crown;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.DivineHood) {
-            assert values[values_index] = Utils.ItemNames.DivineHood;
+            assert values[values_index] = LootUriUtils.ItemNames.DivineHood;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.SilkHood) {
-            assert values[values_index] = Utils.ItemNames.SilkHood;
+            assert values[values_index] = LootUriUtils.ItemNames.SilkHood;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.LinenHood) {
-            assert values[values_index] = Utils.ItemNames.LinenHood;
+            assert values[values_index] = LootUriUtils.ItemNames.LinenHood;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Hood) {
-            assert values[values_index] = Utils.ItemNames.Hood;
+            assert values[values_index] = LootUriUtils.ItemNames.Hood;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.DemonCrown) {
-            assert values[values_index] = Utils.ItemNames.DemonCrown;
+            assert values[values_index] = LootUriUtils.ItemNames.DemonCrown;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.DragonsCrown) {
-            assert values[values_index] = Utils.ItemNames.DragonsCrown;
+            assert values[values_index] = LootUriUtils.ItemNames.DragonsCrown;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.WarCap) {
-            assert values[values_index] = Utils.ItemNames.WarCap;
+            assert values[values_index] = LootUriUtils.ItemNames.WarCap;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.LeatherCap) {
-            assert values[values_index] = Utils.ItemNames.LeatherCap;
+            assert values[values_index] = LootUriUtils.ItemNames.LeatherCap;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Cap) {
-            assert values[values_index] = Utils.ItemNames.Cap;
+            assert values[values_index] = LootUriUtils.ItemNames.Cap;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.AncientHelm) {
-            assert values[values_index] = Utils.ItemNames.AncientHelm;
+            assert values[values_index] = LootUriUtils.ItemNames.AncientHelm;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.OrnateHelm) {
-            assert values[values_index] = Utils.ItemNames.OrnateHelm;
+            assert values[values_index] = LootUriUtils.ItemNames.OrnateHelm;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.GreatHelm) {
-            assert values[values_index] = Utils.ItemNames.GreatHelm;
+            assert values[values_index] = LootUriUtils.ItemNames.GreatHelm;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.FullHelm) {
-            assert values[values_index] = Utils.ItemNames.FullHelm;
+            assert values[values_index] = LootUriUtils.ItemNames.FullHelm;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Helm) {
-            assert values[values_index] = Utils.ItemNames.Helm;
+            assert values[values_index] = LootUriUtils.ItemNames.Helm;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.BrightsilkSash) {
-            assert values[values_index] = Utils.ItemNames.BrightsilkSash;
+            assert values[values_index] = LootUriUtils.ItemNames.BrightsilkSash;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.SilkSash) {
-            assert values[values_index] = Utils.ItemNames.SilkSash;
+            assert values[values_index] = LootUriUtils.ItemNames.SilkSash;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.WoolSash) {
-            assert values[values_index] = Utils.ItemNames.WoolSash;
+            assert values[values_index] = LootUriUtils.ItemNames.WoolSash;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.LinenSash) {
-            assert values[values_index] = Utils.ItemNames.LinenSash;
+            assert values[values_index] = LootUriUtils.ItemNames.LinenSash;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Sash) {
-            assert values[values_index] = Utils.ItemNames.Sash;
+            assert values[values_index] = LootUriUtils.ItemNames.Sash;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.DemonhideBelt) {
-            assert values[values_index] = Utils.ItemNames.DemonhideBelt;
+            assert values[values_index] = LootUriUtils.ItemNames.DemonhideBelt;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.DragonskinBelt) {
-            assert values[values_index] = Utils.ItemNames.DragonskinBelt;
+            assert values[values_index] = LootUriUtils.ItemNames.DragonskinBelt;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.StuddedLeatherBelt) {
-            assert values[values_index] = Utils.ItemNames.StuddedLeatherBelt;
+            assert values[values_index] = LootUriUtils.ItemNames.StuddedLeatherBelt;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.HardLeatherBelt) {
-            assert values[values_index] = Utils.ItemNames.HardLeatherBelt;
+            assert values[values_index] = LootUriUtils.ItemNames.HardLeatherBelt;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.LeatherBelt) {
-            assert values[values_index] = Utils.ItemNames.LeatherBelt;
+            assert values[values_index] = LootUriUtils.ItemNames.LeatherBelt;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.OrnateBelt) {
-            assert values[values_index] = Utils.ItemNames.OrnateBelt;
+            assert values[values_index] = LootUriUtils.ItemNames.OrnateBelt;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.WarBelt) {
-            assert values[values_index] = Utils.ItemNames.WarBelt;
+            assert values[values_index] = LootUriUtils.ItemNames.WarBelt;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.PlatedBelt) {
-            assert values[values_index] = Utils.ItemNames.PlatedBelt;
+            assert values[values_index] = LootUriUtils.ItemNames.PlatedBelt;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.MeshBelt) {
-            assert values[values_index] = Utils.ItemNames.MeshBelt;
+            assert values[values_index] = LootUriUtils.ItemNames.MeshBelt;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.HeavyBelt) {
-            assert values[values_index] = Utils.ItemNames.HeavyBelt;
+            assert values[values_index] = LootUriUtils.ItemNames.HeavyBelt;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.DivineSlippers) {
-            assert values[values_index] = Utils.ItemNames.DivineSlippers;
+            assert values[values_index] = LootUriUtils.ItemNames.DivineSlippers;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.SilkSlippers) {
-            assert values[values_index] = Utils.ItemNames.SilkSlippers;
+            assert values[values_index] = LootUriUtils.ItemNames.SilkSlippers;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.WoolShoes) {
-            assert values[values_index] = Utils.ItemNames.WoolShoes;
+            assert values[values_index] = LootUriUtils.ItemNames.WoolShoes;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.LinenShoes) {
-            assert values[values_index] = Utils.ItemNames.LinenShoes;
+            assert values[values_index] = LootUriUtils.ItemNames.LinenShoes;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Shoes) {
-            assert values[values_index] = Utils.ItemNames.Shoes;
+            assert values[values_index] = LootUriUtils.ItemNames.Shoes;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.DemonhideBoots) {
-            assert values[values_index] = Utils.ItemNames.DemonhideBoots;
+            assert values[values_index] = LootUriUtils.ItemNames.DemonhideBoots;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.DragonskinBoots) {
-            assert values[values_index] = Utils.ItemNames.DragonskinBoots;
+            assert values[values_index] = LootUriUtils.ItemNames.DragonskinBoots;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.StuddedLeatherBoots) {
-            assert values[values_index] = Utils.ItemNames.StuddedLeatherBoots;
+            assert values[values_index] = LootUriUtils.ItemNames.StuddedLeatherBoots;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.HardLeatherBoots) {
-            assert values[values_index] = Utils.ItemNames.HardLeatherBoots;
+            assert values[values_index] = LootUriUtils.ItemNames.HardLeatherBoots;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.LeatherBoots) {
-            assert values[values_index] = Utils.ItemNames.LeatherBoots;
+            assert values[values_index] = LootUriUtils.ItemNames.LeatherBoots;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.ChainBoots) {
-            assert values[values_index] = Utils.ItemNames.ChainBoots;
+            assert values[values_index] = LootUriUtils.ItemNames.ChainBoots;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.HeavyBoots) {
-            assert values[values_index] = Utils.ItemNames.HeavyBoots;
+            assert values[values_index] = LootUriUtils.ItemNames.HeavyBoots;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.HolyGauntlets) {
-            assert values[values_index] = Utils.ItemNames.HolyGauntlets;
+            assert values[values_index] = LootUriUtils.ItemNames.HolyGauntlets;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.OrnateGauntlets) {
-            assert values[values_index] = Utils.ItemNames.OrnateGauntlets;
+            assert values[values_index] = LootUriUtils.ItemNames.OrnateGauntlets;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Gauntlets) {
-            assert values[values_index] = Utils.ItemNames.Gauntlets;
+            assert values[values_index] = LootUriUtils.ItemNames.Gauntlets;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.DivineGloves) {
-            assert values[values_index] = Utils.ItemNames.DivineGloves;
+            assert values[values_index] = LootUriUtils.ItemNames.DivineGloves;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.SilkGloves) {
-            assert values[values_index] = Utils.ItemNames.SilkGloves;
+            assert values[values_index] = LootUriUtils.ItemNames.SilkGloves;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.WoolGloves) {
-            assert values[values_index] = Utils.ItemNames.WoolGloves;
+            assert values[values_index] = LootUriUtils.ItemNames.WoolGloves;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.LinenGloves) {
-            assert values[values_index] = Utils.ItemNames.LinenGloves;
+            assert values[values_index] = LootUriUtils.ItemNames.LinenGloves;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Gloves) {
-            assert values[values_index] = Utils.ItemNames.Gloves;
+            assert values[values_index] = LootUriUtils.ItemNames.Gloves;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.DemonsHands) {
-            assert values[values_index] = Utils.ItemNames.DemonsHands;
+            assert values[values_index] = LootUriUtils.ItemNames.DemonsHands;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.DragonskinGloves) {
-            assert values[values_index] = Utils.ItemNames.DragonskinGloves;
+            assert values[values_index] = LootUriUtils.ItemNames.DragonskinGloves;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.StuddedLeatherGloves) {
-            assert values[values_index] = Utils.ItemNames.StuddedLeatherGloves;
+            assert values[values_index] = LootUriUtils.ItemNames.StuddedLeatherGloves;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.HardLeatherGloves) {
-            assert values[values_index] = Utils.ItemNames.HardLeatherGloves;
+            assert values[values_index] = LootUriUtils.ItemNames.HardLeatherGloves;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.LeatherGloves) {
-            assert values[values_index] = Utils.ItemNames.LeatherGloves;
+            assert values[values_index] = LootUriUtils.ItemNames.LeatherGloves;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.HolyGreaves) {
-            assert values[values_index] = Utils.ItemNames.HolyGreaves;
+            assert values[values_index] = LootUriUtils.ItemNames.HolyGreaves;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.OrnateGreaves) {
-            assert values[values_index] = Utils.ItemNames.OrnateGreaves;
+            assert values[values_index] = LootUriUtils.ItemNames.OrnateGreaves;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.Greaves) {
-            assert values[values_index] = Utils.ItemNames.Greaves;
+            assert values[values_index] = LootUriUtils.ItemNames.Greaves;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.ChainGloves) {
-            assert values[values_index] = Utils.ItemNames.ChainGloves;
+            assert values[values_index] = LootUriUtils.ItemNames.ChainGloves;
             return (values_index + 1,);
         }
         if (name_id == ItemIds.HeavyGloves) {
-            assert values[values_index] = Utils.ItemNames.HeavyGloves;
+            assert values[values_index] = LootUriUtils.ItemNames.HeavyGloves;
             return (values_index + 1,);
         }
         return (values_index,);
@@ -1331,67 +1331,67 @@ namespace Uri {
             return (values_index,);
         }
         if (suffix_id == ItemSuffixes.of_Power) {
-            assert values[values_index] = Utils.ItemSuffixes.of_Power;
+            assert values[values_index] = LootUriUtils.ItemSuffixes.of_Power;
             return (values_index + 1,);
         }
         if (suffix_id == ItemSuffixes.of_Giant) {
-            assert values[values_index] = Utils.ItemSuffixes.of_Giant;
+            assert values[values_index] = LootUriUtils.ItemSuffixes.of_Giant;
             return (values_index + 1,);
         }
         if (suffix_id == ItemSuffixes.of_Titans) {
-            assert values[values_index] = Utils.ItemSuffixes.of_Titans;
+            assert values[values_index] = LootUriUtils.ItemSuffixes.of_Titans;
             return (values_index + 1,);
         }
         if (suffix_id == ItemSuffixes.of_Skill) {
-            assert values[values_index] = Utils.ItemSuffixes.of_Skill;
+            assert values[values_index] = LootUriUtils.ItemSuffixes.of_Skill;
             return (values_index + 1,);
         }
         if (suffix_id == ItemSuffixes.of_Perfection) {
-            assert values[values_index] = Utils.ItemSuffixes.of_Perfection;
+            assert values[values_index] = LootUriUtils.ItemSuffixes.of_Perfection;
             return (values_index + 1,);
         }
         if (suffix_id == ItemSuffixes.of_Brilliance) {
-            assert values[values_index] = Utils.ItemSuffixes.of_Brilliance;
+            assert values[values_index] = LootUriUtils.ItemSuffixes.of_Brilliance;
             return (values_index + 1,);
         }
         if (suffix_id == ItemSuffixes.of_Enlightenment) {
-            assert values[values_index] = Utils.ItemSuffixes.of_Enlightenment;
+            assert values[values_index] = LootUriUtils.ItemSuffixes.of_Enlightenment;
             return (values_index + 1,);
         }
         if (suffix_id == ItemSuffixes.of_Protection) {
-            assert values[values_index] = Utils.ItemSuffixes.of_Protection;
+            assert values[values_index] = LootUriUtils.ItemSuffixes.of_Protection;
             return (values_index + 1,);
         }
         if (suffix_id == ItemSuffixes.of_Anger) {
-            assert values[values_index] = Utils.ItemSuffixes.of_Anger;
+            assert values[values_index] = LootUriUtils.ItemSuffixes.of_Anger;
             return (values_index + 1,);
         }
         if (suffix_id == ItemSuffixes.of_Rage) {
-            assert values[values_index] = Utils.ItemSuffixes.of_Rage;
+            assert values[values_index] = LootUriUtils.ItemSuffixes.of_Rage;
             return (values_index + 1,);
         }
         if (suffix_id == ItemSuffixes.of_Fury) {
-            assert values[values_index] = Utils.ItemSuffixes.of_Fury;
+            assert values[values_index] = LootUriUtils.ItemSuffixes.of_Fury;
             return (values_index + 1,);
         }
         if (suffix_id == ItemSuffixes.of_Vitriol) {
-            assert values[values_index] = Utils.ItemSuffixes.of_Vitriol;
+            assert values[values_index] = LootUriUtils.ItemSuffixes.of_Vitriol;
             return (values_index + 1,);
         }
         if (suffix_id == ItemSuffixes.of_the_Fox) {
-            assert values[values_index] = Utils.ItemSuffixes.of_the_Fox;
+            assert values[values_index] = LootUriUtils.ItemSuffixes.of_the_Fox;
             return (values_index + 1,);
         }
         if (suffix_id == ItemSuffixes.of_Detection) {
-            assert values[values_index] = Utils.ItemSuffixes.of_Detection;
+            assert values[values_index] = LootUriUtils.ItemSuffixes.of_Detection;
             return (values_index + 1,);
         }
         if (suffix_id == ItemSuffixes.of_Reflection) {
-            assert values[values_index] = Utils.ItemSuffixes.of_Reflection;
+            assert values[values_index] = LootUriUtils.ItemSuffixes.of_Reflection;
             return (values_index + 1,);
         }
         if (suffix_id == ItemSuffixes.of_the_Twins) {
-            assert values[values_index] = Utils.ItemSuffixes.of_the_Twins;
+            assert values[values_index] = LootUriUtils.ItemSuffixes.of_the_Twins;
             return (values_index + 1,);
         }
         return (values_index,);
@@ -1409,36 +1409,36 @@ namespace Uri {
             return (values_index,);
         }
         if (slot_id == Slot.Weapon) {
-            assert values[values_index + 2] = Utils.Slots.Weapon;
+            assert values[values_index + 2] = LootUriUtils.Slots.Weapon;
         }
         if (slot_id == Slot.Chest) {
-            assert values[values_index + 2] = Utils.Slots.Chest;
+            assert values[values_index + 2] = LootUriUtils.Slots.Chest;
         }
         if (slot_id == Slot.Head) {
-            assert values[values_index + 2] = Utils.Slots.Head;
+            assert values[values_index + 2] = LootUriUtils.Slots.Head;
         }
         if (slot_id == Slot.Waist) {
-            assert values[values_index + 2] = Utils.Slots.Waist;
+            assert values[values_index + 2] = LootUriUtils.Slots.Waist;
         }
         if (slot_id == Slot.Foot) {
-            assert values[values_index + 2] = Utils.Slots.Feet;
+            assert values[values_index + 2] = LootUriUtils.Slots.Feet;
         }
         if (slot_id == Slot.Hand) {
-            assert values[values_index + 2] = Utils.Slots.Hands;
+            assert values[values_index + 2] = LootUriUtils.Slots.Hands;
         }
         if (slot_id == Slot.Neck) {
-            assert values[values_index + 2] = Utils.Slots.Neck;
+            assert values[values_index + 2] = LootUriUtils.Slots.Neck;
         }
         if (slot_id == Slot.Ring) {
-            assert values[values_index + 2] = Utils.Slots.Ring;
+            assert values[values_index + 2] = LootUriUtils.Slots.Ring;
         }
 
-        let right_bracket = Utils.Symbols.RightBracket;
-        let inverted_commas = Utils.Symbols.InvertedCommas;
-        let comma = Utils.Symbols.Comma;
+        let right_bracket = LootUriUtils.Symbols.RightBracket;
+        let inverted_commas = LootUriUtils.Symbols.InvertedCommas;
+        let comma = LootUriUtils.Symbols.Comma;
 
-        assert values[values_index] = Utils.TraitKeys.Slot;
-        assert values[values_index + 1] = Utils.TraitKeys.ValueKey;
+        assert values[values_index] = LootUriUtils.TraitKeys.Slot;
+        assert values[values_index + 1] = LootUriUtils.TraitKeys.ValueKey;
         assert values[values_index + 3] = inverted_commas;
         assert values[values_index + 4] = right_bracket;
         assert values[values_index + 5] = comma;
@@ -1458,45 +1458,45 @@ namespace Uri {
             return (values_index,);
         }
         if (type_id == Type.generic) {
-            assert values[values_index + 2] = Utils.Types.Generic;
+            assert values[values_index + 2] = LootUriUtils.Types.Generic;
         }
         if (type_id == Type.Weapon.generic) {
-            assert values[values_index + 2] = Utils.Types.WeaponGeneric;
+            assert values[values_index + 2] = LootUriUtils.Types.WeaponGeneric;
         }
         if (type_id == Type.Weapon.bludgeon) {
-            assert values[values_index + 2] = Utils.Types.WeaponBludgeon;
+            assert values[values_index + 2] = LootUriUtils.Types.WeaponBludgeon;
         }
         if (type_id == Type.Weapon.blade) {
-            assert values[values_index + 2] = Utils.Types.WeaponBlade;
+            assert values[values_index + 2] = LootUriUtils.Types.WeaponBlade;
         }
         if (type_id == Type.Weapon.magic) {
-            assert values[values_index + 2] = Utils.Types.WeaponMagic;
+            assert values[values_index + 2] = LootUriUtils.Types.WeaponMagic;
         }
         if (type_id == Type.Armor.generic) {
-            assert values[values_index + 2] = Utils.Types.ArmorGeneric;
+            assert values[values_index + 2] = LootUriUtils.Types.ArmorGeneric;
         }
         if (type_id == Type.Armor.metal) {
-            assert values[values_index + 2] = Utils.Types.ArmorMetal;
+            assert values[values_index + 2] = LootUriUtils.Types.ArmorMetal;
         }
         if (type_id == Type.Armor.hide) {
-            assert values[values_index + 2] = Utils.Types.ArmorHide;
+            assert values[values_index + 2] = LootUriUtils.Types.ArmorHide;
         }
         if (type_id == Type.Armor.cloth) {
-            assert values[values_index + 2] = Utils.Types.ArmorCloth;
+            assert values[values_index + 2] = LootUriUtils.Types.ArmorCloth;
         }
         if (type_id == Type.ring) {
-            assert values[values_index + 2] = Utils.Types.Ring;
+            assert values[values_index + 2] = LootUriUtils.Types.Ring;
         }
         if (type_id == Type.necklace) {
-            assert values[values_index + 2] = Utils.Types.Necklace;
+            assert values[values_index + 2] = LootUriUtils.Types.Necklace;
         }
 
-        let right_bracket = Utils.Symbols.RightBracket;
-        let inverted_commas = Utils.Symbols.InvertedCommas;
-        let comma = Utils.Symbols.Comma;
+        let right_bracket = LootUriUtils.Symbols.RightBracket;
+        let inverted_commas = LootUriUtils.Symbols.InvertedCommas;
+        let comma = LootUriUtils.Symbols.Comma;
 
-        assert values[values_index] = Utils.TraitKeys.Type;
-        assert values[values_index + 1] = Utils.TraitKeys.ValueKey;
+        assert values[values_index] = LootUriUtils.TraitKeys.Type;
+        assert values[values_index + 1] = LootUriUtils.TraitKeys.ValueKey;
         assert values[values_index + 3] = inverted_commas;
         assert values[values_index + 4] = right_bracket;
         assert values[values_index + 5] = comma;
@@ -1516,355 +1516,355 @@ namespace Uri {
             return (values_index,);
         }
         if (material_id == Material.generic) {
-            assert values[values_index] = Utils.Materials.Generic;
+            assert values[values_index] = LootUriUtils.Materials.Generic;
             return (values_index + 1,);
         }
         if (material_id == Material.Metal.generic) {
-            assert values[values_index] = Utils.Materials.MetalGeneric;
+            assert values[values_index] = LootUriUtils.Materials.MetalGeneric;
             return (values_index + 1,);
         }
         if (material_id == Material.Metal.ancient) {
-            assert values[values_index] = Utils.Materials.MetalAncient;
+            assert values[values_index] = LootUriUtils.Materials.MetalAncient;
             return (values_index + 1,);
         }
         if (material_id == Material.Metal.holy) {
-            assert values[values_index] = Utils.Materials.MetalHoly;
+            assert values[values_index] = LootUriUtils.Materials.MetalHoly;
             return (values_index + 1,);
         }
         if (material_id == Material.Metal.ornate) {
-            assert values[values_index] = Utils.Materials.MetalOrnate;
+            assert values[values_index] = LootUriUtils.Materials.MetalOrnate;
             return (values_index + 1,);
         }
         if (material_id == Material.Metal.gold) {
-            assert values[values_index] = Utils.Materials.MetalGold;
+            assert values[values_index] = LootUriUtils.Materials.MetalGold;
             return (values_index + 1,);
         }
         if (material_id == Material.Metal.silver) {
-            assert values[values_index] = Utils.Materials.MetalSilver;
+            assert values[values_index] = LootUriUtils.Materials.MetalSilver;
             return (values_index + 1,);
         }
         if (material_id == Material.Metal.bronze) {
-            assert values[values_index] = Utils.Materials.MetalBronze;
+            assert values[values_index] = LootUriUtils.Materials.MetalBronze;
             return (values_index + 1,);
         }
         if (material_id == Material.Metal.platinum) {
-            assert values[values_index] = Utils.Materials.MetalPlatinum;
+            assert values[values_index] = LootUriUtils.Materials.MetalPlatinum;
             return (values_index + 1,);
         }
         if (material_id == Material.Metal.titanium) {
-            assert values[values_index] = Utils.Materials.MetalTitanium;
+            assert values[values_index] = LootUriUtils.Materials.MetalTitanium;
             return (values_index + 1,);
         }
         if (material_id == Material.Metal.steel) {
-            assert values[values_index] = Utils.Materials.MetalSteel;
+            assert values[values_index] = LootUriUtils.Materials.MetalSteel;
             return (values_index + 1,);
         }
         if (material_id == Material.Cloth.generic) {
-            assert values[values_index] = Utils.Materials.ClothGeneric;
+            assert values[values_index] = LootUriUtils.Materials.ClothGeneric;
             return (values_index + 1,);
         }
         if (material_id == Material.Cloth.royal) {
-            assert values[values_index] = Utils.Materials.ClothRoyal;
+            assert values[values_index] = LootUriUtils.Materials.ClothRoyal;
             return (values_index + 1,);
         }
         if (material_id == Material.Cloth.divine) {
-            assert values[values_index] = Utils.Materials.ClothDivine;
+            assert values[values_index] = LootUriUtils.Materials.ClothDivine;
             return (values_index + 1,);
         }
         if (material_id == Material.Cloth.brightsilk) {
-            assert values[values_index] = Utils.Materials.ClothBrightsilk;
+            assert values[values_index] = LootUriUtils.Materials.ClothBrightsilk;
             return (values_index + 1,);
         }
         if (material_id == Material.Cloth.silk) {
-            assert values[values_index] = Utils.Materials.ClothSilk;
+            assert values[values_index] = LootUriUtils.Materials.ClothSilk;
             return (values_index + 1,);
         }
         if (material_id == Material.Cloth.wool) {
-            assert values[values_index] = Utils.Materials.ClothWool;
+            assert values[values_index] = LootUriUtils.Materials.ClothWool;
             return (values_index + 1,);
         }
         if (material_id == Material.Cloth.linen) {
-            assert values[values_index] = Utils.Materials.ClothLinen;
+            assert values[values_index] = LootUriUtils.Materials.ClothLinen;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.generic) {
-            assert values[values_index] = Utils.Materials.BioticGeneric;
+            assert values[values_index] = LootUriUtils.Materials.BioticGeneric;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Demon.generic) {
-            assert values[values_index] = Utils.Materials.BioticDemonGeneric;
+            assert values[values_index] = LootUriUtils.Materials.BioticDemonGeneric;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Demon.blood) {
-            assert values[values_index] = Utils.Materials.BioticDemonBlood;
+            assert values[values_index] = LootUriUtils.Materials.BioticDemonBlood;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Demon.bones) {
-            assert values[values_index] = Utils.Materials.BioticDemonBones;
+            assert values[values_index] = LootUriUtils.Materials.BioticDemonBones;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Demon.brain) {
-            assert values[values_index] = Utils.Materials.BioticDemonBrain;
+            assert values[values_index] = LootUriUtils.Materials.BioticDemonBrain;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Demon.eyes) {
-            assert values[values_index] = Utils.Materials.BioticDemonEyes;
+            assert values[values_index] = LootUriUtils.Materials.BioticDemonEyes;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Demon.hide) {
-            assert values[values_index] = Utils.Materials.BioticDemonHide;
+            assert values[values_index] = LootUriUtils.Materials.BioticDemonHide;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Demon.flesh) {
-            assert values[values_index] = Utils.Materials.BioticDemonFlesh;
+            assert values[values_index] = LootUriUtils.Materials.BioticDemonFlesh;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Demon.hair) {
-            assert values[values_index] = Utils.Materials.BioticDemonHair;
+            assert values[values_index] = LootUriUtils.Materials.BioticDemonHair;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Demon.heart) {
-            assert values[values_index] = Utils.Materials.BioticDemonHeart;
+            assert values[values_index] = LootUriUtils.Materials.BioticDemonHeart;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Demon.entrails) {
-            assert values[values_index] = Utils.Materials.BioticDemonEntrails;
+            assert values[values_index] = LootUriUtils.Materials.BioticDemonEntrails;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Demon.hands) {
-            assert values[values_index] = Utils.Materials.BioticDemonHands;
+            assert values[values_index] = LootUriUtils.Materials.BioticDemonHands;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Demon.feet) {
-            assert values[values_index] = Utils.Materials.BioticDemonFeet;
+            assert values[values_index] = LootUriUtils.Materials.BioticDemonFeet;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Dragon.generic) {
-            assert values[values_index] = Utils.Materials.BioticDragonGeneric;
+            assert values[values_index] = LootUriUtils.Materials.BioticDragonGeneric;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Dragon.blood) {
-            assert values[values_index] = Utils.Materials.BioticDragonBlood;
+            assert values[values_index] = LootUriUtils.Materials.BioticDragonBlood;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Dragon.bones) {
-            assert values[values_index] = Utils.Materials.BioticDragonBones;
+            assert values[values_index] = LootUriUtils.Materials.BioticDragonBones;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Dragon.brain) {
-            assert values[values_index] = Utils.Materials.BioticDragonBrain;
+            assert values[values_index] = LootUriUtils.Materials.BioticDragonBrain;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Dragon.eyes) {
-            assert values[values_index] = Utils.Materials.BioticDragonEyes;
+            assert values[values_index] = LootUriUtils.Materials.BioticDragonEyes;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Dragon.skin) {
-            assert values[values_index] = Utils.Materials.BioticDragonSkin;
+            assert values[values_index] = LootUriUtils.Materials.BioticDragonSkin;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Dragon.flesh) {
-            assert values[values_index] = Utils.Materials.BioticDragonFlesh;
+            assert values[values_index] = LootUriUtils.Materials.BioticDragonFlesh;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Dragon.hair) {
-            assert values[values_index] = Utils.Materials.BioticDragonHair;
+            assert values[values_index] = LootUriUtils.Materials.BioticDragonHair;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Dragon.heart) {
-            assert values[values_index] = Utils.Materials.BioticDragonHeart;
+            assert values[values_index] = LootUriUtils.Materials.BioticDragonHeart;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Dragon.entrails) {
-            assert values[values_index] = Utils.Materials.BioticDragonEntrails;
+            assert values[values_index] = LootUriUtils.Materials.BioticDragonEntrails;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Dragon.hands) {
-            assert values[values_index] = Utils.Materials.BioticDragonHands;
+            assert values[values_index] = LootUriUtils.Materials.BioticDragonHands;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Dragon.feet) {
-            assert values[values_index] = Utils.Materials.BioticDragonFeet;
+            assert values[values_index] = LootUriUtils.Materials.BioticDragonFeet;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Animal.generic) {
-            assert values[values_index] = Utils.Materials.BioticAnimalGeneric;
+            assert values[values_index] = LootUriUtils.Materials.BioticAnimalGeneric;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Animal.blood) {
-            assert values[values_index] = Utils.Materials.BioticAnimalBlood;
+            assert values[values_index] = LootUriUtils.Materials.BioticAnimalBlood;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Animal.bones) {
-            assert values[values_index] = Utils.Materials.BioticAnimalBones;
+            assert values[values_index] = LootUriUtils.Materials.BioticAnimalBones;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Animal.brain) {
-            assert values[values_index] = Utils.Materials.BioticAnimalBrain;
+            assert values[values_index] = LootUriUtils.Materials.BioticAnimalBrain;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Animal.eyes) {
-            assert values[values_index] = Utils.Materials.BioticAnimalEyes;
+            assert values[values_index] = LootUriUtils.Materials.BioticAnimalEyes;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Animal.hide) {
-            assert values[values_index] = Utils.Materials.BioticAnimalHide;
+            assert values[values_index] = LootUriUtils.Materials.BioticAnimalHide;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Animal.flesh) {
-            assert values[values_index] = Utils.Materials.BioticAnimalFlesh;
+            assert values[values_index] = LootUriUtils.Materials.BioticAnimalFlesh;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Animal.hair) {
-            assert values[values_index] = Utils.Materials.BioticAnimalHair;
+            assert values[values_index] = LootUriUtils.Materials.BioticAnimalHair;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Animal.heart) {
-            assert values[values_index] = Utils.Materials.BioticAnimalHeart;
+            assert values[values_index] = LootUriUtils.Materials.BioticAnimalHeart;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Animal.entrails) {
-            assert values[values_index] = Utils.Materials.BioticAnimalEntrails;
+            assert values[values_index] = LootUriUtils.Materials.BioticAnimalEntrails;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Animal.hands) {
-            assert values[values_index] = Utils.Materials.BioticAnimalHands;
+            assert values[values_index] = LootUriUtils.Materials.BioticAnimalHands;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Animal.feet) {
-            assert values[values_index] = Utils.Materials.BioticAnimalFeet;
+            assert values[values_index] = LootUriUtils.Materials.BioticAnimalFeet;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Human.generic) {
-            assert values[values_index] = Utils.Materials.BioticHumanGeneric;
+            assert values[values_index] = LootUriUtils.Materials.BioticHumanGeneric;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Human.blood) {
-            assert values[values_index] = Utils.Materials.BioticHumanBlood;
+            assert values[values_index] = LootUriUtils.Materials.BioticHumanBlood;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Human.bones) {
-            assert values[values_index] = Utils.Materials.BioticHumanBones;
+            assert values[values_index] = LootUriUtils.Materials.BioticHumanBones;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Human.brain) {
-            assert values[values_index] = Utils.Materials.BioticHumanBrain;
+            assert values[values_index] = LootUriUtils.Materials.BioticHumanBrain;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Human.eyes) {
-            assert values[values_index] = Utils.Materials.BioticHumanEyes;
+            assert values[values_index] = LootUriUtils.Materials.BioticHumanEyes;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Human.hide) {
-            assert values[values_index] = Utils.Materials.BioticHumanHide;
+            assert values[values_index] = LootUriUtils.Materials.BioticHumanHide;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Human.flesh) {
-            assert values[values_index] = Utils.Materials.BioticHumanFlesh;
+            assert values[values_index] = LootUriUtils.Materials.BioticHumanFlesh;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Human.hair) {
-            assert values[values_index] = Utils.Materials.BioticHumanHair;
+            assert values[values_index] = LootUriUtils.Materials.BioticHumanHair;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Human.heart) {
-            assert values[values_index] = Utils.Materials.BioticHumanHeart;
+            assert values[values_index] = LootUriUtils.Materials.BioticHumanHeart;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Human.entrails) {
-            assert values[values_index] = Utils.Materials.BioticHumanEntrails;
+            assert values[values_index] = LootUriUtils.Materials.BioticHumanEntrails;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Human.hands) {
-            assert values[values_index] = Utils.Materials.BioticHumanHands;
+            assert values[values_index] = LootUriUtils.Materials.BioticHumanHands;
             return (values_index + 1,);
         }
         if (material_id == Material.Biotic.Human.feet) {
-            assert values[values_index] = Utils.Materials.BioticHumanFeet;
+            assert values[values_index] = LootUriUtils.Materials.BioticHumanFeet;
             return (values_index + 1,);
         }
         if (material_id == Material.Paper.generic) {
-            assert values[values_index] = Utils.Materials.PaperGeneric;
+            assert values[values_index] = LootUriUtils.Materials.PaperGeneric;
             return (values_index + 1,);
         }
         if (material_id == Material.Paper.magical) {
-            assert values[values_index] = Utils.Materials.PaperMagical;
+            assert values[values_index] = LootUriUtils.Materials.PaperMagical;
             return (values_index + 1,);
         }
         if (material_id == Material.Wood.generic) {
-            assert values[values_index] = Utils.Materials.WoodGeneric;
+            assert values[values_index] = LootUriUtils.Materials.WoodGeneric;
             return (values_index + 1,);
         }
         if (material_id == Material.Wood.Hard.generic) {
-            assert values[values_index] = Utils.Materials.WoodHardGeneric;
+            assert values[values_index] = LootUriUtils.Materials.WoodHardGeneric;
             return (values_index + 1,);
         }
         if (material_id == Material.Wood.Hard.walnut) {
-            assert values[values_index] = Utils.Materials.WoodHardWalnut;
+            assert values[values_index] = LootUriUtils.Materials.WoodHardWalnut;
             return (values_index + 1,);
         }
         if (material_id == Material.Wood.Hard.mahogany) {
-            assert values[values_index] = Utils.Materials.WoodHardMahogany;
+            assert values[values_index] = LootUriUtils.Materials.WoodHardMahogany;
             return (values_index + 1,);
         }
         if (material_id == Material.Wood.Hard.maple) {
-            assert values[values_index] = Utils.Materials.WoodHardMaple;
+            assert values[values_index] = LootUriUtils.Materials.WoodHardMaple;
             return (values_index + 1,);
         }
         if (material_id == Material.Wood.Hard.oak) {
-            assert values[values_index] = Utils.Materials.WoodHardOak;
+            assert values[values_index] = LootUriUtils.Materials.WoodHardOak;
             return (values_index + 1,);
         }
         if (material_id == Material.Wood.Hard.rosewood) {
-            assert values[values_index] = Utils.Materials.WoodHardRosewood;
+            assert values[values_index] = LootUriUtils.Materials.WoodHardRosewood;
             return (values_index + 1,);
         }
         if (material_id == Material.Wood.Hard.cherry) {
-            assert values[values_index] = Utils.Materials.WoodHardCherry;
+            assert values[values_index] = LootUriUtils.Materials.WoodHardCherry;
             return (values_index + 1,);
         }
         if (material_id == Material.Wood.Hard.balsa) {
-            assert values[values_index] = Utils.Materials.WoodHardBalsa;
+            assert values[values_index] = LootUriUtils.Materials.WoodHardBalsa;
             return (values_index + 1,);
         }
         if (material_id == Material.Wood.Hard.birch) {
-            assert values[values_index] = Utils.Materials.WoodHardBirch;
+            assert values[values_index] = LootUriUtils.Materials.WoodHardBirch;
             return (values_index + 1,);
         }
         if (material_id == Material.Wood.Hard.holly) {
-            assert values[values_index] = Utils.Materials.WoodHardHolly;
+            assert values[values_index] = LootUriUtils.Materials.WoodHardHolly;
             return (values_index + 1,);
         }
         if (material_id == Material.Wood.Soft.generic) {
-            assert values[values_index] = Utils.Materials.WoodSoftGeneric;
+            assert values[values_index] = LootUriUtils.Materials.WoodSoftGeneric;
             return (values_index + 1,);
         }
         if (material_id == Material.Wood.Soft.cedar) {
-            assert values[values_index] = Utils.Materials.WoodSoftCedar;
+            assert values[values_index] = LootUriUtils.Materials.WoodSoftCedar;
             return (values_index + 1,);
         }
         if (material_id == Material.Wood.Soft.pine) {
-            assert values[values_index] = Utils.Materials.WoodSoftPine;
+            assert values[values_index] = LootUriUtils.Materials.WoodSoftPine;
             return (values_index + 1,);
         }
         if (material_id == Material.Wood.Soft.fir) {
-            assert values[values_index] = Utils.Materials.WoodSoftFir;
+            assert values[values_index] = LootUriUtils.Materials.WoodSoftFir;
             return (values_index + 1,);
         }
         if (material_id == Material.Wood.Soft.hemlock) {
-            assert values[values_index] = Utils.Materials.WoodSoftHemlock;
+            assert values[values_index] = LootUriUtils.Materials.WoodSoftHemlock;
             return (values_index + 1,);
         }
         if (material_id == Material.Wood.Soft.spruce) {
-            assert values[values_index] = Utils.Materials.WoodSoftSpruce;
+            assert values[values_index] = LootUriUtils.Materials.WoodSoftSpruce;
             return (values_index + 1,);
         }
         if (material_id == Material.Wood.Soft.elder) {
-            assert values[values_index] = Utils.Materials.WoodSoftElder;
+            assert values[values_index] = LootUriUtils.Materials.WoodSoftElder;
             return (values_index + 1,);
         }
         if (material_id == Material.Wood.Soft.yew) {
-            assert values[values_index] = Utils.Materials.WoodSoftYew;
+            assert values[values_index] = LootUriUtils.Materials.WoodSoftYew;
             return (values_index + 1,);
         }
         return (values_index,);
