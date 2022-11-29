@@ -187,7 +187,7 @@ def explore(network, adventurer):
 
     out = out.split(" ")
 
-    if out[24] == '1':
+    if out[23] == '1':
         print("🧌 You have discovered a beast")
     else:
         print("🤔 You discovered nothing")

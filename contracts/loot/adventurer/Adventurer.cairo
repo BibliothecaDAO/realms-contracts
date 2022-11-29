@@ -390,7 +390,7 @@ func increase_xp{
 @external
 func assign_beast{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     adventurer_token_id: Uint256, value: felt
-) {
+) -> (success: felt) {
     Module.only_approved();
 
     // unpack adventurer
@@ -404,7 +404,7 @@ func assign_beast{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
 
     emit_adventurer_state(adventurer_token_id);
 
-    return ();
+    return (TRUE,);
 }
 
 // @notice Explore for discoveries

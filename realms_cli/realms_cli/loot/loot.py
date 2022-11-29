@@ -1,5 +1,5 @@
 import click
-from realms_cli.caller_invoker import wrapped_call, wrapped_send
+from realms_cli.caller_invoker import wrapped_call, wrapped_send, wrapped_proxy_call
 from realms_cli.config import Config
 from realms_cli.utils import print_over_colums, uint, felt_to_str
 
@@ -34,9 +34,10 @@ def get_loot(loot_token_id, network):
     """
     config = Config(nile_network=network)
 
-    out = wrapped_call(
+    out = wrapped_proxy_call(
         network=config.nile_network,
         contract_alias="proxy_Loot",
+        abi='artifacts/abis/Loot.json',
         function="getItemByTokenId",
         arguments=[*uint(loot_token_id)],
     )
@@ -45,7 +46,7 @@ def get_loot(loot_token_id, network):
     for i, key in enumerate(config.LOOT):
 
         # Output names for item name prefix1, prefix2, and suffix
-        if i in [5, 6, 7]:
+        if i in [13]:
             pretty_out.append(
                 f"{key} : {felt_to_str(int(out[i]))}")
         else:
