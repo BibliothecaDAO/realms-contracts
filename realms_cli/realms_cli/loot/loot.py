@@ -12,7 +12,7 @@ def mint_loot(network):
     """
     config = Config(nile_network=network)
 
-    print('🗡 Minting item ...')
+    print('🎲 Minting random item ...')
 
     wrapped_send(
         network=config.nile_network,
@@ -22,7 +22,7 @@ def mint_loot(network):
         arguments=[config.USER_ADDRESS]
     )
 
-    print('🗡 Minted item ✅')
+    print('🎲 Minted random item ✅')
 
 
 @click.command()
@@ -85,23 +85,12 @@ def set_loot(loot_token_id, network):
     """
     config = Config(nile_network=network)
 
-    out = wrapped_call(
+    print('🗡 Setting item by id ...')
+
+    wrapped_send(
         network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Loot",
         function="setItemById",
-        arguments=[*uint(loot_token_id)],
+        arguments=[config.USER_ADDRESS]
     )
-    out = out.split(" ")
-    pretty_out = []
-    for i, key in enumerate(config.LOOT):
-
-        # Output names for item name prefix1, prefix2, and suffix
-        if i in [5, 6, 7]:
-            pretty_out.append(
-                f"{key} : {felt_to_str(int(out[i]))}")
-        else:
-            pretty_out.append(
-                f"{key} : {int(out[i])}")
-
-    print("_________ LOOT ITEM - " + str(out[0]) + "___________")
-    print_over_colums(pretty_out)

@@ -295,6 +295,29 @@ func update_status{
     return (TRUE,);
 }
 
+@external
+func assign_beast{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(
+    adventurer_token_id: Uint256, value: felt
+) -> (success: felt) {
+    alloc_locals;
+    Module.only_approved();
+
+    // unpack adventurer
+    let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
+
+    // deduct health
+    let (new_adventurer) = AdventurerLib.assign_beast(value, unpacked_adventurer);
+
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
+    adventurer.write(adventurer_token_id, packed_new_adventurer);
+
+    emit_adventurer_state(adventurer_token_id);
+
+    return (TRUE,);
+}
+
 // @notice Deduct health from adventurer
 // @param adventurer_token_id: Id of adventurer
 // @param amount: Health amount to deduct
@@ -385,26 +408,6 @@ func increase_xp{
         emit_adventurer_state(adventurer_token_id);
         return (TRUE,);
     }
-}
-
-@external
-func assign_beast{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    adventurer_token_id: Uint256, value: felt
-) -> (success: felt) {
-    Module.only_approved();
-
-    // unpack adventurer
-    let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
-
-    // deduct health
-    let (new_adventurer) = AdventurerLib.assign_beast(value, unpacked_adventurer);
-
-    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
-    adventurer.write(adventurer_token_id, packed_new_adventurer);
-
-    emit_adventurer_state(adventurer_token_id);
-
-    return (TRUE,);
 }
 
 // @notice Explore for discoveries

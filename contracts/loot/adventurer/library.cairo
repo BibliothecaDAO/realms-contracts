@@ -374,9 +374,6 @@ namespace AdventurerLib {
     ) -> (new_unpacked_adventurer: AdventurerState) {
         alloc_locals;
 
-        // Adventurers can only battle one beast at a time (for now)
-        assert unpacked_adventurer.Beast = 0;
-
         // update adventurer beast
         let (updated_adventurer: AdventurerState) = cast_state(
             AdventurerSlotIds.Beast, beast_id, unpacked_adventurer
