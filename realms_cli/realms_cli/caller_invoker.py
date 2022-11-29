@@ -7,10 +7,12 @@ import re
 import subprocess
 import asyncio
 
+from nile.common import run_command
 from nile.core.declare import declare
 from nile.core.account import Account, get_nonce
 from nile import deployments
 from nile.core.call_or_invoke import call_or_invoke
+from nile.utils import hex_address
 from realms_cli.config import Config
 from starkware.starknet.compiler.compile import compile_starknet_files
 
@@ -68,6 +70,29 @@ def call(network, contract_alias, function, arguments) -> str:
     ]
     return subprocess.check_output(command).strip().decode("utf-8")
 
+def proxy_call(network, contract_alias, abi, function, params) -> str:
+    """Nile proxy call function."""
+
+    address, _ = next(deployments.load(contract_alias, network)) or contract_alias
+
+    address = hex_address(address)
+
+    arguments = [
+        "--address",
+        address,
+        "--abi",
+        abi,
+        "--function",
+        function,
+    ]
+    
+    return run_command(
+        operation="call",
+        network=network,
+        inputs=params,
+        arguments=arguments,
+    )
+
 
 async def _call_async(network, contract_alias, function, arguments) -> str:
     """Nile async call function."""
@@ -111,7 +136,6 @@ def call_multi(network, contract_alias, function, calldata) -> str:
 def wrapped_call(network, contract_alias, function, arguments) -> str:
     """Send command with some extra functionality such as tx status check and built-in timeout.
     (only supported for non-localhost networks)
-
     tx statuses:
     RECEIVED -> PENDING -> ACCEPTED_ON_L2
     """
@@ -121,6 +145,77 @@ def wrapped_call(network, contract_alias, function, arguments) -> str:
     print("------- CALL ----------------------------------------------------")
     # return out such that it can be prettified at a higher level
     return out
+
+
+def wrapped_proxy_call(network, contract_alias, abi, function, arguments) -> str:
+    """Send command with some extra functionality such as tx status check and built-in timeout.
+    (only supported for non-localhost networks)
+    tx statuses:
+    RECEIVED -> PENDING -> ACCEPTED_ON_L2
+    """
+    print("------- CALL ----------------------------------------------------")
+    print(f"calling {function} from {contract_alias} with {arguments}")
+    out = proxy_call(network, contract_alias, abi, function, arguments)
+    print("------- CALL ----------------------------------------------------")
+    # return out such that it can be prettified at a higher level
+    return out
+
+# def wrapped_proxy_call(network, signer_alias, contract_alias, function, arguments, nonce=None) -> str:
+#     """Send command with some extra functionality such as tx status check and built-in timeout.
+#     (only supported for non-localhost networks)
+
+#     tx statuses:
+#     RECEIVED -> PENDING -> ACCEPTED_ON_L2
+#     """
+#     print("------- CALL ----------------------------------------------------")
+#     print(f"calling {function} from {contract_alias} with {arguments}")
+#     target_address, _ = next(deployments.load(contract_alias, network)) or contract_alias
+#     config = Config(nile_network=network)
+#     account = Account(signer_alias, network)
+#     target_address, _ = next(deployments.load(target_address, network)) or target_address
+#     print([int(c) for c in arguments])
+#     calldata = [int(c) for c in arguments]
+#     # calldata = [[int(x) for x in c] for c in arguments]
+#     # print([[function, *calldata]])
+
+#     if nonce is None:
+#         nonce = get_nonce(account.address, account.network)
+
+#     # (execute_calldata, sig_r, sig_s) = account.signer.sign_transaction(
+#     #     sender=account.address,
+#     #     calls=[[function, *calldata]],
+#     #     nonce=nonce,
+#     #     max_fee=config.MAX_FEE,
+#     # )
+
+#     out = call_or_invoke(
+#         contract=target_address,
+#         type="invoke",
+#         method="__default__",
+#         params=calldata,
+#         network=account.network,
+#     )
+#     print("------- CALL ----------------------------------------------------")
+#     # return out such that it can be prettified at a higher level
+#     return out
+
+# def wrapped_proxy_call(network, signer_alias, contract_alias, function, arguments, nonce=None) -> str:
+#     """Send command with some extra functionality such as tx status check and built-in timeout.
+#     (only supported for non-localhost networks)
+
+#     tx statuses:
+#     RECEIVED -> PENDING -> ACCEPTED_ON_L2
+#     """
+#     print("------- CALL ----------------------------------------------------")
+#     print(f"calling {function} from {contract_alias} with {arguments}")
+#     out = send(network, signer_alias, contract_alias, function, arguments)
+#     if out:
+#         _, tx_hash = parse_send(out)
+#         get_tx_status(network, tx_hash,)
+#     else:
+#         raise Exception("send message returned None")
+#     print("------- CALL ----------------------------------------------------")
+#     return out
 
 
 def send(network, signer_alias, contract_alias, function, arguments) -> str:
@@ -211,11 +306,11 @@ def wrapped_declare(account, contract_name, network, alias):
         sender=account.address,
         contract_class=contract_class,
         nonce=nonce,
-        max_fee=999994390139630,
+        max_fee=9999943901396300,
     )
 
     class_hash = declare(sender=account.address, contract_name=alias, signature=[
-                         sig_r, sig_s], alias=alias, network=network, max_fee=999994390139630)
+                         sig_r, sig_s], alias=alias, network=network, max_fee=9999943901396300)
     return class_hash
 
 

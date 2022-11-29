@@ -60,7 +60,7 @@ class Config:
     def __init__(self, nile_network: str):
         self.nile_network = "127.0.0.1" if nile_network == "localhost" else nile_network
 
-        self.MAX_FEE = 1282666338551926
+        self.MAX_FEE = 9999943901396300
 
         self.Arbiter_alias = "proxy_" + ContractAlias.Arbiter
         self.Module_Controller_alias = "proxy_" + ContractAlias.ModuleController
@@ -253,14 +253,14 @@ class Config:
             "Charisma",
             "Luck",
             "XP",
-            "NeckId",
             "WeaponId",
-            "RingId",
             "ChestId",
             "HeadId",
             "WaistId",
             "FeetId",
             "HandsId",
+            "NeckId",
+            "RingId",
             "Status",
             "Beast"
         ]

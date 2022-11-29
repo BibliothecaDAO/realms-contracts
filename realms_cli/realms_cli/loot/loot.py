@@ -12,6 +12,8 @@ def mint_loot(network):
     """
     config = Config(nile_network=network)
 
+    print('🗡 Minting item ...')
+
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
@@ -19,6 +21,8 @@ def mint_loot(network):
         function="mint",
         arguments=[config.USER_ADDRESS]
     )
+
+    print('🗡 Minted item ✅')
 
 
 @click.command()

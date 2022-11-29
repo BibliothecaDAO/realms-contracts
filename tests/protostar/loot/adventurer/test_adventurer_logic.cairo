@@ -18,7 +18,13 @@ from contracts.loot.constants.adventurer import (
 )
 from contracts.loot.adventurer.library import AdventurerLib
 
-from tests.protostar.loot.setup.interfaces import IAdventurer, ILoot, ILords, IRealms
+from tests.protostar.loot.setup.interfaces import (
+    IAdventurer, 
+    ILoot, 
+    ILords, 
+    IRealms,
+    IXoroshiro
+)
 from tests.protostar.loot.setup.setup import Contracts, deploy_all
 from tests.protostar.loot.test_structs import (
     TestAdventurerState,
@@ -288,4 +294,25 @@ func test_explore{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
     %}
 
     return ();
+}
+
+@external
+func test_random_number{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+
+    local xoroshiro_address;
+    %{
+        ids.xoroshiro_address = context.xoroshiro
+    %}
+    let (local rand_1) = IXoroshiro.next(xoroshiro_address);
+    let (local rand_2) = IXoroshiro.next(xoroshiro_address);
+    let (local rand_3) = IXoroshiro.next(xoroshiro_address);
+    
+    %{
+        print(ids.rand_1)
+        print(ids.rand_2)
+        print(ids.rand_3)
+    %}
+
+    return();
 }

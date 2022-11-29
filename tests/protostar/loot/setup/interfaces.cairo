@@ -122,3 +122,9 @@ namespace ILords {
     func allowance(owner: felt, spender: felt) -> (allowance: Uint256) {
     }
 }
+
+@contract_interface
+namespace IXoroshiro {
+    func next() -> (rand: felt) {
+    }
+}

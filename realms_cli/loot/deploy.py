@@ -86,7 +86,7 @@ def run(nre):
 
     # # wait 120s - this will reduce on mainnet
     # print('🕒 Waiting for deploy before invoking')
-    # time.sleep(300)
+    # time.sleep(500)
 
     # wrapped_send(
     #     network=config.nile_network,
@@ -154,7 +154,7 @@ def run(nre):
 
     # # wait 120s - this will reduce on mainnet
     print('🕒 Waiting for deploy before invoking')
-    time.sleep(300)
+    time.sleep(500)
 
     #---------------- INIT MODULES  ----------------#
     wrapped_send(
