@@ -387,6 +387,26 @@ func increase_xp{
     }
 }
 
+@external
+func assign_beast{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    adventurer_token_id: Uint256, value: felt
+) {
+    Module.only_approved();
+
+    // unpack adventurer
+    let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
+
+    // deduct health
+    let (new_adventurer) = AdventurerLib.assign_beast(value, unpacked_adventurer);
+
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
+    adventurer.write(adventurer_token_id, packed_new_adventurer);
+
+    emit_adventurer_state(adventurer_token_id);
+
+    return ();
+}
+
 // @notice Explore for discoveries
 // @param adventurer_token_id: Id of adventurer
 // @return success: Value indicating success
