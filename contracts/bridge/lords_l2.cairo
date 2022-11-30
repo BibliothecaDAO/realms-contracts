@@ -1,7 +1,7 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
-from starkware.cairo.common.math import assert_le_felt
+from starkware.cairo.common.math import assert_le_felt, assert_not_equal
 from starkware.cairo.common.uint256 import Uint256, uint256_check
 from starkware.starknet.common.messages import send_message_to_l1
 from starkware.starknet.common.syscalls import get_caller_address
@@ -77,12 +77,16 @@ func initiate_withdrawal{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
         uint256_check(amount);
     }
 
+    let (bridge: l1_address) = l1_bridge.read();
+    with_attr error_message("Bridge: L1 recipient cannot be the bridge") {
+        assert_not_equal(l1_recipient, bridge);
+    }
+
     let (lords_token: address) = lords.read();
     let (caller: address) = get_caller_address();
 
     IBurnable.burnFrom(lords_token, caller, amount);
 
-    let (bridge: l1_address) = l1_bridge.read();
     tempvar payload: felt* = new (PROCESS_WITHDRAWAL, l1_recipient, amount.low, amount.high);
     send_message_to_l1(bridge, 4, payload);
 
