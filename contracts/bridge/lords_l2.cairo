@@ -3,6 +3,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_le_felt, assert_not_equal
 from starkware.cairo.common.uint256 import Uint256, uint256_check
+from starkware.starknet.common.eth_utils import assert_eth_address_range
 from starkware.starknet.common.messages import send_message_to_l1
 from starkware.starknet.common.syscalls import get_caller_address
 
@@ -10,7 +11,6 @@ from starkware.starknet.common.syscalls import get_caller_address
 using address = felt;
 using l1_address = felt;
 
-const MAX_L1_ADDRESS = 2 ** 160 - 1;
 // operation ID sent in the message payload to L1
 const PROCESS_WITHDRAWAL = 1;
 
@@ -70,7 +70,7 @@ func initiate_withdrawal{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
     l1_recipient: l1_address, amount: Uint256
 ) {
     with_attr error_message("Bridge: Invalid L1 address") {
-        assert_le_felt(l1_recipient, MAX_L1_ADDRESS);
+        assert_eth_address_range(l1_recipient);
     }
 
     with_attr error_message("Bridge: Invalid amount") {
