@@ -113,6 +113,8 @@ func build{
 }(token_id: Uint256, building_id: felt, quantity: felt) -> (success: felt) {
     alloc_locals;
 
+    Module.__callback__(token_id);
+
     let (caller) = get_caller_address();
     let (controller) = Module.controller_address();
 

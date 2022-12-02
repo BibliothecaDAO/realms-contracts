@@ -12,4 +12,6 @@ namespace ICalculator {
     }
     func calculate_population(token_id: Uint256) -> (population: felt) {
     }
+    func happiness__callback__(realm_id: Uint256) {
+    }
 }

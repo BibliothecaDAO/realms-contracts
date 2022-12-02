@@ -778,18 +778,39 @@ namespace Combat {
     }
 
     func apply_hunger_penalty{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-        unpacked_army: Army
+        unpacked_army: Army, ticks: felt
     ) -> (unpacked_army: Army) {
         alloc_locals;
-        let light_cavalry_health = reduce_health(unpacked_army.light_cavalry.health);
-        let heavy_cavalry_health = reduce_health(unpacked_army.heavy_cavalry.health);
-        let archer_health = reduce_health(unpacked_army.archer.health);
-        let longbow_health = reduce_health(unpacked_army.longbow.health);
 
-        let mage_health = reduce_health(unpacked_army.mage.health);
-        let arcanist_health = reduce_health(unpacked_army.arcanist.health);
-        let light_infantry_health = reduce_health(unpacked_army.light_infantry.health);
-        let heavy_infantry_health = reduce_health(unpacked_army.heavy_infantry.health);
+        // get total damage BP
+        let total_damage_BP = 100 - CCombat.ARMY_DESERTION_DAMAGE * ticks;
+
+        // check great than 1... else return dead army....
+        let has_totally_deserted = is_le(total_damage_BP, 0);
+
+        if (has_totally_deserted == TRUE) {
+            return (
+                Army(Battalion(0, 0), Battalion(0, 0), Battalion(0, 0), Battalion(0, 0), Battalion(0, 0), Battalion(0, 0), Battalion(0, 0), Battalion(0, 0)),
+            );
+        }
+
+        let light_cavalry_health = reduce_health(
+            unpacked_army.light_cavalry.health, total_damage_BP
+        );
+        let heavy_cavalry_health = reduce_health(
+            unpacked_army.heavy_cavalry.health, total_damage_BP
+        );
+        let archer_health = reduce_health(unpacked_army.archer.health, total_damage_BP);
+        let longbow_health = reduce_health(unpacked_army.longbow.health, total_damage_BP);
+
+        let mage_health = reduce_health(unpacked_army.mage.health, total_damage_BP);
+        let arcanist_health = reduce_health(unpacked_army.arcanist.health, total_damage_BP);
+        let light_infantry_health = reduce_health(
+            unpacked_army.light_infantry.health, total_damage_BP
+        );
+        let heavy_infantry_health = reduce_health(
+            unpacked_army.heavy_infantry.health, total_damage_BP
+        );
 
         return (
             Army(Battalion(unpacked_army.light_cavalry.quantity, light_cavalry_health), Battalion(unpacked_army.heavy_cavalry.quantity, heavy_cavalry_health), Battalion(unpacked_army.archer.quantity, archer_health), Battalion(unpacked_army.longbow.quantity, longbow_health), Battalion(unpacked_army.mage.quantity, mage_health), Battalion(unpacked_army.arcanist.quantity, arcanist_health), Battalion(unpacked_army.light_infantry.quantity, light_infantry_health), Battalion(unpacked_army.heavy_infantry.quantity, heavy_infantry_health)),
@@ -797,7 +818,7 @@ namespace Combat {
     }
 
     func reduce_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-        battalion_health: felt
+        battalion_health: felt, total_damage_BP: felt
     ) -> felt {
         let battalion_has_no_health = is_le(battalion_health, 0);
 
@@ -805,7 +826,7 @@ namespace Combat {
             return (0);
         }
 
-        let (values, _) = unsigned_div_rem(battalion_health, 2);
+        let (values, _) = unsigned_div_rem(battalion_health * total_damage_BP, 1000);
 
         return (values);
     }

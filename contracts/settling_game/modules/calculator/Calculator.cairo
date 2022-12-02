@@ -45,6 +45,14 @@ from contracts.settling_game.modules.relics.interface import IRelics
 // TODO: increase decay of buildings if unhappy
 // TODO: stop workhut increases if unhappy - needs test
 
+@storage_var
+func since_last_tick(token_id: Uint256) -> (time: felt) {
+}
+
+@event
+func SinceLastTick(realm_id: Uint256, time: felt) {
+}
+
 // -----------------------------------
 // Initialize & upgrade
 // -----------------------------------
@@ -237,4 +245,69 @@ func calculate_daily_randomness{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, 
     let get_randomness_value = Calculator.get_randomness_value(random_number);
 
     return (get_randomness_value,);
+}
+
+// called on every Realm action IF realm is unhappy
+
+@external
+func happiness__callback__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    realm_id: Uint256
+) {
+    let (happy) = is_realm_happy(realm_id);
+    if (happy == FALSE) {
+        let (needs_update, TOTAL_TICKS) = check_tick_time(realm_id);
+
+        if (needs_update == TRUE) {
+            let (block_timestamp) = get_block_timestamp();
+            let (controller) = Module.controller_address();
+            let (combat_address) = IModuleController.get_module_address(
+                controller, ModuleIds.L06_Combat
+            );
+
+            ICombat.combat_callback(combat_address, realm_id, TOTAL_TICKS);
+
+            // set and emit
+            since_last_tick.write(realm_id, block_timestamp);
+            SinceLastTick.emit(realm_id, block_timestamp);
+            return ();
+        }
+        return ();
+    }
+
+    return ();
+}
+
+func check_tick_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    token_id: Uint256
+) -> (felt, felt) {
+    let (last_tick) = since_last_tick.read(token_id);
+
+    let (block_timestamp) = get_block_timestamp();
+
+    // if uninitialized update
+    if (last_tick == 0) {
+        return (TRUE, 1);
+    }
+
+    // check if past last tick
+    let past_tick_time = is_le(last_tick + CCalculator.HAPPINESS_TIME_PERIOD_TICK, block_timestamp);
+
+    if (past_tick_time == TRUE) {
+        let (TOTAL_TICKS, _) = unsigned_div_rem(
+            past_tick_time, CCalculator.HAPPINESS_TIME_PERIOD_TICK
+        );
+
+        return (TRUE, TOTAL_TICKS);
+    }
+
+    return (FALSE, 0);
+}
+
+@external
+func __callback__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    realm_id: Uint256
+) {
+    happiness__callback__(realm_id);
+
+    return ();
 }

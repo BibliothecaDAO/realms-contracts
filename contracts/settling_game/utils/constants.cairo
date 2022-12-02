@@ -137,6 +137,9 @@ namespace CCombat {
 
     // weight in bp
     const FIXED_DAMAGE_AMOUNT = 70;
+
+    // bp
+    const ARMY_DESERTION_DAMAGE = 150;
 }
 
 // -----------------------------------
@@ -176,4 +179,6 @@ namespace CCalculator {
 
     // number of potentially random events
     const NUMBER_OF_RANDOM_EVENTS = 9;
+
+    const HAPPINESS_TIME_PERIOD_TICK = DAY / 2;
 }

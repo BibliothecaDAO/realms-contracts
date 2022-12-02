@@ -97,6 +97,8 @@ func claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
 ) {
     alloc_locals;
 
+    Module.__callback__(token_id);
+
     // contracts
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms);
     let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms);

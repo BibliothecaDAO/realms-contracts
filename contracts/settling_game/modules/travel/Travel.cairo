@@ -15,7 +15,12 @@ from starkware.starknet.common.syscalls import get_block_timestamp
 
 from openzeppelin.upgrades.library import Proxy
 
-from contracts.settling_game.utils.game_structs import TravelInformation, ExternalContractIds, Point
+from contracts.settling_game.utils.game_structs import (
+    TravelInformation,
+    ExternalContractIds,
+    Point,
+    ModuleIds,
+)
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.modules.travel.library import Travel
 
@@ -114,6 +119,8 @@ func travel{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     destination_nested_id: felt,
 ) {
     alloc_locals;
+
+    Module.__callback__(traveller_token_id);
 
     // TODO: assert is correct ID (can't try move unmoveable assets)
 

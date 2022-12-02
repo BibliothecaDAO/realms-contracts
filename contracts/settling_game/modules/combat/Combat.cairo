@@ -168,6 +168,8 @@ func build_army_from_battalions{
 ) {
     alloc_locals;
 
+    Module.__callback__(ModuleIds.Calculator, realm_id);
+
     // TODO: assert can build army -> # max regions
     // TODO: can only add to the army if you are at homebase or friendly Realm
 
@@ -295,7 +297,7 @@ func initiate_combat{
     let (defender_food_store) = IFood.available_food_in_store(food_module, defending_realm_id);
 
     if (attacker_food_store == 0) {
-        let (attacker) = Combat.apply_hunger_penalty(starting_attack_army);
+        let (attacker) = Combat.apply_hunger_penalty(starting_attack_army, 1);
         tempvar range_check_ptr = range_check_ptr;
         tempvar pedersen_ptr = pedersen_ptr;
         tempvar syscall_ptr = syscall_ptr;
@@ -308,7 +310,7 @@ func initiate_combat{
     tempvar attacker = attacker;
 
     if (defender_food_store == 0) {
-        let (defender) = Combat.apply_hunger_penalty(starting_defend_army);
+        let (defender) = Combat.apply_hunger_penalty(starting_defend_army, 1);
         tempvar range_check_ptr = range_check_ptr;
         tempvar pedersen_ptr = pedersen_ptr;
         tempvar syscall_ptr = syscall_ptr;
@@ -408,8 +410,6 @@ func update_army_in_realm{
     range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, bitwise_ptr: BitwiseBuiltin*
 }(army_id: felt, army: Army, realm_id: Uint256) {
     alloc_locals;
-
-    Module.ERC721_owner_check(realm_id, ExternalContractIds.S_Realms);
 
     // pack army
     let (new_packed_army) = Combat.pack_army(army);
@@ -621,4 +621,47 @@ func set_xoroshiro{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
     Proxy.assert_only_admin();
     xoroshiro_address.write(xoroshiro);
     return ();
+}
+
+// -----------------------------------
+// Callbacks
+// -----------------------------------
+
+@external
+func combat_callback{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(realm_id: Uint256, ticks: felt) {
+    let (all_armies_len, army_ids) = get_all_armies(realm_id);
+
+    combat_callback_loop(realm_id, ticks, all_armies_len, army_ids);
+
+    return ();
+}
+
+@external
+func combat_callback_loop{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(realm_id: Uint256, ticks: felt, army_ids_len: felt, army_ids: felt*) {
+    alloc_locals;
+    if (army_ids_len == 0) {
+        return ();
+    }
+
+    let (current_packed_army: ArmyData) = get_realm_army_combat_data([army_ids], realm_id);
+
+    let (unpacked_army: Army) = Combat.unpack_army(current_packed_army.packed);
+
+    let (adjusted_army) = Combat.apply_hunger_penalty(unpacked_army, ticks);
+
+    let (new_packed_army) = Combat.pack_army(adjusted_army);
+
+    set_army_data_and_emit(
+        [army_ids],
+        realm_id,
+        ArmyData(new_packed_army, current_packed_army.last_attacked, current_packed_army.XP, current_packed_army.level, current_packed_army.call_sign),
+    );
+
+    BuildArmy.emit([army_ids], realm_id, adjusted_army, 0, cast(0, felt*), 0, cast(0, felt*));
+
+    return combat_callback_loop(realm_id, ticks, army_ids_len - 1, army_ids + 1);
 }

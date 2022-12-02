@@ -130,6 +130,8 @@ func create{
 }(token_id: Uint256, qty: felt, food_building_id: felt) {
     alloc_locals;
 
+    Module.__callback__(token_id);
+
     // check id
     Food.assert_ids(food_building_id);
 

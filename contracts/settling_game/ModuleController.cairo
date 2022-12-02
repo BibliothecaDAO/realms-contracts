@@ -24,12 +24,15 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_not_zero
-from starkware.starknet.common.syscalls import get_caller_address
+from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds
 from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.bool import TRUE, FALSE
+from starkware.cairo.common.uint256 import Uint256
 
 from openzeppelin.upgrades.library import Proxy
+
+from contracts.settling_game.library.IUtils import IUtils
 
 // -----------------------------------
 // Storage
@@ -292,5 +295,17 @@ func only_arbiter{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
     let (caller) = get_caller_address();
     let (current_arbiter) = arbiter.read();
     assert caller = current_arbiter;
+    return ();
+}
+
+// TODO: Accept array of module IDS - recurse through them to trigger update
+@external
+func __callback__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    asset_id: Uint256
+) -> () {
+    let (module_address) = address_of_module_id.read(ModuleIds.Calculator);
+
+    IUtils.__callback__(module_address, asset_id);
+
     return ();
 }

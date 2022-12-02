@@ -14,4 +14,6 @@ namespace ICombat {
     }
     func get_population_of_armies(realm_id: Uint256) -> (population: felt) {
     }
+    func combat_callback(realm_id: Uint256, ticks: felt) {
+    }
 }

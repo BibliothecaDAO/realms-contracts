@@ -22,6 +22,8 @@ from openzeppelin.token.erc721.IERC721 import IERC721
 
 from contracts.settling_game.interfaces.imodules import IModuleController
 
+from contracts.settling_game.library.IUtils import IUtils
+
 // -----------------------------------
 // Storage
 // -----------------------------------
@@ -144,5 +146,18 @@ namespace Module {
         // Will revert the transaction if not.
         let (success) = IModuleController.has_write_access(controller, caller);
         return (success,);
+    }
+
+    // -----------------------------------
+    // Callback
+    // -----------------------------------
+
+    func __callback__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        asset_id: Uint256
+    ) -> () {
+        let (controller) = module_controller_address.read();
+        IUtils.__callback__(controller, asset_id);
+
+        return ();
     }
 }
