@@ -7,10 +7,12 @@ import re
 import subprocess
 import asyncio
 
+from nile.common import run_command
 from nile.core.declare import declare
 from nile.core.account import Account, get_nonce
 from nile import deployments
 from nile.core.call_or_invoke import call_or_invoke
+from nile.utils import hex_address
 from realms_cli.config import Config
 from starkware.starknet.compiler.compile import compile_starknet_files
 
@@ -68,6 +70,29 @@ def call(network, contract_alias, function, arguments) -> str:
     ]
     return subprocess.check_output(command).strip().decode("utf-8")
 
+def proxy_call(network, contract_alias, abi, function, params) -> str:
+    """Nile proxy call function."""
+
+    address, _ = next(deployments.load(contract_alias, network)) or contract_alias
+
+    address = hex_address(address)
+
+    arguments = [
+        "--address",
+        address,
+        "--abi",
+        abi,
+        "--function",
+        function,
+    ]
+    
+    return run_command(
+        operation="call",
+        network=network,
+        inputs=params,
+        arguments=arguments,
+    )
+
 
 async def _call_async(network, contract_alias, function, arguments) -> str:
     """Nile async call function."""
@@ -111,13 +136,26 @@ def call_multi(network, contract_alias, function, calldata) -> str:
 def wrapped_call(network, contract_alias, function, arguments) -> str:
     """Send command with some extra functionality such as tx status check and built-in timeout.
     (only supported for non-localhost networks)
-
     tx statuses:
     RECEIVED -> PENDING -> ACCEPTED_ON_L2
     """
     print("------- CALL ----------------------------------------------------")
     print(f"calling {function} from {contract_alias} with {arguments}")
     out = call(network, contract_alias, function, arguments)
+    print("------- CALL ----------------------------------------------------")
+    # return out such that it can be prettified at a higher level
+    return out
+
+
+def wrapped_proxy_call(network, contract_alias, abi, function, arguments) -> str:
+    """Send command with some extra functionality such as tx status check and built-in timeout.
+    (only supported for non-localhost networks)
+    tx statuses:
+    RECEIVED -> PENDING -> ACCEPTED_ON_L2
+    """
+    print("------- CALL ----------------------------------------------------")
+    print(f"calling {function} from {contract_alias} with {arguments}")
+    out = proxy_call(network, contract_alias, abi, function, arguments)
     print("------- CALL ----------------------------------------------------")
     # return out such that it can be prettified at a higher level
     return out
@@ -197,19 +235,6 @@ def compile(contract_alias) -> str:
     return subprocess.check_output(command).strip().decode("utf-8")
 
 
-# def declare(contract_name, alias) -> str:
-#     """Nile declare function."""
-#     command = [
-#         "nile",
-#         "declare",
-#         account,
-#         contract_name,
-#         "--alias",
-#         alias,
-#     ]
-#     return subprocess.check_output(command).strip().decode("utf-8")
-
-
 def wrapped_declare(account, contract_name, network, alias):
 
     account = Account(account, network)
@@ -224,11 +249,11 @@ def wrapped_declare(account, contract_name, network, alias):
         sender=account.address,
         contract_class=contract_class,
         nonce=nonce,
-        max_fee=80999285161067,
+        max_fee=9999943901396300,
     )
 
     class_hash = declare(sender=account.address, contract_name=alias, signature=[
-                         sig_r, sig_s], alias=alias, network=network, max_fee=80999285161067000)
+                         sig_r, sig_s], alias=alias, network=network, max_fee=9999943901396300)
     return class_hash
 
 
