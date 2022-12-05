@@ -14,7 +14,10 @@ from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
 from openzeppelin.upgrades.library import Proxy
 
 from contracts.loot.constants.item import Item
+from contracts.loot.interfaces.imodules import IModuleController
+from contracts.loot.loot.library import ItemLib
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
+from contracts.settling_game.library.library_module import Module
 
 from starkware.starknet.common.syscalls import (
     get_block_timestamp,
@@ -30,10 +33,6 @@ from contracts.loot.loot.stats.item import ItemStats
 // -----------------------------------
 
 @storage_var
-func xoroshiro_address() -> (address: felt) {
-}
-
-@storage_var
 func counter() -> (count: felt) {
 }
 // -----------------------------------
@@ -45,12 +44,12 @@ func counter() -> (count: felt) {
 // @return proxy_admin: Proxy admin address
 @external
 func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    name: felt, symbol: felt, proxy_admin: felt, xoroshiro_address_: felt
+    name: felt, symbol: felt, address_of_controller: felt, proxy_admin: felt
 ) {
+    Module.initializer(address_of_controller);
     ERC721.initializer(name, symbol);
     ERC721Enumerable.initializer();
     Proxy.initializer(proxy_admin);
-    xoroshiro_address.write(xoroshiro_address_);
     return ();
 }
 
@@ -230,169 +229,103 @@ func renounceOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 func item(tokenId: Uint256) -> (item: Item) {
 }
 
+// -----------------------------
+// External Loot Specific
+// -----------------------------
+
+// @notice Mint random item
+// @param to: Address to mint the item to
 @external
 func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: felt) {
     alloc_locals;
 
     // fetch new item with random Id
-    let (new_item: Item) = generateRandomItem();
+    let (rnd) = get_random_number();
+    let (new_item: Item) = ItemLib.generate_random_item(rnd);
 
     let (next_id) = counter.read();
 
-    item.write(Uint256(next_id, 0), new_item);
+    item.write(Uint256(next_id + 1, 0), new_item);
 
-    ERC721Enumerable._mint(to, Uint256(next_id, 0));
+    ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
 
     counter.write(next_id + 1);
     return ();
 }
 
-// ------------new
-
-@view
-func getItemByTokenId{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    tokenId: Uint256
-) -> (item: Item) {
-    let (storedItem: Item) = item.read(tokenId);
-
-    let Id = storedItem.Id;
-    let (Slot) = ItemStats.item_slot(storedItem.Id);  // determined by Id
-    let (Type) = ItemStats.item_type(storedItem.Id);  // determined by Id
-    let (Material) = ItemStats.item_material(storedItem.Id);  // determined by Id
-    let (Rank) = ItemStats.item_rank(storedItem.Id);  // stored state
-    let (Prefix_1) = ItemStats.item_name_prefix(1);  // stored state
-    let (Prefix_2) = ItemStats.item_name_suffix(1);  // stored state
-    let (Suffix) = ItemStats.item_suffix(1);  // stored state
-    let Greatness = 0;  // stored state
-    let CreatedBlock = storedItem.CreatedBlock;  // timestamp
-    let XP = 0;  // stored state
-    let Adventurer = 0;
-    let Bag = 0;
-
-    return (
-        Item(
-        Id=Id,
-        Slot=Slot,
-        Type=Type,
-        Material=Material,
-        Rank=Rank,
-        Prefix_1=Prefix_1,
-        Prefix_2=Prefix_2,
-        Suffix=Suffix,
-        Greatness=Greatness,
-        CreatedBlock=CreatedBlock,
-        XP=XP,
-        Adventurer=Adventurer,
-        Bag=Bag
-        ),
-    );
-}
-
-// TODO: Unequip Item
-
+// @notice Update item adventurer
+// @param tokenId: Id of loot item
+// @param adventurerId: Id of adventurer
 @external
 func updateAdventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256, adventurerId: felt
 ) {
-    // TODO: Only allow calling by Adventurer Contract
+    Module.only_approved();
     let (item_: Item) = item.read(tokenId);
 
-    // TODO: Move library
-    let update_item = Item(
-        Id=item_.Id,
-        Slot=item_.Slot,
-        Type=item_.Type,
-        Material=item_.Material,
-        Rank=item_.Rank,
-        Prefix_1=item_.Prefix_1,
-        Prefix_2=item_.Prefix_2,
-        Suffix=item_.Suffix,
-        Greatness=item_.Greatness,
-        CreatedBlock=item_.CreatedBlock,
-        XP=item_.XP,
-        Adventurer=adventurerId,
-        Bag=item_.Bag,
-    );
+    let updated_item = ItemLib.update_adventurer(item_, adventurerId);
 
-    setItemById(tokenId, update_item);
+    setItemById(tokenId, updated_item);
     return ();
 }
 
+// @notice Update item xp
+// @param tokenId: Id of loot item
+// @param xp: Amount of xp to update
+@external
+func updateXP{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    tokenId: Uint256, xp: felt
+) {
+    Module.only_approved();
+    let (item_: Item) = item.read(tokenId);
+
+    let updated_item = ItemLib.update_xp(item_, xp);
+
+    setItemById(tokenId, updated_item);
+    return ();
+}
+
+// @notice Set loot item data by id
+// @param tokenId: Id of loot item
+// @param item_: Data of loot item
 @external
 func setItemById{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256, item_: Item
 ) {
-    // TODO: Security
+    // Module.only_arbiter();
     item.write(tokenId, item_);
     return ();
 }
 
-func generateRandomItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
-    item: Item
-) {
-    // set blank item
-    let (Id) = roll_dice();
-    let Slot = 0;  // determined by Id
-    let Type = 0;  // determined by Id
-    let Material = 0;  // determined by Id
-    let Rank = 0;  // stored state
-    let Prefix_1 = 0;  // stored state
-    let Prefix_2 = 0;  // stored state
-    let Suffix = 0;  // stored state
-    let Greatness = 0;  // stored state
-    let (CreatedBlock) = get_block_timestamp();  // timestamp
-    let XP = 0;  // stored state
-    let Adventurer = 0;
-    let Bag = 0;
+// -----------------------------
+// Internal Loot Specific
+// -----------------------------
 
-    return (
-        Item(
-        Id=Id,
-        Slot=Slot,
-        Type=Type,
-        Material=Material,
-        Rank=Rank,
-        Prefix_1=Prefix_1,
-        Prefix_2=Prefix_2,
-        Suffix=Suffix,
-        Greatness=Greatness,
-        CreatedBlock=CreatedBlock,
-        XP=XP,
-        Adventurer=Adventurer,
-        Bag=Bag
-        ),
-    );
-}
-
-@external
-func set_xoroshiro{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    xoroshiro: felt
-) {
-    // TODO:
-    Proxy.assert_only_admin();
-    xoroshiro_address.write(xoroshiro);
-    return ();
-}
-
-@view
-func get_xoroshiro{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (x: felt) {
-    let (xoroshiro) = xoroshiro_address.read();
-    return (xoroshiro,);
-}
-
-func roll_dice{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}() -> (
+// @notice Get xiroshiro random number
+// @return dice_roll: Random number
+func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}() -> (
     dice_roll: felt
 ) {
     alloc_locals;
-    let (xoroshiro_address_) = xoroshiro_address.read();
-    let (rnd) = IXoroshiro.next(xoroshiro_address_);
 
-    // useful for testing:
-    // local rnd
-    // %{
-    //     import random
-    //     ids.rnd = random.randint(0, 5000)
-    // %}
-    let (_, r) = unsigned_div_rem(rnd, 101);
-    return (r + 1,);  // values from 1 to 101 inclusive
+    let (controller) = Module.controller_address();
+    let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
+    let (rnd) = IXoroshiro.next(xoroshiro_address_);
+    return (rnd,);  // values from 1 to 101 inclusive
+}
+
+// --------------------
+// Getters
+// --------------------
+
+// @notice Get item data by the token id
+// @param tokenId: Id of the item token
+// @return item: Item data
+@view
+func getItemByTokenId{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    tokenId: Uint256
+) -> (item: Item) {
+    let (item_: Item) = item.read(tokenId);
+
+    return (item_,);
 }

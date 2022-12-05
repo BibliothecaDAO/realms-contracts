@@ -5,18 +5,26 @@ from starkware.cairo.common.math_cmp import is_nn, is_le
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
 from starkware.cairo.common.pow import pow
 
-from contracts.loot.constants.item import ItemIds, ItemSlot, ItemType, ItemMaterial, Material
+from contracts.loot.constants.item import Item, ItemIds, ItemSlot, ItemType, ItemMaterial, Material
 from contracts.loot.constants.rankings import ItemRank
 from contracts.loot.loot.stats.item import ItemStats
 from contracts.loot.constants.physics import MaterialDensity
-from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState
+from contracts.loot.constants.adventurer import (
+    Adventurer, 
+    AdventurerState, 
+    PackedAdventurerState, 
+    AdventurerStatus,
+    DiscoveryType
+)
 from contracts.loot.adventurer.library import AdventurerLib
 
 from tests.protostar.loot.test_structs import (
     TestAdventurerState,
     get_adventurer_state,
-    get_item,
+    TestUtils,
     TEST_WEAPON_TOKEN_ID,
+    TEST_DAMAGE_HEALTH_REMAINING,
+    TEST_DAMAGE_OVERKILL,
 )
 
 @external
@@ -114,7 +122,7 @@ func test_cast{
 
     let (c) = AdventurerLib.cast_state(0, 3, adventurer);
 
-    %{ print('Race', ids.c.Race) %}
+    assert c.Race = 3;
 
     return ();
 }
@@ -127,7 +135,7 @@ func test_equip{
 
     let (state) = get_adventurer_state();
 
-    let (item) = get_item();
+    let (item) = TestUtils.create_item(ItemIds.Katana, 20);
 
     let (adventurer_state: PackedAdventurerState) = AdventurerLib.pack(state);
 
@@ -136,6 +144,83 @@ func test_equip{
     let (c) = AdventurerLib.equip_item(TEST_WEAPON_TOKEN_ID, item, adventurer);
 
     assert c.WeaponId = TEST_WEAPON_TOKEN_ID;
+
+    return ();
+}
+
+@external
+func test_unequip{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}() {
+    alloc_locals;
+
+    let (state) = get_adventurer_state();
+
+    let (item) = TestUtils.create_item(ItemIds.Katana, 20);
+
+    let (adventurer_state: PackedAdventurerState) = AdventurerLib.pack(state);
+
+    let (adventurer: AdventurerState) = AdventurerLib.unpack(adventurer_state);
+
+    let (c) = AdventurerLib.equip_item(TEST_WEAPON_TOKEN_ID, item, adventurer);
+
+    assert c.WeaponId = TEST_WEAPON_TOKEN_ID;
+
+    let (new_c) = AdventurerLib.unequip_item(item, c);
+
+    assert new_c.WeaponId = 0;
+    
+    return ();
+}
+
+@external
+func test_deductHealth{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}() {
+    alloc_locals;
+
+    let (state) = get_adventurer_state();
+
+    let (adventurer_state: PackedAdventurerState) = AdventurerLib.pack(state);
+
+    let (adventurer: AdventurerState) = AdventurerLib.unpack(adventurer_state);
+
+    let (c) = AdventurerLib.deduct_health(TEST_DAMAGE_HEALTH_REMAINING, adventurer);
+
+    assert c.Health = TestAdventurerState.Health - TEST_DAMAGE_HEALTH_REMAINING;
+
+    let (c) = AdventurerLib.deduct_health(TEST_DAMAGE_OVERKILL, adventurer);
+
+    assert c.Health = 0;
+
+    return ();
+}
+
+@external
+func test_assign_beast{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}() {
+    alloc_locals;
+    
+    let (state) = get_adventurer_state();
+
+    let (adventurer_state: PackedAdventurerState) = AdventurerLib.pack(state);
+
+    let (adventurer: AdventurerState) = AdventurerLib.unpack(adventurer_state);
+
+    let (c) = AdventurerLib.assign_beast(1, adventurer);
+
+    assert c.Beast = 1;
+
+    return ();
+}
+
+@external
+func test_discovery{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+
+    let (r) = AdventurerLib.get_random_discovery(1);
+
+    assert r = DiscoveryType.Beast;
 
     return ();
 }

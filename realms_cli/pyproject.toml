@@ -51,6 +51,8 @@ cairo-nile = "^0.5.0"
 
 #-----------LORDS
 "check_lords" = "realms_cli.player.lords.check_lords"
+"approve_lords" = "realms_cli.player.lords.approve_lords"
+"mint_lords" = "realms_cli.player.lords.mint_lords"
 
 #-----------SETTLING
 "approve_realm" = "realms_cli.player.settle.approve_realm"
@@ -161,14 +163,21 @@ cairo-nile = "^0.5.0"
 
 
 #-----------LOOT
-"mint_loot"  =  "realms_cli.loot.loot.mint_loot"
-"get_loot"  =  "realms_cli.loot.loot.get_loot"
-
+"mint_loot" = "realms_cli.loot.loot.mint_loot"
+"get_loot" = "realms_cli.loot.loot.get_loot"
+"set_loot" = "realms_cli.loot.loot.set_loot"
 
 #-----------ADVENTURER
 "mint_adventurer"  =  "realms_cli.loot.adventurer.mint_adventurer"
 "get_adventurer"  =  "realms_cli.loot.adventurer.get_adventurer"
 "equip"  =  "realms_cli.loot.adventurer.equip"
+"unequip" = "realms_cli.loot.adventurer.unequip"
+"explore" = "realms_cli.loot.adventurer.explore"
+
+#-----------BEAST
+"get_beast" = "realms_cli.loot.beast.get_beast"
+"attack_beast" = "realms_cli.loot.beast.attack_beast"
+"flee_from_beast" = "realms_cli.loot.beast.flee_from_beast"
 
 #-----------TRAVEL
 "set_coordinates" = "realms_cli.player.travel.set_coordinates"

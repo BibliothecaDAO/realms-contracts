@@ -13,7 +13,7 @@ stdout-on-success = true
 main = ["./contracts/settling_game/Arbiter.cairo"]
 
 ["protostar.build"]
-cairo-path = ["./lib/cairo_contracts/src"]
+cairo-path = ["./lib/cairo_contracts/src", "./lib/cairo_graphs/src"]
 
 ["protostar.test"]
 disable-hint-validation = true

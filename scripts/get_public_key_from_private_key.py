@@ -8,5 +8,5 @@ signer = Signer(private_key)
 
 if __name__ == "__main__":
     print(f"private: {private_key}")
-    print(f"public: {signer.public_key}")
+    print(f"public: {hex(signer.public_key)}")
     print("--> put the public key as a dict key in NETWORK.accounts.json")
