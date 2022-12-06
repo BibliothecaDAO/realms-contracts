@@ -90,9 +90,8 @@ def get_adventurer(adventurer_token_id, network):
 
     out = out.split(" ")
 
-    # pretty_out = []
-    # for i, key in enumerate(config.ADVENTURER):
-
+    pretty_out = []
+    for i, key in enumerate(config.ADVENTURER):
         # Output names for item name prefix1, prefix2, and suffix
         if i in [25]:
             pretty_out.append(

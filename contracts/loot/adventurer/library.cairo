@@ -27,8 +27,7 @@ from contracts.loot.constants.adventurer import (
     AdventurerDynamic,
     PackedAdventurerState,
     SHIFT_P_1,
-    SHIFT_P_2,
-    SHIFT_P_5,
+    SHIFT_P_4,
     ItemShift,
     StatisticShift,
     AdventurerSlotIds,
@@ -249,7 +248,7 @@ namespace AdventurerLib {
         let p3 = Feet + Hands + Neck + Ring;
         let p4 = Status + Beast;
 
-        let packedAdventurer = PackedAdventurerState(p1, p2, p3, p4, p5);
+        let packedAdventurer = PackedAdventurerState(p1, p2, p3, p4);
 
         return (packedAdventurer,);
     }
@@ -297,10 +296,6 @@ namespace AdventurerLib {
         // ---------- p4 ---------#
         let (Status) = unpack_data(packed_adventurer.p4, 0, 7);  // 3
         let (Beast) = unpack_data(packed_adventurer.p4, 3, 2199023255551);  // 41
-
-        // ---------- p5 ---------#
-        let (Status) = unpack_data(packed_adventurer.p5, 0, 7);  // 3
-        let (Beast) = unpack_data(packed_adventurer.p5, 3, 2199023255551);  // 41
 
         return (
             AdventurerDynamic(
@@ -447,9 +442,6 @@ namespace AdventurerLib {
     ) -> (new_unpacked_adventurer: AdventurerDynamic) {
         alloc_locals;
 
-        // Adventurers can only battle one beast at a time (for now)
-        assert unpacked_adventurer.Beast = 0;
-
         // update adventurer beast
         let (updated_adventurer: AdventurerDynamic) = cast_state(
             AdventurerSlotIds.Beast, beast_id, unpacked_adventurer
@@ -494,22 +486,3 @@ namespace AdventurerLib {
         return (0,);
     }
 }
-
-// Stopping point/thought-holder:
-// The basic (v0.1) adventurer flow is going to be:
-// 1. Mint Adventurer (Done)
-// 2. Equip Items (Done)
-// 3. Explore (In Progress)
-// 4. If a Beast is discovered, option to Beast.attack or Beast.flee (Done)
-// 5. If you defeat beast/obstacle, increase_xp (Done)
-//    If you flee, reset adventurer state to idle. (Done)
-//    If you die, set adventurer state to dead. (TODO)
-
-// List of TODO for this file/lib:
-// 1. Test Cases for Beast.attack and Beast.flee
-// 2. All calls to calculate_damage_from_beast() in this file currently pass in ChestId for the armor. 
-//    We should come up with a way to make this dynamic. Beast could attack/bite your leg, or arm for example
-//    When battling with adventurers, they will intentionally try to attack your weak spot, with beasts however
-//    I think this makes sense to be a property of the beast/obstacle.
-// 3. Increase sophistication of the ambush system for beasts/obstacles by giving beasts same stats as adventurers
-//    and basing their ambush chance on their stats.
