@@ -94,10 +94,16 @@ def safe_load_declarations(alias: str, network: str):
     print(f"Found deployment for alias {alias}.")
     return address
 
-
 def strhex_as_strfelt(strhex: str):
     """Converts a string in hex format to a string in felt format"""
     if strhex is not None:
         return str(int(strhex, 16))
+    else:
+        print("strhex address is None.")
+
+def strhex_as_felt(strhex: str):
+    """Converts a string in hex format to an int in felt format"""
+    if strhex is not None:
+        return int(strhex, 16)
     else:
         print("strhex address is None.")

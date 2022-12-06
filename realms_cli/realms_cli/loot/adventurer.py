@@ -1,4 +1,5 @@
-import click
+import anyio
+import asyncclick as click
 from realms_cli.caller_invoker import wrapped_proxy_call, wrapped_send
 from realms_cli.config import Config
 from realms_cli.utils import print_over_colums,  uint, felt_to_str, str_to_felt
@@ -14,7 +15,7 @@ from realms_cli.utils import print_over_colums,  uint, felt_to_str, str_to_felt
               metavar='<columns>', type=click.STRING, help='adventurer name', prompt=True)
 @click.option('--order', is_flag=False,
               metavar='<columns>', type=click.STRING, help='adventurer order', prompt=True)
-def mint_adventurer(network, race, home_realm, name, order):
+async def mint_adventurer(network, race, home_realm, name, order):
     """
     Mint a Random Loot Item
     """
@@ -22,7 +23,7 @@ def mint_adventurer(network, race, home_realm, name, order):
 
     print('🪙 Minting lords ...')
 
-    wrapped_send(
+    await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias=config.Lords_ERC20_Mintable_alias,
@@ -38,7 +39,7 @@ def mint_adventurer(network, race, home_realm, name, order):
 
     print('👍 Approving lords to be spent ...')
 
-    wrapped_send(
+    await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias=config.Lords_ERC20_Mintable_alias,
@@ -54,7 +55,7 @@ def mint_adventurer(network, race, home_realm, name, order):
 
     print('🤴 Minting adventurer ...')
 
-    wrapped_send(
+    await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Adventurer",
@@ -74,13 +75,13 @@ def mint_adventurer(network, race, home_realm, name, order):
 @click.command()
 @click.argument("adventurer_token_id", nargs=1)
 @click.option("--network", default="goerli")
-def get_adventurer(adventurer_token_id, network):
+async def get_adventurer(adventurer_token_id, network):
     """
     Get Adventurer metadata
     """
     config = Config(nile_network=network)
 
-    out = wrapped_proxy_call(
+    out = await wrapped_proxy_call(
         network=config.nile_network,
         contract_alias="proxy_Adventurer",
         abi='artifacts/abis/Adventurer.json',
@@ -92,6 +93,7 @@ def get_adventurer(adventurer_token_id, network):
 
     pretty_out = []
     for i, key in enumerate(config.ADVENTURER):
+
         # Output names for item name prefix1, prefix2, and suffix
         if i in [25]:
             pretty_out.append(
@@ -112,7 +114,7 @@ def get_adventurer(adventurer_token_id, network):
               metavar='<columns>', type=click.STRING, help='adventurer id', prompt=True)
 @click.option('--item', is_flag=False,
               metavar='<columns>', type=click.STRING, help='item id', prompt=True)
-def equip(network, adventurer, item):
+async def equip(network, adventurer, item):
     """
     Equip loot item
     """
@@ -120,7 +122,7 @@ def equip(network, adventurer, item):
 
     print('🫴 Equiping item ...')
 
-    wrapped_send(
+    await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Adventurer",
@@ -136,7 +138,7 @@ def equip(network, adventurer, item):
               metavar='<columns>', type=click.STRING, help='adventurer id', prompt=True)
 @click.option('--item', is_flag=False,
               metavar='<columns>', type=click.STRING, help='item id', prompt=True)
-def unequip(network, adventurer, item):
+async def unequip(network, adventurer, item):
     """
     Unequip loot item
     """
@@ -144,7 +146,7 @@ def unequip(network, adventurer, item):
 
     print('🫳 Unequiping item ...')
 
-    wrapped_send(
+    await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Adventurer",
@@ -158,7 +160,7 @@ def unequip(network, adventurer, item):
 @click.option("--network", default="goerli")
 @click.option('--adventurer', is_flag=False,
               metavar='<columns>', type=click.STRING, help='adventurer id', prompt=True)
-def explore(network, adventurer):
+async def explore(network, adventurer):
     """
     Explore with adventurer
     """
@@ -166,7 +168,7 @@ def explore(network, adventurer):
 
     print('👣 Exploring ...')
 
-    wrapped_send(
+    await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Adventurer",
@@ -176,7 +178,7 @@ def explore(network, adventurer):
 
     print('👣 Explored ✅')
 
-    out = wrapped_proxy_call(
+    out = await wrapped_proxy_call(
         network=config.nile_network,
         contract_alias="proxy_Adventurer",
         abi='artifacts/abis/Adventurer.json',

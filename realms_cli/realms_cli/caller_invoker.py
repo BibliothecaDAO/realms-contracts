@@ -28,7 +28,7 @@ async def send_multi(self, to, method, calldata, nonce=None):
     if nonce is None:
         nonce = await get_nonce(self.address, self.network)
 
-    (execute_calldata, sig_r, sig_s) = self.signer.sign_transaction(
+    (execute_calldata, sig_r, sig_s) = self.signer.sign_invoke(
         sender=self.address,
         calls=[[target_address, method, c] for c in calldata],
         nonce=nonce,
