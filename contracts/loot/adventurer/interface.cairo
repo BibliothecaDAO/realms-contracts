@@ -16,6 +16,8 @@ namespace IAdventurer {
     }
     func update_status(tokenId: Uint256, status: felt) -> (success: felt) {
     }
+    func assign_beast(tokenId: Uint256, value: felt) -> (success: felt) {
+    }
     func explore(tokenId: Uint256) -> (success: felt) {
     }
 }

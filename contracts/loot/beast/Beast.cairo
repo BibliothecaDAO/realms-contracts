@@ -350,6 +350,7 @@ func flee{
         IAdventurer.update_status(
             adventurer_address, Uint256(beast.Adventurer, 0), AdventurerStatus.Idle
         );
+       IAdventurer.assign_beast(adventurer_address, Uint256(beast.Adventurer, 0), 0);
         // adventurer was able to flee
         return ();
     } else {

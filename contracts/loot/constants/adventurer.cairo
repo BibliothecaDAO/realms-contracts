@@ -165,6 +165,7 @@ struct PackedAdventurerState {
     p2: felt,
     p3: felt,
     p4: felt,
+    p5: felt,
 }
 
 namespace SHIFT_P_1 {

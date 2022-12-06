@@ -1,5 +1,5 @@
 import click
-from realms_cli.caller_invoker import wrapped_call, wrapped_send
+from realms_cli.caller_invoker import wrapped_call, wrapped_send, wrapped_proxy_call
 from realms_cli.config import Config
 from realms_cli.utils import print_over_colums, uint, felt_to_str
 
@@ -12,6 +12,8 @@ def mint_loot(network):
     """
     config = Config(nile_network=network)
 
+    print('🎲 Minting random item ...')
+
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
@@ -19,6 +21,8 @@ def mint_loot(network):
         function="mint",
         arguments=[config.USER_ADDRESS]
     )
+
+    print('🎲 Minted random item ✅')
 
 
 @click.command()
@@ -30,9 +34,10 @@ def get_loot(loot_token_id, network):
     """
     config = Config(nile_network=network)
 
-    out = wrapped_call(
+    out = wrapped_proxy_call(
         network=config.nile_network,
         contract_alias="proxy_Loot",
+        abi='artifacts/abis/Loot.json',
         function="getItemByTokenId",
         arguments=[*uint(loot_token_id)],
     )
@@ -41,7 +46,7 @@ def get_loot(loot_token_id, network):
     for i, key in enumerate(config.LOOT):
 
         # Output names for item name prefix1, prefix2, and suffix
-        if i in [5, 6, 7]:
+        if i in [13]:
             pretty_out.append(
                 f"{key} : {felt_to_str(int(out[i]))}")
         else:
@@ -80,23 +85,12 @@ def set_loot(loot_token_id, network):
     """
     config = Config(nile_network=network)
 
-    out = wrapped_call(
+    print('🗡 Setting item by id ...')
+
+    wrapped_send(
         network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Loot",
         function="setItemById",
-        arguments=[*uint(loot_token_id)],
+        arguments=[config.USER_ADDRESS]
     )
-    out = out.split(" ")
-    pretty_out = []
-    for i, key in enumerate(config.LOOT):
-
-        # Output names for item name prefix1, prefix2, and suffix
-        if i in [5, 6, 7]:
-            pretty_out.append(
-                f"{key} : {felt_to_str(int(out[i]))}")
-        else:
-            pretty_out.append(
-                f"{key} : {int(out[i])}")
-
-    print("_________ LOOT ITEM - " + str(out[0]) + "___________")
-    print_over_colums(pretty_out)

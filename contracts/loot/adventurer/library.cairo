@@ -27,7 +27,8 @@ from contracts.loot.constants.adventurer import (
     AdventurerDynamic,
     PackedAdventurerState,
     SHIFT_P_1,
-    SHIFT_P_4,
+    SHIFT_P_2,
+    SHIFT_P_5,
     ItemShift,
     StatisticShift,
     AdventurerSlotIds,
@@ -248,7 +249,7 @@ namespace AdventurerLib {
         let p3 = Feet + Hands + Neck + Ring;
         let p4 = Status + Beast;
 
-        let packedAdventurer = PackedAdventurerState(p1, p2, p3, p4);
+        let packedAdventurer = PackedAdventurerState(p1, p2, p3, p4, p5);
 
         return (packedAdventurer,);
     }
@@ -296,6 +297,10 @@ namespace AdventurerLib {
         // ---------- p4 ---------#
         let (Status) = unpack_data(packed_adventurer.p4, 0, 7);  // 3
         let (Beast) = unpack_data(packed_adventurer.p4, 3, 2199023255551);  // 41
+
+        // ---------- p5 ---------#
+        let (Status) = unpack_data(packed_adventurer.p5, 0, 7);  // 3
+        let (Beast) = unpack_data(packed_adventurer.p5, 3, 2199023255551);  // 41
 
         return (
             AdventurerDynamic(
