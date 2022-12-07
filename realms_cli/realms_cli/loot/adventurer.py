@@ -34,8 +34,8 @@ async def mint_adventurer(network, race, home_realm, name, order, image_hash_1, 
         function="mint",
         arguments=[
             config.USER_ADDRESS,
-            100,           # uint 1
-            0              # uint 2
+            100 * 10 ** 18,           # uint 1
+            0                         # uint 2
         ]
     )
 
@@ -50,8 +50,8 @@ async def mint_adventurer(network, race, home_realm, name, order, image_hash_1, 
         function="approve",
         arguments=[
             config.ADVENTURER_PROXY_ADDRESS,
-            100,              # uint 1
-            0,                # uint 2
+            100 * 10 ** 18,       # uint 1
+            0,                    # uint 2
         ]
     )
 
