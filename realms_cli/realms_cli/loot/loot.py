@@ -62,16 +62,6 @@ async def get_loot(loot_token_id, network):
 @click.option("--network", default="goerli")
 @click.option('--item', is_flag=False,
               metavar='<columns>', type=click.STRING, help='item id', prompt=True)
-@click.option('--slot', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='slot id', prompt=True)
-@click.option('--type', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='type id', prompt=True)
-@click.option('--material', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='material id', prompt=True)
-@click.option('--rank', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='rank id', prompt=True)
-@click.option('--prefix', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='prefix id', prompt=True)
 @click.option('--greatness', is_flag=False,
               metavar='<columns>', type=click.STRING, help='greatness', prompt=True)
 @click.option('--xp', is_flag=False,
@@ -80,7 +70,7 @@ async def get_loot(loot_token_id, network):
               metavar='<columns>', type=click.STRING, help='adventurer', prompt=True)
 @click.option('--bag', is_flag=False,
               metavar='<columns>', type=click.STRING, help='bag', prompt=True)
-async def set_loot(loot_token_id, network):
+async def set_loot(loot_token_id, item, greatness, xp, adventurer, bag, network):
     """
     Set Loot Item metadata
     """
@@ -93,5 +83,5 @@ async def set_loot(loot_token_id, network):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Loot",
         function="setItemById",
-        arguments=[config.USER_ADDRESS]
+        arguments=[*uint(loot_token_id), item, greatness, xp, adventurer, bag]
     )

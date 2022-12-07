@@ -46,7 +46,7 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         stop_prank_lords = start_prank(ids.addresses.account_1, ids.addresses.lords)
     %}
 
-    ILords.approve(addresses.lords, addresses.adventurer, Uint256(10000, 0));
+    ILords.approve(addresses.lords, addresses.adventurer, Uint256(100000000000000000000, 0));
 
     %{
         stop_prank_lords()
@@ -78,7 +78,7 @@ func test_mint{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
     let (new_balance: Uint256) = ILords.balanceOf(lords_address, account_1_address);
 
-    assert new_balance = Uint256(9900, 0);
+    assert new_balance = Uint256(0, 0);
     %{
         stop_prank_realms()
         stop_prank_adventurer()
