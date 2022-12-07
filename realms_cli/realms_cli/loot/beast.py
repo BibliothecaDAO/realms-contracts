@@ -1,4 +1,5 @@
-import click
+import anyio
+import asyncclick as click
 from realms_cli.caller_invoker import wrapped_call, wrapped_send, wrapped_proxy_call
 from realms_cli.config import Config
 from realms_cli.utils import print_over_colums, uint, felt_to_str, str_to_felt
@@ -7,13 +8,13 @@ from realms_cli.loot.constants import BEASTS
 @click.command()
 @click.argument("beast_token_id", nargs=1)
 @click.option("--network", default="goerli")
-def get_beast(beast_token_id, network):
+async def get_beast(beast_token_id, network):
     """
     Get Beast metadata
     """
     config = Config(nile_network=network)
 
-    out = wrapped_proxy_call(
+    out = await wrapped_proxy_call(
         network=config.nile_network,
         contract_alias="proxy_Beast",
         abi='artifacts/abis/Beast.json',
@@ -43,7 +44,7 @@ def get_beast(beast_token_id, network):
 @click.option('--beast', is_flag=False,
               metavar='<columns>', type=click.STRING, help='beast id', prompt=True)
 @click.option("--network", default="goerli")
-def attack_beast(beast, network):
+async def attack_beast(beast, network):
     """
     Attack beast
     """
@@ -51,7 +52,7 @@ def attack_beast(beast, network):
 
     print('🧌 Attacking beast ...')
 
-    wrapped_send(
+    await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Beast",
@@ -61,7 +62,7 @@ def attack_beast(beast, network):
 
     print('🧌 Attacked beast ✅')
 
-    beast_out = wrapped_proxy_call(
+    beast_out = await wrapped_proxy_call(
         network=config.nile_network,
         contract_alias="proxy_Beast",
         abi='artifacts/abis/Beast.json',
@@ -70,7 +71,7 @@ def attack_beast(beast, network):
     )
     beast_out = beast_out.split(" ")
 
-    adventurer_out = wrapped_proxy_call(
+    adventurer_out = await wrapped_proxy_call(
         network=config.nile_network,
         contract_alias="proxy_Adventurer",
         abi='artifacts/abis/Adventurer.json',
@@ -94,7 +95,7 @@ def attack_beast(beast, network):
 @click.option('--beast', is_flag=False,
               metavar='<columns>', type=click.STRING, help='beast id', prompt=True)
 @click.option("--network", default="goerli")
-def flee_from_beast(beast, network):
+async def flee_from_beast(beast, network):
     """
     Flee from beast
     """
@@ -102,7 +103,7 @@ def flee_from_beast(beast, network):
 
     print('🏃‍♂️ Fleeing from beast ...')
 
-    wrapped_send(
+    await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Beast",
@@ -110,7 +111,7 @@ def flee_from_beast(beast, network):
         arguments=[*uint(beast)]
     )
 
-    beast_out = wrapped_proxy_call(
+    beast_out = await wrapped_proxy_call(
         network=config.nile_network,
         contract_alias="proxy_Beast",
         abi='artifacts/abis/Beast.json',
@@ -119,7 +120,7 @@ def flee_from_beast(beast, network):
     )
     beast_out = beast_out.split(" ")
 
-    adventurer_out = wrapped_proxy_call(
+    adventurer_out = await wrapped_proxy_call(
         network=config.nile_network,
         contract_alias="proxy_Adventurer",
         abi='artifacts/abis/Adventurer.json',
@@ -127,8 +128,6 @@ def flee_from_beast(beast, network):
         arguments=[*uint(beast_out[7])],
     )
     adventurer_out = adventurer_out.split(" ")
-
-    print(adventurer_out)
 
     if adventurer_out[23] == '0':
         print(f"🏃‍♂️ You successfully fled from beast ✅")

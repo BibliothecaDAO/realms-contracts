@@ -18,13 +18,7 @@ from contracts.loot.constants.adventurer import (
 )
 from contracts.loot.adventurer.library import AdventurerLib
 
-from tests.protostar.loot.setup.interfaces import (
-    IAdventurer, 
-    ILoot, 
-    ILords, 
-    IRealms,
-    IXoroshiro
-)
+from tests.protostar.loot.setup.interfaces import IAdventurer, ILoot, ILords, IRealms
 from tests.protostar.loot.setup.setup import Contracts, deploy_all
 from tests.protostar.loot.test_structs import (
     TestAdventurerState,
@@ -81,7 +75,7 @@ func test_mint{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
     let (local allowance: Uint256) = ILords.allowance(lords_address, account_1_address, adventurer_address);
-    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8);
+    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
     let (new_balance: Uint256) = ILords.balanceOf(lords_address, account_1_address);
 
     assert new_balance = Uint256(9900, 0);
@@ -109,27 +103,17 @@ func test_equip_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
         ids.loot_address = context.loot
         stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+        stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
     %}
     let (timestamp) = get_block_timestamp();
-    let weapon_id: Item = Item(
-        ItemIds.Wand,
-        ItemSlot.Wand, 
-        ItemType.Wand, 
-        ItemMaterial.Wand, 
-        ItemRank.Wand, 
-        1, 
-        1, 
-        1, 
-        0, 
-        0, 
-        0, 
-        0, 
-        0
-    ); // Wand
     ILoot.mint(loot_address, account_1_address);
-    ILoot.setItemById(loot_address, Uint256(1,0), weapon_id);
+    ILoot.setItemById(loot_address, Uint256(1,0), ItemIds.Wand, 0, 0, 0, 0);
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
-    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8);
+    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
+    %{
+        stop_prank_loot()
+        stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address)
+    %}
     IAdventurer.equip_item(adventurer_address, Uint256(1,0), Uint256(1,0));
     let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
     let (adventurer_item) = ILoot.getItemByTokenId(loot_address, Uint256(adventurer.WeaponId, 0));
@@ -138,6 +122,7 @@ func test_equip_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     %{
         stop_prank_realms()
         stop_prank_adventurer()
+        stop_prank_loot()
     %}
 
     return ();
@@ -159,13 +144,17 @@ func test_unequip_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
         ids.loot_address = context.loot
         stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+        stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
     %}
     let (timestamp) = get_block_timestamp();
-    let weapon_id: Item = Item(ItemIds.Wand, 0, 0, 0, 0, 0, 0, 0, 0, timestamp, 0, 0, 0); // Wand
     ILoot.mint(loot_address, account_1_address);
-    ILoot.setItemById(loot_address, Uint256(1,0), weapon_id);
+    ILoot.setItemById(loot_address, Uint256(1,0), ItemIds.Wand, 15, 0, 0, 0);
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
-    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8);
+    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
+    %{
+        stop_prank_loot()
+        stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address)
+    %}
     IAdventurer.equip_item(adventurer_address, Uint256(1,0), Uint256(1,0));
     IAdventurer.unequip_item(adventurer_address, Uint256(1,0), Uint256(1,0));
     let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
@@ -175,6 +164,7 @@ func test_unequip_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     %{
         stop_prank_realms()
         stop_prank_adventurer()
+        stop_prank_loot()
     %}
 
     return ();
@@ -199,7 +189,7 @@ func test_deduct_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_ch
     %}
 
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
-    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8);
+    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
 
     %{
         stop_prank_adventurer()
@@ -236,7 +226,7 @@ func test_increase_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     %}
 
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
-    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8);
+    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
 
     %{
         stop_prank_adventurer()
@@ -280,7 +270,7 @@ func test_explore{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
     %}
 
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
-    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8);
+    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
     IAdventurer.explore(adventurer_address, Uint256(1,0));
 
     let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
@@ -294,25 +284,4 @@ func test_explore{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
     %}
 
     return ();
-}
-
-@external
-func test_random_number{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
-    alloc_locals;
-
-    local xoroshiro_address;
-    %{
-        ids.xoroshiro_address = context.xoroshiro
-    %}
-    let (local rand_1) = IXoroshiro.next(xoroshiro_address);
-    let (local rand_2) = IXoroshiro.next(xoroshiro_address);
-    let (local rand_3) = IXoroshiro.next(xoroshiro_address);
-    
-    %{
-        print(ids.rand_1)
-        print(ids.rand_2)
-        print(ids.rand_3)
-    %}
-
-    return();
 }

@@ -129,6 +129,7 @@ func deploy_all{
 
     IRealms.initializer(contracts.realms, 1, 1, contracts.account_1);
     ILords.initializer(contracts.lords, 1, 1, 18, Uint256(10000, 0), contracts.account_1, contracts.account_1);
+    IController.set_address_for_external_contract(contracts.controller, ExternalContractIds.Realms, contracts.realms);
     IController.set_address_for_external_contract(contracts.controller, ExternalContractIds.Lords, contracts.lords);
 
     %{

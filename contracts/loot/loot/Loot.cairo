@@ -16,6 +16,7 @@ from openzeppelin.upgrades.library import Proxy
 from contracts.loot.constants.item import Item
 from contracts.loot.interfaces.imodules import IModuleController
 from contracts.loot.loot.library import ItemLib
+from contracts.loot.loot.metadata import LootUri
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library.library_module import Module
 
@@ -27,6 +28,7 @@ from starkware.starknet.common.syscalls import (
 )
 
 from contracts.loot.loot.stats.item import ItemStats
+from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
 
 // -----------------------------------
 // Storage
@@ -49,6 +51,7 @@ func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     Module.initializer(address_of_controller);
     ERC721.initializer(name, symbol);
     ERC721Enumerable.initializer();
+    Ownable.initializer(proxy_admin);
     Proxy.initializer(proxy_admin);
     return ();
 }
@@ -148,9 +151,13 @@ func isApprovedForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 @view
 func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256
-) -> (tokenURI: felt) {
-    let (tokenURI: felt) = ERC721.token_uri(tokenId);
-    return (tokenURI,);
+) -> (tokenURI_len: felt, tokenURI: felt*) {
+    alloc_locals;
+    let (controller) = Module.controller_address();
+    let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
+    let (item_data) = getItemByTokenId(tokenId);
+    let (tokenURI_len, tokenURI: felt*) = LootUri.build(tokenId, item_data, adventurer_address);
+    return (tokenURI_len, tokenURI,);
 }
 
 @view
@@ -199,15 +206,6 @@ func safeTransferFrom{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
 func burn{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(tokenId: Uint256) {
     ERC721.assert_only_token_owner(tokenId);
     ERC721Enumerable._burn(tokenId);
-    return ();
-}
-
-@external
-func setTokenURI{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    tokenId: Uint256, tokenURI: felt
-) {
-    Ownable.assert_only_owner();
-    ERC721._set_token_uri(tokenId, tokenURI);
     return ();
 }
 
@@ -265,7 +263,7 @@ func updateAdventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 
     let updated_item = ItemLib.update_adventurer(item_, adventurerId);
 
-    setItemById(tokenId, updated_item);
+    item.write(tokenId, updated_item);
     return ();
 }
 
@@ -281,7 +279,7 @@ func updateXP{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     let updated_item = ItemLib.update_xp(item_, xp);
 
-    setItemById(tokenId, updated_item);
+    item.write(tokenId, updated_item);
     return ();
 }
 
@@ -290,9 +288,16 @@ func updateXP{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 // @param item_: Data of loot item
 @external
 func setItemById{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    tokenId: Uint256, item_: Item
+    tokenId: Uint256, 
+    item_id: felt, 
+    greatness: felt, 
+    xp: felt, 
+    adventurer: felt, 
+    bag_id: felt
 ) {
-    // Module.only_arbiter();
+    alloc_locals;
+    Ownable.assert_only_owner();
+    let (item_) = ItemLib.set_item(item_id, greatness, xp, adventurer, bag_id);
     item.write(tokenId, item_);
     return ();
 }
