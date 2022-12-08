@@ -783,7 +783,7 @@ namespace Combat {
         alloc_locals;
 
         // get total damage BP
-        let total_damage_BP = 100 - CCombat.ARMY_DESERTION_DAMAGE * ticks;
+        let total_damage_BP = 1000 - CCombat.ARMY_DESERTION_DAMAGE * ticks;
 
         // check great than 1... else return dead army....
         let has_totally_deserted = is_le(total_damage_BP, 0);

@@ -168,7 +168,7 @@ func build_army_from_battalions{
 ) {
     alloc_locals;
 
-    Module.__callback__(ModuleIds.Calculator, realm_id);
+    Module.__callback__(realm_id);
 
     // TODO: assert can build army -> # max regions
     // TODO: can only add to the army if you are at homebase or friendly Realm
@@ -206,6 +206,38 @@ func build_army_from_battalions{
         controller, ExternalContractIds.Resources
     );
     IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values);
+
+    _build_army(
+        realm_id,
+        army_id,
+        battalion_ids_len,
+        battalion_ids,
+        battalion_quantity_len,
+        battalion_quantity,
+    );
+
+    return ();
+}
+
+// @notice Creates a new Army on Realm. Armies are comprised of Battalions.
+// @param realm_id: Staked Realm ID (S_Realm)
+// @param army_id: Army ID being added too.
+// @param battalion_ids_len: Battlion IDs length
+// @param battalion_ids: Battlion IDs
+// @param battalions_len: Battalions lengh
+// @param battalions: Battalions to add
+
+func _build_army{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(
+    realm_id: Uint256,
+    army_id: felt,
+    battalion_ids_len: felt,
+    battalion_ids: felt*,
+    battalion_quantity_len: felt,
+    battalion_quantity: felt*,
+) {
+    alloc_locals;
 
     // fetch packed army
     let (army_packed) = army_data_by_id.read(army_id, realm_id);
@@ -533,6 +565,39 @@ func loop_all_armies{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     return loop_all_armies(army_id + 1, realm_id, armies_len + 1, armies + 1);
 }
 
+// @notice Get All Armies Ids on a Realm
+@view
+func get_all_army_ids{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    realm_id: Uint256
+) -> (army_ids_len: felt, army_ids: felt*) {
+    alloc_locals;
+
+    // loop and get armies
+    let (army_ids: felt*) = alloc();
+    let (all_armies_len) = get_all_army_ids_loop(0, realm_id, 0, army_ids);
+
+    return (all_armies_len, army_ids);
+}
+
+// @notice Loop over all armies and return
+func get_all_army_ids_loop{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    army_id: felt, realm_id: Uint256, army_ids_len: felt, army_ids: felt*
+) -> (armies_len: felt) {
+    alloc_locals;
+
+    // loop armies starting from 0 (defensive army)
+    let (army_data: ArmyData) = get_realm_army_combat_data(army_id, realm_id);
+
+    // if army.packed == 0 then no Armies have been made!
+    if (army_data.packed == 0) {
+        return (armies_len=army_id);
+    }
+
+    assert [army_ids] = army_id;
+
+    return get_all_army_ids_loop(army_id + 1, realm_id, army_ids_len + 1, army_ids + 1);
+}
+
 // @notice Get all Population of Armies
 @view
 func get_population_of_armies{
@@ -631,7 +696,7 @@ func set_xoroshiro{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
 func combat_callback{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(realm_id: Uint256, ticks: felt) {
-    let (all_armies_len, army_ids) = get_all_armies(realm_id);
+    let (all_armies_len, army_ids) = get_all_army_ids(realm_id);
 
     combat_callback_loop(realm_id, ticks, all_armies_len, army_ids);
 
@@ -664,4 +729,24 @@ func combat_callback_loop{
     BuildArmy.emit([army_ids], realm_id, adjusted_army, 0, cast(0, felt*), 0, cast(0, felt*));
 
     return combat_callback_loop(realm_id, ticks, army_ids_len - 1, army_ids + 1);
+}
+
+// start armies
+@external
+func build_start_army{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(realm_id: Uint256) {
+    alloc_locals;
+
+    Module.only_approved();
+    tempvar battalion_ids = new (1, 3, 5, 7);
+    tempvar battalion_quantity = new (1, 1, 1, 1);
+
+    tempvar army_length = 4;
+
+    _build_army(realm_id, 1, army_length, battalion_ids, army_length, battalion_quantity);
+
+    _build_army(realm_id, 0, army_length, battalion_ids, army_length, battalion_quantity);
+
+    return ();
 }

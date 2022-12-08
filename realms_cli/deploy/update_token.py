@@ -19,8 +19,20 @@ Contracts = namedtuple('Contracts', 'alias contract_name address')
 # 6. Set token contract approval if needed - Resources etc
 
 NEW_MODULES = [
-    Contracts("LisbonCrown", "LisbonCrown",
-              "poaps/crowns/LisbonCrown", ),
+    # Contracts("ModuleController", "ModuleController",
+    #           "settling_game/ModuleController", ),
+    # Contracts("Buildings", "Buildings",
+    #           "settling_game/modules/buildings/Buildings", ),
+    # Contracts("Calculator", "Calculator",
+    #           "settling_game/modules/calculator/Calculator", ),
+    # Contracts("Combat", "Combat",
+    #           "settling_game/modules/combat/Combat", ),
+    # Contracts("Food", "Food",
+    #           "settling_game/modules/food/Food", ),
+    Contracts("Resources", "Resources",
+              "settling_game/modules/resources/Resources", ),
+    # Contracts("Travel", "Travel",
+    #           "settling_game/modules/travel/Travel", ),
     # Contracts("S_Realms_ERC721_Mintable", "S_Realms_ERC721_Mintable", token_path +
     #           "S_Realms_ERC721_Mintable", ),
     # Contracts("Resources_ERC1155_Mintable_Burnable", "Resources_ERC1155_Mintable_Burnable", token_path +
@@ -51,7 +63,7 @@ def run(nre):
                     f.write(line)
             f.truncate()
 
-        compile(contract_alias="contracts/poaps/crowns/LisbonCrown.cairo")
+        compile(contract_alias='contracts/' + contract.address + '.cairo')
 
         logged_deploy(
             nre,
@@ -59,8 +71,6 @@ def run(nre):
             alias=contract.alias,
             arguments=[],
         )
-
-        time.sleep(400)
 
         class_hash = wrapped_declare(
             config.ADMIN_ALIAS, contract.address, nre.network, contract.alias)

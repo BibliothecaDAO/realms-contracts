@@ -122,7 +122,7 @@ func is_realm_happy{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_
     let (happiness) = calculate_happiness(token_id);
 
     // check if happiness is over or equal to base happiness
-    let is_happy = is_le(happiness, CCalculator.BASE_HAPPINESS);
+    let is_happy = is_le(CCalculator.BASE_HAPPINESS, happiness);
 
     return (is_happy=is_happy);
 }
@@ -248,17 +248,18 @@ func calculate_daily_randomness{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, 
 }
 
 // called on every Realm action IF realm is unhappy
-
 @external
 func happiness__callback__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     realm_id: Uint256
 ) {
-    let (happy) = is_realm_happy(realm_id);
-    if (happy == FALSE) {
-        let (needs_update, TOTAL_TICKS) = check_tick_time(realm_id);
+    alloc_locals;
+    let (needs_update, TOTAL_TICKS) = check_tick_time(realm_id);
 
-        if (needs_update == TRUE) {
-            let (block_timestamp) = get_block_timestamp();
+    if (needs_update == TRUE) {
+        let (happy) = is_realm_happy(realm_id);
+        let (block_timestamp) = get_block_timestamp();
+
+        if (happy == FALSE) {
             let (controller) = Module.controller_address();
             let (combat_address) = IModuleController.get_module_address(
                 controller, ModuleIds.L06_Combat
@@ -267,10 +268,12 @@ func happiness__callback__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range
             ICombat.combat_callback(combat_address, realm_id, TOTAL_TICKS);
 
             // set and emit
-            since_last_tick.write(realm_id, block_timestamp);
-            SinceLastTick.emit(realm_id, block_timestamp);
+
+            update_tick(realm_id, block_timestamp);
+
             return ();
         }
+        update_tick(realm_id, block_timestamp);
         return ();
     }
 
@@ -308,6 +311,15 @@ func __callback__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
     realm_id: Uint256
 ) {
     happiness__callback__(realm_id);
+
+    return ();
+}
+
+func update_tick{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    realm_id: Uint256, block_timestamp: felt
+) {
+    since_last_tick.write(realm_id, block_timestamp);
+    SinceLastTick.emit(realm_id, block_timestamp);
 
     return ();
 }

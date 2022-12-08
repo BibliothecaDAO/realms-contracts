@@ -198,6 +198,8 @@ func harvest{
 }(token_id: Uint256, harvest_type: felt, food_building_id: felt) {
     alloc_locals;
 
+    Module.__callback__(token_id);
+
     // check id and harvest type
     Food.assert_ids(food_building_id);
     Food.assert_harvest_type(harvest_type);

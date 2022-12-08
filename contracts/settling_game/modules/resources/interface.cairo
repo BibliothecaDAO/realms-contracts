@@ -34,4 +34,7 @@ namespace IResources {
         total_vault_days_remaining: felt,
     ) {
     }
+
+    func mint_resources(token_id: Uint256) {
+    }
 }

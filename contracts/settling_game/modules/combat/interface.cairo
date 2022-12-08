@@ -16,4 +16,6 @@ namespace ICombat {
     }
     func combat_callback(realm_id: Uint256, ticks: felt) {
     }
+    func build_start_army(realm_id: Uint256) {
+    }
 }
