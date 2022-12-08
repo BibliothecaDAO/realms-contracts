@@ -9,6 +9,7 @@ from starkware.cairo.common.uint256 import Uint256
 
 from openzeppelin.access.accesscontrol.library import AccessControl
 from openzeppelin.token.erc20.library import ERC20
+from openzeppelin.utils.constants.library import DEFAULT_ADMIN_ROLE
 
 // roles used to validate access to mint and burn_away functions
 const MINT_ROLE = 'mint';
@@ -19,8 +20,10 @@ func constructor{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     name: felt, symbol: felt, decimals: felt, admin: felt
 ) {
     ERC20.initializer(name, symbol, decimals);
+
     AccessControl.initializer();
-    AccessControl._set_role_admin(admin);
+    AccessControl._grant_role(DEFAULT_ADMIN_ROLE, admin);
+
     return ();
 }
 
