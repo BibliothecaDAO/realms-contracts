@@ -1,5 +1,6 @@
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin
+from starkware.cairo.common.math import assert_not_zero
 from starkware.cairo.common.uint256 import Uint256
 
 from tests.protostar.loot.setup.interfaces import IAdventurer, ILoot, ILords, IRealms
@@ -34,9 +35,42 @@ func test_mint{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     ILoot.mint(loot_address, account_1_address);
 
-    // assert
+    let (item) = ILoot.getItemByTokenId(loot_address, Uint256(1,0));
+
+    assert_not_zero(item.Id);
 
     return ();    
+}
+
+@external
+func test_set_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+    local account_1_address;
+    local loot_address;
+
+    %{
+        ids.account_1_address = context.account_1
+        ids.loot_address = context.loot
+        stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
+    %}
+
+    ILoot.mint(loot_address, account_1_address);
+
+    ILoot.setItemById(loot_address, Uint256(1,0), 20, 5, 100, 5, 30);
+
+    let (item) = ILoot.getItemByTokenId(loot_address, Uint256(1,0));
+
+    assert item.Id = 20;
+    assert item.Greatness = 5;
+    assert item.XP = 100;
+    assert item.Adventurer = 5;
+    assert item.Bag = 30;
+
+    %{
+        stop_prank_loot()
+    %}
+
+    return ();
 }
 
 @external

@@ -15,6 +15,7 @@ async def logged_deploy(nre, account, contract_name, alias, calldata):
     # seed needs to be different for every deployment, hence use of time
 
     current_time = time.time()
+    print(int(current_time))
 
     address, tx_hash, abi = await deploy_contract(
         account=account,
@@ -24,8 +25,7 @@ async def logged_deploy(nre, account, contract_name, alias, calldata):
         calldata=calldata,
         alias=alias,
         deployer_address=strhex_as_felt('0x041a78e741e5af2fec34b695679bc6891742439f7afb8484ecd7766661ad02bf'),
-        max_fee=config.MAX_FEE,
-        watch_mode=True
+        max_fee=config.MAX_FEE
     )
     print(address, tx_hash, abi)
     print("waiting 5 sec")

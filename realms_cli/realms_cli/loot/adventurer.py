@@ -2,7 +2,7 @@ import anyio
 import asyncclick as click
 from realms_cli.caller_invoker import wrapped_proxy_call, wrapped_send
 from realms_cli.config import Config
-from realms_cli.utils import print_over_colums,  uint, felt_to_str, str_to_felt
+from realms_cli.utils import print_over_colums,  uint, felt_to_str, str_to_felt, strhex_as_felt
 
 
 @click.command()
@@ -15,7 +15,11 @@ from realms_cli.utils import print_over_colums,  uint, felt_to_str, str_to_felt
               metavar='<columns>', type=click.STRING, help='adventurer name', prompt=True)
 @click.option('--order', is_flag=False,
               metavar='<columns>', type=click.STRING, help='adventurer order', prompt=True)
-async def mint_adventurer(network, race, home_realm, name, order):
+@click.option('--image_hash_1', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='adventurer image hash part 1', prompt=True)
+@click.option('--image_hash_2', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='adventurer image hash part 2', prompt=True)
+async def mint_adventurer(network, race, home_realm, name, order, image_hash_1, image_hash_2):
     """
     Mint a Random Loot Item
     """
@@ -30,8 +34,8 @@ async def mint_adventurer(network, race, home_realm, name, order):
         function="mint",
         arguments=[
             config.USER_ADDRESS,
-            100,           # uint 1
-            0              # uint 2
+            100 * 10 ** 18,           # uint 1
+            0                         # uint 2
         ]
     )
 
@@ -46,8 +50,8 @@ async def mint_adventurer(network, race, home_realm, name, order):
         function="approve",
         arguments=[
             config.ADVENTURER_PROXY_ADDRESS,
-            100,              # uint 1
-            0,                # uint 2
+            100 * 10 ** 18,       # uint 1
+            0,                    # uint 2
         ]
     )
 
@@ -65,7 +69,9 @@ async def mint_adventurer(network, race, home_realm, name, order):
             int(race),
             int(home_realm),
             str_to_felt(name),
-            int(order)
+            int(order),
+            strhex_as_felt(image_hash_1),
+            strhex_as_felt(image_hash_2)
         ]
     )
 
