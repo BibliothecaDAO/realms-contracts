@@ -60,7 +60,7 @@ class Config:
     def __init__(self, nile_network: str):
         self.nile_network = "127.0.0.1" if nile_network == "localhost" else nile_network
 
-        self.MAX_FEE = 1282666338551926
+        self.MAX_FEE = 9999943901396300
 
         self.Arbiter_alias = "proxy_" + ContractAlias.Arbiter
         self.Module_Controller_alias = "proxy_" + ContractAlias.ModuleController
@@ -86,11 +86,11 @@ class Config:
 
         self.ADMIN_ALIAS = "STARKNET_ADMIN_PRIVATE_KEY"
         self.ADMIN_ADDRESS, _ = safe_load_deployment(
-            "account-1", self.nile_network)
+            "account-0", self.nile_network)
 
         self.INITIAL_LORDS_SUPPLY = 500000000 * (10 ** 18)
 
-        self.USER_ALIAS = "STARKNET_PRIVATE_KEY"
+        self.USER_ALIAS = "STARKNET_ADMIN_PRIVATE_KEY"
         self.USER_ADDRESS, _ = safe_load_deployment(
             "account-0", self.nile_network)
 
@@ -253,12 +253,34 @@ class Config:
             "Charisma",
             "Luck",
             "XP",
-            "NeckId",
             "WeaponId",
-            "RingId",
             "ChestId",
             "HeadId",
             "WaistId",
             "FeetId",
-            "HandsId"
+            "HandsId",
+            "NeckId",
+            "RingId",
+            "Status",
+            "Beast"
         ]
+
+        self.ADVENTURER_PROXY_ADDRESS, _ = safe_load_deployment(
+            "proxy_Adventurer", self.nile_network)
+
+        self.BEAST = [
+            "Id",
+            "AttackType",
+            "ArmorType",
+            "Rank",
+            "Prefix_1",
+            "Prefix_2",
+            "Health",
+            "Adventurer",
+            "XP",
+            "Level",
+            "SlainOnDate",
+        ]
+
+        self.BEAST_PROXY_ADDRESS, _ = safe_load_deployment(
+            "proxy_Beast", self.nile_network)

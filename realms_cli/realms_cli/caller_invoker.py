@@ -7,9 +7,10 @@ import re
 import subprocess
 import asyncio
 
-from nile.common import run_command
+from nile.common import prepare_params, ABIS_DIRECTORY, BUILD_DIRECTORY
 from nile.core.declare import declare
 from nile.core.account import Account, get_nonce
+from nile.starknet_cli import execute_call
 from nile import deployments
 from nile.core.call_or_invoke import call_or_invoke
 from nile.utils import hex_address
@@ -17,7 +18,7 @@ from realms_cli.config import Config
 from starkware.starknet.compiler.compile import compile_starknet_files
 
 
-def send_multi(self, to, method, calldata, nonce=None):
+async def send_multi(self, to, method, calldata, nonce=None):
     """Execute a tx going through an Account contract. Inspired from openzeppelin."""
     config = Config(nile_network=self.network)
     target_address, _ = next(deployments.load(to, self.network)) or to
@@ -25,9 +26,9 @@ def send_multi(self, to, method, calldata, nonce=None):
     calldata = [[int(x) for x in c] for c in calldata]
 
     if nonce is None:
-        nonce = get_nonce(self.address, self.network)
+        nonce = await get_nonce(self.address, self.network)
 
-    (execute_calldata, sig_r, sig_s) = self.signer.sign_transaction(
+    (execute_calldata, sig_r, sig_s) = self.signer.sign_invoke(
         sender=self.address,
         calls=[[target_address, method, c] for c in calldata],
         nonce=nonce,
@@ -41,7 +42,7 @@ def send_multi(self, to, method, calldata, nonce=None):
     # params.extend([str(param) for param in calldata])
     # params.append(str(nonce))
 
-    return call_or_invoke(
+    return await call_or_invoke(
         contract=self.address,
         type="invoke",
         method="__execute__",
@@ -50,7 +51,6 @@ def send_multi(self, to, method, calldata, nonce=None):
         signature=[str(sig_r), str(sig_s)],
         max_fee=str(config.MAX_FEE),
     )
-
 
 # bind it to the account class so that we can use the function when signing
 Account.send_multi = send_multi
@@ -70,27 +70,22 @@ def call(network, contract_alias, function, arguments) -> str:
     ]
     return subprocess.check_output(command).strip().decode("utf-8")
 
-def proxy_call(network, contract_alias, abi, function, params) -> str:
+
+async def proxy_call(network, contract_alias, abi, function, params) -> str:
     """Nile proxy call function."""
 
-    address, _ = next(deployments.load(contract_alias, network)) or contract_alias
+    address, _ = next(deployments.load(
+        contract_alias, network)) or contract_alias
 
     address = hex_address(address)
 
-    arguments = [
-        "--address",
-        address,
-        "--abi",
-        abi,
-        "--function",
-        function,
-    ]
-    
-    return run_command(
-        operation="call",
+    return await call_or_invoke(
+        contract=address,
+        type="call",
+        method=function,
+        params=params,
         network=network,
-        inputs=params,
-        arguments=arguments,
+        abi=abi,
     )
 
 
@@ -147,7 +142,7 @@ def wrapped_call(network, contract_alias, function, arguments) -> str:
     return out
 
 
-def wrapped_proxy_call(network, contract_alias, abi, function, arguments) -> str:
+async def wrapped_proxy_call(network, contract_alias, abi, function, arguments) -> str:
     """Send command with some extra functionality such as tx status check and built-in timeout.
     (only supported for non-localhost networks)
     tx statuses:
@@ -155,21 +150,21 @@ def wrapped_proxy_call(network, contract_alias, abi, function, arguments) -> str
     """
     print("------- CALL ----------------------------------------------------")
     print(f"calling {function} from {contract_alias} with {arguments}")
-    out = proxy_call(network, contract_alias, abi, function, arguments)
+    out = await proxy_call(network, contract_alias, abi, function, arguments)
     print("------- CALL ----------------------------------------------------")
     # return out such that it can be prettified at a higher level
     return out
 
 
-def send(network, signer_alias, contract_alias, function, arguments) -> str:
+async def send(network, signer_alias, contract_alias, function, arguments) -> str:
     """Nile send function."""
-    account = Account(signer_alias, network)
+    account = await Account(signer_alias, network)
     if isinstance(arguments[0], list):
-        return account.send_multi(contract_alias, function, arguments)
-    return account.send_multi(contract_alias, function, [arguments])
+        return await account.send_multi(contract_alias, function, arguments)
+    return await account.send_multi(contract_alias, function, [arguments])
 
 
-def wrapped_send(network, signer_alias, contract_alias, function, arguments):
+async def wrapped_send(network, signer_alias, contract_alias, function, arguments):
     """Send command with some extra functionality such as tx status check and built-in timeout.
     (only supported for non-localhost networks)
 
@@ -178,7 +173,7 @@ def wrapped_send(network, signer_alias, contract_alias, function, arguments):
     """
     print("------- SEND ----------------------------------------------------")
     print(f"invoking {function} from {contract_alias} with {arguments}")
-    out = send(network, signer_alias, contract_alias, function, arguments)
+    out = await send(network, signer_alias, contract_alias, function, arguments)
     if out:
         _, tx_hash = parse_send(out)
         get_tx_status(network, tx_hash,)
@@ -235,26 +230,25 @@ def compile(contract_alias) -> str:
     return subprocess.check_output(command).strip().decode("utf-8")
 
 
-def wrapped_declare(account, contract_name, network, alias):
+async def wrapped_declare(account, contract_name, network, alias):
 
-    account = Account(account, network)
+    account = await Account(account, network)
 
     config = Config(nile_network=network)
 
     contract_class = compile_starknet_files(
         files=[f"{'contracts'}/{contract_name}.cairo"], debug_info=True, cairo_path=["/workspaces/realms-contracts/lib/cairo_contracts/src"]
     )
-    nonce = get_nonce(account.address, network)
+    nonce = await get_nonce(account.address, network)
+
     sig_r, sig_s = account.signer.sign_declare(
         sender=account.address,
         contract_class=contract_class,
         nonce=nonce,
-        max_fee=9999943901396300,
+        max_fee=config.MAX_FEE,
     )
 
-    class_hash = declare(sender=account.address, contract_name=alias, signature=[
-                         sig_r, sig_s], alias=alias, network=network, max_fee=9999943901396300)
+    class_hash, _ = await declare(sender=account.address, contract_name=alias, signature=[
+        sig_r, sig_s], alias=alias, network=network, max_fee=config.MAX_FEE)
+
     return class_hash
-
-
-Account.wrapped_declare = wrapped_declare

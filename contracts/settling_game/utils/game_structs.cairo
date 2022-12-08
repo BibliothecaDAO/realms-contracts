@@ -150,6 +150,8 @@ namespace ExternalContractIds {
     const Storage = 6;
     const Crypts = 7;
     const S_Crypts = 8;
+    const Loot = 9;
+    const Adventurer = 10;
 }
 
 struct CryptData {
