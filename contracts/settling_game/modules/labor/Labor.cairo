@@ -69,7 +69,7 @@ from contracts.settling_game.modules.labor.library import Labor
 // @param resource_id: Resource id
 // @param balance: Balance of resource
 @event
-func UpdateLabor(token_id: Uint256, resource_id: Uint256, balance: felt) {
+func UpdateLabor(token_id: Uint256, resource_id: Uint256, last_update: felt, balance: felt) {
 }
 
 // -----------------------------------
@@ -175,6 +175,15 @@ func create{
     let labor = labor_units * BASE_LABOR_UNITS;
 
     // check uninitalised
+
+    let (last_harvest_time) = last_harvest.read(token_id, resource_id);
+
+    if (last_harvest_time == 0) {
+        tempvar harvest_time = ts;
+    } else {
+        tempvar harvest_time = last_harvest_time;
+    }
+
     if (current_balance == 0) {
         tempvar new_balance = ts + labor;
     } else {
@@ -184,12 +193,14 @@ func create{
     // write balance
     balance.write(token_id, resource_id, new_balance);
 
-    UpdateLabor.emit(token_id, resource_id, new_balance);
+    // emit
+    UpdateLabor.emit(token_id, resource_id, harvest_time, new_balance);
 
     return ();
 }
 
 // @notice Harvest labor units on a Realms resource.
+// @dev The smallest you can harvest is one BASE_LABOR_UNITS (2hrs)
 // @param token_id: Realm ID
 // @param resource_id: Resource ID
 @external
@@ -208,12 +219,20 @@ func harvest{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         // if there is labour still available, we don't have to adjust the balance
         balance.write(token_id, resource_id, ts);
 
-        tempvar returning_time = 0;
+        // emit
+        UpdateLabor.emit(token_id, resource_id, ts, ts);
+
+        tempvar returning_time = ts;
         tempvar syscall_ptr = syscall_ptr;
         tempvar range_check_ptr = range_check_ptr;
         tempvar pedersen_ptr = pedersen_ptr;
     } else {
         tempvar returning_time = ts - part_labour_units;
+
+        // emit
+        let (current_balance) = balance.read(token_id, resource_id);
+        UpdateLabor.emit(token_id, resource_id, returning_time, current_balance);
+
         tempvar syscall_ptr = syscall_ptr;
         tempvar range_check_ptr = range_check_ptr;
         tempvar pedersen_ptr = pedersen_ptr;
@@ -222,6 +241,7 @@ func harvest{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     // add leftover time back so you don't loose part labour units
     last_harvest.write(token_id, resource_id, returning_time);
 
+    // minting
     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources);
     let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms);
 
@@ -232,8 +252,6 @@ func harvest{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     // mint resources
     IERC1155.mint(resources_address, owner, resource_id, Uint256(generated * 10 ** 18, 0), 1, data);
-
-    UpdateLabor.emit(token_id, resource_id, returning_time);
 
     return ();
 }
