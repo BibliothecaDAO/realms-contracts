@@ -58,7 +58,7 @@ from contracts.settling_game.interfaces.IRealms import IRealms
 from contracts.settling_game.modules.resources.library import Resources
 from contracts.settling_game.utils.general import transform_costs_to_tokens
 
-from contracts.settling_game.modules.labour.library import Labor
+from contracts.settling_game.modules.labor.library import Labor
 
 // -----------------------------------
 // EVENTS & CALLBACKS
