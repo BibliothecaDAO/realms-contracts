@@ -213,6 +213,7 @@ func harvest{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     let (generated, part_labour_units, is_labour_complete) = labor_units_generated(
         token_id, resource_id
     );
+    let (current_balance) = balance.read(token_id, resource_id);
 
     if (is_labour_complete == TRUE) {
         // set balance to current ts - since we have harvested everything
@@ -222,26 +223,20 @@ func harvest{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         // emit
         UpdateLabor.emit(token_id, resource_id, ts, ts);
 
-        tempvar returning_time = ts;
+        last_harvest.write(token_id, resource_id, ts);
+
         tempvar syscall_ptr = syscall_ptr;
         tempvar range_check_ptr = range_check_ptr;
         tempvar pedersen_ptr = pedersen_ptr;
     } else {
-        tempvar returning_time = ts - part_labour_units;
-
-        // emit
-        let (current_balance) = balance.read(token_id, resource_id);
         UpdateLabor.emit(token_id, resource_id, returning_time, current_balance);
 
+        // add leftover time back so you don't loose part labour units
+        last_harvest.write(token_id, resource_id, ts - part_labour_units);
         tempvar syscall_ptr = syscall_ptr;
         tempvar range_check_ptr = range_check_ptr;
         tempvar pedersen_ptr = pedersen_ptr;
     }
-
-    tempvar returning_time = returning_time;
-
-    // add leftover time back so you don't loose part labour units
-    last_harvest.write(token_id, resource_id, returning_time);
 
     // minting
     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources);
