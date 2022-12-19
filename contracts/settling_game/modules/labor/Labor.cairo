@@ -238,6 +238,8 @@ func harvest{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         tempvar pedersen_ptr = pedersen_ptr;
     }
 
+    tempvar returning_time = returning_time;
+
     // add leftover time back so you don't loose part labour units
     last_harvest.write(token_id, resource_id, returning_time);
 
