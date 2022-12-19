@@ -1,6 +1,6 @@
 # First, import click dependency
 import json
-import click
+import asyncclick as click
 
 from nile.core.account import Account
 
@@ -33,14 +33,14 @@ def check_lords(address, network):
 
 
 @click.command()
-@click.option("--address", default="345146928680632380054834305160472483727196822183058780918380481194722482684", help="Account address in hex format 0x...")
+@click.option("--address", default="215841415264021347611548658569481387405434591260197304377489076467094176277", help="Account address in hex format 0x...")
 @click.option("--network", default="goerli")
-def transfer_lords(address, network):
+async def transfer_lords(address, network):
     """
     Transfer Lords  2391140167327979619938051357136306508268704638528932947906243138584057924271
     """
     config = Config(nile_network=network)
-    wrapped_send(
+    await wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
         contract_alias=config.Lords_ERC20_Mintable_alias,
@@ -51,6 +51,7 @@ def transfer_lords(address, network):
             0,                # uint 2
         ],
     )
+
 
 @click.command()
 @click.option("--network", default="goerli")
@@ -74,6 +75,7 @@ def approve_lords(spender, amount, network):
             0,                # uint 2
         ],
     )
+
 
 @click.command()
 @click.option("--network", default="goerli")

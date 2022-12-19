@@ -51,7 +51,7 @@ namespace RealmBuildingsIds {
 // square meters
 namespace RealmBuildingsSize {
     const House = 4;
-    const StoreHouse = 2;
+    const StoreHouse = 1;
     const Granary = 3;
     const Farm = 3;
     const FishingVillage = 3;

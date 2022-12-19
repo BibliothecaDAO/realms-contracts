@@ -28,15 +28,16 @@ class ModuleId(IntEnum):
 # 2. Give write access to specific modules
 
 
-def run(nre):
+async def run(nre):
 
     config = Config(nre.network)
 
     write_list = [
-        [ModuleId.Food.value, ModuleId.Resources_Token.value]
+        [ModuleId.Settling.value, ModuleId.Combat.value],
+        [ModuleId.Settling.value, ModuleId.Resources.value]
     ]
 
-    wrapped_send(
+    await wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
         contract_alias="proxy_Arbiter",

@@ -174,7 +174,8 @@ func calculate_happiness{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
     }
 
     return (
-        CCalculator.BASE_HAPPINESS - daily_randomness_value - no_defending_army_loss - no_food_loss - no_relic_loss,
+        CCalculator.BASE_HAPPINESS - daily_randomness_value - no_defending_army_loss -
+        no_food_loss - no_relic_loss,
     );
 }
 
@@ -244,7 +245,7 @@ func calculate_daily_randomness{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, 
     // get actual value using the random ID
     let get_randomness_value = Calculator.get_randomness_value(random_number);
 
-    return (get_randomness_value,);
+    return (0,);
 }
 
 // called on every Realm action IF realm is unhappy

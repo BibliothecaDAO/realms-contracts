@@ -147,8 +147,8 @@ func settle{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(tok
 
     let (lords_address) = Module.get_external_contract_address(ExternalContractIds.Lords);
 
-    let (combat_address) = Module.get_external_contract_address(ModuleIds.L06_Combat);
-    let (resources_address) = Module.get_external_contract_address(ModuleIds.Resources);
+    let (combat_address) = Module.get_module_address(ModuleIds.L06_Combat);
+    let (resources_address) = Module.get_module_address(ModuleIds.Resources);
 
     // start up assets
     ICombat.build_start_army(combat_address, token_id);

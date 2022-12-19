@@ -241,7 +241,7 @@ func harvest{
     );
 
     // total food to harvest - either sent to export or sent to store
-    let total_food = total_harvest * BASE_FOOD_PRODUCTION;
+    let total_food = total_harvest * unpacked_food_buildings.number_built * BASE_FOOD_PRODUCTION;
 
     // set default data in mint call
     let (local data: felt*) = alloc();

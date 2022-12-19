@@ -2,6 +2,7 @@ from collections import namedtuple
 from realms_cli.caller_invoker import wrapped_call, wrapped_send, compile, deploy,  wrapped_declare
 from realms_cli.deployer import logged_deploy
 from realms_cli.config import Config
+from realms_cli.utils import str_to_felt, strhex_as_felt
 import time
 
 token_path = 'settling_game/tokens/'
@@ -23,14 +24,16 @@ NEW_MODULES = [
     #           "settling_game/ModuleController", ),
     # Contracts("Buildings", "Buildings",
     #           "settling_game/modules/buildings/Buildings", ),
-    # Contracts("Calculator", "Calculator",
-    #           "settling_game/modules/calculator/Calculator", ),
+    Contracts("Calculator", "Calculator",
+              "settling_game/modules/calculator/Calculator", ),
     # Contracts("Combat", "Combat",
     #           "settling_game/modules/combat/Combat", ),
+    # Contracts("Settling", "Settling",
+    #           "settling_game/modules/settling/Settling", ),
     # Contracts("Food", "Food",
     #           "settling_game/modules/food/Food", ),
-    Contracts("Resources", "Resources",
-              "settling_game/modules/resources/Resources", ),
+    # Contracts("Resources", "Resources",
+    #           "settling_game/modules/resources/Resources", ),
     # Contracts("Travel", "Travel",
     #           "settling_game/modules/travel/Travel", ),
     # Contracts("S_Realms_ERC721_Mintable", "S_Realms_ERC721_Mintable", token_path +
@@ -40,7 +43,7 @@ NEW_MODULES = [
 ]
 
 
-def run(nre):
+async def run(nre):
 
     config = Config(nre.network)
 
@@ -65,22 +68,24 @@ def run(nre):
 
         compile(contract_alias='contracts/' + contract.address + '.cairo')
 
-        logged_deploy(
+        await logged_deploy(
             nre,
+            config.ADMIN_ALIAS,
             contract.contract_name,
             alias=contract.alias,
-            arguments=[],
+
+            calldata=[],
         )
 
-        class_hash = wrapped_declare(
+        class_hash = await wrapped_declare(
             config.ADMIN_ALIAS, contract.address, nre.network, contract.alias)
 
-        time.sleep(400)
+        time.sleep(60)
 
-        wrapped_send(
+        await wrapped_send(
             network=config.nile_network,
             signer_alias=config.ADMIN_ALIAS,
             contract_alias="proxy_" + contract.alias,
             function="upgrade",
-            arguments=[class_hash],
+            arguments=[strhex_as_felt(class_hash)],
         )

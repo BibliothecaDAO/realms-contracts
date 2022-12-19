@@ -80,11 +80,13 @@ const WORK_HUT_COST_IN_BP = 5;  // 1/5 of resource output
 const WORK_HUT_COST = 75;  // 1/5 of resource output
 const WORK_HUT_OUTPUT = 50;
 
+const BASE_LABOR_UNITS = DAY / 12;
+
 // -----------------------------------
 // Buildings
 // -----------------------------------
 const BASE_SQM = 100;  // base sqm of base
-const STORE_HOUSE_SIZE = 10000;  // divisor to get sq of storehouse food
+const STORE_HOUSE_SIZE = 650000;  // divisor to get sq of storehouse food
 
 // -----------------------------------
 // Food
