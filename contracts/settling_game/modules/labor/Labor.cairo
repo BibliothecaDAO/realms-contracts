@@ -5,11 +5,9 @@
 // LOGIC:
 //      Allows players to generate resources on their Realm.
 //      Resources start generating after you have setup the
-//      tools and labour on a specific resource - you must do this on
-//      every resource. You can choose not set any up.
-//      This creates a demand side buy pressure of every resource.
-//      The cost to produce the resources is based off the relative
-//      rarity of the resources.
+//      "tools and labour" on a specific resource.
+//      You can choose not to generate a resource if you wish.
+//      The gross cost to produce resources is ~42% of its relative rarity.
 //
 // AUTHOR:
 //       <ponderingdemocritus@protonmail.com>
@@ -23,7 +21,7 @@ from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, asser
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
-from starkware.cairo.common.uint256 import Uint256, uint256_lt
+from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.bool import TRUE, FALSE
 
 from openzeppelin.token.erc721.IERC721 import IERC721
@@ -38,7 +36,6 @@ from contracts.settling_game.utils.game_structs import (
 )
 
 from contracts.settling_game.utils.constants import (
-    CCombat,
     VAULT_LENGTH,
     DAY,
     BASE_RESOURCES_PER_DAY,
@@ -50,15 +47,15 @@ from contracts.settling_game.utils.constants import (
 
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
-from contracts.settling_game.modules.settling.interface import ISettling
-from contracts.settling_game.modules.calculator.interface import ICalculator
 from contracts.settling_game.modules.buildings.interface import IBuildings
-from contracts.settling_game.modules.goblintown.interface import IGoblinTown
 from contracts.settling_game.interfaces.IRealms import IRealms
 from contracts.settling_game.modules.resources.library import Resources
 from contracts.settling_game.utils.general import transform_costs_to_tokens
 
 from contracts.settling_game.modules.labor.library import Labor
+
+// TODO:
+// - pack balances into a single felt
 
 // -----------------------------------
 // EVENTS & CALLBACKS
@@ -92,6 +89,15 @@ func balance(token_id: Uint256, resource_id: Uint256) -> (balance: felt) {
 func last_harvest(token_id: Uint256, resource_id: Uint256) -> (last_harvest: felt) {
 }
 
+// @notice Last time a resource was harvested
+// @param token_id: Realm token id
+// @param resource_id: Resource id
+// @return balance: Balance of resource
+@storage_var
+func vault_balance(token_id: Uint256, resource_id: Uint256) -> (balance: felt) {
+}
+
+// labour cost to generate 1 unit
 @storage_var
 func labor_cost(resource_id: Uint256) -> (cost: Cost) {
 }
@@ -138,14 +144,12 @@ func create{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(token_id: Uint256, resource_id: Uint256, labor_units: felt) {
     alloc_locals;
-    // check resources exists on Realm
 
     Module.__callback__(token_id);
 
     let (owner) = get_caller_address();
-    let (controller) = Module.controller_address();
 
-    // check auth
+    // check owner is calling
     Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms);
 
     // addresses
@@ -163,7 +167,6 @@ func create{
     let (costs: Cost*) = alloc();
     assert [costs] = cost;
     let (token_len, token_ids, token_values) = transform_costs_to_tokens(1, costs, labor_units);
-
     IERC1155.burnBatch(resources_address, owner, token_len, token_ids, token_len, token_values);
 
     let (ts) = get_block_timestamp();
@@ -171,19 +174,18 @@ func create{
     // get current balance
     let (current_balance) = balance.read(token_id, resource_id);
 
-    // labor units
+    // labor units calculation - BASE_LABOR_UNITS = minimum amount purchaseable
     let labor = labor_units * BASE_LABOR_UNITS;
 
-    // check uninitalised
-
+    // check uninitalised - if not then set as now timestamp
     let (last_harvest_time) = last_harvest.read(token_id, resource_id);
-
     if (last_harvest_time == 0) {
         tempvar harvest_time = ts;
     } else {
         tempvar harvest_time = last_harvest_time;
     }
 
+    // check if balance exists
     if (current_balance == 0) {
         tempvar new_balance = ts + labor;
     } else {
@@ -208,11 +210,39 @@ func harvest{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     token_id: Uint256, resource_id: Uint256
 ) {
     alloc_locals;
+
+    Module.__callback__(token_id);
+
     let (ts) = get_block_timestamp();
 
-    let (generated, part_labour_units, is_labour_complete) = labor_units_generated(
-        token_id, resource_id
+    // calculate labor units available to harvest
+    let (
+        generated, part_labour_units, is_labour_complete, vault_generated_amount
+    ) = labor_units_generated(token_id, resource_id);
+
+    // calculate vault balance
+    // we add vault_generated_amount here so they can immediatley harvest the vault if there is a remainder
+    let (current_vault_balance) = vault_balance.read(token_id, resource_id);
+    let (vault_units_generated, part_vault_units_generated) = Labor.vault_units(
+        current_vault_balance + vault_generated_amount
     );
+
+    // check at least 1 available
+    let days = vault_units_generated + generated;
+
+    with_attr error_message("LABOUR: Nothing Generated") {
+        assert_not_zero(days);
+    }
+
+    // Set vault balance to increase or reset it to 0 if claiming
+    if (vault_units_generated == FALSE) {
+        tempvar new_vault_balance = current_vault_balance + vault_generated_amount;
+    } else {
+        tempvar new_vault_balance = 0;
+    }
+    vault_balance.write(token_id, resource_id, new_vault_balance);
+
+    // calculate balance - so we can emit
     let (current_balance) = balance.read(token_id, resource_id);
 
     if (is_labour_complete == TRUE) {
@@ -226,16 +256,13 @@ func harvest{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         last_harvest.write(token_id, resource_id, ts);
 
         tempvar syscall_ptr = syscall_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar pedersen_ptr = pedersen_ptr;
     } else {
-        UpdateLabor.emit(token_id, resource_id, returning_time, current_balance);
+        // emit
+        UpdateLabor.emit(token_id, resource_id, ts - part_labour_units, current_balance);
 
         // add leftover time back so you don't loose part labour units
         last_harvest.write(token_id, resource_id, ts - part_labour_units);
         tempvar syscall_ptr = syscall_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar pedersen_ptr = pedersen_ptr;
     }
 
     // minting
@@ -254,19 +281,26 @@ func harvest{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 }
 
 // -----------------------------------
-// VIEW
+// GETTERS
 // -----------------------------------
 
 @view
 func labor_units_generated{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     token_id: Uint256, resource_id: Uint256
-) -> (labor_units_generated: felt, part_labor_units: felt, is_labor_complete: felt) {
-    alloc_locals;
-
+) -> (
+    labor_units_generated: felt, part_labor_units: felt, is_labor_complete: felt, vault_amount: felt
+) {
     let (current_balance) = balance.read(token_id, resource_id);
     let (last_harvest_time) = last_harvest.read(token_id, resource_id);
 
     return Labor.labor_units_generated(current_balance, last_harvest_time);
+}
+
+@view
+func vault_units_generated{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    token_id: Uint256, resource_id: Uint256
+) -> (balance: felt) {
+    return vault_balance.read(token_id, resource_id);
 }
 
 // @notice
