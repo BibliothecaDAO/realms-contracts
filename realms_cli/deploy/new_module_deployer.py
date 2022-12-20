@@ -1,7 +1,8 @@
 from collections import namedtuple
 from realms_cli.caller_invoker import wrapped_send, wrapped_declare, compile
 from realms_cli.deployer import logged_deploy
-from realms_cli.config import Config, strhex_as_strfelt, safe_load_deployment
+from realms_cli.config import Config, safe_load_deployment
+from realms_cli.utils import strhex_as_felt
 import time
 
 ModuleContracts = namedtuple('Contracts', 'contract_name alias id')
@@ -19,11 +20,11 @@ ModuleContracts = namedtuple('Contracts', 'contract_name alias id')
 # token tuples
 MODULE_CONTRACT_IMPLEMENTATIONS = [
     ModuleContracts(
-        "settling_game/modules/goblintown/GoblinTown", "GoblinTown", 14)
+        "settling_game/modules/labor/Labor", "Labor", 16)
 ]
 
 
-def run(nre):
+async def run(nre):
 
     config = Config(nre.network)
 
@@ -32,27 +33,27 @@ def run(nre):
     for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
 
         compile(
-            contract_alias="contracts/settling_game/modules/goblintown/GoblinTown.cairo")
+            contract_alias="contracts/settling_game/modules/labor/Labor.cairo")
 
-        logged_deploy(
+        await logged_deploy(
             nre,
+            config.ADMIN_ALIAS,
             contract.alias,
             alias=contract.alias,
-            arguments=[],
+            calldata=[],
         )
 
-        time.sleep(150)
-
-        class_hash = wrapped_declare(
+        class_hash = await wrapped_declare(
             config.ADMIN_ALIAS, contract.contract_name, nre.network, contract.alias)
 
-        time.sleep(150)
+        time.sleep(60)
 
-        logged_deploy(
+        await logged_deploy(
             nre,
+            config.ADMIN_ALIAS,
             'PROXY_Logic',
             alias='proxy_' + contract.alias,
-            arguments=[class_hash],
+            calldata=[strhex_as_felt(class_hash)],
         )
 
     #---------------- INIT MODULES  ----------------#
@@ -62,7 +63,7 @@ def run(nre):
         module, _ = safe_load_deployment(
             "proxy_" + contract.alias, nre.network)
 
-        wrapped_send(
+        await wrapped_send(
             network=config.nile_network,
             signer_alias=config.ADMIN_ALIAS,
             contract_alias="proxy_" + contract.alias,
@@ -71,16 +72,16 @@ def run(nre):
                 config.CONTROLLER_PROXY_ADDRESS, config.ADMIN_ADDRESS],
         )
 
-        # wrapped_send(x
-        #     network=config.nile_network,
-        #     signer_alias=config.ADMIN_ALIAS,
-        #     contract_alias=config.Arbiter_alias,
-        #     function="appoint_contract_as_module",
-        #     arguments=[
-        #         module,
-        #         contract.id
-        #     ],
-        # )
+        await wrapped_send(
+            network=config.nile_network,
+            signer_alias=config.ADMIN_ALIAS,
+            contract_alias=config.Arbiter_alias,
+            function="appoint_contract_as_module",
+            arguments=[
+                module,
+                contract.id
+            ],
+        )
 
         # wrapped_send(
         #     network=config.nile_network,

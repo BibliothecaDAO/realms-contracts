@@ -66,7 +66,9 @@ from contracts.settling_game.modules.labor.library import Labor
 // @param resource_id: Resource id
 // @param balance: Balance of resource
 @event
-func UpdateLabor(token_id: Uint256, resource_id: Uint256, last_update: felt, balance: felt) {
+func UpdateLabor(
+    token_id: Uint256, resource_id: Uint256, last_update: felt, balance: felt, vault_balance: felt
+) {
 }
 
 // -----------------------------------
@@ -195,8 +197,11 @@ func create{
     // write balance
     balance.write(token_id, resource_id, new_balance);
 
+    // get vault balance
+    let (current_vault_balance) = vault_balance.read(token_id, resource_id);
+
     // emit
-    UpdateLabor.emit(token_id, resource_id, harvest_time, new_balance);
+    UpdateLabor.emit(token_id, resource_id, harvest_time, new_balance, current_vault_balance);
 
     return ();
 }
@@ -213,7 +218,7 @@ func harvest{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     Module.__callback__(token_id);
 
-    let (ts) = get_block_timestamp();
+    Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms);
 
     // calculate labor units available to harvest
     let (
@@ -245,20 +250,24 @@ func harvest{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     // calculate balance - so we can emit
     let (current_balance) = balance.read(token_id, resource_id);
 
+    let (ts) = get_block_timestamp();
+
     if (is_labour_complete == TRUE) {
         // set balance to current ts - since we have harvested everything
         // if there is labour still available, we don't have to adjust the balance
         balance.write(token_id, resource_id, ts);
 
         // emit
-        UpdateLabor.emit(token_id, resource_id, ts, ts);
+        UpdateLabor.emit(token_id, resource_id, ts, ts, new_vault_balance);
 
         last_harvest.write(token_id, resource_id, ts);
 
         tempvar syscall_ptr = syscall_ptr;
     } else {
         // emit
-        UpdateLabor.emit(token_id, resource_id, ts - part_labour_units, current_balance);
+        UpdateLabor.emit(
+            token_id, resource_id, ts - part_labour_units, current_balance, new_vault_balance
+        );
 
         // add leftover time back so you don't loose part labour units
         last_harvest.write(token_id, resource_id, ts - part_labour_units);
@@ -280,6 +289,56 @@ func harvest{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     return ();
 }
 
+// @notice
+// @dev
+// @param token_id
+@external
+func pillage{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    token_id: Uint256, claimer: felt
+) {
+    alloc_locals;
+
+    // only combat can call
+    Module.only_approved();
+
+    let (owner) = get_caller_address();
+
+    // external contracts
+    let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms);
+    let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources);
+
+    // resources ids
+    let (realms_data: RealmData) = IRealms.fetch_realm_data(realms_address, token_id);
+
+    let (resource_ids: Uint256*) = Resources._calculate_realm_resource_ids(realms_data);
+
+    let (resource_values: Uint256*) = alloc();
+    get_all_raidable(
+        token_id,
+        realms_data.resource_number,
+        resource_ids,
+        realms_data.resource_number,
+        resource_values,
+    );
+
+    let (data: felt*) = alloc();
+    assert data[0] = 0;
+
+    // pillage resources and send to player that won the battle
+    IERC1155.mintBatch(
+        resources_address,
+        claimer,
+        realms_data.resource_number,
+        resource_ids,
+        realms_data.resource_number,
+        resource_values,
+        1,
+        data,
+    );
+
+    return ();
+}
+
 // -----------------------------------
 // GETTERS
 // -----------------------------------
@@ -290,14 +349,15 @@ func labor_units_generated{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range
 ) -> (
     labor_units_generated: felt, part_labor_units: felt, is_labor_complete: felt, vault_amount: felt
 ) {
+    let (ts) = get_block_timestamp();
     let (current_balance) = balance.read(token_id, resource_id);
     let (last_harvest_time) = last_harvest.read(token_id, resource_id);
 
-    return Labor.labor_units_generated(current_balance, last_harvest_time);
+    return Labor.labor_units_generated(current_balance, last_harvest_time, ts);
 }
 
 @view
-func vault_units_generated{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func get_vault_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     token_id: Uint256, resource_id: Uint256
 ) -> (balance: felt) {
     return vault_balance.read(token_id, resource_id);
@@ -312,6 +372,59 @@ func get_labor_cost{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuilt
 ) -> (cost: Cost) {
     let (cost) = labor_cost.read(resource_id);
     return (cost,);
+}
+
+@view
+func get_raidable{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    token_id: Uint256, resource_id: Uint256
+) -> (vault_units_generated: felt, part_vault_units_generated: felt) {
+    let (balance) = vault_balance.read(token_id, resource_id);
+
+    return Labor.raidable_labor_units(balance);
+}
+
+func get_all_raidable{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    token_id: Uint256,
+    resource_ids_len: felt,
+    resource_ids: Uint256*,
+    resource_values_len: felt,
+    resource_values: Uint256*,
+) {
+    if (resource_ids_len == 0) {
+        return ();
+    }
+
+    // get balance
+    let (vault_units_generated, _) = get_raidable(token_id, [resource_ids]);
+
+    assert [resource_values] = Uint256(vault_units_generated, 0);
+
+    // set vault back
+    update_vault_balance(token_id, [resource_ids], vault_units_generated * BASE_LABOR_UNITS);
+
+    return get_all_raidable(
+        token_id,
+        resource_ids_len - 1,
+        resource_ids + Uint256.SIZE,
+        resource_values_len - 1,
+        resource_values + Uint256.SIZE,
+    );
+}
+
+func update_vault_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    token_id: Uint256, resource_id: Uint256, update_value: felt
+) {
+    let (_balance) = get_vault_balance(token_id, resource_id);
+    vault_balance.write(token_id, resource_id, _balance - update_value);
+
+    let (current_balance) = balance.read(token_id, resource_id);
+    let (last_harvest_balance) = last_harvest.read(token_id, resource_id);
+
+    UpdateLabor.emit(
+        token_id, resource_id, last_harvest_balance, current_balance, _balance - update_value
+    );
+
+    return ();
 }
 
 // -----------------------------------

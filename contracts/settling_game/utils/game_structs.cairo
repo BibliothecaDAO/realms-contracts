@@ -133,6 +133,7 @@ namespace ModuleIds {
     const L10_Food = 13;
     const GoblinTown = 14;
     const Travel = 15;
+    const Labor = 16;
     const Crypts_Token = 1001;
     const Lords_Token = 1002;
     const Realms_Token = 1003;
