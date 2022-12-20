@@ -197,6 +197,8 @@ func create{
     // write balance
     balance.write(token_id, resource_id, new_balance);
 
+    last_harvest.write(token_id, resource_id, harvest_time);
+
     // get vault balance
     let (current_vault_balance) = vault_balance.read(token_id, resource_id);
 

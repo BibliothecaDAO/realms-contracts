@@ -30,38 +30,40 @@ async def run(nre):
 
     #---------------- SET MODULES  ----------------#
 
-    for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
+    # for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
 
-        compile(
-            contract_alias="contracts/settling_game/modules/labor/Labor.cairo")
+    #     compile(
+    #         contract_alias="contracts/settling_game/modules/labor/Labor.cairo")
 
-        await logged_deploy(
-            nre,
-            config.ADMIN_ALIAS,
-            contract.alias,
-            alias=contract.alias,
-            calldata=[],
-        )
+    #     await logged_deploy(
+    #         nre,
+    #         config.ADMIN_ALIAS,
+    #         contract.alias,
+    #         alias=contract.alias,
+    #         calldata=[],
+    #     )
 
-        class_hash = await wrapped_declare(
-            config.ADMIN_ALIAS, contract.contract_name, nre.network, contract.alias)
+    #     class_hash = await wrapped_declare(
+    #         config.ADMIN_ALIAS, contract.contract_name, nre.network, contract.alias)
 
-        time.sleep(60)
+    #     time.sleep(120)
 
-        await logged_deploy(
-            nre,
-            config.ADMIN_ALIAS,
-            'PROXY_Logic',
-            alias='proxy_' + contract.alias,
-            calldata=[strhex_as_felt(class_hash)],
-        )
+    #     await logged_deploy(
+    #         nre,
+    #         config.ADMIN_ALIAS,
+    #         'PROXY_Logic',
+    #         alias='proxy_' + contract.alias,
+    #         calldata=[strhex_as_felt(class_hash)],
+    #     )
 
     #---------------- INIT MODULES  ----------------#
 
     for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
 
-        module, _ = safe_load_deployment(
-            "proxy_" + contract.alias, nre.network)
+        # module, _ = safe_load_deployment(
+        #     "proxy_" + contract.alias, nre.network)
+
+        # time.sleep(30)
 
         await wrapped_send(
             network=config.nile_network,
@@ -72,16 +74,16 @@ async def run(nre):
                 config.CONTROLLER_PROXY_ADDRESS, config.ADMIN_ADDRESS],
         )
 
-        await wrapped_send(
-            network=config.nile_network,
-            signer_alias=config.ADMIN_ALIAS,
-            contract_alias=config.Arbiter_alias,
-            function="appoint_contract_as_module",
-            arguments=[
-                module,
-                contract.id
-            ],
-        )
+        # await wrapped_send(
+        #     network=config.nile_network,
+        #     signer_alias=config.ADMIN_ALIAS,
+        #     contract_alias=config.Arbiter_alias,
+        #     function="appoint_contract_as_module",
+        #     arguments=[
+        #         module,
+        #         contract.id
+        #     ],
+        # )
 
         # wrapped_send(
         #     network=config.nile_network,
