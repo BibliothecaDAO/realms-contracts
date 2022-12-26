@@ -381,8 +381,13 @@ func pillage_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     let (_, resource_mint, total_vault_days, _) = get_all_vault_raidable(token_id);
 
     // Check Raidable
-    with_attr error_message("RESOURCES: NOTHING TO RAID!") {
-        assert_not_zero(total_vault_days);
+    // with_attr error_message("RESOURCES: NOTHING TO RAID!") {
+    //     assert_not_zero(total_vault_days);
+    // }
+
+    // early return if there's nothing to raid
+    if (total_vault_days == 0) {
+        return ();
     }
 
     let (last_update) = ISettling.get_time_vault_staked(settling_logic_address, token_id);
