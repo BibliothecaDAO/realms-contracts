@@ -570,11 +570,13 @@ func buy_tokens_loop{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
 
     // Transfer currency and purchased tokens
     IERC20.transferFrom(currency_address_, caller, contract, currency_amount);
-    tempvar syscall_ptr: felt* = syscall_ptr;
+
+    // Royalty
+    IERC20.transfer(currency_address_, royalty_fee_address_, royalty_fee);
+
     IERC1155.safeTransferFrom(
         token_address_, contract, caller, [token_ids], [token_amounts], 1, data
     );
-    IERC20.transfer(currency_address_, royalty_fee_address_, royalty_fee);  // Royalty
 
     // Emit event
     TokensPurchased.emit(caller, currency_amount, [token_ids], [token_amounts]);
@@ -655,7 +657,6 @@ func sell_tokens_loop{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     let (token_address_) = token_address.read();
     let (currency_address_) = currency_address.read();
 
-    let (royalty_fee_thousands_) = royalty_fee_thousands.read();
     let (royalty_fee_address_) = royalty_fee_address.read();
 
     // Read current reserve levels
@@ -683,8 +684,9 @@ func sell_tokens_loop{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 
     // Transfer currency
     IERC20.transfer(currency_address_, caller, currency_amount);
-    tempvar syscall_ptr: felt* = syscall_ptr;
-    IERC20.transfer(currency_address_, royalty_fee_address_, royalty_fee);  // Royalty
+
+    // Royalty
+    IERC20.transfer(currency_address_, royalty_fee_address_, royalty_fee);
 
     // Update reserves
     let (new_reserves) = uint256_sub(currency_reserves_, currency_amount_sans_royal);

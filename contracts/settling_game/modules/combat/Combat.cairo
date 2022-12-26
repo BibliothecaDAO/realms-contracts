@@ -44,6 +44,7 @@ from contracts.settling_game.modules.resources.interface import IResources
 from contracts.settling_game.modules.buildings.interface import IBuildings
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.interfaces.IRealms import IRealms
+from contracts.settling_game.modules.labor.interface import ILabor
 
 from contracts.settling_game.utils.constants import CCombat
 from contracts.settling_game.utils.game_structs import (
@@ -373,13 +374,12 @@ func initiate_combat{
     // pillaging only if attacker wins
     let (now) = get_block_timestamp();
     if (combat_outcome == CCombat.COMBAT_OUTCOME_ATTACKER_WINS) {
-        let (controller) = Module.controller_address();
-        let (resources_logic_address) = IModuleController.get_module_address(
-            controller, ModuleIds.Resources
-        );
-        let (relic_address) = IModuleController.get_module_address(controller, ModuleIds.Relics);
         let (caller) = get_caller_address();
-        IResources.pillage_resources(resources_logic_address, defending_realm_id, caller);
+
+        let (labor_address) = Module.get_module_address(ModuleIds.Labor);
+        let (relic_address) = Module.get_module_address(ModuleIds.Relics);
+
+        ILabor.pillage(labor_address, defending_realm_id, caller);
         IRelics.set_relic_holder(relic_address, attacking_realm_id, defending_realm_id);
 
         tempvar syscall_ptr = syscall_ptr;
@@ -407,13 +407,25 @@ func initiate_combat{
     set_army_data_and_emit(
         attacking_army_id,
         attacking_realm_id,
-        ArmyData(ending_attacking_army_packed, now, attacking_realm_data.XP + attacking_xp, attacking_realm_data.level, attacking_realm_data.call_sign),
+        ArmyData(
+            ending_attacking_army_packed,
+            now,
+            attacking_realm_data.XP + attacking_xp,
+            attacking_realm_data.level,
+            attacking_realm_data.call_sign,
+        ),
     );
 
     set_army_data_and_emit(
         defending_army_id,
         defending_realm_id,
-        ArmyData(ending_defending_army_packed, now, defending_realm_data.XP + defending_xp, defending_realm_data.level, defending_realm_data.call_sign),
+        ArmyData(
+            ending_defending_army_packed,
+            now,
+            defending_realm_data.XP + defending_xp,
+            defending_realm_data.level,
+            defending_realm_data.call_sign,
+        ),
     );
 
     // emit end
@@ -452,7 +464,13 @@ func update_army_in_realm{
     set_army_data_and_emit(
         army_id,
         realm_id,
-        ArmyData(new_packed_army, current_packed_army.last_attacked, current_packed_army.XP, current_packed_army.level, current_packed_army.call_sign),
+        ArmyData(
+            new_packed_army,
+            current_packed_army.last_attacked,
+            current_packed_army.XP,
+            current_packed_army.level,
+            current_packed_army.call_sign,
+        ),
     );
 
     return ();
@@ -723,7 +741,13 @@ func combat_callback_loop{
     set_army_data_and_emit(
         [army_ids],
         realm_id,
-        ArmyData(new_packed_army, current_packed_army.last_attacked, current_packed_army.XP, current_packed_army.level, current_packed_army.call_sign),
+        ArmyData(
+            new_packed_army,
+            current_packed_army.last_attacked,
+            current_packed_army.XP,
+            current_packed_army.level,
+            current_packed_army.call_sign,
+        ),
     );
 
     BuildArmy.emit([army_ids], realm_id, adjusted_army, 0, cast(0, felt*), 0, cast(0, felt*));

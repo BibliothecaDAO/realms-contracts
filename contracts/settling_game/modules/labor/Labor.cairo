@@ -43,6 +43,7 @@ from contracts.settling_game.utils.constants import (
     MAX_DAYS_ACCURED,
     WONDER_RATE,
     BASE_LABOR_UNITS,
+    BASE_RESOURCES_PER_CYCLE,
 )
 
 from contracts.settling_game.library.library_module import Module
@@ -235,10 +236,10 @@ func harvest{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     );
 
     // check at least 1 available
-    let days = vault_units_generated + generated;
+    let units = vault_units_generated + generated;
 
     with_attr error_message("LABOUR: Nothing Generated") {
-        assert_not_zero(days);
+        assert_not_zero(units);
     }
 
     // Set vault balance to increase or reset it to 0 if claiming
@@ -285,8 +286,10 @@ func harvest{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     let (local data: felt*) = alloc();
     assert data[0] = 0;
 
+    let resource_amount = Uint256(units * BASE_RESOURCES_PER_CYCLE * 10 ** 18, 0);
+
     // mint resources
-    IERC1155.mint(resources_address, owner, resource_id, Uint256(generated * 10 ** 18, 0), 1, data);
+    IERC1155.mint(resources_address, owner, resource_id, resource_amount, 1, data);
 
     return ();
 }
@@ -303,15 +306,12 @@ func pillage{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     // only combat can call
     Module.only_approved();
 
-    let (owner) = get_caller_address();
-
     // external contracts
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms);
     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources);
 
     // resources ids
     let (realms_data: RealmData) = IRealms.fetch_realm_data(realms_address, token_id);
-
     let (resource_ids: Uint256*) = Resources._calculate_realm_resource_ids(realms_data);
 
     let (resource_values: Uint256*) = alloc();
@@ -399,7 +399,9 @@ func get_all_raidable{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     // get balance
     let (vault_units_generated, _) = get_raidable(token_id, [resource_ids]);
 
-    assert [resource_values] = Uint256(vault_units_generated, 0);
+    assert [resource_values] = Uint256(
+        vault_units_generated * BASE_RESOURCES_PER_CYCLE * 10 ** 18, 0
+    );
 
     // set vault back
     update_vault_balance(token_id, [resource_ids], vault_units_generated * BASE_LABOR_UNITS);

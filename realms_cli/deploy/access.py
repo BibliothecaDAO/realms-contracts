@@ -23,6 +23,7 @@ class ModuleId(IntEnum):
     Resources_Token = 1004
     S_Crypts_Token = 1005
     S_Realms_Token = 1006
+    Labor = 16
 
 # 1. Appoint new contract as Module
 # 2. Give write access to specific modules
@@ -33,8 +34,7 @@ async def run(nre):
     config = Config(nre.network)
 
     write_list = [
-        [ModuleId.Settling.value, ModuleId.Combat.value],
-        [ModuleId.Settling.value, ModuleId.Resources.value]
+        [ModuleId.Labor.value, ModuleId.Resources_Token.value]
     ]
 
     await wrapped_send(
