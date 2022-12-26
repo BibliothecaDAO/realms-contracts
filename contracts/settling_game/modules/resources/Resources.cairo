@@ -39,19 +39,11 @@ from contracts.settling_game.utils.constants import (
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.interfaces.IERC1155 import IERC1155
 from contracts.settling_game.modules.settling.interface import ISettling
+from contracts.settling_game.modules.calculator.interface import ICalculator
 from contracts.settling_game.modules.buildings.interface import IBuildings
 from contracts.settling_game.modules.goblintown.interface import IGoblinTown
-from contracts.settling_game.modules.calculator.interface import ICalculator
 from contracts.settling_game.interfaces.IRealms import IRealms
 from contracts.settling_game.modules.resources.library import Resources
-
-// -----------------------------------
-// Events
-// -----------------------------------
-
-@event
-func ResourceUpgraded(token_id: Uint256, building_id: felt, level: felt) {
-}
 
 // -----------------------------------
 // Storage
@@ -97,35 +89,174 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 // EXTERNAL
 // -----------------------------------
 
-// @notice Claim available resources
-// @token_id: Staked realm token id
+// @notice Claim available resources. Checks if Realm has accrued Days and Vault Days.
+// @token_id: Staked Realm ID
+// @external
+// func claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+//     token_id: Uint256
+// ) {
+//     alloc_locals;
+
+// Module.__callback__(token_id);
+
+// // contracts
+//     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms);
+//     let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms);
+//     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources);
+
+// // modules
+//     let (settling_logic_address) = Module.get_module_address(ModuleIds.Settling);
+//     let (calculator_address) = Module.get_module_address(ModuleIds.Calculator);
+
+// // owner
+//     let (owner) = IERC721.ownerOf(s_realms_address, token_id);
+
+// // only settling can claim
+//     let (caller) = get_caller_address();
+//     if (caller != settling_logic_address) {
+//         Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms);
+//         tempvar syscall_ptr = syscall_ptr;
+//         tempvar range_check_ptr = range_check_ptr;
+//         tempvar pedersen_ptr = pedersen_ptr;
+//     } else {
+//         tempvar syscall_ptr = syscall_ptr;
+//         tempvar range_check_ptr = range_check_ptr;
+//         tempvar pedersen_ptr = pedersen_ptr;
+//     }
+
+// // fetch realm data
+//     let (realms_data: RealmData) = IRealms.fetch_realm_data(realms_address, token_id);
+
+// // calculate total days
+//     let (total_days, remainder) = days_accrued(token_id);
+
+// // calculate if any vault days
+//     let (total_vault_days, vault_remainder) = get_available_vault_days(token_id);
+
+// // check days + vault > 1
+//     let days = total_days + total_vault_days;
+
+// with_attr error_message("RESOURCES: Nothing Claimable.") {
+//         assert_not_zero(days);
+//     }
+
+// // set vault time only if actually claiming vault
+//     if (total_vault_days != 0) {
+//         ISettling.set_time_vault_staked(settling_logic_address, token_id, vault_remainder);
+//         tempvar syscall_ptr = syscall_ptr;
+//         tempvar range_check_ptr = range_check_ptr;
+//         tempvar pedersen_ptr = pedersen_ptr;
+//     } else {
+//         tempvar syscall_ptr = syscall_ptr;
+//         tempvar range_check_ptr = range_check_ptr;
+//         tempvar pedersen_ptr = pedersen_ptr;
+//     }
+
+// // set claim time
+//     ISettling.set_time_staked(settling_logic_address, token_id, remainder);
+
+// // check happiness
+//     // let (is_happy) = ICalculator.is_realm_happy(calculator_address, token_id);
+
+// // // do NOT add the houses if the Realm is unhappy
+//     // if (is_happy == TRUE) {
+//     //     // get current buildings on realm
+//     //     let (buildings_address) = Module.get_module_address(ModuleIds.Buildings);
+//     //     let (current_buildings: RealmBuildings) = IBuildings.get_effective_buildings(
+//     //         buildings_address, token_id
+//     //     );
+//     //     tempvar houses_built = current_buildings.House;
+//     //     tempvar syscall_ptr = syscall_ptr;
+//     //     tempvar range_check_ptr = range_check_ptr;
+//     //     tempvar pedersen_ptr = pedersen_ptr;
+//     // } else {
+//     //     // set 0 houses built if unhappy
+//     //     tempvar houses_built = 0;
+
+// // tempvar syscall_ptr = syscall_ptr;
+//     //     tempvar range_check_ptr = range_check_ptr;
+//     //     tempvar pedersen_ptr = pedersen_ptr;
+//     // }
+//     // tempvar houses_built = houses_built;
+
+// // resources ids and mint
+//     let (resource_ids) = Resources._calculate_realm_resource_ids(realms_data);
+//     let (resource_mint) = Resources._calculate_total_mintable_resources(
+//         0, 100, realms_data, days, 100
+//     );
+
+// // data to send via 1155 mint
+//     let (local data: felt*) = alloc();
+//     assert data[0] = 0;
+
+// // mint users resources
+//     IERC1155.mintBatch(
+//         resources_address,
+//         owner,
+//         realms_data.resource_number,
+//         resource_ids,
+//         realms_data.resource_number,
+//         resource_mint,
+//         1,
+//         data,
+//     );
+
+// // check wonder and mint batch if wonder exists
+//     let check_wonder = is_le(0, realms_data.wonder);
+//     if (check_wonder == TRUE) {
+//         let (wonder_resources_claim_ids: Uint256*) = alloc();
+//         let (wonder_resources_claim_amounts: Uint256*) = alloc();
+//         loop_wonder_resources_claim(
+//             0, 22, total_days, wonder_resources_claim_ids, wonder_resources_claim_amounts
+//         );
+
+// IERC1155.mintBatch(
+//             resources_address,
+//             owner,
+//             22,
+//             wonder_resources_claim_ids,
+//             22,
+//             wonder_resources_claim_amounts,
+//             1,
+//             data,
+//         );
+//         return ();
+//     }
+
+// return ();
+// }
+
+// @notice Claim available resources. Checks if Realm has accrued Days and Vault Days.
+// @token_id: Staked Realm ID
 @external
 func claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     token_id: Uint256
 ) {
     alloc_locals;
+    Module.__callback__(token_id);
+
     let (caller) = get_caller_address();
 
-    // CONTRACT ADDRESSES
+    // contracts
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms);
     let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms);
     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources);
 
     // modules
     let (settling_logic_address) = Module.get_module_address(ModuleIds.Settling);
-    let (goblin_town_address) = Module.get_module_address(ModuleIds.GoblinTown);
+    // let (goblin_town_address) = Module.get_module_address(ModuleIds.GoblinTown);
 
     // check if there's no goblin town on realm
-    with_attr error_message("RESOURCES: Goblin Town present") {
-        let (_, spawn_ts) = IGoblinTown.get_strength_and_timestamp(goblin_town_address, token_id);
-        let (now) = get_block_timestamp();
-        assert_le(spawn_ts, now);
-    }
+    // with_attr error_message("RESOURCES: Goblin Town present") {
+    //     let (_, spawn_ts) = IGoblinTown.get_strength_and_timestamp(goblin_town_address, token_id);
+    //     let (now) = get_block_timestamp();
+    //     assert_le(spawn_ts, now);
+    // }
 
-    // FETCH OWNER
+    // owner
     let (owner) = IERC721.ownerOf(s_realms_address, token_id);
 
-    // ALLOW RESOURCE LOGIC ADDRESS TO CLAIM, BUT STILL RESTRICT
+    // only settling can claim
     if (caller != settling_logic_address) {
         Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms);
         tempvar syscall_ptr = syscall_ptr;
@@ -155,7 +286,6 @@ func claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
 
     // set vault time only if actually claiming vault
     if (total_vault_days != 0) {
-        // TODO: why is this here? same is called below, outside the if
         ISettling.set_time_vault_staked(settling_logic_address, token_id, vault_remainder);
         tempvar syscall_ptr = syscall_ptr;
         tempvar range_check_ptr = range_check_ptr;
@@ -167,7 +297,6 @@ func claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     }
 
     ISettling.set_time_staked(settling_logic_address, token_id, remainder);
-    ISettling.set_time_vault_staked(settling_logic_address, token_id, vault_remainder);
 
     // get current buildings on realm
     let (buildings_address) = Module.get_module_address(ModuleIds.Buildings);
@@ -201,15 +330,12 @@ func claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     );
 
     let check_wonder = is_le(0, realms_data.wonder);
-    if (check_wonder == 1) {
+    if (check_wonder == FALSE) {
         let (wonder_resources_claim_ids: Uint256*) = alloc();
         let (wonder_resources_claim_amounts: Uint256*) = alloc();
         loop_wonder_resources_claim(
             0, 22, total_days, wonder_resources_claim_ids, wonder_resources_claim_amounts
         );
-
-        let (local data: felt*) = alloc();
-        assert data[0] = 0;
 
         // MINT WONDER RESOURCES TO HOLDER
         IERC1155.mintBatch(
@@ -229,7 +355,7 @@ func claim_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
 }
 
 // @notice Pillage resources after a succesful raid
-// @param token_id: Staked realm id
+// @param token_id: Staked Realm ID
 // @param claimer: Resource receiver address
 @external
 func pillage_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
@@ -246,13 +372,18 @@ func pillage_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     //     assert caller = combat_address
     // end
 
-    // EXTERNAL CONTRACTS
+    // External contracts
     let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms);
     let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources);
     let (settling_logic_address) = Module.get_module_address(ModuleIds.Settling);
 
     // Get all vault raidable
     let (_, resource_mint, total_vault_days, _) = get_all_vault_raidable(token_id);
+
+    // Check Raidable
+    // with_attr error_message("RESOURCES: NOTHING TO RAID!") {
+    //     assert_not_zero(total_vault_days);
+    // }
 
     // early return if there's nothing to raid
     if (total_vault_days == 0) {
@@ -266,7 +397,7 @@ func pillage_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     // TODO: could this overflow?
     let (time_over) = Resources._calculate_vault_time_remaining(block_timestamp - last_update);
 
-    // SET VAULT TIME = REMAINDER - CURRENT_TIME
+    // Set vault time
     ISettling.set_time_vault_staked(settling_logic_address, token_id, time_over);
 
     // resources ids
@@ -276,7 +407,7 @@ func pillage_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     let (local data: felt*) = alloc();
     assert data[0] = 0;
 
-    // MINT PILLAGED RESOURCES TO VICTOR
+    // pillage resources and send to player that won the battle
     IERC1155.mintBatch(
         resources_address,
         claimer,
@@ -296,7 +427,7 @@ func pillage_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 // -----------------------------------
 
 // @notice Gets the number of accrued days
-// @param token_id: Staked realm token id
+// @param token_id: Staked Realm ID
 // @return days_accrued: Number of days accrued
 // @return remainder: Time remainder after division in seconds
 @view
@@ -322,7 +453,7 @@ func days_accrued{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
 }
 
 // @notice Gets the number of accrued days for the vault
-// @param token_id: Staked realm token id
+// @param token_id: Staked Realm ID
 // @return days_accrued: Number of days accrued for the vault
 // @return remainder: Time remainder after division in seconds
 @view
@@ -343,7 +474,7 @@ func vault_days_accrued{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_ch
 
 // @notice Fetches vault days available for realm owner only
 // @dev Only returns value if days are over epoch length - set to 7 day cycles
-// @param token_id: Staked realm token id
+// @param token_id: Staked Realm ID
 // @return days_accrued: Number of days accrued
 // @return remainder: Remaining seconds
 @view
@@ -368,7 +499,7 @@ func get_available_vault_days{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, ra
 }
 
 // @notice check if resources are claimable
-// @param token_id: Staked realm token id
+// @param token_id: Staked Realm ID
 // @return can_claim: Return if resources can be claimed
 @view
 func check_if_claimable{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
@@ -499,4 +630,59 @@ func loop_wonder_resources_claim{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*,
         wonder_resources_claim_amounts,
     );
     return ();
+}
+
+@external
+func mint_resources{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    token_id: Uint256
+) {
+    alloc_locals;
+
+    Module.only_approved();
+
+    // External contracts
+    let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms);
+    let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources);
+    let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms);
+
+    let (owner) = IERC721.ownerOf(s_realms_address, token_id);
+
+    // resources ids
+    let (realms_data: RealmData) = IRealms.fetch_realm_data(realms_address, token_id);
+    let (resource_ids: Uint256*) = Resources._calculate_realm_resource_ids(realms_data);
+
+    let (local resource_value: Uint256*) = alloc();
+    create_resource_value_array(realms_data.resource_number, resource_value);
+
+    let (local data: felt*) = alloc();
+    assert data[0] = 0;
+
+    // pillage resources and send to player that won the battle
+    IERC1155.mintBatch(
+        resources_address,
+        owner,
+        realms_data.resource_number,
+        resource_ids,
+        realms_data.resource_number,
+        resource_value,
+        1,
+        data,
+    );
+
+    return ();
+}
+
+func create_resource_value_array{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    resource_qty: felt, resource_value: Uint256*
+) {
+    if (resource_qty == 0) {
+        return ();
+    }
+    tempvar values = new (BASE_RESOURCES_PER_DAY * 10 ** 18, 0);
+
+    let s = cast(values, Uint256*);
+
+    assert [resource_value] = [s];
+
+    return create_resource_value_array(resource_qty - 1, resource_value + Uint256.SIZE);
 }

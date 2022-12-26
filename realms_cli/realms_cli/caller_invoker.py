@@ -55,6 +55,7 @@ async def send_multi(self, to, method, calldata, nonce=None):
 # bind it to the account class so that we can use the function when signing
 Account.send_multi = send_multi
 
+
 def call(network, contract_alias, function, arguments) -> str:
     """Nile call function."""
 
@@ -69,13 +70,15 @@ def call(network, contract_alias, function, arguments) -> str:
     ]
     return subprocess.check_output(command).strip().decode("utf-8")
 
+
 async def proxy_call(network, contract_alias, abi, function, params) -> str:
     """Nile proxy call function."""
 
-    address, _ = next(deployments.load(contract_alias, network)) or contract_alias
+    address, _ = next(deployments.load(
+        contract_alias, network)) or contract_alias
 
     address = hex_address(address)
-    
+
     return await call_or_invoke(
         contract=address,
         type="call",
@@ -246,6 +249,6 @@ async def wrapped_declare(account, contract_name, network, alias):
     )
 
     class_hash, _ = await declare(sender=account.address, contract_name=alias, signature=[
-                         sig_r, sig_s], alias=alias, network=network, max_fee=config.MAX_FEE)
+        sig_r, sig_s], alias=alias, network=network, max_fee=config.MAX_FEE)
 
     return class_hash

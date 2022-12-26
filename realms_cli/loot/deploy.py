@@ -6,15 +6,18 @@ from realms_cli.utils import str_to_felt, strhex_as_felt
 import time
 from enum import IntEnum
 
+
 class ExternalContractIds(IntEnum):
     Realms_ERC721_Mintable = 1
     Lords_ERC20_Mintable = 2
     Treasury = 3
 
+
 class ModuleId(IntEnum):
     Adventurer = 1
     Loot = 2
     Beast = 3
+
 
 Contracts = namedtuple('Contracts', 'contract_name alias')
 ModuleContracts = namedtuple('Contracts', 'contract_name alias id')
@@ -29,7 +32,8 @@ token_path = 'settling_game/tokens/'
 
 # token tuples
 MODULE_CONTRACT_IMPLEMENTATIONS = [
-    ModuleContracts(module_path + "adventurer/Adventurer", "Adventurer", ModuleId.Adventurer),
+    ModuleContracts(module_path + "adventurer/Adventurer",
+                    "Adventurer", ModuleId.Adventurer),
     ModuleContracts(module_path + "loot/Loot", "Loot", ModuleId.Loot),
     ModuleContracts(module_path + "beast/Beast", "Beast", ModuleId.Beast),
 ]
@@ -57,6 +61,7 @@ ADVENTURER_SYMBOL = str_to_felt("ADVENTURER")
 # Loot
 LOOT = str_to_felt("Loot")
 LOOT_SYMBOL = str_to_felt("LOOT")
+
 
 async def run(nre):
 

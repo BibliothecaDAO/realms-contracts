@@ -65,7 +65,7 @@ def check_resources(address, network):
 @click.option("--network", default="goerli")
 def claim_resources(realm_token_id, network):
     """
-    Claim available resources & lords
+    Claim available resources on a specific Realm
     """
     config = Config(nile_network=network)
 

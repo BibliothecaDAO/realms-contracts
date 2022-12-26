@@ -2,9 +2,6 @@
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.202.5/containers/python-3
 {
 	"name": "Loot",
-	"runArgs": [
-		"--init"
-	],
 	"image": "ghcr.io/bibliothecaforadventurers/loot:latest",
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
@@ -32,9 +29,6 @@
 		"graphql.vscode-graphql",
 		"redhat.vscode-yaml"
 	],
-	"containerEnv": {
-		"OWNER_PRIVATE_KEY": "${localEnv:OWNER_PRIVATE_KEY}"
-	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 	// Use 'postCreateCommand' to run commands after the container is created.
@@ -44,5 +38,5 @@
 	"remoteEnv": {
 		"CAIRO_PATH": "/workspaces/realms-contracts/lib/cairo_graphs/src:/workspaces/realms-contracts/lib/cairo_contracts/src:/workspaces/realms-contracts/lib/cairo_math_64x61/contracts:/workspaces/realms-contracts/lib/guild_contracts:${containerEnv:PATH}"
 	},
-	"postStartCommand": "bash /workspaces/realms-contracts/scripts/setup_cli_env.sh"
+	// "postStartCommand": "bash /workspaces/realms-contracts/scripts/setup_cli_env.sh"
 }

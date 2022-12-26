@@ -1,9 +1,11 @@
 from collections import namedtuple
-from realms_cli.caller_invoker import wrapped_send, declare
+from realms_cli.caller_invoker import wrapped_send, wrapped_declare, compile
 from realms_cli.deployer import logged_deploy
-from realms_cli.config import Config, strhex_as_strfelt, safe_load_deployment
+from realms_cli.config import Config, safe_load_deployment
+from realms_cli.utils import strhex_as_felt
+import time
 
-Contracts = namedtuple('Contracts', 'alias contract_name id')
+ModuleContracts = namedtuple('Contracts', 'contract_name alias id')
 
 # STEPS
 # 0. Set new names in array accordingly to the tuple structure
@@ -14,63 +16,74 @@ Contracts = namedtuple('Contracts', 'alias contract_name id')
 # 5. Set write access if needed
 # 6. Set token contract approval if needed - Resources etc
 
-NEW_MODULES = [
-    Contracts("Travel", "Travel", "15"),
+
+# token tuples
+MODULE_CONTRACT_IMPLEMENTATIONS = [
+    ModuleContracts(
+        "settling_game/modules/labor/Labor", "Labor", 16)
 ]
 
 
-def run(nre):
+async def run(nre):
 
     config = Config(nre.network)
 
     #---------------- SET MODULES  ----------------#
 
-    for contract in NEW_MODULES:
+    # for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
 
-        logged_deploy(
-            nre,
-            contract.contract_name,
-            alias=contract.alias,
-            arguments=[],
-        )
+    #     compile(
+    #         contract_alias="contracts/settling_game/modules/labor/Labor.cairo")
 
-        declare(contract.contract_name, contract.alias)
+    #     await logged_deploy(
+    #         nre,
+    #         config.ADMIN_ALIAS,
+    #         contract.alias,
+    #         alias=contract.alias,
+    #         calldata=[],
+    #     )
 
-        predeclared_class = nre.get_declaration(contract.alias)
+    #     class_hash = await wrapped_declare(
+    #         config.ADMIN_ALIAS, contract.contract_name, nre.network, contract.alias)
 
-        logged_deploy(
-            nre,
-            'PROXY_Logic',
-            alias='proxy_' + contract.alias,
-            arguments=[strhex_as_strfelt(predeclared_class)],
-        )
+    #     time.sleep(120)
+
+    #     await logged_deploy(
+    #         nre,
+    #         config.ADMIN_ALIAS,
+    #         'PROXY_Logic',
+    #         alias='proxy_' + contract.alias,
+    #         calldata=[strhex_as_felt(class_hash)],
+    #     )
 
     #---------------- INIT MODULES  ----------------#
 
-    for contract in NEW_MODULES:
+    for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
 
-        module, _ = safe_load_deployment(
-            "proxy_" + contract.alias, nre.network)
+        # module, _ = safe_load_deployment(
+        #     "proxy_" + contract.alias, nre.network)
 
-        wrapped_send(
+        # time.sleep(30)
+
+        await wrapped_send(
             network=config.nile_network,
             signer_alias=config.ADMIN_ALIAS,
-            contract_alias="proxy_" + contract.contract_name,
+            contract_alias="proxy_" + contract.alias,
             function="initializer",
-            arguments=[strhex_as_strfelt(
-                config.CONTROLLER_ADDRESS), strhex_as_strfelt(config.ADMIN_ADDRESS)],
+            arguments=[
+                config.CONTROLLER_PROXY_ADDRESS, config.ADMIN_ADDRESS],
         )
 
-        wrapped_send(
-            network=config.nile_network,
-            signer_alias=config.ADMIN_ALIAS,
-            contract_alias="arbiter",
-            function="appoint_contract_as_module",
-            arguments=[
-                strhex_as_strfelt(module),
-                contract.id
-            ],
-        )
+        # await wrapped_send(
+        #     network=config.nile_network,
+        #     signer_alias=config.ADMIN_ALIAS,
+        #     contract_alias=config.Arbiter_alias,
+        #     function="appoint_contract_as_module",
+        #     arguments=[
+        #         module,
+        #         contract.id
+        #     ],
+        # )
 
         # wrapped_send(
         #     network=config.nile_network,

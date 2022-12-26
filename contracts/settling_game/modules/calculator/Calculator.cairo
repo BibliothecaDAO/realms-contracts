@@ -12,28 +12,46 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import unsigned_div_rem
-from starkware.cairo.common.math_cmp import is_nn_le, is_nn, is_le
+from starkware.cairo.common.math_cmp import is_nn_le, is_nn, is_le, is_not_zero
 from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
+from starkware.cairo.common.bool import TRUE, FALSE
 
 from openzeppelin.upgrades.library import Proxy
+from openzeppelin.token.erc721.IERC721 import IERC721
 
 from contracts.settling_game.utils.game_structs import (
     RealmBuildings,
     ModuleIds,
-    BuildingsFood,
     BuildingsPopulation,
-    BuildingsCulture,
     RealmCombatData,
+    ExternalContractIds,
 )
-from contracts.settling_game.utils.constants import VAULT_LENGTH_SECONDS, BASE_LORDS_PER_DAY
+from contracts.settling_game.modules.calculator.library import Calculator
+from contracts.settling_game.utils.constants import (
+    VAULT_LENGTH_SECONDS,
+    BASE_LORDS_PER_DAY,
+    DAY,
+    CCalculator,
+)
 from contracts.settling_game.modules.settling.interface import ISettling
 from contracts.settling_game.interfaces.imodules import IModuleController
-from contracts.settling_game.modules.combat.interface import IL06_Combat
 from contracts.settling_game.library.library_module import Module
-from contracts.settling_game.modules.calculator.library import Calculator
-from contracts.settling_game.library.library_combat import Combat
+from contracts.settling_game.modules.combat.interface import ICombat
 from contracts.settling_game.modules.buildings.interface import IBuildings
+from contracts.settling_game.modules.food.interface import IFood
+from contracts.settling_game.modules.relics.interface import IRelics
+
+// TODO: increase decay of buildings if unhappy
+// TODO: stop workhut increases if unhappy - needs test
+
+@storage_var
+func since_last_tick(token_id: Uint256) -> (time: felt) {
+}
+
+@event
+func SinceLastTick(realm_id: Uint256, time: felt) {
+}
 
 // -----------------------------------
 // Initialize & upgrade
@@ -58,9 +76,11 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 }
 
 // -----------------------------------
-// Calculators
+// Epoch and Day Calculator
 // -----------------------------------
 
+// @notice Calculates epoch of game. On deployment of game a timestamp is set, an epoch is the length of the vault.
+// @returns epoch: of game as a felt.
 @view
 func calculate_epoch{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
     epoch: felt
@@ -74,111 +94,233 @@ func calculate_epoch{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     return (epoch=epoch);
 }
 
+// @notice Calculates day number in the game. Used for deterministic values.
+// @returns day: of the game.
+@view
+func calculate_day_number{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
+    day: felt
+) {
+    let (controller) = Module.controller_address();
+    let (genesis_time_stamp) = IModuleController.get_genesis(controller);
+    let (block_timestamp) = get_block_timestamp();
+
+    let (day, _) = unsigned_div_rem(block_timestamp - genesis_time_stamp, DAY);
+    return (day,);
+}
+
+// -----------------------------------
+// Happiness Calculators
+// -----------------------------------
+
+// @notice Checks if the Realm is Happy or Not.
+// @returns is_happy: TRUE(1) for Happy, FALSE(0) if unhappy
+@view
+func is_realm_happy{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    token_id: Uint256
+) -> (is_happy: felt) {
+    // get actual happiness value
+    let (happiness) = calculate_happiness(token_id);
+
+    // check if happiness is over or equal to base happiness
+    let is_happy = is_le(CCalculator.BASE_HAPPINESS, happiness);
+
+    return (is_happy=is_happy);
+}
+
+// @notice Calculates the total happiness on the Realm. This is a big number 0 - 200.
+// @param token_id: Realm ID
+// @returns happiness: actual happiness value as a number.
 @view
 func calculate_happiness{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     token_id: Uint256
 ) -> (happiness: felt) {
     alloc_locals;
+    // random
+    let (daily_randomness_value) = calculate_daily_randomness(token_id);
 
-    // FETCH VALUES
-    let (population) = calculate_population(token_id);
-    let (food) = calculate_food(token_id);
+    let (controller) = Module.controller_address();
 
-    // GET HAPPINESS
-    let (happiness) = Calculator.calculate_happiness(population, food);
+    // get available food - check if serfs are starving.
+    let (food_addr) = IModuleController.get_module_address(controller, ModuleIds.L10_Food);
+    let (available_food_in_store) = IFood.available_food_in_store(food_addr, token_id);
+    let is_starving = is_le(available_food_in_store, 1);
 
-    return (happiness,);
+    if (is_starving == TRUE) {
+        tempvar no_food_loss = CCalculator.NO_FOOD_LOSS;
+    } else {
+        tempvar no_food_loss = 0;
+    }
+
+    // check if relic is owned - if not subtract
+    let (relic_addr) = IModuleController.get_module_address(controller, ModuleIds.Relics);
+    let (is_relic_at_home) = IRelics.is_relic_at_home(relic_addr, token_id);
+
+    if (is_relic_at_home == FALSE) {
+        tempvar no_relic_loss = CCalculator.NO_RELIC_LOSS;
+    } else {
+        tempvar no_relic_loss = 0;
+    }
+
+    // does a Defending Army exist on a Realm? - if yes, add
+    // 0 is for Defending Army ID
+    let (combat_addr) = IModuleController.get_module_address(controller, ModuleIds.L06_Combat);
+    let (defending_army) = ICombat.get_realm_army_combat_data(combat_addr, 0, token_id);
+    let has_defending_army = is_not_zero(defending_army.packed);
+
+    if (has_defending_army == FALSE) {
+        tempvar no_defending_army_loss = CCalculator.NO_DEFENDING_ARMY_LOSS;
+    } else {
+        tempvar no_defending_army_loss = 0;
+    }
+
+    return (
+        CCalculator.BASE_HAPPINESS - daily_randomness_value - no_defending_army_loss -
+        no_food_loss - no_relic_loss,
+    );
 }
 
+// -----------------------------------
+// Population Calculators
+// -----------------------------------
+
+// @notice Calculates the population of all the Armies that exist on a Realm.
+// @param token_id: Realm ID
+// @returns population: of all the Armies on the Realm.
 @view
-func calculate_troop_population{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func calculate_armies_population{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     token_id: Uint256
-) -> (troop_population: felt) {
-    alloc_locals;
+) -> (population: felt) {
+    let (controller) = Module.controller_address();
+    let (combat) = IModuleController.get_module_address(controller, ModuleIds.L06_Combat);
+    let (armies_population) = ICombat.get_population_of_armies(combat, token_id);
 
-    // SUM TOTAL TROOP POPULATION
-    // let (controller) = Module.controller_address()
-    // let (combat_logic) = IModuleController.get_module_address(controller, ModuleIds.L06_Combat)
-    // let (realm_combat_data : RealmCombatData) = IL06_Combat.get_realm_combat_data(
-    //     combat_logic, token_id
-    // )
-
-    // let (attacking_population) = Combat.get_troop_population(realm_combat_data.attacking_squad)
-    // let (defending_population) = Combat.get_troop_population(realm_combat_data.defending_squad)
-
-    return (0,);
+    return (population=armies_population);
 }
 
+// @notice Calculates the total population of the Realm. Armies + Buildings.
+// @param token_id: Realm ID
+// @returns population: of entire Realm
 @view
 func calculate_population{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     token_id: Uint256
 ) -> (population: felt) {
-    alloc_locals;
-
-    // SUM TOTAL POPULATION
     let (controller) = Module.controller_address();
-    let (buildings_logic_address) = IModuleController.get_module_address(
-        controller, ModuleIds.Buildings
-    );
+    let (buildings_address) = IModuleController.get_module_address(controller, ModuleIds.Buildings);
     let (current_buildings: RealmBuildings) = IBuildings.get_effective_population_buildings(
-        buildings_logic_address, token_id
+        buildings_address, token_id
     );
 
-    // TROOP POPULATION
-    let (troop_population) = calculate_troop_population(token_id);
+    // Army Population
+    let (army_population) = calculate_armies_population(token_id);
 
-    let (realm_population) = Calculator.calculate_population(current_buildings, troop_population);
+    // Realm Population
+    let realm_population = Calculator.calculate_population(current_buildings);
 
-    return (realm_population,);
+    return (population=realm_population + army_population);
 }
 
+// TODO: We could move this to the controller??
+// TOOD: The issue with this approach is that it is entirely deterministic to the game. You will be able to see
+//        if the future what numbers will come up. This could be solved by adding a random number saved to the MC every 24hrs which is then used in the calc.
 @view
-func calculate_food{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func calculate_daily_randomness{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     token_id: Uint256
-) -> (food: felt) {
-    alloc_locals;
-
-    // CALCULATE FOOD
+) -> (random_number: felt) {
     let (controller) = Module.controller_address();
-    let (buildings_logic_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.Buildings
+    let (address) = IModuleController.get_external_contract_address(
+        controller, ExternalContractIds.S_Realms
     );
-    let (current_buildings: RealmBuildings) = IBuildings.get_effective_buildings(
-        buildings_logic_address, token_id
+    let (owner) = IERC721.ownerOf(address, token_id);
+
+    // Day number is the evolving value. When the days tick over a new number appears.
+    // This avoids us having to do any writes. Can be upgraded to use random number in future. To make it
+    // probabilistic we can set a new random number every day with yagi and use it. This way you can't predict it.
+    let (day_number) = calculate_day_number();
+
+    // returns ID of event - a number between 0 - NUMBER_OF_RANDOM_EVENTS
+    let (_, random_number) = unsigned_div_rem(
+        10000 + token_id.low * day_number, CCalculator.NUMBER_OF_RANDOM_EVENTS
     );
 
-    let (troop_population) = calculate_troop_population(token_id);
+    // get actual value using the random ID
+    let get_randomness_value = Calculator.get_randomness_value(random_number);
 
-    let (realm_food) = Calculator.calculate_food(current_buildings, troop_population);
-
-    return (realm_food,);
+    return (0,);
 }
 
-// TODO: Make LORDS decrease over time...
-@view
-func calculate_tribute{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
-    tribute: felt
+// called on every Realm action IF realm is unhappy
+@external
+func happiness__callback__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    realm_id: Uint256
 ) {
-    // TOD0: Decreasing supply curve of Lords
-    // calculate number of buildings realm has
+    alloc_locals;
+    let (needs_update, TOTAL_TICKS) = check_tick_time(realm_id);
 
-    return (tribute=BASE_LORDS_PER_DAY);
+    if (needs_update == TRUE) {
+        let (happy) = is_realm_happy(realm_id);
+        let (block_timestamp) = get_block_timestamp();
+
+        if (happy == FALSE) {
+            let (controller) = Module.controller_address();
+            let (combat_address) = IModuleController.get_module_address(
+                controller, ModuleIds.L06_Combat
+            );
+
+            ICombat.combat_callback(combat_address, realm_id, TOTAL_TICKS);
+
+            // set and emit
+
+            update_tick(realm_id, block_timestamp);
+
+            return ();
+        }
+        update_tick(realm_id, block_timestamp);
+        return ();
+    }
+
+    return ();
 }
 
-@view
-func calculate_troop_coefficent{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func check_tick_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     token_id: Uint256
-) -> (troop_coefficent: felt) {
-    alloc_locals;
-    let (controller) = Module.controller_address();
-    let (buildings_logic_address) = IModuleController.get_module_address(
-        contract_address=controller, module_id=ModuleIds.Buildings
-    );
-    let (current_buildings: RealmBuildings) = IBuildings.get_effective_buildings(
-        buildings_logic_address, token_id
-    );
+) -> (felt, felt) {
+    let (last_tick) = since_last_tick.read(token_id);
 
-    let (troop_coefficent) = Calculator.calculate_troop_coefficient(current_buildings);
+    let (block_timestamp) = get_block_timestamp();
 
-    return (troop_coefficent,);
+    // if uninitialized update
+    if (last_tick == 0) {
+        return (TRUE, 1);
+    }
+
+    // check if past last tick
+    let past_tick_time = is_le(last_tick + CCalculator.HAPPINESS_TIME_PERIOD_TICK, block_timestamp);
+
+    if (past_tick_time == TRUE) {
+        let (TOTAL_TICKS, _) = unsigned_div_rem(
+            past_tick_time, CCalculator.HAPPINESS_TIME_PERIOD_TICK
+        );
+
+        return (TRUE, TOTAL_TICKS);
+    }
+
+    return (FALSE, 0);
+}
+
+@external
+func __callback__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    realm_id: Uint256
+) {
+    happiness__callback__(realm_id);
+
+    return ();
+}
+
+func update_tick{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    realm_id: Uint256, block_timestamp: felt
+) {
+    since_last_tick.write(realm_id, block_timestamp);
+    SinceLastTick.emit(realm_id, block_timestamp);
+
+    return ();
 }

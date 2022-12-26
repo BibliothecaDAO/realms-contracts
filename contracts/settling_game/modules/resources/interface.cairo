@@ -35,6 +35,6 @@ namespace IResources {
     ) {
     }
 
-    func wonder_claim(token_id: Uint256) {
+    func mint_resources(token_id: Uint256) {
     }
 }

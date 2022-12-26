@@ -1,11 +1,8 @@
-# First, import click dependency
 import click
-
-from nile.core.declare import declare
-
-from realms_cli.caller_invoker import wrapped_send, compile, deploy
-from realms_cli.config import Config, strhex_as_strfelt
+from realms_cli.caller_invoker import wrapped_call, wrapped_send, compile, deploy, wrapped_declare
+from realms_cli.config import Config
 from realms_cli.utils import uint
+import time
 
 resources = uint(100000000 * 10 ** 18)
 
@@ -36,15 +33,15 @@ def mint_resources(network):
     uints.append("0")
 
     for i in range(n_resources):
-        amounts.append(100000000 * 10 ** 18)
+        amounts.append(1000 * 10 ** 18)
         amounts.append(0)
 
     wrapped_send(
         network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_resources",
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias=config.Resources_ERC1155_Mintable_Burnable_alias,
         function="mintBatch",
-        arguments=[int('0x07Deb0dA237EE37276489278FE16EFF3E6A3d62F830446104D93C892df771cA2', 16), n_resources,
+        arguments=[int('0x04649766c7c55a0ca90F18b8c6a20f990e77dE5a5C65E369C75A001668f6726C', 16), n_resources,
                    *uints, n_resources, *amounts, 1, 1],
     )
 
@@ -76,24 +73,29 @@ def upgrade_module(module_name, network):
                 f.write(line)
         f.truncate()
 
-    compile(contract_alias="contracts/settling_game/modules/" + module_name.lower() + "/" +
-            module_name + ".cairo")
+    name = "settling_game/modules/" + module_name.lower() + "/" + \
+        module_name
+
+    compile(contract_alias="contracts/" + name + ".cairo")
 
     deploy(
         network=network,
         alias=module_name
     )
 
-    module = declare(module_name, network, module_name)
+    time.sleep(200)
 
-    print(module)
+    class_hash = wrapped_declare(
+        config.ADMIN_ALIAS, name, network, module_name)
+
+    time.sleep(200)
 
     wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
         contract_alias="proxy_" + module_name,
         function="upgrade",
-        arguments=[strhex_as_strfelt(module)]
+        arguments=[class_hash]
     )
 
     print('Have patience, you might need to wait 30s before invoking this')
@@ -126,14 +128,14 @@ def set_xoroshiro(network):
     Sets Xoroshiro
     """
     config = Config(nile_network=network)
-
-    wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_Combat",
-        function="set_xoroshiro",
-        arguments=[int(config.XOROSHIRO_ADDRESS, 16)],
-    )
+    print(config.XOROSHIRO_ADDRESS)
+    # wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="proxy_Combat",
+    #     function="set_xoroshiro",
+    #     arguments=[config.XOROSHIRO_ADDRESS],
+    # )
 
     # wrapped_send(
     #     network=config.nile_network,
@@ -160,3 +162,65 @@ def zero_dead_squads(network, token_id):
         function="zero_dead_squads",
         arguments=[token_id, 0],
     )
+
+
+@click.command()
+@click.argument("token_id", nargs=1)
+@click.option("--network", default="goerli")
+def check_module(network, token_id):
+    """
+    Checks module address
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias=config.Module_Controller_alias,
+        function="get_module_address",
+        arguments=[
+            token_id,  # uint 1
+        ],
+    )
+    print(out)
+
+
+@click.command()
+@click.argument("address", nargs=1)
+@click.option("--network", default="goerli")
+def check_address_module(network, address):
+    """
+    Checks module address
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias=config.Module_Controller_alias,
+        function="get_module_id_of_address",
+        arguments=[
+            address,  # uint 1
+        ],
+    )
+    print(out)
+
+
+@click.command()
+@click.argument("address_from", nargs=1)
+@click.argument("address_to", nargs=1)
+@click.option("--network", default="goerli")
+def get_write_access(network, address_from, address_to):
+    """
+    Checks module address
+    """
+    config = Config(nile_network=network)
+
+    out = wrapped_call(
+        network=config.nile_network,
+        contract_alias=config.Module_Controller_alias,
+        function="get_write_access",
+        arguments=[
+            address_from,  # uint 1
+            address_to
+        ],
+    )
+    print(out)

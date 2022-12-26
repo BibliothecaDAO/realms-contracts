@@ -4,6 +4,12 @@ from realms_cli.config import Config, strhex_as_strfelt
 import time
 import json
 from realms_cli.binary_converter import map_realm
+from realms_cli.utils import uint
+from realms_cli.utils import str_to_felt
+
+per_set = 50
+total = 8000
+total_sets = 160
 
 
 def run(nre):
@@ -15,17 +21,21 @@ def run(nre):
     orders = json.load(open("data/orders.json", "r"))
     wonders = json.load(open("data/wonders.json", ))
 
-    a_list = list(range(250, 300))
+    for set, i in enumerate(range(total_sets)):
 
-    calldata = [
-        [id, 0, map_realm(realms[str(id)], resources, wonders, orders)]
-        for id in a_list
-    ]
+        myList = list(range((i * per_set), (per_set * (i + 1))))
 
-    wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_realms",
-        function="set_realm_data",
-        arguments=calldata,
-    )
+        calldata = [
+            [id + 1, 0, str_to_felt(realms[str(id + 1)]['name']), map_realm(realms[str(id + 1)],
+                                                                            resources, wonders, orders)]
+            for id in myList
+        ]
+        print(calldata)
+
+        wrapped_send(
+            network=config.nile_network,
+            signer_alias=config.ADMIN_ALIAS,
+            contract_alias=config.Realms_ERC721_Mintable_alias,
+            function="set_realm_data",
+            arguments=calldata,
+        )

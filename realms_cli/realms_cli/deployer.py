@@ -5,6 +5,7 @@ from realms_cli.config import Config
 from realms_cli.utils import strhex_as_felt
 import time
 
+
 async def logged_deploy(nre, account, contract_name, alias, calldata):
     print(f"deploying {alias} contract")
 
@@ -24,7 +25,8 @@ async def logged_deploy(nre, account, contract_name, alias, calldata):
         unique=False,
         calldata=calldata,
         alias=alias,
-        deployer_address=strhex_as_felt('0x041a78e741e5af2fec34b695679bc6891742439f7afb8484ecd7766661ad02bf'),
+        deployer_address=strhex_as_felt(
+            '0x041a78e741e5af2fec34b695679bc6891742439f7afb8484ecd7766661ad02bf'),
         max_fee=config.MAX_FEE
     )
     print(address, tx_hash, abi)

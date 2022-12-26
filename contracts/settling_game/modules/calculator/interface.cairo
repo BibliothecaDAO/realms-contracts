@@ -8,14 +8,10 @@ namespace ICalculator {
     }
     func calculate_happiness(token_id: Uint256) -> (happiness: felt) {
     }
-    func calculate_troop_population(token_id: Uint256) -> (troop_population: felt) {
+    func is_realm_happy(token_id: Uint256) -> (is_happy: felt) {
     }
     func calculate_population(token_id: Uint256) -> (population: felt) {
     }
-    func calculate_food(token_id: Uint256) -> (food: felt) {
-    }
-    func calculate_tribute() -> (tribute: felt) {
-    }
-    func calculate_troop_coefficent(token_id: Uint256) -> (troop_coefficent: felt) {
+    func happiness__callback__(realm_id: Uint256) {
     }
 }

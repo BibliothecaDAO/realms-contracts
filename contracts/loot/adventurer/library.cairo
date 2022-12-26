@@ -43,13 +43,13 @@ from contracts.loot.loot.stats.combat import CombatStats
 
 namespace AdventurerLib {
     func birth{syscall_ptr: felt*, range_check_ptr}(
-        race: felt, 
-        home_realm: felt, 
-        name: felt, 
-        birth_date: felt, 
-        order: felt, 
-        image_hash_1: felt, 
-        image_hash_2: felt
+        race: felt,
+        home_realm: felt,
+        name: felt,
+        birth_date: felt,
+        order: felt,
+        image_hash_1: felt,
+        image_hash_2: felt,
     ) -> (adventurer_static: AdventurerStatic, adventurer_dynamic: AdventurerDynamic) {
         alloc_locals;
 
@@ -91,55 +91,53 @@ namespace AdventurerLib {
 
         return (
             AdventurerStatic(
-                Race=Race,
-                HomeRealm=HomeRealm,
-                Birthdate=Birthdate,
-                Name=Name,
-                Order=Order,
-                ImageHash1=ImageHash1,
-                ImageHash2=ImageHash2,
+            Race=Race,
+            HomeRealm=HomeRealm,
+            Birthdate=Birthdate,
+            Name=Name,
+            Order=Order,
+            ImageHash1=ImageHash1,
+            ImageHash2=ImageHash2,
             ),
             AdventurerDynamic(
-                Health=Health,
-                Level=Level,
-                Strength=Strength,
-                Dexterity=Dexterity,
-                Vitality=Vitality,
-                Intelligence=Intelligence,
-                Wisdom=Wisdom,
-                Charisma=Charisma,
-                Luck=Luck,
-                XP=XP,
-                WeaponId=WeaponId,
-                ChestId=ChestId,
-                HeadId=HeadId,
-                WaistId=WaistId,
-                FeetId=FeetId,
-                HandsId=HandsId,
-                NeckId=NeckId,
-                RingId=RingId,
-                Status=Status,
-                Beast=Beast
-            )
+            Health=Health,
+            Level=Level,
+            Strength=Strength,
+            Dexterity=Dexterity,
+            Vitality=Vitality,
+            Intelligence=Intelligence,
+            Wisdom=Wisdom,
+            Charisma=Charisma,
+            Luck=Luck,
+            XP=XP,
+            WeaponId=WeaponId,
+            ChestId=ChestId,
+            HeadId=HeadId,
+            WaistId=WaistId,
+            FeetId=FeetId,
+            HandsId=HandsId,
+            NeckId=NeckId,
+            RingId=RingId,
+            Status=Status,
+            Beast=Beast
+            ),
         );
     }
 
-    func aggregate_data{syscall_ptr: felt*, range_check_ptr} (
+    func aggregate_data{syscall_ptr: felt*, range_check_ptr}(
         adventurer_static: AdventurerStatic, adventurer_dynamic: AdventurerDynamic
-    ) -> (
-        adventurer: AdventurerState
-    ) {
+    ) -> (adventurer: AdventurerState) {
         let adventurer = AdventurerState(
-            adventurer_static.Race, 
-            adventurer_static.HomeRealm, 
+            adventurer_static.Race,
+            adventurer_static.HomeRealm,
             adventurer_static.Birthdate,
             adventurer_static.Name,
             adventurer_static.Order,
             adventurer_static.ImageHash1,
             adventurer_static.ImageHash2,
-            adventurer_dynamic.Health, 
-            adventurer_dynamic.Level, 
-            adventurer_dynamic.Strength, 
+            adventurer_dynamic.Health,
+            adventurer_dynamic.Level,
+            adventurer_dynamic.Strength,
             adventurer_dynamic.Dexterity,
             adventurer_dynamic.Vitality,
             adventurer_dynamic.Intelligence,
@@ -166,8 +164,8 @@ namespace AdventurerLib {
         adventurer_static: AdventurerStatic, adventurer_dynamic: AdventurerDynamic
     ) {
         let adventurer_static = AdventurerStatic(
-            adventurer.Race, 
-            adventurer.HomeRealm, 
+            adventurer.Race,
+            adventurer.HomeRealm,
             adventurer.Birthdate,
             adventurer.Name,
             adventurer.Order,
@@ -176,9 +174,9 @@ namespace AdventurerLib {
         );
 
         let adventurer_dynamic = AdventurerDynamic(
-            adventurer.Health, 
-            adventurer.Level, 
-            adventurer.Strength, 
+            adventurer.Health,
+            adventurer.Level,
+            adventurer.Strength,
             adventurer.Dexterity,
             adventurer.Vitality,
             adventurer.Intelligence,
@@ -262,21 +260,21 @@ namespace AdventurerLib {
         alloc_locals;
 
         // ---------- p1 ---------#
-        let (Health) = unpack_data(packed_adventurer.p1, 0, 1023); // 10
-        let (Level) = unpack_data(packed_adventurer.p1, 10, 1023); // 10
+        let (Health) = unpack_data(packed_adventurer.p1, 0, 1023);  // 10
+        let (Level) = unpack_data(packed_adventurer.p1, 10, 1023);  // 10
 
         // Physical
-        let (Strength) = unpack_data(packed_adventurer.p1, 20, 1023); // 10
-        let (Dexterity) = unpack_data(packed_adventurer.p1, 30, 1023); // 10
-        let (Vitality) = unpack_data(packed_adventurer.p1, 40, 1023); // 10
+        let (Strength) = unpack_data(packed_adventurer.p1, 20, 1023);  // 10
+        let (Dexterity) = unpack_data(packed_adventurer.p1, 30, 1023);  // 10
+        let (Vitality) = unpack_data(packed_adventurer.p1, 40, 1023);  // 10
 
         // Mental
-        let (Intelligence) = unpack_data(packed_adventurer.p1, 50, 1023); // 10
-        let (Wisdom) = unpack_data(packed_adventurer.p1, 60, 1023); // 10
-        let (Charisma) = unpack_data(packed_adventurer.p1, 70, 1023); // 10
+        let (Intelligence) = unpack_data(packed_adventurer.p1, 50, 1023);  // 10
+        let (Wisdom) = unpack_data(packed_adventurer.p1, 60, 1023);  // 10
+        let (Charisma) = unpack_data(packed_adventurer.p1, 70, 1023);  // 10
 
         // Luck
-        let (Luck) = unpack_data(packed_adventurer.p1, 80, 1023); // 10
+        let (Luck) = unpack_data(packed_adventurer.p1, 80, 1023);  // 10
 
         // XP
         let (XP) = unpack_data(packed_adventurer.p1, 90, 134217727);  // 27
@@ -299,26 +297,26 @@ namespace AdventurerLib {
 
         return (
             AdventurerDynamic(
-                Health=Health,
-                Level=Level,
-                Strength=Strength,
-                Dexterity=Dexterity,
-                Vitality=Vitality,
-                Intelligence=Intelligence,
-                Wisdom=Wisdom,
-                Charisma=Charisma,
-                Luck=Luck,
-                XP=XP,
-                WeaponId=WeaponId,
-                ChestId=ChestId,
-                HeadId=HeadId,
-                WaistId=WaistId,
-                FeetId=FeetId,
-                HandsId=HandsId,
-                NeckId=NeckId,
-                RingId=RingId,
-                Status=Status,
-                Beast=Beast
+            Health=Health,
+            Level=Level,
+            Strength=Strength,
+            Dexterity=Dexterity,
+            Vitality=Vitality,
+            Intelligence=Intelligence,
+            Wisdom=Wisdom,
+            Charisma=Charisma,
+            Luck=Luck,
+            XP=XP,
+            WeaponId=WeaponId,
+            ChestId=ChestId,
+            HeadId=HeadId,
+            WaistId=WaistId,
+            FeetId=FeetId,
+            HandsId=HandsId,
+            NeckId=NeckId,
+            RingId=RingId,
+            Status=Status,
+            Beast=Beast
             ),
         );
     }
@@ -335,7 +333,9 @@ namespace AdventurerLib {
         memcpy(a, &unpacked_adventurer, index);
         memset(a + index, value, 1);
         memcpy(
-            a + (index + 1), &unpacked_adventurer + (index + 1), AdventurerDynamic.SIZE - (index + 1)
+            a + (index + 1),
+            &unpacked_adventurer + (index + 1),
+            AdventurerDynamic.SIZE - (index + 1),
         );
 
         let cast_adventurer = cast(a, AdventurerDynamic*);
@@ -355,11 +355,10 @@ namespace AdventurerLib {
 
         return (updated_adventurer,);
     }
-    
+
     func unequip_item{syscall_ptr: felt*, range_check_ptr}(
         item: Item, unpacked_adventurer: AdventurerDynamic
-    ) -> (new_unpacked_adventurer: AdventurerDynamic){
-
+    ) -> (new_unpacked_adventurer: AdventurerDynamic) {
         // pass index shift and Item slot to find what item to update
         let (updated_adventurer: AdventurerDynamic) = cast_state(
             ItemShift + item.Slot, 0, unpacked_adventurer
@@ -421,12 +420,12 @@ namespace AdventurerLib {
     }
 
     func update_status{syscall_ptr: felt*, range_check_ptr}(
-       status: felt, unpacked_adventurer: AdventurerDynamic
+        status: felt, unpacked_adventurer: AdventurerDynamic
     ) -> (new_unpacked_adventurer: AdventurerDynamic) {
         alloc_locals;
 
         // Make sure status is within allowable range
-        assert_le(status, AdventurerStatus.Dead +1);
+        assert_le(status, AdventurerStatus.Dead + 1);
 
         // update adventurer status
         let (updated_adventurer: AdventurerDynamic) = cast_state(
@@ -465,9 +464,9 @@ namespace AdventurerLib {
         return (updated_adventurer,);
     }
 
-    func get_random_discovery{
-        range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
-    }(xoroshiro_random: felt) -> (discovery: felt) {
+    func get_random_discovery{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
+        xoroshiro_random: felt
+    ) -> (discovery: felt) {
         alloc_locals;
 
         let (_, r) = unsigned_div_rem(xoroshiro_random, 4);

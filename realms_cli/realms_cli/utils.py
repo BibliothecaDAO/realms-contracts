@@ -16,7 +16,7 @@ def print_over_colums(array_of_strings, cols=2, width=40):
 
 
 def uint(a):
-    return(a, 0)
+    return (a, 0)
 
 
 def parse_multi_input(cli_input) -> List:
@@ -54,7 +54,7 @@ def pack_values(values: list) -> int:
 
 def uint_decimal(a):
     x = int(a) * 10 ** 18
-    return(x, 0)
+    return (x, 0)
 
 
 def expanded_uint_list(arr):
@@ -77,6 +77,7 @@ def from_bn(a):
     """
     return round(int(a, 16) / 1000000000000000000, 4)
 
+
 def safe_load_deployment(alias: str, network: str):
     """Safely loads address from deployments file"""
     try:
@@ -94,12 +95,14 @@ def safe_load_declarations(alias: str, network: str):
     print(f"Found deployment for alias {alias}.")
     return address
 
+
 def strhex_as_strfelt(strhex: str):
     """Converts a string in hex format to a string in felt format"""
     if strhex is not None:
         return str(int(strhex, 16))
     else:
         print("strhex address is None.")
+
 
 def strhex_as_felt(strhex: str):
     """Converts a string in hex format to an int in felt format"""

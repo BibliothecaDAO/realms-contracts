@@ -15,7 +15,12 @@ from starkware.starknet.common.syscalls import get_block_timestamp
 
 from openzeppelin.upgrades.library import Proxy
 
-from contracts.settling_game.utils.game_structs import TravelInformation, ExternalContractIds, Point
+from contracts.settling_game.utils.game_structs import (
+    TravelInformation,
+    ExternalContractIds,
+    Point,
+    ModuleIds,
+)
 from contracts.settling_game.library.library_module import Module
 from contracts.settling_game.modules.travel.library import Travel
 
@@ -32,10 +37,13 @@ from contracts.settling_game.modules.travel.library import Travel
 // @param destination_token_id: Destination token_id (Actual NFT ID)
 // @param arrival_time: Arrival time in unix
 @event
-func TravelAction(
+func TravelAction_2(
     traveller_contract_id: felt,
     traveller_token_id: Uint256,
     traveller_nested_id: felt,
+    location_contract_id: felt,
+    location_token_id: Uint256,
+    location_nested_id: felt,
     destination_contract_id: felt,
     destination_token_id: Uint256,
     destination_nested_id: felt,
@@ -112,6 +120,8 @@ func travel{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 ) {
     alloc_locals;
 
+    Module.__callback__(traveller_token_id);
+
     // TODO: assert is correct ID (can't try move unmoveable assets)
 
     // You cannot move nested asset ID 0 - this is the actual location.
@@ -151,6 +161,11 @@ func travel{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         destination_contract_id, destination_token_id, destination_nested_id
     );
 
+    // get current information
+    let (traveller_current_information: TravelInformation) = get_travel_information(
+        traveller_contract_id, traveller_token_id, traveller_nested_id
+    );
+
     // calculate time
     let (time) = get_travel_time(traveller_coordinates, destination_coordinates);
 
@@ -163,10 +178,13 @@ func travel{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     );
 
     // emit event
-    TravelAction.emit(
+    TravelAction_2.emit(
         traveller_contract_id,
         traveller_token_id,
         traveller_nested_id,
+        traveller_current_information.destination_asset_id,
+        traveller_current_information.destination_token_id,
+        traveller_current_information.destination_nested_asset_id,
         destination_contract_id,
         destination_token_id,
         destination_nested_id,

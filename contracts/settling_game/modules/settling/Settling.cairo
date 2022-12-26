@@ -19,6 +19,7 @@ from starkware.cairo.common.bool import TRUE, FALSE
 
 from openzeppelin.upgrades.library import Proxy
 from openzeppelin.token.erc721.IERC721 import IERC721
+from openzeppelin.token.erc20.IERC20 import IERC20
 
 from contracts.settling_game.utils.game_structs import ModuleIds, ExternalContractIds, RealmData
 from contracts.settling_game.library.library_module import Module
@@ -29,7 +30,7 @@ from contracts.settling_game.interfaces.imodules import IModuleController
 
 from contracts.settling_game.modules.goblintown.interface import IGoblinTown
 from contracts.settling_game.modules.resources.interface import IResources
-
+from contracts.settling_game.modules.combat.interface import ICombat
 // -----------------------------------
 // Events
 // -----------------------------------
@@ -66,6 +67,10 @@ func time_vault_staked(token_id: Uint256) -> (time: felt) {
 
 @storage_var
 func total_realms_settled() -> (amount: felt) {
+}
+
+@storage_var
+func first_settle(token_id: Uint256) -> (settled: felt) {
 }
 
 // -----------------------------------
@@ -128,11 +133,32 @@ func settle{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(tok
     _set_total_realms_settled(realms_settled + 1);
 
     // TODO: maybe use a hook? if so, how to approve the module in GT?
-    let (goblin_town_address) = Module.get_module_address(ModuleIds.GoblinTown);
-    IGoblinTown.spawn_goblin_welcomparty(goblin_town_address, token_id);
+    // let (goblin_town_address) = Module.get_module_address(ModuleIds.GoblinTown);
+    // IGoblinTown.spawn_goblin_welcomparty(goblin_town_address, token_id);
+
+    let (has_settled) = first_settle.read(token_id);
 
     // EMIT
     Settled.emit(caller, token_id);
+
+    if (has_settled == TRUE) {
+        return (TRUE,);
+    }
+
+    let (lords_address) = Module.get_external_contract_address(ExternalContractIds.Lords);
+
+    let (combat_address) = Module.get_module_address(ModuleIds.L06_Combat);
+    let (resources_address) = Module.get_module_address(ModuleIds.Resources);
+
+    // start up assets
+    ICombat.build_start_army(combat_address, token_id);
+    IResources.mint_resources(resources_address, token_id);
+
+    IERC20.approve(lords_address, caller, Uint256(10 * 10 ** 18, 0));
+    IERC20.transfer(lords_address, caller, Uint256(10 * 10 ** 18, 0));
+
+    // set to settled
+    first_settle.write(token_id, TRUE);
 
     return (TRUE,);
 }
@@ -164,9 +190,7 @@ func unsettle{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     }
 
     // SEND ANY RELICS BACK TO OWNERS
-    let (relic_address) = IModuleController.get_module_address(
-        controller, ModuleIds.Relics
-    );
+    let (relic_address) = IModuleController.get_module_address(controller, ModuleIds.Relics);
     IRelics.return_relics(relic_address, token_id);
 
     // TRANSFER REALM BACK TO OWNER

@@ -26,11 +26,12 @@ from contracts.token.library import ERC1155
 
 @external
 func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    uri: felt, proxy_admin: felt
+    uri: felt, proxy_admin: felt, module_controller_address: felt
 ) {
     ERC1155.initializer();
     Ownable.initializer(proxy_admin);
     Proxy.initializer(proxy_admin);
+    Module.initializer(module_controller_address);
     return ();
 }
 
@@ -143,7 +144,7 @@ func mintBatch{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     data_len: felt,
     data: felt*,
 ) {
-    Module.only_approved();
+    // Module.only_approved();
     let (caller) = get_caller_address();
     with_attr error_message("ERC1155: called from zero address") {
         assert_not_zero(caller);

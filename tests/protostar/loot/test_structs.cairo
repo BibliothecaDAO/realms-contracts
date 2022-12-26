@@ -1,7 +1,12 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from contracts.loot.constants.adventurer import Adventurer, AdventurerState, PackedAdventurerState, AdventurerStatus
+from contracts.loot.constants.adventurer import (
+    Adventurer,
+    AdventurerState,
+    PackedAdventurerState,
+    AdventurerStatus,
+)
 from contracts.loot.constants.item import Item, ItemIds, ItemType, ItemSlot, ItemMaterial, State
 from contracts.loot.constants.rankings import ItemRank
 from contracts.loot.constants.beast import Beast, BeastStatic, BeastDynamic
@@ -62,36 +67,35 @@ namespace TestAdventurerState {
 func get_adventurer_state{syscall_ptr: felt*, range_check_ptr}() -> (
     adventurer_state: AdventurerState
 ) {
-
     return (
         AdventurerState(
-            TestAdventurerState.Race,
-            TestAdventurerState.HomeRealm,
-            TestAdventurerState.Birthdate,
-            TestAdventurerState.Name,
-            TestAdventurerState.Order,
-            TestAdventurerState.ImageHash1,
-            TestAdventurerState.ImageHash2,
-            TestAdventurerState.Health,
-            TestAdventurerState.Level,
-            TestAdventurerState.Strength,
-            TestAdventurerState.Dexterity,
-            TestAdventurerState.Vitality,
-            TestAdventurerState.Intelligence,
-            TestAdventurerState.Wisdom,
-            TestAdventurerState.Charisma,
-            TestAdventurerState.Luck,
-            TestAdventurerState.XP,
-            TestAdventurerState.WeaponId,
-            TestAdventurerState.ChestId,
-            TestAdventurerState.HeadId,
-            TestAdventurerState.WaistId,
-            TestAdventurerState.FeetId,
-            TestAdventurerState.HandsId,
-            TestAdventurerState.NeckId,
-            TestAdventurerState.RingId,
-            TestAdventurerState.Status,
-            TestAdventurerState.Beast,
+        TestAdventurerState.Race,
+        TestAdventurerState.HomeRealm,
+        TestAdventurerState.Birthdate,
+        TestAdventurerState.Name,
+        TestAdventurerState.Order,
+        TestAdventurerState.ImageHash1,
+        TestAdventurerState.ImageHash2,
+        TestAdventurerState.Health,
+        TestAdventurerState.Level,
+        TestAdventurerState.Strength,
+        TestAdventurerState.Dexterity,
+        TestAdventurerState.Vitality,
+        TestAdventurerState.Intelligence,
+        TestAdventurerState.Wisdom,
+        TestAdventurerState.Charisma,
+        TestAdventurerState.Luck,
+        TestAdventurerState.XP,
+        TestAdventurerState.WeaponId,
+        TestAdventurerState.ChestId,
+        TestAdventurerState.HeadId,
+        TestAdventurerState.WaistId,
+        TestAdventurerState.FeetId,
+        TestAdventurerState.HandsId,
+        TestAdventurerState.NeckId,
+        TestAdventurerState.RingId,
+        TestAdventurerState.Status,
+        TestAdventurerState.Beast,
         ),
     );
 }
@@ -138,24 +142,8 @@ namespace TestUtils {
 
     // @notice creates an empty item object
     // @return item: empty item
-    func create_zero_item{syscall_ptr: felt*, range_check_ptr}() -> (
-        item: Item
-    ) {
-        let zero_item = Item(
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
-        );
+    func create_zero_item{syscall_ptr: felt*, range_check_ptr}() -> (item: Item) {
+        let zero_item = Item(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
         return (zero_item,);
     }
@@ -180,17 +168,17 @@ namespace TestUtils {
         let slain_on_date = 0;
         return (
             Beast(
-                beast_id,
-                attack_type,
-                armor_type,
-                rank,
-                prefix_1,
-                prefix_2,
-                health,
-                adventurer,
-                xp,
-                level,
-                slain_on_date
+            beast_id,
+            attack_type,
+            armor_type,
+            rank,
+            prefix_1,
+            prefix_2,
+            health,
+            adventurer,
+            xp,
+            level,
+            slain_on_date
             ),
         );
     }

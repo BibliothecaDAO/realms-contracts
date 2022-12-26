@@ -44,6 +44,7 @@ from contracts.settling_game.modules.resources.interface import IResources
 from contracts.settling_game.modules.buildings.interface import IBuildings
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.interfaces.IRealms import IRealms
+from contracts.settling_game.modules.labor.interface import ILabor
 
 from contracts.settling_game.utils.constants import CCombat
 from contracts.settling_game.utils.game_structs import (
@@ -168,6 +169,8 @@ func build_army_from_battalions{
 ) {
     alloc_locals;
 
+    Module.__callback__(realm_id);
+
     // TODO: assert can build army -> # max regions
     // TODO: can only add to the army if you are at homebase or friendly Realm
 
@@ -181,14 +184,20 @@ func build_army_from_battalions{
 
     Combat.assert_can_build_battalions(battalion_ids_len, battalion_ids, realm_buildings);
 
+    // convert ids to flattened array and get new length
+    let (ids_for_costs: felt*) = alloc();
+    Combat.flatten_ids(
+        battalion_ids_len, battalion_ids, battalion_quantity_len, battalion_quantity, ids_for_costs
+    );
+    let ids_for_costs_len = Combat.id_length(battalion_quantity_len, battalion_quantity, 0);
+
     // get the Cost for every Troop to build
-    // TODO: add in QUANTITY of battalions being built -> this is only getting 1 cost value
     let (battalion_costs: Cost*) = alloc();
-    load_battalion_costs(battalion_ids_len, battalion_ids, battalion_costs);
+    load_battalion_costs(ids_for_costs_len, ids_for_costs, battalion_costs);
 
     // transform costs into tokens
     let (token_len: felt, token_ids: Uint256*, token_values: Uint256*) = transform_costs_to_tokens(
-        battalion_ids_len, battalion_costs, 1
+        ids_for_costs_len, battalion_costs, 1
     );
 
     // pay for the battalions
@@ -198,6 +207,38 @@ func build_army_from_battalions{
         controller, ExternalContractIds.Resources
     );
     IERC1155.burnBatch(resource_address, caller, token_len, token_ids, token_len, token_values);
+
+    _build_army(
+        realm_id,
+        army_id,
+        battalion_ids_len,
+        battalion_ids,
+        battalion_quantity_len,
+        battalion_quantity,
+    );
+
+    return ();
+}
+
+// @notice Creates a new Army on Realm. Armies are comprised of Battalions.
+// @param realm_id: Staked Realm ID (S_Realm)
+// @param army_id: Army ID being added too.
+// @param battalion_ids_len: Battlion IDs length
+// @param battalion_ids: Battlion IDs
+// @param battalions_len: Battalions lengh
+// @param battalions: Battalions to add
+
+func _build_army{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(
+    realm_id: Uint256,
+    army_id: felt,
+    battalion_ids_len: felt,
+    battalion_ids: felt*,
+    battalion_quantity_len: felt,
+    battalion_quantity: felt*,
+) {
+    alloc_locals;
 
     // fetch packed army
     let (army_packed) = army_data_by_id.read(army_id, realm_id);
@@ -267,33 +308,6 @@ func initiate_combat{
         defending_army_id,
     );
 
-    // check if the fighting realms have enough food, otherwise
-    // decrease whole squad vitality by 50%
-
-    // TODO: Food penalty with new module @NEW
-
-    // let (food_module) = Module.get_module_address(ModuleIds.L10_Food)
-    // let (attacker_food_store) = IFood.available_food_in_store(food_module, attacking_realm_id)
-    // let (defender_food_store) = IFood.available_food_in_store(food_module, defending_realm_id)
-
-    // if attacker_food_store == 0:
-    //     let (attacker) = Combat.apply_hunger_penalty(attacker)
-    //     tempvar range_check_ptr = range_check_ptr
-    // else:
-    //     tempvar attacker = attacker
-    //     tempvar range_check_ptr = range_check_ptr
-    // end
-    // tempvar attacker = attacker
-
-    // if defender_food_store == 0:
-    //     let (defender) = Combat.apply_hunger_penalty(defender)
-    //     tempvar range_check_ptr = range_check_ptr
-    // else:
-    //     tempvar defender = defender
-    //     tempvar range_check_ptr = range_check_ptr
-    // end
-    // tempvar defender = defender
-
     // fetch combat data
     let (attacking_realm_data: ArmyData) = get_realm_army_combat_data(
         attacking_army_id, attacking_realm_id
@@ -306,34 +320,66 @@ func initiate_combat{
     let (starting_attack_army: Army) = Combat.unpack_army(attacking_realm_data.packed);
     let (starting_defend_army: Army) = Combat.unpack_army(defending_realm_data.packed);
 
+    // check if the fighting realms have enough food, otherwise
+    // decrease whole squad vitality by 50%
+
+    // TODO: Food penalty with new module
+
+    let (food_module) = Module.get_module_address(ModuleIds.L10_Food);
+    let (attacker_food_store) = IFood.available_food_in_store(food_module, attacking_realm_id);
+    let (defender_food_store) = IFood.available_food_in_store(food_module, defending_realm_id);
+
+    if (attacker_food_store == 0) {
+        let (attacker) = Combat.apply_hunger_penalty(starting_attack_army, 1);
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar pedersen_ptr = pedersen_ptr;
+        tempvar syscall_ptr = syscall_ptr;
+    } else {
+        tempvar attacker = starting_attack_army;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar pedersen_ptr = pedersen_ptr;
+        tempvar syscall_ptr = syscall_ptr;
+    }
+    tempvar attacker = attacker;
+
+    if (defender_food_store == 0) {
+        let (defender) = Combat.apply_hunger_penalty(starting_defend_army, 1);
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar pedersen_ptr = pedersen_ptr;
+        tempvar syscall_ptr = syscall_ptr;
+    } else {
+        tempvar defender = starting_defend_army;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar pedersen_ptr = pedersen_ptr;
+        tempvar syscall_ptr = syscall_ptr;
+    }
+    tempvar defender = defender;
+
     // emit starting
     CombatStart_4.emit(
         attacking_army_id,
         attacking_realm_id,
-        starting_attack_army,
+        attacker,
         defending_army_id,
         defending_realm_id,
-        starting_defend_army,
+        defender,
     );
 
     // luck role and then outcome
     let (luck) = roll_dice();
     let (combat_outcome, ending_attacking_army, ending_defending_army) = Combat.calculate_winner(
-        luck, starting_attack_army, starting_defend_army
+        luck, attacker, defender
     );
 
     // pillaging only if attacker wins
     let (now) = get_block_timestamp();
     if (combat_outcome == CCombat.COMBAT_OUTCOME_ATTACKER_WINS) {
-        let (controller) = Module.controller_address();
-        let (resources_logic_address) = IModuleController.get_module_address(
-            controller, ModuleIds.Resources
-        );
-        let (relic_address) = IModuleController.get_module_address(
-            controller, ModuleIds.Relics
-        );
         let (caller) = get_caller_address();
-        IResources.pillage_resources(resources_logic_address, defending_realm_id, caller);
+
+        let (labor_address) = Module.get_module_address(ModuleIds.Labor);
+        let (relic_address) = Module.get_module_address(ModuleIds.Relics);
+
+        ILabor.pillage(labor_address, defending_realm_id, caller);
         IRelics.set_relic_holder(relic_address, attacking_realm_id, defending_realm_id);
 
         tempvar syscall_ptr = syscall_ptr;
@@ -361,13 +407,25 @@ func initiate_combat{
     set_army_data_and_emit(
         attacking_army_id,
         attacking_realm_id,
-        ArmyData(ending_attacking_army_packed, now, attacking_realm_data.XP + attacking_xp, attacking_realm_data.level, attacking_realm_data.call_sign),
+        ArmyData(
+            ending_attacking_army_packed,
+            now,
+            attacking_realm_data.XP + attacking_xp,
+            attacking_realm_data.level,
+            attacking_realm_data.call_sign,
+        ),
     );
 
     set_army_data_and_emit(
         defending_army_id,
         defending_realm_id,
-        ArmyData(ending_defending_army_packed, now, defending_realm_data.XP + defending_xp, defending_realm_data.level, defending_realm_data.call_sign),
+        ArmyData(
+            ending_defending_army_packed,
+            now,
+            defending_realm_data.XP + defending_xp,
+            defending_realm_data.level,
+            defending_realm_data.call_sign,
+        ),
     );
 
     // emit end
@@ -397,8 +455,6 @@ func update_army_in_realm{
 }(army_id: felt, army: Army, realm_id: Uint256) {
     alloc_locals;
 
-    Module.ERC721_owner_check(realm_id, ExternalContractIds.S_Realms);
-
     // pack army
     let (new_packed_army) = Combat.pack_army(army);
 
@@ -408,7 +464,13 @@ func update_army_in_realm{
     set_army_data_and_emit(
         army_id,
         realm_id,
-        ArmyData(new_packed_army, current_packed_army.last_attacked, current_packed_army.XP, current_packed_army.level, current_packed_army.call_sign),
+        ArmyData(
+            new_packed_army,
+            current_packed_army.last_attacked,
+            current_packed_army.XP,
+            current_packed_army.level,
+            current_packed_army.call_sign,
+        ),
     );
 
     return ();
@@ -488,6 +550,86 @@ func get_realm_army_combat_data{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, 
     return army_data_by_id.read(army_id, realm_id);
 }
 
+// @notice Get All Armies on a Realm
+@view
+func get_all_armies{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    realm_id: Uint256
+) -> (armies_len: felt, armies: felt*) {
+    alloc_locals;
+
+    // loop and get armies
+    let (armies: felt*) = alloc();
+    let (all_armies_len) = loop_all_armies(0, realm_id, 0, armies);
+
+    return (all_armies_len, armies);
+}
+
+// @notice Loop over all armies and return
+func loop_all_armies{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    army_id: felt, realm_id: Uint256, armies_len: felt, armies: felt*
+) -> (armies_len: felt) {
+    alloc_locals;
+
+    // loop armies starting from 0 (defensive army)
+    let (army_data: ArmyData) = get_realm_army_combat_data(army_id, realm_id);
+
+    // if army.packed == 0 then no Armies have been made!
+    if (army_data.packed == 0) {
+        return (armies_len=army_id);
+    }
+
+    assert [armies] = army_data.packed;
+
+    return loop_all_armies(army_id + 1, realm_id, armies_len + 1, armies + 1);
+}
+
+// @notice Get All Armies Ids on a Realm
+@view
+func get_all_army_ids{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    realm_id: Uint256
+) -> (army_ids_len: felt, army_ids: felt*) {
+    alloc_locals;
+
+    // loop and get armies
+    let (army_ids: felt*) = alloc();
+    let (all_armies_len) = get_all_army_ids_loop(0, realm_id, 0, army_ids);
+
+    return (all_armies_len, army_ids);
+}
+
+// @notice Loop over all armies and return
+func get_all_army_ids_loop{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    army_id: felt, realm_id: Uint256, army_ids_len: felt, army_ids: felt*
+) -> (armies_len: felt) {
+    alloc_locals;
+
+    // loop armies starting from 0 (defensive army)
+    let (army_data: ArmyData) = get_realm_army_combat_data(army_id, realm_id);
+
+    // if army.packed == 0 then no Armies have been made!
+    if (army_data.packed == 0) {
+        return (armies_len=army_id);
+    }
+
+    assert [army_ids] = army_id;
+
+    return get_all_army_ids_loop(army_id + 1, realm_id, army_ids_len + 1, army_ids + 1);
+}
+
+// @notice Get all Population of Armies
+@view
+func get_population_of_armies{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(realm_id: Uint256) -> (population: felt) {
+    // get all armies
+    let (armies_len, armies) = get_all_armies(realm_id);
+
+    // get population
+    let population = Combat.population_of_armies(armies_len, armies, 0);
+
+    return (population=population);
+}
+
 // @notice Check if Realm an be attacked
 @view
 func Realm_can_be_attacked{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
@@ -561,5 +703,74 @@ func set_xoroshiro{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
 ) {
     Proxy.assert_only_admin();
     xoroshiro_address.write(xoroshiro);
+    return ();
+}
+
+// -----------------------------------
+// Callbacks
+// -----------------------------------
+
+@external
+func combat_callback{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(realm_id: Uint256, ticks: felt) {
+    let (all_armies_len, army_ids) = get_all_army_ids(realm_id);
+
+    combat_callback_loop(realm_id, ticks, all_armies_len, army_ids);
+
+    return ();
+}
+
+@external
+func combat_callback_loop{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(realm_id: Uint256, ticks: felt, army_ids_len: felt, army_ids: felt*) {
+    alloc_locals;
+    if (army_ids_len == 0) {
+        return ();
+    }
+
+    let (current_packed_army: ArmyData) = get_realm_army_combat_data([army_ids], realm_id);
+
+    let (unpacked_army: Army) = Combat.unpack_army(current_packed_army.packed);
+
+    let (adjusted_army) = Combat.apply_hunger_penalty(unpacked_army, ticks);
+
+    let (new_packed_army) = Combat.pack_army(adjusted_army);
+
+    set_army_data_and_emit(
+        [army_ids],
+        realm_id,
+        ArmyData(
+            new_packed_army,
+            current_packed_army.last_attacked,
+            current_packed_army.XP,
+            current_packed_army.level,
+            current_packed_army.call_sign,
+        ),
+    );
+
+    BuildArmy.emit([army_ids], realm_id, adjusted_army, 0, cast(0, felt*), 0, cast(0, felt*));
+
+    return combat_callback_loop(realm_id, ticks, army_ids_len - 1, army_ids + 1);
+}
+
+// start armies
+@external
+func build_start_army{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(realm_id: Uint256) {
+    alloc_locals;
+
+    Module.only_approved();
+    tempvar battalion_ids = new (1, 3, 5, 7);
+    tempvar battalion_quantity = new (1, 1, 1, 1);
+
+    tempvar army_length = 4;
+
+    _build_army(realm_id, 1, army_length, battalion_ids, army_length, battalion_quantity);
+
+    _build_army(realm_id, 0, army_length, battalion_ids, army_length, battalion_quantity);
+
     return ();
 }

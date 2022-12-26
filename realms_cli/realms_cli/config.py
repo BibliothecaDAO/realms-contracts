@@ -86,7 +86,7 @@ class Config:
 
         self.ADMIN_ALIAS = "STARKNET_ADMIN_PRIVATE_KEY"
         self.ADMIN_ADDRESS, _ = safe_load_deployment(
-            "account-0", self.nile_network)
+            "account-1", self.nile_network)
 
         self.INITIAL_LORDS_SUPPLY = 500000000 * (10 ** 18)
 

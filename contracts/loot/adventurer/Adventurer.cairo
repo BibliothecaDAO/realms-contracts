@@ -50,7 +50,6 @@ from contracts.loot.beast.interface import IBeast
 from contracts.loot.loot.ILoot import ILoot
 from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
 
-
 const MINT_COST = 50000000000000000000;
 
 // -----------------------------------
@@ -80,6 +79,23 @@ func adventurer_dynamic(adventurer_token_id: Uint256) -> (adventurer: PackedAdve
 // balance of $LORDS
 @storage_var
 func adventurer_balance(adventurer_token_id: Uint256) -> (balance: Uint256) {
+}
+
+@storage_var
+func treasury_address() -> (address: felt) {
+}
+
+@storage_var
+func adventurer(tokenId: Uint256) -> (adventurer: PackedAdventurerState) {
+}
+
+// balance of $LORDS
+@storage_var
+func adventurer_balance(tokenId: Uint256) -> (balance: Uint256) {
+}
+
+@storage_var
+func adventurer_image(tokenId: Uint256) -> (image: felt) {
 }
 
 // -----------------------------------
@@ -129,13 +145,13 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 func mint{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(
-    to: felt, 
-    race: felt, 
-    home_realm: felt, 
-    name: felt, 
-    order: felt, 
-    image_hash_1: felt, 
-    image_hash_2: felt
+    to: felt,
+    race: felt,
+    home_realm: felt,
+    name: felt,
+    order: felt,
+    image_hash_1: felt,
+    image_hash_2: felt,
 ) {
     alloc_locals;
 
@@ -144,10 +160,7 @@ func mint{
 
     // birth
     let (birth_time) = get_block_timestamp();
-    let (
-        adventurer_static_, 
-        adventurer_dynamic_
-    ) = AdventurerLib.birth(
+    let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.birth(
         race, home_realm, name, birth_time, order, image_hash_1, image_hash_2
     );
 
@@ -324,9 +337,7 @@ func update_status{
 @external
 func assign_beast{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(
-    adventurer_token_id: Uint256, value: felt
-) -> (success: felt) {
+}(adventurer_token_id: Uint256, value: felt) -> (success: felt) {
     alloc_locals;
     Module.only_approved();
 
@@ -479,7 +490,9 @@ func explore{
         // create beast
         let (beast_address) = Module.get_module_address(ModuleIds.Beast);
         let (beast_id: Uint256) = IBeast.create(beast_address, token_id);
-        let (updated_adventurer) = AdventurerLib.assign_beast(beast_id.low, new_unpacked_adventurer);
+        let (updated_adventurer) = AdventurerLib.assign_beast(
+            beast_id.low, new_unpacked_adventurer
+        );
         let (packed_adventurer) = AdventurerLib.pack(updated_adventurer);
 
         adventurer_dynamic.write(token_id, packed_adventurer);
@@ -567,7 +580,6 @@ func get_adventurer_by_id{
     let (unpacked_adventurer: AdventurerDynamic) = AdventurerLib.unpack(packed_adventurer);
     let (adventurer) = AdventurerLib.aggregate_data(adventurer_static_, unpacked_adventurer);
 
-
     return (adventurer,);
 }
 
@@ -652,9 +664,9 @@ func isApprovedForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 }
 
 @view
-func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, bitwise_ptr: BitwiseBuiltin*, range_check_ptr}(
-    tokenId: Uint256
-) -> (tokenURI_len: felt, tokenURI: felt*) {
+func tokenURI{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, bitwise_ptr: BitwiseBuiltin*, range_check_ptr
+}(tokenId: Uint256) -> (tokenURI_len: felt, tokenURI: felt*) {
     alloc_locals;
     let (controller) = Module.controller_address();
     let (item_address) = Module.get_module_address(ModuleIds.Loot);
@@ -663,7 +675,9 @@ func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, bitwise_ptr: Bitwi
         controller, ExternalContractIds.Realms
     );
     let (adventurer_data) = get_adventurer_by_id(tokenId);
-    let (tokenURI_len, tokenURI: felt*) = AdventurerUri.build(tokenId, adventurer_data, item_address, beast_address, realms_address);
+    let (tokenURI_len, tokenURI: felt*) = AdventurerUri.build(
+        tokenId, adventurer_data, item_address, beast_address, realms_address
+    );
     return (tokenURI_len, tokenURI);
 }
 

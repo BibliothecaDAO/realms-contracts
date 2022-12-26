@@ -11,8 +11,8 @@
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.registers import get_label_location
-from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_lt
-from starkware.cairo.common.math_cmp import is_nn, is_le
+from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_lt, abs_value
+from starkware.cairo.common.math_cmp import is_nn, is_le, is_le_felt, is_not_zero
 from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
 from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.bool import TRUE, FALSE
@@ -164,9 +164,17 @@ namespace Combat {
     ) -> (defence: felt) {
         alloc_locals;
 
+        let no_battalions = is_le(attacking_total_battalions, 1);
+
+        if (no_battalions == TRUE) {
+            tempvar new_battalions = 1;
+        } else {
+            tempvar new_battalions = attacking_total_battalions;
+        }
+
         // get ratio of battlions to whole Army
         let (percentage_of_battalions, _) = unsigned_div_rem(
-            (attacking_unit_battalions * 1000), attacking_total_battalions
+            (attacking_unit_battalions * 1000), new_battalions
         );
 
         let (values, _) = unsigned_div_rem(defence * percentage_of_battalions, 1000);
@@ -275,10 +283,18 @@ namespace Combat {
 
         // update armies battlion health
         let (updated_attacking_army) = update_army(
-            attacking_army_statistics, defending_army_statistics, attacking_army, final_outcome
+            attacking_army_statistics,
+            defending_army_statistics,
+            attacking_army,
+            final_outcome,
+            TRUE,
         );
         let (updated_defending_army) = update_army(
-            defending_army_statistics, attacking_army_statistics, defending_army, final_outcome
+            defending_army_statistics,
+            attacking_army_statistics,
+            defending_army,
+            final_outcome,
+            FALSE,
         );
 
         return (successful, updated_attacking_army, updated_defending_army);
@@ -313,7 +329,9 @@ namespace Combat {
         alloc_locals;
 
         // get weight of attack over defence
-        let (attack_over_defence, _) = unsigned_div_rem(battalion_attack * 1000, counter_defence);
+        let (attack_over_defence, _) = unsigned_div_rem(
+            (battalion_attack + 1) * 1000, counter_defence + 1
+        );
 
         // get base health remaining - divided by 1000000 as values coming in a bp
         let (health_remaining, _) = unsigned_div_rem(
@@ -336,21 +354,101 @@ namespace Combat {
         }
 
         // if health 0 the battalion is dead. Return 0,0
-        let is_dead = is_le(actual_health_remaining, 0);
+        let is_dead = is_le(actual_health_remaining - 10, 0);
         if (is_dead == TRUE) {
             return (0, 0);
         }
 
-        // smallest amount of battalions is 1 - Battles reduce the Battalions.
-        let is_battalion_alive = is_le(actual_health_remaining, 100);
+        // adjust battalions to make health fixed figure per battalion
+        // eg: 400 / 100 = 4 battalions
         let (adjusted_battalions, _) = unsigned_div_rem(actual_health_remaining, 100);
+
+        // // if less than 1 battalion exists
+        let is_battalion_alive = is_le(actual_health_remaining, 100);
         if (is_battalion_alive == TRUE) {
-            tempvar battalions = 1;
-        } else {
-            tempvar battalions = adjusted_battalions;
+            return (actual_health_remaining, 1);
         }
 
-        return (actual_health_remaining, battalions);
+        let (health_per_battalion, remaining_health) = unsigned_div_rem(
+            actual_health_remaining, adjusted_battalions
+        );
+
+        // if only 1 battalion left - edge case
+        if (adjusted_battalions == 1) {
+            let (health_per_battalion, remaining_health) = unsigned_div_rem(
+                actual_health_remaining, adjusted_battalions + 1
+            );
+            return (health_per_battalion, adjusted_battalions + 1);
+        }
+
+        // if half battalions exist
+        let is_remaining_health = is_not_zero(remaining_health);
+        if (is_remaining_health == TRUE) {
+            let (health_per_battalion, remaining_health) = unsigned_div_rem(
+                actual_health_remaining, adjusted_battalions + 1
+            );
+            return (health_per_battalion, adjusted_battalions + 1);
+        }
+
+        return (health_per_battalion, adjusted_battalions);
+    }
+
+    // @notice calculates the health percentage loss of a battle. 450 is half the size of a fully maxxed Army
+    // @param outcome: battle outcome
+    // @return health_percentage: percentage loss
+
+    const FIXED_DIV = 450;
+    const FULL_HEALTH = 1000;
+
+    func calculate_health_loss_percentage{
+        syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+    }(outcome: felt, is_attacking: felt) -> (health_percentage: felt) {
+        alloc_locals;
+
+        if (is_attacking == TRUE) {
+            let less_than = is_le(outcome, 0);
+
+            if (less_than == TRUE) {
+                let absolute_outcome = abs_value(outcome);
+
+                let (i, _) = unsigned_div_rem((absolute_outcome) * 1000, FIXED_DIV);
+
+                // minus 1000 from abs outcome
+                let pre_calc = FULL_HEALTH - i;
+
+                // // check if greater than 1000
+                let check_killed = is_le(pre_calc, 0);
+
+                if (check_killed == TRUE) {
+                    return (health_percentage=100);
+                }
+
+                return (health_percentage=pre_calc);
+            }
+        } else {
+            let less_than = is_le(0, outcome);
+            // let less_than = is_le_felt(outcome, 2 ** 128);
+
+            if (less_than == TRUE) {
+                let absolute_outcome = abs_value(outcome);
+
+                let (i, _) = unsigned_div_rem((absolute_outcome) * 1000, FIXED_DIV);
+
+                // minus 1000 from abs outcome
+                let pre_calc = FULL_HEALTH - i;
+
+                // // check if greater than 1000
+                let check_killed = is_le(pre_calc, 0);
+
+                if (check_killed == TRUE) {
+                    return (health_percentage=100);
+                }
+
+                return (health_percentage=pre_calc);
+            }
+        }
+
+        return (health_percentage=FULL_HEALTH);
     }
 
     // @notice updates Army
@@ -363,11 +461,12 @@ namespace Combat {
         defending_army_statistics: ArmyStatistics,
         attack_army: Army,
         outcome: felt,
+        is_attacking: felt,
     ) -> (updated_army: Army) {
         alloc_locals;
 
         // get HP loss
-        let (hp_loss) = calculate_health_loss_percentage(outcome);
+        let (hp_loss) = calculate_health_loss_percentage(outcome, is_attacking);
 
         // get health for each battalion type
         let (light_cavalry_health, light_cavalry_battalions) = calculate_health_remaining(
@@ -439,24 +538,6 @@ namespace Combat {
         );
 
         return (updated_attacking_army,);
-    }
-
-    // @notice calculates the health percentage loss of a battle. 450 is half the size of a fully maxxed Army
-    // @param outcome: battle outcome
-    // @return health_percentage: percentage loss
-    func calculate_health_loss_percentage{
-        syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
-    }(outcome: felt) -> (health_percentage: felt) {
-        alloc_locals;
-
-        let less_than = is_le(outcome, 0);
-
-        if (less_than == TRUE) {
-            let (i, _) = unsigned_div_rem(((-outcome)) * 1000, 450);
-            return (health_percentage=1000 - i);
-        }
-
-        return (health_percentage=1000);
     }
 
     // @notice Returns battalion building
@@ -605,5 +686,148 @@ namespace Combat {
         dw BattalionStatistics.Attack.Arcanist;
         dw BattalionStatistics.Attack.LightInfantry;
         dw BattalionStatistics.Attack.HeavyInfantry;
+    }
+
+    func flatten_ids{range_check_ptr}(
+        battalion_ids_len: felt,
+        battalion_ids: felt*,
+        battalion_qty_len: felt,
+        battalion_qty: felt*,
+        all_ids: felt*,
+    ) {
+        alloc_locals;
+
+        if (battalion_ids_len == 0) {
+            return ();
+        }
+
+        flatten_recursive([battalion_qty], all_ids, [battalion_ids]);
+
+        return flatten_ids(
+            battalion_ids_len - 1,
+            battalion_ids + 1,
+            battalion_qty_len - 1,
+            battalion_qty + 1,
+            all_ids + [battalion_qty],
+        );
+    }
+
+    func flatten_recursive{range_check_ptr}(len_all_ids: felt, all_ids: felt*, id: felt) {
+        alloc_locals;
+
+        if (len_all_ids == 0) {
+            return ();
+        }
+
+        assert [all_ids] = id;
+
+        return flatten_recursive(len_all_ids - 1, all_ids + 1, id);
+    }
+
+    func id_length{range_check_ptr}(all_qtys_len: felt, all_qtys: felt*, id: felt) -> felt {
+        alloc_locals;
+
+        if (all_qtys_len == 0) {
+            return (id);
+        }
+
+        return id_length(all_qtys_len - 1, all_qtys + 1, id + [all_qtys]);
+    }
+
+    // @notice Gets a population of a single packed Army
+    // @param battalion_id: population
+    // @ returns attack value
+    func population_of_army{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr,
+        bitwise_ptr: BitwiseBuiltin*,
+    }(army_packed: felt) -> felt {
+        let (unpacked_army) = unpack_army(army_packed);
+
+        let light_cavalry = unpacked_army.light_cavalry.quantity;
+        let heavy_cavalry = unpacked_army.heavy_cavalry.quantity;
+        let archer = unpacked_army.archer.quantity;
+        let longbow = unpacked_army.longbow.quantity;
+
+        let mage = unpacked_army.mage.quantity;
+        let arcanist = unpacked_army.arcanist.quantity;
+        let light_infantry = unpacked_army.light_infantry.quantity;
+        let heavy_infantry = unpacked_army.heavy_infantry.quantity;
+
+        return (light_cavalry + heavy_cavalry + archer + longbow + mage + arcanist + light_infantry + heavy_infantry);
+    }
+
+    func population_of_armies{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr,
+        bitwise_ptr: BitwiseBuiltin*,
+    }(armies_packed_len: felt, armies_packed: felt*, total_population: felt) -> felt {
+        // return population after sum
+        if (armies_packed_len == 0) {
+            return (total_population);
+        }
+
+        // get single population
+        let population_single_army = population_of_army([armies_packed]);
+
+        return population_of_armies(
+            armies_packed_len - 1, armies_packed + 1, total_population + population_single_army
+        );
+    }
+
+    func apply_hunger_penalty{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        unpacked_army: Army, ticks: felt
+    ) -> (unpacked_army: Army) {
+        alloc_locals;
+
+        // get total damage BP
+        let total_damage_BP = 1000 - CCombat.ARMY_DESERTION_DAMAGE * ticks;
+
+        // check great than 1... else return dead army....
+        let has_totally_deserted = is_le(total_damage_BP, 0);
+
+        if (has_totally_deserted == TRUE) {
+            return (
+                Army(Battalion(0, 0), Battalion(0, 0), Battalion(0, 0), Battalion(0, 0), Battalion(0, 0), Battalion(0, 0), Battalion(0, 0), Battalion(0, 0)),
+            );
+        }
+
+        let light_cavalry_health = reduce_health(
+            unpacked_army.light_cavalry.health, total_damage_BP
+        );
+        let heavy_cavalry_health = reduce_health(
+            unpacked_army.heavy_cavalry.health, total_damage_BP
+        );
+        let archer_health = reduce_health(unpacked_army.archer.health, total_damage_BP);
+        let longbow_health = reduce_health(unpacked_army.longbow.health, total_damage_BP);
+
+        let mage_health = reduce_health(unpacked_army.mage.health, total_damage_BP);
+        let arcanist_health = reduce_health(unpacked_army.arcanist.health, total_damage_BP);
+        let light_infantry_health = reduce_health(
+            unpacked_army.light_infantry.health, total_damage_BP
+        );
+        let heavy_infantry_health = reduce_health(
+            unpacked_army.heavy_infantry.health, total_damage_BP
+        );
+
+        return (
+            Army(Battalion(unpacked_army.light_cavalry.quantity, light_cavalry_health), Battalion(unpacked_army.heavy_cavalry.quantity, heavy_cavalry_health), Battalion(unpacked_army.archer.quantity, archer_health), Battalion(unpacked_army.longbow.quantity, longbow_health), Battalion(unpacked_army.mage.quantity, mage_health), Battalion(unpacked_army.arcanist.quantity, arcanist_health), Battalion(unpacked_army.light_infantry.quantity, light_infantry_health), Battalion(unpacked_army.heavy_infantry.quantity, heavy_infantry_health)),
+        );
+    }
+
+    func reduce_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        battalion_health: felt, total_damage_BP: felt
+    ) -> felt {
+        let battalion_has_no_health = is_le(battalion_health, 0);
+
+        if (battalion_has_no_health == TRUE) {
+            return (0);
+        }
+
+        let (values, _) = unsigned_div_rem(battalion_health * total_damage_BP, 1000);
+
+        return (values);
     }
 }

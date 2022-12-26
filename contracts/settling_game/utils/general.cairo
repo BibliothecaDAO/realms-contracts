@@ -187,7 +187,9 @@ func convert_cost_dict_to_tokens_and_values{range_check_ptr}(
         assert_le(current_entry.new_value, MAX_UINT_PART);
     }
     assert [token_ids] = Uint256(low=current_entry.key, high=0);
-    assert [token_values] = Uint256(low=current_entry.new_value * 10 ** 18 * value_multiplier, high=0);
+    assert [token_values] = Uint256(
+        low=current_entry.new_value * 10 ** 16 * value_multiplier, high=0
+    );
 
     return convert_cost_dict_to_tokens_and_values(
         len - 1,

@@ -56,12 +56,6 @@ namespace IModuleController {
     func set_xoroshiro(xoroshiro: felt) {
     }
 
-    func set_initial_module_addresses(
-        module_01_addr: felt,
-        module_02_addr: felt,
-        module_03_addr: felt,
-        module_04_addr: felt,
-        module_06_addr: felt,
-    ) {
+    func __callback__(token_id: Uint256) {
     }
 }

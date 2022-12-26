@@ -11,6 +11,7 @@ from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.math import unsigned_div_rem, assert_nn
+from starkware.cairo.common.bool import TRUE, FALSE
 
 from contracts.settling_game.utils.game_structs import RealmData
 from contracts.settling_game.utils.constants import (
@@ -238,5 +239,37 @@ namespace Resources {
         let (time_over, _) = unsigned_div_rem(total_time * CCombat.PILLAGE_AMOUNT, 100);
 
         return (time_over,);
+    }
+
+    func assert_resources_exist{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        realms_data: RealmData, resource_id: Uint256
+    ) {
+        alloc_locals;
+
+        let (resources) = _calculate_realm_resource_ids(realms_data);
+
+        let (exists) = check_resources_exist_loop(
+            realms_data.resource_number, resources, resource_id
+        );
+
+        assert exists = TRUE;
+
+        return ();
+    }
+
+    func check_resources_exist_loop{
+        syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+    }(len: felt, resources: Uint256*, resource_id: Uint256) -> (exists: felt) {
+        alloc_locals;
+
+        if ([resources].low == resource_id.low) {
+            return (TRUE,);
+        }
+
+        if (len == 0) {
+            return (FALSE,);
+        }
+
+        return check_resources_exist_loop(len - 1, resources + Uint256.SIZE, resource_id);
     }
 }
