@@ -12,16 +12,14 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.registers import get_label_location
 
-from contracts.loot.constants.beast import (
-    BeastAttackType,
-    BeastArmorType,
-    BeastRank
-)
+from contracts.loot.constants.beast import BeastAttackType, BeastArmorType, BeastRank
 from contracts.loot.constants.rankings import ItemRank
 from contracts.loot.constants.physics import MaterialDensity
 
 namespace BeastStats {
-    func get_attack_type_from_id{syscall_ptr: felt*, range_check_ptr}(beast_id: felt) -> (type: felt) {
+    func get_attack_type_from_id{syscall_ptr: felt*, range_check_ptr}(beast_id: felt) -> (
+        type: felt
+    ) {
         alloc_locals;
 
         let (label_location) = get_label_location(labels);
@@ -48,7 +46,9 @@ namespace BeastStats {
         dw BeastAttackType.Rat;
     }
 
-    func get_armor_type_from_id{syscall_ptr: felt*, range_check_ptr}(beast_id: felt) -> (type: felt) {
+    func get_armor_type_from_id{syscall_ptr: felt*, range_check_ptr}(beast_id: felt) -> (
+        type: felt
+    ) {
         alloc_locals;
 
         let (label_location) = get_label_location(labels);

@@ -72,9 +72,9 @@ namespace Combat {
     // @return vitality: Vitality of the squad
     func compute_squad_vitality(s: Squad) -> (vitality: felt) {
         let vitality = s.t1_1.vitality + s.t1_2.vitality + s.t1_3.vitality + s.t1_4.vitality +
-            s.t1_5.vitality + s.t1_6.vitality + s.t1_7.vitality + s.t1_8.vitality + s.t1_9.vitality +
-            s.t2_1.vitality + s.t2_2.vitality + s.t2_3.vitality + s.t2_4.vitality + s.t2_5.vitality +
-            s.t3_1.vitality;
+            s.t1_5.vitality + s.t1_6.vitality + s.t1_7.vitality + s.t1_8.vitality +
+            s.t1_9.vitality + s.t2_1.vitality + s.t2_2.vitality + s.t2_3.vitality +
+            s.t2_4.vitality + s.t2_5.vitality + s.t3_1.vitality;
         return (vitality,);
     }
 
@@ -117,7 +117,8 @@ namespace Combat {
             (pt2_3 * (SHIFT ** 22)) +
             (pt2_4 * (SHIFT ** 24)) +
             (pt2_5 * (SHIFT ** 26)) +
-            (pt3_1 * (SHIFT ** 28)));
+            (pt3_1 * (SHIFT ** 28))
+        );
 
         return (packed,);
     }
@@ -148,9 +149,23 @@ namespace Combat {
         let (t3_1) = unpack_troop([p_out + 14]);
 
         return (
-            Squad(t1_1=t1_1, t1_2=t1_2, t1_3=t1_3, t1_4=t1_4, t1_5=t1_5,
-            t1_6=t1_6, t1_7=t1_7, t1_8=t1_8, t1_9=t1_9, t2_1=t2_1, t2_2=t2_2,
-            t2_3=t2_3, t2_4=t2_4, t2_5=t2_5, t3_1=t3_1),
+            Squad(
+                t1_1=t1_1,
+                t1_2=t1_2,
+                t1_3=t1_3,
+                t1_4=t1_4,
+                t1_5=t1_5,
+                t1_6=t1_6,
+                t1_7=t1_7,
+                t1_8=t1_8,
+                t1_9=t1_9,
+                t2_1=t2_1,
+                t2_2=t2_2,
+                t2_3=t2_3,
+                t2_4=t2_4,
+                t2_5=t2_5,
+                t3_1=t3_1,
+            ),
         );
     }
 
@@ -173,7 +188,17 @@ namespace Combat {
         let (vitality, troop_id) = unsigned_div_rem(packed, SHIFT);
         if (troop_id == 0) {
             return (
-                Troop(id=0, type=0, tier=0, building=0, agility=0, attack=0, armor=0, vitality=0, wisdom=0),
+                Troop(
+                    id=0,
+                    type=0,
+                    tier=0,
+                    building=0,
+                    agility=0,
+                    attack=0,
+                    armor=0,
+                    vitality=0,
+                    wisdom=0,
+                ),
             );
         }
         let (type, tier, building, agility, attack, armor, _, wisdom) = get_troop_properties(
@@ -181,8 +206,17 @@ namespace Combat {
         );
 
         return (
-            Troop(id=troop_id, type=type, tier=tier, building=building,
-            agility=agility, attack=attack, armor=armor, vitality=vitality, wisdom=wisdom),
+            Troop(
+                id=troop_id,
+                type=type,
+                tier=tier,
+                building=building,
+                agility=agility,
+                attack=attack,
+                armor=armor,
+                vitality=vitality,
+                wisdom=wisdom,
+            ),
         );
     }
 
@@ -355,8 +389,17 @@ namespace Combat {
             troop_id
         );
         return (
-            Troop(id=troop_id, type=type, tier=tier, building=building,
-            agility=agility, attack=attack, armor=armor, vitality=vitality, wisdom=wisdom),
+            Troop(
+                id=troop_id,
+                type=type,
+                tier=tier,
+                building=building,
+                agility=agility,
+                attack=attack,
+                armor=armor,
+                vitality=vitality,
+                wisdom=wisdom,
+            ),
         );
     }
 
@@ -522,7 +565,9 @@ namespace Combat {
         hit_points: felt
     ) {
         alloc_locals;
-        let h = ((a.agility - d.agility) + a.attack * (dice_roll - d.armor) - (d.wisdom - a.wisdom));
+        let h = (
+            (a.agility - d.agility) + a.attack * (dice_roll - d.armor) - (d.wisdom - a.wisdom)
+        );
         let is_valid = is_nn(h);
 
         if (is_valid == TRUE) {
@@ -710,9 +755,23 @@ namespace Combat {
         let (t3_1) = troop_copy_with_vitality(s.t3_1, v);
 
         return (
-            Squad(t1_1=t1_1, t1_2=t1_2, t1_3=t1_3, t1_4=t1_4, t1_5=t1_5,
-            t1_6=t1_6, t1_7=t1_7, t1_8=t1_8, t1_9=t1_9, t2_1=t2_1, t2_2=t2_2,
-            t2_3=t2_3, t2_4=t2_4, t2_5=t2_5, t3_1=t3_1),
+            Squad(
+                t1_1=t1_1,
+                t1_2=t1_2,
+                t1_3=t1_3,
+                t1_4=t1_4,
+                t1_5=t1_5,
+                t1_6=t1_6,
+                t1_7=t1_7,
+                t1_8=t1_8,
+                t1_9=t1_9,
+                t2_1=t2_1,
+                t2_2=t2_2,
+                t2_3=t2_3,
+                t2_4=t2_4,
+                t2_5=t2_5,
+                t3_1=t3_1,
+            ),
         );
     }
 
@@ -720,29 +779,29 @@ namespace Combat {
         if (v == 0) {
             return (
                 Troop(
-                id=0,
-                type=0,
-                tier=0,
-                building=0,
-                agility=0,
-                attack=0,
-                armor=0,
-                vitality=0,
-                wisdom=0,
+                    id=0,
+                    type=0,
+                    tier=0,
+                    building=0,
+                    agility=0,
+                    attack=0,
+                    armor=0,
+                    vitality=0,
+                    wisdom=0,
                 ),
             );
         } else {
             return (
                 Troop(
-                id=t.id,
-                type=t.type,
-                tier=t.tier,
-                building=t.building,
-                agility=t.agility,
-                attack=t.attack,
-                armor=t.armor,
-                vitality=v,
-                wisdom=t.wisdom,
+                    id=t.id,
+                    type=t.type,
+                    tier=t.tier,
+                    building=t.building,
+                    agility=t.agility,
+                    attack=t.attack,
+                    armor=t.armor,
+                    vitality=v,
+                    wisdom=t.wisdom,
                 ),
             );
         }

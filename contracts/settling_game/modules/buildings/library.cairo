@@ -116,7 +116,8 @@ namespace Buildings {
         let ArcherTower = current_buildings.ArcherTower * RealmBuildingsSize.ArcherTower;
         let Castle = current_buildings.Castle * RealmBuildingsSize.Castle;
 
-        let size = House + StoreHouse + Granary + Farm + FishingVillage + Barracks + MageTower + ArcherTower + Castle;
+        let size = House + StoreHouse + Granary + Farm + FishingVillage + Barracks + MageTower +
+            ArcherTower + Castle;
 
         return (size,);
     }
@@ -309,15 +310,15 @@ namespace Buildings {
 
         return (
             unpacked_buildings=RealmBuildings(
-            House=House,
-            StoreHouse=StoreHouse,
-            Granary=Granary,
-            Farm=Farm,
-            FishingVillage=FishingVillage,
-            Barracks=Barracks,
-            MageTower=MageTower,
-            ArcherTower=ArcherTower,
-            Castle=Castle,
+                House=House,
+                StoreHouse=StoreHouse,
+                Granary=Granary,
+                Farm=Farm,
+                FishingVillage=FishingVillage,
+                Barracks=Barracks,
+                MageTower=MageTower,
+                ArcherTower=ArcherTower,
+                Castle=Castle,
             ),
         );
     }
@@ -350,7 +351,9 @@ namespace Buildings {
         tempvar military_value = Castle + ArcherTower + MageTower + Barracks;
 
         return (
-            PackedBuildings(military=military_value, economic=economic_value, housing=housing_value),
+            PackedBuildings(
+                military=military_value, economic=economic_value, housing=housing_value
+            ),
         );
     }
 
@@ -495,15 +498,15 @@ namespace Buildings {
 
         return (
             adjusted_buildings=RealmBuildings(
-            House=buildings[0],
-            StoreHouse=buildings[1],
-            Granary=buildings[2],
-            Farm=buildings[3],
-            FishingVillage=buildings[4],
-            Barracks=buildings[5],
-            MageTower=buildings[6],
-            ArcherTower=buildings[7],
-            Castle=buildings[8],
+                House=buildings[0],
+                StoreHouse=buildings[1],
+                Granary=buildings[2],
+                Farm=buildings[3],
+                FishingVillage=buildings[4],
+                Barracks=buildings[5],
+                MageTower=buildings[6],
+                ArcherTower=buildings[7],
+                Castle=buildings[8],
             ),
         );
     }

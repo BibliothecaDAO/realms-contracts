@@ -91,35 +91,35 @@ namespace AdventurerLib {
 
         return (
             AdventurerStatic(
-            Race=Race,
-            HomeRealm=HomeRealm,
-            Birthdate=Birthdate,
-            Name=Name,
-            Order=Order,
-            ImageHash1=ImageHash1,
-            ImageHash2=ImageHash2,
+                Race=Race,
+                HomeRealm=HomeRealm,
+                Birthdate=Birthdate,
+                Name=Name,
+                Order=Order,
+                ImageHash1=ImageHash1,
+                ImageHash2=ImageHash2,
             ),
             AdventurerDynamic(
-            Health=Health,
-            Level=Level,
-            Strength=Strength,
-            Dexterity=Dexterity,
-            Vitality=Vitality,
-            Intelligence=Intelligence,
-            Wisdom=Wisdom,
-            Charisma=Charisma,
-            Luck=Luck,
-            XP=XP,
-            WeaponId=WeaponId,
-            ChestId=ChestId,
-            HeadId=HeadId,
-            WaistId=WaistId,
-            FeetId=FeetId,
-            HandsId=HandsId,
-            NeckId=NeckId,
-            RingId=RingId,
-            Status=Status,
-            Beast=Beast
+                Health=Health,
+                Level=Level,
+                Strength=Strength,
+                Dexterity=Dexterity,
+                Vitality=Vitality,
+                Intelligence=Intelligence,
+                Wisdom=Wisdom,
+                Charisma=Charisma,
+                Luck=Luck,
+                XP=XP,
+                WeaponId=WeaponId,
+                ChestId=ChestId,
+                HeadId=HeadId,
+                WaistId=WaistId,
+                FeetId=FeetId,
+                HandsId=HandsId,
+                NeckId=NeckId,
+                RingId=RingId,
+                Status=Status,
+                Beast=Beast,
             ),
         );
     }
@@ -239,7 +239,8 @@ namespace AdventurerLib {
 
         // packing
         // let p1 = XP + Luck + Charisma + Wisdom + Intelligence + Vitality + Dexterity + Strength + Level + Health;
-        let p1 = Health + Level + Strength + Dexterity + Vitality + Intelligence + Wisdom + Charisma + Luck + XP;
+        let p1 = Health + Level + Strength + Dexterity + Vitality + Intelligence + Wisdom +
+            Charisma + Luck + XP;
         // let p2 = Waist + Head + Chest + Weapon;
         let p2 = Weapon + Chest + Head + Waist;
         // let p3 = Ring + Neck + Hands + Feet;
@@ -297,26 +298,26 @@ namespace AdventurerLib {
 
         return (
             AdventurerDynamic(
-            Health=Health,
-            Level=Level,
-            Strength=Strength,
-            Dexterity=Dexterity,
-            Vitality=Vitality,
-            Intelligence=Intelligence,
-            Wisdom=Wisdom,
-            Charisma=Charisma,
-            Luck=Luck,
-            XP=XP,
-            WeaponId=WeaponId,
-            ChestId=ChestId,
-            HeadId=HeadId,
-            WaistId=WaistId,
-            FeetId=FeetId,
-            HandsId=HandsId,
-            NeckId=NeckId,
-            RingId=RingId,
-            Status=Status,
-            Beast=Beast
+                Health=Health,
+                Level=Level,
+                Strength=Strength,
+                Dexterity=Dexterity,
+                Vitality=Vitality,
+                Intelligence=Intelligence,
+                Wisdom=Wisdom,
+                Charisma=Charisma,
+                Luck=Luck,
+                XP=XP,
+                WeaponId=WeaponId,
+                ChestId=ChestId,
+                HeadId=HeadId,
+                WaistId=WaistId,
+                FeetId=FeetId,
+                HandsId=HandsId,
+                NeckId=NeckId,
+                RingId=RingId,
+                Status=Status,
+                Beast=Beast,
             ),
         );
     }

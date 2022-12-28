@@ -374,18 +374,8 @@ namespace ItemStats {
         let isle51 = is_le(5100, material_id);
         let isle52 = is_le(5200, material_id);
 
-        let idx = label_id +
-            isle10 * 1 +
-            isle20 * 10 +
-            isle30 * 7 +
-            isle31 * 1 +
-            isle32 * 12 +
-            isle33 * 12 +
-            isle34 * 12 +
-            isle40 * 12 +
-            isle50 * 2 +
-            isle51 * 1 +
-            isle52 * 10;
+        let idx = label_id + isle10 * 1 + isle20 * 10 + isle30 * 7 + isle31 * 1 + isle32 * 12 +
+            isle33 * 12 + isle34 * 12 + isle40 * 12 + isle50 * 2 + isle51 * 1 + isle52 * 10;
 
         let (label_location) = get_label_location(labels);
         return ([label_location + idx],);

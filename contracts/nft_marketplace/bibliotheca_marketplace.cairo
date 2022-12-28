@@ -146,7 +146,8 @@ func open_trade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
     write_trade(
         trade_count,
         Trade(
-        _token_contract, _token_id, _expiration, _price, caller, TradeStatus.Open, trade_count),
+            _token_contract, _token_id, _expiration, _price, caller, TradeStatus.Open, trade_count
+        ),
     );
 
     // increment
@@ -185,13 +186,14 @@ func execute_trade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
     write_trade(
         _trade,
         Trade(
-        trade.token_contract,
-        trade.token_id,
-        trade.expiration,
-        trade.price,
-        trade.poster,
-        TradeStatus.Executed,
-        _trade),
+            trade.token_contract,
+            trade.token_id,
+            trade.expiration,
+            trade.price,
+            trade.poster,
+            TradeStatus.Executed,
+            _trade,
+        ),
     );
 
     return ();
@@ -212,7 +214,15 @@ func update_price{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
 
     write_trade(
         _trade,
-        Trade(trade.token_contract, trade.token_id, trade.expiration, _price, trade.poster, trade.status, _trade),
+        Trade(
+            trade.token_contract,
+            trade.token_id,
+            trade.expiration,
+            _price,
+            trade.poster,
+            trade.status,
+            _trade,
+        ),
     );
     return ();
 }
@@ -231,13 +241,14 @@ func cancel_trade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
     write_trade(
         _trade,
         Trade(
-        trade.token_contract,
-        trade.token_id,
-        trade.expiration,
-        trade.price,
-        trade.poster,
-        TradeStatus.Cancelled,
-        _trade),
+            trade.token_contract,
+            trade.token_id,
+            trade.expiration,
+            trade.price,
+            trade.poster,
+            TradeStatus.Cancelled,
+            _trade,
+        ),
     );
 
     return ();

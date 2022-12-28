@@ -52,7 +52,7 @@ struct Adventurer {
 
     // TODO: Update adventurer pack/unpack to include this new attribute
     Status: felt,  // {Idle, Battling, Traveling, Questing, Dead}
-    Beast: felt, // tokenId of the beast the adventurer is battling
+    Beast: felt,  // tokenId of the beast the adventurer is battling
 
     // TODO: Consider storing adventurer location information
 }
@@ -184,7 +184,6 @@ namespace SHIFT_P_4 {
     const _1 = 2 ** 0;
     const _2 = 2 ** 3;
 }
-
 
 namespace AdventurerSlotIds {
     // evolving stats

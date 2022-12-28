@@ -19,10 +19,10 @@ struct Beast {
     Prefix_1: felt,  // First part of the name prefix (i.e Tear)
     Prefix_2: felt,  // Second part of the name prefix (i.e Bearer)
     Health: felt,  // health of the beast
-    Adventurer: felt, // The token id of the adventurer the beast is battling
+    Adventurer: felt,  // The token id of the adventurer the beast is battling
     XP: felt,  // the xp of the beast
-    Level: felt, // the level of the beast
-    SlainOnDate: felt, // unix timestamp when the beast was slain
+    Level: felt,  // the level of the beast
+    SlainOnDate: felt,  // unix timestamp when the beast was slain
 }
 
 // Structure for the adventurer Beast primitive
@@ -34,18 +34,18 @@ struct BeastStatic {
 
 struct BeastDynamic {
     Health: felt,  // health of the beast
-    Adventurer: felt, // The token id of the adventurer the beast is battling
+    Adventurer: felt,  // The token id of the adventurer the beast is battling
     XP: felt,  // the xp of the beast
-    Level: felt, // the level of the beast
-    SlainOnDate: felt, // unix timestamp when the beast was slain
+    Level: felt,  // the level of the beast
+    SlainOnDate: felt,  // unix timestamp when the beast was slain
 }
 
 namespace SHIFT_P {
-    const _1 = 2 ** 0; // Health
-    const _2 = 2 ** 10; // Adventurer Token Id
-    const _3 = 2 ** 51; // XP
-    const _4 = 2 ** 78; // Level
-    const _5 = 2 ** 88; // Slain On Date
+    const _1 = 2 ** 0;  // Health
+    const _2 = 2 ** 10;  // Adventurer Token Id
+    const _3 = 2 ** 51;  // XP
+    const _4 = 2 ** 78;  // Level
+    const _5 = 2 ** 88;  // Slain On Date
 }
 
 namespace BeastIds {

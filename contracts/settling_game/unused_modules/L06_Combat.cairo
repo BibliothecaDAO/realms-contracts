@@ -296,9 +296,7 @@ func initiate_combat{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuil
         let (resources_logic_address) = IModuleController.get_module_address(
             controller, ModuleIds.Resources
         );
-        let (relic_address) = IModuleController.get_module_address(
-            controller, ModuleIds.Relics
-        );
+        let (relic_address) = IModuleController.get_module_address(controller, ModuleIds.Relics);
         let (caller) = get_caller_address();
         IResources.pillage_resources(resources_logic_address, defending_realm_id, caller);
         IRelics.set_relic_holder(relic_address, attacking_realm_id, defending_realm_id);

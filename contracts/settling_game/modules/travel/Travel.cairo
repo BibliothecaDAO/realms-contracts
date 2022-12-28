@@ -174,7 +174,9 @@ func travel{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         traveller_contract_id,
         traveller_token_id,
         traveller_nested_id,
-        TravelInformation(destination_contract_id, destination_token_id, destination_nested_id, time),
+        TravelInformation(
+            destination_contract_id, destination_token_id, destination_nested_id, time
+        ),
     );
 
     // emit event

@@ -9,10 +9,10 @@ from contracts.loot.constants.item import Item
 from contracts.loot.loot.stats.item import ItemStats
 from contracts.settling_game.utils.general import unpack_data
 
-
 namespace ItemLib {
-    func update_adventurer{syscall_ptr: felt*, range_check_ptr}(item: Item, adventurerId: felt) -> Item {
-
+    func update_adventurer{syscall_ptr: felt*, range_check_ptr}(
+        item: Item, adventurerId: felt
+    ) -> Item {
         let updated_item = Item(
             Id=item.Id,
             Slot=item.Slot,
@@ -33,7 +33,6 @@ namespace ItemLib {
     }
 
     func update_xp{syscall_ptr: felt*, range_check_ptr}(item: Item, xp: felt) -> Item {
-
         let updated_item = Item(
             Id=item.Id,
             Slot=item.Slot,
@@ -54,7 +53,6 @@ namespace ItemLib {
     }
 
     func generate_random_item{syscall_ptr: felt*, range_check_ptr}(rnd: felt) -> (item: Item) {
-
         let (_, r) = unsigned_div_rem(rnd, 101);
 
         // set blank item
@@ -69,8 +67,8 @@ namespace ItemLib {
         let Greatness = 0;  // greatness blank, random?
         let (CreatedBlock) = get_block_timestamp();  // timestamp
         let XP = 0;  // xp blank
-        let Adventurer = 0; // adventurer blank
-        let Bag = 0; // bag blank
+        let Adventurer = 0;  // adventurer blank
+        let Bag = 0;  // bag blank
 
         return (
             Item(
@@ -86,7 +84,7 @@ namespace ItemLib {
                 CreatedBlock=CreatedBlock,
                 XP=XP,
                 Adventurer=Adventurer,
-                Bag=Bag
+                Bag=Bag,
             ),
         );
     }
@@ -142,7 +140,7 @@ namespace ItemLib {
                 CreatedBlock=CreatedBlock,
                 XP=XP,
                 Adventurer=Adventurer,
-                Bag=Bag
+                Bag=Bag,
             ),
         );
     }
