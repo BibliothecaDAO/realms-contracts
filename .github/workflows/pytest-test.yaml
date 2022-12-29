@@ -1,0 +1,33 @@
+name: pytest-test
+on: [push]
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Set Cairo Path
+        run: echo "CAIRO_PATH=${GITHUB_WORKSPACE}/lib/cairo_contracts/src" >> $GITHUB_ENV
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: create and activate venv
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+      - name: upgrade pip
+        run: pip install --upgrade pip
+      - name: install requirements
+        run: pip install -r requirements.txt
+      - name: check python setup
+        uses: ./.github/workflows/check-python-setup
+      - name: check nile version
+        run: nile version
+
+      - name: compile
+        run: scripts/compile
+      - name: test
+        run: pytest -n auto -W ignore::DeprecationWarning ./tests
+        if: success() || failure()  # Run whether or not compile failed
