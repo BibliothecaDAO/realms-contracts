@@ -1,3 +1,6 @@
+# Vim swp files
+*.swp
+
 .DS_Store
 .temp/
 OwnerAccount.json
