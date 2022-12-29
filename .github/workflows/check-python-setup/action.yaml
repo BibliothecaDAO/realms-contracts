@@ -1,0 +1,13 @@
+name: check-python-setup
+runs:
+  using: composite
+  steps:
+    - name: check python version
+      run: python --version
+      shell: bash
+    - name: check pip version
+      run: pip --version
+      shell: bash
+    - name: check python packages
+      run: pip freeze
+      shell: bash
