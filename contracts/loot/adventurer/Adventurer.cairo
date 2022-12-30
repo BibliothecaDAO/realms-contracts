@@ -76,11 +76,6 @@ func adventurer_static(adventurer_token_id: Uint256) -> (adventurer: AdventurerS
 func adventurer_dynamic(adventurer_token_id: Uint256) -> (adventurer: PackedAdventurerState) {
 }
 
-// balance of $LORDS
-@storage_var
-func adventurer_balance(adventurer_token_id: Uint256) -> (balance: Uint256) {
-}
-
 @storage_var
 func treasury_address() -> (address: felt) {
 }
