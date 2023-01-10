@@ -140,26 +140,31 @@ func travel{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         traveller_contract_id, traveller_token_id, traveller_nested_id
     );
 
+    // get destination coordinates
+    let (destination_coordinates: Point) = get_coordinates(
+        destination_contract_id, destination_token_id, destination_nested_id
+    );
+
     // if no current location set, use the home coordinates
     if (traveller_coordinates.x == 0) {
+        coordinates.write(
+            traveller_contract_id, traveller_token_id, traveller_nested_id, destination_coordinates
+        );
         let (traveller_coordinates: Point) = get_coordinates(
             traveller_contract_id, traveller_token_id, 0
         );
+        tempvar traveller_coordinates = traveller_coordinates;
         tempvar syscall_ptr = syscall_ptr;
         tempvar range_check_ptr = range_check_ptr;
         tempvar pedersen_ptr = pedersen_ptr;
     } else {
+        tempvar traveller_coordinates = traveller_coordinates;
         tempvar syscall_ptr = syscall_ptr;
         tempvar range_check_ptr = range_check_ptr;
         tempvar pedersen_ptr = pedersen_ptr;
     }
 
     tempvar traveller_coordinates = traveller_coordinates;
-
-    // get destination coordinates
-    let (destination_coordinates: Point) = get_coordinates(
-        destination_contract_id, destination_token_id, destination_nested_id
-    );
 
     // get current information
     let (traveller_current_information: TravelInformation) = get_travel_information(
@@ -174,7 +179,9 @@ func travel{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         traveller_contract_id,
         traveller_token_id,
         traveller_nested_id,
-        TravelInformation(destination_contract_id, destination_token_id, destination_nested_id, time),
+        TravelInformation(
+            destination_contract_id, destination_token_id, destination_nested_id, time
+        ),
     );
 
     // emit event

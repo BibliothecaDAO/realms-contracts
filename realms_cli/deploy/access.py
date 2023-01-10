@@ -34,7 +34,9 @@ async def run(nre):
     config = Config(nre.network)
 
     write_list = [
-        [ModuleId.Labor.value, ModuleId.Resources_Token.value]
+        [ModuleId.Combat.value, ModuleId.Labor.value],
+        [ModuleId.Combat.value, ModuleId.Relics.value],
+        [ModuleId.Labor.value, ModuleId.Relics.value]
     ]
 
     await wrapped_send(
