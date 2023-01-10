@@ -157,7 +157,7 @@ func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
     let (item_data) = getItemByTokenId(tokenId);
     let (tokenURI_len, tokenURI: felt*) = LootUri.build(tokenId, item_data, adventurer_address);
-    return (tokenURI_len, tokenURI,);
+    return (tokenURI_len, tokenURI);
 }
 
 @view
@@ -288,12 +288,7 @@ func updateXP{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 // @param item_: Data of loot item
 @external
 func setItemById{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    tokenId: Uint256, 
-    item_id: felt, 
-    greatness: felt, 
-    xp: felt, 
-    adventurer: felt, 
-    bag_id: felt
+    tokenId: Uint256, item_id: felt, greatness: felt, xp: felt, adventurer: felt, bag_id: felt
 ) {
     alloc_locals;
     Ownable.assert_only_owner();

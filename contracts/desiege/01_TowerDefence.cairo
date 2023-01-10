@@ -96,14 +96,14 @@ func constructor{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 @view
 func get_game_context_variables{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     ) -> (
-    game_idx: felt,
-    bpm: felt,
-    hpg: felt,
-    curr_block: felt,
-    game_start: felt,
-    main_health: felt,
-    curr_boost: felt,
-) {
+        game_idx: felt,
+        bpm: felt,
+        hpg: felt,
+        curr_block: felt,
+        game_start: felt,
+        main_health: felt,
+        curr_boost: felt,
+    ) {
     alloc_locals;
     let (controller) = controller_address.read();
 

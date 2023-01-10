@@ -400,10 +400,14 @@ func increase_xp{
     let (updated_xp_beast) = BeastLib.increase_xp(amount, beast_dynamic_);
 
     // check if beast has reached the next level
-    let (leveled_up) = CombatStats.check_for_level_increase(updated_xp_beast.XP, updated_xp_beast.Level);
+    let (leveled_up) = CombatStats.check_for_level_increase(
+        updated_xp_beast.XP, updated_xp_beast.Level
+    );
     // if so
     if (leveled_up == TRUE) {
-        let (updated_level_beast) = BeastLib.update_level(updated_xp_beast.Level + 1, updated_xp_beast);
+        let (updated_level_beast) = BeastLib.update_level(
+            updated_xp_beast.Level + 1, updated_xp_beast
+        );
         // pack beast for storage
         let (packed_beast) = BeastLib.pack(updated_level_beast);
         // write beast to chain

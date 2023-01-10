@@ -192,13 +192,7 @@ namespace Food {
         let (collections_left) = unpack_data(packed_food_buildings, 41, 2199023255551);
         let (update_time) = unpack_data(packed_food_buildings, 82, 2199023255551);
 
-        return (
-            unpacked_food_buildings=FoodBuildings(
-            number_built,
-            collections_left,
-            update_time
-            ),
-        );
+        return (unpacked_food_buildings=FoodBuildings(number_built, collections_left, update_time));
     }
 
     // @notice Computes value of store houses. Store houses take up variable space on the Realm according to STORE_HOUSE_SIZE
@@ -254,9 +248,6 @@ namespace Food {
         let (time_built) = unpack_data(packed_store_house, 0, 2199023255551);
         let (total_food_stored) = unpack_data(packed_store_house, 41, 2199023255551);
 
-        return (store_house_unpacked=StoreHouse(
-            time_built,
-            total_food_stored,
-            ));
+        return (store_house_unpacked=StoreHouse(time_built, total_food_stored));
     }
 }

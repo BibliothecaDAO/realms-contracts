@@ -1,0 +1,19 @@
+name: protostar-test
+on: [push]
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Set Cairo Path
+        run: echo "CAIRO_PATH=${GITHUB_WORKSPACE}/lib/cairo_contracts/src" >> $GITHUB_ENV
+      - name: Install Protostar
+        uses: sambarnes/protostar-toolchain@main
+      - name: Run protostar tests
+        run: protostar test ./tests/protostar
