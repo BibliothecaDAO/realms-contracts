@@ -7,11 +7,12 @@
 import json
 import click
 
-from nile.core.account import Account
+from nile.core.types.account import Account
 
 from realms_cli.caller_invoker import wrapped_call, wrapped_send
 from realms_cli.config import Config
 from realms_cli.binary_converter import map_crypt
+
 
 @click.command()
 @click.argument("crypt_token_id", nargs=1)
@@ -34,6 +35,7 @@ def mint_crypt(crypt_token_id, network):
         ],
     )
 
+
 @click.command()
 @click.option("--network", default="goerli")
 def approve_crypt(network):
@@ -52,6 +54,7 @@ def approve_crypt(network):
             "1",               # true
         ],
     )
+
 
 @click.command()
 @click.argument("crypt_token_id", nargs=1)
@@ -73,6 +76,7 @@ def settle_crypt(crypt_token_id, network):
         ],
     )
 
+
 @click.command()
 @click.argument("crypt_token_id", nargs=1)
 @click.option("--network", default="goerli")
@@ -86,7 +90,8 @@ def set_crypt_data(crypt_token_id, network):
     resources = json.load(open("data/resources.json", "r"))
     legendary = json.load(open("data/legendary.json", "r"))
 
-    crypt_data_felt = map_crypt(crypts[str(crypt_token_id)], resources, legendary)
+    crypt_data_felt = map_crypt(
+        crypts[str(crypt_token_id)], resources, legendary)
 
     wrapped_send(
         network=config.nile_network,
@@ -122,6 +127,7 @@ def check_crypts(address, network):
     )
     print(out)
 
+
 @click.command()
 @click.option("--address", default="", help="Account address in hex format 0x...")
 @click.option("--network", default="goerli")
@@ -143,6 +149,7 @@ def check_s_crypts(address, network):
     )
     print(out)
 
+
 @click.command()
 @click.argument("crypt_token_id", nargs=1)
 @click.option("--network", default="goerli")
@@ -159,6 +166,7 @@ def check_owner_of_crypt(crypt_token_id, network):
         arguments=[crypt_token_id, 0],
     )
     print(out)
+
 
 @click.command()
 @click.argument("crypt_token_id", nargs=1)
