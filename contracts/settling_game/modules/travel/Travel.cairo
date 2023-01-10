@@ -171,6 +171,11 @@ func travel{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         traveller_contract_id, traveller_token_id, traveller_nested_id
     );
 
+    // get current information
+    let (traveller_current_information: TravelInformation) = get_travel_information(
+        traveller_contract_id, traveller_token_id, traveller_nested_id
+    );
+
     // calculate time
     let (time) = get_travel_time(traveller_coordinates, destination_coordinates);
 

@@ -18,14 +18,14 @@ from starkware.cairo.common.math_cmp import is_le
 from contracts.loot.constants.adventurer import AdventurerState, AdventurerStatic
 from contracts.loot.adventurer.interface import IAdventurer
 from contracts.loot.constants.item import (
-    Item, 
+    Item,
     ItemIds,
     Slot,
-    Type, 
+    Type,
     Material,
-    ItemNamePrefixes, 
-    ItemNameSuffixes, 
-    ItemSuffixes
+    ItemNamePrefixes,
+    ItemNameSuffixes,
+    ItemSuffixes,
 )
 from contracts.settling_game.utils.game_structs import ExternalContractIds
 
@@ -249,7 +249,7 @@ namespace LootUriUtils {
         const Moon = 'Moon ';
     }
 
-    namespace ItemSuffixes{
+    namespace ItemSuffixes {
         const of_Power = ' Of Power';
         const of_Giant = ' Of Giant';
         const of_Titans = ' Of Titans';
@@ -431,10 +431,14 @@ namespace LootUri {
         assert values[6] = inverted_commas;
 
         let (name_prefix_index) = append_item_name_prefix(item_data.Prefix_1, 7, values);
-        let (name_suffix_index) = append_item_name_suffix(item_data.Prefix_2, name_prefix_index, values);
-        let (name_index) =  append_item_name(item_data.Id, name_suffix_index, values);
+        let (name_suffix_index) = append_item_name_suffix(
+            item_data.Prefix_2, name_prefix_index, values
+        );
+        let (name_index) = append_item_name(item_data.Id, name_suffix_index, values);
         let (suffix_index) = append_item_suffix(item_data.Suffix, name_index, values);
-        let (greatness_suffix_index) = append_item_greatness_suffix(item_data.Greatness, suffix_index, values);
+        let (greatness_suffix_index) = append_item_greatness_suffix(
+            item_data.Greatness, suffix_index, values
+        );
 
         assert values[greatness_suffix_index] = inverted_commas;
         assert values[greatness_suffix_index + 1] = comma;
@@ -463,7 +467,7 @@ namespace LootUri {
         assert values[type_index + 1] = LootUriUtils.TraitKeys.ValueKey;
 
         let (material_index) = append_material(item_data.Material, type_index + 2, values);
-        
+
         assert values[material_index] = inverted_commas;
         assert values[material_index + 1] = right_bracket;
         assert values[material_index + 2] = comma;
@@ -489,9 +493,11 @@ namespace LootUri {
         assert values[greatness_index + 3] = LootUriUtils.TraitKeys.CreatedBlock;
         assert values[greatness_index + 4] = LootUriUtils.TraitKeys.ValueKey;
 
-        let (created_size) = append_felt_ascii(item_data.CreatedBlock, values + greatness_index + 5);
+        let (created_size) = append_felt_ascii(
+            item_data.CreatedBlock, values + greatness_index + 5
+        );
         let created_index = greatness_index + 5 + created_size;
-       
+
         assert values[created_index] = inverted_commas;
         assert values[created_index + 1] = right_bracket;
         assert values[created_index + 2] = comma;
@@ -501,7 +507,7 @@ namespace LootUri {
 
         let (xp_size) = append_felt_ascii(item_data.XP, values + created_index + 5);
         let xp_index = created_index + 5 + xp_size;
-        
+
         assert values[xp_index] = inverted_commas;
         assert values[xp_index + 1] = right_bracket;
         assert values[xp_index + 2] = comma;
@@ -509,9 +515,11 @@ namespace LootUri {
         assert values[xp_index + 3] = LootUriUtils.TraitKeys.Adventurer;
         assert values[xp_index + 4] = LootUriUtils.TraitKeys.ValueKey;
 
-        let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(item_data.Adventurer, 0));
+        let (adventurer) = IAdventurer.get_adventurer_by_id(
+            adventurer_address, Uint256(item_data.Adventurer, 0)
+        );
         assert values[xp_index + 5] = adventurer.Name;
-        
+
         assert values[xp_index + 6] = inverted_commas;
         assert values[xp_index + 7] = right_bracket;
         assert values[xp_index + 8] = comma;
@@ -521,7 +529,7 @@ namespace LootUri {
 
         let (bag_size) = append_felt_ascii(item_data.Bag, values + xp_index + 11);
         let bag_index = xp_index + 11 + bag_size;
-        
+
         assert values[bag_index] = inverted_commas;
         assert values[bag_index + 1] = right_bracket;
         assert values[bag_index + 2] = comma;
@@ -537,9 +545,9 @@ namespace LootUri {
     // @param name_prefix_id: id of the name prefix, if 0 nothing is appended
     // @param values_index: index in the uri array
     // @param values: uri array
-    func append_item_name_prefix{range_check_ptr}(name_prefix_id: felt, values_index: felt, values: felt*) -> (
-        name_prefix_index: felt
-    ) {
+    func append_item_name_prefix{range_check_ptr}(
+        name_prefix_id: felt, values_index: felt, values: felt*
+    ) -> (name_prefix_index: felt) {
         if (name_prefix_id == 0) {
             return (values_index,);
         }
@@ -703,7 +711,7 @@ namespace LootUri {
             assert values[values_index] = LootUriUtils.ItemNamePrefixes.Loath;
             return (values_index + 1,);
         }
-         if (name_prefix_id == ItemNamePrefixes.Maelstrom) {
+        if (name_prefix_id == ItemNamePrefixes.Maelstrom) {
             assert values[values_index] = LootUriUtils.ItemNamePrefixes.Maelstrom;
             return (values_index + 1,);
         }
@@ -827,9 +835,9 @@ namespace LootUri {
     // @param name_suffix_id: id of the name suffix, if 0 nothing is appended
     // @param values_index: index in the uri array
     // @param values: uri array
-    func append_item_name_suffix{range_check_ptr}(name_suffix_id: felt, values_index: felt, values: felt*) -> (
-        name_suffix_index: felt
-    ) {
+    func append_item_name_suffix{range_check_ptr}(
+        name_suffix_id: felt, values_index: felt, values: felt*
+    ) -> (name_suffix_index: felt) {
         if (name_suffix_id == 0) {
             return (values_index,);
         }
@@ -1327,9 +1335,9 @@ namespace LootUri {
     // @param suffix_id: id of the suffix, if 0 nothing is appended
     // @param values_index: index in the uri array
     // @param values: uri array
-    func append_item_suffix{range_check_ptr}(suffix_id: felt, values_index: felt, values: felt*) -> (
-        suffix_index: felt
-    ) {
+    func append_item_suffix{range_check_ptr}(
+        suffix_id: felt, values_index: felt, values: felt*
+    ) -> (suffix_index: felt) {
         if (suffix_id == 0) {
             return (values_index,);
         }
@@ -1406,9 +1414,9 @@ namespace LootUri {
     // @param values_index: index in the uri array
     // @param values: uri array
     // @return greatness_suffix_index: new index of array
-    func append_item_greatness_suffix{range_check_ptr}(greatness: felt, values_index: felt, values: felt*) -> (
-        greatness_suffix_index: felt
-    ) {
+    func append_item_greatness_suffix{range_check_ptr}(
+        greatness: felt, values_index: felt, values: felt*
+    ) -> (greatness_suffix_index: felt) {
         let check_ge_20 = is_le(20, greatness);
         if (check_ge_20 == TRUE) {
             assert values[values_index] = ' +1';

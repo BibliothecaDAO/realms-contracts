@@ -309,15 +309,15 @@ func get_effective_buildings{
 
     return (
         realm_buildings=RealmBuildings(
-        House=House,
-        StoreHouse=StoreHouse,
-        Granary=Granary,
-        Farm=Farm,
-        FishingVillage=FishingVillage,
-        Barracks=Barracks,
-        MageTower=MageTower,
-        ArcherTower=ArcherTower,
-        Castle=Castle
+            House=House,
+            StoreHouse=StoreHouse,
+            Granary=Granary,
+            Farm=Farm,
+            FishingVillage=FishingVillage,
+            Barracks=Barracks,
+            MageTower=MageTower,
+            ArcherTower=ArcherTower,
+            Castle=Castle,
         ),
     );
 }
@@ -365,15 +365,15 @@ func get_effective_population_buildings{
 
     return (
         realm_buildings=RealmBuildings(
-        House=House,
-        StoreHouse=StoreHouse,
-        Granary=Granary,
-        Farm=Farm,
-        FishingVillage=FishingVillage,
-        Barracks=Barracks,
-        MageTower=MageTower,
-        ArcherTower=ArcherTower,
-        Castle=Castle
+            House=House,
+            StoreHouse=StoreHouse,
+            Granary=Granary,
+            Farm=Farm,
+            FishingVillage=FishingVillage,
+            Barracks=Barracks,
+            MageTower=MageTower,
+            ArcherTower=ArcherTower,
+            Castle=Castle,
         ),
     );
 }
@@ -441,15 +441,15 @@ func get_buildings_unpacked{
 
     return (
         realm_buildings=RealmBuildings(
-        House=House,
-        StoreHouse=StoreHouse,
-        Granary=Granary,
-        Farm=Farm,
-        FishingVillage=FishingVillage,
-        Barracks=Barracks,
-        MageTower=MageTower,
-        ArcherTower=ArcherTower,
-        Castle=Castle
+            House=House,
+            StoreHouse=StoreHouse,
+            Granary=Granary,
+            Farm=Farm,
+            FishingVillage=FishingVillage,
+            Barracks=Barracks,
+            MageTower=MageTower,
+            ArcherTower=ArcherTower,
+            Castle=Castle,
         ),
     );
 }

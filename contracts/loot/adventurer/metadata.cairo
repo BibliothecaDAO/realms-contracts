@@ -139,11 +139,11 @@ namespace AdventurerUri {
     // @param adventurer_id: id of the adventurer
     // @param adventurer_data: unpacked data for adventurer
     func build{syscall_ptr: felt*, range_check_ptr}(
-        adventurer_id: Uint256, 
-        adventurer_data: AdventurerState, 
-        item_address: felt, 
-        beast_address, 
-        realms_address: felt
+        adventurer_id: Uint256,
+        adventurer_data: AdventurerState,
+        item_address: felt,
+        beast_address,
+        realms_address: felt,
     ) -> (encoded_len: felt, encoded: felt*) {
         alloc_locals;
 
@@ -198,7 +198,7 @@ namespace AdventurerUri {
         let image_url_3 = adventurer_data.ImageHash2;
 
         let (values: felt*) = alloc();
-        assert values [0] = data_format;
+        assert values[0] = data_format;
         assert values[1] = left_bracket;  // start
         // description key
         assert values[2] = description_key;
@@ -229,7 +229,9 @@ namespace AdventurerUri {
         assert values[race_index] = AdventurerUriUtils.TraitKeys.HomeRealm;
         assert values[race_index + 1] = AdventurerUriUtils.TraitKeys.ValueKey;
 
-        let (realm_name) = IRealms.get_realm_name(realms_address, Uint256(adventurer_data.HomeRealm, 0));
+        let (realm_name) = IRealms.get_realm_name(
+            realms_address, Uint256(adventurer_data.HomeRealm, 0)
+        );
 
         assert values[race_index + 2] = realm_name;
         assert values[race_index + 3] = inverted_commas;
@@ -237,12 +239,14 @@ namespace AdventurerUri {
         assert values[race_index + 5] = comma;
 
         let (order_index) = append_order_name(adventurer_data.Order, race_index + 6, values);
-        
+
         // birth date
         assert values[order_index] = AdventurerUriUtils.TraitKeys.Birthdate;
         assert values[order_index + 1] = AdventurerUriUtils.TraitKeys.ValueKey;
 
-        let (birthdate_size) = append_felt_ascii(adventurer_data.Birthdate, values + order_index + 2);
+        let (birthdate_size) = append_felt_ascii(
+            adventurer_data.Birthdate, values + order_index + 2
+        );
         let birthdate_index = order_index + 2 + birthdate_size;
 
         assert values[birthdate_index] = inverted_commas;
@@ -253,8 +257,8 @@ namespace AdventurerUri {
         assert values[birthdate_index + 4] = AdventurerUriUtils.TraitKeys.ValueKey;
 
         let (health_size) = append_felt_ascii(adventurer_data.Health, values + birthdate_index + 5);
-        let health_index =  birthdate_index + 5 + health_size;
-        
+        let health_index = birthdate_index + 5 + health_size;
+
         assert values[health_index] = inverted_commas;
         assert values[health_index + 1] = right_bracket;
         assert values[health_index + 2] = comma;
@@ -268,14 +272,14 @@ namespace AdventurerUri {
         assert values[level_index] = inverted_commas;
         assert values[level_index + 1] = right_bracket;
         assert values[level_index + 2] = comma;
-        
+
         // strength
         assert values[level_index + 3] = AdventurerUriUtils.TraitKeys.Strength;
         assert values[level_index + 4] = AdventurerUriUtils.TraitKeys.ValueKey;
 
         let (strength_size) = append_felt_ascii(adventurer_data.Strength, values + level_index + 5);
         let strength_index = level_index + 5 + strength_size;
-        
+
         assert values[strength_index] = inverted_commas;
         assert values[strength_index + 1] = right_bracket;
         assert values[strength_index + 2] = comma;
@@ -283,9 +287,11 @@ namespace AdventurerUri {
         assert values[strength_index + 3] = AdventurerUriUtils.TraitKeys.Dexterity;
         assert values[strength_index + 4] = AdventurerUriUtils.TraitKeys.ValueKey;
 
-        let (dexterity_size) = append_felt_ascii(adventurer_data.Dexterity, values + strength_index + 5);
+        let (dexterity_size) = append_felt_ascii(
+            adventurer_data.Dexterity, values + strength_index + 5
+        );
         let dexterity_index = strength_index + 5 + dexterity_size;
-        
+
         assert values[dexterity_index] = inverted_commas;
         assert values[dexterity_index + 1] = right_bracket;
         assert values[dexterity_index + 2] = comma;
@@ -293,9 +299,11 @@ namespace AdventurerUri {
         assert values[dexterity_index + 3] = AdventurerUriUtils.TraitKeys.Vitality;
         assert values[dexterity_index + 4] = AdventurerUriUtils.TraitKeys.ValueKey;
 
-        let (vitality_size) = append_felt_ascii(adventurer_data.Vitality, values + dexterity_index + 5);
+        let (vitality_size) = append_felt_ascii(
+            adventurer_data.Vitality, values + dexterity_index + 5
+        );
         let vitality_index = dexterity_index + 5 + vitality_size;
-        
+
         assert values[vitality_index] = inverted_commas;
         assert values[vitality_index + 1] = right_bracket;
         assert values[vitality_index + 2] = comma;
@@ -303,9 +311,11 @@ namespace AdventurerUri {
         assert values[vitality_index + 3] = AdventurerUriUtils.TraitKeys.Intelligence;
         assert values[vitality_index + 4] = AdventurerUriUtils.TraitKeys.ValueKey;
 
-        let (intelligence_size) = append_felt_ascii(adventurer_data.Intelligence, values + vitality_index + 5);
+        let (intelligence_size) = append_felt_ascii(
+            adventurer_data.Intelligence, values + vitality_index + 5
+        );
         let intelligence_index = vitality_index + 5 + intelligence_size;
-        
+
         assert values[intelligence_index] = inverted_commas;
         assert values[intelligence_index + 1] = right_bracket;
         assert values[intelligence_index + 2] = comma;
@@ -313,9 +323,11 @@ namespace AdventurerUri {
         assert values[intelligence_index + 3] = AdventurerUriUtils.TraitKeys.Wisdom;
         assert values[intelligence_index + 4] = AdventurerUriUtils.TraitKeys.ValueKey;
 
-        let (wisdom_size) = append_felt_ascii(adventurer_data.Wisdom, values + intelligence_index + 5);
+        let (wisdom_size) = append_felt_ascii(
+            adventurer_data.Wisdom, values + intelligence_index + 5
+        );
         let wisdom_index = intelligence_index + 5 + wisdom_size;
-        
+
         assert values[wisdom_index] = inverted_commas;
         assert values[wisdom_index + 1] = right_bracket;
         assert values[wisdom_index + 2] = comma;
@@ -323,9 +335,11 @@ namespace AdventurerUri {
         assert values[wisdom_index + 3] = AdventurerUriUtils.TraitKeys.Charisma;
         assert values[wisdom_index + 4] = AdventurerUriUtils.TraitKeys.ValueKey;
 
-        let (charisma_size) = append_felt_ascii(adventurer_data.Charisma, values + wisdom_index + 5);
+        let (charisma_size) = append_felt_ascii(
+            adventurer_data.Charisma, values + wisdom_index + 5
+        );
         let charisma_index = wisdom_index + 5 + charisma_size;
-        
+
         assert values[charisma_index] = inverted_commas;
         assert values[charisma_index + 1] = right_bracket;
         assert values[charisma_index + 2] = comma;
@@ -335,7 +349,7 @@ namespace AdventurerUri {
 
         let (luck_size) = append_felt_ascii(adventurer_data.Luck, values + charisma_index + 5);
         let luck_index = charisma_index + 5 + luck_size;
-        
+
         assert values[luck_index] = inverted_commas;
         assert values[luck_index + 1] = right_bracket;
         assert values[luck_index + 2] = comma;
@@ -345,7 +359,7 @@ namespace AdventurerUri {
 
         let (xp_size) = append_felt_ascii(adventurer_data.XP, values + luck_index + 5);
         let xp_index = luck_index + 5 + xp_size;
-        
+
         assert values[xp_index] = inverted_commas;
         assert values[xp_index + 1] = right_bracket;
         assert values[xp_index + 2] = comma;
@@ -432,7 +446,7 @@ namespace AdventurerUri {
 
         return (values_index + 6,);
     }
-    
+
     // @notice append felts to uri array for order
     // @implicit range_check_ptr
     // @param order: id of the order, if 0 nothing is appended
@@ -563,9 +577,9 @@ namespace AdventurerUri {
     // @param values_index: index in the uri array
     // @param values: uri array
     // @return chest_index: new index of the array
-    func append_chest_item{range_check_ptr}(chest_data: Item, values_index: felt, values: felt*) -> (
-        chest_index: felt
-    ) {
+    func append_chest_item{range_check_ptr}(
+        chest_data: Item, values_index: felt, values: felt*
+    ) -> (chest_index: felt) {
         if (chest_data.Id == 0) {
             return (values_index,);
         }
@@ -578,7 +592,6 @@ namespace AdventurerUri {
 
         assert values[values_index] = chest_key;
         assert values[values_index + 1] = value_key;
-
 
         if (chest_data.Prefix_1 == 0) {
             LootUri.append_item_name(chest_data.Id, values_index + 2, values);
@@ -662,9 +675,9 @@ namespace AdventurerUri {
     // @param values_index: index in the uri array
     // @param values: uri array
     // @return waist_index: new index of the array
-    func append_waist_item{range_check_ptr}(waist_data: Item, values_index: felt, values: felt*) -> (
-        waist_index: felt
-    ) {
+    func append_waist_item{range_check_ptr}(
+        waist_data: Item, values_index: felt, values: felt*
+    ) -> (waist_index: felt) {
         if (waist_data.Id == 0) {
             return (values_index,);
         }
@@ -760,9 +773,9 @@ namespace AdventurerUri {
     // @param values_index: index in the uri array
     // @param values: uri array
     // @return hands_index: new index of the array
-    func append_hands_item{range_check_ptr}(hands_data: Item, values_index: felt, values: felt*) -> (
-        hands_index: felt
-    ) {
+    func append_hands_item{range_check_ptr}(
+        hands_data: Item, values_index: felt, values: felt*
+    ) -> (hands_index: felt) {
         if (hands_data.Id == 0) {
             return (values_index,);
         }

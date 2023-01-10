@@ -29,7 +29,8 @@ namespace Calculator {
         let ArcherTower = BuildingsPopulation.ArcherTower * buildings.ArcherTower;
         let Castle = BuildingsPopulation.Castle * buildings.Castle;
 
-        let population = House + StoreHouse + Granary + Farm + FishingVillage + Barracks + MageTower + ArcherTower + Castle;
+        let population = House + StoreHouse + Granary + Farm + FishingVillage + Barracks +
+            MageTower + ArcherTower + Castle;
 
         return (population);
     }

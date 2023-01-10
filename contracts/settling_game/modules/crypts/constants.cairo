@@ -8,8 +8,8 @@
 %lang starknet
 
 namespace Entity {
-    const Generic = 0; // Generic Entity
-    const Adventurer = 1; // Another Adventurer
+    const Generic = 0;  // Generic Entity
+    const Adventurer = 1;  // Another Adventurer
 
     namespace Item {
         const Generic = 2;

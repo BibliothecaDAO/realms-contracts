@@ -35,17 +35,9 @@ namespace BeastLib {
         let SlainOnDate = 0;
 
         return (
-            BeastStatic(
-            Id=BeastId,
-            Prefix_1=Prefix_1,
-            Prefix_2=Prefix_2,
-            ),
+            BeastStatic(Id=BeastId, Prefix_1=Prefix_1, Prefix_2=Prefix_2),
             BeastDynamic(
-            Health=Health,
-            Adventurer=Adventurer,
-            XP=XP,
-            Level=Level,
-            SlainOnDate=SlainOnDate,
+                Health=Health, Adventurer=Adventurer, XP=XP, Level=Level, SlainOnDate=SlainOnDate
             ),
         );
     }
@@ -116,15 +108,7 @@ namespace BeastLib {
         let (Level) = unpack_data(packed_beast, 78, 1023);  // 10
         let (Slain_On_Date) = unpack_data(packed_beast, 88, 8589934591);  // 33
 
-        return (
-            BeastDynamic(
-            Health,
-            Adventurer,
-            XP,
-            Level,
-            Slain_On_Date
-            ),
-        );
+        return (BeastDynamic(Health, Adventurer, XP, Level, Slain_On_Date),);
     }
 
     // helper to cast value to location in State

@@ -133,7 +133,16 @@ namespace Combat {
         );
 
         return (
-            ArmyStatistics(cavalry_attack, archery_attack, magic_attack, infantry_attack, cavalry_defence, archer_defence, magic_defence, infantry_defence),
+            ArmyStatistics(
+                cavalry_attack,
+                archery_attack,
+                magic_attack,
+                infantry_attack,
+                cavalry_defence,
+                archer_defence,
+                magic_defence,
+                infantry_defence,
+            ),
         );
     }
 
@@ -191,7 +200,9 @@ namespace Combat {
         alloc_locals;
 
         return (
-            army.light_cavalry.quantity + army.heavy_cavalry.quantity + army.archer.quantity + army.longbow.quantity + army.mage.quantity + army.arcanist.quantity + army.light_infantry.quantity + army.heavy_infantry.quantity,
+            army.light_cavalry.quantity + army.heavy_cavalry.quantity + army.archer.quantity +
+            army.longbow.quantity + army.mage.quantity + army.arcanist.quantity +
+            army.light_infantry.quantity + army.heavy_infantry.quantity,
         );
     }
 
@@ -208,13 +219,52 @@ namespace Combat {
 
         let (total_battalions) = calculate_total_battalions(defending_army);
 
-        let c_defence = attacking_army.light_cavalry.quantity * BattalionStatistics.Defence.Cavalry.LightCavalry + attacking_army.heavy_cavalry.quantity * BattalionStatistics.Defence.Cavalry.HeavyCavalry + attacking_army.archer.quantity * BattalionStatistics.Defence.Cavalry.Archer + attacking_army.longbow.quantity * BattalionStatistics.Defence.Cavalry.Longbow + attacking_army.mage.quantity * BattalionStatistics.Defence.Cavalry.Mage + attacking_army.arcanist.quantity * BattalionStatistics.Defence.Cavalry.Arcanist + attacking_army.light_infantry.quantity * BattalionStatistics.Defence.Cavalry.LightInfantry + attacking_army.heavy_infantry.quantity * BattalionStatistics.Defence.Cavalry.HeavyInfantry;
+        let c_defence = attacking_army.light_cavalry.quantity *
+            BattalionStatistics.Defence.Cavalry.LightCavalry +
+            attacking_army.heavy_cavalry.quantity *
+            BattalionStatistics.Defence.Cavalry.HeavyCavalry + attacking_army.archer.quantity *
+            BattalionStatistics.Defence.Cavalry.Archer + attacking_army.longbow.quantity *
+            BattalionStatistics.Defence.Cavalry.Longbow + attacking_army.mage.quantity *
+            BattalionStatistics.Defence.Cavalry.Mage + attacking_army.arcanist.quantity *
+            BattalionStatistics.Defence.Cavalry.Arcanist + attacking_army.light_infantry.quantity *
+            BattalionStatistics.Defence.Cavalry.LightInfantry +
+            attacking_army.heavy_infantry.quantity *
+            BattalionStatistics.Defence.Cavalry.HeavyInfantry;
 
-        let a_defence = attacking_army.light_cavalry.quantity * BattalionStatistics.Defence.Archery.LightCavalry + attacking_army.heavy_cavalry.quantity * BattalionStatistics.Defence.Archery.HeavyCavalry + attacking_army.archer.quantity * BattalionStatistics.Defence.Archery.Archer + attacking_army.longbow.quantity * BattalionStatistics.Defence.Archery.Longbow + attacking_army.mage.quantity * BattalionStatistics.Defence.Archery.Mage + attacking_army.arcanist.quantity * BattalionStatistics.Defence.Archery.Arcanist + attacking_army.light_infantry.quantity * BattalionStatistics.Defence.Archery.LightInfantry + attacking_army.heavy_infantry.quantity * BattalionStatistics.Defence.Archery.HeavyInfantry;
+        let a_defence = attacking_army.light_cavalry.quantity *
+            BattalionStatistics.Defence.Archery.LightCavalry +
+            attacking_army.heavy_cavalry.quantity *
+            BattalionStatistics.Defence.Archery.HeavyCavalry + attacking_army.archer.quantity *
+            BattalionStatistics.Defence.Archery.Archer + attacking_army.longbow.quantity *
+            BattalionStatistics.Defence.Archery.Longbow + attacking_army.mage.quantity *
+            BattalionStatistics.Defence.Archery.Mage + attacking_army.arcanist.quantity *
+            BattalionStatistics.Defence.Archery.Arcanist + attacking_army.light_infantry.quantity *
+            BattalionStatistics.Defence.Archery.LightInfantry +
+            attacking_army.heavy_infantry.quantity *
+            BattalionStatistics.Defence.Archery.HeavyInfantry;
 
-        let m_defence = attacking_army.light_cavalry.quantity * BattalionStatistics.Defence.Magic.LightCavalry + attacking_army.heavy_cavalry.quantity * BattalionStatistics.Defence.Magic.HeavyCavalry + attacking_army.archer.quantity * BattalionStatistics.Defence.Magic.Archer + attacking_army.longbow.quantity * BattalionStatistics.Defence.Magic.Longbow + attacking_army.mage.quantity * BattalionStatistics.Defence.Magic.Mage + attacking_army.arcanist.quantity * BattalionStatistics.Defence.Magic.Arcanist + attacking_army.light_infantry.quantity * BattalionStatistics.Defence.Magic.LightInfantry + attacking_army.heavy_infantry.quantity * BattalionStatistics.Defence.Magic.HeavyInfantry;
+        let m_defence = attacking_army.light_cavalry.quantity *
+            BattalionStatistics.Defence.Magic.LightCavalry + attacking_army.heavy_cavalry.quantity *
+            BattalionStatistics.Defence.Magic.HeavyCavalry + attacking_army.archer.quantity *
+            BattalionStatistics.Defence.Magic.Archer + attacking_army.longbow.quantity *
+            BattalionStatistics.Defence.Magic.Longbow + attacking_army.mage.quantity *
+            BattalionStatistics.Defence.Magic.Mage + attacking_army.arcanist.quantity *
+            BattalionStatistics.Defence.Magic.Arcanist + attacking_army.light_infantry.quantity *
+            BattalionStatistics.Defence.Magic.LightInfantry +
+            attacking_army.heavy_infantry.quantity *
+            BattalionStatistics.Defence.Magic.HeavyInfantry;
 
-        let i_defence = attacking_army.light_cavalry.quantity * BattalionStatistics.Defence.Infantry.LightCavalry + attacking_army.heavy_cavalry.quantity * BattalionStatistics.Defence.Infantry.HeavyCavalry + attacking_army.archer.quantity * BattalionStatistics.Defence.Infantry.Archer + attacking_army.longbow.quantity * BattalionStatistics.Defence.Infantry.Longbow + attacking_army.mage.quantity * BattalionStatistics.Defence.Infantry.Mage + attacking_army.arcanist.quantity * BattalionStatistics.Defence.Infantry.Arcanist + attacking_army.light_infantry.quantity * BattalionStatistics.Defence.Infantry.LightInfantry + attacking_army.heavy_infantry.quantity * BattalionStatistics.Defence.Infantry.HeavyInfantry;
+        let i_defence = attacking_army.light_cavalry.quantity *
+            BattalionStatistics.Defence.Infantry.LightCavalry +
+            attacking_army.heavy_cavalry.quantity *
+            BattalionStatistics.Defence.Infantry.HeavyCavalry + attacking_army.archer.quantity *
+            BattalionStatistics.Defence.Infantry.Archer + attacking_army.longbow.quantity *
+            BattalionStatistics.Defence.Infantry.Longbow + attacking_army.mage.quantity *
+            BattalionStatistics.Defence.Infantry.Mage + attacking_army.arcanist.quantity *
+            BattalionStatistics.Defence.Infantry.Arcanist + attacking_army.light_infantry.quantity *
+            BattalionStatistics.Defence.Infantry.LightInfantry +
+            attacking_army.heavy_infantry.quantity *
+            BattalionStatistics.Defence.Infantry.HeavyInfantry;
 
         let (cavalry_defence) = calculate_defence_values(
             c_defence,
@@ -519,22 +569,14 @@ namespace Combat {
         );
 
         let updated_attacking_army = Army(
-            Battalion(light_cavalry_battalions,
-            light_cavalry_health),
-            Battalion(heavy_cavalry_battalions,
-            heavy_cavalry_health),
-            Battalion(archer_battalions,
-            archer_health),
-            Battalion(longbow_battalions,
-            longbow_health),
-            Battalion(mage_battalions,
-            mage_health),
-            Battalion(archanist_battalions,
-            archanist_health),
-            Battalion(light_infantry_battalions,
-            light_infantry_health),
-            Battalion(heavy_infantry_battalions,
-            heavy_infantry_health),
+            Battalion(light_cavalry_battalions, light_cavalry_health),
+            Battalion(heavy_cavalry_battalions, heavy_cavalry_health),
+            Battalion(archer_battalions, archer_health),
+            Battalion(longbow_battalions, longbow_health),
+            Battalion(mage_battalions, mage_health),
+            Battalion(archanist_battalions, archanist_health),
+            Battalion(light_infantry_battalions, light_infantry_health),
+            Battalion(heavy_infantry_battalions, heavy_infantry_health),
         );
 
         return (updated_attacking_army,);
@@ -596,7 +638,16 @@ namespace Combat {
         let (heavy_infantry_health) = unpack_data(army_packed, 91, 127);  // 7
 
         return (
-            Army(Battalion(light_cavalry_quantity, light_cavalry_health), Battalion(heavy_cavalry_quantity, heavy_cavalry_health), Battalion(archer_quantity, archer_health), Battalion(longbow_quantity, longbow_health), Battalion(mage_quantity, mage_health), Battalion(archanist_quantity, arcanist_health), Battalion(light_infantry_quantity, light_infantry_health), Battalion(heavy_infantry_quantity, heavy_infantry_health)),
+            Army(
+                Battalion(light_cavalry_quantity, light_cavalry_health),
+                Battalion(heavy_cavalry_quantity, heavy_cavalry_health),
+                Battalion(archer_quantity, archer_health),
+                Battalion(longbow_quantity, longbow_health),
+                Battalion(mage_quantity, mage_health),
+                Battalion(archanist_quantity, arcanist_health),
+                Battalion(light_infantry_quantity, light_infantry_health),
+                Battalion(heavy_infantry_quantity, heavy_infantry_health),
+            ),
         );
     }
 
@@ -629,7 +680,10 @@ namespace Combat {
         let light_infantry_health = army_unpacked.light_infantry.health * SHIFT_ARMY._15;
         let heavy_infantry_health = army_unpacked.heavy_infantry.health * SHIFT_ARMY._16;
 
-        let packed = heavy_infantry_health + light_infantry_health + arcanist_health + mage_health + longbow_health + archer_health + heavy_cavalry_health + light_cavalry_health + heavy_infantry_quantity + light_infantry_quantity + archanist_quantity + mage_quantity + longbow_quantity + archer_quantity + heavy_cavalry_quantity + light_cavalry_quantity;
+        let packed = heavy_infantry_health + light_infantry_health + arcanist_health + mage_health +
+            longbow_health + archer_health + heavy_cavalry_health + light_cavalry_health +
+            heavy_infantry_quantity + light_infantry_quantity + archanist_quantity + mage_quantity +
+            longbow_quantity + archer_quantity + heavy_cavalry_quantity + light_cavalry_quantity;
         return (packed,);
     }
 
@@ -755,7 +809,16 @@ namespace Combat {
         let light_infantry = unpacked_army.light_infantry.quantity;
         let heavy_infantry = unpacked_army.heavy_infantry.quantity;
 
-        return (light_cavalry + heavy_cavalry + archer + longbow + mage + arcanist + light_infantry + heavy_infantry);
+        return (
+            light_cavalry +
+            heavy_cavalry +
+            archer +
+            longbow +
+            mage +
+            arcanist +
+            light_infantry +
+            heavy_infantry
+        );
     }
 
     func population_of_armies{
@@ -790,7 +853,16 @@ namespace Combat {
 
         if (has_totally_deserted == TRUE) {
             return (
-                Army(Battalion(0, 0), Battalion(0, 0), Battalion(0, 0), Battalion(0, 0), Battalion(0, 0), Battalion(0, 0), Battalion(0, 0), Battalion(0, 0)),
+                Army(
+                    Battalion(0, 0),
+                    Battalion(0, 0),
+                    Battalion(0, 0),
+                    Battalion(0, 0),
+                    Battalion(0, 0),
+                    Battalion(0, 0),
+                    Battalion(0, 0),
+                    Battalion(0, 0),
+                ),
             );
         }
 
@@ -813,7 +885,16 @@ namespace Combat {
         );
 
         return (
-            Army(Battalion(unpacked_army.light_cavalry.quantity, light_cavalry_health), Battalion(unpacked_army.heavy_cavalry.quantity, heavy_cavalry_health), Battalion(unpacked_army.archer.quantity, archer_health), Battalion(unpacked_army.longbow.quantity, longbow_health), Battalion(unpacked_army.mage.quantity, mage_health), Battalion(unpacked_army.arcanist.quantity, arcanist_health), Battalion(unpacked_army.light_infantry.quantity, light_infantry_health), Battalion(unpacked_army.heavy_infantry.quantity, heavy_infantry_health)),
+            Army(
+                Battalion(unpacked_army.light_cavalry.quantity, light_cavalry_health),
+                Battalion(unpacked_army.heavy_cavalry.quantity, heavy_cavalry_health),
+                Battalion(unpacked_army.archer.quantity, archer_health),
+                Battalion(unpacked_army.longbow.quantity, longbow_health),
+                Battalion(unpacked_army.mage.quantity, mage_health),
+                Battalion(unpacked_army.arcanist.quantity, arcanist_health),
+                Battalion(unpacked_army.light_infantry.quantity, light_infantry_health),
+                Battalion(unpacked_army.heavy_infantry.quantity, heavy_infantry_health),
+            ),
         );
     }
 

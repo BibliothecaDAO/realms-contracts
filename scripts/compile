@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+import os
+import subprocess
+
+# Set up a list of ignored file names
+ignored_files = [
+]
+
+# Set up a list of ignored directories
+ignored_dirs = [
+    'unused_modules'
+]
+
+# Find all files with the .cairo extension, excluding the ignored files and directories
+files = []
+for dirpath, _dirnames, filenames in os.walk('contracts'):
+    if any(dirname in dirpath for dirname in ignored_dirs):
+        continue
+    for filename in filenames:
+        if not filename.endswith('.cairo'):
+            continue
+        if filename in ignored_files:
+            continue
+        files.append(os.path.join(dirpath, filename))
+
+# Run the compile command with all the found files as arguments
+compile_cmd = ' '.join(['nile', 'compile', *files])
+process = subprocess.Popen(compile_cmd, shell=True)
+process.wait()
