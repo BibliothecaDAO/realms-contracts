@@ -1,10 +1,9 @@
 # First, import click dependency
 import click
 
-from nile.core.types.utils import from_call_to_call_array
+from nile.signer import from_call_to_call_array
 
 from starkware.starknet.public.abi import get_selector_from_name
-
 from realms_cli.caller_invoker import wrapped_call, wrapped_send
 from realms_cli.config import Config, strhex_as_strfelt
 
@@ -63,7 +62,7 @@ def set_settle_permission(network):
         function="initialize_permissions",
         arguments=[
             2,  # felt
-            strhex_as_strfelt(config.L01_SETTLING_PROXY_ADDRESS),  # felt
+            strhex_as_strfelt(config.SETTLING_ADDRESS),  # felt
             get_selector_from_name("settle"),  # felt
             strhex_as_strfelt(config.REALMS_PROXY_ADDRESS),
             get_selector_from_name("setApprovalForAll")
@@ -154,10 +153,10 @@ def settle_realm_from_guild(realm_token_id, network):
         (
             int(config.REALMS_PROXY_ADDRESS, 16),
             "setApprovalForAll",
-            [int(config.L01_SETTLING_PROXY_ADDRESS, 16), 1]
+            [int(config.SETTLING_ADDRESS, 16), 1]
         ),
         (
-            int(config.L01_SETTLING_PROXY_ADDRESS, 16),
+            int(config.SETTLING_ADDRESS, 16),
             "settle",
             [realm_token_id, 0]
         )
@@ -198,7 +197,7 @@ def claim_resources_from_guild(realm_token_id, network):
 
     calls = [
         (
-            int(config.L02_RESOURCES_ADDRESS, 16),
+            int(config.SETTLING_ADDRESS, 16),
             "claim_resources",
             [realm_token_id, 0]
         )

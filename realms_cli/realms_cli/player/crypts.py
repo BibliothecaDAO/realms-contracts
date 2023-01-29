@@ -7,7 +7,7 @@
 import json
 import click
 
-from nile.core.types.account import Account
+from nile.core.account import Account
 
 from realms_cli.caller_invoker import wrapped_call, wrapped_send
 from realms_cli.config import Config

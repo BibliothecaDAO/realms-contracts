@@ -1,5 +1,5 @@
 """Helper functions for repeating nre patterns."""
-from nile.core.types.account import Account
+from nile.core.account import Account
 from nile.core.deploy import deploy_contract
 from realms_cli.config import Config
 from realms_cli.utils import strhex_as_felt
