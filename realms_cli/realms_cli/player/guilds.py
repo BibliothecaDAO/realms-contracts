@@ -1,7 +1,7 @@
 # First, import click dependency
 import click
 
-from nile.signer import from_call_to_call_array
+from nile.core.types.utils import from_call_to_call_array
 
 from starkware.starknet.public.abi import get_selector_from_name
 
