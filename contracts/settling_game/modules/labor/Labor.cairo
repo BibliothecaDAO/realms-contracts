@@ -44,6 +44,7 @@ from contracts.settling_game.utils.constants import (
     WONDER_RATE,
     BASE_LABOR_UNITS,
     BASE_RESOURCES_PER_CYCLE,
+    BASE_FOOD_PRODUCTION,
 )
 
 from contracts.settling_game.library.library_module import Module
@@ -70,6 +71,10 @@ from contracts.settling_game.modules.labor.library import Labor
 func UpdateLabor(
     token_id: Uint256, resource_id: Uint256, last_update: felt, balance: felt, vault_balance: felt
 ) {
+}
+
+@event
+func FoodBuildingsBuilt(token_id: Uint256, resource_id: Uint256, qty_built: felt) {
 }
 
 // -----------------------------------
@@ -103,6 +108,11 @@ func vault_balance(token_id: Uint256, resource_id: Uint256) -> (balance: felt) {
 // labour cost to generate 1 unit
 @storage_var
 func labor_cost(resource_id: Uint256) -> (cost: Cost) {
+}
+
+// buildings
+@storage_var
+func food_buildings_produced(token_id: Uint256, resource_id: Uint256) -> (quantity: felt) {
 }
 
 // -----------------------------------
@@ -167,10 +177,7 @@ func create{
 
     // burn costs of labor
     let (cost) = get_labor_cost(resource_id);
-    let (costs: Cost*) = alloc();
-    assert [costs] = cost;
-    let (token_len, token_ids, token_values) = transform_costs_to_tokens(1, costs, labor_units);
-    IERC1155.burnBatch(resources_address, owner, token_len, token_ids, token_len, token_values);
+    Module.burn_resources(cost, labor_units, owner);
 
     let (ts) = get_block_timestamp();
 
@@ -225,7 +232,7 @@ func harvest{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     // calculate labor units available to harvest
     let (
-        generated, part_labour_units, is_labour_complete, vault_generated_amount
+        generated, part_labor_units, is_labor_complete, vault_generated_amount
     ) = labor_units_generated(token_id, resource_id);
 
     // calculate vault balance
@@ -255,7 +262,7 @@ func harvest{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     let (ts) = get_block_timestamp();
 
-    if (is_labour_complete == TRUE) {
+    if (is_labor_complete == TRUE) {
         // set balance to current ts - since we have harvested everything
         // if there is labour still available, we don't have to adjust the balance
         balance.write(token_id, resource_id, ts);
@@ -269,11 +276,11 @@ func harvest{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     } else {
         // emit
         UpdateLabor.emit(
-            token_id, resource_id, ts - part_labour_units, current_balance, new_vault_balance
+            token_id, resource_id, ts - part_labor_units, current_balance, new_vault_balance
         );
 
         // add leftover time back so you don't loose part labour units
-        last_harvest.write(token_id, resource_id, ts - part_labour_units);
+        last_harvest.write(token_id, resource_id, ts - part_labor_units);
         tempvar syscall_ptr = syscall_ptr;
     }
 
@@ -444,5 +451,191 @@ func set_labor_cost{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuilt
 ) {
     Proxy.assert_only_admin();
     labor_cost.write(resource_id, cost);
+    return ();
+}
+
+@external
+func create_food{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(token_id: Uint256, resource_id: Uint256, labor_units: felt, qty_built: felt) {
+    alloc_locals;
+
+    Module.__callback__(token_id);
+
+    let (owner) = get_caller_address();
+
+    // check owner is calling
+    Module.ERC721_owner_check(token_id, ExternalContractIds.S_Realms);
+
+    // addresses
+    let (realms_address) = Module.get_external_contract_address(ExternalContractIds.Realms);
+
+    // Get Realm Data
+    let (realms_data: RealmData) = IRealms.fetch_realm_data(realms_address, token_id);
+
+    // check resource exists on realm - otherwise revert
+    Labor.assert_resource_ids(resource_id.low);
+
+    // assert enough traits
+    // Labor.assert_enough_traits(realms_data, resource_id.low, qty_built);
+
+    // can't build 0
+    assert_not_zero(qty_built);
+
+    // burn costs of labor
+    let (cost) = get_labor_cost(resource_id);
+    Module.burn_resources(cost, labor_units * qty_built, owner);
+
+    //
+    // buildings_to_claim = if you try to build a different number from what already exists we
+    // overwrite the value - but before that the player gets a small boost from what they have
+    // already spent
+    //
+
+    let (current_buildings) = food_buildings_produced.read(token_id, resource_id);
+
+    if (current_buildings == qty_built) {
+        tempvar syscall_ptr = syscall_ptr;
+        tempvar pedersen_ptr = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    } else {
+        _harvest_unharvested(token_id, resource_id, current_buildings);
+
+        tempvar syscall_ptr = syscall_ptr;
+        tempvar pedersen_ptr = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    }
+
+    // labor units calculation - BASE_LABOR_UNITS = minimum amount purchaseable
+    let food_cycle = labor_units * BASE_LABOR_UNITS;
+
+    let (ts) = get_block_timestamp();
+    let (current_balance) = balance.read(token_id, resource_id);
+
+    // check uninitalised - if not then set as now timestamp
+    let (last_harvest_time) = last_harvest.read(token_id, resource_id);
+    if (last_harvest_time == 0) {
+        tempvar harvest_time = ts;
+    } else {
+        tempvar harvest_time = last_harvest_time;
+    }
+
+    // check if balance exists
+    if (current_balance == 0) {
+        tempvar new_balance = ts + food_cycle;
+    } else {
+        tempvar new_balance = current_balance + food_cycle;
+    }
+
+    // write balance
+    balance.write(token_id, resource_id, new_balance);
+
+    last_harvest.write(token_id, resource_id, harvest_time);
+
+    // store buildings produced
+    food_buildings_produced.write(token_id, resource_id, qty_built);
+
+    // emit qty_built
+    FoodBuildingsBuilt.emit(token_id, resource_id, qty_built);
+
+    // update
+    let (current_vault_balance) = vault_balance.read(token_id, resource_id);
+    UpdateLabor.emit(token_id, resource_id, harvest_time, new_balance, current_vault_balance);
+
+    return ();
+}
+
+@external
+func harvest_food{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    token_id: Uint256, resource_id: Uint256
+) {
+    alloc_locals;
+    let (ts) = get_block_timestamp();
+
+    // balance
+    let (current_balance) = balance.read(token_id, resource_id);
+
+    // harvest time
+    let (last_harvest_time) = last_harvest.read(token_id, resource_id);
+
+    // qty of buildings built
+    let (qty_built) = food_buildings_produced.read(token_id, resource_id);
+
+    // calculate generated
+    let (labor_units_generated, part_labor_units, is_labor_complete) = Labor.food_units_generated(
+        current_balance, last_harvest_time, ts
+    );
+
+    if (is_labor_complete == TRUE) {
+        // set balance to current ts - since we have harvested everything
+        // if there is labour still available, we don't have to adjust the balance
+        balance.write(token_id, resource_id, ts);
+
+        // emit
+        UpdateLabor.emit(token_id, resource_id, ts, ts, 0);
+
+        last_harvest.write(token_id, resource_id, ts);
+
+        tempvar syscall_ptr = syscall_ptr;
+    } else {
+        // emit
+        UpdateLabor.emit(token_id, resource_id, ts - part_labor_units, current_balance, 0);
+
+        // add leftover time back so you don't loose part labour units
+        last_harvest.write(token_id, resource_id, ts - part_labor_units);
+        tempvar syscall_ptr = syscall_ptr;
+    }
+
+    // TODO: only mint if greater than 1
+    let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms);
+    let (owner) = IERC721.ownerOf(s_realms_address, token_id);
+    mint_resource(resource_id, labor_units_generated * qty_built * BASE_FOOD_PRODUCTION, owner);
+
+    return ();
+}
+
+// harvests remaining food - used in the create function
+func _harvest_unharvested{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    token_id: Uint256, resource_id: Uint256, qty_built: felt
+) {
+    alloc_locals;
+
+    // calculate labor units available to harvest
+    let (current_balance) = balance.read(token_id, resource_id);
+    let (ts) = get_block_timestamp();
+    let (last_harvest_time) = last_harvest.read(token_id, resource_id);
+
+    // full amount of past produced
+    let (labor_units_generated, _, _) = Labor.food_units_generated(
+        current_balance, last_harvest_time, ts
+    );
+
+    let (remaining_units, _) = unsigned_div_rem(
+        current_balance - last_harvest_time, BASE_LABOR_UNITS
+    );
+
+    // we divide by to deducte the penalty
+    let (deducted, _) = unsigned_div_rem(remaining_units, 4);
+
+    // TODO: only mint if greater than 1
+    let (s_realms_address) = Module.get_external_contract_address(ExternalContractIds.S_Realms);
+    let (owner) = IERC721.ownerOf(s_realms_address, token_id);
+    mint_resource(
+        resource_id, (deducted + labor_units_generated) * qty_built * BASE_FOOD_PRODUCTION, owner
+    );
+
+    return ();
+}
+
+func mint_resource{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    resource_id: Uint256, amount: felt, owner: felt
+) {
+    alloc_locals;
+
+    let (resources_address) = Module.get_external_contract_address(ExternalContractIds.Resources);
+    let (data: felt*) = alloc();
+    assert data[0] = 0;
+    let resource_amount = Uint256(amount * 10 ** 18, 0);
+    IERC1155.mint(resources_address, owner, resource_id, resource_amount, 1, data);
     return ();
 }

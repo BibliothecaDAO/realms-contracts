@@ -1,6 +1,6 @@
 # First, import click dependency
 import click
-from nile.core.types.account import Account
+from nile.core.account import Account
 from realms_cli.caller_invoker import wrapped_call, wrapped_send
 from realms_cli.config import Config, strhex_as_strfelt
 from realms_cli.utils import uint, expanded_uint_list, expanded_uint_list_decimals, uint_decimal, from_bn, print_over_colums

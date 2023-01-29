@@ -9,7 +9,7 @@ import asyncio
 
 from nile.common import prepare_params, ABIS_DIRECTORY, BUILD_DIRECTORY
 from nile.core.declare import declare
-from nile.core.types.account import Account, get_nonce
+from nile.core.account import Account, get_nonce
 from nile.starknet_cli import execute_call
 from nile import deployments
 from nile.core.call_or_invoke import call_or_invoke
@@ -237,7 +237,7 @@ async def wrapped_declare(account, contract_name, network, alias):
     config = Config(nile_network=network)
 
     contract_class = compile_starknet_files(
-        files=[f"{'contracts'}/{contract_name}.cairo"], debug_info=True, cairo_path=["/workspaces/realms-contracts/lib/cairo_contracts/src"]
+        files=[f"{contract_name}"], debug_info=True, cairo_path=["/workspaces/realms-contracts/lib/cairo_contracts/src"]
     )
     nonce = await get_nonce(account.address, network)
 

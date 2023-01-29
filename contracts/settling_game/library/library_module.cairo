@@ -12,17 +12,22 @@
 
 %lang starknet
 
-from starkware.cairo.common.cairo_builtins import HashBuiltin
+from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.starknet.common.syscalls import get_caller_address, get_contract_address
 from starkware.cairo.common.math import assert_not_zero
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.bool import TRUE, FALSE
+from starkware.cairo.common.alloc import alloc
 
 from openzeppelin.token.erc721.IERC721 import IERC721
+from contracts.settling_game.interfaces.IERC1155 import IERC1155
 
 from contracts.settling_game.interfaces.imodules import IModuleController
+from contracts.settling_game.utils.general import transform_costs_to_tokens
 
 from contracts.settling_game.library.IUtils import IUtils
+
+from contracts.settling_game.utils.game_structs import ExternalContractIds, Cost
 
 // -----------------------------------
 // Storage
@@ -111,6 +116,23 @@ namespace Module {
         );
 
         return (module_address,);
+    }
+
+    func burn_resources{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr,
+        bitwise_ptr: BitwiseBuiltin*,
+    }(cost: Cost, quantity: felt, owner: felt) {
+        alloc_locals;
+        let (resources_address) = get_external_contract_address(ExternalContractIds.Resources);
+
+        let (costs: Cost*) = alloc();
+        assert [costs] = cost;
+        let (token_len, token_ids, token_values) = transform_costs_to_tokens(1, costs, quantity);
+        IERC1155.burnBatch(resources_address, owner, token_len, token_ids, token_len, token_values);
+
+        return ();
     }
 
     // -----------------------------------
