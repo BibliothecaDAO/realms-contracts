@@ -83,6 +83,7 @@ const WORK_HUT_OUTPUT = 50;
 
 const BASE_LABOR_UNITS = DAY / 12;
 
+const TRICKLE_LABOR_UNITS = DAY / 24;
 // -----------------------------------
 // Buildings
 // -----------------------------------
@@ -99,6 +100,8 @@ const HARVEST_LENGTH = DAY / 10;
 const FARM_LENGTH = (DAY / 3) * BASE_HARVESTS;
 const FISHING_TRAPS = (DAY / 3) * BASE_HARVESTS;
 const BASE_FOOD_PRODUCTION = 14000;  // food production per unit
+
+const MINIMUM_FOOD_CYCLE = DAY / 12;
 
 // -----------------------------------
 // Combat

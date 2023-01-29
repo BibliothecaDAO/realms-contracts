@@ -1163,6 +1163,15 @@ func set_royalty_info{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     return ();
 }
 
+@external
+func set_lp_info{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    lp_fee_thousands_: Uint256
+) {
+    // Proxy_only_admin()
+    lp_fee_thousands.write(lp_fee_thousands_);
+    return ();
+}
+
 @view
 func get_owed_currency_tokens{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     token_ids_len: felt, token_ids: Uint256*, lp_amounts_len: felt, lp_amounts: Uint256*

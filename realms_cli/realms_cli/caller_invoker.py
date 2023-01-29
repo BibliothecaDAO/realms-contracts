@@ -237,7 +237,7 @@ async def wrapped_declare(account, contract_name, network, alias):
     config = Config(nile_network=network)
 
     contract_class = compile_starknet_files(
-        files=[f"{'contracts'}/{contract_name}.cairo"], debug_info=True, cairo_path=["/workspaces/realms-contracts/lib/cairo_contracts/src"]
+        files=[f"{contract_name}"], debug_info=True, cairo_path=["/workspaces/realms-contracts/lib/cairo_contracts/src"]
     )
     nonce = await get_nonce(account.address, network)
 

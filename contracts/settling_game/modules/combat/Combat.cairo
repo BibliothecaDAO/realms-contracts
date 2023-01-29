@@ -285,6 +285,7 @@ func initiate_combat{
     attacking_realm_id: Uint256,
     defending_army_id: felt,
     defending_realm_id: Uint256,
+    capture_relic: felt,
 ) -> (combat_outcome: felt) {
     alloc_locals;
 
@@ -380,7 +381,17 @@ func initiate_combat{
         let (relic_address) = Module.get_module_address(ModuleIds.Relics);
 
         ILabor.pillage(labor_address, defending_realm_id, caller);
-        IRelics.set_relic_holder(relic_address, attacking_realm_id, defending_realm_id);
+
+        if (capture_relic == TRUE) {
+            IRelics.set_relic_holder(relic_address, attacking_realm_id, defending_realm_id);
+            tempvar syscall_ptr = syscall_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+            tempvar pedersen_ptr = pedersen_ptr;
+        } else {
+            tempvar syscall_ptr = syscall_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+            tempvar pedersen_ptr = pedersen_ptr;
+        }
 
         tempvar syscall_ptr = syscall_ptr;
         tempvar range_check_ptr = range_check_ptr;
