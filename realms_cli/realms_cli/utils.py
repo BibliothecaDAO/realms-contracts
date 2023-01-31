@@ -110,3 +110,23 @@ def strhex_as_felt(strhex: str):
         return int(strhex, 16)
     else:
         print("strhex address is None.")
+
+
+def delete_existing_deployment(contract_name: str):
+    with open("goerli.deployments.txt", "r+") as f:
+        new_f = f.readlines()
+        f.seek(0)
+        for line in new_f:
+            if contract_name + ".json:" + contract_name not in line:
+                f.write(line)
+        f.truncate()
+
+
+def delete_existing_declaration(contract_name: str):
+    with open("goerli.declarations.txt", "r+") as f:
+        new_f = f.readlines()
+        f.seek(0)
+        for line in new_f:
+            if contract_name not in line:
+                f.write(line)
+        f.truncate()

@@ -5,10 +5,10 @@ from collections import namedtuple
 from realms_cli.caller_invoker import wrapped_send, compile,  wrapped_declare
 from realms_cli.deployer import logged_deploy
 from realms_cli.config import Config
-from realms_cli.utils import strhex_as_felt
+from realms_cli.utils import strhex_as_felt, delete_existing_deployment, delete_existing_declaration
 
 
-Contracts = namedtuple('Contracts', 'contract_name')
+Contracts = namedtuple('Contracts', 'name')
 
 # STEPS
 # 0. Set new names in array accordingly to the tuple structure
@@ -23,8 +23,8 @@ NEW_MODULES = [
     # Contracts("ModuleController"),
     # Contracts("Buildings"),
     # Contracts("Calculator"),
-    # Contracts("Labor"),
-    Contracts("Combat"),
+    Contracts("Labor"),
+    # Contracts("Combat"),
     # Contracts("Settling"),
     # Contracts("Food"),
     # Contracts("Resources"),
@@ -51,44 +51,29 @@ async def run(nre):
 
     for contract in NEW_MODULES:
 
-        location = find_file(
-            '/workspaces/realms-contracts', contract.contract_name + '.cairo')
+        delete_existing_deployment(contract.name)
 
-        with open("goerli.deployments.txt", "r+") as f:
-            new_f = f.readlines()
-            f.seek(0)
-            for line in new_f:
-                if contract.contract_name + ".json:" + contract.contract_name not in line:
-                    f.write(line)
-            f.truncate()
+        delete_existing_declaration(contract.name)
 
-        with open("goerli.declarations.txt", "r+") as f:
-            new_f = f.readlines()
-            f.seek(0)
-            for line in new_f:
-                if contract.contract_name not in line:
-                    f.write(line)
-            f.truncate()
-
-        compile(contract_alias=location)
+        compile(contract.name)
 
         await logged_deploy(
             nre,
             config.ADMIN_ALIAS,
-            contract.contract_name,
-            alias=contract.contract_name,
+            contract.name,
+            alias=contract.name,
             calldata=[],
         )
 
         class_hash = await wrapped_declare(
-            config.ADMIN_ALIAS, location, nre.network, contract.contract_name)
+            config.ADMIN_ALIAS, contract.name, nre.network, contract.name)
 
         time.sleep(60)
 
         await wrapped_send(
             network=config.nile_network,
             signer_alias=config.ADMIN_ALIAS,
-            contract_alias="proxy_" + contract.contract_name,
+            contract_alias="proxy_" + contract.name,
             function="upgrade",
             arguments=[strhex_as_felt(class_hash)],
         )

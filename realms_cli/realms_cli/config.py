@@ -60,7 +60,7 @@ class Config:
     def __init__(self, nile_network: str):
         self.nile_network = "127.0.0.1" if nile_network == "localhost" else nile_network
 
-        self.MAX_FEE = 9999943901396300
+        self.MAX_FEE = 99999439013963000
 
         self.Arbiter_alias = "proxy_" + ContractAlias.Arbiter
         self.Module_Controller_alias = "proxy_" + ContractAlias.ModuleController
@@ -84,15 +84,15 @@ class Config:
 
         self.Exchange_ERC20_1155_alias = "proxy_" + ContractAlias.Exchange_ERC20_1155
 
-        self.ADMIN_ALIAS = "STARKNET_PRIVATE_KEY"
+        self.ADMIN_ALIAS = "STARKNET_ADMIN_PRIVATE_KEY"
         self.ADMIN_ADDRESS, _ = safe_load_deployment(
-            "account-0", self.nile_network)
+            "account-1", self.nile_network)
 
         self.INITIAL_LORDS_SUPPLY = 500000000 * (10 ** 18)
 
-        self.USER_ALIAS = "STARKNET_ADMIN_PRIVATE_KEY"
+        self.USER_ALIAS = "STARKNET_PRIVATE_KEY"
         self.USER_ADDRESS, _ = safe_load_deployment(
-            "account-1", self.nile_network)
+            "account-0", self.nile_network)
 
         self.ARBITER_ADDRESS, _ = safe_load_deployment(
             ContractAlias.Arbiter, self.nile_network)

@@ -152,12 +152,12 @@ namespace Labor {
 
         // check
         if (resource_id == ResourceIds.fish) {
-            let le = is_le(realm_data.harbours, qty_built + 1);
+            let le = is_le(qty_built, realm_data.harbours);
             assert_not_zero(le);
             return ();
         }
         if (resource_id == ResourceIds.wheat) {
-            let le = is_le(realm_data.rivers, qty_built + 1);
+            let le = is_le(qty_built, realm_data.rivers);
             assert_not_zero(le);
             return ();
         }

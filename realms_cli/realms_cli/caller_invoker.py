@@ -6,8 +6,8 @@ probably also just call nile python functions.
 import re
 import subprocess
 import asyncio
+import os
 
-from nile.common import prepare_params, ABIS_DIRECTORY, BUILD_DIRECTORY
 from nile.core.declare import declare
 from nile.core.account import Account, get_nonce
 from nile.starknet_cli import execute_call
@@ -222,22 +222,37 @@ def deploy(network, alias) -> str:
 
 def compile(contract_alias) -> str:
     """Nile call function."""
+
+    location = find_file(
+        '/workspaces/realms-contracts', contract_alias + '.cairo')
+
     command = [
         "nile",
         "compile",
-        contract_alias,
+        location,
     ]
     return subprocess.check_output(command).strip().decode("utf-8")
 
 
+def find_file(root_dir, file_name):
+    for dirpath, dirnames, filenames in os.walk(root_dir):
+        for f in filenames:
+            if f == file_name:
+                return os.path.relpath(os.path.join(dirpath, f), root_dir)
+    return None
+
+
 async def wrapped_declare(account, contract_name, network, alias):
+
+    location = find_file(
+        '/workspaces/realms-contracts', contract_name + '.cairo')
 
     account = await Account(account, network)
 
     config = Config(nile_network=network)
 
     contract_class = compile_starknet_files(
-        files=[f"{contract_name}"], debug_info=True, cairo_path=["/workspaces/realms-contracts/lib/cairo_contracts/src"]
+        files=[f"{location}"], debug_info=True, cairo_path=["/workspaces/realms-contracts/lib/cairo_contracts/src"]
     )
     nonce = await get_nonce(account.address, network)
 
@@ -248,7 +263,7 @@ async def wrapped_declare(account, contract_name, network, alias):
         max_fee=config.MAX_FEE,
     )
 
-    class_hash, _ = await declare(sender=account.address, contract_name=alias, signature=[
+    class_hash, _ = await declare(sender=account.address, contract_name=contract_name, signature=[
         sig_r, sig_s], alias=alias, network=network, max_fee=config.MAX_FEE)
 
     return class_hash

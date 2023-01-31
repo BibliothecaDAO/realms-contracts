@@ -16,7 +16,6 @@ async def logged_deploy(nre, account, contract_name, alias, calldata):
     # seed needs to be different for every deployment, hence use of time
 
     current_time = time.time()
-    print(int(current_time))
 
     address, tx_hash, abi = await deploy_contract(
         account=account,

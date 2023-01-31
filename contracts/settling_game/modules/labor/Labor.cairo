@@ -477,7 +477,7 @@ func create_food{
     Labor.assert_resource_ids(resource_id.low);
 
     // assert enough traits
-    // Labor.assert_enough_traits(realms_data, resource_id.low, qty_built);
+    Labor.assert_enough_traits(realms_data, resource_id.low, qty_built);
 
     // can't build 0
     assert_not_zero(qty_built);
