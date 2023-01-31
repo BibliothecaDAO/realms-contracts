@@ -1,6 +1,4 @@
 import time
-import os
-
 from collections import namedtuple
 from realms_cli.caller_invoker import wrapped_send, compile,  wrapped_declare
 from realms_cli.deployer import logged_deploy
@@ -33,14 +31,6 @@ NEW_MODULES = [
     # Contracts("Resources_ERC1155_Mintable_Burnable"),
     # Contracts("Exchange_ERC20_1155"),
 ]
-
-
-def find_file(root_dir, file_name):
-    for dirpath, dirnames, filenames in os.walk(root_dir):
-        for f in filenames:
-            if f == file_name:
-                return os.path.relpath(os.path.join(dirpath, f), root_dir)
-    return None
 
 
 async def run(nre):
