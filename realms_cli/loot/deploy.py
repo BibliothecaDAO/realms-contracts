@@ -4,6 +4,7 @@ from realms_cli.caller_invoker import wrapped_send, wrapped_declare
 from realms_cli.config import Config, safe_load_deployment
 from realms_cli.utils import str_to_felt, strhex_as_felt
 from enum import IntEnum
+import time
 
 
 class ExternalContractIds(IntEnum):
@@ -77,6 +78,8 @@ async def run(nre):
             calldata=[],
         )
 
+        time.sleep(60)
+
         await logged_deploy(
             nre,
             config.ADMIN_ALIAS,
@@ -85,9 +88,11 @@ async def run(nre):
             calldata=[strhex_as_felt(class_hash)],
         )
 
+        time.sleep(60)
+
     # wait 120s - this will reduce on mainnet
-    # print('🕒 Waiting for deploy before invoking')
-    # time.sleep(120)
+    print('🕒 Waiting for deploy before invoking')
+    time.sleep(120)
 
     await wrapped_send(
         network=config.nile_network,

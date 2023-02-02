@@ -3,6 +3,7 @@ from nile.core.account import Account
 from nile.core.deploy import deploy_contract
 from realms_cli.config import Config
 from realms_cli.utils import strhex_as_felt
+from realms_cli.caller_invoker import get_tx_status
 import time
 
 
@@ -29,7 +30,6 @@ async def logged_deploy(nre, account, contract_name, alias, calldata):
         max_fee=config.MAX_FEE
     )
     print(address, tx_hash, abi)
-    print("waiting 5 sec")
-    time.sleep(5)
+    get_tx_status(nre.network, str(tx_hash),)
 
     return address, tx_hash, abi

@@ -13,7 +13,7 @@ from nile.core.account import Account, get_nonce
 from nile.starknet_cli import execute_call
 from nile import deployments
 from nile.core.call_or_invoke import call_or_invoke
-from nile.utils import hex_address
+from nile.utils import hex_address, felt_to_str
 from realms_cli.config import Config
 from starkware.starknet.compiler.compile import compile_starknet_files
 
@@ -263,7 +263,9 @@ async def wrapped_declare(account, contract_name, network, alias):
         max_fee=config.MAX_FEE,
     )
 
-    class_hash, _ = await declare(sender=account.address, contract_name=contract_name, signature=[
+    class_hash, tx_hash = await declare(sender=account.address, contract_name=contract_name, signature=[
         sig_r, sig_s], alias=alias, network=network, max_fee=config.MAX_FEE)
+
+    get_tx_status(network, str(tx_hash),)
 
     return class_hash
