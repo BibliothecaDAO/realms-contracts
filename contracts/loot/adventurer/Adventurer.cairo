@@ -89,11 +89,6 @@ func treasury_address() -> (address: felt) {
 func adventurer(tokenId: Uint256) -> (adventurer: PackedAdventurerState) {
 }
 
-// balance of $LORDS
-@storage_var
-func adventurer_balance(tokenId: Uint256) -> (balance: Uint256) {
-}
-
 @storage_var
 func adventurer_image(tokenId: Uint256) -> (image: felt) {
 }
