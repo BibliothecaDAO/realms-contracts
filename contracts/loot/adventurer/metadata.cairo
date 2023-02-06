@@ -26,7 +26,7 @@ from contracts.settling_game.utils.game_structs import ExternalContractIds
 from contracts.loot.beast.interface import IBeast
 from contracts.loot.loot.ILoot import ILoot
 from contracts.settling_game.interfaces.IRealms import IRealms
-from contracts.settling_game.interfaces.Imodules import IModuleController
+from contracts.settling_game.interfaces.imodules import IModuleController
 
 namespace AdventurerUriUtils {
     namespace Symbols {

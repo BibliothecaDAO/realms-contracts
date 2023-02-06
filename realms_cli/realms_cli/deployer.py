@@ -1,35 +1,27 @@
 """Helper functions for repeating nre patterns."""
-from nile.core.account import Account
-from nile.core.deploy import deploy_contract
-from realms_cli.config import Config
-from realms_cli.utils import strhex_as_felt
+from nile.core.types.account import Account
 from realms_cli.caller_invoker import get_tx_status
 import time
 
 
-async def logged_deploy(nre, account, contract_name, alias, calldata):
+async def logged_deploy(network, account, contract_name, alias, calldata):
     print(f"deploying {alias} contract")
 
-    account = await Account(account, nre.network)
-
-    config = Config(nile_network=nre.network)
-
-    # seed needs to be different for every deployment, hence use of time
+    account = await Account(account, network)
 
     current_time = time.time()
 
-    address, tx_hash, abi = await deploy_contract(
-        account=account,
+    tx_wrapper = await account.deploy_contract(
         contract_name=contract_name,
         salt=int(current_time),
         unique=False,
         calldata=calldata,
         alias=alias,
-        deployer_address=strhex_as_felt(
-            '0x041a78e741e5af2fec34b695679bc6891742439f7afb8484ecd7766661ad02bf'),
-        max_fee=config.MAX_FEE
+        max_fee=11111111111111
     )
-    print(address, tx_hash, abi)
-    get_tx_status(nre.network, str(tx_hash),)
 
-    return address, tx_hash, abi
+    await tx_wrapper.execute(watch_mode='track')
+
+    get_tx_status(network, str(tx_wrapper.hash),)
+
+    return tx_wrapper

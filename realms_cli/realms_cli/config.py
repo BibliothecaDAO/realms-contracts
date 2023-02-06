@@ -86,7 +86,7 @@ class Config:
 
         self.ADMIN_ALIAS = "STARKNET_ADMIN_PRIVATE_KEY"
         self.ADMIN_ADDRESS, _ = safe_load_deployment(
-            "account-1", self.nile_network)
+            "STARKNET_ADMIN_PRIVATE_KEY", self.nile_network)
 
         self.INITIAL_LORDS_SUPPLY = 500000000 * (10 ** 18)
 
@@ -102,6 +102,11 @@ class Config:
         self.ARBITER_PROXY_ADDRESS, _ = safe_load_deployment(
             "proxy_" + ContractAlias.Arbiter, self.nile_network)
         self.CONTROLLER_PROXY_ADDRESS, _ = safe_load_deployment(
+            "proxy_" + ContractAlias.ModuleController, self.nile_network)
+
+        self.ARBITER_LOOT_PROXY_ADDRESS, _ = safe_load_deployment(
+            "proxy_" + ContractAlias.Arbiter, self.nile_network)
+        self.CONTROLLER_LOOT_PROXY_ADDRESS, _ = safe_load_deployment(
             "proxy_" + ContractAlias.ModuleController, self.nile_network)
 
         self.LORDS_ADDRESS, _ = safe_load_deployment(
