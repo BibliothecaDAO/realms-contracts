@@ -17,10 +17,10 @@ async def mint_loot(network):
 
     await wrapped_send(
         network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
+        signer_alias=config.ADMIN_ALIAS,
         contract_alias="proxy_Loot",
         function="mint",
-        arguments=[config.USER_ADDRESS]
+        arguments=[config.ADMIN_ADDRESS]
     )
 
     print('🎲 Minted random item ✅')
@@ -56,6 +56,7 @@ async def get_loot(loot_token_id, network):
 
     print("_________ LOOT ITEM - " + str(out[0]) + "___________")
     print_over_colums(pretty_out)
+
 
 @click.command()
 @click.argument("loot_token_id", nargs=1)

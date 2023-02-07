@@ -303,6 +303,7 @@ func setItemById{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 
 // @notice Get xiroshiro random number
 // @return dice_roll: Random number
+@view
 func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}() -> (
     dice_roll: felt
 ) {

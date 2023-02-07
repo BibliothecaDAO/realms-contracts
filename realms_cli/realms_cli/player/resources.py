@@ -2,7 +2,7 @@
 import json
 import click
 
-from nile.core.account import Account
+from nile.core.types.account import Account
 from ecdsa import SigningKey, SECP256k1
 
 from realms_cli.caller_invoker import wrapped_call, wrapped_send

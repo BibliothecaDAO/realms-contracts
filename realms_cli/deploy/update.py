@@ -1,9 +1,9 @@
-import time
 from collections import namedtuple
+from nile.common import get_class_hash
 from realms_cli.caller_invoker import wrapped_send, compile,  wrapped_declare
 from realms_cli.deployer import logged_deploy
 from realms_cli.config import Config
-from realms_cli.utils import strhex_as_felt, delete_existing_deployment, delete_existing_declaration
+from realms_cli.utils import delete_existing_deployment, delete_existing_declaration
 
 
 Contracts = namedtuple('Contracts', 'name')
@@ -21,7 +21,7 @@ NEW_MODULES = [
     # Contracts("ModuleController"),
     # Contracts("Buildings"),
     # Contracts("Calculator"),
-    Contracts("Labor"),
+    # Contracts("Labor"),
     # Contracts("Combat"),
     # Contracts("Settling"),
     # Contracts("Food"),
@@ -30,6 +30,8 @@ NEW_MODULES = [
     # Contracts("S_Realms_ERC721_Mintable"),
     # Contracts("Resources_ERC1155_Mintable_Burnable"),
     # Contracts("Exchange_ERC20_1155"),
+    # Contracts("Adventurer"),
+    Contracts("Loot"),
 ]
 
 
@@ -47,23 +49,23 @@ async def run(nre):
 
         compile(contract.name)
 
+        await wrapped_declare(
+            config.ADMIN_ALIAS, contract.name, nre.network, contract.name)
+
         await logged_deploy(
-            nre,
+            nre.network,
             config.ADMIN_ALIAS,
             contract.name,
             alias=contract.name,
             calldata=[],
         )
 
-        class_hash = await wrapped_declare(
-            config.ADMIN_ALIAS, contract.name, nre.network, contract.name)
-
-        time.sleep(60)
+        class_hash = get_class_hash(contract.name)
 
         await wrapped_send(
             network=config.nile_network,
             signer_alias=config.ADMIN_ALIAS,
             contract_alias="proxy_" + contract.name,
             function="upgrade",
-            arguments=[strhex_as_felt(class_hash)],
+            arguments=[class_hash],
         )

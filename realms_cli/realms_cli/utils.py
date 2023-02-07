@@ -1,6 +1,6 @@
 import struct
 from typing import List
-
+from nile.common import get_class_hash, ABIS_DIRECTORY
 from nile import deployments
 
 
@@ -130,3 +130,7 @@ def delete_existing_declaration(contract_name: str):
             if contract_name not in line:
                 f.write(line)
         f.truncate()
+
+
+def get_contract_abi(contract_name):
+    return f"{ABIS_DIRECTORY}/{contract_name}.json"

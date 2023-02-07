@@ -5,6 +5,7 @@ from realms_cli.config import Config
 from realms_cli.utils import print_over_colums, uint, felt_to_str, str_to_felt
 from realms_cli.loot.constants import BEASTS
 
+
 @click.command()
 @click.argument("beast_token_id", nargs=1)
 @click.option("--network", default="goerli")
@@ -54,7 +55,7 @@ async def attack_beast(beast, network):
 
     await wrapped_send(
         network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
+        signer_alias=config.ADMIN_ALIAS,
         contract_alias="proxy_Beast",
         function="attack",
         arguments=[*uint(beast)]
@@ -83,12 +84,14 @@ async def attack_beast(beast, network):
     if adventurer_out[4] == '0':
         print(f"🪦 You have been killed")
     else:
-        print(f"🤕 You didn't kill and were counterattacked, you have {adventurer_out[4]} health remaining")
+        print(
+            f"🤕 You didn't kill and were counterattacked, you have {adventurer_out[4]} health remaining")
 
     if beast_out[6] == '0':
         print(f"💀 You have killed the {BEASTS[str(int(beast_out[0]))]} 🎉")
     else:
-        print(f"👹 You hurt the {BEASTS[str(int(beast_out[0]))]}, health is now {beast_out[6]}")
+        print(
+            f"👹 You hurt the {BEASTS[str(int(beast_out[0]))]}, health is now {beast_out[6]}")
 
 
 @click.command()
@@ -132,4 +135,5 @@ async def flee_from_beast(beast, network):
     if adventurer_out[23] == '0':
         print(f"🏃‍♂️ You successfully fled from beast ✅")
     if adventurer_out[23] == '1':
-        print(f"😫 You have been ambushed! Your health is now {adventurer_out[4]}")
+        print(
+            f"😫 You have been ambushed! Your health is now {adventurer_out[4]}")

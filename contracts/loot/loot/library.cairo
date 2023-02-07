@@ -176,7 +176,7 @@ namespace ItemLib {
     // @notice Returns a name prefix for the provided random number that is consistent with the Loot Contract
     // @param item_id: The id of the item to get a name prefix for
     // @param rnd: A random number
-    // @return The name prefix
+    // @return name_prefix: The name prefix
     func generate_name_prefix{syscall_ptr: felt*, range_check_ptr}(item_id: felt, rnd: felt) -> (
         name_prefix: felt
     ) {
@@ -222,7 +222,7 @@ namespace ItemLib {
     func assign_item_name_suffix{syscall_ptr: felt*, range_check_ptr}(item: Item, rnd: felt) -> (
         updated_item: Item
     ) {
-        let (updated_name_suffix) = generate_name_suffix(rnd);
+        let (updated_name_suffix) = generate_name_suffix(item.id, rnd);
 
         let updated_item = Item(
             Id=item.Id,
@@ -296,7 +296,7 @@ namespace ItemLib {
     // @param rnd: A random number
     // @return updated_item: The provided item with a canoncially sound suffix added
     func assign_item_suffix{syscall_ptr: felt*, range_check_ptr}(item: Item, rnd: felt) -> Item {
-        let (updated_suffix) = generate_item_suffix(rnd);
+        let (updated_suffix) = generate_item_suffix(item.Id, rnd);
 
         let updated_item = Item(
             Id=item.Id,
@@ -320,6 +320,7 @@ namespace ItemLib {
     // @notice Returns an item suffix for the provided item that is consistent with the Loot Contract
     // @param item_id: The id of the item to get a name prefix for
     // @param rnd: A random number
+    // @return item_suffix: An item suffix
     func generate_item_suffix{syscall_ptr: felt*, range_check_ptr}(item_id: felt, rnd: felt) -> (
         item_suffix: felt
     ) {

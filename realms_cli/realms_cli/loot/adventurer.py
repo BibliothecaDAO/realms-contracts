@@ -1,4 +1,3 @@
-import anyio
 import asyncclick as click
 from realms_cli.caller_invoker import wrapped_proxy_call, wrapped_send
 from realms_cli.config import Config
@@ -29,11 +28,11 @@ async def mint_adventurer(network, race, home_realm, name, order, image_hash_1, 
 
     await wrapped_send(
         network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
+        signer_alias=config.ADMIN_ALIAS,
         contract_alias=config.Lords_ERC20_Mintable_alias,
         function="mint",
         arguments=[
-            config.USER_ADDRESS,
+            config.ADMIN_ADDRESS,
             100 * 10 ** 18,           # uint 1
             0                         # uint 2
         ]
@@ -45,7 +44,7 @@ async def mint_adventurer(network, race, home_realm, name, order, image_hash_1, 
 
     await wrapped_send(
         network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
+        signer_alias=config.ADMIN_ALIAS,
         contract_alias=config.Lords_ERC20_Mintable_alias,
         function="approve",
         arguments=[
@@ -55,23 +54,23 @@ async def mint_adventurer(network, race, home_realm, name, order, image_hash_1, 
         ]
     )
 
-    print('👍 Approved lords to be spent ✅')
+    # print('👍 Approved lords to be spent ✅')
 
-    print('🤴 Minting adventurer ...')
+    # print('🤴 Minting adventurer ...')
 
     await wrapped_send(
         network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
+        signer_alias=config.ADMIN_ALIAS,
         contract_alias="proxy_Adventurer",
         function="mint",
         arguments=[
-            config.USER_ADDRESS,
-            int(race),
-            int(home_realm),
+            config.ADMIN_ADDRESS,
+            str_to_felt(race),
+            str_to_felt(home_realm),
             str_to_felt(name),
-            int(order),
-            strhex_as_felt(image_hash_1),
-            strhex_as_felt(image_hash_2)
+            str_to_felt(order),
+            str_to_felt(image_hash_1),
+            str_to_felt(image_hash_2)
         ]
     )
 
@@ -138,6 +137,7 @@ async def equip(network, adventurer, item):
 
     print('🫴 Equiped item ✅')
 
+
 @click.command()
 @click.option("--network", default="goerli")
 @click.option('--adventurer', is_flag=False,
@@ -162,6 +162,7 @@ async def unequip(network, adventurer, item):
 
     print('🫳 Unequiped item ...')
 
+
 @click.command()
 @click.option("--network", default="goerli")
 @click.option('--adventurer', is_flag=False,
@@ -176,7 +177,7 @@ async def explore(network, adventurer):
 
     await wrapped_send(
         network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
+        signer_alias=config.ADMIN_ALIAS,
         contract_alias="proxy_Adventurer",
         function="explore",
         arguments=[*uint(adventurer)]
