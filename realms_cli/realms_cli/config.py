@@ -28,6 +28,8 @@ class ContractAlias(auto):
     S_Realms_ERC721_Mintable = 'S_Realms_ERC721_Mintable'
     Resources_ERC1155_Mintable_Burnable = 'Resources_ERC1155_Mintable_Burnable'
     Exchange_ERC20_1155 = 'Exchange_ERC20_1155'
+    ModuleLootController = 'ModuleController_Loot'
+    ArbiterLoot = 'Arbiter_Loot'
 
 
 def safe_load_deployment(alias: str, network: str):
@@ -105,9 +107,9 @@ class Config:
             "proxy_" + ContractAlias.ModuleController, self.nile_network)
 
         self.ARBITER_LOOT_PROXY_ADDRESS, _ = safe_load_deployment(
-            "proxy_" + ContractAlias.Arbiter, self.nile_network)
+            "proxy_" + ContractAlias.ArbiterLoot, self.nile_network)
         self.CONTROLLER_LOOT_PROXY_ADDRESS, _ = safe_load_deployment(
-            "proxy_" + ContractAlias.ModuleController, self.nile_network)
+            "proxy_" + ContractAlias.ModuleLootController, self.nile_network)
 
         self.LORDS_ADDRESS, _ = safe_load_deployment(
             ContractAlias.Lords_ERC20_Mintable, self.nile_network)
@@ -247,9 +249,11 @@ class Config:
             "HomeRealm",
             "Birthdate",
             "Name",
+            "Order",
+            "ImageHash1",
+            "ImageHash2",
             "Health",
             "Level",
-            "Order",
             "Strength",
             "Dexterity",
             "Vitality",

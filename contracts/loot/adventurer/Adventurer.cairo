@@ -177,11 +177,11 @@ func mint{
     let (lords_address) = Module.get_external_contract_address(ExternalContractIds.Lords);
 
     // send to Nexus
-    // let (treasury) = Module.get_external_contract_address(ExternalContractIds.Treasury);
-    // IERC20.transferFrom(lords_address, caller, treasury, Uint256(MINT_COST, 0));
+    let (treasury) = Module.get_external_contract_address(ExternalContractIds.Treasury);
+    IERC20.transferFrom(lords_address, caller, treasury, Uint256(MINT_COST, 0));
     // send to this contract and set Balance of Adventurer
-    // let (this) = get_contract_address();
-    // IERC20.transferFrom(lords_address, caller, this, Uint256(MINT_COST, 0));
+    let (this) = get_contract_address();
+    IERC20.transferFrom(lords_address, caller, this, Uint256(MINT_COST, 0));
     adventurer_balance.write(next_adventurer_id, Uint256(MINT_COST, 0));
 
     return ();

@@ -24,35 +24,35 @@ async def mint_adventurer(network, race, home_realm, name, order, image_hash_1, 
     """
     config = Config(nile_network=network)
 
-    # print('🪙 Minting lords ...')
+    print('🪙 Minting lords ...')
 
-    # await wrapped_send(
-    #     network=config.nile_network,
-    #     signer_alias=config.ADMIN_ALIAS,
-    #     contract_alias=config.Lords_ERC20_Mintable_alias,
-    #     function="mint",
-    #     arguments=[
-    #         config.USER_ADDRESS,
-    #         100 * 10 ** 18,           # uint 1
-    #         0                         # uint 2
-    #     ]
-    # )
+    await wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias=config.Lords_ERC20_Mintable_alias,
+        function="mint",
+        arguments=[
+            config.ADMIN_ADDRESS,
+            100 * 10 ** 18,           # uint 1
+            0                         # uint 2
+        ]
+    )
 
-    # print('🪙 Minted lords ✅')
+    print('🪙 Minted lords ✅')
 
-    # print('👍 Approving lords to be spent ...')
+    print('👍 Approving lords to be spent ...')
 
-    # await wrapped_send(
-    #     network=config.nile_network,
-    #     signer_alias=config.ADMIN_ALIAS,
-    #     contract_alias=config.Lords_ERC20_Mintable_alias,
-    #     function="approve",
-    #     arguments=[
-    #         config.ADVENTURER_PROXY_ADDRESS,
-    #         100 * 10 ** 18,       # uint 1
-    #         0,                    # uint 2
-    #     ]
-    # )
+    await wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias=config.Lords_ERC20_Mintable_alias,
+        function="approve",
+        arguments=[
+            config.ADVENTURER_PROXY_ADDRESS,
+            100 * 10 ** 18,       # uint 1
+            0,                    # uint 2
+        ]
+    )
 
     # print('👍 Approved lords to be spent ✅')
 
@@ -177,7 +177,7 @@ async def explore(network, adventurer):
 
     await wrapped_send(
         network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
+        signer_alias=config.ADMIN_ALIAS,
         contract_alias="proxy_Adventurer",
         function="explore",
         arguments=[*uint(adventurer)]
