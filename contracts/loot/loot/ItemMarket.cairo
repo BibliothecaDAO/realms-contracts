@@ -236,13 +236,30 @@ func item(tokenId: Uint256) -> (item: Item) {
 
 // @notice Mint random item
 // @param to: Address to mint the item to
-@external
-func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: felt) {
+// @external
+// func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: felt) {
+//     alloc_locals;
+
+// // fetch new item with random Id
+//     let (rnd) = get_random_number();
+//     let (new_item: Item) = ItemLib.generate_random_item(rnd);
+
+// let (next_id) = counter.read();
+
+// item.write(Uint256(next_id + 1, 0), new_item);
+
+// ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
+
+// counter.write(next_id + 1);
+//     return ();
+// }
+
+func mintFromMart{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    to: felt, item_id: felt
+) {
     alloc_locals;
 
-    // fetch new item with random Id
-    let (rnd) = get_random_number();
-    let (new_item: Item) = ItemLib.generate_random_item(rnd);
+    let (new_item: Item) = ItemLib.generate_item_by_id(item_id);
 
     let (next_id) = counter.read();
 
@@ -333,6 +350,13 @@ func getItemByTokenId{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 
     return (item_,);
 }
+
+// --------------------
+// Market
+// --------------------
+
+// This uses a Seed which is created every 12hrs. From this seed X number of items can be purchased
+// after they have been bidded on.
 
 namespace BidStatus {
     const closed = 0;
@@ -490,9 +514,10 @@ func bidOnItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 }
 
 @external
-func claimItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(tokenId: Uint256) {
+func claimItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(item_id: Uint256) {
+    alloc_locals;
     let (caller) = get_caller_address();
-    let (current_bid) = bid.read(tokenId);
+    let (current_bid) = bid.read(item_id);
 
     with_attr error_message("Item Market: Item not available") {
         assert current_bid.status = BidStatus.open;
@@ -502,9 +527,11 @@ func claimItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         assert current_bid.bidder = caller;
     }
 
-    // mint item // transfer item from contract to buyer.
+    mintFromMart(caller, item_id.low);
 
-    bid.write(tokenId, Bid(current_bid.price, 0, caller, 0));
+    // spend gold & mint...
+
+    bid.write(item_id, Bid(current_bid.price, 0, caller, 0));
 
     return ();
 }

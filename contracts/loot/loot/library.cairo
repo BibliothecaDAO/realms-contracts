@@ -92,6 +92,43 @@ namespace ItemLib {
         );
     }
 
+    func generate_item_by_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        Id: felt
+    ) -> (item: Item) {
+
+
+        let (Slot) = ItemStats.item_slot(Id);  // determined by Id
+        let (Type) = ItemStats.item_type(Id);  // determined by Id
+        let (Material) = ItemStats.item_material(Id);  // determined by Id
+        let (Rank) = ItemStats.item_rank(Id);  // determined by Id
+        let Prefix_1 = 0;  // name prefix blank
+        let Prefix_2 = 0;  // name suffix blank
+        let Suffix = 0;  // suffix blank
+        let Greatness = 0;  // greatness blank, random?
+        let (CreatedBlock) = get_block_timestamp();  // timestamp
+        let XP = 0;  // xp blank
+        let Adventurer = 0;  // adventurer blank
+        let Bag = 0;  // bag blank
+
+        return (
+            Item(
+                Id=Id,
+                Slot=Slot,
+                Type=Type,
+                Material=Material,
+                Rank=Rank,
+                Prefix_1=Prefix_1,
+                Prefix_2=Prefix_2,
+                Suffix=Suffix,
+                Greatness=Greatness,
+                CreatedBlock=CreatedBlock,
+                XP=XP,
+                Adventurer=Adventurer,
+                Bag=Bag,
+            ),
+        );
+    }
+
     func generate_starter_weapon{syscall_ptr: felt*, range_check_ptr}(item_id: felt) -> (
         item: Item
     ) {
