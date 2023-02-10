@@ -4,6 +4,7 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le
 from starkware.starknet.common.syscalls import get_block_timestamp
+from starkware.cairo.common.cairo_builtins import HashBuiltin
 
 from contracts.loot.constants.item import Item
 from contracts.loot.loot.stats.item import ItemStats
@@ -52,7 +53,9 @@ namespace ItemLib {
         return updated_item;
     }
 
-    func generate_random_item{syscall_ptr: felt*, range_check_ptr}(rnd: felt) -> (item: Item) {
+    func generate_random_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        rnd: felt
+    ) -> (item: Item) {
         let (_, r) = unsigned_div_rem(rnd, 101);
 
         // set blank item
