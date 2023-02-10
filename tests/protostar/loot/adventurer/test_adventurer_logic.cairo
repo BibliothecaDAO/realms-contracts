@@ -11,10 +11,10 @@ from contracts.loot.constants.rankings import ItemRank
 from contracts.loot.loot.stats.item import ItemStats
 from contracts.loot.constants.physics import MaterialDensity
 from contracts.loot.constants.adventurer import (
-    Adventurer, 
-    AdventurerState, 
-    PackedAdventurerState, 
-    AdventurerStatus
+    Adventurer,
+    AdventurerState,
+    PackedAdventurerState,
+    AdventurerStatus,
 )
 from contracts.loot.adventurer.library import AdventurerLib
 
@@ -30,8 +30,7 @@ from tests.protostar.loot.test_structs import (
 )
 
 @external
-func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() 
-{
+func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
 
     let addresses: Contracts = deploy_all();
@@ -48,9 +47,7 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     ILords.approve(addresses.lords, addresses.adventurer, Uint256(100000000000000000000, 0));
 
-    %{
-        stop_prank_lords()
-    %}
+    %{ stop_prank_lords() %}
 
     return ();
 }
@@ -74,11 +71,59 @@ func test_mint{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     %}
 
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
-    let (local allowance: Uint256) = ILords.allowance(lords_address, account_1_address, adventurer_address);
+    let (local allowance: Uint256) = ILords.allowance(
+        lords_address, account_1_address, adventurer_address
+    );
     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
     let (new_balance: Uint256) = ILords.balanceOf(lords_address, account_1_address);
 
     assert new_balance = Uint256(0, 0);
+    %{
+        stop_prank_realms()
+        stop_prank_adventurer()
+    %}
+
+    return ();
+}
+
+@external
+func test_mint_with_starting_weapon{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+}() {
+    alloc_locals;
+
+    local account_1_address;
+    local realms_address;
+    local adventurer_address;
+    local lords_address;
+    local loot_address;
+
+    %{
+        ids.account_1_address = context.account_1
+        ids.realms_address = context.realms
+        ids.adventurer_address = context.adventurer
+        ids.lords_address = context.lords
+        stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
+        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+    %}
+
+    IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
+    let (local allowance: Uint256) = ILords.allowance(
+        lords_address, account_1_address, adventurer_address
+    );
+
+    // Mint an adventurer with a book as a starting weapon
+    IAdventurer.mint_with_starting_weapon(
+        adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, ItemIds.Book
+    );
+    let (new_balance: Uint256) = ILords.balanceOf(lords_address, account_1_address);
+
+    assert new_balance = Uint256(0, 0);
+
+    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
+    let (adventurer_item) = ILoot.getItemByTokenId(loot_address, Uint256(adventurer.WeaponId, 0));
+    assert adventurer_item.Id = ItemIds.Book;
+
     %{
         stop_prank_realms()
         stop_prank_adventurer()
@@ -107,15 +152,15 @@ func test_equip_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     %}
     let (timestamp) = get_block_timestamp();
     ILoot.mint(loot_address, account_1_address);
-    ILoot.setItemById(loot_address, Uint256(1,0), ItemIds.Wand, 0, 0, 0, 0);
+    ILoot.setItemById(loot_address, Uint256(1, 0), ItemIds.Wand, 0, 0, 0, 0);
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
     %{
         stop_prank_loot()
         stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address)
     %}
-    IAdventurer.equip_item(adventurer_address, Uint256(1,0), Uint256(1,0));
-    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
+    IAdventurer.equip_item(adventurer_address, Uint256(1, 0), Uint256(1, 0));
+    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
     let (adventurer_item) = ILoot.getItemByTokenId(loot_address, Uint256(adventurer.WeaponId, 0));
     assert adventurer_item.Id = ItemIds.Wand;
 
@@ -148,16 +193,16 @@ func test_unequip_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     %}
     let (timestamp) = get_block_timestamp();
     ILoot.mint(loot_address, account_1_address);
-    ILoot.setItemById(loot_address, Uint256(1,0), ItemIds.Wand, 15, 0, 0, 0);
+    ILoot.setItemById(loot_address, Uint256(1, 0), ItemIds.Wand, 15, 0, 0, 0);
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
     %{
         stop_prank_loot()
         stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address)
     %}
-    IAdventurer.equip_item(adventurer_address, Uint256(1,0), Uint256(1,0));
-    IAdventurer.unequip_item(adventurer_address, Uint256(1,0), Uint256(1,0));
-    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
+    IAdventurer.equip_item(adventurer_address, Uint256(1, 0), Uint256(1, 0));
+    IAdventurer.unequip_item(adventurer_address, Uint256(1, 0), Uint256(1, 0));
+    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
     let (adventurer_item) = ILoot.getItemByTokenId(loot_address, Uint256(adventurer.WeaponId, 0));
     assert adventurer_item.Id = 0;
 
@@ -195,8 +240,8 @@ func test_deduct_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_ch
         stop_prank_adventurer()
         stop_prank_adventurer = start_prank(ids.loot_address, ids.adventurer_address)
     %}
-    IAdventurer.deduct_health(adventurer_address, Uint256(1,0), 50);
-    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
+    IAdventurer.deduct_health(adventurer_address, Uint256(1, 0), 50);
+    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
     assert adventurer.Health = 50;
     %{
         stop_prank_realms()
@@ -222,7 +267,6 @@ func test_increase_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
         ids.loot_address = context.loot
         stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
-        
     %}
 
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
@@ -233,7 +277,7 @@ func test_increase_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
         stop_prank_adventurer = start_prank(ids.loot_address, ids.adventurer_address)
     %}
 
-    let adventurer_token_id = Uint256(1,0);
+    let adventurer_token_id = Uint256(1, 0);
     IAdventurer.increase_xp(adventurer_address, adventurer_token_id, 10);
 
     let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_token_id);
@@ -271,9 +315,9 @@ func test_explore{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
 
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
-    IAdventurer.explore(adventurer_address, Uint256(1,0));
+    IAdventurer.explore(adventurer_address, Uint256(1, 0));
 
-    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
+    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
 
     assert adventurer.Status = AdventurerStatus.Battle;
 

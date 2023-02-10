@@ -236,25 +236,8 @@ func item(tokenId: Uint256) -> (item: Item) {
 
 // @notice Mint random item
 // @param to: Address to mint the item to
-// @external
-// func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: felt) {
-//     alloc_locals;
-
-//     // fetch new item with random Id
-//     let (rnd) = get_random_number();
-//     let (new_item: Item) = ItemLib.generate_random_item(rnd);
-
-//     let (next_id) = counter.read();
-
-//     item.write(Uint256(next_id + 1, 0), new_item);
-
-//     ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
-
-//     counter.write(next_id + 1);
-//     return ();
-// }
 @external
-func mintFromRandom{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: felt, id: felt) {
+func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: felt) {
     alloc_locals;
 
     // fetch new item with random Id
@@ -270,7 +253,6 @@ func mintFromRandom{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_
     counter.write(next_id + 1);
     return ();
 }
-
 
 // @notice Update item adventurer
 // @param tokenId: Id of loot item

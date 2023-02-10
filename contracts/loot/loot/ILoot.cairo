@@ -9,4 +9,6 @@ namespace ILoot {
     }
     func updateAdventurer(tokenId: Uint256, adventurer: felt) {
     }
+    func mintStarterWeapon(to: felt, weapon_id: felt) -> (item_token_id: Uint256) {
+    }
 }
