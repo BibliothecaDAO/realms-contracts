@@ -251,6 +251,32 @@ func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: f
     return ();
 }
 
+// @notice Mint adventurer starting weapon
+// @param to: Address to mint the item to
+// @param weapon_id: Weapon ID to mint
+// @return item_token_id: The token id of the minted item
+@external
+func mintStarterWeapon{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    to: felt, weapon_id: felt
+) -> (item_token_id: Uint256) {
+    alloc_locals;
+
+    // TODO: Assert the weapon_id is book, wand, club, or short sword
+
+    // fetch new item with random Id
+    let (new_item: Item) = ItemLib.generate_starter_weapon(weapon_id);
+
+    let (next_id) = counter.read();
+
+    item.write(Uint256(next_id + 1, 0), new_item);
+
+    ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
+
+    counter.write(next_id + 1);
+
+    return (Uint256(next_id + 1, 0),);
+}
+
 // @notice Update item adventurer
 // @param tokenId: Id of loot item
 // @param adventurerId: Id of adventurer

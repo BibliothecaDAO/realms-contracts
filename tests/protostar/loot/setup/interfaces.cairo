@@ -18,7 +18,6 @@ namespace IController {
     }
     func set_xoroshiro(xoroshiro: felt) {
     }
-
 }
 
 @contract_interface
@@ -31,24 +30,16 @@ namespace IRealms {
 
 @contract_interface
 namespace ILoot {
-    func initializer(
-        name: felt, 
-        symbol: felt, 
-        proxy_admin: felt, 
-        controller_address: felt
-    ) {
+    func initializer(name: felt, symbol: felt, proxy_admin: felt, controller_address: felt) {
     }
     func mint(to: felt) {
+    }
+    func mintStarterWeapon(to: felt, weapon_id: felt) {
     }
     func updateAdventurer(tokenId: Uint256, adventurerId: felt) {
     }
     func setItemById(
-        tokenId: Uint256,
-        item_id: felt, 
-        greatness: felt, 
-        xp: felt, 
-        adventurer: felt, 
-        bag_id: felt
+        tokenId: Uint256, item_id: felt, greatness: felt, xp: felt, adventurer: felt, bag_id: felt
     ) {
     }
     func getItemByTokenId(tokenId: Uint256) -> (item: Item) {
@@ -59,23 +50,29 @@ namespace ILoot {
 
 @contract_interface
 namespace IAdventurer {
-    func initializer(
-        name: felt,
-        symbol: felt,
-        proxy_admin: felt,
-        address_of_controller: felt,
-    ) {
+    func initializer(name: felt, symbol: felt, proxy_admin: felt, address_of_controller: felt) {
     }
     func mint(
-        to: felt, 
-        race: felt, 
-        home_realm: felt, 
-        name: felt, 
-        order: felt, 
-        image_hash_1: felt, 
-        image_hash_2: felt
-    ) {
+        to: felt,
+        race: felt,
+        home_realm: felt,
+        name: felt,
+        order: felt,
+        image_hash_1: felt,
+        image_hash_2: felt,
+    ) -> (adventurer_token_id: felt) {
     }
+    func mint_with_starting_weapon(
+        to: felt,
+        race: felt,
+        home_realm: felt,
+        name: felt,
+        order: felt,
+        image_hash_1: felt,
+        image_hash_2: felt,
+    ) -> (adventurer_token_id: felt, item_token_id: felt) {
+    }
+
     func equip_item(tokenId: Uint256, itemTokenId: Uint256) -> (success: felt) {
     }
     func unequip_item(tokenId: Uint256, itemTokenId: Uint256) -> (success: felt) {

@@ -147,7 +147,7 @@ func mint{
     order: felt,
     image_hash_1: felt,
     image_hash_2: felt,
-) {
+) -> (adventurer_token_id: Uint256) {
     alloc_locals;
 
     let (controller) = Module.controller_address();
@@ -184,7 +184,35 @@ func mint{
     IERC20.transferFrom(lords_address, caller, this, Uint256(MINT_COST, 0));
     adventurer_balance.write(next_adventurer_id, Uint256(MINT_COST, 0));
 
-    return ();
+    return (next_adventurer_id,);
+}
+
+@external
+func mint_with_starting_weapon{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(
+    to: felt,
+    race: felt,
+    home_realm: felt,
+    name: felt,
+    order: felt,
+    image_hash_1: felt,
+    image_hash_2: felt,
+    weapon_id: felt,
+) -> (adventurer_token_id: Uint256, item_token_id: Uint256) {
+    alloc_locals;
+
+    // Mint new adventurer
+    let (adventurer_token_id) = mint(to, race, home_realm, name, order, image_hash_1, image_hash_2);
+
+    // Mint starting weapon for the adventurer (book, wand, club, short sword)
+    let (item_token_id) = ILoot.mintStarterWeapon(to, weapon_id);
+
+    // Equip the selected item to the adventurer
+    equip_item(adventurer_token_id, item_token_id);
+
+    // Return adventuer token id and item token id
+    return (adventurer_token_id, item_token_id);
 }
 
 // @notice Equip loot item to adventurer

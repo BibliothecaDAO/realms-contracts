@@ -5,7 +5,7 @@ from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le
 from starkware.starknet.common.syscalls import get_block_timestamp
 
-from contracts.loot.constants.item import Item
+from contracts.loot.constants.item import Item, Slot
 from contracts.loot.loot.stats.item import ItemStats
 from contracts.settling_game.utils.general import unpack_data
 
@@ -74,6 +74,42 @@ namespace ItemLib {
             Item(
                 Id=Id,
                 Slot=Slot,
+                Type=Type,
+                Material=Material,
+                Rank=Rank,
+                Prefix_1=Prefix_1,
+                Prefix_2=Prefix_2,
+                Suffix=Suffix,
+                Greatness=Greatness,
+                CreatedBlock=CreatedBlock,
+                XP=XP,
+                Adventurer=Adventurer,
+                Bag=Bag,
+            ),
+        );
+    }
+
+    func generate_starter_weapon{syscall_ptr: felt*, range_check_ptr}(item_id: felt) -> (
+        item: Item
+    ) {
+        // set blank item
+        let (_Slot) = ItemStats.item_slot(Slot.Weapon);  // determined by Id
+        let (Type) = ItemStats.item_type(item_id);  // determined by Id
+        let (Material) = ItemStats.item_material(item_id);  // determined by Id
+        let (Rank) = ItemStats.item_rank(item_id);  // determined by Id
+        let Prefix_1 = 0;  // name prefix blank
+        let Prefix_2 = 0;  // name suffix blank
+        let Suffix = 0;  // suffix blank
+        let Greatness = 0;  // greatness blank, random?
+        let (CreatedBlock) = get_block_timestamp();  // timestamp
+        let XP = 0;  // xp blank
+        let Adventurer = 0;  // adventurer blank
+        let Bag = 0;  // bag blank
+
+        return (
+            Item(
+                Id=item_id,
+                Slot=_Slot,
                 Type=Type,
                 Material=Material,
                 Rank=Rank,
