@@ -388,13 +388,15 @@ func mintIndex() -> (number: felt) {
 }
 
 @storage_var
-func unminted(tokenId: felt) -> (minted: felt) {
+func newItems() -> (number: felt) {
 }
 
 const HOUR = 3600;
 const BID_TIME = 3600 * 2;  // 2 hours
 const SHUFFLE_TIME = 3600 * 12;
 const BASE_PRICE = 10;
+const SEED_MULTI = 1000;
+const NUMBER_LOOT_ITEMS = 101;
 
 @event
 func ItemMerchantUpdate(item: Item, item_id: felt, bid: Bid) {
@@ -412,16 +414,27 @@ func mintDailyItems{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_
         assert is_past_tick = TRUE;
     }
 
+    // TODO: replace with curve according to gold
+    let new_items = 20;
+
     // get current index
     let (current_index) = mintIndex.read();
-    // TODO: check balance of Gold that exists in the world and add
-    let new_index = current_index + 20;
+
+    let new_index = current_index + new_items;
 
     let (random) = get_random_number();
     mintSeed.write(random);
     lastSeedTime.write(current_time);
 
     emitNewItemsLoop(random, new_index, current_index);
+
+    // set new index
+    mintIndex.write(new_index);
+
+    // set number of items in this batch - this allows us to force people to only mint within the new item scope
+    // eg: mint items only > mintIndex - new_items && < mintIndex
+    // TODO: might be better way than this.
+    newItems.write(new_items);
 
     return ();
 }
@@ -438,7 +451,7 @@ func getRandomItemFromSeed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range
 func _getRandomItemFromSeed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     item_id: felt, daily_seed: felt
 ) -> (item: Item) {
-    let (_, r) = unsigned_div_rem(daily_seed * item_id * 100, 101);
+    let (_, r) = unsigned_div_rem(daily_seed * item_id * SEED_MULTI, NUMBER_LOOT_ITEMS);
 
     let (new_item: Item) = ItemLib.generate_random_item(r);
 
@@ -467,6 +480,12 @@ func viewUnmintedItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     return getRandomItemFromSeed(item_id);
 }
 
+// @notice Allows a bidder to place a bid on an item. If no previous bids have been placed, the bid time will start from the current block timestamp plus the bid time duration. If a previous bid has been placed, the bidder must submit a higher bid within the bid time window of the previous bid.
+// @param tokenId The ID of the item being bid on.
+// @param price The amount of the bid.
+// @param expiry The expiration time of the bid, after which the bidder will no longer be able to claim the item.
+// @param bidder The address of the bidder.
+// @dev Requires the item to be owned by the market contract and for the bid to be higher than the base price. The function will update the bid price and expiry time for the item.
 @external
 func bidOnItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256, price: felt, expiry: felt, bidder: felt
@@ -477,18 +496,13 @@ func bidOnItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     let (current_time) = get_block_timestamp();
     let (this) = get_contract_address();
 
-    let (owner) = ERC721.owner_of(tokenId);
-    with_attr error_message("Item Market: Item is not owned by Market") {
-        assert owner = this;
-    }
-
     // check higher than the base price that is set
     let higer_than_base_price = is_le(BASE_PRICE, price);
-
     with_attr error_message("Item Market: Your bid is not high enough") {
         assert higer_than_base_price = TRUE;
     }
 
+    // read current bid
     let (current_bid) = bid.read(tokenId);
 
     // if current expiry = 0 means unbidded = set base time from now + BID_TIME
@@ -503,24 +517,36 @@ func bidOnItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         assert higher_price = TRUE;
     }
 
+    // check bid time not expired
     let not_expired = is_le(current_bid.expiry, expiry);
     with_attr error_message("Item Market: Bid has expired") {
         assert not_expired = TRUE;
     }
 
+    // update bid state
     bid.write(tokenId, Bid(price, current_bid.expiry, caller, BidStatus.open));
+
+    // update gold balance in contract
+    // refund balance of previous bid if there is any..
 
     return ();
 }
-
+// @notice Allows a bidder to claim a previously placed bid on an item, provided the bid has expired and the item is still available.
+// @param item_id The ID of the item being claimed.
+// @dev Requires the caller to be the bidder who previously placed the bid. The function will also mint a token representing the claimed item for the caller and update the bid status to "closed".
 @external
 func claimItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(item_id: Uint256) {
     alloc_locals;
     let (caller) = get_caller_address();
+    let (current_time) = get_block_timestamp();
+
     let (current_bid) = bid.read(item_id);
 
+    // check bid has expired + item is still available
+    let expired = is_le(current_bid.expiry, current_time);
     with_attr error_message("Item Market: Item not available") {
         assert current_bid.status = BidStatus.open;
+        assert expired = TRUE;
     }
 
     with_attr error_message("Item Market: Caller not bidder!") {
@@ -531,7 +557,7 @@ func claimItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     // spend gold & mint...
 
-    bid.write(item_id, Bid(current_bid.price, 0, caller, 0));
+    bid.write(item_id, Bid(current_bid.price, 0, caller, BidStatus.closed));
 
     return ();
 }
