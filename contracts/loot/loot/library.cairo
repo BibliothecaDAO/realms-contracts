@@ -214,7 +214,7 @@ namespace ItemLib {
         // verify if the prefix can be selected
         // banned prefixes are the ones that will never be selected due to
         // the greatness >= 19 condition in the original Loot
-        let (is_banned) = ItemStats.loot_banned_name_prefixes(name_prefix);
+        let (is_banned) = ItemStats.loot_banned_name(name_prefix - 1);
         if (is_banned == 1) {
             // if banned select the next prefix
             let new_rnd = new_rnd + 1;
@@ -302,7 +302,7 @@ namespace ItemLib {
         // verify if the suffix can be selected
         // banned suffixes are the ones that will never be selected due to
         // the greatness > 14 condition in the original Loot
-        let (is_banned) = ItemStats.loot_banned_name_suffixes(name_suffix);
+        let (is_banned) = ItemStats.loot_banned_name(name_suffix - 1);
         if (is_banned == 1) {
             // if banned select the next suffix
             let new_rnd = new_rnd + 1;

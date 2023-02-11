@@ -137,109 +137,13 @@ namespace ItemStats {
         dw ItemSlot.HeavyGloves;
     }
 
-    func loot_banned_name_prefixes{syscall_ptr: felt*, range_check_ptr}(index: felt) -> (
-        is_banned: felt
-    ) {
-        let (label_location) = get_label_location(labels);
-        return ([label_location + index - 1],);
-
-        labels:
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-    }
-
-    func loot_banned_name_suffixes{syscall_ptr: felt*, range_check_ptr}(index: felt) -> (
-        is_banned: felt
-    ) {
-        let (label_location) = get_label_location(labels);
-        return ([label_location + index - 1],);
-
-        labels:
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
-        dw TRUE;
-        dw FALSE;
-        dw FALSE;
+    func loot_banned_name{syscall_ptr: felt*, range_check_ptr}(index: felt) -> (is_banned: felt) {
+        let (_, r) = unsigned_div_rem(index, 3);
+        if (r == 0) {
+            return (TRUE,);
+        } else {
+            return (FALSE,);
+        }
     }
 
     func loot_slot_length{syscall_ptr: felt*, range_check_ptr}(slot: felt) -> (slot_length: felt) {
