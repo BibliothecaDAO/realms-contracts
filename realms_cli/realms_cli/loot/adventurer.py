@@ -28,11 +28,11 @@ async def mint_adventurer(network, race, home_realm, name, order, image_hash_1, 
 
     await wrapped_send(
         network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
+        signer_alias=config.USER_ALIAS,
         contract_alias=config.Lords_ERC20_Mintable_alias,
         function="mint",
         arguments=[
-            config.ADMIN_ADDRESS,
+            config.USER_ADDRESS,
             100 * 10 ** 18,           # uint 1
             0                         # uint 2
         ]
@@ -44,7 +44,7 @@ async def mint_adventurer(network, race, home_realm, name, order, image_hash_1, 
 
     await wrapped_send(
         network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
+        signer_alias=config.USER_ALIAS,
         contract_alias=config.Lords_ERC20_Mintable_alias,
         function="approve",
         arguments=[
@@ -60,17 +60,93 @@ async def mint_adventurer(network, race, home_realm, name, order, image_hash_1, 
 
     await wrapped_send(
         network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
+        signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Adventurer",
         function="mint",
         arguments=[
-            config.ADMIN_ADDRESS,
+            config.USER_ADDRESS,
             str_to_felt(race),
             str_to_felt(home_realm),
             str_to_felt(name),
             str_to_felt(order),
             str_to_felt(image_hash_1),
             str_to_felt(image_hash_2)
+        ]
+    )
+
+    print('🤴 Minted adventurer ✅')
+
+
+@click.command()
+@click.option("--network", default="goerli")
+@click.option('--item', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='adventurer item to start', prompt=True)
+@click.option('--race', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='adventurer race', prompt=True)
+@click.option('--home_realm', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='adventurer home realm', prompt=True)
+@click.option('--name', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='adventurer name', prompt=True)
+@click.option('--order', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='adventurer order', prompt=True)
+@click.option('--image_hash_1', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='adventurer image hash part 1', prompt=True)
+@click.option('--image_hash_2', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='adventurer image hash part 2', prompt=True)
+async def mint_adventurer_with_item(network, item, race, home_realm, name, order, image_hash_1, image_hash_2):
+    """
+    Mint a Random Loot Item
+    """
+    config = Config(nile_network=network)
+
+    print('🪙 Minting lords ...')
+
+    await wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias=config.Lords_ERC20_Mintable_alias,
+        function="mint",
+        arguments=[
+            config.USER_ADDRESS,
+            100 * 10 ** 18,           # uint 1
+            0                         # uint 2
+        ]
+    )
+
+    print('🪙 Minted lords ✅')
+
+    print('👍 Approving lords to be spent ...')
+
+    await wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias=config.Lords_ERC20_Mintable_alias,
+        function="approve",
+        arguments=[
+            config.ADVENTURER_PROXY_ADDRESS,
+            100 * 10 ** 18,       # uint 1
+            0,                    # uint 2
+        ]
+    )
+
+    # print('👍 Approved lords to be spent ✅')
+
+    # print('🤴 Minting adventurer ...')
+
+    await wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_Adventurer",
+        function="mint_with_starting_weapon",
+        arguments=[
+            config.USER_ADDRESS,
+            race,
+            home_realm,
+            str_to_felt(name),
+            order,
+            image_hash_1,
+            image_hash_2,
+            item
         ]
     )
 
@@ -177,7 +253,7 @@ async def explore(network, adventurer):
 
     await wrapped_send(
         network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
+        signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Adventurer",
         function="explore",
         arguments=[*uint(adventurer)]

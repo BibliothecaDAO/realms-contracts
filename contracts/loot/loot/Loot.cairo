@@ -262,6 +262,7 @@ func mintStarterWeapon{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_che
     alloc_locals;
 
     // TODO: Assert the weapon_id is book, wand, club, or short sword
+    // TODO: permissions
 
     // fetch new item with random Id
     let (new_item: Item) = ItemLib.generate_starter_weapon(weapon_id);

@@ -24,4 +24,11 @@ namespace IBeast {
     }
     func get_adventurer_from_beast(beast_token_id: Uint256) -> () {
     }
+
+    func balanceOf(adventurer_token_id: Uint256) -> () {
+    }
+    func subtractFromBalance(adventurer_token_id: Uint256, subtraction: felt) -> () {
+    }
+    func addToBalance(adventurer_token_id: Uint256, addition: felt) -> () {
+    }
 }

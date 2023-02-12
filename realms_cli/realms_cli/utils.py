@@ -2,6 +2,7 @@ import struct
 from typing import List
 from nile.common import get_class_hash, ABIS_DIRECTORY
 from nile import deployments
+import datetime
 
 
 def print_over_colums(array_of_strings, cols=2, width=40):
@@ -134,3 +135,14 @@ def delete_existing_declaration(contract_name: str):
 
 def get_contract_abi(contract_name):
     return f"{ABIS_DIRECTORY}/{contract_name}.json"
+
+
+def convert_unix_time(unix_time):
+
+    # Convert datetime object to a localized datetime object
+    local_datetime = datetime.datetime.fromtimestamp(unix_time).astimezone()
+
+    # Convert localized datetime object to a readable string
+    readable_time = local_datetime.strftime('%Y-%m-%d %H:%M:%S')
+
+    return readable_time

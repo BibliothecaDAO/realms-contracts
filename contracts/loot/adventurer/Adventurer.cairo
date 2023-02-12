@@ -52,6 +52,8 @@ from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
 
 const MINT_COST = 50000000000000000000;
 
+const STARTING_GOLD = 20;
+
 // -----------------------------------
 // Events
 // -----------------------------------
@@ -205,11 +207,17 @@ func mint_with_starting_weapon{
     // Mint new adventurer
     let (adventurer_token_id) = mint(to, race, home_realm, name, order, image_hash_1, image_hash_2);
 
+    let (loot_address) = Module.get_module_address(ModuleIds.Loot);
+    let (beast_address) = Module.get_module_address(ModuleIds.Beast);
+
     // Mint starting weapon for the adventurer (book, wand, club, short sword)
-    let (item_token_id) = ILoot.mintStarterWeapon(to, weapon_id);
+    let (item_token_id) = ILoot.mintStarterWeapon(loot_address, to, weapon_id);
 
     // Equip the selected item to the adventurer
     equip_item(adventurer_token_id, item_token_id);
+
+    // add STARTING_GOLD to balance
+    IBeast.addToBalance(beast_address, adventurer_token_id, STARTING_GOLD);
 
     // Return adventuer token id and item token id
     return (adventurer_token_id, item_token_id);
@@ -239,6 +247,8 @@ func equip_item{
 
     assert item.Adventurer = 0;
     assert item.Bag = 0;
+
+    // TODO: Check item owned by Adventurer
 
     // Check item is owned by caller
     let (owner) = IERC721.ownerOf(loot_address, item_token_id);

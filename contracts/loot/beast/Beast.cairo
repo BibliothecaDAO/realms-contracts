@@ -192,6 +192,9 @@ func attack{
         let (xp_gained) = CombatStats.calculate_xp_earned(beast_rank, beast_level);
 
         IAdventurer.increase_xp(adventurer_address, adventurer_id, xp_gained);
+
+        // drop gold
+        _addToBalance(adventurer_id, 20);
         return (damage_dealt, 0);
     }
 }
@@ -525,4 +528,75 @@ func get_total_supply{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
 ) {
     let (total_supply: Uint256) = ERC721Enumerable.total_supply();
     return (total_supply,);
+}
+
+// gold functions
+
+@storage_var
+func goldBalance(tokenId: Uint256) -> (balance: felt) {
+}
+
+@external
+func addToBalance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    adventurer_token_id: Uint256, addition: felt
+) {
+    Module.only_approved();
+
+    _addToBalance(adventurer_token_id, addition);
+    return ();
+}
+
+func _addToBalance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    adventurer_token_id: Uint256, addition: felt
+) {
+    let (current_balance) = balanceOf(adventurer_token_id);
+
+    goldBalance.write(adventurer_token_id, current_balance + addition);
+
+    return ();
+}
+
+@external
+func subtractFromBalance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    adventurer_token_id: Uint256, subtraction: felt
+) {
+    Module.only_approved();
+
+    _subtractFromBalance(adventurer_token_id, subtraction);
+
+    return ();
+}
+
+func _subtractFromBalance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    adventurer_token_id: Uint256, subtraction: felt
+) {
+    let (current_balance) = balanceOf(adventurer_token_id);
+
+    let negative = is_le(current_balance - subtraction, 0);
+
+    // add in overflow assert so you can't spend more than what you have.
+    with_attr error_message("Beast: Not enough gold in balance.") {
+        assert negative = FALSE;
+    }
+
+    goldBalance.write(adventurer_token_id, current_balance - subtraction);
+
+    return ();
+}
+
+@view
+func balanceOf{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    adventurer_token_id: Uint256
+) -> (balance: felt) {
+    return goldBalance.read(adventurer_token_id);
+}
+
+@external
+func transferFrom{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    amount: felt, _from: Uint256, to: Uint256
+) {
+    _addToBalance(to, amount);
+    _subtractFromBalance(_from, amount);
+
+    return ();
 }

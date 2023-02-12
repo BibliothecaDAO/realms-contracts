@@ -166,9 +166,12 @@ async def wrapped_proxy_call(network, contract_alias, abi, function, arguments) 
 async def send(network, signer_alias, contract_alias, function, arguments) -> str:
     """Nile send function."""
     account = await Account(signer_alias, network)
-    if isinstance(arguments[0], list):
+    if not arguments:
+        return await account.send_multi(contract_alias, function, [])
+    elif isinstance(arguments[0], list):
         return await account.send_multi(contract_alias, function, arguments)
-    return await account.send_multi(contract_alias, function, [arguments])
+    else:
+        return await account.send_multi(contract_alias, function, [arguments])
 
 
 async def wrapped_send(network, signer_alias, contract_alias, function, arguments):

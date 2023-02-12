@@ -94,7 +94,7 @@ class Config:
 
         self.USER_ALIAS = "STARKNET_PRIVATE_KEY"
         self.USER_ADDRESS, _ = safe_load_deployment(
-            "account-0", self.nile_network)
+            "STARKNET_PRIVATE_KEY", self.nile_network)
 
         self.ARBITER_ADDRESS, _ = safe_load_deployment(
             ContractAlias.Arbiter, self.nile_network)
@@ -293,3 +293,13 @@ class Config:
 
         self.BEAST_PROXY_ADDRESS, _ = safe_load_deployment(
             "proxy_Beast", self.nile_network)
+
+        self.BID = [
+            "Price",
+            "Expiry",
+            "Bidder",
+            "Status"
+        ]
+
+        self.LOOT_ITEMS = ['Pendant',  'Necklace',  'Amulet',  'Silver Ring',  'Bronze Ring',  'Platinum Ring',  'Titanium Ring',  'Gold Ring',  'Ghost Wand',  'Grave Wand',  'Bone Wand',  'Wand',  'Grimoire',  'Chronicle',  'Tome',  'Book',  'Katana',  'Falchion',  'Scimitar',  'Long Sword',  'Short Sword',  'Warhammer',  'Quarterstaff',  'Maul',  'Mace',  'Club',  'Divine Robe',  'Silk Robe',  'Linen Robe',  'Robe',  'Shirt',  'Demon Husk',  'Dragonskin Armor',  'Studded Leather Armor',  'Hard Leather Armor',  'Leather Armor',  'Holy Chestplate',  'Ornate ChestPlate',  'Plate Mail',  'Chain Mail',  'Ring Mail',  'Crown',  'Divine Hood',  'Silk Hood',  'Linen Hood',  'Hood',  'Demon Crown',  'Dragons Crown',  'War Cap',  'Leather Cap',  'Cap',  'Ancient Helm',  'Ornate Helm',  'Great Helm',  'Full Helm',
+                           'Helm',  'Brightsilk Sash',  'Silk Sash',  'Wool Sash',  'Linen Sash',  'Sash',  'Demonhide Belt',  'Dragonskin Belt',  'Studded Leather Belt',  'Hard Leather Belt',  'Leather Belt',  'Ornate Belt',  'War Belt',  'Plated Belt',  'Mesh Belt',  'Heavy Belt',  'Divine Slippers',  'Silk Slippers',  'Wool Shoes',  'Linen Shoes',  'Shoes',  'Demonhide Boots',  'Dragonskin Boots',  'Studded Leather Boots',  'Hard Leather Boots',  'Leather Boots',  'Chain Boots',  'Heavy Boots',  'Holy Gauntlets',  'Ornate Gauntlets',  'Gauntlets',  'Divine Gloves',  'Silk Gloves',  'Wool Gloves',  'Linen Gloves',  'Gloves',  'Demons Hands',  'Dragonskin Gloves',  'Studded Leather Gloves',  'Hard Leather Gloves',  'Leather Gloves',  'Holy Greaves',  'Ornate Greaves',  'Greaves',  'Chain Gloves',  'Heavy Gloves']
