@@ -4,13 +4,20 @@ This is a fork of the OG Loot physics to show how a minigame can be played.
 
 This is experimental.
 
-TODO:
-- Explore
-- Beasts attack should scale
+TODO High priority:
+Change Explore Function to by more dynamic:
+-- Traps do damage unless you have the right equipment
+-- Beasts can be attacked and killed. You might not escape and be killed when trying to flee.
+-- Items - health potion, random loot item, gold nuggests
+
+
+
+TODO Low priority:
+- Multipler damage for adventurer Level. The Adventurer should both, deal more damange and receive more damage. 
 
 ### Objective
 
-Get the highest gold balance without dying.... Do you dare?
+Get the highest gold balance without dying.... Do you dare? You can always stop on top
 
 
 ### How to play
@@ -51,7 +58,7 @@ You can do three things, choose wisely
 
 ### Explore
 
-This is like searching the long grass in pokemon... You might discover a Beast...
+This is like searching the long grass in pokemon... You might discover a Beast... You might discover gold... You might discover a trap
 
 Once you have discovered - you can flee or fight
 
