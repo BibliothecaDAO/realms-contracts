@@ -428,7 +428,7 @@ const HOUR = 3600;
 const BID_TIME = 3600 * 2;  // 2 hours
 const SHUFFLE_TIME = 3600 * 12;
 const BASE_PRICE = 10;
-const SEED_MULTI = 1000;
+const SEED_MULTI = 5846975;
 const NUMBER_LOOT_ITEMS = 101;
 
 @event
@@ -581,7 +581,7 @@ func bidOnItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     if (current_bid.bidder == FALSE) {
     } else {
-        IBeast.addToBalance(beast_address, Uint256(current_bid.bidder, 0), price);
+        IBeast.addToBalance(beast_address, Uint256(current_bid.bidder, 0), current_bid.price);
     }
 
     let (item) = getRandomItemFromSeed(tokenId.low);

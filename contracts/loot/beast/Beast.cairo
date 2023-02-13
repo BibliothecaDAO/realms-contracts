@@ -159,6 +159,8 @@ func attack{
         // having been attacked, it automatically attacks back
         let (chest) = ILoot.getItemByTokenId(item_address, Uint256(unpacked_adventurer.ChestId, 0));
         let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, chest);
+
+        // TODO: Add multiplier
         IAdventurer.deduct_health(adventurer_address, adventurer_id, damage_taken);
 
         // check if beast counter attack killed adventurer
@@ -194,6 +196,7 @@ func attack{
         IAdventurer.increase_xp(adventurer_address, adventurer_id, xp_gained);
 
         // drop gold
+        // TODO: Make dynamic somehow...
         _addToBalance(adventurer_id, 20);
         return (damage_dealt, 0);
     }
@@ -591,12 +594,14 @@ func balanceOf{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     return goldBalance.read(adventurer_token_id);
 }
 
-@external
-func transferFrom{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    amount: felt, _from: Uint256, to: Uint256
-) {
-    _addToBalance(to, amount);
-    _subtractFromBalance(_from, amount);
+// @external
+// func transferFrom{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+//     amount: felt, _from: Uint256, to: Uint256
+// ) {
+//     _addToBalance(to, amount);
+//     _subtractFromBalance(_from, amount);
 
-    return ();
-}
+// return ();
+// }
+
+// TODO: Record total in existence

@@ -2,7 +2,7 @@
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.202.5/containers/python-3
 {
 	"name": "Loot",
-	"image": "ghcr.io/bibliothecaforadventurers/loot:latest",
+	"image": "ghcr.io/bibliothecadao/loot:latest",
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
 		"python.pythonPath": "/usr/local/bin/python",

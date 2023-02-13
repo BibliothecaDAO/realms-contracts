@@ -275,3 +275,7 @@ async def explore(network, adventurer):
         print("🧌 You have discovered a beast")
     else:
         print("🤔 You discovered nothing")
+
+
+# TODO:
+# Get Wallet Adventurer IDS

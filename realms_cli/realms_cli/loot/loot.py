@@ -135,7 +135,7 @@ async def get_unminted_loot(loot_token_id, network):
         else:
             if i == 0:
                 pretty_out.append(
-                    f"{key} : {config.LOOT_ITEMS[int(out[i])]}")
+                    f"{key} : {config.LOOT_ITEMS[int(out[0])]}")
             else:
                 pretty_out.append(
                     f"{key} : {int(out[i])}")

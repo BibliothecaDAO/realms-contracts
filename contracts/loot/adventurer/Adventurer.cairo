@@ -211,6 +211,8 @@ func mint_with_starting_weapon{
     let (beast_address) = Module.get_module_address(ModuleIds.Beast);
 
     // Mint starting weapon for the adventurer (book, wand, club, short sword)
+
+    // TODO: Assert correct ids.
     let (item_token_id) = ILoot.mintStarterWeapon(loot_address, to, weapon_id);
 
     // Equip the selected item to the adventurer
@@ -562,10 +564,12 @@ func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBu
 ) {
     alloc_locals;
 
+    let (ts) = get_block_timestamp();
+
     let (controller) = Module.controller_address();
     let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
     let (rnd) = IXoroshiro.next(xoroshiro_address_);
-    return (rnd,);
+    return (rnd * ts,);
 }
 
 // @notice Emit state of adventurer
