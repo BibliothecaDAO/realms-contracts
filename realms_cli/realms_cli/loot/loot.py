@@ -3,6 +3,7 @@ import asyncclick as click
 from realms_cli.caller_invoker import wrapped_call, wrapped_send, wrapped_proxy_call
 from realms_cli.config import Config
 from realms_cli.utils import print_over_colums, uint, felt_to_str, convert_unix_time
+from cli2gui import Cli2Gui
 
 
 @click.command()

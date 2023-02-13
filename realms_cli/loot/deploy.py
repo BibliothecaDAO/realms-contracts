@@ -9,6 +9,7 @@ from nile.common import get_class_hash
 from enum import IntEnum
 
 
+
 class ExternalContractIds(IntEnum):
     Realms_ERC721_Mintable = 1
     Lords_ERC20_Mintable = 2
@@ -61,12 +62,19 @@ ADVENTURER_SYMBOL = str_to_felt("ADVENTURER")
 LOOT = str_to_felt("Loot")
 LOOT_SYMBOL = str_to_felt("LOOT")
 
+decorator_function = Cli2Gui(
+    run_function=run,
+    auto_enable=True,
+)
+
+gui = decorator_function(run)
+
 
 async def run(nre):
 
     config = Config(nre.network)
 
-    #---------------- CONTROLLERS  ----------------#
+    # ---------------- CONTROLLERS  ----------------#
     # for contract in CONTROLLER_CONTRACT_IMPLEMENTATIONS:
 
     #     await wrapped_declare(
@@ -131,7 +139,7 @@ async def run(nre):
     #     arguments=[xoroshiro],
     # )
 
-    #---------------- MODULE IMPLEMENTATIONS  ----------------#
+    # ---------------- MODULE IMPLEMENTATIONS  ----------------#
     # for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
     #     await wrapped_declare(
     #         config.ADMIN_ALIAS, contract.alias, nre.network, contract.alias)
@@ -159,7 +167,7 @@ async def run(nre):
     # # #         calldata=[strhex_as_felt(class_hash)],
     # # #     )
 
-    #---------------- INIT MODULES  ----------------#
+    # ---------------- INIT MODULES  ----------------#
 
     deployment, _ = safe_load_deployment(
         "proxy_ModuleController_Loot", nre.network)
