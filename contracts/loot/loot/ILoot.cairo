@@ -11,4 +11,8 @@ namespace ILoot {
     }
     func mintStarterWeapon(to: felt, weapon_id: felt) -> (item_token_id: Uint256) {
     }
+    func mint(to: felt, adventurer_token_id: Uint256) -> (item_token_id: Uint256) {
+    }
+    func itemOwner(tokenId: Uint256, adventurer_token_id: Uint256) -> (owner: felt) {
+    }
 }

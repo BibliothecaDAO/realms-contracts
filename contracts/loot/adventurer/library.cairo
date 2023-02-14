@@ -392,6 +392,20 @@ namespace AdventurerLib {
         return (updated_adventurer,);
     }
 
+    // loaf
+    func add_health{syscall_ptr: felt*, range_check_ptr}(
+        health: felt, unpacked_adventurer: AdventurerDynamic
+    ) -> (new_unpacked_adventurer: AdventurerDynamic) {
+        alloc_locals;
+
+        // set new health to previous health - damage dealt
+        let (updated_adventurer: AdventurerDynamic) = cast_state(
+            AdventurerSlotIds.Health, unpacked_adventurer.Health + health, unpacked_adventurer
+        );
+
+        return (updated_adventurer,);
+    }
+
     func increase_xp{syscall_ptr: felt*, range_check_ptr}(
         xp: felt, unpacked_adventurer: AdventurerDynamic
     ) -> (new_unpacked_adventurer: AdventurerDynamic) {

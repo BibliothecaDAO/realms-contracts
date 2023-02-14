@@ -402,40 +402,22 @@ func deduct_health{
     alloc_locals;
 
     Module.only_approved();
+    _deduct_health(adventurer_token_id, amount);
+    return (TRUE,);
+}
 
-    // unpack adventurer
-    let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
-    let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
+// @notice Deduct health from adventurer
+// @param adventurer_token_id: Id of adventurer
+// @param amount: Health amount to deduct
+// @return success: Value indicating success
+@external
+func add_health{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(adventurer_token_id: Uint256, amount: felt) -> (success: felt) {
+    alloc_locals;
 
-    // deduct health
-    let (new_adventurer) = AdventurerLib.deduct_health(amount, adventurer_dynamic_);
-
-    // if the adventurer is dead
-    if (new_adventurer.Health == 0) {
-        // transfer all their LORDS to the beast address
-        // TODO MILESTONE2: Figure out how to assign the LORDS tokens to the beast that killed the adventurer
-        let (lords_address) = Module.get_external_contract_address(ExternalContractIds.Lords);
-        let (beast_address) = Module.get_module_address(ModuleIds.Beast);
-        let (adventurer_balance_) = adventurer_balance.read(adventurer_token_id);
-        IERC20.transfer(lords_address, beast_address, adventurer_balance_);
-        adventurer_balance.write(adventurer_token_id, Uint256(0, 0));
-
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
-    } else {
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
-    }
-
-    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
-    adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
-
-    emit_adventurer_state(adventurer_token_id);
-
+    Module.only_approved();
+    _add_health(adventurer_token_id, amount);
     return (TRUE,);
 }
 
@@ -450,39 +432,9 @@ func increase_xp{
     alloc_locals;
 
     Module.only_approved();
+    _increase_xp(adventurer_token_id, amount);
 
-    // unpack adventurer
-    let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
-    let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
-
-    // increase xp
-    let (updated_xp_adventurer) = AdventurerLib.increase_xp(amount, adventurer_dynamic_);
-
-    // check if the adventurer  reached the next level
-    let (leveled_up) = CombatStats.check_for_level_increase(
-        updated_xp_adventurer.XP, updated_xp_adventurer.Level
-    );
-
-    // if it did
-    if (leveled_up == TRUE) {
-        // increase level
-        let (updated_level_adventurer) = AdventurerLib.update_level(
-            updated_xp_adventurer.Level + 1, updated_xp_adventurer
-        );
-        let (packed_updated_adventurer: PackedAdventurerState) = AdventurerLib.pack(
-            updated_level_adventurer
-        );
-        adventurer_dynamic.write(adventurer_token_id, packed_updated_adventurer);
-        emit_adventurer_leveled_up(adventurer_token_id);
-        return (TRUE,);
-    } else {
-        let (packed_updated_adventurer: PackedAdventurerState) = AdventurerLib.pack(
-            updated_xp_adventurer
-        );
-        adventurer_dynamic.write(adventurer_token_id, packed_updated_adventurer);
-        emit_adventurer_state(adventurer_token_id);
-        return (TRUE,);
-    }
+    return (TRUE,);
 }
 
 // @notice Explore for discoveries
@@ -517,6 +469,8 @@ func explore{
     let (discovery) = AdventurerLib.get_random_discovery(rnd);
 
     // If the adventurer encounter a beast
+
+    // we should return the type of discovery here
     if (discovery == DiscoveryType.Beast) {
         // we set their status to battle
         let (new_unpacked_adventurer) = AdventurerLib.update_status(
@@ -534,15 +488,53 @@ func explore{
 
         emit_adventurer_state(token_id);
 
-        return (TRUE,);
+        return (DiscoveryType.Beast,);
     }
-    
-    // TODO: Rarity generation of random number to determine these
-    // TODO: Add in Gold find
-    // TODO: Add in health potion
-    // TODO: Add in free XP
 
-    return (TRUE,);
+    if (discovery == DiscoveryType.Obstacle) {
+        // hard coded 10HP damage
+        _deduct_health(token_id, 10);
+        return (DiscoveryType.Obstacle,);
+    }
+    if (discovery == DiscoveryType.Item) {
+        // generate another random 4 numbers
+        // this could probably be better
+        let (rnd) = get_random_number();
+        let (discovery) = AdventurerLib.get_random_discovery(rnd * 9231312312);
+
+        if (discovery == 1) {
+            // add GOLD
+            // TODO: determin gold amount
+            let (beast_address) = Module.get_module_address(ModuleIds.Beast);
+            IBeast.addToBalance(beast_address, token_id, 1);
+            emit_adventurer_state(token_id);
+            return (TRUE,);
+        }
+        if (discovery == 2) {
+            // TODO: dynamic XP amount
+            _increase_xp(token_id, 20);
+            return (TRUE,);
+        }
+        if (discovery == 3) {
+            // mint loot items
+            let (loot_address) = Module.get_module_address(ModuleIds.Loot);
+            let (owner) = ownerOf(token_id);
+            ILoot.mint(loot_address, owner, token_id);
+            emit_adventurer_state(token_id);
+            return (TRUE,);
+        }
+        if (discovery == 4) {
+            // potion
+            // TODO: dynamic health amount
+            _add_health(token_id, 20);
+            return (TRUE,);
+        }
+
+        // send item
+        return (DiscoveryType.Item,);
+    }
+
+    return (FALSE,);
 }
 // -----------------------------
 // Internal Adventurer Specific
@@ -770,4 +762,108 @@ func transferOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 func renounceOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     Ownable.renounce_ownership();
     return ();
+}
+
+//
+// INTERNAL
+//
+
+func _deduct_health{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(adventurer_token_id: Uint256, amount: felt) -> (success: felt) {
+    alloc_locals;
+
+    // unpack adventurer
+    let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
+    let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
+
+    // deduct health
+    let (new_adventurer) = AdventurerLib.deduct_health(amount, adventurer_dynamic_);
+
+    // if the adventurer is dead
+    if (new_adventurer.Health == 0) {
+        // transfer all their LORDS to the beast address
+        // TODO MILESTONE2: Figure out how to assign the LORDS tokens to the beast that killed the adventurer
+        let (lords_address) = Module.get_external_contract_address(ExternalContractIds.Lords);
+        let (beast_address) = Module.get_module_address(ModuleIds.Beast);
+        let (adventurer_balance_) = adventurer_balance.read(adventurer_token_id);
+        IERC20.transfer(lords_address, beast_address, adventurer_balance_);
+        adventurer_balance.write(adventurer_token_id, Uint256(0, 0));
+
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+    } else {
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+    }
+
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
+    adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
+
+    emit_adventurer_state(adventurer_token_id);
+
+    return (TRUE,);
+}
+
+func _increase_xp{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(adventurer_token_id: Uint256, amount: felt) -> (success: felt) {
+    alloc_locals;
+
+    // unpack adventurer
+    let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
+    let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
+
+    // increase xp
+    let (updated_xp_adventurer) = AdventurerLib.increase_xp(amount, adventurer_dynamic_);
+
+    // check if the adventurer  reached the next level
+    let (leveled_up) = CombatStats.check_for_level_increase(
+        updated_xp_adventurer.XP, updated_xp_adventurer.Level
+    );
+
+    // if it did
+    if (leveled_up == TRUE) {
+        // increase level
+        let (updated_level_adventurer) = AdventurerLib.update_level(
+            updated_xp_adventurer.Level + 1, updated_xp_adventurer
+        );
+        let (packed_updated_adventurer: PackedAdventurerState) = AdventurerLib.pack(
+            updated_level_adventurer
+        );
+        adventurer_dynamic.write(adventurer_token_id, packed_updated_adventurer);
+        emit_adventurer_leveled_up(adventurer_token_id);
+        return (TRUE,);
+    } else {
+        let (packed_updated_adventurer: PackedAdventurerState) = AdventurerLib.pack(
+            updated_xp_adventurer
+        );
+        adventurer_dynamic.write(adventurer_token_id, packed_updated_adventurer);
+        emit_adventurer_state(adventurer_token_id);
+        return (TRUE,);
+    }
+}
+
+func _add_health{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(adventurer_token_id: Uint256, amount: felt) -> (success: felt) {
+    alloc_locals;
+
+    // unpack adventurer
+    let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
+    let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
+
+    // deduct health
+    let (new_adventurer) = AdventurerLib.add_health(amount, adventurer_dynamic_);
+
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
+    adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
+
+    emit_adventurer_state(adventurer_token_id);
+
+    return (TRUE,);
 }

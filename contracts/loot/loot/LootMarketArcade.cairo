@@ -242,26 +242,31 @@ func item_adventurer_owner(tokenId: Uint256, adventurerId: Uint256) -> (owner: f
 
 // @notice Mint random item
 // @param to: Address to mint the item to
-// @external
-// func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: felt) {
-//     alloc_locals;
+@external
+func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    to: felt, adventurer_token_id: Uint256
+) {
+    alloc_locals;
+    Module.only_approved();
 
-// // fetch new item with random Id
-//     let (rnd) = get_random_number();
-//     let (new_item: Item) = ItemLib.generate_random_item(rnd);
+    // fetch new item with random Id
+    let (rnd) = get_random_number();
+    let (new_item: Item) = ItemLib.generate_random_item(rnd);
 
-// let (next_id) = counter.read();
+    let (next_id) = counter.read();
 
-// item.write(Uint256(next_id + 1, 0), new_item);
+    item.write(Uint256(next_id + 1, 0), new_item);
 
-// ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
+    ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
 
-// counter.write(next_id + 1);
-//     return ();
-// }
+    item_adventurer_owner.write(Uint256(next_id + 1, 0), adventurer_token_id, TRUE);
+
+    counter.write(next_id + 1);
+    return ();
+}
 
 func mintFromMart{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    to: felt, item_id: felt
+    to: felt, item_id: felt, adventurer_token_id: Uint256
 ) {
     alloc_locals;
 
@@ -272,6 +277,8 @@ func mintFromMart{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_pt
     item.write(Uint256(next_id + 1, 0), new_item);
 
     ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
+
+    item_adventurer_owner.write(Uint256(next_id + 1, 0), adventurer_token_id, TRUE);
 
     counter.write(next_id + 1);
 
@@ -368,7 +375,7 @@ func getItemByTokenId{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 // @return item_token_id: The token id of the minted item
 @external
 func mintStarterWeapon{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    to: felt, weapon_id: felt
+    to: felt, weapon_id: felt, adventurer_token_id: Uint256
 ) -> (item_token_id: Uint256) {
     alloc_locals;
 
@@ -382,6 +389,8 @@ func mintStarterWeapon{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_che
     item.write(Uint256(next_id + 1, 0), new_item);
 
     ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
+
+    item_adventurer_owner.write(Uint256(next_id + 1, 0), adventurer_token_id, TRUE);
 
     counter.write(next_id + 1);
 
@@ -426,13 +435,21 @@ func newItems() -> (number: felt) {
 
 const HOUR = 3600;
 const BID_TIME = 3600 * 2;  // 2 hours
-const SHUFFLE_TIME = 3600 * 12;
+const SHUFFLE_TIME = 3600 * 6;
 const BASE_PRICE = 10;
 const SEED_MULTI = 5846975;
 const NUMBER_LOOT_ITEMS = 101;
 
 @event
 func ItemMerchantUpdate(item: Item, item_id: felt, bid: Bid) {
+}
+
+// returns TRUE if token is owned
+@view
+func itemOwner{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    tokenId: Uint256, adventurer_token_id: Uint256
+) -> (owner: felt) {
+    return item_adventurer_owner.read(tokenId, adventurer_token_id);
 }
 
 @external
@@ -468,6 +485,8 @@ func mintDailyItems{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_
     // eg: mint items only > mintIndex - new_items && < mintIndex
     // TODO: might be better way than this.
     newItems.write(new_items);
+
+    // TODO: send 2 gold to the adventurer whoever calls this
 
     return ();
 }
@@ -530,7 +549,7 @@ func viewUnmintedItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 // @dev Requires the item to be owned by the market contract and for the bid to be higher than the base price. The function will update the bid price and expiry time for the item.
 @external
 func bidOnItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    tokenId: Uint256, adventurerTokenId: Uint256, price: felt
+    tokenId: Uint256, adventurer_token_id: Uint256, price: felt
 ) {
     alloc_locals;
 
@@ -539,7 +558,7 @@ func bidOnItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     let (this) = get_contract_address();
 
     // store the id not the Unit in the struct
-    let adventurerIdAsFelt = adventurerTokenId.low;
+    let adventurerIdAsFelt = adventurer_token_id.low;
 
     // TODO: check caller owner of Adventurer...
     // TODO: check adventurer is alive...
@@ -577,7 +596,7 @@ func bidOnItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     let (beast_address) = Module.get_module_address(ModuleIds.Beast);
 
     // subtract gold balance from buyer
-    IBeast.subtractFromBalance(beast_address, adventurerTokenId, price);
+    IBeast.subtractFromBalance(beast_address, adventurer_token_id, price);
 
     if (current_bid.bidder == FALSE) {
     } else {
@@ -596,7 +615,7 @@ func bidOnItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 // @dev Requires the caller to be the bidder who previously placed the bid. The function will also mint a token representing the claimed item for the caller and update the bid status to "closed".
 @external
 func claimItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    item_id: Uint256, adventurerTokenId: Uint256
+    item_id: Uint256, adventurer_token_id: Uint256
 ) {
     alloc_locals;
     let (caller) = get_caller_address();
@@ -615,11 +634,9 @@ func claimItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         assert current_bid.bidder = caller;
     }
 
-    mintFromMart(caller, item_id.low);
+    mintFromMart(caller, item_id.low, adventurer_token_id);
 
-    bid.write(item_id, Bid(current_bid.price, 0, adventurerTokenId.low, BidStatus.closed));
-
-    item_adventurer_owner.write(item_id, adventurerTokenId, TRUE);
+    bid.write(item_id, Bid(current_bid.price, 0, adventurer_token_id.low, BidStatus.closed));
 
     return ();
 }

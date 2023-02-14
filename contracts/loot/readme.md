@@ -60,7 +60,7 @@ You can do three things, choose wisely
 
 This is like searching the long grass in pokemon... You might discover a Beast... You might discover gold... You might discover a trap
 
-Once you have discovered - you can flee or fight
+Once you have discovered - you can flee or fight. If you flee you might get hurt.
 
 ```
 nile explore
