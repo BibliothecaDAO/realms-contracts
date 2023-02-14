@@ -1,14 +1,14 @@
 import asyncclick as click
-from realms_cli.caller_invoker import wrapped_send, wrapped_proxy_call
+from realms_cli.caller_invoker import wrapped_send
 from realms_cli.config import Config
-from realms_cli.utils import print_over_colums, uint, felt_to_str
+from realms_cli.utils import uint
 from realms_cli.loot.constants import BEASTS
-
 from realms_cli.loot.getters import _get_adventurer, _get_beast
 
 
 @click.command()
-@click.argument("beast_token_id", nargs=1)
+@click.option('--beast_token_id', is_flag=False,
+              metavar='<columns>', type=click.STRING, help='beast id', prompt=True)
 @click.option("--network", default="goerli")
 async def get_beast(beast_token_id, network):
     """
@@ -18,10 +18,10 @@ async def get_beast(beast_token_id, network):
 
 
 @click.command()
-@click.option('--beast', is_flag=False,
+@click.option('--beast_token_id', is_flag=False,
               metavar='<columns>', type=click.STRING, help='beast id', prompt=True)
 @click.option("--network", default="goerli")
-async def attack_beast(beast, network):
+async def attack_beast(beast_token_id, network):
     """
     Attack beast
     """
@@ -34,12 +34,12 @@ async def attack_beast(beast, network):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Beast",
         function="attack",
-        arguments=[*uint(beast)]
+        arguments=[*uint(beast_token_id)]
     )
 
     print('🧌 Attacked beast ✅')
 
-    beast_out = await _get_beast(beast, network)
+    beast_out = await _get_beast(beast_token_id, network)
 
     adventurer_out = await _get_adventurer(network, beast_out[7])
 
@@ -47,20 +47,21 @@ async def attack_beast(beast, network):
         print(f"🪦 You have been killed")
     else:
         print(
-            f"🤕 You didn't kill and were counterattacked, you have {adventurer_out[4]} health remaining")
+            f"🤕 You didn't kill and were counterattacked, you have {adventurer_out[7]} health remaining")
 
     if beast_out[6] == '0':
-        print(f"💀 You have killed the {BEASTS[str(int(beast_out[0]))]} 🎉")
+        print(
+            f"💀 You have killed the {BEASTS[str(int(beast_out[0]))]} 🎉")
     else:
         print(
             f"👹 You hurt the {BEASTS[str(int(beast_out[0]))]}, health is now {beast_out[6]}")
 
 
 @click.command()
-@click.option('--beast', is_flag=False,
+@click.option('--beast_token_id', is_flag=False,
               metavar='<columns>', type=click.STRING, help='beast id', prompt=True)
 @click.option("--network", default="goerli")
-async def flee_from_beast(beast, network):
+async def flee_from_beast(beast_token_id, network):
     """
     Flee from beast
     """
@@ -73,11 +74,11 @@ async def flee_from_beast(beast, network):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Beast",
         function="flee",
-        arguments=[*uint(beast)]
+        arguments=[*uint(beast_token_id)]
     )
 
 
-    beast_out = await _get_beast(beast, network)
+    beast_out = await _get_beast(beast_token_id, network)
 
     adventurer_out = await _get_adventurer(network, beast_out[7])
 

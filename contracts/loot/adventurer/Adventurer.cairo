@@ -792,7 +792,7 @@ func _deduct_health{
         let (lords_address) = Module.get_external_contract_address(ExternalContractIds.Lords);
         let (beast_address) = Module.get_module_address(ModuleIds.Beast);
         let (adventurer_balance_) = adventurer_balance.read(adventurer_token_id);
-        IERC20.transfer(lords_address, beast_address, adventurer_balance_);
+        // IERC20.transfer(lords_address, beast_address, adventurer_balance_);
         adventurer_balance.write(adventurer_token_id, Uint256(0, 0));
 
         tempvar syscall_ptr: felt* = syscall_ptr;

@@ -175,7 +175,7 @@ func attack{
             // calculate xp earned from killing adventurer (adventurers are rank 1)
             let (xp_gained) = CombatStats.calculate_xp_earned(1, updated_adventurer.Level);
             // increase beast xp and writes
-            increase_xp(beast_token_id, updated_health_beast, xp_gained);
+            _increase_xp(beast_token_id, updated_health_beast, xp_gained);
             tempvar syscall_ptr: felt* = syscall_ptr;
             tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
             tempvar range_check_ptr = range_check_ptr;
@@ -254,7 +254,7 @@ func counter_attack{
         let (xp_gained) = CombatStats.calculate_xp_earned(1, updated_adventurer.Level);
         // increase beast xp and writes
         let (_, beast_dynamic_) = BeastLib.split_data(beast);
-        increase_xp(beast_token_id, beast_dynamic_, xp_gained);
+        _increase_xp(beast_token_id, beast_dynamic_, xp_gained);
 
         tempvar syscall_ptr: felt* = syscall_ptr;
         tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
@@ -330,7 +330,7 @@ func flee{
             let (xp_gained) = CombatStats.calculate_xp_earned(1, updated_adventurer.Level);
             // increase beast xp and writes
             let (_, beast_dynamic_) = BeastLib.split_data(beast);
-            increase_xp(beast_token_id, beast_dynamic_, xp_gained);
+            _increase_xp(beast_token_id, beast_dynamic_, xp_gained);
 
             tempvar syscall_ptr: felt* = syscall_ptr;
             tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
@@ -406,6 +406,17 @@ func increase_xp{
     alloc_locals;
 
     Module.only_approved();
+
+    return _increase_xp(beast_token_id, beast_dynamic_, amount);
+}
+
+
+func _increase_xp{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(beast_token_id: Uint256, beast_dynamic_: BeastDynamic, amount: felt) -> (
+    returned_beast_dynamic: BeastDynamic
+) {
+    alloc_locals;
 
     // increase beast xp
     let (updated_xp_beast) = BeastLib.increase_xp(amount, beast_dynamic_);
@@ -544,6 +555,10 @@ func get_total_supply{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
 func goldBalance(tokenId: Uint256) -> (balance: felt) {
 }
 
+@storage_var
+func worldSupply() -> (balance: felt) {
+}
+
 @external
 func addToBalance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     adventurer_token_id: Uint256, addition: felt
@@ -560,6 +575,9 @@ func _addToBalance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
     let (current_balance) = balanceOf(adventurer_token_id);
 
     goldBalance.write(adventurer_token_id, current_balance + addition);
+
+    let (supply) = worldSupply.read();
+    worldSupply.write(supply + addition);
 
     return ();
 }
@@ -589,6 +607,10 @@ func _subtractFromBalance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
 
     goldBalance.write(adventurer_token_id, current_balance - subtraction);
 
+    // todo: check overflow
+    let (supply) = worldSupply.read();
+    worldSupply.write(supply - subtraction);
+
     return ();
 }
 
@@ -598,6 +620,12 @@ func balanceOf{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 ) -> (balance: felt) {
     return goldBalance.read(adventurer_token_id);
 }
+
+@view
+func getWorldSuppply{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (balance: felt) {
+    return worldSupply.read();
+}
+
 
 // @external
 // func transferFrom{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(

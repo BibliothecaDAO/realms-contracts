@@ -1,10 +1,7 @@
-import asyncclick as click
-from realms_cli.caller_invoker import wrapped_send, wrapped_proxy_call
+from realms_cli.caller_invoker import wrapped_proxy_call
 from realms_cli.config import Config
 from realms_cli.utils import print_over_colums, uint, felt_to_str
 from realms_cli.loot.constants import BEASTS
-
-
 
 async def _get_beast(beast_token_id, network):
     """
@@ -21,7 +18,7 @@ async def _get_beast(beast_token_id, network):
     )
     _print_beast(out.split(" "))
 
-    return out
+    return out.split(" ")
 
 
 def _print_beast(out):

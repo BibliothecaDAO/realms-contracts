@@ -102,7 +102,12 @@ async def mint_adventurer_with_item(network, item, race, home_realm, name,
 
 
 @click.command()
-@click.argument("adventurer_token_id", nargs=1)
+@click.option('--adventurer_token_id',
+              is_flag=False,
+              metavar='<columns>',
+              type=click.STRING,
+              help='adventurer id',
+              prompt=True)
 @click.option("--network", default="goerli")
 async def get_adventurer(adventurer_token_id, network):
     """
@@ -114,7 +119,7 @@ async def get_adventurer(adventurer_token_id, network):
 
 @click.command()
 @click.option("--network", default="goerli")
-@click.option('--adventurer',
+@click.option('--adventurer_token_id',
               is_flag=False,
               metavar='<columns>',
               type=click.STRING,
@@ -126,7 +131,7 @@ async def get_adventurer(adventurer_token_id, network):
               type=click.STRING,
               help='item id',
               prompt=True)
-async def equip(network, adventurer, item):
+async def equip(network, adventurer_token_id, item):
     """
     Equip loot item
     """
@@ -138,14 +143,14 @@ async def equip(network, adventurer, item):
                        signer_alias=config.USER_ALIAS,
                        contract_alias="proxy_Adventurer",
                        function="equip_item",
-                       arguments=[*uint(adventurer), *uint(item)])
+                       arguments=[*uint(adventurer_token_id), *uint(item)])
 
     print('🫴 Equiped item ✅')
 
 
 @click.command()
 @click.option("--network", default="goerli")
-@click.option('--adventurer',
+@click.option('--adventurer_token_id',
               is_flag=False,
               metavar='<columns>',
               type=click.STRING,
@@ -176,7 +181,7 @@ async def unequip(network, adventurer_token_id, item):
 
 @click.command()
 @click.option("--network", default="goerli")
-@click.option('--adventurer',
+@click.option('--adventurer_token_id',
               is_flag=False,
               metavar='<columns>',
               type=click.STRING,

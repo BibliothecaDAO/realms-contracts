@@ -1,13 +1,8 @@
 from collections import namedtuple
-from realms_cli.deployer import logged_deploy
-from realms_cli.caller_invoker import wrapped_send, wrapped_declare, declare_class
+from realms_cli.caller_invoker import wrapped_send
 from realms_cli.config import Config, safe_load_deployment
-from realms_cli.utils import str_to_felt, strhex_as_felt
-
-from nile.common import get_class_hash
-
+from realms_cli.utils import str_to_felt
 from enum import IntEnum
-
 
 
 class ExternalContractIds(IntEnum):
@@ -62,12 +57,7 @@ ADVENTURER_SYMBOL = str_to_felt("ADVENTURER")
 LOOT = str_to_felt("Loot")
 LOOT_SYMBOL = str_to_felt("LOOT")
 
-decorator_function = Cli2Gui(
-    run_function=run,
-    auto_enable=True,
-)
 
-gui = decorator_function(run)
 
 
 async def run(nre):
@@ -167,47 +157,47 @@ async def run(nre):
     # # #         calldata=[strhex_as_felt(class_hash)],
     # # #     )
 
-    # ---------------- INIT MODULES  ----------------#
+    # # ---------------- INIT MODULES  ----------------#
 
-    deployment, _ = safe_load_deployment(
-        "proxy_ModuleController_Loot", nre.network)
+    # deployment, _ = safe_load_deployment(
+    #     "proxy_ModuleController_Loot", nre.network)
 
-    await wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_LootMarketArcade",
-        function="initializer",
-        arguments=[
-            LOOT,
-            LOOT_SYMBOL,
-            deployment,
-            config.ADMIN_ADDRESS,
-        ],
-    )
+    # await wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="proxy_LootMarketArcade",
+    #     function="initializer",
+    #     arguments=[
+    #         LOOT,
+    #         LOOT_SYMBOL,
+    #         deployment,
+    #         config.ADMIN_ADDRESS,
+    #     ],
+    # )
 
-    await wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_Adventurer",
-        function="initializer",
-        arguments=[
-            ADVENTURER,
-            ADVENTURER_SYMBOL,
-            deployment,
-            config.ADMIN_ADDRESS,
-        ],
-    )
+    # await wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="proxy_Adventurer",
+    #     function="initializer",
+    #     arguments=[
+    #         ADVENTURER,
+    #         ADVENTURER_SYMBOL,
+    #         deployment,
+    #         config.ADMIN_ADDRESS,
+    #     ],
+    # )
 
-    await wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_Beast",
-        function="initializer",
-        arguments=[
-            deployment,
-            config.ADMIN_ADDRESS,
-        ],
-    )
+    # await wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="proxy_Beast",
+    #     function="initializer",
+    #     arguments=[
+    #         deployment,
+    #         config.ADMIN_ADDRESS,
+    #     ],
+    # )
 
     # # # #---------------- INIT TOKENS  ----------------#
 
@@ -275,22 +265,22 @@ async def run(nre):
         arguments=write_list
     )
 
-    # # #---------------- SET EXTERNAL CONTRACT ADDRESSES ----------------#
+    # # # #---------------- SET EXTERNAL CONTRACT ADDRESSES ----------------#
 
-    lords_deployment, _ = safe_load_deployment(
-        "proxy_Lords_ERC20_Mintable", nre.network)
+    # lords_deployment, _ = safe_load_deployment(
+    #     "proxy_Lords_ERC20_Mintable", nre.network)
 
-    realms_deployment, _ = safe_load_deployment(
-        "proxy_Realms_ERC721_Mintable", nre.network)
+    # realms_deployment, _ = safe_load_deployment(
+    #     "proxy_Realms_ERC721_Mintable", nre.network)
 
-    await wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_Arbiter_Loot",
-        function="set_external_contract_address",
-        arguments=[
-            [realms_deployment, ExternalContractIds.Realms_ERC721_Mintable.value],
-            [lords_deployment, ExternalContractIds.Lords_ERC20_Mintable.value],
-            [config.ADMIN_ADDRESS, ExternalContractIds.Treasury.value]
-        ]
-    )
+    # await wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="proxy_Arbiter_Loot",
+    #     function="set_external_contract_address",
+    #     arguments=[
+    #         [realms_deployment, ExternalContractIds.Realms_ERC721_Mintable.value],
+    #         [lords_deployment, ExternalContractIds.Lords_ERC20_Mintable.value],
+    #         [config.ADMIN_ADDRESS, ExternalContractIds.Treasury.value]
+    #     ]
+    # )
