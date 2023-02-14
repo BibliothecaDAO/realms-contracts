@@ -13,16 +13,29 @@ from starkware.cairo.common.pow import pow
 
 from contracts.settling_game.utils.general import unpack_data
 
-from contracts.loot.constants.adventurer import Adventurer
+from contracts.loot.constants.adventurer import Adventurer, AdventurerState
 from contracts.loot.constants.beast import Beast, BeastStatic, BeastDynamic, SHIFT_P, BeastSlotIds
 from contracts.loot.beast.stats.beast import BeastStats
 from contracts.loot.loot.stats.item import ItemStats
 
+const BASE_BEAST_LEVEL = 3;
 namespace BeastLib {
     func create{syscall_ptr: felt*, range_check_ptr}(
-        xoroshiro_random: felt, adventurer_id: felt
+        xoroshiro_random: felt, adventurer_id: felt, adventurer_state: AdventurerState
     ) -> (beast_static: BeastStatic, beast_dynamic: BeastDynamic) {
-        let (_, r) = unsigned_div_rem(xoroshiro_random, 17);  // number of beast ids
+        alloc_locals;
+        let (_, random_level) = unsigned_div_rem(xoroshiro_random, 6);
+
+        let (_, r) = unsigned_div_rem(xoroshiro_random, 17);
+
+        let is_less_than_base_level = is_le(adventurer_state.Level, BASE_BEAST_LEVEL);
+        if (is_less_than_base_level == TRUE) {
+            tempvar beast_level = adventurer_state.Level;
+        } else {
+            tempvar beast_level = random_level + (adventurer_state.Level - BASE_BEAST_LEVEL);
+        }
+
+        // number of beast ids
         let beast_id = r + 1;
 
         let BeastId = beast_id;
@@ -30,8 +43,8 @@ namespace BeastLib {
         let (Prefix_1) = ItemStats.item_name_prefix(1);
         let (Prefix_2) = ItemStats.item_name_suffix(1);
         let Adventurer = adventurer_id;
-        let XP = 0;
-        let Level = 1;
+        let XP = 1;
+        let Level = beast_level;
         let SlainOnDate = 0;
 
         return (

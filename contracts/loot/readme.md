@@ -4,15 +4,13 @@ This is a fork of the OG Loot physics to show how a minigame can be played.
 
 This is experimental.
 
-TODO High priority:
-Change Explore Function to by more dynamic:
--- Traps do damage unless you have the right equipment
--- Beasts can be attacked and killed. You might not escape and be killed when trying to flee.
--- Items - health potion, random loot item, gold nuggests
+#### TODO High priority:
+- ADD Statistics Points
+-- At XP level - spend points onto a Stat level
+-- Health Shop - Bid style
 
 
-
-TODO Low priority:
+#### TODO Low priority:
 - Multipler damage for adventurer Level. The Adventurer should both, deal more damange and receive more damage. 
 
 ### Objective
@@ -74,10 +72,8 @@ try again....
 
 
 
-### Buy itmes
+### Buy items
 
-
-Adv
 
 - Loot items are not tradable
 - They spawn on market every 8hrs, and you can purchase.

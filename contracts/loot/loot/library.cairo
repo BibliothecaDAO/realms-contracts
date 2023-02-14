@@ -67,7 +67,7 @@ namespace ItemLib {
         let Prefix_1 = 0;  // name prefix blank
         let Prefix_2 = 0;  // name suffix blank
         let Suffix = 0;  // suffix blank
-        let Greatness = 0;  // greatness blank, random?
+        let Greatness = 1;  // greatness blank, random?
         let (CreatedBlock) = get_block_timestamp();  // timestamp
         let XP = 0;  // xp blank
         let Adventurer = 0;  // adventurer blank
@@ -95,8 +95,6 @@ namespace ItemLib {
     func generate_item_by_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         Id: felt
     ) -> (item: Item) {
-
-
         let (Slot) = ItemStats.item_slot(Id);  // determined by Id
         let (Type) = ItemStats.item_type(Id);  // determined by Id
         let (Material) = ItemStats.item_material(Id);  // determined by Id
@@ -104,7 +102,7 @@ namespace ItemLib {
         let Prefix_1 = 0;  // name prefix blank
         let Prefix_2 = 0;  // name suffix blank
         let Suffix = 0;  // suffix blank
-        let Greatness = 0;  // greatness blank, random?
+        let Greatness = 1;  // greatness blank, random?
         let (CreatedBlock) = get_block_timestamp();  // timestamp
         let XP = 0;  // xp blank
         let Adventurer = 0;  // adventurer blank
@@ -133,14 +131,14 @@ namespace ItemLib {
         item: Item
     ) {
         // set blank item
-        let (_Slot) = ItemStats.item_slot(Slot.Weapon);  // determined by Id
+        let (_Slot) = ItemStats.item_slot(item_id);  // determined by Id
         let (Type) = ItemStats.item_type(item_id);  // determined by Id
         let (Material) = ItemStats.item_material(item_id);  // determined by Id
         let (Rank) = ItemStats.item_rank(item_id);  // determined by Id
         let Prefix_1 = 0;  // name prefix blank
         let Prefix_2 = 0;  // name suffix blank
         let Suffix = 0;  // suffix blank
-        let Greatness = 0;  // greatness blank, random?
+        let Greatness = 1;  // greatness blank, random?
         let (CreatedBlock) = get_block_timestamp();  // timestamp
         let XP = 0;  // xp blank
         let Adventurer = 0;  // adventurer blank

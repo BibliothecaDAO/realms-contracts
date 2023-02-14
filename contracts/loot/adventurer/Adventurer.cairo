@@ -213,7 +213,7 @@ func mint_with_starting_weapon{
     // Mint starting weapon for the adventurer (book, wand, club, short sword)
 
     // TODO: Assert correct ids.
-    let (item_token_id) = ILoot.mintStarterWeapon(loot_address, to, weapon_id);
+    let (item_token_id) = ILoot.mintStarterWeapon(loot_address, to, weapon_id, adventurer_token_id);
 
     // Equip the selected item to the adventurer
     equip_item(adventurer_token_id, item_token_id);
@@ -443,11 +443,13 @@ func increase_xp{
 @external
 func explore{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(token_id: Uint256) -> (success: felt) {
+}(token_id: Uint256) -> (type: felt, id: felt) {
     alloc_locals;
 
     // only adventurer owner can explore
     ERC721.assert_only_token_owner(token_id);
+
+    let (ts) = get_block_timestamp();
 
     // unpack adventurer
     let (unpacked_adventurer) = get_adventurer_by_id(token_id);
@@ -466,7 +468,7 @@ func explore{
     }
 
     let (rnd) = get_random_number();
-    let (discovery) = AdventurerLib.get_random_discovery(rnd);
+    let (discovery) = AdventurerLib.get_random_discovery(rnd * ts);
 
     // If the adventurer encounter a beast
 
@@ -488,13 +490,16 @@ func explore{
 
         emit_adventurer_state(token_id);
 
-        return (DiscoveryType.Beast,);
+        return (DiscoveryType.Beast, beast_id.low);
     }
 
     if (discovery == DiscoveryType.Obstacle) {
         // hard coded 10HP damage
+        // TODO: pick obstacle
+        let (rnd) = get_random_number();
+        let (_, r) = unsigned_div_rem(rnd * 9231312312, 15);
         _deduct_health(token_id, 10);
-        return (DiscoveryType.Obstacle,);
+        return (DiscoveryType.Obstacle, r);
     }
     if (discovery == DiscoveryType.Item) {
         // generate another random 4 numbers
@@ -508,12 +513,12 @@ func explore{
             let (beast_address) = Module.get_module_address(ModuleIds.Beast);
             IBeast.addToBalance(beast_address, token_id, 1);
             emit_adventurer_state(token_id);
-            return (TRUE,);
+            return (DiscoveryType.Item, 0);
         }
         if (discovery == 2) {
             // TODO: dynamic XP amount
             _increase_xp(token_id, 20);
-            return (TRUE,);
+            return (DiscoveryType.Item, 0);
         }
         if (discovery == 3) {
             // mint loot items
@@ -521,20 +526,20 @@ func explore{
             let (owner) = ownerOf(token_id);
             ILoot.mint(loot_address, owner, token_id);
             emit_adventurer_state(token_id);
-            return (TRUE,);
+            return (DiscoveryType.Item, 0);
         }
         if (discovery == 4) {
             // potion
             // TODO: dynamic health amount
             _add_health(token_id, 20);
-            return (TRUE,);
+            return (DiscoveryType.Item, 0);
         }
 
         // send item
-        return (DiscoveryType.Item,);
+        return (DiscoveryType.Item, 0);
     }
 
-    return (FALSE,);
+    return (FALSE, 0);
 }
 // -----------------------------
 // Internal Adventurer Specific

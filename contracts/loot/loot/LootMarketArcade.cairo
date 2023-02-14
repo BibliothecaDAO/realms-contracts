@@ -434,7 +434,7 @@ func newItems() -> (number: felt) {
 }
 
 const HOUR = 3600;
-const BID_TIME = 3600 * 2;  // 2 hours
+const BID_TIME = HOUR / 2;  // 2 hours
 const SHUFFLE_TIME = 3600 * 6;
 const BASE_PRICE = 10;
 const SEED_MULTI = 5846975;

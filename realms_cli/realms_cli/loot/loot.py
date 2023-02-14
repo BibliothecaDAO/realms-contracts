@@ -38,8 +38,8 @@ async def get_loot(loot_token_id, network):
 
     out = await wrapped_proxy_call(
         network=config.nile_network,
-        contract_alias="proxy_Loot",
-        abi='artifacts/abis/Loot.json',
+        contract_alias="proxy_LootMarketArcade",
+        abi='artifacts/abis/LootMarketArcade.json',
         function="getItemByTokenId",
         arguments=[*uint(loot_token_id)],
     )
@@ -52,8 +52,13 @@ async def get_loot(loot_token_id, network):
             pretty_out.append(
                 f"{key} : {felt_to_str(int(out[i]))}")
         else:
-            pretty_out.append(
-                f"{key} : {int(out[i])}")
+            if i == 0:
+                pretty_out.append(
+                    f"{key} : {config.LOOT_ITEMS[int(out[0]) -1]}")
+            else:
+                pretty_out.append(
+                    f"{key} : {int(out[i])}")
+
 
     print("_________ LOOT ITEM - " + str(out[0]) + "___________")
     print_over_colums(pretty_out)
@@ -136,7 +141,7 @@ async def get_unminted_loot(loot_token_id, network):
         else:
             if i == 0:
                 pretty_out.append(
-                    f"{key} : {config.LOOT_ITEMS[int(out[0])]}")
+                    f"{key} : {config.LOOT_ITEMS[int(out[0]) -1]}")
             else:
                 pretty_out.append(
                     f"{key} : {int(out[i])}")

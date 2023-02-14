@@ -1,10 +1,9 @@
 from collections import namedtuple
 from nile.common import get_class_hash
-from realms_cli.caller_invoker import wrapped_send, compile,  wrapped_declare
+from realms_cli.caller_invoker import wrapped_send, compile, wrapped_declare
 from realms_cli.deployer import logged_deploy
 from realms_cli.config import Config
 from realms_cli.utils import delete_existing_deployment, delete_existing_declaration
-
 
 Contracts = namedtuple('Contracts', 'name')
 
@@ -30,7 +29,7 @@ NEW_MODULES = [
     # Contracts("S_Realms_ERC721_Mintable"),
     # Contracts("Resources_ERC1155_Mintable_Burnable"),
     # Contracts("Exchange_ERC20_1155"),
-    Contracts("Adventurer"),
+    # Contracts("Adventurer"),
     Contracts("LootMarketArcade"),
     # Contracts("Beast"),
 ]
@@ -50,8 +49,8 @@ async def run(nre):
 
         compile(contract.name)
 
-        await wrapped_declare(
-            config.ADMIN_ALIAS, contract.name, nre.network, contract.name)
+        await wrapped_declare(config.ADMIN_ALIAS, contract.name, nre.network,
+                              contract.name)
 
         await logged_deploy(
             nre.network,

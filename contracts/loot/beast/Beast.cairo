@@ -103,9 +103,14 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 func create{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(adventurer_id: Uint256) -> (beast_token_id: Uint256) {
+    alloc_locals;
     Module.only_approved();
+
+    let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
+    let (adventurer_state) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_id);
+
     let (rnd) = get_random_number();
-    let (beast_static_, beast_dynamic_) = BeastLib.create(rnd, adventurer_id.low);
+    let (beast_static_, beast_dynamic_) = BeastLib.create(rnd, adventurer_id.low, adventurer_state);
     let (packed_beast) = BeastLib.pack(beast_dynamic_);
     let (current_id) = total_supply.read();
     let (next_id, _) = uint256_add(current_id, Uint256(1, 0));
@@ -197,7 +202,7 @@ func attack{
 
         // drop gold
         // TODO: Make dynamic somehow...
-        _addToBalance(adventurer_id, 20);
+        _addToBalance(adventurer_id, xp_gained);
         return (damage_dealt, 0);
     }
 }
