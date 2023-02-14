@@ -536,6 +536,11 @@ func explore{
 
         return (TRUE,);
     }
+    
+    // TODO: Rarity generation of random number to determine these
+    // TODO: Add in Gold find
+    // TODO: Add in health potion
+    // TODO: Add in free XP
 
     return (TRUE,);
 }

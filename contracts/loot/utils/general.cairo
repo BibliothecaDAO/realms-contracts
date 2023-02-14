@@ -8,3 +8,9 @@ func _uint_to_felt{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
     assert_lt_felt(value.high, 2 ** 123);
     return (value.high * (2 ** 128) + value.low,);
 }
+
+func rare_number_generator{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    arguments
+) {
+    return ();
+}
