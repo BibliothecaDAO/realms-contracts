@@ -62,6 +62,8 @@ namespace TestAdventurerState {
     // Packed Stats p3
     const Status = AdventurerStatus.Idle;
     const Beast = 0;
+    const Upgrading = 0;
+    const PurchasingHealth = 0;
 }
 
 func get_adventurer_state{syscall_ptr: felt*, range_check_ptr}() -> (
@@ -96,6 +98,8 @@ func get_adventurer_state{syscall_ptr: felt*, range_check_ptr}() -> (
         TestAdventurerState.RingId,
         TestAdventurerState.Status,
         TestAdventurerState.Beast,
+        TestAdventurerState.Upgrading,
+        TestAdventurerState.PurchasingHealth
         ),
     );
 }

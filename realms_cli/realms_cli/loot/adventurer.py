@@ -3,6 +3,8 @@ from realms_cli.caller_invoker import  wrapped_send
 from realms_cli.config import Config
 from realms_cli.utils import uint, str_to_felt
 from realms_cli.loot.getters import _get_adventurer, _get_beast
+import dearpygui.dearpygui as dpg
+import subprocess
 
 
 @click.command()
@@ -109,7 +111,8 @@ async def get_adventurer(adventurer_token_id, network):
     Get Adventurer metadata
     """
 
-    await _get_adventurer(network, adventurer_token_id)
+    data = await _get_adventurer(network, adventurer_token_id)
+    return data
 
 
 @click.command()
@@ -205,3 +208,57 @@ async def explore(network, adventurer_token_id):
         await _get_beast(out[26], network)
     else:
         print("🤔 You discovered nothing")
+
+@click.command()
+@click.option("--network", default="goerli")
+@click.option('--adventurer',
+              is_flag=False,
+              metavar='<columns>',
+              type=click.STRING,
+              help='adventurer id',
+              prompt=True)
+@click.option('--stat',
+              is_flag=False,
+              metavar='<columns>',
+              type=click.STRING,
+              help='stat id',
+              prompt=True)
+async def upgrade_stat(network, adventurer_token_id, stat_id):
+    """
+    Upgrade adventurer stat
+    """
+    config = Config(nile_network=network)
+
+    print('💪 Upgrading stat ...')
+
+    await wrapped_send(network=config.nile_network,
+                       signer_alias=config.USER_ALIAS,
+                       contract_alias="proxy_Adventurer",
+                       function="upgradeStat",
+                       arguments=[*uint(adventurer_token_id), stat_id])
+
+    print('💪 Upgraded stat ✅')
+
+@click.command()
+@click.option("--network", default="goerli")
+@click.option('--adventurer',
+              is_flag=False,
+              metavar='<columns>',
+              type=click.STRING,
+              help='adventurer id',
+              prompt=True)
+async def purchase_health(network, adventurer_token_id):
+    """
+    Purchase health for gold
+    """
+    config = Config(nile_network=network)
+
+    print('🧪 Purchasing health ...')
+
+    await wrapped_send(network=config.nile_network,
+                       signer_alias=config.USER_ALIAS,
+                       contract_alias="proxy_Adventurer",
+                       function="purchaseHealth",
+                       arguments=[*uint(adventurer_token_id)])
+
+    print('🧪 Purchased health ✅')

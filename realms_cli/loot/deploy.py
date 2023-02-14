@@ -62,19 +62,12 @@ ADVENTURER_SYMBOL = str_to_felt("ADVENTURER")
 LOOT = str_to_felt("Loot")
 LOOT_SYMBOL = str_to_felt("LOOT")
 
-decorator_function = Cli2Gui(
-    run_function=run,
-    auto_enable=True,
-)
-
-gui = decorator_function(run)
-
 
 async def run(nre):
 
     config = Config(nre.network)
 
-    # ---------------- CONTROLLERS  ----------------#
+    # # ---------------- CONTROLLERS  ----------------#
     # for contract in CONTROLLER_CONTRACT_IMPLEMENTATIONS:
 
     #     await wrapped_declare(
@@ -139,7 +132,7 @@ async def run(nre):
     #     arguments=[xoroshiro],
     # )
 
-    # ---------------- MODULE IMPLEMENTATIONS  ----------------#
+    # # ---------------- MODULE IMPLEMENTATIONS  ----------------#
     # for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
     #     await wrapped_declare(
     #         config.ADMIN_ALIAS, contract.alias, nre.network, contract.alias)
@@ -154,60 +147,60 @@ async def run(nre):
     #         calldata=[class_hash],
     #     )
 
-    # # # # #---------------- TOKEN IMPLEMENTATIONS  ----------------#
-    # # # for contract in TOKEN_CONTRACT_IMPLEMENTATIONS:
-    # # #     class_hash = await wrapped_declare(
-    # # #         config.ADMIN_ALIAS, contract.contract_name, nre.network, contract.alias)
+    # # # #---------------- TOKEN IMPLEMENTATIONS  ----------------#
+    # # for contract in TOKEN_CONTRACT_IMPLEMENTATIONS:
+    # #     class_hash = await wrapped_declare(
+    # #         config.ADMIN_ALIAS, contract.contract_name, nre.network, contract.alias)
 
-    # # #     await logged_deploy(
-    # # #         nre,
-    # # #         config.ADMIN_ALIAS,
-    # # #         'PROXY_Logic',
-    # # #         alias='proxy_' + contract.alias,
-    # # #         calldata=[strhex_as_felt(class_hash)],
-    # # #     )
+    # #     await logged_deploy(
+    # #         nre,
+    # #         config.ADMIN_ALIAS,
+    # #         'PROXY_Logic',
+    # #         alias='proxy_' + contract.alias,
+    # #         calldata=[strhex_as_felt(class_hash)],
+    # #     )
 
     # ---------------- INIT MODULES  ----------------#
 
-    deployment, _ = safe_load_deployment(
-        "proxy_ModuleController_Loot", nre.network)
+    # deployment, _ = safe_load_deployment(
+    #     "proxy_ModuleController_Loot", nre.network)
 
-    await wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_LootMarketArcade",
-        function="initializer",
-        arguments=[
-            LOOT,
-            LOOT_SYMBOL,
-            deployment,
-            config.ADMIN_ADDRESS,
-        ],
-    )
+    # await wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="proxy_LootMarketArcade",
+    #     function="initializer",
+    #     arguments=[
+    #         LOOT,
+    #         LOOT_SYMBOL,
+    #         deployment,
+    #         config.ADMIN_ADDRESS,
+    #     ],
+    # )
 
-    await wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_Adventurer",
-        function="initializer",
-        arguments=[
-            ADVENTURER,
-            ADVENTURER_SYMBOL,
-            deployment,
-            config.ADMIN_ADDRESS,
-        ],
-    )
+    # await wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="proxy_Adventurer",
+    #     function="initializer",
+    #     arguments=[
+    #         ADVENTURER,
+    #         ADVENTURER_SYMBOL,
+    #         deployment,
+    #         config.ADMIN_ADDRESS,
+    #     ],
+    # )
 
-    await wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_Beast",
-        function="initializer",
-        arguments=[
-            deployment,
-            config.ADMIN_ADDRESS,
-        ],
-    )
+    # await wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="proxy_Beast",
+    #     function="initializer",
+    #     arguments=[
+    #         deployment,
+    #         config.ADMIN_ADDRESS,
+    #     ],
+    # )
 
     # # # #---------------- INIT TOKENS  ----------------#
 

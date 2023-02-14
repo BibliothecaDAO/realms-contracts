@@ -50,9 +50,10 @@ struct Adventurer {
     Level: felt,  // 1- 100
     Order: felt,  // 1 - 16
 
-    // TODO: Update adventurer pack/unpack to include this new attribute
     Status: felt,  // {Idle, Battling, Traveling, Questing, Dead}
     Beast: felt,  // tokenId of the beast the adventurer is battling
+    Upgrading: felt,
+    PurchasingHealth: felt,
 
     // TODO: Consider storing adventurer location information
 }
@@ -104,6 +105,8 @@ struct AdventurerState {
 
     Status: felt,
     Beast: felt,
+    Upgrading: felt,
+    PurchasingHealth: felt,
 }
 
 // @notice This is immutable information stored on-chain
@@ -158,6 +161,8 @@ struct AdventurerDynamic {
 
     Status: felt,
     Beast: felt,
+    Upgrading: felt,
+    PurchasingHealth: felt,
 }
 
 struct PackedAdventurerState {
@@ -183,6 +188,8 @@ namespace SHIFT_P_1 {
 namespace SHIFT_P_4 {
     const _1 = 2 ** 0;
     const _2 = 2 ** 3;
+    const _3 = 2 ** 44;
+    const _4 = 2 ** 45;
 }
 
 namespace AdventurerSlotIds {
@@ -222,6 +229,8 @@ namespace AdventurerSlotIds {
     // Packed Stats p4
     const Status = 18;
     const Beast = 19;
+    const Upgrading = 20;
+    const PurchasingHealth = 21;
 }
 
 namespace AdventurerStatus {
