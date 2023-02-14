@@ -13,7 +13,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_add
-from starkware.cairo.common.math import unsigned_div_rem, assert_not_equal, assert_not_zero
+from starkware.cairo.common.math import unsigned_div_rem, assert_not_equal, assert_not_zero, assert_in_range
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.starknet.common.syscalls import (
     get_caller_address,
@@ -35,6 +35,7 @@ from contracts.loot.adventurer.library import AdventurerLib
 from contracts.loot.adventurer.metadata import AdventurerUri
 from contracts.loot.constants.adventurer import (
     Adventurer,
+    AdventurerSlotIds,
     AdventurerState,
     AdventurerStatic,
     AdventurerDynamic,
@@ -406,9 +407,9 @@ func deduct_health{
     return (TRUE,);
 }
 
-// @notice Deduct health from adventurer
+// @notice Add health to adventurer
 // @param adventurer_token_id: Id of adventurer
-// @param amount: Health amount to deduct
+// @param amount: Health amount to add
 // @return success: Value indicating success
 @external
 func add_health{
@@ -434,6 +435,89 @@ func increase_xp{
     Module.only_approved();
     _increase_xp(adventurer_token_id, amount);
 
+    return (TRUE,);
+}
+
+// @notice Allow purchasing health
+// @param adventurer_token_id: Id of adventurer
+// @return success: Value indicating success
+@external
+func allowPurchasingHealth{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*}(
+    adventurer_token_id: Uint256
+) {
+    Module.only_approved();
+
+    _set_purchasing_health(adventurer_token_id, TRUE);
+    return ();
+}
+
+
+// @notice Upgrade stat of adventurer
+// @param adventurer_token_id: Id of adventurer
+// @param amount: Amount of xp to increase
+// @return success: Value indicating success
+@external
+func upgradeStat{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(adventurer_token_id: Uint256, stat: felt) -> (success: felt) {
+    alloc_locals;
+    // only adventurer owner can upgrade stat
+    ERC721.assert_only_token_owner(adventurer_token_id);
+
+    // unpack adventurer
+    let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
+    let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
+    with_attr error_message("Adventurer: Adventurer must be upgradable") {
+        assert adventurer_dynamic_.Upgrading = TRUE;
+    }
+
+    // check stat is upgradeable
+    assert_in_range(stat, AdventurerSlotIds.Strength, AdventurerSlotIds.Luck);
+
+    // upgrade stat
+    let (updated_adventurer) = AdventurerLib.update_statistics(stat, adventurer_dynamic_);
+
+    // reset upgradability
+    _set_upgradable(adventurer_token_id, FALSE);
+
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(updated_adventurer);
+    adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
+
+    return (TRUE,);
+}
+
+// @notice Purchase health for gold
+// @param adventurer_token_id: Id of adventurer
+// @return success: Value indicating success
+@external
+func purchaseHealth{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}( adventurer_token_id: Uint256) -> (success: felt) {
+    alloc_locals;
+
+    let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
+    // only adventurer owner can purchase health
+    ERC721.assert_only_token_owner(adventurer_token_id);
+
+    // check the adventurer can purchase health
+    let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
+    let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
+
+    with_attr error_message("Beast: Health must be purchasable") {
+        assert adventurer_dynamic_.PurchasingHealth = TRUE;
+    }
+
+    let (beast_address) = Module.get_module_address(ModuleIds.Beast);
+
+    // health potion costs 5 gold
+    IBeast.subtractFromBalance(beast_address, adventurer_token_id, 5);
+
+    // health potion adds 10 health
+    _add_health(adventurer_token_id, 10);
+
+    // reset purchasing health state
+    _set_purchasing_health(adventurer_token_id, FALSE);
+    
     return (TRUE,);
 }
 
@@ -466,6 +550,23 @@ func explore{
     with_attr error_message("Adventurer: Cannot explore while assigned beast") {
         assert unpacked_adventurer.Beast = 0;
     }
+
+    // TODO: replace with below when working
+    _set_purchasing_health(token_id, FALSE);
+
+    // // If the adventurer was able to purchase health reset
+    // if (adventurer_dynamic_.PurchasingHealth == TRUE) {
+    //     _set_purchasing_health(token_id, FALSE);
+    //     tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+    //     tempvar syscall_ptr: felt* = syscall_ptr;
+    //     tempvar range_check_ptr = range_check_ptr;
+    //     tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+    // } else {
+    //     tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+    //     tempvar syscall_ptr: felt* = syscall_ptr;
+    //     tempvar range_check_ptr = range_check_ptr;
+    //     tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+    // }
 
     let (rnd) = get_random_number();
     let (discovery) = AdventurerLib.get_random_discovery(rnd * ts);
@@ -840,6 +941,8 @@ func _increase_xp{
         let (packed_updated_adventurer: PackedAdventurerState) = AdventurerLib.pack(
             updated_level_adventurer
         );
+        // allow adventurer to choose a stat to upgrade
+        _set_upgradable(adventurer_token_id, TRUE);
         adventurer_dynamic.write(adventurer_token_id, packed_updated_adventurer);
         emit_adventurer_leveled_up(adventurer_token_id);
         return (TRUE,);
@@ -871,4 +974,44 @@ func _add_health{
     emit_adventurer_state(adventurer_token_id);
 
     return (TRUE,);
+}
+
+func _set_purchasing_health{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(adventurer_token_id: Uint256, purchasingHealth: felt) -> (success: felt) {
+    alloc_locals;
+    
+    // unpack adventurer
+    let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
+    let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
+
+    // set purchasing health
+    let (updated_adventurer) = AdventurerLib.set_purchasing_health(purchasingHealth, adventurer_dynamic_);
+
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(updated_adventurer);
+    adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
+
+    emit_adventurer_state(adventurer_token_id);
+
+    return (TRUE,);
+}
+
+func _set_upgradable{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(adventurer_token_id: Uint256, upgradable: felt) {
+    alloc_locals;
+    
+    // unpack adventurer
+    let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
+    let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
+
+    // set upgrading
+    let (updated_adventurer) = AdventurerLib.set_upgrading(upgradable, adventurer_dynamic_);
+
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(updated_adventurer);
+    adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
+
+    emit_adventurer_state(adventurer_token_id);
+
+    return ();
 }

@@ -8,10 +8,10 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.alloc import alloc
+from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le, assert_nn
 from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.uint256 import Uint256
-from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
@@ -40,6 +40,7 @@ from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.constants import SHIFT_41
 from contracts.loot.constants.beast import Beast
 from contracts.loot.loot.stats.combat import CombatStats
+
 
 namespace AdventurerLib {
     func birth{syscall_ptr: felt*, range_check_ptr}(
@@ -88,6 +89,8 @@ namespace AdventurerLib {
 
         let Status = AdventurerStatus.Idle;
         let Beast = 0;
+        let Upgrading = 0;
+        let PurchasingHealth = 0;
 
         return (
             AdventurerStatic(
@@ -120,6 +123,8 @@ namespace AdventurerLib {
                 RingId=RingId,
                 Status=Status,
                 Beast=Beast,
+                Upgrading=Upgrading,
+                PurchasingHealth=PurchasingHealth
             ),
         );
     }
@@ -155,6 +160,8 @@ namespace AdventurerLib {
             adventurer_dynamic.RingId,
             adventurer_dynamic.Status,
             adventurer_dynamic.Beast,
+            adventurer_dynamic.Upgrading,
+            adventurer_dynamic.PurchasingHealth
         );
 
         return (adventurer,);
@@ -194,6 +201,8 @@ namespace AdventurerLib {
             adventurer.RingId,
             adventurer.Status,
             adventurer.Beast,
+            adventurer.Upgrading,
+            adventurer.PurchasingHealth
         );
 
         return (adventurer_static, adventurer_dynamic);
@@ -236,6 +245,8 @@ namespace AdventurerLib {
 
         let Status = unpacked_adventurer_state.Status * SHIFT_P_4._1;
         let Beast = unpacked_adventurer_state.Beast * SHIFT_P_4._2;
+        let Upgrading = unpacked_adventurer_state.Upgrading * SHIFT_P_4._3;
+        let PurchasingHealth = unpacked_adventurer_state.PurchasingHealth * SHIFT_P_4._4;
 
         // packing
         // let p1 = XP + Luck + Charisma + Wisdom + Intelligence + Vitality + Dexterity + Strength + Level + Health;
@@ -245,7 +256,7 @@ namespace AdventurerLib {
         let p2 = Weapon + Chest + Head + Waist;
         // let p3 = Ring + Neck + Hands + Feet;
         let p3 = Feet + Hands + Neck + Ring;
-        let p4 = Status + Beast;
+        let p4 = Status + Beast + Upgrading + PurchasingHealth;
 
         let packedAdventurer = PackedAdventurerState(p1, p2, p3, p4);
 
@@ -295,6 +306,8 @@ namespace AdventurerLib {
         // ---------- p4 ---------#
         let (Status) = unpack_data(packed_adventurer.p4, 0, 7);  // 3
         let (Beast) = unpack_data(packed_adventurer.p4, 3, 2199023255551);  // 41
+        let (Upgrading) = unpack_data(packed_adventurer.p4, 44, 1); // 1
+        let (PurchasingHealth) = unpack_data(packed_adventurer.p4, 45, 1); // 1
 
         return (
             AdventurerDynamic(
@@ -318,6 +331,8 @@ namespace AdventurerLib {
                 RingId=RingId,
                 Status=Status,
                 Beast=Beast,
+                Upgrading=Upgrading,
+                PurchasingHealth=PurchasingHealth
             ),
         );
     }
@@ -489,14 +504,74 @@ namespace AdventurerLib {
     }
 
     func update_statistics{syscall_ptr: felt*, range_check_ptr}(
-        item_token_id: felt, item: Item, unpacked_adventurer: AdventurerDynamic
+        stat: felt, unpacked_adventurer: AdventurerDynamic
     ) -> (new_unpacked_adventurer: AdventurerDynamic) {
         alloc_locals;
 
-        // cast state into felt array
-        // make adjustment to felt at index
-        // cast back into adventuerState
+        if (stat == AdventurerSlotIds.Strength) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Strength, unpacked_adventurer.Strength + 1, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (stat == AdventurerSlotIds.Dexterity) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Dexterity, unpacked_adventurer.Dexterity + 1, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (stat == AdventurerSlotIds.Vitality) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Vitality, unpacked_adventurer.Vitality + 1, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (stat == AdventurerSlotIds.Intelligence) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Intelligence, unpacked_adventurer.Intelligence + 1, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (stat == AdventurerSlotIds.Wisdom) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Wisdom, unpacked_adventurer.Wisdom + 1, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (stat == AdventurerSlotIds.Charisma) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Charisma, unpacked_adventurer.Charisma + 1, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        } else {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Luck, unpacked_adventurer.Luck + 1, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+    }
 
-        return (0,);
+    func set_upgrading{syscall_ptr: felt*, range_check_ptr}(
+        upgrading: felt, unpacked_adventurer: AdventurerDynamic
+    ) -> (new_unpacked_adventurer: AdventurerDynamic) {
+
+        // set upgrade status
+        let (updated_adventurer: AdventurerDynamic) = cast_state(
+            AdventurerSlotIds.Upgrading, upgrading, unpacked_adventurer
+        );
+
+        return (updated_adventurer,);
+    }
+
+    func set_purchasing_health{syscall_ptr: felt*, range_check_ptr}(
+        purchasing: felt, unpacked_adventurer: AdventurerDynamic
+    ) -> (new_unpacked_adventurer: AdventurerDynamic) {
+
+        // set the purchasing health
+        let (updated_adventurer: AdventurerDynamic) = cast_state(
+            AdventurerSlotIds.PurchasingHealth, purchasing, unpacked_adventurer
+        );
+
+        return (updated_adventurer,);
     }
 }

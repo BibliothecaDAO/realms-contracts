@@ -1,4 +1,6 @@
 %lang starknet
+
+from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_add, uint256_sub
 from starkware.cairo.common.math_cmp import is_nn, is_le
@@ -241,6 +243,55 @@ func test_discovery{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_
     let (r) = AdventurerLib.get_random_discovery(1);
 
     assert r = DiscoveryType.Beast;
+
+    return ();
+}
+
+@external
+func test_upgrading{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}() {
+    alloc_locals;
+
+    let (state) = get_adventurer_state();
+
+    let (adventurer_static, adventurer_dynamic) = AdventurerLib.split_data(state);
+
+    let (adventurer_state: PackedAdventurerState) = AdventurerLib.pack(adventurer_dynamic);
+
+    let (unpacked_adventurer: AdventurerDynamic) = AdventurerLib.unpack(adventurer_state);
+
+    let (c) = AdventurerLib.set_upgrading(TRUE, unpacked_adventurer);
+
+    assert c.Upgrading = TRUE;
+
+    let (c) = AdventurerLib.set_upgrading(FALSE, unpacked_adventurer);
+
+    assert c.Upgrading = FALSE;
+
+    return ();
+}
+
+@external
+func test_purchasing{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}() {
+    alloc_locals;
+
+    let (state) = get_adventurer_state();
+
+    let (adventurer_static, adventurer_dynamic) = AdventurerLib.split_data(state);
+
+    let (adventurer_state: PackedAdventurerState) = AdventurerLib.pack(adventurer_dynamic);
+
+    let (unpacked_adventurer: AdventurerDynamic) = AdventurerLib.unpack(adventurer_state);
+
+    let (c) = AdventurerLib.set_purchasing_health(TRUE, unpacked_adventurer);
+
+    assert c.PurchasingHealth = TRUE;
+
+
+    let (c) = AdventurerLib.set_purchasing_health(FALSE, unpacked_adventurer);
+
+    assert c.PurchasingHealth = FALSE;
 
     return ();
 }

@@ -58,13 +58,11 @@ LOOT = str_to_felt("Loot")
 LOOT_SYMBOL = str_to_felt("LOOT")
 
 
-
-
 async def run(nre):
 
     config = Config(nre.network)
 
-    # ---------------- CONTROLLERS  ----------------#
+    # # ---------------- CONTROLLERS  ----------------#
     # for contract in CONTROLLER_CONTRACT_IMPLEMENTATIONS:
 
     #     await wrapped_declare(
@@ -129,7 +127,7 @@ async def run(nre):
     #     arguments=[xoroshiro],
     # )
 
-    # ---------------- MODULE IMPLEMENTATIONS  ----------------#
+    # # ---------------- MODULE IMPLEMENTATIONS  ----------------#
     # for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
     #     await wrapped_declare(
     #         config.ADMIN_ALIAS, contract.alias, nre.network, contract.alias)
@@ -144,18 +142,18 @@ async def run(nre):
     #         calldata=[class_hash],
     #     )
 
-    # # # # #---------------- TOKEN IMPLEMENTATIONS  ----------------#
-    # # # for contract in TOKEN_CONTRACT_IMPLEMENTATIONS:
-    # # #     class_hash = await wrapped_declare(
-    # # #         config.ADMIN_ALIAS, contract.contract_name, nre.network, contract.alias)
+    # # # #---------------- TOKEN IMPLEMENTATIONS  ----------------#
+    # # for contract in TOKEN_CONTRACT_IMPLEMENTATIONS:
+    # #     class_hash = await wrapped_declare(
+    # #         config.ADMIN_ALIAS, contract.contract_name, nre.network, contract.alias)
 
-    # # #     await logged_deploy(
-    # # #         nre,
-    # # #         config.ADMIN_ALIAS,
-    # # #         'PROXY_Logic',
-    # # #         alias='proxy_' + contract.alias,
-    # # #         calldata=[strhex_as_felt(class_hash)],
-    # # #     )
+    # #     await logged_deploy(
+    # #         nre,
+    # #         config.ADMIN_ALIAS,
+    # #         'PROXY_Logic',
+    # #         alias='proxy_' + contract.alias,
+    # #         calldata=[strhex_as_felt(class_hash)],
+    # #     )
 
     # # ---------------- INIT MODULES  ----------------#
 
