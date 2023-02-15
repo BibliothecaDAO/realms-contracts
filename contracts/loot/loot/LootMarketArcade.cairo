@@ -158,7 +158,7 @@ func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     alloc_locals;
     let (controller) = Module.controller_address();
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
-    let (item_data) = getItemByTokenId(tokenId);
+    let (item_data) = get_item_by_token_id(tokenId);
     let (tokenURI_len, tokenURI: felt*) = LootUri.build(tokenId, item_data, adventurer_address);
     return (tokenURI_len, tokenURI);
 }
@@ -267,7 +267,7 @@ func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
     return ();
 }
 
-func mintFromMart{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+func mint_from_mart{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
     to: felt, item_id: felt, adventurer_token_id: Uint256
 ) {
     alloc_locals;
@@ -291,7 +291,7 @@ func mintFromMart{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_pt
 // @param tokenId: Id of loot item
 // @param adventurerId: Id of adventurer
 @external
-func updateAdventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func update_adventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256, adventurerId: felt
 ) {
     Module.only_approved();
@@ -307,7 +307,7 @@ func updateAdventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 // @param tokenId: Id of loot item
 // @param xp: Amount of xp to update
 @external
-func updateXP{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func update_xP{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256, xp: felt
 ) {
     Module.only_approved();
@@ -323,7 +323,7 @@ func updateXP{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 // @param tokenId: Id of loot item
 // @param item_: Data of loot item
 @external
-func setItemById{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func set_item_by_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256, item_id: felt, greatness: felt, xp: felt, adventurer: felt, bag_id: felt
 ) {
     alloc_locals;
@@ -359,7 +359,7 @@ func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBu
 // @param tokenId: Id of the item token
 // @return item: Item data
 @view
-func getItemByTokenId{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func get_item_by_token_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256
 ) -> (item: Item) {
     let (item_: Item) = item.read(tokenId);
@@ -376,7 +376,7 @@ func getItemByTokenId{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 // @param weapon_id: Weapon ID to mint
 // @return item_token_id: The token id of the minted item
 @external
-func mintStarterWeapon{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+func mint_starter_weapon{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
     to: felt, weapon_id: felt, adventurer_token_id: Uint256
 ) -> (item_token_id: Uint256) {
     alloc_locals;
@@ -423,20 +423,20 @@ func bid(market_item_id: Uint256) -> (bid: Bid) {
 }
 
 @storage_var
-func lastSeedTime() -> (number: felt) {
+func last_seed_time() -> (number: felt) {
 }
 
 @storage_var
-func mintSeed() -> (number: felt) {
+func mint_seed() -> (number: felt) {
 }
 
 // index
 @storage_var
-func mintIndex() -> (number: felt) {
+func mint_index() -> (number: felt) {
 }
 
 @storage_var
-func newItems() -> (number: felt) {
+func new_items() -> (number: felt) {
 }
 
 const HOUR = 3600;
@@ -452,76 +452,76 @@ func ItemMerchantUpdate(item: Item, market_item_id: felt, bid: Bid) {
 
 // returns TRUE if item is owned and in existence is owned
 @view
-func itemOwner{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func item_owner{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256, adventurer_token_id: Uint256
 ) -> (owner: felt) {
     return item_adventurer_owner.read(tokenId, adventurer_token_id);
 }
 
 @external
-func mintDailyItems{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+func mint_daily_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
 
     // check 12hrs has passed
     let (current_time) = get_block_timestamp();
-    let (_lastSeedTime) = lastSeedTime.read();
+    let (_lastSeedTime) = last_seed_time.read();
     let is_past_tick = is_le(_lastSeedTime + SHUFFLE_TIME, current_time);
     with_attr error_message("Item Market: You cannot mint daily items yet...") {
         assert is_past_tick = TRUE;
     }
 
     // TODO: replace with curve according to gold
-    let new_items = 20;
+    let _new_items = 20;
 
     // get current index
-    let (current_index) = mintIndex.read();
+    let (current_index) = mint_index.read();
 
-    let new_index = current_index + new_items;
+    let new_index = current_index + _new_items;
 
     let (random) = get_random_number();
-    mintSeed.write(random * current_time);
+    mint_seed.write(random * current_time);
 
-    lastSeedTime.write(current_time);
+    last_seed_time.write(current_time);
 
-    emitNewItemsLoop(random, new_index, current_index);
+    emit_new_items_loop(random, new_index, current_index);
 
     // set new index
-    mintIndex.write(new_index);
+    mint_index.write(new_index);
 
     // set number of items in this batch - this allows us to force people to only mint within the new item scope
     // eg: mint items only > mintIndex - new_items && < mintIndex
     // TODO: might be better way than this.
-    newItems.write(new_items);
+    new_items.write(_new_items);
 
     // TODO: send 2 gold to the adventurer whoever calls this
 
     return ();
 }
 
-func emitNewItemsLoop{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func emit_new_items_loop{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     daily_seed: felt, item_start_index_len: felt, item_start_index: felt
 ) -> (item_start_index_len: felt, item_start_index: felt) {
     if (item_start_index_len == item_start_index) {
         return (0, 0);
     }
 
-    let (new_item: Item) = _getRandomItemFromSeed(item_start_index, daily_seed);
+    let (new_item: Item) = _get_random_item_from_seed(item_start_index, daily_seed);
 
     ItemMerchantUpdate.emit(new_item, item_start_index, Bid(BASE_PRICE, 0, 0, 0, new_item.Id));
 
-    return emitNewItemsLoop(daily_seed, item_start_index_len - 1, item_start_index + 1);
+    return emit_new_items_loop(daily_seed, item_start_index_len - 1, item_start_index + 1);
 }
 
 @view
-func getRandomItemFromSeed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func get_random_item_from_seed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     market_item_id: felt
 ) -> (item: Item) {
-    let (seed) = mintSeed.read();
+    let (seed) = mint_seed.read();
 
-    return _getRandomItemFromSeed(market_item_id, seed);
+    return _get_random_item_from_seed(market_item_id, seed);
 }
 
-func _getRandomItemFromSeed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func _get_random_item_from_seed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     market_item_id: felt, daily_seed: felt
 ) -> (item: Item) {
     let (_, r) = unsigned_div_rem(daily_seed * market_item_id * SEED_MULTI, NUMBER_LOOT_ITEMS);
@@ -532,19 +532,19 @@ func _getRandomItemFromSeed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
 }
 
 @view
-func viewBid{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(market_item_id: Uint256) -> (
+func view_bid{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(market_item_id: Uint256) -> (
     bid: Bid
 ) {
     return bid.read(market_item_id);
 }
 
 @view
-func viewUnmintedItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func view_unminted_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     market_item_id: Uint256
 ) -> (item: Item, bid: Bid) {
-    let (item) = getRandomItemFromSeed(market_item_id.low);
+    let (item) = get_random_item_from_seed(market_item_id.low);
 
-    let (bid) = viewBid(market_item_id);
+    let (bid) = view_bid(market_item_id);
     return (item, bid);
 }
 
@@ -557,7 +557,7 @@ func viewUnmintedItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 // @param bidder The address of the bidder.
 // @dev Requires the item to be owned by the market contract and for the bid to be higher than the base price. The function will update the bid price and expiry time for the item.
 @external
-func bidOnItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     market_item_id: Uint256, adventurer_token_id: Uint256, price: felt
 ) {
     alloc_locals;
@@ -567,7 +567,7 @@ func bidOnItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     let (this) = get_contract_address();
 
     // store the id not the Unit in the struct
-    let adventurerIdAsFelt = adventurer_token_id.low;
+    let adventurer_id_as_felt = adventurer_token_id.low;
 
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
     let (owner) = IERC721.ownerOf(adventurer_address, adventurer_token_id);
@@ -582,14 +582,14 @@ func bidOnItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         assert higer_than_base_price = TRUE;
     }
 
-    let (item) = getRandomItemFromSeed(market_item_id.low);
+    let (item) = get_random_item_from_seed(market_item_id.low);
 
     // read current bid
     let (current_bid) = bid.read(market_item_id);
 
     // if current expiry = 0 means unbidded = set base time from now + BID_TIME
     if (current_bid.expiry == FALSE) {
-        bid.write(market_item_id, Bid(price, current_time + BID_TIME, adventurerIdAsFelt, BidStatus.open, item.Id));
+        bid.write(market_item_id, Bid(price, current_time + BID_TIME, adventurer_id_as_felt, BidStatus.open, item.Id));
         return ();
     }
 
@@ -608,21 +608,21 @@ func bidOnItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     assert_can_purchase(market_item_id.low);
 
     // update bid state
-    bid.write(market_item_id, Bid(price, current_bid.expiry, adventurerIdAsFelt, BidStatus.open, item.Id));
+    bid.write(market_item_id, Bid(price, current_bid.expiry, adventurer_id_as_felt, BidStatus.open, item.Id));
 
     let (beast_address) = Module.get_module_address(ModuleIds.Beast);
 
     // subtract gold balance from buyer
-    IBeast.subtractFromBalance(beast_address, adventurer_token_id, price);
+    IBeast.subtract_from_balance(beast_address, adventurer_token_id, price);
 
     if (current_bid.bidder == FALSE) {
     } else {
-        IBeast.addToBalance(beast_address, Uint256(current_bid.bidder, 0), current_bid.price);
+        IBeast.add_to_balance(beast_address, Uint256(current_bid.bidder, 0), current_bid.price);
     }
 
     
     ItemMerchantUpdate.emit(
-        item, market_item_id.low, Bid(price, current_bid.expiry, adventurerIdAsFelt, BidStatus.open, item.Id)
+        item, market_item_id.low, Bid(price, current_bid.expiry, adventurer_id_as_felt, BidStatus.open, item.Id)
     );
 
     return ();
@@ -631,7 +631,7 @@ func bidOnItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 // @param item_id The ID of the item being claimed.
 // @dev Requires the caller to be the bidder who previously placed the bid. The function will also mint a token representing the claimed item for the caller and update the bid status to "closed".
 @external
-func claimItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func claim_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     market_item_id: Uint256, adventurer_token_id: Uint256
 ) {
     alloc_locals;
@@ -661,7 +661,7 @@ func claimItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     }
 
     // we pass in the current_bid.item_id
-    mintFromMart(caller, current_bid.item_id, adventurer_token_id);
+    mint_from_mart(caller, current_bid.item_id, adventurer_token_id);
 
     // this could be optimised
     bid.write(market_item_id, Bid(current_bid.price, 0, adventurer_token_id.low, BidStatus.closed, current_bid.item_id));
@@ -673,9 +673,9 @@ func assert_can_purchase{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
     market_item_id: felt
 ) {
 
-    let (start_index) = mintIndex.read();
+    let (start_index) = mint_index.read();
 
-    let (current_items) = newItems.read();
+    let (current_items) = new_items.read();
 
     let above_start_index = is_le(start_index, market_item_id);
 

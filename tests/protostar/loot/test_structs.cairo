@@ -34,17 +34,17 @@ namespace TestAdventurerState {
     const Level = 500;  //
 
     // Physical
-    const Strength = 1000;
-    const Dexterity = 1000;
-    const Vitality = 1000;
+    const Strength = 0;
+    const Dexterity = 0;
+    const Vitality = 0;
 
     // Mental
-    const Intelligence = 1000;
-    const Wisdom = 1000;
-    const Charisma = 1000;
+    const Intelligence = 0;
+    const Wisdom = 0;
+    const Charisma = 0;
 
     // Meta Physical
-    const Luck = 1000;
+    const Luck = 0;
 
     const XP = 1000000;  //
 
@@ -63,7 +63,6 @@ namespace TestAdventurerState {
     const Status = AdventurerStatus.Idle;
     const Beast = 0;
     const Upgrading = 0;
-    const PurchasingHealth = 0;
 }
 
 func get_adventurer_state{syscall_ptr: felt*, range_check_ptr}() -> (
@@ -99,7 +98,6 @@ func get_adventurer_state{syscall_ptr: felt*, range_check_ptr}() -> (
         TestAdventurerState.Status,
         TestAdventurerState.Beast,
         TestAdventurerState.Upgrading,
-        TestAdventurerState.PurchasingHealth
         ),
     );
 }

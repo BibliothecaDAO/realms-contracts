@@ -5,14 +5,14 @@ from contracts.loot.constants.item import Item
 
 @contract_interface
 namespace ILoot {
-    func getItemByTokenId(tokenId: Uint256) -> (item: Item) {
+    func get_item_by_token_id(tokenId: Uint256) -> (item: Item) {
     }
-    func updateAdventurer(tokenId: Uint256, adventurer: felt) {
+    func update_adventurer(tokenId: Uint256, adventurer: felt) {
     }
-    func mintStarterWeapon(to: felt, weapon_id: felt, adventurer_token_id: Uint256) -> (item_token_id: Uint256) {
+    func mint_starter_weapon(to: felt, weapon_id: felt) -> (item_token_id: Uint256) {
     }
     func mint(to: felt, adventurer_token_id: Uint256) -> (item_token_id: Uint256) {
     }
-    func itemOwner(tokenId: Uint256, adventurer_token_id: Uint256) -> (owner: felt) {
+    func item_owner(tokenId: Uint256, adventurer_token_id: Uint256) -> (owner: felt) {
     }
 }

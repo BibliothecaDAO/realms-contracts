@@ -62,7 +62,7 @@ async def set_loot(loot_token_id, item, greatness, xp, adventurer, bag, network)
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Loot",
-        function="setItemById",
+        function="set_item_by_id",
         arguments=[*uint(loot_token_id), item, greatness, xp, adventurer, bag]
     )
 
@@ -81,7 +81,7 @@ async def mint_daily_items(network):
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_LootMarketArcade",
-        function="mintDailyItems",
+        function="mint_daily_items",
         arguments=[]
     )
 
@@ -99,7 +99,7 @@ async def get_unminted_loot(loot_token_id, network):
         network=config.nile_network,
         contract_alias="proxy_LootMarketArcade",
         abi='artifacts/abis/LootMarketArcade.json',
-        function="viewUnmintedItem",
+        function="view_unminted_item",
         arguments=[*uint(loot_token_id)],
     )
     out = out.split(" ")
@@ -128,7 +128,7 @@ async def bid_on_item(network, item, adventurer, price):
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_LootMarketArcade",
-        function="bidOnItem",
+        function="bid_on_item",
         arguments=[*uint(item), *uint(adventurer), price]
     )
 
@@ -151,7 +151,7 @@ async def claim_item(network, item, adventurer):
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_LootMarketArcade",
-        function="claimItem",
+        function="claim_item",
         arguments=[*uint(item), *uint(adventurer)]
     )
 
@@ -170,7 +170,7 @@ async def all_loot(network):
         network=config.nile_network,
         contract_alias="proxy_LootMarketArcade",
         abi='artifacts/abis/LootMarketArcade.json',
-        function="balanceOf",
+        function="balance_of",
         arguments=[config.USER_ADDRESS],
     )
 
@@ -185,7 +185,7 @@ async def all_loot(network):
             network=config.nile_network,
             contract_alias="proxy_LootMarketArcade",
             abi='artifacts/abis/LootMarketArcade.json',
-            function="tokenOfOwnerByIndex",
+            function="token_of_owner_by_index",
             arguments=[config.USER_ADDRESS, *uint(i)],
         )
 
@@ -195,7 +195,7 @@ async def all_loot(network):
             network=config.nile_network,
             contract_alias="proxy_LootMarketArcade",
             abi='artifacts/abis/LootMarketArcade.json',
-            function="getItemByTokenId",
+            function="get_item_by_token_id",
             arguments=[*uint(id[0])],
         )
 
