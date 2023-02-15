@@ -42,9 +42,9 @@ func __setup__{syscall_ptr: felt*, range_check_ptr}() {
     %}
 
     // Set tokens to ids above for testing
-    ILoot.setItemById(addresses.loot, Uint256(1,0), ItemIds.Wand, 20, 100, 0, 0);
+    ILoot.set_item_by_id(addresses.loot, Uint256(1,0), ItemIds.Wand, 20, 100, 0, 0);
 
-    ILords.approve(addresses.lords, addresses.adventurer, Uint256(100,0));
+    ILords.approve(addresses.lords, addresses.adventurer, Uint256(100000000000000000000, 0));
 
     %{
         stop_prank_lords()
