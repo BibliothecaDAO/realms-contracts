@@ -7,7 +7,7 @@
 %lang starknet
 
 from starkware.cairo.common.alloc import alloc
-from starkware.cairo.common.bool import TRUE
+from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math_cmp import is_le, is_nn
 from starkware.cairo.common.uint256 import Uint256
@@ -54,6 +54,15 @@ func TravelAction_2(
 // -----------------------------------
 // Storage
 // -----------------------------------
+
+// @param traveller_contract_id: ContractId
+// @param traveller_token_id: TokenID
+// @param traveller_nested_id: NestedID
+@storage_var
+func cannot_travel(
+    traveller_contract_id: felt, traveller_token_id: felt, traveller_nested_id: felt
+) -> (cannot_travel: felt) {
+}
 
 // @asset_id: ContractId
 // @token_id: TokenID
@@ -103,6 +112,34 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 // External
 // -----------------------------------
 
+// @notice Allow an asset to travel (army, adventurer)
+// @dev By default all assets can travel
+// @param traveller_contract_id: ContractId
+// @param traveller_token_id: TokenID
+// @param traveller_nested_id: NestedID
+@external
+func allow_travel{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    traveller_contract_id: felt, traveller_token_id: felt, traveller_nested_id: felt
+) -> () {
+    Module.only_approved();
+    cannot_travel.write(traveller_contract_id, traveller_token_id, traveller_nested_id, FALSE);
+    return ();
+}
+
+// @notice Forbid an asset from travelling (army, adventurer)
+// @dev By default all assets can travel
+// @param traveller_contract_id: ContractId
+// @param traveller_token_id: TokenID
+// @param traveller_nested_id: NestedID
+@external
+func forbid_travel{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    traveller_contract_id: felt, traveller_token_id: felt, traveller_nested_id: felt
+) -> () {
+    Module.only_approved();
+    cannot_travel.write(traveller_contract_id, traveller_token_id, traveller_nested_id, TRUE);
+    return ();
+}
+
 // @traveller_contract_id: External contract ID -> keeping the same for consistency
 // @traveller_token_id: Asset token ID moving (Realm, Adventurer)
 // @traveller_nested_id: Nested asset ID (Armies, persons etc)
@@ -123,6 +160,8 @@ func travel{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     Module.__callback__(traveller_token_id);
 
     // TODO: assert is correct ID (can't try move unmoveable assets)
+
+    assert_can_travel(traveller_contract_id, traveller_token_id, traveller_nested_id);
 
     // You cannot move nested asset ID 0 - this is the actual location.
     let is_not_defending_army = is_nn(traveller_nested_id);
@@ -247,6 +286,20 @@ func get_travel_distance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
     let (distance) = Travel.calculate_distance(traveller_coordinates, destination_coordinates);
 
     return (distance,);
+}
+
+// @notice Assert that an item can travel (army, adventurer), by default all items can travel
+func assert_can_travel{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    traveller_contract_id: felt, traveller_token_id: felt, traveller_nested_id: felt
+) -> () {
+    with_attr error_message("Travel: cannot move this item") {
+        let (forbid_to_travel) = cannot_travel.read(
+            traveller_contract_id, traveller_token_id, traveller_nested_id
+        );
+
+        assert forbid_to_travel = 0;
+    }
+    return ();
 }
 
 @view
