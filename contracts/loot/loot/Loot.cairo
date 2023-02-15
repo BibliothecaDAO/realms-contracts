@@ -155,7 +155,7 @@ func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     alloc_locals;
     let (controller) = Module.controller_address();
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
-    let (item_data) = getItemByTokenId(tokenId);
+    let (item_data) = get_item_by_token_id(tokenId);
     let (tokenURI_len, tokenURI: felt*) = LootUri.build(tokenId, item_data, adventurer_address);
     return (tokenURI_len, tokenURI);
 }
@@ -256,12 +256,14 @@ func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: f
 // @param weapon_id: Weapon ID to mint
 // @return item_token_id: The token id of the minted item
 @external
-func mintStarterWeapon{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+func mint_starter_weapon{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
     to: felt, weapon_id: felt
 ) -> (item_token_id: Uint256) {
     alloc_locals;
 
     // TODO: Assert the weapon_id is book, wand, club, or short sword
+
+
     // TODO: permissions
 
     // fetch new item with random Id
@@ -282,7 +284,7 @@ func mintStarterWeapon{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_che
 // @param tokenId: Id of loot item
 // @param adventurerId: Id of adventurer
 @external
-func updateAdventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func update_adventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256, adventurerId: felt
 ) {
     Module.only_approved();
@@ -298,7 +300,7 @@ func updateAdventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 // @param tokenId: Id of loot item
 // @param xp: Amount of xp to update
 @external
-func updateXP{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func update_xP{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256, xp: felt
 ) {
     Module.only_approved();
@@ -314,7 +316,7 @@ func updateXP{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 // @param tokenId: Id of loot item
 // @param item_: Data of loot item
 @external
-func setItemById{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func set_item_by_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256, item_id: felt, greatness: felt, xp: felt, adventurer: felt, bag_id: felt
 ) {
     alloc_locals;
@@ -350,7 +352,7 @@ func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBu
 // @param tokenId: Id of the item token
 // @return item: Item data
 @view
-func getItemByTokenId{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func get_item_by_token_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256
 ) -> (item: Item) {
     let (item_: Item) = item.read(tokenId);

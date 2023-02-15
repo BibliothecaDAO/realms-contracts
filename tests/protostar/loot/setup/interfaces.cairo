@@ -34,15 +34,15 @@ namespace ILoot {
     }
     func mint(to: felt) {
     }
-    func mintStarterWeapon(to: felt, weapon_id: felt) {
+    func mint_starter_weapon(to: felt, weapon_id: felt) {
     }
-    func updateAdventurer(tokenId: Uint256, adventurerId: felt) {
+    func update_adventurer(tokenId: Uint256, adventurerId: felt) {
     }
-    func setItemById(
+    func set_item_by_id(
         tokenId: Uint256, item_id: felt, greatness: felt, xp: felt, adventurer: felt, bag_id: felt
     ) {
     }
-    func getItemByTokenId(tokenId: Uint256) -> (item: Item) {
+    func get_item_by_token_id(tokenId: Uint256) -> (item: Item) {
     }
     func tokenURI(tokenId: Uint256) -> (tokenURI_len: felt, tokenURI: felt*) {
     }
@@ -70,7 +70,8 @@ namespace IAdventurer {
         order: felt,
         image_hash_1: felt,
         image_hash_2: felt,
-    ) -> (adventurer_token_id: felt, item_token_id: felt) {
+        weapon_id: felt,
+    ) -> (adventurer_token_id: Uint256, item_token_id: Uint256) {
     }
 
     func equip_item(tokenId: Uint256, itemTokenId: Uint256) -> (success: felt) {
@@ -81,13 +82,11 @@ namespace IAdventurer {
     }
     func increase_xp(tokenId: Uint256, amount: felt) -> (success: felt) {
     }
-    func explore(token_id: Uint256) -> (success: felt) {
+    func explore(token_id: Uint256) -> (type: felt, id: felt) {
     }
     func tokenURI(tokenId: Uint256) -> (tokenURI_len: felt, tokenURI: felt*) {
     }
     func get_adventurer_by_id(tokenId: Uint256) -> (adventurer: AdventurerState) {
-    }
-    func allowPurchasingHealth(tokenId: Uint256) {
     }
     func purchase_health(tokenId: Uint256, number: felt) -> (success: felt) {
     }
@@ -117,9 +116,9 @@ namespace IBeast {
     }
     func get_adventurer_from_beast(beast_token_id: Uint256) -> () {
     }
-    func balanceOf(adventurer_token_id: Uint256) -> (res: felt) {
+    func balance_of(adventurer_token_id: Uint256) -> (res: felt) {
     }
-    func addToBalance(adventurer_token_id: Uint256, addition: felt) {
+    func add_to_balance(adventurer_token_id: Uint256, addition: felt) {
     } 
 }
 

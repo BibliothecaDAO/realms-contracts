@@ -213,14 +213,13 @@ func mint_with_starting_weapon{
 
     // Mint starting weapon for the adventurer (book, wand, club, short sword)
 
-    // TODO: Assert correct ids.
-    let (item_token_id) = ILoot.mintStarterWeapon(loot_address, to, weapon_id, adventurer_token_id);
+    let (item_token_id) = ILoot.mint_starter_weapon(loot_address, to, weapon_id);
 
     // Equip the selected item to the adventurer
     equip_item(adventurer_token_id, item_token_id);
 
     // add STARTING_GOLD to balance
-    IBeast.addToBalance(beast_address, adventurer_token_id, STARTING_GOLD);
+    IBeast.add_to_balance(beast_address, adventurer_token_id, STARTING_GOLD);
 
     // Return adventuer token id and item token id
     return (adventurer_token_id, item_token_id);
@@ -246,7 +245,7 @@ func equip_item{
     let (loot_address) = Module.get_module_address(ModuleIds.Loot);
 
     // Get Item from Loot contract
-    let (item) = ILoot.getItemByTokenId(loot_address, item_token_id);
+    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
 
     assert item.Adventurer = 0;
     assert item.Bag = 0;
@@ -271,7 +270,7 @@ func equip_item{
     let (adventurer_to_felt) = _uint_to_felt(adventurer_token_id);
 
     // Update item
-    ILoot.updateAdventurer(loot_address, item_token_id, adventurer_to_felt);
+    ILoot.update_adventurer(loot_address, item_token_id, adventurer_to_felt);
 
     emit_adventurer_state(adventurer_token_id);
 
@@ -307,7 +306,7 @@ func unequip_item{
     // Get Item from Loot contract
     let (loot_address) = Module.get_module_address(ModuleIds.Loot);
 
-    let (item) = ILoot.getItemByTokenId(loot_address, item_token_id);
+    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
 
     assert item.Adventurer = adventurer_token_id.low;
 
@@ -327,7 +326,7 @@ func unequip_item{
     adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
 
     // Update item
-    ILoot.updateAdventurer(loot_address, item_token_id, 0);
+    ILoot.update_adventurer(loot_address, item_token_id, 0);
 
     emit_adventurer_state(adventurer_token_id);
 
@@ -500,7 +499,7 @@ func purchase_health{
     let (beast_address) = Module.get_module_address(ModuleIds.Beast);
 
     // health potion costs 5 gold
-    IBeast.subtractFromBalance(beast_address, adventurer_token_id, 5 * number);
+    IBeast.subtract_from_balance(beast_address, adventurer_token_id, 5 * number);
 
     // health potion adds 10 health
     _add_health(adventurer_token_id, 10 * number);
@@ -582,7 +581,7 @@ func explore{
             // add GOLD
             // TODO: determin gold amount
             let (beast_address) = Module.get_module_address(ModuleIds.Beast);
-            IBeast.addToBalance(beast_address, token_id, 1);
+            IBeast.add_to_balance(beast_address, token_id, 1);
             emit_adventurer_state(token_id);
             return (DiscoveryType.Item, 0);
         }
@@ -594,7 +593,7 @@ func explore{
         if (discovery == 3) {
             // mint loot items
             let (loot_address) = Module.get_module_address(ModuleIds.Loot);
-            let (owner) = ownerOf(token_id);
+            let (owner) = owner_of(token_id);
             ILoot.mint(loot_address, owner, token_id);
             emit_adventurer_state(token_id);
             return (DiscoveryType.Item, 0);
@@ -714,7 +713,7 @@ func tokenByIndex{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_pt
 }
 
 @view
-func tokenOfOwnerByIndex{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+func token_of_owner_by_index{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
     owner: felt, index: Uint256
 ) -> (adventurer_token_id: Uint256) {
     let (adventurer_token_id: Uint256) = ERC721Enumerable.token_of_owner_by_index(owner, index);
@@ -742,7 +741,7 @@ func symbol{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -
 }
 
 @view
-func balanceOf{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(owner: felt) -> (
+func balance_of{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(owner: felt) -> (
     balance: Uint256
 ) {
     let (balance: Uint256) = ERC721.balance_of(owner);
@@ -750,7 +749,7 @@ func balanceOf{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 }
 
 @view
-func ownerOf{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func owner_of{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     adventurer_token_id: Uint256
 ) -> (owner: felt) {
     let (owner: felt) = ERC721.owner_of(adventurer_token_id);

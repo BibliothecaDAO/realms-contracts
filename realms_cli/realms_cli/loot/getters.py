@@ -98,7 +98,7 @@ async def _get_loot(loot_token_id, network):
         network=config.nile_network,
         contract_alias="proxy_LootMarketArcade",
         abi='artifacts/abis/LootMarketArcade.json',
-        function="getItemByTokenId",
+        function="get_item_by_token_id",
         arguments=[*uint(loot_token_id)],
     )
     out = out.split(" ")

@@ -147,7 +147,7 @@ func attack{
 
     // calculate damage
     let (item_address) = Module.get_module_address(ModuleIds.Loot);
-    let (weapon) = ILoot.getItemByTokenId(item_address, Uint256(unpacked_adventurer.WeaponId, 0));
+    let (weapon) = ILoot.get_item_by_token_id(item_address, Uint256(unpacked_adventurer.WeaponId, 0));
     let (damage_dealt) = CombatStats.calculate_damage_to_beast(beast, weapon);
     // deduct health from beast
     let (beast_static_, beast_dynamic_) = BeastLib.split_data(beast);
@@ -162,7 +162,7 @@ func attack{
     // if the beast is alive
     if (beast_is_alive == TRUE) {
         // having been attacked, it automatically attacks back
-        let (chest) = ILoot.getItemByTokenId(item_address, Uint256(unpacked_adventurer.ChestId, 0));
+        let (chest) = ILoot.get_item_by_token_id(item_address, Uint256(unpacked_adventurer.ChestId, 0));
         let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, chest);
 
         // TODO: Add multiplier
@@ -202,7 +202,7 @@ func attack{
 
         // drop gold
         // TODO: Make dynamic somehow...
-        _addToBalance(adventurer_id, xp_gained);
+        _add_to_balance(adventurer_id, xp_gained);
         return (damage_dealt, 0);
     }
 }
@@ -242,7 +242,7 @@ func counter_attack{
 
     // retreive unpacked adventurer
     let (unpacked_adventurer) = get_adventurer_from_beast(beast_token_id);
-    let (chest) = ILoot.getItemByTokenId(item_address, Uint256(unpacked_adventurer.ChestId, 0));
+    let (chest) = ILoot.get_item_by_token_id(item_address, Uint256(unpacked_adventurer.ChestId, 0));
     let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, chest);
 
     IAdventurer.deduct_health(adventurer_address, adventurer_token_id, damage_taken);
@@ -318,7 +318,7 @@ func flee{
 
     // unless ambush occurs
     if (is_ambushed == TRUE) {
-        let (chest) = ILoot.getItemByTokenId(item_address, Uint256(unpacked_adventurer.ChestId, 0));
+        let (chest) = ILoot.get_item_by_token_id(item_address, Uint256(unpacked_adventurer.ChestId, 0));
         // then calculate damage based on beast
         let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, chest);
         IAdventurer.deduct_health(adventurer_address, Uint256(beast.Adventurer, 0), damage_taken);
@@ -471,7 +471,7 @@ func assert_adventurer_owner{
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
 
     let (caller) = get_caller_address();
-    let (owner) = IAdventurer.ownerOf(adventurer_address, adventurer_id);
+    let (owner) = IAdventurer.owner_of(adventurer_address, adventurer_id);
 
     with_attr error_message("Beast: Only adventurer owner can attack") {
         assert caller = owner;
@@ -560,19 +560,19 @@ func worldSupply() -> (balance: felt) {
 }
 
 @external
-func addToBalance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func add_to_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     adventurer_token_id: Uint256, addition: felt
 ) {
     Module.only_approved();
 
-    _addToBalance(adventurer_token_id, addition);
+    _add_to_balance(adventurer_token_id, addition);
     return ();
 }
 
-func _addToBalance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func _add_to_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     adventurer_token_id: Uint256, addition: felt
 ) {
-    let (current_balance) = balanceOf(adventurer_token_id);
+    let (current_balance) = balance_of(adventurer_token_id);
 
     goldBalance.write(adventurer_token_id, current_balance + addition);
 
@@ -583,20 +583,20 @@ func _addToBalance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
 }
 
 @external
-func subtractFromBalance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func subtract_from_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     adventurer_token_id: Uint256, subtraction: felt
 ) {
     Module.only_approved();
 
-    _subtractFromBalance(adventurer_token_id, subtraction);
+    _subtract_from_balance(adventurer_token_id, subtraction);
 
     return ();
 }
 
-func _subtractFromBalance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func _subtract_from_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     adventurer_token_id: Uint256, subtraction: felt
 ) {
-    let (current_balance) = balanceOf(adventurer_token_id);
+    let (current_balance) = balance_of(adventurer_token_id);
 
     let negative = is_le(current_balance - subtraction, 0);
 
@@ -615,7 +615,7 @@ func _subtractFromBalance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
 }
 
 @view
-func balanceOf{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func balance_of{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     adventurer_token_id: Uint256
 ) -> (balance: felt) {
     return goldBalance.read(adventurer_token_id);
