@@ -501,7 +501,8 @@ func mint_daily_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 func emit_new_items_loop{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     daily_seed: felt, item_start_index_len: felt, item_start_index: felt
 ) -> (item_start_index_len: felt, item_start_index: felt) {
-    if (item_start_index_len == item_start_index) {
+    // we loop over all new items
+    if (item_start_index_len == (item_start_index_len - item_start_index)) {
         return (0, 0);
     }
 
