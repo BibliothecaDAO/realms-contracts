@@ -84,3 +84,25 @@ There is a native dynamic loot market. However there are some rules.
 
 
 # LORDS
+
+
+### Statistics
+
+|   Type   |  Metal  |  Hide  | Cloth |
+| :------: | :-----: | :----: | :---: |
+|  Blade   |   Low   | Medium | Strong|
+| Bludgeon | Medium  | Strong |  Low  |
+|  Magic   |   High  |  Low   |Medium |
+
+Blade: 
+    low vs metal
+    medium vs hide
+    strong vs cloth
+Bludgeon:
+    medium vs metal
+    strong vs hide
+    low vs cloth
+Magic:
+    High vs metal
+    Low vs hide
+    Medium vs cloth
