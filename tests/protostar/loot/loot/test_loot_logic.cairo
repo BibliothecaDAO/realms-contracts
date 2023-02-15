@@ -36,7 +36,7 @@ func test_mint{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     ILoot.mint(loot_address, account_1_address);
 
-    let (item) = ILoot.getItemByTokenId(loot_address, Uint256(1, 0));
+    let (item) = ILoot.get_item_by_token_id(loot_address, Uint256(1, 0));
 
     assert_not_zero(item.Id);
 
@@ -56,13 +56,13 @@ func test_mint_starter_weapon{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, ra
     %}
 
     // Mint a starter item for the adventurer (book)
-    ILoot.mintStarterWeapon(loot_address, account_1_address, ItemIds.Book);
+    ILoot.mint_starter_weapon(loot_address, account_1_address, ItemIds.Book);
 
     // Get item from the contract
-    let (item) = ILoot.getItemByTokenId(loot_address, Uint256(1, 0));
+    let (item) = ILoot.get_item_by_token_id(loot_address, Uint256(1, 0));
 
     // Verify it is indeed a book
-    assert item.id = ItemIds.Book;
+    assert item.Id = ItemIds.Book;
 
     return ();
 }
@@ -81,9 +81,9 @@ func test_set_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
 
     ILoot.mint(loot_address, account_1_address);
 
-    ILoot.setItemById(loot_address, Uint256(1, 0), 20, 5, 100, 5, 30);
+    ILoot.set_item_by_id(loot_address, Uint256(1, 0), 20, 5, 100, 5, 30);
 
-    let (item) = ILoot.getItemByTokenId(loot_address, Uint256(1, 0));
+    let (item) = ILoot.get_item_by_token_id(loot_address, Uint256(1, 0));
 
     assert item.Id = 20;
     assert item.Greatness = 5;
@@ -113,9 +113,9 @@ func test_update_adventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
 
     %{ stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address) %}
 
-    ILoot.updateAdventurer(loot_address, Uint256(1, 0), 2);
+    ILoot.update_adventurer(loot_address, Uint256(1, 0), 2);
 
-    let (item) = ILoot.getItemByTokenId(loot_address, Uint256(1, 0));
+    let (item) = ILoot.get_item_by_token_id(loot_address, Uint256(1, 0));
 
     assert item.Adventurer = 2;
 

@@ -160,7 +160,7 @@ async def run(nre):
     # #---------------- TOKEN IMPLEMENTATIONS  ----------------#
     for contract in TOKEN_CONTRACT_IMPLEMENTATIONS:
         class_hash = await wrapped_declare(
-            config.ADMIN_ALIAS, contract.name, nre.network, contract.alias)
+            config.ADMIN_ALIAS, contract.alias, nre.network, contract.alias)
 
         await logged_deploy(
             nre,
