@@ -1,8 +1,8 @@
-# Loot Arcade
+# Loot Survivor
 
-This is a fork of the OG Loot physics to show how a minigame can be played.
+This is a fork of the OG Loot physics to show how a minigame can be created.
 
-This is experimental.
+This is experimental. Put a Fork in it.
 
 #### TODO High priority:
 - ADD Statistics Points
@@ -72,11 +72,15 @@ try again....
 
 
 
-### Buy items
+### Buy
 
+There is a native dynamic loot market. However there are some rules.
 
-- Loot items are not tradable
-- They spawn on market every 8hrs, and you can purchase.
+- Items are not tradable from an Adventurer. They are soul bound to that Character.
+- Items can be rerolled every 6hrs by anyone. It is an open function and the Adventurer who rolls it gets 3 gold.
+- When rerolled the past Items that have not been purchased are no longer purchasable.
+- You must bid on an Item above the minimum bid, currently (3)
+- You must claim your item after you have won the bid
 
 
 # LORDS

@@ -36,10 +36,10 @@ def safe_load_deployment(alias: str, network: str):
     """Safely loads address from deployments file"""
     try:
         address, _ = next(deployments.load(alias, network))
-        print(f"Found deployment for alias {alias}.")
+        # print(f"Found deployment for alias {alias}.")
         return address, _
     except StopIteration:
-        print(f"Deployment for alias {alias} not found.")
+        # print(f"Deployment for alias {alias} not found.")
         return None, None
 
 

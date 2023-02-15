@@ -31,6 +31,8 @@ from starkware.starknet.common.syscalls import (
 from contracts.loot.loot.stats.item import ItemStats
 from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
 
+from openzeppelin.token.erc721.IERC721 import IERC721
+
 // -----------------------------------
 // Storage
 // -----------------------------------
@@ -400,6 +402,9 @@ func mintStarterWeapon{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_che
 // This uses a Seed which is created every 12hrs. From this seed X number of items can be purchased
 // after they have been bidded on.
 
+// tokenId = ERC721 TokenId
+// market_item_id = Market item id - these only exist in the Market listings - they are not actual item ids or token ids.
+
 namespace BidStatus {
     const closed = 0;
     const open = 1;
@@ -410,10 +415,11 @@ struct Bid {
     expiry: felt,
     bidder: felt,
     status: felt,
+    item_id: felt,
 }
 
 @storage_var
-func bid(tokenId: Uint256) -> (bid: Bid) {
+func bid(market_item_id: Uint256) -> (bid: Bid) {
 }
 
 @storage_var
@@ -436,15 +442,15 @@ func newItems() -> (number: felt) {
 const HOUR = 3600;
 const BID_TIME = HOUR / 2;  // 2 hours
 const SHUFFLE_TIME = 3600 * 6;
-const BASE_PRICE = 10;
-const SEED_MULTI = 5846975;
+const BASE_PRICE = 3;
+const SEED_MULTI = 5846975; // for psudeo randomness now
 const NUMBER_LOOT_ITEMS = 101;
 
 @event
-func ItemMerchantUpdate(item: Item, item_id: felt, bid: Bid) {
+func ItemMerchantUpdate(item: Item, market_item_id: felt, bid: Bid) {
 }
 
-// returns TRUE if token is owned
+// returns TRUE if item is owned and in existence is owned
 @view
 func itemOwner{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256, adventurer_token_id: Uint256
@@ -473,7 +479,8 @@ func mintDailyItems{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_
     let new_index = current_index + new_items;
 
     let (random) = get_random_number();
-    mintSeed.write(random);
+    mintSeed.write(random * current_time);
+
     lastSeedTime.write(current_time);
 
     emitNewItemsLoop(random, new_index, current_index);
@@ -500,24 +507,24 @@ func emitNewItemsLoop{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 
     let (new_item: Item) = _getRandomItemFromSeed(item_start_index, daily_seed);
 
-    ItemMerchantUpdate.emit(new_item, item_start_index, Bid(BASE_PRICE, 0, 0, 0));
+    ItemMerchantUpdate.emit(new_item, item_start_index, Bid(BASE_PRICE, 0, 0, 0, new_item.Id));
 
     return emitNewItemsLoop(daily_seed, item_start_index_len - 1, item_start_index + 1);
 }
 
 @view
 func getRandomItemFromSeed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    item_id: felt
+    market_item_id: felt
 ) -> (item: Item) {
     let (seed) = mintSeed.read();
 
-    return _getRandomItemFromSeed(item_id, seed);
+    return _getRandomItemFromSeed(market_item_id, seed);
 }
 
 func _getRandomItemFromSeed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    item_id: felt, daily_seed: felt
+    market_item_id: felt, daily_seed: felt
 ) -> (item: Item) {
-    let (_, r) = unsigned_div_rem(daily_seed * item_id * SEED_MULTI, NUMBER_LOOT_ITEMS);
+    let (_, r) = unsigned_div_rem(daily_seed * market_item_id * SEED_MULTI, NUMBER_LOOT_ITEMS);
 
     let (new_item: Item) = ItemLib.generate_random_item(r);
 
@@ -525,21 +532,23 @@ func _getRandomItemFromSeed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
 }
 
 @view
-func viewBid{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(tokenId: Uint256) -> (
+func viewBid{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(market_item_id: Uint256) -> (
     bid: Bid
 ) {
-    return bid.read(tokenId);
+    return bid.read(market_item_id);
 }
 
 @view
 func viewUnmintedItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    tokenId: Uint256
+    market_item_id: Uint256
 ) -> (item: Item, bid: Bid) {
-    let (item) = getRandomItemFromSeed(tokenId.low);
+    let (item) = getRandomItemFromSeed(market_item_id.low);
 
-    let (bid) = viewBid(tokenId);
+    let (bid) = viewBid(market_item_id);
     return (item, bid);
 }
+
+// loop items by index
 
 // @notice Allows a bidder to place a bid on an item. If no previous bids have been placed, the bid time will start from the current block timestamp plus the bid time duration. If a previous bid has been placed, the bidder must submit a higher bid within the bid time window of the previous bid.
 // @param tokenId The ID of the item being bid on.
@@ -549,7 +558,7 @@ func viewUnmintedItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 // @dev Requires the item to be owned by the market contract and for the bid to be higher than the base price. The function will update the bid price and expiry time for the item.
 @external
 func bidOnItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    tokenId: Uint256, adventurer_token_id: Uint256, price: felt
+    market_item_id: Uint256, adventurer_token_id: Uint256, price: felt
 ) {
     alloc_locals;
 
@@ -560,7 +569,11 @@ func bidOnItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     // store the id not the Unit in the struct
     let adventurerIdAsFelt = adventurer_token_id.low;
 
-    // TODO: check caller owner of Adventurer...
+    let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
+    let (owner) = IERC721.ownerOf(adventurer_address, adventurer_token_id);
+    with_attr error_message("Item Market: You do not own this Adventurer") {
+        assert caller = owner;
+    }
     // TODO: check adventurer is alive...
 
     // check higher than the base price that is set
@@ -569,12 +582,14 @@ func bidOnItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         assert higer_than_base_price = TRUE;
     }
 
+    let (item) = getRandomItemFromSeed(market_item_id.low);
+
     // read current bid
-    let (current_bid) = bid.read(tokenId);
+    let (current_bid) = bid.read(market_item_id);
 
     // if current expiry = 0 means unbidded = set base time from now + BID_TIME
     if (current_bid.expiry == FALSE) {
-        bid.write(tokenId, Bid(price, current_time + BID_TIME, adventurerIdAsFelt, BidStatus.open));
+        bid.write(market_item_id, Bid(price, current_time + BID_TIME, adventurerIdAsFelt, BidStatus.open, item.Id));
         return ();
     }
 
@@ -590,8 +605,10 @@ func bidOnItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         assert not_expired = TRUE;
     }
 
+    assert_can_purchase(market_item_id.low);
+
     // update bid state
-    bid.write(tokenId, Bid(price, current_bid.expiry, adventurerIdAsFelt, BidStatus.open));
+    bid.write(market_item_id, Bid(price, current_bid.expiry, adventurerIdAsFelt, BidStatus.open, item.Id));
 
     let (beast_address) = Module.get_module_address(ModuleIds.Beast);
 
@@ -603,9 +620,9 @@ func bidOnItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         IBeast.addToBalance(beast_address, Uint256(current_bid.bidder, 0), current_bid.price);
     }
 
-    let (item) = getRandomItemFromSeed(tokenId.low);
+    
     ItemMerchantUpdate.emit(
-        item, tokenId.low, Bid(price, current_bid.expiry, adventurerIdAsFelt, BidStatus.open)
+        item, market_item_id.low, Bid(price, current_bid.expiry, adventurerIdAsFelt, BidStatus.open, item.Id)
     );
 
     return ();
@@ -615,13 +632,22 @@ func bidOnItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 // @dev Requires the caller to be the bidder who previously placed the bid. The function will also mint a token representing the claimed item for the caller and update the bid status to "closed".
 @external
 func claimItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    item_id: Uint256, adventurer_token_id: Uint256
+    market_item_id: Uint256, adventurer_token_id: Uint256
 ) {
     alloc_locals;
+
     let (caller) = get_caller_address();
+    // ownly owner of Adventurer can call
+    // TODO: we could open this to anyone to call so bids can be cleared by helper accounts...
+    let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
+    let (owner) = IERC721.ownerOf(adventurer_address, adventurer_token_id);
+    with_attr error_message("Item Market: You do not own this Adventurer") {
+        assert caller = owner;
+    }
+
     let (current_time) = get_block_timestamp();
 
-    let (current_bid) = bid.read(item_id);
+    let (current_bid) = bid.read(market_item_id);
 
     // check bid has expired + item is still available
     let expired = is_le(current_bid.expiry, current_time);
@@ -631,12 +657,34 @@ func claimItem{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     }
 
     with_attr error_message("Item Market: Caller not bidder!") {
-        assert current_bid.bidder = caller;
+        assert current_bid.bidder = adventurer_token_id.low;
     }
 
-    mintFromMart(caller, item_id.low, adventurer_token_id);
+    // we pass in the current_bid.item_id
+    mintFromMart(caller, current_bid.item_id, adventurer_token_id);
 
-    bid.write(item_id, Bid(current_bid.price, 0, adventurer_token_id.low, BidStatus.closed));
+    // this could be optimised
+    bid.write(market_item_id, Bid(current_bid.price, 0, adventurer_token_id.low, BidStatus.closed, current_bid.item_id));
+
+    return ();
+}
+
+func assert_can_purchase{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    market_item_id: felt
+) {
+
+    let (start_index) = mintIndex.read();
+
+    let (current_items) = newItems.read();
+
+    let above_start_index = is_le(start_index, market_item_id);
+
+    let below_end_index = is_le(market_item_id, start_index + current_items);
+
+    with_attr error_message("Item Market: Item not available anymore") {
+        assert above_start_index = TRUE;
+        assert below_end_index = TRUE;
+    }
 
     return ();
 }

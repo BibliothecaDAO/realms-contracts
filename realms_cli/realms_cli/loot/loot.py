@@ -1,8 +1,9 @@
-import anyio
 import asyncclick as click
-from realms_cli.caller_invoker import wrapped_call, wrapped_send, wrapped_proxy_call
+from realms_cli.caller_invoker import wrapped_send, wrapped_proxy_call
 from realms_cli.config import Config
 from realms_cli.utils import print_over_colums, uint, felt_to_str, convert_unix_time
+from realms_cli.loot.getters import _get_loot, print_loot, print_loot_bid, print_loot_and_bid
+
 
 @click.command()
 @click.option("--network", default="goerli")
@@ -32,34 +33,8 @@ async def get_loot(loot_token_id, network):
     """
     Get Loot Item metadata
     """
-    config = Config(nile_network=network)
 
-    out = await wrapped_proxy_call(
-        network=config.nile_network,
-        contract_alias="proxy_LootMarketArcade",
-        abi='artifacts/abis/LootMarketArcade.json',
-        function="getItemByTokenId",
-        arguments=[*uint(loot_token_id)],
-    )
-    out = out.split(" ")
-    pretty_out = []
-    for i, key in enumerate(config.LOOT):
-
-        # Output names for item name prefix1, prefix2, and suffix
-        if i in [13]:
-            pretty_out.append(
-                f"{key} : {felt_to_str(int(out[i]))}")
-        else:
-            if i == 0:
-                pretty_out.append(
-                    f"{key} : {config.LOOT_ITEMS[int(out[0]) -1]}")
-            else:
-                pretty_out.append(
-                    f"{key} : {int(out[i])}")
-
-
-    print("_________ LOOT ITEM - " + str(out[0]) + "___________")
-    print_over_colums(pretty_out)
+    await _get_loot(loot_token_id, network)
 
 
 @click.command()
@@ -128,34 +103,9 @@ async def get_unminted_loot(loot_token_id, network):
         arguments=[*uint(loot_token_id)],
     )
     out = out.split(" ")
-    pretty_out = []
-    pretty_bid_out = []
-    for i, key in enumerate(config.LOOT):
 
-        # Output names for item name prefix1, prefix2, and suffix
-        if i in [13]:
-            pretty_out.append(
-                f"{key} : {felt_to_str(int(out[i]))}")
-        else:
-            if i == 0:
-                pretty_out.append(
-                    f"{key} : {config.LOOT_ITEMS[int(out[0]) -1]}")
-            else:
-                pretty_out.append(
-                    f"{key} : {int(out[i])}")
+    print_loot_and_bid(out)
 
-    print("_________ LOOT ITEM - " + str(out[0]) + "___________")
-    print_over_colums(pretty_out)
-
-    for i, key in enumerate(config.BID):
-        if key == 'Expiry':
-            pretty_bid_out.append(
-                f"{key} : {convert_unix_time(int(out[i + 13]))}")
-        else:
-            pretty_bid_out.append(
-                f"{key} : {int(out[i + 13])}")
-
-    print_over_colums(pretty_bid_out)
 
 
 @click.command()
@@ -204,3 +154,52 @@ async def claim_item(network, item, adventurer):
         function="claimItem",
         arguments=[*uint(item), *uint(adventurer)]
     )
+
+
+@click.command()
+@click.option("--network", default="goerli")
+async def all_loot(network):
+    """
+    Get all your loot
+    """
+    config = Config(nile_network=network)
+
+    print('🗡 Claiming item ...')
+
+    out = await wrapped_proxy_call(
+        network=config.nile_network,
+        contract_alias="proxy_LootMarketArcade",
+        abi='artifacts/abis/LootMarketArcade.json',
+        function="balanceOf",
+        arguments=[config.USER_ADDRESS],
+    )
+
+    out = out.split(" ")
+
+
+    all_items = []
+
+    for i in range(0, int(out[0])):
+
+        item = await wrapped_proxy_call(
+            network=config.nile_network,
+            contract_alias="proxy_LootMarketArcade",
+            abi='artifacts/abis/LootMarketArcade.json',
+            function="tokenOfOwnerByIndex",
+            arguments=[config.USER_ADDRESS, *uint(i)],
+        )
+
+        id = item.split(" ")
+
+        out = await wrapped_proxy_call(
+            network=config.nile_network,
+            contract_alias="proxy_LootMarketArcade",
+            abi='artifacts/abis/LootMarketArcade.json',
+            function="getItemByTokenId",
+            arguments=[*uint(id[0])],
+        )
+
+        all_items.append(out)
+
+    print_loot(all_items)
+

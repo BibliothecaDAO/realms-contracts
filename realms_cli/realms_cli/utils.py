@@ -138,11 +138,14 @@ def get_contract_abi(contract_name):
 
 
 def convert_unix_time(unix_time):
-
     # Convert datetime object to a localized datetime object
-    local_datetime = datetime.datetime.fromtimestamp(unix_time).astimezone()
 
-    # Convert localized datetime object to a readable string
-    readable_time = local_datetime.strftime('%Y-%m-%d %H:%M:%S')
+    
+    # Get the current time in UTC
+    current_time = datetime.datetime.utcnow().timestamp()
 
-    return readable_time
+    # Compare the unix_time with the current time to see if it's in the past
+    if unix_time > current_time:
+        return 'open'
+    else:
+        return 'closed'

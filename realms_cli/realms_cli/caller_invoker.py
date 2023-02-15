@@ -146,7 +146,7 @@ def wrapped_call(network, contract_alias, function, arguments) -> str:
     print("------- CALL ----------------------------------------------------")
     print(f"calling {function} from {contract_alias} with {arguments}")
     out = call(network, contract_alias, function, arguments)
-    print("------- CALL ----------------------------------------------------")
+    print("_________________________________________________________________")
     # return out such that it can be prettified at a higher level
     return out
 
@@ -161,7 +161,7 @@ async def wrapped_proxy_call(network, contract_alias, abi, function,
     print("------- CALL ----------------------------------------------------")
     print(f"calling {function} from {contract_alias} with {arguments}")
     out = await proxy_call(network, contract_alias, abi, function, arguments)
-    print("------- CALL ----------------------------------------------------")
+    print("_________________________________________________________________")
     # return out such that it can be prettified at a higher level
     return out
 
@@ -274,7 +274,7 @@ async def wrapped_declare(account, contract_name, network, alias):
         debug_info=True,
         cairo_path=["/workspaces/realms-contracts/lib/cairo_contracts/src"])
 
-    tx_wrapper = await account.declare(contract_name, max_fee=11111111111111)
+    tx_wrapper = await account.declare(contract_name, max_fee=4226601250467000)
     tx_status, declared_hash = await tx_wrapper.execute(watch_mode="track")
 
     get_tx_status(

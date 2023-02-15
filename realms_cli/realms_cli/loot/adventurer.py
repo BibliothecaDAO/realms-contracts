@@ -1,8 +1,8 @@
 import asyncclick as click
-from realms_cli.caller_invoker import  wrapped_send
+from realms_cli.caller_invoker import wrapped_send, wrapped_proxy_call
 from realms_cli.config import Config
 from realms_cli.utils import uint, str_to_felt
-from realms_cli.loot.getters import _get_adventurer, _get_beast
+from realms_cli.loot.getters import _get_adventurer, _get_beast, print_adventurer
 import dearpygui.dearpygui as dpg
 import subprocess
 
@@ -116,8 +116,8 @@ async def get_adventurer(adventurer_token_id, network):
     Get Adventurer metadata
     """
 
-    data = await _get_adventurer(network, adventurer_token_id)
-    return data
+    await _get_adventurer(network, adventurer_token_id)
+
 
 
 @click.command()
@@ -147,8 +147,10 @@ async def equip(network, adventurer_token_id, item):
                        contract_alias="proxy_Adventurer",
                        function="equip_item",
                        arguments=[*uint(adventurer_token_id), *uint(item)])
-
+    
     print('🫴 Equiped item ✅')
+    await _get_adventurer(network, adventurer_token_id)
+    
 
 
 @click.command()
@@ -178,8 +180,10 @@ async def unequip(network, adventurer_token_id, item):
                        contract_alias="proxy_Adventurer",
                        function="unequip_item",
                        arguments=[*uint(adventurer_token_id), *uint(item)])
-
+    
     print('🫳 Unequiped item ...')
+    await _get_adventurer(network, adventurer_token_id)
+    
 
 
 @click.command()
@@ -267,3 +271,48 @@ async def purchase_health(network, adventurer_token_id):
                        arguments=[*uint(adventurer_token_id)])
 
     print('🧪 Purchased health ✅')
+
+@click.command()
+@click.option("--network", default="goerli")
+async def all_adventurers(network):
+    """
+    Get all your Adventurers you own.
+    """
+    config = Config(nile_network=network)
+
+    out = await wrapped_proxy_call(
+        network=config.nile_network,
+        contract_alias="proxy_Adventurer",
+        abi='artifacts/abis/Adventurer.json',
+        function="balanceOf",
+        arguments=[config.USER_ADDRESS],
+    )
+
+    out = out.split(" ")
+
+
+    all_items = []
+
+    for i in range(0, int(out[0])):
+
+        item = await wrapped_proxy_call(
+            network=config.nile_network,
+            contract_alias="proxy_Adventurer",
+            abi='artifacts/abis/Adventurer.json',
+            function="tokenOfOwnerByIndex",
+            arguments=[config.USER_ADDRESS, *uint(i)],
+        )
+
+        id = item.split(" ")
+
+        out = await wrapped_proxy_call(
+            network=config.nile_network,
+            contract_alias="proxy_Adventurer",
+            abi='artifacts/abis/Adventurer.json',
+            function="get_adventurer_by_id",
+            arguments=[*uint(id[0])],
+        )
+
+        all_items.append(out)
+
+    print_adventurer(all_items)

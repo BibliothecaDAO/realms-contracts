@@ -172,6 +172,7 @@ cairo-nile = "^0.13.0"
 "mint_loot" = "realms_cli.loot.loot.mint_loot"
 "get_loot" = "realms_cli.loot.loot.get_loot"
 "set_loot" = "realms_cli.loot.loot.set_loot"
+"all_loot" = "realms_cli.loot.loot.all_loot"
 
 #-----------LOOT MARKET
 "mint_daily_items" = "realms_cli.loot.loot.mint_daily_items"
@@ -185,6 +186,7 @@ cairo-nile = "^0.13.0"
 "equip"  =  "realms_cli.loot.adventurer.equip"
 "unequip" = "realms_cli.loot.adventurer.unequip"
 "explore" = "realms_cli.loot.adventurer.explore"
+"all_adventurers" = "realms_cli.loot.adventurer.all_adventurers"
 
 #-----------BEAST
 "get_beast" = "realms_cli.loot.beast.get_beast"
