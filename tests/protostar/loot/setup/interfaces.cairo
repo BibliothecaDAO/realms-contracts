@@ -60,7 +60,7 @@ namespace IAdventurer {
         order: felt,
         image_hash_1: felt,
         image_hash_2: felt,
-    ) -> (adventurer_token_id: felt) {
+    ) -> (adventurer_token_id: Uint256) {
     }
     func mint_with_starting_weapon(
         to: felt,
@@ -87,6 +87,10 @@ namespace IAdventurer {
     }
     func get_adventurer_by_id(tokenId: Uint256) -> (adventurer: AdventurerState) {
     }
+    func allowPurchasingHealth(tokenId: Uint256) {
+    }
+    func purchaseHealth(tokenId: Uint256) -> (success: felt) {
+    }
 }
 
 @contract_interface
@@ -111,23 +115,22 @@ namespace IBeast {
     }
     func get_adventurer_from_beast(beast_token_id: Uint256) -> () {
     }
+    func balanceOf(adventurer_token_id: Uint256) -> (res: felt) {
+    }
+    func addToBalance(adventurer_token_id: Uint256, addition: felt) {
+    } 
 }
 
 @contract_interface
 namespace ILords {
-    func initializer(
-        name: felt,
-        symbol: felt,
-        decimals: felt,
-        initial_supply: Uint256,
-        recipient: felt,
-        proxy_admin: felt,
-    ) {
-    }
     func balanceOf(owner: felt) -> (balance: Uint256) {
     }
     func approve(spender: felt, amount: Uint256) -> (success: felt) {
     }
     func allowance(owner: felt, spender: felt) -> (allowance: Uint256) {
+    }
+    func mint(to: felt, amount: Uint256) {
+    }
+    func grant_role(role: felt, to: felt) {
     }
 }

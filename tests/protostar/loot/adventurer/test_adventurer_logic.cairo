@@ -18,7 +18,7 @@ from contracts.loot.constants.adventurer import (
 )
 from contracts.loot.adventurer.library import AdventurerLib
 
-from tests.protostar.loot.setup.interfaces import IAdventurer, ILoot, ILords, IRealms
+from tests.protostar.loot.setup.interfaces import IAdventurer, IBeast, ILoot, ILords, IRealms
 from tests.protostar.loot.setup.setup import Contracts, deploy_all
 from tests.protostar.loot.test_structs import (
     TestAdventurerState,
@@ -40,6 +40,7 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         context.xoroshiro = ids.addresses.xoroshiro
         context.realms = ids.addresses.realms
         context.adventurer = ids.addresses.adventurer
+        context.beast = ids.addresses.beast
         context.loot = ids.addresses.loot
         context.lords = ids.addresses.lords
         stop_prank_lords = start_prank(ids.addresses.account_1, ids.addresses.lords)
@@ -338,6 +339,7 @@ func test_purchase_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
     local xoroshiro_address;
     local realms_address;
     local adventurer_address;
+    local beast_address;
     local loot_address;
 
 
@@ -345,6 +347,7 @@ func test_purchase_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
         ids.account_1_address = context.account_1
         ids.realms_address = context.realms
         ids.adventurer_address = context.adventurer
+        ids.beast_address = context.beast
         ids.loot_address = context.loot
         stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
@@ -352,6 +355,98 @@ func test_purchase_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
 
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
-    IAdventurer.explore(adventurer_address, Uint256(1, 0));
 
+    %{
+        stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
+        stop_prank_adventurer()
+        stop_prank_adventurer = start_prank(ids.beast_address, ids.adventurer_address)
+    %}
+
+    // store balance of 5 gold
+    IBeast.addToBalance(beast_address, Uint256(1,0), 10);
+
+    %{
+        stop_prank_beast()
+    %}
+
+    IAdventurer.allowPurchasingHealth(adventurer_address, Uint256(1, 0));
+
+    %{
+        stop_prank_adventurer()
+        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+    %}
+
+    IAdventurer.purchaseHealth(adventurer_address, Uint256(1, 0));
+
+    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
+
+    assert adventurer.Health = 110;
+
+    %{
+        stop_prank_realms()
+        stop_prank_adventurer()
+    %}
+
+    return ();
 }
+
+
+// TODO
+// @external
+// func test_upgrade_stat{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+//     alloc_locals;
+
+//     local account_1_address;
+//     local xoroshiro_address;
+//     local realms_address;
+//     local adventurer_address;
+//     local beast_address;
+//     local loot_address;
+
+
+//     %{
+//         ids.account_1_address = context.account_1
+//         ids.realms_address = context.realms
+//         ids.adventurer_address = context.adventurer
+//         ids.beast_address = context.beast
+//         ids.loot_address = context.loot
+//         stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
+//         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+//     %}
+
+//     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
+//     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
+
+//     %{
+//         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
+//         stop_prank_adventurer()
+//         stop_prank_adventurer = start_prank(ids.beast_address, ids.adventurer_address)
+//     %}
+
+//     // x
+//     IBeast.addToBalance(beast_address, Uint256(1,0), 5);
+
+//     %{
+//         stop_prank_beast()
+//     %}
+
+//     IAdventurer.allowPurchasingHealth(adventurer_address, Uint256(1, 0));
+
+//     %{
+//         stop_prank_adventurer()
+//         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+//     %}
+
+//     IAdventurer.purchaseHealth(adventurer_address, Uint256(1, 0));
+
+//     let (adventurer) = IAdventurer.get_adventurer_by_id(account_1_address, Uint256(1, 0));
+
+//     assert adventurer.Health = 110;
+
+//     %{
+//         stop_prank_realms()
+//         stop_prank_adventurer()
+//     %}
+
+//     return ();
+// }
