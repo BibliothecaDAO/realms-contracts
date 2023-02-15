@@ -12,7 +12,8 @@ from contracts.loot.constants.rankings import ItemRank
 from contracts.loot.loot.stats.item import ItemStats
 from contracts.loot.constants.physics import MaterialDensity
 from contracts.loot.constants.adventurer import (
-    Adventurer, 
+    Adventurer,
+    AdventurerSlotIds,
     AdventurerState,
     AdventurerStatic,
     AdventurerDynamic,
@@ -264,34 +265,9 @@ func test_upgrading{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_
 
     assert c.Upgrading = TRUE;
 
-    let (c) = AdventurerLib.set_upgrading(FALSE, unpacked_adventurer);
+    let (c_statistics) = AdventurerLib.update_statistics(AdventurerSlotIds.Strength, c);
 
-    assert c.Upgrading = FALSE;
-
-    return ();
-}
-
-@external
-func test_purchasing{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}() {
-    alloc_locals;
-
-    let (state) = get_adventurer_state();
-
-    let (adventurer_static, adventurer_dynamic) = AdventurerLib.split_data(state);
-
-    let (adventurer_state: PackedAdventurerState) = AdventurerLib.pack(adventurer_dynamic);
-
-    let (unpacked_adventurer: AdventurerDynamic) = AdventurerLib.unpack(adventurer_state);
-
-    let (c) = AdventurerLib.set_purchasing_health(TRUE, unpacked_adventurer);
-
-    assert c.PurchasingHealth = TRUE;
-
-
-    let (c) = AdventurerLib.set_purchasing_health(FALSE, unpacked_adventurer);
-
-    assert c.PurchasingHealth = FALSE;
+    assert c_statistics.Strength = 1;
 
     return ();
 }

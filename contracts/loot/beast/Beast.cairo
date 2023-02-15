@@ -199,7 +199,6 @@ func attack{
         let (xp_gained) = CombatStats.calculate_xp_earned(beast_rank, beast_level);
 
         IAdventurer.increase_xp(adventurer_address, adventurer_id, xp_gained);
-        IAdventurer.allowPurchasingHealth(adventurer_address, adventurer_id);
 
         // drop gold
         // TODO: Make dynamic somehow...

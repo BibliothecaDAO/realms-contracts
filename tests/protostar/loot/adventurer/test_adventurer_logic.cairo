@@ -12,6 +12,7 @@ from contracts.loot.loot.stats.item import ItemStats
 from contracts.loot.constants.physics import MaterialDensity
 from contracts.loot.constants.adventurer import (
     Adventurer,
+    AdventurerSlotIds,
     AdventurerState,
     PackedAdventurerState,
     AdventurerStatus,
@@ -363,24 +364,37 @@ func test_purchase_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
     %}
 
     // store balance of 5 gold
-    IBeast.addToBalance(beast_address, Uint256(1,0), 10);
+    IBeast.addToBalance(beast_address, Uint256(1,0), 100);
 
     %{
         stop_prank_beast()
+        stop_prank_adventurer()
+        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
     %}
 
-    IAdventurer.allowPurchasingHealth(adventurer_address, Uint256(1, 0));
+    IAdventurer.purchase_health(adventurer_address, Uint256(1, 0), 1);
+
+    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
+
+    assert adventurer.Health = 100;
+
+    %{
+        stop_prank_adventurer()
+        stop_prank_adventurer = start_prank(ids.beast_address, ids.adventurer_address)
+    %}
+
+    IAdventurer.deduct_health(adventurer_address, Uint256(1, 0), 90);
 
     %{
         stop_prank_adventurer()
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
     %}
 
-    IAdventurer.purchaseHealth(adventurer_address, Uint256(1, 0));
+    IAdventurer.purchase_health(adventurer_address, Uint256(1, 0), 5);
 
-    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
+    let (new_adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
 
-    assert adventurer.Health = 110;
+    assert new_adventurer.Health = 60;
 
     %{
         stop_prank_realms()
@@ -390,63 +404,60 @@ func test_purchase_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
     return ();
 }
 
+@external
+func test_upgrade_stat{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
 
-// TODO
-// @external
-// func test_upgrade_stat{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
-//     alloc_locals;
-
-//     local account_1_address;
-//     local xoroshiro_address;
-//     local realms_address;
-//     local adventurer_address;
-//     local beast_address;
-//     local loot_address;
+    local account_1_address;
+    local xoroshiro_address;
+    local realms_address;
+    local adventurer_address;
+    local beast_address;
+    local loot_address;
 
 
-//     %{
-//         ids.account_1_address = context.account_1
-//         ids.realms_address = context.realms
-//         ids.adventurer_address = context.adventurer
-//         ids.beast_address = context.beast
-//         ids.loot_address = context.loot
-//         stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
-//         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
-//     %}
+    %{
+        ids.account_1_address = context.account_1
+        ids.realms_address = context.realms
+        ids.adventurer_address = context.adventurer
+        ids.beast_address = context.beast
+        ids.loot_address = context.loot
+        stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
+        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+    %}
 
-//     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
-//     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
+    IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
+    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
 
-//     %{
-//         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
-//         stop_prank_adventurer()
-//         stop_prank_adventurer = start_prank(ids.beast_address, ids.adventurer_address)
-//     %}
+    %{
+        stop_prank_adventurer()
+        stop_prank_adventurer = start_prank(ids.beast_address, ids.adventurer_address)
+    %}
 
-//     // x
-//     IBeast.addToBalance(beast_address, Uint256(1,0), 5);
+    // enough xp to level up
+    IAdventurer.increase_xp(adventurer_address, Uint256(1,0), 9);
 
-//     %{
-//         stop_prank_beast()
-//     %}
+    %{
+        stop_prank_adventurer()
+        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+    %}
 
-//     IAdventurer.allowPurchasingHealth(adventurer_address, Uint256(1, 0));
+    // upgrade strength
+    IAdventurer.upgrade_stat(adventurer_address, Uint256(1, 0), AdventurerSlotIds.Strength);
 
-//     %{
-//         stop_prank_adventurer()
-//         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
-//     %}
+    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
 
-//     IAdventurer.purchaseHealth(adventurer_address, Uint256(1, 0));
+    assert adventurer.Strength = 1;
 
-//     let (adventurer) = IAdventurer.get_adventurer_by_id(account_1_address, Uint256(1, 0));
+    %{ expect_revert(error_message="Adventurer: Adventurer must be upgradable") %}
 
-//     assert adventurer.Health = 110;
+    // try upgrade strength again
+    IAdventurer.upgrade_stat(adventurer_address, Uint256(1, 0), AdventurerSlotIds.Strength);
 
-//     %{
-//         stop_prank_realms()
-//         stop_prank_adventurer()
-//     %}
+    %{
+        stop_prank_realms()
+        stop_prank_adventurer()
+    %}
 
-//     return ();
-// }
+    return ();
+}

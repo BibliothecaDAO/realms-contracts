@@ -53,7 +53,6 @@ struct Adventurer {
     Status: felt,  // {Idle, Battling, Traveling, Questing, Dead}
     Beast: felt,  // tokenId of the beast the adventurer is battling
     Upgrading: felt,
-    PurchasingHealth: felt,
 
     // TODO: Consider storing adventurer location information
 }
@@ -106,7 +105,6 @@ struct AdventurerState {
     Status: felt,
     Beast: felt,
     Upgrading: felt,
-    PurchasingHealth: felt,
 }
 
 // @notice This is immutable information stored on-chain
@@ -162,7 +160,6 @@ struct AdventurerDynamic {
     Status: felt,
     Beast: felt,
     Upgrading: felt,
-    PurchasingHealth: felt,
 }
 
 struct PackedAdventurerState {
@@ -230,7 +227,6 @@ namespace AdventurerSlotIds {
     const Status = 18;
     const Beast = 19;
     const Upgrading = 20;
-    const PurchasingHealth = 21;
 }
 
 namespace AdventurerStatus {

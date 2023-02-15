@@ -90,7 +90,6 @@ namespace AdventurerLib {
         let Status = AdventurerStatus.Idle;
         let Beast = 0;
         let Upgrading = 0;
-        let PurchasingHealth = 0;
 
         return (
             AdventurerStatic(
@@ -124,7 +123,6 @@ namespace AdventurerLib {
                 Status=Status,
                 Beast=Beast,
                 Upgrading=Upgrading,
-                PurchasingHealth=PurchasingHealth
             ),
         );
     }
@@ -161,7 +159,6 @@ namespace AdventurerLib {
             adventurer_dynamic.Status,
             adventurer_dynamic.Beast,
             adventurer_dynamic.Upgrading,
-            adventurer_dynamic.PurchasingHealth
         );
 
         return (adventurer,);
@@ -202,7 +199,6 @@ namespace AdventurerLib {
             adventurer.Status,
             adventurer.Beast,
             adventurer.Upgrading,
-            adventurer.PurchasingHealth
         );
 
         return (adventurer_static, adventurer_dynamic);
@@ -246,7 +242,6 @@ namespace AdventurerLib {
         let Status = unpacked_adventurer_state.Status * SHIFT_P_4._1;
         let Beast = unpacked_adventurer_state.Beast * SHIFT_P_4._2;
         let Upgrading = unpacked_adventurer_state.Upgrading * SHIFT_P_4._3;
-        let PurchasingHealth = unpacked_adventurer_state.PurchasingHealth * SHIFT_P_4._4;
 
         // packing
         // let p1 = XP + Luck + Charisma + Wisdom + Intelligence + Vitality + Dexterity + Strength + Level + Health;
@@ -256,7 +251,7 @@ namespace AdventurerLib {
         let p2 = Weapon + Chest + Head + Waist;
         // let p3 = Ring + Neck + Hands + Feet;
         let p3 = Feet + Hands + Neck + Ring;
-        let p4 = Status + Beast + Upgrading + PurchasingHealth;
+        let p4 = Status + Beast + Upgrading;
 
         let packedAdventurer = PackedAdventurerState(p1, p2, p3, p4);
 
@@ -307,7 +302,6 @@ namespace AdventurerLib {
         let (Status) = unpack_data(packed_adventurer.p4, 0, 7);  // 3
         let (Beast) = unpack_data(packed_adventurer.p4, 3, 2199023255551);  // 41
         let (Upgrading) = unpack_data(packed_adventurer.p4, 44, 1); // 1
-        let (PurchasingHealth) = unpack_data(packed_adventurer.p4, 45, 1); // 1
 
         return (
             AdventurerDynamic(
@@ -332,7 +326,6 @@ namespace AdventurerLib {
                 Status=Status,
                 Beast=Beast,
                 Upgrading=Upgrading,
-                PurchasingHealth=PurchasingHealth
             ),
         );
     }
@@ -558,18 +551,6 @@ namespace AdventurerLib {
         // set upgrade status
         let (updated_adventurer: AdventurerDynamic) = cast_state(
             AdventurerSlotIds.Upgrading, upgrading, unpacked_adventurer
-        );
-
-        return (updated_adventurer,);
-    }
-
-    func set_purchasing_health{syscall_ptr: felt*, range_check_ptr}(
-        purchasing: felt, unpacked_adventurer: AdventurerDynamic
-    ) -> (new_unpacked_adventurer: AdventurerDynamic) {
-
-        // set the purchasing health
-        let (updated_adventurer: AdventurerDynamic) = cast_state(
-            AdventurerSlotIds.PurchasingHealth, purchasing, unpacked_adventurer
         );
 
         return (updated_adventurer,);

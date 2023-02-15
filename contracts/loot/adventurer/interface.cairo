@@ -20,6 +20,4 @@ namespace IAdventurer {
     }
     func explore(tokenId: Uint256) -> (success: felt) {
     }
-    func allowPurchasingHealth(tokenId: Uint256) -> (success: felt) {
-    }
 }

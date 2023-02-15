@@ -89,7 +89,9 @@ namespace IAdventurer {
     }
     func allowPurchasingHealth(tokenId: Uint256) {
     }
-    func purchaseHealth(tokenId: Uint256) -> (success: felt) {
+    func purchase_health(tokenId: Uint256, number: felt) -> (success: felt) {
+    }
+    func upgrade_stat(adventurer_token_id: Uint256, stat: felt) -> (success: felt) {
     }
 }
 
