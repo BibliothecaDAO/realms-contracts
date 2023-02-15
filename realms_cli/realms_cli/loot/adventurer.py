@@ -51,7 +51,7 @@ import subprocess
               type=click.STRING,
               help='adventurer image hash part 2',
               prompt=True)
-async def mint_adventurer_with_item(network, item, race, home_realm, name,
+async def new_adventurer(network, item, race, home_realm, name,
                                     order, image_hash_1, image_hash_2):
     """
     Mint a Random Loot Item

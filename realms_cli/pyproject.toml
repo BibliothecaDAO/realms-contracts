@@ -180,7 +180,7 @@ cairo-nile = "^0.13.0"
 "claim_item" = "realms_cli.loot.loot.claim_item"
 
 #-----------ADVENTURER
-"mint_adventurer_with_item"   =  "realms_cli.loot.adventurer.mint_adventurer_with_item"
+"new_adventurer"   =  "realms_cli.loot.adventurer.mint_adventurer_with_item"
 "get_adventurer"  =  "realms_cli.loot.adventurer.get_adventurer"
 "equip"  =  "realms_cli.loot.adventurer.equip"
 "unequip" = "realms_cli.loot.adventurer.unequip"
