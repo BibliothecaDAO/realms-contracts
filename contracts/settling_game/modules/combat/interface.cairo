@@ -18,4 +18,11 @@ namespace ICombat {
     }
     func build_start_army(realm_id: Uint256) {
     }
+    func initiate_combat_approved_module(
+        attacking_army_id: felt,
+        attacking_realm_id: Uint256,
+        defending_army_id: felt,
+        defending_realm_id: Uint256,
+    ) -> (combat_outcome: felt) {
+    }
 }
