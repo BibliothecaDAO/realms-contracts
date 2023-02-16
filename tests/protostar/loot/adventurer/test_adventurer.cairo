@@ -271,3 +271,17 @@ func test_upgrading{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_
 
     return ();
 }
+
+// @notice Tests gold discovery calculation
+// Gold calculation is:
+// 1 + (rnd % 4)
+@external
+func test_calculate_gold_discovery{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+
+    let (gold_discovery) = AdventurerLib.calculate_gold_discovery(1);
+
+    assert gold_discovery = 2;
+
+    return ();
+}

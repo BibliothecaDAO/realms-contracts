@@ -245,11 +245,11 @@ namespace BeastLib {
         rnd: felt, xp_gained: felt
     ) -> (gold_reward: felt) {
 
-        let (_, reward_multi) = unsigned_div_rem(rnd + 1, 4);
+        let (_, reward_multi) = unsigned_div_rem(rnd, 4);
         let (xp_correction, xp_factor) = unsigned_div_rem(xp_gained, 4);
         let xp_start = xp_gained - xp_correction;
 
-        let gold_reward = xp_start * reward_multi;
+        let gold_reward = xp_start + (xp_correction * reward_multi);
 
         return (gold_reward,);
     }

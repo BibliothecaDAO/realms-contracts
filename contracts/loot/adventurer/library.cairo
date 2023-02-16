@@ -555,4 +555,15 @@ namespace AdventurerLib {
 
         return (updated_adventurer,);
     }
+    
+    func calculate_gold_discovery{syscall_ptr: felt*, range_check_ptr}(
+        rnd: felt
+    ) -> (gold_discovery: felt) {
+
+        let (_, discover_multi) = unsigned_div_rem(rnd, 4);
+
+        let gold_discovery = 1 + discover_multi;
+
+        return (gold_discovery,);
+    }
 }

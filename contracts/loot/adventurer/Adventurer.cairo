@@ -578,8 +578,10 @@ func explore{
         if (discovery == 1) {
             // add GOLD
             // TODO: determin gold amount
+            // @distracteddev: formula - 1 + (rnd % 4)
+            let (gold_discovery) = AdventurerLib.calculate_gold_discovery(rnd);
             let (beast_address) = Module.get_module_address(ModuleIds.Beast);
-            IBeast.add_to_balance(beast_address, token_id, 1);
+            IBeast.add_to_balance(beast_address, token_id, gold_discovery);
             emit_adventurer_state(token_id);
             return (DiscoveryType.Item, 0);
         }
