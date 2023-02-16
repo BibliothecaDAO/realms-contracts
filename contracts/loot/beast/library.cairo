@@ -239,4 +239,18 @@ namespace BeastLib {
 
         return (ambush_chance,);
     }
+
+
+    func calculate_gold_reward{syscall_ptr: felt*, range_check_ptr}(
+        rnd: felt, xp_gained: felt
+    ) -> (gold_reward: felt) {
+
+        let (_, reward_multi) = unsigned_div_rem(rnd + 1, 4);
+        let (xp_correction, xp_factor) = unsigned_div_rem(xp_gained, 4);
+        let xp_start = xp_gained - xp_correction;
+
+        let gold_reward = xp_start * ((1 + xp_factor) * reward_multi);
+
+        return (gold_reward,);
+    }
 }

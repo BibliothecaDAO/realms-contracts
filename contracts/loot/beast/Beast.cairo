@@ -201,7 +201,11 @@ func attack{
 
         // drop gold
         // TODO: Make dynamic somehow...
-        _add_to_balance(adventurer_id, xp_gained);
+        // @distracteddev: add randomness to reward
+        // formula: (xp_gained  - (xp_gained / 4)) * (xp_gained % 4 * rand)
+        let (rnd) = get_random_number();
+        let (gold_reward) = BeastLib.calculate_gold_reward(rnd, xp_gained);
+        _add_to_balance(adventurer_id, gold_reward);
         return (damage_dealt, 0);
     }
 }
@@ -304,7 +308,7 @@ func flee{
     // Short-term (while we are using rng) would be to base rng on beast health. The
     // lower the beast health, the lower the chance it will ambush and the easier
     // it will be to flee.
-    // @distracteddev: simple calculation, random: (0,1) * ( health/50: (0, 1, 2) )
+    // @distracteddev: simple calculation, random: (0,1) * (health/50): (0, 1, 2)
     let (ambush_chance) = BeastLib.calculate_ambush_chance(rnd, beast.Health);
 
     // Adventurer ambush resistance is based on wisdom plus luck
