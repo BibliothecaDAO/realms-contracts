@@ -32,9 +32,9 @@ namespace IRealms {
 namespace ILoot {
     func initializer(name: felt, symbol: felt, proxy_admin: felt, controller_address: felt) {
     }
-    func mint(to: felt) {
+    func mint(to: felt, adventurer_token_id: Uint256) {
     }
-    func mint_starter_weapon(to: felt, weapon_id: felt) {
+    func mint_starter_weapon(to: felt, weapon_id: felt, adventuer_token_id: Uint256) {
     }
     func update_adventurer(tokenId: Uint256, adventurerId: felt) {
     }

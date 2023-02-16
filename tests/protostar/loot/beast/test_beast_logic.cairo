@@ -46,8 +46,6 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     %}
 
     ILords.approve(addresses.lords, addresses.adventurer, Uint256(100000000000000000000, 0));
-    ILoot.mint(addresses.loot, addresses.account_1);
-    ILoot.set_item_by_id(addresses.loot, Uint256(1,0), ItemIds.Wand, 10, 0, 0, 0);
     IRealms.set_realm_data(addresses.realms, Uint256(13, 0), 'Test Realm', 1);
 
     %{
@@ -55,6 +53,8 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     %}
 
     IAdventurer.mint(addresses.adventurer, addresses.account_1, 4, 10, 'Test', 8, 1, 1);
+    ILoot.mint(addresses.loot, addresses.account_1, Uint256(1,0));
+    ILoot.set_item_by_id(addresses.loot, Uint256(1,0), ItemIds.Wand, 10, 0, 0, 0);
     %{
         stop_prank_loot()
     %}
@@ -99,11 +99,6 @@ func test_create{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     assert beast.XP = 0;
     assert beast.Level = 1;
     assert beast.SlainOnDate = 0;
-
-    %{
-        stop_prank_beast()
-        stop_mock()
-    %}
 
     return ();
 }
@@ -227,10 +222,6 @@ func test_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     // Since we used a new adventurer, this should be the only xp they have gained
     assert adventurer.XP = expected_xp;
 
-    %{
-        stop_prank_beast()
-    %}
-
     return ();
 }
 
@@ -277,12 +268,6 @@ func test_ambushed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
     let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
 
     assert adventurer.Status = AdventurerStatus.Battle;
-
-    %{
-        stop_mock_flee_random()
-        stop_warp()
-        stop_prank_beast()
-    %}
 
     return ();
 }
@@ -332,12 +317,6 @@ func test_flee{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     assert adventurer.Status = AdventurerStatus.Idle;
 
-    %{
-        stop_mock_flee_random()
-        stop_warp()
-        stop_prank_beast()
-    %}
-
     return ();
 }
 
@@ -373,10 +352,6 @@ func test_increase_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     assert returned_beast_plus_10xp.Level = 2;
     assert onchain_beast_plus_10xp.XP = returned_beast_plus_10xp.XP;
     assert onchain_beast_plus_10xp.Level = returned_beast_plus_10xp.Level;
-    
-    %{
-        stop_prank_adventurer()
-    %}
 
     return ();
 }

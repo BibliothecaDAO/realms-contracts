@@ -148,7 +148,7 @@ func attack{
     // calculate damage
     let (item_address) = Module.get_module_address(ModuleIds.Loot);
     let (weapon) = ILoot.get_item_by_token_id(item_address, Uint256(unpacked_adventurer.WeaponId, 0));
-    let (damage_dealt) = CombatStats.calculate_damage_to_beast(beast, weapon);
+    let (damage_dealt) = CombatStats.calculate_damage_to_beast(beast, weapon, unpacked_adventurer);
     // deduct health from beast
     let (beast_static_, beast_dynamic_) = BeastLib.split_data(beast);
     let (updated_health_beast) = BeastLib.deduct_health(damage_dealt, beast_dynamic_);
@@ -243,7 +243,7 @@ func counter_attack{
     // retreive unpacked adventurer
     let (unpacked_adventurer) = get_adventurer_from_beast(beast_token_id);
     let (chest) = ILoot.get_item_by_token_id(item_address, Uint256(unpacked_adventurer.ChestId, 0));
-    let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, chest);
+    let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, chest, unpacked_adventurer);
 
     IAdventurer.deduct_health(adventurer_address, adventurer_token_id, damage_taken);
     // check if beast counter attack killed adventurer
@@ -319,7 +319,7 @@ func flee{
     if (is_ambushed == TRUE) {
         let (chest) = ILoot.get_item_by_token_id(item_address, Uint256(unpacked_adventurer.ChestId, 0));
         // then calculate damage based on beast
-        let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, chest);
+        let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, chest, unpacked_adventurer);
         IAdventurer.deduct_health(adventurer_address, Uint256(beast.Adventurer, 0), damage_taken);
         // check if beast counter attack killed adventurer
         let (updated_adventurer) = get_adventurer_from_beast(beast_token_id);
@@ -606,7 +606,7 @@ func _subtract_from_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
 
     let (supply) = worldSupply.read();
     let new_supply = supply - subtraction;
-    asser_nn(new_supply);
+    assert_nn(new_supply);
     worldSupply.write(supply - subtraction);
 
     return ();

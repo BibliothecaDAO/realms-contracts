@@ -229,7 +229,7 @@ func item(tokenId: Uint256) -> (item: Item) {
 }
 
 @storage_var
-func adventurer_owner(tokenId: Uint256) -> (adventuer_token_id: Uint256) {
+func adventurer_owner(tokenId: Uint256) -> (adventurer_token_id: Uint256) {
 }
 
 
@@ -240,8 +240,11 @@ func adventurer_owner(tokenId: Uint256) -> (adventuer_token_id: Uint256) {
 // @notice Mint random item
 // @param to: Address to mint the item to
 @external
-func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: felt, adventuer_token_id: Uint256) {
+func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: felt, adventurer_token_id: Uint256) {
     alloc_locals;
+
+    // // Only LootMarketArcade and Adventurer
+    // Module.only_approved();
 
     // fetch new item with random Id
     let (rnd) = get_random_number();
@@ -251,7 +254,7 @@ func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: f
 
     item.write(Uint256(next_id + 1, 0), new_item);
 
-    adventurer_owner.write(adventurer_token_id, next_id);
+    adventurer_owner.write(Uint256(next_id + 1, 0), adventurer_token_id);
 
     ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
 
@@ -265,7 +268,7 @@ func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: f
 // @return item_token_id: The token id of the minted item
 @external
 func mint_starter_weapon{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    to: felt, weapon_id: felt, adventuer_token_id: Uint256
+    to: felt, weapon_id: felt, adventurer_token_id: Uint256
 ) -> (item_token_id: Uint256) {
     alloc_locals;
 
@@ -280,7 +283,7 @@ func mint_starter_weapon{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_c
 
     item.write(Uint256(next_id + 1, 0), new_item);
 
-    adventurer_owner.write(adventurer_token_id, next_id);
+    adventurer_owner.write(Uint256(next_id + 1, 0), adventurer_token_id);
 
     ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
 
@@ -396,10 +399,11 @@ func get_item_by_token_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
 // @notice Get adventurer owner
 // @param tokenId: Id of the item token
 // @return adventurer_token_id: Id of the adventurer
-@view get_adventurer_owner{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+@view 
+func get_adventurer_owner{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256
-) -> (adventuer_token_id: Uint256) {
-    let (dventuer_token_id) = adventurer_owner.read(tokenId);
+) -> (adventurer_token_id: Uint256) {
+    let (adventurer_token_id) = adventurer_owner.read(tokenId);
 
-    return (adventuer_token_id,);
+    return (adventurer_token_id,);
 }

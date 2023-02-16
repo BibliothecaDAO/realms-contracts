@@ -12,7 +12,7 @@
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from starkware.cairo.common.uint256 import Uint256, uint256_add
+from starkware.cairo.common.uint256 import Uint256, uint256_add, uint256_eq
 from starkware.cairo.common.math import unsigned_div_rem, assert_not_equal, assert_not_zero, assert_in_range
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.starknet.common.syscalls import (
@@ -218,7 +218,7 @@ func mint_with_starting_weapon{
     // add STARTING_GOLD to balance
     IBeast.add_to_balance(beast_address, adventurer_token_id, STARTING_GOLD);
 
-    // Return adventuer token id and item token id
+    // Return adventurer token id and item token id
     return (adventurer_token_id, item_token_id);
 }
 
@@ -248,7 +248,7 @@ func equip_item{
     assert item.Bag = 0;
 
     // Check item owned by Adventurer
-    assert_adventurer_is_owner(adventuer_token_id, item_token_id);
+    assert_adventurer_is_owner(adventurer_token_id, item_token_id);
 
     // Check item is owned by caller
     let (owner) = IERC721.ownerOf(loot_address, item_token_id);
@@ -632,10 +632,12 @@ func assert_not_dead{
 // @param itemId: Id of the item
 func assert_adventurer_is_owner{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(adventuer_token_id: Uint256, itemId: Uint256) {
-    let (owner) = ILoot.get_adventurer_owner(itemId);
-    let (check) = uint256_eq(owner, adventuer_token_id);
-    with_attr error_message("Adventurer: Adventurer is item owner") {
+}(adventurer_token_id: Uint256, itemId: Uint256) {
+    alloc_locals;
+    let (loot_address) = Module.get_module_address(ModuleIds.Loot);
+    let (owner) = ILoot.get_adventurer_owner(loot_address, itemId);
+    let (check) = uint256_eq(owner, adventurer_token_id);
+    with_attr error_message("Adventurer: Adventurer is not item owner") {
        assert check = TRUE;
     }
     return ();

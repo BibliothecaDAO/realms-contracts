@@ -36,6 +36,24 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     ILords.approve(addresses.lords, addresses.adventurer, Uint256(100000000000000000000, 0));
 
+    %{
+        stop_prank_lords()
+        stop_prank_lords = start_prank(ids.addresses.adventurer, ids.addresses.lords)
+    %}
+
+    // Mint adventurer with random params
+    IAdventurer.mint(
+        addresses.adventurer, 
+        addresses.account_1, 
+        4, 
+        10, 
+        'Test', 
+        8, 
+        'QmUn4BZtz4tw3rzpZHpT2oE',
+        'o6guw2FxsiPEyvfRFnUJWzZ'
+    );
+
+
     // Store item ids and equip to adventurer
 
     let (timestamp) = get_block_timestamp();
@@ -44,14 +62,14 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         stop_mock = mock_call(1, 'next', [1])
     %}
     // Mint 8 tokens
-    ILoot.mint(addresses.loot, addresses.account_1);
-    ILoot.mint(addresses.loot, addresses.account_1);
-    ILoot.mint(addresses.loot, addresses.account_1);
-    ILoot.mint(addresses.loot, addresses.account_1);
-    ILoot.mint(addresses.loot, addresses.account_1);
-    ILoot.mint(addresses.loot, addresses.account_1);
-    ILoot.mint(addresses.loot, addresses.account_1);
-    ILoot.mint(addresses.loot, addresses.account_1);
+    ILoot.mint(addresses.loot, addresses.account_1, Uint256(1,0));
+    ILoot.mint(addresses.loot, addresses.account_1, Uint256(1,0));
+    ILoot.mint(addresses.loot, addresses.account_1, Uint256(1,0));
+    ILoot.mint(addresses.loot, addresses.account_1, Uint256(1,0));
+    ILoot.mint(addresses.loot, addresses.account_1, Uint256(1,0));
+    ILoot.mint(addresses.loot, addresses.account_1, Uint256(1,0));
+    ILoot.mint(addresses.loot, addresses.account_1, Uint256(1,0));
+    ILoot.mint(addresses.loot, addresses.account_1, Uint256(1,0));
     %{
         stop_mock()
         stop_prank_lords()
@@ -67,18 +85,6 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     ILoot.set_item_by_id(addresses.loot, Uint256(6,0), ItemIds.WoolGloves, 20, 0, 0, 0);
     ILoot.set_item_by_id(addresses.loot, Uint256(7,0), ItemIds.Amulet, 20, 0, 0, 0);
     ILoot.set_item_by_id(addresses.loot, Uint256(8,0), ItemIds.PlatinumRing, 20, 0, 0, 0);
-
-    // Mint adventurer with random params
-    IAdventurer.mint(
-        addresses.adventurer, 
-        addresses.account_1, 
-        4, 
-        10, 
-        'Test', 
-        8, 
-        'QmUn4BZtz4tw3rzpZHpT2oE',
-        'o6guw2FxsiPEyvfRFnUJWzZ'
-    );
 
     %{
         stop_prank_loot()

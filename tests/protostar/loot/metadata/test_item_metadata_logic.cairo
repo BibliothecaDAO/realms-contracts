@@ -1,7 +1,6 @@
 %lang starknet
 
 from starkware.cairo.common.uint256 import Uint256, uint256_add
-from starkware.starknet.common.syscalls import get_block_timestamp
 
 from contracts.loot.loot.metadata import LootUri
 from contracts.loot.constants.adventurer import AdventurerState
@@ -27,22 +26,7 @@ func __setup__{syscall_ptr: felt*, range_check_ptr}() {
         stop_prank_loot = start_prank(ids.addresses.account_1, ids.addresses.loot)
         stop_prank_lords = start_prank(ids.addresses.account_1, ids.addresses.lords)
     %}
-    IRealms.set_realm_data(addresses.realms, Uint256(10, 0), 'Test Realm', 1); 
-    // Store item ids and equip to adventurer
-
-    let (timestamp) = get_block_timestamp();
-
-    %{
-        stop_mock = mock_call(1, 'next', [1])
-    %}
-    // Mint a token
-    ILoot.mint(addresses.loot, addresses.account_1);
-    %{
-        stop_mock()
-    %}
-
-    // Set tokens to ids above for testing
-    ILoot.set_item_by_id(addresses.loot, Uint256(1,0), ItemIds.Wand, 20, 100, 0, 0);
+    IRealms.set_realm_data(addresses.realms, Uint256(10, 0), 'Test Realm', 1);
 
     ILords.approve(addresses.lords, addresses.adventurer, Uint256(100000000000000000000, 0));
 
@@ -53,6 +37,20 @@ func __setup__{syscall_ptr: felt*, range_check_ptr}() {
 
     // Mint adventurer with random params
     IAdventurer.mint(addresses.adventurer, addresses.account_1, 4, 10, 'Test', 8, 1, 1);
+ 
+    // Store item ids and equip to adventurer
+
+    %{
+        stop_mock = mock_call(1, 'next', [1])
+    %}
+    // Mint a token
+    ILoot.mint(addresses.loot, addresses.account_1, Uint256(1,0));
+    %{
+        stop_mock()
+    %}
+
+    // Set tokens to ids above for testing
+    ILoot.set_item_by_id(addresses.loot, Uint256(1,0), ItemIds.Wand, 20, 100, 0, 0);
 
     %{
         stop_prank_loot()

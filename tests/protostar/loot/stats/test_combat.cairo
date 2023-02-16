@@ -11,7 +11,7 @@ from contracts.loot.constants.combat import WeaponEfficacy
 from contracts.loot.constants.beast import Beast, BeastAttackType, BeastIds
 from contracts.loot.constants.obstacle import Obstacle, ObstacleConstants
 from contracts.loot.loot.stats.combat import CombatStats
-from tests.protostar.loot.test_structs import TestUtils
+from tests.protostar.loot.test_structs import get_adventurer_state, TestUtils
 
 @external
 func test_weapon_vs_armor_efficacy{syscall_ptr: felt*, range_check_ptr}() {
@@ -118,11 +118,13 @@ func test_weapon_vs_armor_efficacy{syscall_ptr: felt*, range_check_ptr}() {
 func test_calculate_damage_from_weapon{syscall_ptr: felt*, range_check_ptr}() {
     alloc_locals;
 
+    let (adventurer_state) = get_adventurer_state();
+
     // greatness 20 katana vs greatness 0 shirt
     // max damage - gg
     let (g20_katana) = TestUtils.create_item(ItemIds.Katana, 20);
     let (g0_shirt) = TestUtils.create_item(ItemIds.Shirt, 0);
-    let (katana_vs_shirt) = CombatStats.calculate_damage_from_weapon(g20_katana, g0_shirt);
+    let (katana_vs_shirt) = CombatStats.calculate_damage_from_weapon(g20_katana, g0_shirt, adventurer_state);
     assert katana_vs_shirt = 300;
 
     // greatness 3 short sword vs greatness 18 holy chestplate
@@ -130,7 +132,7 @@ func test_calculate_damage_from_weapon{syscall_ptr: felt*, range_check_ptr}() {
     let (g3_short_sword) = TestUtils.create_item(ItemIds.ShortSword, 3);
     let (g18_holy_chestplate) = TestUtils.create_item(ItemIds.HolyChestplate, 18);
     let (holy_chestplate_vs_short_sword) = CombatStats.calculate_damage_from_weapon(
-        g3_short_sword, g18_holy_chestplate
+        g3_short_sword, g18_holy_chestplate, adventurer_state
     );
     assert holy_chestplate_vs_short_sword = 0;
 
@@ -143,16 +145,18 @@ func test_calculate_damage_from_beast{
 }() {
     alloc_locals;
 
+    let (adventurer_state) = get_adventurer_state();
+
     // greatness 20 orc vs greatness 0 shirt (oof)
     let (orc) = TestUtils.create_beast(BeastIds.Orc, 20);
     let (shirt) = TestUtils.create_item(ItemIds.Shirt, 0);
-    let (orc_vs_shirt) = CombatStats.calculate_damage_from_beast(orc, shirt);
+    let (orc_vs_shirt) = CombatStats.calculate_damage_from_beast(orc, shirt, adventurer_state);
     assert orc_vs_shirt = 60;
 
     // greatness 10 giant vs greatness 10 leather armor
     let (leather) = TestUtils.create_item(ItemIds.LeatherArmor, 10);
     let (giant) = TestUtils.create_beast(BeastIds.Giant, 10);
-    let (giant_vs_leather) = CombatStats.calculate_damage_from_beast(orc, leather);
+    let (giant_vs_leather) = CombatStats.calculate_damage_from_beast(orc, leather, adventurer_state);
     assert giant_vs_leather = 170;
 
     return ();
@@ -164,12 +168,14 @@ func test_calculate_damage_from_obstacle{
 }() {
     alloc_locals;
 
+    let (adventurer_state) = get_adventurer_state();
+
     // greatness 0 ring mail vs greatness 20 demonic alter
     // max damage - gg
     let (g0_ring_mail) = TestUtils.create_item(ItemIds.RingMail, 0);
     let (g20_demonic_alter) = TestUtils.create_obstacle(ObstacleConstants.ObstacleIds.DemonicAlter, 20);
     let (ring_mail_vs_demonic_alter) = CombatStats.calculate_damage_from_obstacle(
-        g20_demonic_alter, g0_ring_mail
+        g20_demonic_alter, g0_ring_mail, adventurer_state
     );
     assert ring_mail_vs_demonic_alter = 300;
 
@@ -178,7 +184,7 @@ func test_calculate_damage_from_obstacle{
     let (g20_demonhusk) = TestUtils.create_item(ItemIds.DemonHusk, 20);
     let (g0_dark_mist) = TestUtils.create_obstacle(ObstacleConstants.ObstacleIds.DarkMist, 0);
     let (demonhusk_vs_dark_mist) = CombatStats.calculate_damage_from_obstacle(
-        g0_dark_mist, g20_demonhusk
+        g0_dark_mist, g20_demonhusk, adventurer_state
     );
     assert demonhusk_vs_dark_mist = 0;
 

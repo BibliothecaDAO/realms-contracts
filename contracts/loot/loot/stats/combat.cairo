@@ -139,7 +139,7 @@ namespace CombatStats {
     // parameters: Item weapon, Item armor
     // returns: damage
     func calculate_damage_from_weapon{syscall_ptr: felt*, range_check_ptr}(
-        weapon: Item, armor: Item
+        weapon: Item, armor: Item, unpacked_adventurer: AdventurerState
     ) -> (damage: felt) {
         alloc_locals;
 
@@ -151,7 +151,7 @@ namespace CombatStats {
 
         // pass details of attack and armor to core damage calculation function
         let (damage_dealt) = calculate_damage(
-            attack_type, weapon.Rank, weapon.Greatness, armor_type, armor.Rank, armor.Greatness
+            attack_type, weapon.Rank, weapon.Greatness, armor_type, armor.Rank, armor.Greatness, unpacked_adventurer.Level
         );
 
         // return damage
@@ -193,7 +193,7 @@ namespace CombatStats {
 
     // Calculates damage dealt from a beast by converting beast into a Loot weapon and calling calculate_damage_from_weapon
     func calculate_damage_to_beast{syscall_ptr: felt*, range_check_ptr}(
-        beast: Beast, weapon: Item
+        beast: Beast, weapon: Item, unpacked_adventurer: AdventurerState
     ) -> (damage: felt) {
         alloc_locals;
 
@@ -220,7 +220,7 @@ namespace CombatStats {
         }
 
         let (damage_dealt) = calculate_damage(
-            weapon_type, weapon.Rank, weapon_greatness, armor_type, beast.Rank, beast.Level
+            weapon_type, weapon.Rank, weapon_greatness, armor_type, beast.Rank, beast.Level, unpacked_adventurer.Level
         );
 
         // return damage
@@ -229,7 +229,7 @@ namespace CombatStats {
 
     // Calculate damage from an obstacle
     func calculate_damage_from_obstacle{syscall_ptr: felt*, range_check_ptr}(
-        obstacle: Obstacle, armor: Item
+        obstacle: Obstacle, armor: Item, unpacked_adventurer: AdventurerState
     ) -> (damage: felt) {
         alloc_locals;
 
@@ -241,7 +241,7 @@ namespace CombatStats {
 
         // pass details of attack and armor to core damage calculation function
         let (damage_dealt) = calculate_damage(
-            attack_type, obstacle.Rank, obstacle.Greatness, armor_type, armor.Rank, armor.Greatness
+            attack_type, obstacle.Rank, obstacle.Greatness, armor_type, armor.Rank, armor.Greatness, unpacked_adventurer.Level
         );
 
         // return damage dealt

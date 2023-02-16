@@ -16,6 +16,7 @@ from contracts.loot.constants.beast import (
 )
 from contracts.loot.loot.stats.combat import CombatStats
 from tests.protostar.loot.test_structs import (
+    get_adventurer_state,
     TestUtils,
     TEST_DAMAGE_HEALTH_REMAINING,
     TEST_DAMAGE_OVERKILL,
@@ -180,13 +181,15 @@ func test_slain{
 func test_calculate_damage_to_beast{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
 
+    let (adventurer_state) = get_adventurer_state();
+
     let (greatness_8_mace) = TestUtils.create_item(75, 8); // Greatness 8 Mace (Bludgeon) vs
     let (xp_1_basilisk) = TestUtils.create_beast(4, 1); // Level 1 Basilisk (Magic)
 
     // attack = 8 * (6-4) * 1 = 16
     // defense = 1 * (6-4) = 2
     // 16 - 2 = 14HP damage
-    let (mace_vs_basilik) = CombatStats.calculate_damage_to_beast(xp_1_basilisk, greatness_8_mace);
+    let (mace_vs_basilik) = CombatStats.calculate_damage_to_beast(xp_1_basilisk, greatness_8_mace, adventurer_state);
     assert mace_vs_basilik = 14;
 
     // TODO: Test attacking without weapon (melee)
@@ -205,6 +208,8 @@ func test_calculate_damage_to_beast{syscall_ptr: felt*, pedersen_ptr: HashBuilti
 func test_calculate_damage_from_beast{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
 
+    let (adventurer_state) = get_adventurer_state();
+
     let (beast) = TestUtils.create_beast(1, 2); // 2XP Pheonix vs
     let (armor) = TestUtils.create_item(50, 1); // Greatness 1 Hard Leather Armor
     
@@ -212,7 +217,7 @@ func test_calculate_damage_from_beast{syscall_ptr: felt*, pedersen_ptr: HashBuil
     // beast_attack = 2 * (6-1) * 1 = 10
     // armor_defense = 1 * (6-4) = 2
     // 10 attack - 2 defense = 8hp damage
-    let (local damage) = CombatStats.calculate_damage_from_beast(beast, armor);
+    let (local damage) = CombatStats.calculate_damage_from_beast(beast, armor, adventurer_state);
     assert damage = 8;
 
     // TODO: Test defending without armor
