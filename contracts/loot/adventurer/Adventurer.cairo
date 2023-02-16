@@ -49,11 +49,7 @@ from contracts.loot.loot.stats.combat import CombatStats
 from contracts.loot.utils.general import _uint_to_felt
 from contracts.loot.beast.interface import IBeast
 from contracts.loot.loot.ILoot import ILoot
-from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
-
-const MINT_COST = 50000000000000000000;
-
-const STARTING_GOLD = 20;
+from contracts.loot.utils.constants import ModuleIds, ExternalContractIds, MINT_COST, STARTING_GOLD
 
 // -----------------------------------
 // Events

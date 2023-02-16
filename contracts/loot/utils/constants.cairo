@@ -9,3 +9,7 @@ namespace ExternalContractIds {
     const Lords = 2;
     const Treasury = 3;
 }
+
+const MINT_COST = 50000000000000000000;
+
+const STARTING_GOLD = 20;
