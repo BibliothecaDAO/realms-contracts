@@ -579,7 +579,8 @@ func explore{
             // add GOLD
             // TODO: determin gold amount
             // @distracteddev: formula - 1 + (rnd % 4)
-            let (gold_discovery) = AdventurerLib.calculate_gold_discovery(rnd);
+            let (gold_rnd) = get_random_number();
+            let (gold_discovery) = AdventurerLib.calculate_gold_discovery(gold_rnd);
             let (beast_address) = Module.get_module_address(ModuleIds.Beast);
             IBeast.add_to_balance(beast_address, token_id, gold_discovery);
             emit_adventurer_state(token_id);
