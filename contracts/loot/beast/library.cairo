@@ -188,15 +188,6 @@ namespace BeastLib {
         return (updated_slain_on_beast,);
     }
 
-    func get_random_ambush{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
-        xoroshiro_random: felt
-    ) -> (discovery: felt) {
-        alloc_locals;
-
-        let (_, r) = unsigned_div_rem(xoroshiro_random, 2);
-        return (r,);  // values from 0 to 1 inclusive
-    }
-
     func get_random_flee{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
         xoroshiro_random: felt
     ) -> (discovery: felt) {
@@ -236,5 +227,16 @@ namespace BeastLib {
 
         // return updated adventurer
         return (updated_beast,);
+    }
+
+    func calculate_ambush_chance{syscall_ptr: felt*, range_check_ptr}(
+        rnd: felt, beast_health: felt
+    ) -> (ambush_chance: felt) {
+
+        let (_, r) = unsigned_div_rem(rnd, 2);
+        let (beast_health_multi, _) =  unsigned_div_rem(beast_health, 50);
+        let ambush_chance = r * (1 + beast_health_multi);
+
+        return (ambush_chance,);
     }
 }

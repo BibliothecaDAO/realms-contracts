@@ -165,7 +165,6 @@ func attack{
         let (chest) = ILoot.get_item_by_token_id(item_address, Uint256(unpacked_adventurer.ChestId, 0));
         let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, chest, unpacked_adventurer);
 
-        // TODO: Add multiplier
         IAdventurer.deduct_health(adventurer_address, adventurer_id, damage_taken);
 
         // check if beast counter attack killed adventurer
@@ -299,16 +298,17 @@ func flee{
     let adventurer_speed = unpacked_adventurer.Dexterity - weight_of_equipment;
     assert_nn(adventurer_speed);
 
-    // Adventurer ambush resistance is based on wisdom plus luck
-    let ambush_resistance = unpacked_adventurer.Wisdom + unpacked_adventurer.Luck;
-
     let (rnd) = get_random_number();
-    let (ambush_chance) = BeastLib.get_random_ambush(rnd);
 
     // TODO Milestone2: Factor in beast health for the ambush chance and for flee chance
     // Short-term (while we are using rng) would be to base rng on beast health. The
     // lower the beast health, the lower the chance it will ambush and the easier
     // it will be to flee.
+    // @distracteddev: simple calculation, random: (0,1) * ( health/50: (0, 1, 2) )
+    let (ambush_chance) = BeastLib.calculate_ambush_chance(rnd, beast.Health);
+
+    // Adventurer ambush resistance is based on wisdom plus luck
+    let ambush_resistance = unpacked_adventurer.Wisdom + unpacked_adventurer.Luck;
 
     // adventurer is ambushed if their ambush resistance is less than random number
     let is_ambushed = is_le(ambush_chance, ambush_resistance);
