@@ -9,7 +9,7 @@
 %lang starknet
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_not_equal
+from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_not_equal, assert_nn
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.uint256 import Uint256, uint256_add, uint256_eq
 from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
@@ -163,7 +163,7 @@ func attack{
     if (beast_is_alive == TRUE) {
         // having been attacked, it automatically attacks back
         let (chest) = ILoot.get_item_by_token_id(item_address, Uint256(unpacked_adventurer.ChestId, 0));
-        let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, chest);
+        let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, chest, unpacked_adventurer);
 
         // TODO: Add multiplier
         IAdventurer.deduct_health(adventurer_address, adventurer_id, damage_taken);
@@ -272,11 +272,10 @@ func counter_attack{
 
 // @notice Flee adventurer from beast
 // @param beast_token_id: Id of beast
-// TODO: return boolean to indicate if user was able to flee
 @external
 func flee{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(beast_token_id: Uint256) {
+}(beast_token_id: Uint256) -> (fled: felt) {
     alloc_locals;
 
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
@@ -297,8 +296,8 @@ func flee{
     // TODO: We need a function to calculate the weight of all the adventurer equipment
     let weight_of_equipment = 0;
 
-    // TODO: Wrap this with overflow protection
     let adventurer_speed = unpacked_adventurer.Dexterity - weight_of_equipment;
+    assert_nn(adventurer_speed);
 
     // Adventurer ambush resistance is based on wisdom plus luck
     let ambush_resistance = unpacked_adventurer.Wisdom + unpacked_adventurer.Luck;
@@ -362,11 +361,9 @@ func flee{
             adventurer_address, Uint256(beast.Adventurer, 0), AdventurerStatus.Idle
         );
         IAdventurer.assign_beast(adventurer_address, Uint256(beast.Adventurer, 0), 0);
-        // adventurer was able to flee
-        return ();
+        return (TRUE,);
     } else {
-        // adventurer was not able to flee
-        return ();
+        return (FALSE,);
     }
 }
 
@@ -607,8 +604,9 @@ func _subtract_from_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
 
     goldBalance.write(adventurer_token_id, current_balance - subtraction);
 
-    // todo: check overflow
     let (supply) = worldSupply.read();
+    let new_supply = supply - subtraction;
+    asser_nn(new_supply);
     worldSupply.write(supply - subtraction);
 
     return ();

@@ -228,6 +228,11 @@ func renounceOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 func item(tokenId: Uint256) -> (item: Item) {
 }
 
+@storage_var
+func adventurer_owner(tokenId: Uint256) -> (adventuer_token_id: Uint256) {
+}
+
+
 // -----------------------------
 // External Loot Specific
 // -----------------------------
@@ -235,7 +240,7 @@ func item(tokenId: Uint256) -> (item: Item) {
 // @notice Mint random item
 // @param to: Address to mint the item to
 @external
-func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: felt) {
+func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: felt, adventuer_token_id: Uint256) {
     alloc_locals;
 
     // fetch new item with random Id
@@ -245,6 +250,8 @@ func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: f
     let (next_id) = counter.read();
 
     item.write(Uint256(next_id + 1, 0), new_item);
+
+    adventurer_owner.write(adventurer_token_id, next_id);
 
     ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
 
@@ -258,14 +265,13 @@ func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: f
 // @return item_token_id: The token id of the minted item
 @external
 func mint_starter_weapon{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    to: felt, weapon_id: felt
+    to: felt, weapon_id: felt, adventuer_token_id: Uint256
 ) -> (item_token_id: Uint256) {
     alloc_locals;
 
-    // TODO: Assert the weapon_id is book, wand, club, or short sword
-    assert_starter_weapon(weapon_id);
+    Module.only_approved();
 
-    // TODO: permissions
+    assert_starter_weapon(weapon_id);
 
     // fetch new item with random Id
     let (new_item: Item) = ItemLib.generate_starter_weapon(weapon_id);
@@ -273,6 +279,8 @@ func mint_starter_weapon{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_c
     let (next_id) = counter.read();
 
     item.write(Uint256(next_id + 1, 0), new_item);
+
+    adventurer_owner.write(adventurer_token_id, next_id);
 
     ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
 
@@ -301,7 +309,7 @@ func update_adventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 // @param tokenId: Id of loot item
 // @param xp: Amount of xp to update
 @external
-func update_xP{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func update_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256, xp: felt
 ) {
     Module.only_approved();
@@ -383,4 +391,15 @@ func get_item_by_token_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
     let (item_: Item) = item.read(tokenId);
 
     return (item_,);
+}
+
+// @notice Get adventurer owner
+// @param tokenId: Id of the item token
+// @return adventurer_token_id: Id of the adventurer
+@view get_adventurer_owner{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    tokenId: Uint256
+) -> (adventuer_token_id: Uint256) {
+    let (dventuer_token_id) = adventurer_owner.read(tokenId);
+
+    return (adventuer_token_id,);
 }

@@ -18,6 +18,7 @@ from contracts.loot.constants.combat import WeaponEfficacy, WeaponEfficiacyDamag
 from contracts.loot.beast.stats.beast import BeastStats
 from contracts.loot.beast.library import BeastLib
 from contracts.loot.loot.stats.item import ItemStats
+from contracts.loot.constants.adventurer import AdventurerState
 from contracts.loot.constants.beast import Beast, BeastStatic, BeastDynamic
 from contracts.loot.constants.obstacle import Obstacle, ObstacleUtils
 
@@ -103,6 +104,7 @@ namespace CombatStats {
         armor_type: felt,
         armor_rank: felt,
         armor_greatness: felt,
+        adventurer_level: felt
     ) -> (damage: felt) {
         alloc_locals;
 
@@ -124,6 +126,7 @@ namespace CombatStats {
         let dealt_damage = is_le_felt(armor_strength, total_weapon_damage);
         if (dealt_damage == 1) {
             // if it is, damage dealt will be positive so return it
+            // @distracteddev: provide some multi here with adventurer level: e.g. damage * (ad_level * 0.1)
             let damage_dealt = total_weapon_damage - armor_strength;
             return (damage_dealt,);
         } else {
@@ -157,7 +160,7 @@ namespace CombatStats {
 
     // Calculates damage dealt from a beast by converting beast into a Loot weapon and calling calculate_damage_from_weapon
     func calculate_damage_from_beast{syscall_ptr: felt*, range_check_ptr}(
-        beast: Beast, armor: Item
+        beast: Beast, armor: Item, unpacked_adventurer: AdventurerState
     ) -> (damage: felt) {
         alloc_locals;
 
@@ -179,8 +182,9 @@ namespace CombatStats {
         }
 
         // pass details of attack and armor to core damage calculation function
+        // @distracteddev: added param to change based on adventurer level
         let (damage_dealt) = calculate_damage(
-            attack_type, beast.Rank, beast.Level, armor_type, armor.Rank, armor.Greatness
+            attack_type, beast.Rank, beast.Level, armor_type, armor.Rank, armor.Greatness, unpacked_adventurer.Level
         );
 
         // return damage

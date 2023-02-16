@@ -213,9 +213,8 @@ func mint_with_starting_weapon{
     let (beast_address) = Module.get_module_address(ModuleIds.Beast);
 
     // Mint starting weapon for the adventurer (book, wand, club, short sword)
-    // TODO add perms
 
-    let (item_token_id) = ILoot.mint_starter_weapon(loot_address, to, weapon_id);
+    let (item_token_id) = ILoot.mint_starter_weapon(loot_address, to, weapon_id, adventurer_token_id);
 
     // Equip the selected item to the adventurer
     equip_item(adventurer_token_id, item_token_id);
@@ -252,7 +251,8 @@ func equip_item{
     assert item.Adventurer = 0;
     assert item.Bag = 0;
 
-    // TODO: Check item owned by Adventurer
+    // Check item owned by Adventurer
+    assert_adventurer_is_owner(adventuer_token_id, item_token_id);
 
     // Check item is owned by caller
     let (owner) = IERC721.ownerOf(loot_address, item_token_id);
@@ -628,6 +628,20 @@ func assert_not_dead{
         assert_not_zero(adventurer.Health);
     }
 
+    return ();
+}
+
+// @notice Revert if adventurer is not item owner
+// @param adventurer_token_id: Id of adventurer
+// @param itemId: Id of the item
+func assert_adventurer_is_owner{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(adventuer_token_id: Uint256, itemId: Uint256) {
+    let (owner) = ILoot.get_adventurer_owner(itemId);
+    let (check) = uint256_eq(owner, adventuer_token_id);
+    with_attr error_message("Adventurer: Adventurer is item owner") {
+       assert check = TRUE;
+    }
     return ();
 }
 
