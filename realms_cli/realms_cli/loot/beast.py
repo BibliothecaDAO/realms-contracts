@@ -80,7 +80,7 @@ async def attack_beast(beast_token_id, network):
     prompt=True,
 )
 @click.option("--network", default="goerli")
-async def flee_from_beast(beast_token_id, network):
+async def flee_beast(beast_token_id, network):
     """
     Flee from beast
     """

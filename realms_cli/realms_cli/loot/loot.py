@@ -170,7 +170,7 @@ async def all_loot(network):
         network=config.nile_network,
         contract_alias="proxy_LootMarketArcade",
         abi='artifacts/abis/LootMarketArcade.json',
-        function="balance_of",
+        function="balanceOf",
         arguments=[config.USER_ADDRESS],
     )
 
@@ -185,7 +185,7 @@ async def all_loot(network):
             network=config.nile_network,
             contract_alias="proxy_LootMarketArcade",
             abi='artifacts/abis/LootMarketArcade.json',
-            function="token_of_owner_by_index",
+            function="tokenOfOwnerByIndex",
             arguments=[config.USER_ADDRESS, *uint(i)],
         )
 

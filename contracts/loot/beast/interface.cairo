@@ -31,4 +31,6 @@ namespace IBeast {
     }
     func add_to_balance(adventurer_token_id: Uint256, addition: felt) -> () {
     }
+    func get_world_supply() -> (balance: felt) {
+    }
 }
