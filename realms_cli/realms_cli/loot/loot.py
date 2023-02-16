@@ -5,7 +5,11 @@ from realms_cli.utils import print_over_colums, uint, felt_to_str, convert_unix_
 from realms_cli.loot.getters import _get_loot, print_loot, print_loot_bid, print_loot_and_bid
 
 
-@click.command()
+@click.group()
+def loot():
+    pass
+
+@loot.command()
 @click.option("--network", default="goerli")
 async def mint_loot(network):
     """
@@ -26,10 +30,17 @@ async def mint_loot(network):
     print('🎲 Minted random item ✅')
 
 
-@click.command()
-@click.argument("loot_token_id", nargs=1)
+@loot.command()
+@click.option(
+    "--loot_token_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="loot_token_id",
+    prompt=True,
+)
 @click.option("--network", default="goerli")
-async def get_loot(loot_token_id, network):
+async def get(loot_token_id, network):
     """
     Get Loot Item metadata
     """
@@ -37,8 +48,15 @@ async def get_loot(loot_token_id, network):
     await _get_loot(loot_token_id, network)
 
 
-@click.command()
-@click.argument("loot_token_id", nargs=1)
+@loot.command()
+@click.option(
+    "--loot_token_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="loot_token_id",
+    prompt=True,
+)
 @click.option("--network", default="goerli")
 @click.option('--item', is_flag=False,
               metavar='<columns>', type=click.STRING, help='item id', prompt=True)
@@ -67,7 +85,7 @@ async def set_loot(loot_token_id, item, greatness, xp, adventurer, bag, network)
     )
 
 
-@click.command()
+@loot.command()
 @click.option("--network", default="goerli")
 async def mint_daily_items(network):
     """
@@ -86,10 +104,17 @@ async def mint_daily_items(network):
     )
 
 
-@click.command()
-@click.argument("loot_token_id", nargs=1)
+@loot.command()
+@click.option(
+    "--loot_token_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="loot_token_id",
+    prompt=True,
+)
 @click.option("--network", default="goerli")
-async def get_unminted_loot(loot_token_id, network):
+async def market(loot_token_id, network):
     """
     Get Loot Item metadata
     """
@@ -108,15 +133,21 @@ async def get_unminted_loot(loot_token_id, network):
 
 
 
-@click.command()
+@loot.command()
 @click.option("--network", default="goerli")
-@click.option('--item', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='item id', prompt=True)
+@click.option(
+    "--loot_token_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="loot_token_id",
+    prompt=True,
+)
 @click.option('--adventurer', is_flag=False,
               metavar='<columns>', type=click.STRING, help='adventurer id for the bid, you have to bid as an adventurer not a wallet', prompt=True)
 @click.option('--price', is_flag=False,
               metavar='<columns>', type=click.STRING, help='price for item, must be greater than past bid or above 10', prompt=True)
-async def bid_on_item(network, item, adventurer, price):
+async def bid(network, loot_token_id, adventurer, price):
     """
     Bid on an item. You can only bid on an item that is currently for sale and has not expired in bid.
     """
@@ -129,17 +160,23 @@ async def bid_on_item(network, item, adventurer, price):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_LootMarketArcade",
         function="bid_on_item",
-        arguments=[*uint(item), *uint(adventurer), price]
+        arguments=[*uint(loot_token_id), *uint(adventurer), price]
     )
 
 
-@click.command()
+@loot.command()
 @click.option("--network", default="goerli")
-@click.option('--item', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='item id', prompt=True)
+@click.option(
+    "--loot_token_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="loot_token_id",
+    prompt=True,
+)
 @click.option('--adventurer', is_flag=False,
               metavar='<columns>', type=click.STRING, help='adventurer id for the bid, you have to bid as an adventurer not a wallet', prompt=True)
-async def claim_item(network, item, adventurer):
+async def claim(network, loot_token_id, adventurer):
     """
     Claim item. You can only claim past the expiry time.
     """
@@ -152,13 +189,13 @@ async def claim_item(network, item, adventurer):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_LootMarketArcade",
         function="claim_item",
-        arguments=[*uint(item), *uint(adventurer)]
+        arguments=[*uint(loot_token_id), *uint(adventurer)]
     )
 
 
-@click.command()
+@loot.command()
 @click.option("--network", default="goerli")
-async def all_loot(network):
+async def bag(network):
     """
     Get all your loot
     """

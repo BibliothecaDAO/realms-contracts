@@ -169,16 +169,16 @@ cairo-nile = "^0.13.0"
 
 
 #-----------LOOT
-"mint_loot" = "realms_cli.loot.loot.mint_loot"
-"get_loot" = "realms_cli.loot.loot.get_loot"
-"set_loot" = "realms_cli.loot.loot.set_loot"
-"all_loot" = "realms_cli.loot.loot.all_loot"
+"loot" = "realms_cli.loot.loot.loot"
+"get" = "realms_cli.loot.loot.get"
+"bag" = "realms_cli.loot.loot.bag"
+"bid" = "realms_cli.loot.loot.bid"
+"claim" = "realms_cli.loot.loot.claim"
+"market" = "realms_cli.loot.loot.market"
 
 #-----------LOOT MARKET
 "mint_daily_items" = "realms_cli.loot.loot.mint_daily_items"
-"get_unminted_loot" = "realms_cli.loot.loot.get_unminted_loot"
-"bid_on_item" = "realms_cli.loot.loot.bid_on_item"
-"claim_item" = "realms_cli.loot.loot.claim_item"
+
 
 #-----------ADVENTURER
 "new_adventurer"   =  "realms_cli.loot.adventurer.mint_adventurer_with_item"
@@ -198,3 +198,8 @@ cairo-nile = "^0.13.0"
 "travel" = "realms_cli.player.travel.travel"
 "get_travel" = "realms_cli.player.travel.get_travel"
 "travel_time" = "realms_cli.player.travel.travel_time"
+
+
+#----- TO DEPRECATE
+"mint_loot" = "realms_cli.loot.loot.mint_loot"
+"set_loot" = "realms_cli.loot.loot.set_loot"

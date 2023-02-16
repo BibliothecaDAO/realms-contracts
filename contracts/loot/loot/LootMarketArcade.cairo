@@ -307,7 +307,7 @@ func update_adventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 // @param tokenId: Id of loot item
 // @param xp: Amount of xp to update
 @external
-func update_xP{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func update_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256, xp: felt
 ) {
     Module.only_approved();
@@ -445,6 +445,8 @@ const SHUFFLE_TIME = 3600 * 6;
 const BASE_PRICE = 3;
 const SEED_MULTI = 5846975; // for psudeo randomness now
 const NUMBER_LOOT_ITEMS = 101;
+const MINIMUM_ITEMS_EMITTED = 20;
+const ITEMS_PER_EPOCH_PER_ADVENTUER = 3;
 
 @event
 func ItemMerchantUpdate(item: Item, market_item_id: felt, bid: Bid) {
@@ -469,6 +471,9 @@ func mint_daily_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     with_attr error_message("Item Market: You cannot mint daily items yet...") {
         assert is_past_tick = TRUE;
     }
+
+    let (beast_address) = Module.get_module_address(ModuleIds.Adventurer);
+    let (world_gold_supply) = IBeast.get_world_supply(beast_address);
 
     // TODO: replace with curve according to gold
     let _new_items = 20;

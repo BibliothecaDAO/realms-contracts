@@ -3,9 +3,6 @@ from realms_cli.caller_invoker import wrapped_send, wrapped_proxy_call
 from realms_cli.config import Config
 from realms_cli.utils import uint, str_to_felt
 from realms_cli.loot.getters import _get_adventurer, _get_beast, print_adventurer
-import dearpygui.dearpygui as dpg
-import subprocess
-
 
 @click.command()
 @click.option("--network", default="goerli")
@@ -73,35 +70,35 @@ async def new_adventurer(
     """
     config = Config(nile_network=network)
 
-    print("🪙 Minting lords ...")
+    # print("🪙 Minting lords ...")
 
-    await wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
-        contract_alias=config.Lords_ERC20_Mintable_alias,
-        function="mint",
-        arguments=[config.USER_ADDRESS, 100 * 10**18, 0],  # uint 1  # uint 2
-    )
+    # await wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.USER_ALIAS,
+    #     contract_alias=config.Lords_ERC20_Mintable_alias,
+    #     function="mint",
+    #     arguments=[config.USER_ADDRESS, 100 * 10**18, 0],  # uint 1  # uint 2
+    # )
 
-    print("🪙 Minted lords ✅")
+    # print("🪙 Minted lords ✅")
 
-    print("👍 Approving lords to be spent ...")
+    # print("👍 Approving lords to be spent ...")
 
-    await wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
-        contract_alias=config.Lords_ERC20_Mintable_alias,
-        function="approve",
-        arguments=[
-            config.ADVENTURER_PROXY_ADDRESS,
-            100 * 10**18,  # uint 1
-            0,  # uint 2
-        ],
-    )
+    # await wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.USER_ALIAS,
+    #     contract_alias=config.Lords_ERC20_Mintable_alias,
+    #     function="approve",
+    #     arguments=[
+    #         config.ADVENTURER_PROXY_ADDRESS,
+    #         100 * 10**18,  # uint 1
+    #         0,  # uint 2
+    #     ],
+    # )
 
-    print("👍 Approved lords to be spent ✅")
+    # print("👍 Approved lords to be spent ✅")
 
-    print("🤴 Minting adventurer ...")
+    # print("🤴 Minting adventurer ...")
 
     await wrapped_send(
         network=config.nile_network,

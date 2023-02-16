@@ -158,17 +158,17 @@ async def run(nre):
         )
 
     # #---------------- TOKEN IMPLEMENTATIONS  ----------------#
-    for contract in TOKEN_CONTRACT_IMPLEMENTATIONS:
-        class_hash = await wrapped_declare(
-            config.ADMIN_ALIAS, contract.alias, nre.network, contract.alias)
+    # for contract in TOKEN_CONTRACT_IMPLEMENTATIONS:
+    #     class_hash = await wrapped_declare(
+    #         config.ADMIN_ALIAS, contract.alias, nre.network, contract.alias)
 
-        await logged_deploy(
-            nre,
-            config.ADMIN_ALIAS,
-            'PROXY_Logic',
-            alias='proxy_' + contract.alias,
-            calldata=[strhex_as_strfelt(class_hash)],
-        )
+    #     await logged_deploy(
+    #         nre,
+    #         config.ADMIN_ALIAS,
+    #         'PROXY_Logic',
+    #         alias='proxy_' + contract.alias,
+    #         calldata=[strhex_as_strfelt(class_hash)],
+    #     )
 
     # ---------------- INIT MODULES  ----------------#
 
@@ -214,33 +214,33 @@ async def run(nre):
 
     #---------------- INIT TOKENS  ----------------#
 
-    await wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_Lords_ERC20_Mintable",
-        function="initializer",
-        arguments=[
-            LORDS,
-            LORDS_SYMBOL,
-            DECIMALS,
-            config.INITIAL_LORDS_SUPPLY,
-            0,
-            config.ADMIN_ADDRESS,
-            config.ADMIN_ADDRESS
-        ],
-    )
+    # await wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="proxy_Lords_ERC20_Mintable",
+    #     function="initializer",
+    #     arguments=[
+    #         LORDS,
+    #         LORDS_SYMBOL,
+    #         DECIMALS,
+    #         config.INITIAL_LORDS_SUPPLY,
+    #         0,
+    #         config.ADMIN_ADDRESS,
+    #         config.ADMIN_ADDRESS
+    #     ],
+    # )
 
-    await wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_Realms_ERC721_Mintable",
-        function="initializer",
-        arguments=[
-            REALMS,  # name
-            REALMS_SYMBOL,  # ticker
-            config.ADMIN_ADDRESS,  # contract_owner
-        ],
-    )
+    # await wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="proxy_Realms_ERC721_Mintable",
+    #     function="initializer",
+    #     arguments=[
+    #         REALMS,  # name
+    #         REALMS_SYMBOL,  # ticker
+    #         config.ADMIN_ADDRESS,  # contract_owner
+    #     ],
+    # )
 
     #---------------- SET MODULES ----------------#
 
