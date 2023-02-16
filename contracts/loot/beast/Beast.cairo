@@ -202,7 +202,7 @@ func attack{
         // drop gold
         // TODO: Make dynamic somehow...
         // @distracteddev: add randomness to reward
-        // formula: (xp_gained  - (xp_gained / 4)) * (xp_gained % 4 * rand)
+        // formula: (xp_gained  - (xp_gained / 4)) * (rand % 4)
         let (rnd) = get_random_number();
         let (gold_reward) = BeastLib.calculate_gold_reward(rnd, xp_gained);
         _add_to_balance(adventurer_id, gold_reward);
