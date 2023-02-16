@@ -249,7 +249,7 @@ namespace BeastLib {
         let (xp_correction, xp_factor) = unsigned_div_rem(xp_gained, 4);
         let xp_start = xp_gained - xp_correction;
 
-        let gold_reward = xp_start * ((1 + xp_factor) * reward_multi);
+        let gold_reward = xp_start * reward_multi;
 
         return (gold_reward,);
     }

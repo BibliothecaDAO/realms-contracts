@@ -241,16 +241,14 @@ func test_ambush_chance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_ch
 
 // @notice Tests ambush chance calculation
 // Ambush calculation is:
-// random_number * (health / 50)
+// (xp_gained - (xp_gained/4)) * (rand % 4)
 @external
 func test_calculate_gold_reward{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
 
-    let (local gold_reward) = BeastLib.calculate_gold_reward(0, 5);
+    let (gold_reward) = BeastLib.calculate_gold_reward(0, 5);
 
-    %{
-        print(ids.gold_reward)
-    %}
+    assert gold_reward = 4;
 
     return ();
 }
