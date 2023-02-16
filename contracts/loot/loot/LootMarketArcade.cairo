@@ -29,7 +29,7 @@ from starkware.starknet.common.syscalls import (
 )
 
 from contracts.loot.loot.stats.item import ItemStats
-from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
+from contracts.loot.utils.constants import ModuleIds, ExternalContractIds, STARTING_GOLD
 
 from openzeppelin.token.erc721.IERC721 import IERC721
 
@@ -472,11 +472,26 @@ func mint_daily_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
         assert is_past_tick = TRUE;
     }
 
-    let (beast_address) = Module.get_module_address(ModuleIds.Adventurer);
+    let (beast_address) = Module.get_module_address(ModuleIds.Beast);
     let (world_gold_supply) = IBeast.get_world_supply(beast_address);
 
-    // TODO: replace with curve according to gold
-    let _new_items = 20;
+    let (relative_adventurers_in_world,_) = unsigned_div_rem(world_gold_supply, STARTING_GOLD);
+
+    let less_than_minimum = is_le(relative_adventurers_in_world, MINIMUM_ITEMS_EMITTED);   
+    if (less_than_minimum == TRUE) {
+        tempvar _new_items = 20;
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    } else {
+        tempvar _new_items = relative_adventurers_in_world;
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    }
+
+    tempvar _new_items = _new_items;
+     
 
     // get current index
     let (current_index) = mint_index.read();
@@ -488,7 +503,7 @@ func mint_daily_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 
     last_seed_time.write(current_time);
 
-    emit_new_items_loop(random, new_index, current_index);
+    emit_new_items_loop(random, _new_items, current_index);
 
     // set new index
     mint_index.write(new_index);
@@ -507,7 +522,7 @@ func emit_new_items_loop{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
     daily_seed: felt, item_start_index_len: felt, item_start_index: felt
 ) -> (item_start_index_len: felt, item_start_index: felt) {
     // we loop over all new items
-    if (item_start_index_len == (item_start_index_len - item_start_index)) {
+    if (item_start_index_len == 0) {
         return (0, 0);
     }
 

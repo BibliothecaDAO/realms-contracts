@@ -623,16 +623,3 @@ func balance_of{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
 func get_world_supply{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (balance: felt) {
     return worldSupply.read();
 }
-
-
-// @external
-// func transferFrom{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-//     amount: felt, _from: Uint256, to: Uint256
-// ) {
-//     _addToBalance(to, amount);
-//     _subtractFromBalance(_from, amount);
-
-// return ();
-// }
-
-// TODO: Record total in existence
