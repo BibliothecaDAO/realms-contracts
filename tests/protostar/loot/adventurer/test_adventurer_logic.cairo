@@ -124,6 +124,13 @@ func test_mint_with_starting_weapon{
     let (adventurer_item) = ILoot.get_item_by_token_id(loot_address, Uint256(adventurer.WeaponId, 0));
     assert adventurer_item.Id = ItemIds.Book;
 
+    %{ expect_revert(error_message="Loot: Item is not a starter weapon") %}
+
+    // Test minting adventurer with a non starting weapon
+    IAdventurer.mint_with_starting_weapon(
+        adventurer_address, account_1_address, 4, 13, 'Test', 8, 1, 1, ItemIds.Katana
+    );
+
     %{
         stop_prank_realms()
         stop_prank_adventurer()

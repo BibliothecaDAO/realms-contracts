@@ -3,6 +3,7 @@
 
 %lang starknet
 from starkware.cairo.common.alloc import alloc
+from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.math import unsigned_div_rem
@@ -13,7 +14,7 @@ from openzeppelin.token.erc721.library import ERC721
 from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
 from openzeppelin.upgrades.library import Proxy
 
-from contracts.loot.constants.item import Item
+from contracts.loot.constants.item import Item, ItemIds
 from contracts.loot.interfaces.imodules import IModuleController
 from contracts.loot.loot.library import ItemLib
 from contracts.loot.loot.metadata import LootUri
@@ -262,7 +263,7 @@ func mint_starter_weapon{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_c
     alloc_locals;
 
     // TODO: Assert the weapon_id is book, wand, club, or short sword
-
+    assert_starter_weapon(weapon_id);
 
     // TODO: permissions
 
@@ -329,6 +330,30 @@ func set_item_by_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_
 // -----------------------------
 // Internal Loot Specific
 // -----------------------------
+
+// @notice Asserts that the weapon is a starter weapon
+// @param weapon_id: Id of loot weapon
+func assert_starter_weapon{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
+    weapon_id: felt
+) {
+    //  book, wand, club, or short sword
+    if (weapon_id == ItemIds.Book) {
+        return ();
+    }
+    if (weapon_id == ItemIds.Wand) {
+        return ();
+    }
+    if (weapon_id == ItemIds.Club) {
+        return ();
+    }
+    if (weapon_id == ItemIds.ShortSword) {
+        return ();
+    }
+    with_attr error_message("Loot: Item is not a starter weapon") {
+        assert TRUE = FALSE;
+    }
+    return ();
+}
 
 // @notice Get xiroshiro random number
 // @return dice_roll: Random number
