@@ -112,6 +112,7 @@ func test_update_adventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
     ILoot.mint(loot_address, account_1_address);
 
     %{ stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address) %}
+    %{ stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address) %}
 
     ILoot.update_adventurer(loot_address, Uint256(1, 0), 2);
 
@@ -121,3 +122,4 @@ func test_update_adventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
 
     return ();
 }
+

@@ -177,6 +177,140 @@ namespace Slot {
     const Ring = 8;
 }
 
+const NamePrefixLength = 69;
+const NameSuffixLength = 18;
+const ItemSuffixLength = 16;
+
+namespace SlotItemsLength {
+    const Weapon = 18;
+    const Chest = 15;
+    const Head = 15;
+    const Waist = 15;
+    const Foot = 15;
+    const Hand = 15;
+    const Neck = 3;
+    const Ring = 5;
+}
+
+namespace ItemIndex {
+    // Weapon
+    const Warhammer = 0;
+    const Quarterstaff = 1;
+    const Maul = 2;
+    const Mace = 3;
+    const Club = 4;
+    const Katana = 5;
+    const Falchion = 6;
+    const Scimitar = 7;
+    const LongSword = 8;
+    const ShortSword = 9;
+    const GhostWand = 10;
+    const GraveWand = 11;
+    const BoneWand = 12;
+    const Wand = 13;
+    const Grimoire = 14;
+    const Chronicle = 15;
+    const Tome = 16;
+    const Book = 17;
+
+    // Chest
+    const DivineRobe = 0;
+    const SilkRobe = 1;
+    const LinenRobe = 2;
+    const Robe = 3;
+    const Shirt = 4;
+    const DemonHusk = 5;
+    const DragonskinArmor = 6;
+    const StuddedLeatherArmor = 7;
+    const HardLeatherArmor = 8;
+    const LeatherArmor = 9;
+    const HolyChestplate = 10;
+    const OrnateChestplate = 11;
+    const PlateMail = 12;
+    const ChainMail = 13;
+    const RingMail = 14;
+
+    // Head
+    const AncientHelm = 0;
+    const OrnateHelm = 1;
+    const GreatHelm = 2;
+    const FullHelm = 3;
+    const Helm = 4;
+    const DemonCrown = 5;
+    const DragonsCrown = 6;
+    const WarCap = 7;
+    const LeatherCap = 8;
+    const Cap = 9;
+    const Crown = 10;
+    const DivineHood = 11;
+    const SilkHood = 12;
+    const LinenHood = 13;
+    const Hood = 14;
+
+    // Waist
+    const OrnateBelt = 0;
+    const WarBelt = 1;
+    const PlatedBelt = 2;
+    const MeshBelt = 3;
+    const HeavyBelt = 4;
+    const DemonhideBelt = 5;
+    const DragonskinBelt = 6;
+    const StuddedLeatherBelt = 7;
+    const HardLeatherBelt = 8;
+    const LeatherBelt = 9;
+    const BrightsilkSash = 10;
+    const SilkSash = 11;
+    const WoolSash = 12;
+    const LinenSash = 13;
+    const Sash = 14;
+
+    // Foot
+    const HolyGreaves = 0;
+    const OrnateGreaves = 1;
+    const Greaves = 2;
+    const ChainBoots = 3;
+    const HeavyBoots = 4;
+    const DemonhideBoots = 5;
+    const DragonskinBoots = 6;
+    const StuddedLeatherBoots = 7;
+    const HardLeatherBoots = 8;
+    const LeatherBoots = 9;
+    const DivineSlippers = 10;
+    const SilkSlippers = 11;
+    const WoolShoes = 12;
+    const LinenShoes = 13;
+    const Shoes = 14;
+
+    // Hand
+    const HolyGauntlets = 0;
+    const OrnateGauntlets = 1;
+    const Gauntlets = 2;
+    const ChainGloves = 3;
+    const HeavyGloves = 4;
+    const DemonsHands = 5;
+    const DragonskinGloves = 6;
+    const StuddedLeatherGloves = 7;
+    const HardLeatherGloves = 8;
+    const LeatherGloves = 9;
+    const DivineGloves = 10;
+    const SilkGloves = 11;
+    const WoolGloves = 12;
+    const LinenGloves = 13;
+    const Gloves = 14;
+
+    // Necklaces
+    const Necklace = 0;
+    const Amulet = 1;
+    const Pendant = 2;
+
+    // Rings
+    const GoldRing = 0;
+    const SilverRing = 1;
+    const BronzeRing = 2;
+    const PlatinumRing = 3;
+    const TitaniumRing = 4;
+}
+
 namespace ItemSlot {
     const Pendant = Slot.Neck;
     const Necklace = Slot.Neck;
