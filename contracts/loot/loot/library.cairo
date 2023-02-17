@@ -53,6 +53,28 @@ namespace ItemLib {
         return updated_item;
     }
 
+    func update_greatness{syscall_ptr: felt*, range_check_ptr}(
+        item: Item, new_greatness: felt
+    ) -> Item {
+        let updated_item = Item(
+            Id=item.Id,
+            Slot=item.Slot,
+            Type=item.Type,
+            Material=item.Material,
+            Rank=item.Rank,
+            Prefix_1=item.Prefix_1,
+            Prefix_2=item.Prefix_2,
+            Suffix=item.Suffix,
+            Greatness=new_greatness,
+            CreatedBlock=item.CreatedBlock,
+            XP=item.XP,
+            Adventurer=item.Adventurer,
+            Bag=item.Bag,
+        );
+
+        return updated_item;
+    }
+
     func generate_random_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         rnd: felt
     ) -> (item: Item) {
