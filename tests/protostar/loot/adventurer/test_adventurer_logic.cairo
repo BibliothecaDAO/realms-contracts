@@ -193,11 +193,15 @@ func test_equip_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
         ids.loot_address = context.loot
         stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
-        stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
+        stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address)
     %}
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
     ILoot.mint(loot_address, account_1_address, Uint256(1,0));
+    %{
+        stop_prank_loot()
+        stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
+    %}
     // make sure adventurer and bag are set to 0
     ILoot.set_item_by_id(loot_address, Uint256(1, 0), ItemIds.Wand, 0, 0, 0, 0);
     %{
@@ -228,12 +232,16 @@ func test_unequip_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
         ids.loot_address = context.loot
         stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
-        stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
+        stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address)
     %}
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
     ILoot.mint(loot_address, account_1_address, Uint256(1,0));
     // make sure adventurer and bag are set to 0
+    %{
+        stop_prank_loot()
+        stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
+    %}
     ILoot.set_item_by_id(loot_address, Uint256(1, 0), ItemIds.Wand, 0, 0, 0, 0);
     %{
         stop_prank_loot()
@@ -435,5 +443,10 @@ func test_upgrade_stat{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     // try upgrade strength again
     IAdventurer.upgrade_stat(adventurer_address, Uint256(1, 0), AdventurerSlotIds.Strength);
 
+    return ();
+}
+
+@external
+func test_discover_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     return ();
 }

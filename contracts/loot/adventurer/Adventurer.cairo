@@ -577,18 +577,20 @@ func explore{
 
         if (discovery == 1) {
             // add GOLD
-            // TODO: determin gold amount
             // @distracteddev: formula - 1 + (rnd % 4)
-            let (gold_rnd) = get_random_number();
-            let (gold_discovery) = AdventurerLib.calculate_gold_discovery(gold_rnd);
+            let (rnd) = get_random_number();
+            let (gold_discovery) = AdventurerLib.calculate_gold_discovery(rnd);
             let (beast_address) = Module.get_module_address(ModuleIds.Beast);
             IBeast.add_to_balance(beast_address, token_id, gold_discovery);
             emit_adventurer_state(token_id);
             return (DiscoveryType.Item, 0);
         }
         if (discovery == 2) {
-            // TODO: dynamic XP amount
-            _increase_xp(token_id, 20);
+            // add XP
+            // @distracteddev: formula - 10 + (5 * (rnd % 4))
+            let (rnd) = get_random_number();
+            let (xp_discovery) = AdventurerLib.calculate_xp_discovery(rnd);
+            _increase_xp(token_id, xp_discovery);
             return (DiscoveryType.Item, 0);
         }
         if (discovery == 3) {
@@ -600,9 +602,11 @@ func explore{
             return (DiscoveryType.Item, 0);
         }
         if (discovery == 4) {
-            // potion
-            // TODO: dynamic health amount
-            _add_health(token_id, 20);
+            // add health
+            // @distracteddev: formula - 10 + (5 * (rnd % 4))
+            let (rnd) = get_random_number();
+            let (health_discovery) = AdventurerLib.calculate_health_discovery(rnd);
+            _add_health(token_id, health_discovery);
             return (DiscoveryType.Item, 0);
         }
 
@@ -638,10 +642,9 @@ func assert_adventurer_is_owner{
 }(adventurer_token_id: Uint256, itemId: Uint256) {
     alloc_locals;
     let (loot_address) = Module.get_module_address(ModuleIds.Loot);
-    let (owner) = ILoot.get_adventurer_owner(loot_address, itemId);
-    let (check) = uint256_eq(owner, adventurer_token_id);
+    let (owner) = ILoot.item_owner(loot_address, itemId, adventurer_token_id);
     with_attr error_message("Adventurer: Adventurer is not item owner") {
-       assert check = TRUE;
+       assert owner = TRUE;
     }
     return ();
 }

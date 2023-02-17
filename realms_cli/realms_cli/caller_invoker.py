@@ -238,8 +238,18 @@ def deploy(network, alias) -> str:
 
 def compile(contract_alias) -> str:
     """Nile call function."""
+    if os.path.dirname(__file__).split("/")[1] == "Users":
+        path = "/" + os.path.join(
+            os.path.dirname(__file__).split("/")[1],
+            os.path.dirname(__file__).split("/")[2],
+            "Documents",
+            "realms",
+            "realms-contracts",
+        )
+    else:
+        path = "/workspaces/realms-contracts"
 
-    location = find_file("/workspaces/realms-contracts", contract_alias + ".cairo")
+    location = find_file(path, contract_alias + ".cairo")
 
     command = [
         "nile",

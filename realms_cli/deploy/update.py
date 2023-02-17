@@ -29,8 +29,8 @@ NEW_MODULES = [
     # Contracts("S_Realms_ERC721_Mintable"),
     # Contracts("Resources_ERC1155_Mintable_Burnable"),
     # Contracts("Exchange_ERC20_1155"),
-    # Contracts("Adventurer"),
-    Contracts("LootMarketArcade"),
+    Contracts("Adventurer"),
+    # Contracts("LootMarketArcade"),
     # Contracts("Beast"),
 ]
 
@@ -51,14 +51,6 @@ async def run(nre):
 
         await wrapped_declare(config.ADMIN_ALIAS, contract.name, nre.network,
                               contract.name)
-
-        await logged_deploy(
-            nre.network,
-            config.ADMIN_ALIAS,
-            contract.name,
-            alias=contract.name,
-            calldata=[],
-        )
 
         class_hash = get_class_hash(contract.name)
 

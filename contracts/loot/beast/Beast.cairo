@@ -680,7 +680,6 @@ func _allocate_xp_to_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range
     if (head_armor_equipped == TRUE) {
         // grant it xp
 
-        // TODO: loothero stopping point - getting error here on syscall_ptr revoke
         let (head_armor_result) = ILoot.increase_xp(
             item_address, Uint256(unpacked_adventurer.HeadId, 0), xp
         );
