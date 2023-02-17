@@ -5,7 +5,7 @@ from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le
 from starkware.starknet.common.syscalls import get_block_timestamp
 
-from contracts.loot.constants.item import Item
+from contracts.loot.constants.item import Item, NamePrefixLength, NameSuffixLength, ItemSuffixLength
 from contracts.loot.loot.stats.item import ItemStats
 from contracts.settling_game.utils.general import unpack_data
 
@@ -147,11 +147,12 @@ namespace ItemLib {
 
     // @notice Assigns a name prefix to a Loot item using the same schema as the OG Loot Contract
     // @param item: The Loot Item you want to assign a name prefix to
+    // @param rnd: A random number
     // @return updated_item: The provided item with a canoncially sound name prefix added
-    func assign_item_name_prefix{syscall_ptr: felt*, range_check_ptr}(item: Item) -> (
+    func assign_item_name_prefix{syscall_ptr: felt*, range_check_ptr}(item: Item, rnd: felt) -> (
         updated_item: Item
     ) {
-        let (updated_name_prefix) = generate_name_prefix(item.Id);
+        let (updated_name_prefix) = generate_name_prefix(item.Id, rnd);
 
         let updated_item = Item(
             Id=item.Id,
@@ -172,10 +173,11 @@ namespace ItemLib {
         return updated_item;
     }
 
-    // @notice Returns a name prefix for the provided item that is consistent with the Loot Contract
+    // @notice Returns a name prefix for the provided random number that is consistent with the Loot Contract
     // @param item_id: The id of the item to get a name prefix for
-    // TODO #289: Implement this function
-    func generate_name_prefix{syscall_ptr: felt*, range_check_ptr}(item_id: felt) -> (
+    // @param rnd: A random number
+    // @return name_prefix: The name prefix
+    func generate_name_prefix{syscall_ptr: felt*, range_check_ptr}(item_id: felt, rnd: felt) -> (
         name_prefix: felt
     ) {
         // The Loot contract assigns the name prefixes here:
@@ -201,20 +203,37 @@ namespace ItemLib {
         //  Mind, Oblivion, Pandemonium, Rage, Skull, Sorrow, Tempest, Victory, Woe}
         //
         // If a katana is passed into this function, it should return one of the above names and only one of those
+        let (item_slot) = ItemStats.item_slot(item_id);
+        let (loot_slot_length) = ItemStats.loot_slot_length(item_slot);
+        let (loot_item_index) = ItemStats.loot_item_index(item_id);
+        // find a new random number that respects Loot constraints
+        let new_rnd = rnd * loot_slot_length + loot_item_index;
 
-        // I'll leave it to the author of this function to figure out how the Loot contract achieves the above and
-        // how best to mimic this behavior in this function. Good luck adventurer!
-
-        return (1,);
+        let (_, index) = unsigned_div_rem(new_rnd, NamePrefixLength);
+        let (name_prefix) = ItemStats.item_name_prefix(index + 1);
+        // verify if the prefix can be selected
+        // banned prefixes are the ones that will never be selected due to
+        // the greatness >= 19 condition in the original Loot
+        let (is_banned) = ItemStats.loot_banned_name(name_prefix - 1);
+        if (is_banned == 1) {
+            // if banned select the next prefix
+            let new_rnd = new_rnd + 1;
+            let (_, index) = unsigned_div_rem(new_rnd, NamePrefixLength);
+            let (name_prefix) = ItemStats.item_name_prefix(index + 1);
+            return (name_prefix,);
+        } else {
+            return (name_prefix,);
+        }
     }
 
     // @notice Assigns a name suffix to a Loot item using the same schema as the OG Loot Contract
     // @param item: The Loot Item you want to assign a name suffix to
+    // @param rnd: A random number
     // @return updated_item: The provided item with a canoncially sound name suffix added
-    func assign_item_name_suffix{syscall_ptr: felt*, range_check_ptr}(item: Item) -> (
+    func assign_item_name_suffix{syscall_ptr: felt*, range_check_ptr}(item: Item, rnd: felt) -> (
         updated_item: Item
     ) {
-        let (updated_name_suffix) = generate_name_suffix(item.Id);
+        let (updated_name_suffix) = generate_name_suffix(item.id, rnd);
 
         let updated_item = Item(
             Id=item.Id,
@@ -237,9 +256,9 @@ namespace ItemLib {
 
     // @notice Returns a name suffix for the provided item that is consistent with the Loot Contract
     // @param item_id: The id of a Loot
+    // @param rnd: A random number
     // @return name_suffix for the item
-    // TODO #289: Implement this function
-    func generate_name_suffix{syscall_ptr: felt*, range_check_ptr}(item_id: felt) -> (
+    func generate_name_suffix{syscall_ptr: felt*, range_check_ptr}(item_id: felt, rnd: felt) -> (
         name_suffix: felt
     ) {
         // The Loot contract assigns the name suffixes here:
@@ -272,18 +291,35 @@ namespace ItemLib {
         // "Sun",
         // "Moon"
         // ];
+        let (item_slot) = ItemStats.item_slot(item_id);
+        let (loot_slot_length) = ItemStats.loot_slot_length(item_slot);
+        let (loot_item_index) = ItemStats.loot_item_index(item_id);
+        // find a new random number that respects Loot constraints
+        let new_rnd = rnd * loot_slot_length + loot_item_index;
 
-        // I'll leave it to the author of this function to figure out how the Loot contract achieves the above and
-        // how best to mimic this behavior in this function. Good luck adventurer!
-
-        return (1,);
+        let (_, index) = unsigned_div_rem(new_rnd, NameSuffixLength);
+        let (name_suffix) = ItemStats.item_name_suffix(index + 1);
+        // verify if the suffix can be selected
+        // banned suffixes are the ones that will never be selected due to
+        // the greatness > 14 condition in the original Loot
+        let (is_banned) = ItemStats.loot_banned_name(name_suffix - 1);
+        if (is_banned == 1) {
+            // if banned select the next suffix
+            let new_rnd = new_rnd + 1;
+            let (_, index) = unsigned_div_rem(new_rnd, NameSuffixLength);
+            let (name_suffix) = ItemStats.item_name_suffix(index + 1);
+            return (name_suffix,);
+        } else {
+            return (name_suffix,);
+        }
     }
 
     // @notice Assigns a suffix to a Loot item using the same schema as the OG Loot Contract
     // @param item: The Loot Item you want to assign a suffix to
+    // @param rnd: A random number
     // @return updated_item: The provided item with a canoncially sound suffix added
-    func assign_item_suffix{syscall_ptr: felt*, range_check_ptr}(item: Item) -> Item {
-        let (updated_suffix) = generate_item_suffix(item.Id);
+    func assign_item_suffix{syscall_ptr: felt*, range_check_ptr}(item: Item, rnd: felt) -> Item {
+        let (updated_suffix) = generate_item_suffix(item.Id, rnd);
 
         let updated_item = Item(
             Id=item.Id,
@@ -304,11 +340,12 @@ namespace ItemLib {
         return updated_item;
     }
 
-    // @notice Returns a name suffix for the provided item that is consistent with the Loot Contract
+    // @notice Returns an item suffix for the provided item that is consistent with the Loot Contract
     // @param item_id: The id of the item to get a name prefix for
-    // TODO #289: Implement this function
-    func generate_item_suffix{syscall_ptr: felt*, range_check_ptr}(item_id: felt) -> (
-        name_suffix: felt
+    // @param rnd: A random number
+    // @return item_suffix: An item suffix
+    func generate_item_suffix{syscall_ptr: felt*, range_check_ptr}(item_id: felt, rnd: felt) -> (
+        item_suffix: felt
     ) {
         // The Loot contract assigns the item suffix here:
         // https://etherscan.io/token/0xff9c1b15b16263c61d017ee9f65c50e4ae0113d7#code#L1510
@@ -343,9 +380,14 @@ namespace ItemLib {
         //     "of the Twins"
         // ];
 
-        // I'll leave it to the author of this function to figure out how the Loot contract achieves the above and
-        // how best to mimic this behavior in this function. Good luck adventurer!
+        let (item_slot) = ItemStats.item_slot(item_id);
+        let (loot_slot_length) = ItemStats.loot_slot_length(item_slot);
+        let (loot_item_index) = ItemStats.loot_item_index(item_id);
+        // find a new random number that respects Loot constraints
+        let new_rnd = rnd * loot_slot_length + loot_item_index;
 
-        return (1,);
+        let (_, index) = unsigned_div_rem(new_rnd, ItemSuffixLength);
+        let (item_suffix) = ItemStats.item_suffix(index + 1);
+        return (item_suffix,);
     }
 }

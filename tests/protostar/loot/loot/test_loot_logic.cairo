@@ -7,8 +7,7 @@ from tests.protostar.loot.setup.interfaces import IAdventurer, ILoot, ILords, IR
 from tests.protostar.loot.setup.setup import Contracts, deploy_all
 
 @external
-func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() 
-{
+func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
 
     let addresses: Contracts = deploy_all();
@@ -35,11 +34,11 @@ func test_mint{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     ILoot.mint(loot_address, account_1_address);
 
-    let (item) = ILoot.getItemByTokenId(loot_address, Uint256(1,0));
+    let (item) = ILoot.getItemByTokenId(loot_address, Uint256(1, 0));
 
     assert_not_zero(item.Id);
 
-    return ();    
+    return ();
 }
 
 @external
@@ -56,9 +55,9 @@ func test_set_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
 
     ILoot.mint(loot_address, account_1_address);
 
-    ILoot.setItemById(loot_address, Uint256(1,0), 20, 5, 100, 5, 30);
+    ILoot.setItemById(loot_address, Uint256(1, 0), 20, 5, 100, 5, 30);
 
-    let (item) = ILoot.getItemByTokenId(loot_address, Uint256(1,0));
+    let (item) = ILoot.getItemByTokenId(loot_address, Uint256(1, 0));
 
     assert item.Id = 20;
     assert item.Greatness = 5;
@@ -66,9 +65,7 @@ func test_set_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
     assert item.Adventurer = 5;
     assert item.Bag = 30;
 
-    %{
-        stop_prank_loot()
-    %}
+    %{ stop_prank_loot() %}
 
     return ();
 }
@@ -88,13 +85,11 @@ func test_update_adventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
 
     ILoot.mint(loot_address, account_1_address);
 
-    %{
-        stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address)
-    %}
+    %{ stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address) %}
 
-    ILoot.updateAdventurer(loot_address, Uint256(1,0), 2);
+    ILoot.updateAdventurer(loot_address, Uint256(1, 0), 2);
 
-    let (item) = ILoot.getItemByTokenId(loot_address, Uint256(1,0));
+    let (item) = ILoot.getItemByTokenId(loot_address, Uint256(1, 0));
 
     assert item.Adventurer = 2;
 

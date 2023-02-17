@@ -15,6 +15,8 @@ from starkware.cairo.common.registers import get_label_location
 from contracts.loot.constants.item import (
     ItemIds,
     ItemSlot,
+    ItemIndex,
+    SlotItemsLength,
     ItemType,
     ItemMaterial,
     ItemNamePrefixes,
@@ -133,6 +135,138 @@ namespace ItemStats {
         dw ItemSlot.Gauntlets;
         dw ItemSlot.ChainGloves;
         dw ItemSlot.HeavyGloves;
+    }
+
+    func loot_banned_name{syscall_ptr: felt*, range_check_ptr}(index: felt) -> (is_banned: felt) {
+        let (_, r) = unsigned_div_rem(index, 3);
+        if (r == 0) {
+            return (TRUE,);
+        } else {
+            return (FALSE,);
+        }
+    }
+
+    func loot_slot_length{syscall_ptr: felt*, range_check_ptr}(slot: felt) -> (slot_length: felt) {
+        let (label_location) = get_label_location(labels);
+        return ([label_location + slot - 1],);
+
+        labels:
+        dw SlotItemsLength.Weapon;
+        dw SlotItemsLength.Chest;
+        dw SlotItemsLength.Head;
+        dw SlotItemsLength.Waist;
+        dw SlotItemsLength.Foot;
+        dw SlotItemsLength.Hand;
+        dw SlotItemsLength.Neck;
+        dw SlotItemsLength.Ring;
+    }
+
+    func loot_item_index{syscall_ptr: felt*, range_check_ptr}(item_id: felt) -> (item_index: felt) {
+        let (label_location) = get_label_location(labels);
+        return ([label_location + item_id - 1],);
+
+        labels:
+        dw ItemIndex.Pendant;
+        dw ItemIndex.Necklace;
+        dw ItemIndex.Amulet;
+        dw ItemIndex.SilverRing;
+        dw ItemIndex.BronzeRing;
+        dw ItemIndex.PlatinumRing;
+        dw ItemIndex.TitaniumRing;
+        dw ItemIndex.GoldRing;
+        dw ItemIndex.GhostWand;
+        dw ItemIndex.GraveWand;
+        dw ItemIndex.BoneWand;
+        dw ItemIndex.Wand;
+        dw ItemIndex.Grimoire;
+        dw ItemIndex.Chronicle;
+        dw ItemIndex.Tome;
+        dw ItemIndex.Book;
+        dw ItemIndex.DivineRobe;
+        dw ItemIndex.SilkRobe;
+        dw ItemIndex.LinenRobe;
+        dw ItemIndex.Robe;
+        dw ItemIndex.Shirt;
+        dw ItemIndex.Crown;
+        dw ItemIndex.DivineHood;
+        dw ItemIndex.SilkHood;
+        dw ItemIndex.LinenHood;
+        dw ItemIndex.Hood;
+        dw ItemIndex.BrightsilkSash;
+        dw ItemIndex.SilkSash;
+        dw ItemIndex.WoolSash;
+        dw ItemIndex.LinenSash;
+        dw ItemIndex.Sash;
+        dw ItemIndex.DivineSlippers;
+        dw ItemIndex.SilkSlippers;
+        dw ItemIndex.WoolShoes;
+        dw ItemIndex.LinenShoes;
+        dw ItemIndex.Shoes;
+        dw ItemIndex.DivineGloves;
+        dw ItemIndex.SilkGloves;
+        dw ItemIndex.WoolGloves;
+        dw ItemIndex.LinenGloves;
+        dw ItemIndex.Gloves;
+        dw ItemIndex.Katana;
+        dw ItemIndex.Falchion;
+        dw ItemIndex.Scimitar;
+        dw ItemIndex.LongSword;
+        dw ItemIndex.ShortSword;
+        dw ItemIndex.DemonHusk;
+        dw ItemIndex.DragonskinArmor;
+        dw ItemIndex.StuddedLeatherArmor;
+        dw ItemIndex.HardLeatherArmor;
+        dw ItemIndex.LeatherArmor;
+        dw ItemIndex.DemonCrown;
+        dw ItemIndex.DragonsCrown;
+        dw ItemIndex.WarCap;
+        dw ItemIndex.LeatherCap;
+        dw ItemIndex.Cap;
+        dw ItemIndex.DemonhideBelt;
+        dw ItemIndex.DragonskinBelt;
+        dw ItemIndex.StuddedLeatherBelt;
+        dw ItemIndex.HardLeatherBelt;
+        dw ItemIndex.LeatherBelt;
+        dw ItemIndex.DemonhideBoots;
+        dw ItemIndex.DragonskinBoots;
+        dw ItemIndex.StuddedLeatherBoots;
+        dw ItemIndex.HardLeatherBoots;
+        dw ItemIndex.LeatherBoots;
+        dw ItemIndex.DemonsHands;
+        dw ItemIndex.DragonskinGloves;
+        dw ItemIndex.StuddedLeatherGloves;
+        dw ItemIndex.HardLeatherGloves;
+        dw ItemIndex.LeatherGloves;
+        dw ItemIndex.Warhammer;
+        dw ItemIndex.Quarterstaff;
+        dw ItemIndex.Maul;
+        dw ItemIndex.Mace;
+        dw ItemIndex.Club;
+        dw ItemIndex.HolyChestplate;
+        dw ItemIndex.OrnateChestplate;
+        dw ItemIndex.PlateMail;
+        dw ItemIndex.ChainMail;
+        dw ItemIndex.RingMail;
+        dw ItemIndex.AncientHelm;
+        dw ItemIndex.OrnateHelm;
+        dw ItemIndex.GreatHelm;
+        dw ItemIndex.FullHelm;
+        dw ItemIndex.Helm;
+        dw ItemIndex.OrnateBelt;
+        dw ItemIndex.WarBelt;
+        dw ItemIndex.PlatedBelt;
+        dw ItemIndex.MeshBelt;
+        dw ItemIndex.HeavyBelt;
+        dw ItemIndex.HolyGreaves;
+        dw ItemIndex.OrnateGreaves;
+        dw ItemIndex.Greaves;
+        dw ItemIndex.ChainBoots;
+        dw ItemIndex.HeavyBoots;
+        dw ItemIndex.HolyGauntlets;
+        dw ItemIndex.OrnateGauntlets;
+        dw ItemIndex.Gauntlets;
+        dw ItemIndex.ChainGloves;
+        dw ItemIndex.HeavyGloves;
     }
 
     func item_type{syscall_ptr: felt*, range_check_ptr}(item_id: felt) -> (type: felt) {

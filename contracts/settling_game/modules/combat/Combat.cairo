@@ -272,7 +272,33 @@ func _build_army{
     return ();
 }
 
-// @notice Commence the attack
+// @notice A general combat function for armies that can be called by approved modules
+// @dev The external module sets the extra conditions for the combat (in addition to some fixed constraints)
+// @param attacking_realm_id: Staked Realm id (S_Realm)
+// @param defending_realm_id: Staked Realm id (S_Realm)
+// @return: combat_outcome: Which side won - either the attacker (CCombat.COMBAT_OUTCOME_ATTACKER_WINS)
+//                          or the defender (CCombat.COMBAT_OUTCOME_DEFENDER_WINS)
+@external
+func initiate_combat_approved_module{
+    range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, bitwise_ptr: BitwiseBuiltin*
+}(
+    attacking_army_id: felt,
+    attacking_realm_id: Uint256,
+    defending_army_id: felt,
+    defending_realm_id: Uint256,
+) -> (combat_outcome: felt) {
+    alloc_locals;
+
+    Module.only_approved();
+
+    let (combat_outcome) = combat(
+        attacking_army_id, attacking_realm_id, defending_army_id, defending_realm_id
+    );
+
+    return (combat_outcome,);
+}
+
+// @notice Commence the attack on a Realm
 // @param attacking_realm_id: Staked Realm id (S_Realm)
 // @param defending_realm_id: Staked Realm id (S_Realm)
 // @return: combat_outcome: Which side won - either the attacker (CCombat.COMBAT_OUTCOME_ATTACKER_WINS)
@@ -290,14 +316,74 @@ func initiate_combat{
     alloc_locals;
 
     with_attr error_message("Combat: Cannot initiate combat") {
-        Module.ERC721_owner_check(attacking_realm_id, ExternalContractIds.S_Realms);
         let (can_attack) = Realm_can_be_attacked(
             attacking_army_id, attacking_realm_id, defending_army_id, defending_realm_id
         );
         assert can_attack = TRUE;
     }
 
-    // Check Army is at actual Realm
+    // Should only be used for raiding a Realm
+    with_attr error_message("Combat: can only raid defending_army_id 0") {
+        assert defending_army_id = 0;
+    }
+
+    let (combat_outcome) = combat(
+        attacking_army_id, attacking_realm_id, defending_army_id, defending_realm_id
+    );
+
+    // pillaging only if attacker wins
+    if (combat_outcome == CCombat.COMBAT_OUTCOME_ATTACKER_WINS) {
+        let (caller) = get_caller_address();
+
+        let (labor_address) = Module.get_module_address(ModuleIds.Labor);
+        let (relic_address) = Module.get_module_address(ModuleIds.Relics);
+
+        ILabor.pillage(labor_address, defending_realm_id, caller);
+
+        if (capture_relic == TRUE) {
+            IRelics.set_relic_holder(relic_address, attacking_realm_id, defending_realm_id);
+            tempvar syscall_ptr = syscall_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+            tempvar pedersen_ptr = pedersen_ptr;
+        } else {
+            tempvar syscall_ptr = syscall_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+            tempvar pedersen_ptr = pedersen_ptr;
+        }
+
+        tempvar syscall_ptr = syscall_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar pedersen_ptr = pedersen_ptr;
+    } else {
+        tempvar syscall_ptr = syscall_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar pedersen_ptr = pedersen_ptr;
+    }
+
+    return (combat_outcome,);
+}
+
+// -----------------------------------
+// Internal
+// -----------------------------------
+
+// @notice General combat logic for any combat situation between armies
+// @param attacking_realm_id: Staked Realm id (S_Realm)
+// @param defending_realm_id: Staked Realm id (S_Realm)
+// @return: combat_outcome: Which side won - either the attacker (CCombat.COMBAT_OUTCOME_ATTACKER_WINS)
+//                          or the defender (CCombat.COMBAT_OUTCOME_DEFENDER_WINS)
+func combat{
+    range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, bitwise_ptr: BitwiseBuiltin*
+}(
+    attacking_army_id: felt,
+    attacking_realm_id: Uint256,
+    defending_army_id: felt,
+    defending_realm_id: Uint256,
+) -> (combat_outcome: felt) {
+    alloc_locals;
+    Module.ERC721_owner_check(attacking_realm_id, ExternalContractIds.S_Realms);
+
+    // Check attacking Army is on same position as defending Army
     let (travel_module) = Module.get_module_address(ModuleIds.Travel);
     ITravel.assert_traveller_is_at_location(
         travel_module,
@@ -372,47 +458,21 @@ func initiate_combat{
         luck, attacker, defender
     );
 
-    // pillaging only if attacker wins
+    let (ending_attacking_army_packed: felt) = Combat.pack_army(ending_attacking_army);
+    let (ending_defending_army_packed: felt) = Combat.pack_army(ending_defending_army);
+
     let (now) = get_block_timestamp();
+
     if (combat_outcome == CCombat.COMBAT_OUTCOME_ATTACKER_WINS) {
-        let (caller) = get_caller_address();
-
-        let (labor_address) = Module.get_module_address(ModuleIds.Labor);
-        let (relic_address) = Module.get_module_address(ModuleIds.Relics);
-
-        ILabor.pillage(labor_address, defending_realm_id, caller);
-
-        if (capture_relic == TRUE) {
-            IRelics.set_relic_holder(relic_address, attacking_realm_id, defending_realm_id);
-            tempvar syscall_ptr = syscall_ptr;
-            tempvar range_check_ptr = range_check_ptr;
-            tempvar pedersen_ptr = pedersen_ptr;
-        } else {
-            tempvar syscall_ptr = syscall_ptr;
-            tempvar range_check_ptr = range_check_ptr;
-            tempvar pedersen_ptr = pedersen_ptr;
-        }
-
-        tempvar syscall_ptr = syscall_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar pedersen_ptr = pedersen_ptr;
-
         tempvar attacking_xp = CCombat.ATTACKING_ARMY_XP;
         tempvar defending_xp = CCombat.DEFENDING_ARMY_XP;
     } else {
-        tempvar syscall_ptr = syscall_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar pedersen_ptr = pedersen_ptr;
-
         tempvar attacking_xp = CCombat.DEFENDING_ARMY_XP;
         tempvar defending_xp = CCombat.ATTACKING_ARMY_XP;
     }
 
     tempvar attacking_xp = attacking_xp;
     tempvar defending_xp = defending_xp;
-
-    let (ending_attacking_army_packed: felt) = Combat.pack_army(ending_attacking_army);
-    let (ending_defending_army_packed: felt) = Combat.pack_army(ending_defending_army);
 
     // store new values with added XP
     set_army_data_and_emit(
@@ -452,10 +512,6 @@ func initiate_combat{
 
     return (combat_outcome,);
 }
-
-// -----------------------------------
-// Internal
-// -----------------------------------
 
 // @notice Update army in Realm
 // @param army_id: Army ID
