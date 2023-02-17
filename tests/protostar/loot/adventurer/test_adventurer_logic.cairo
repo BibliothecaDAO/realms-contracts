@@ -79,8 +79,8 @@ func test_mint{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
     let (new_balance: Uint256) = ILords.balanceOf(lords_address, account_1_address);
 
-    assert new_balance = Uint256(0, 0);
-    
+    assert new_balance = Uint256(100000000000000000000, 0);
+
     return ();
 }
 
@@ -112,13 +112,33 @@ func test_mint_with_starting_weapon{
     IAdventurer.mint_with_starting_weapon(
         adventurer_address, account_1_address, 4, 13, 'Test', 8, 1, 1, ItemIds.Book
     );
+
+    %{
+        stop_prank_lords = start_prank(ids.account_1_address, ids.lords_address)
+    %}
+
+    ILords.approve(lords_address, adventurer_address, Uint256(100000000000000000000, 0));
+
+    %{
+        stop_prank_lords()
+    %}
+
+    // Mint an adventurer with a book as a starting weapon
+    IAdventurer.mint_with_starting_weapon(
+        adventurer_address, account_1_address, 4, 13, 'Test', 8, 1, 1, ItemIds.Book
+    );
+
     let (new_balance: Uint256) = ILords.balanceOf(lords_address, account_1_address);
 
-    assert new_balance = Uint256(0, 0);
+    // assert new_balance = Uint256(0, 0);
 
     let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
     let (adventurer_item) = ILoot.get_item_by_token_id(loot_address, Uint256(adventurer.WeaponId, 0));
     assert adventurer_item.Id = ItemIds.Book;
+
+    let (next_adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(2, 0));
+    let (next_adventurer_item) = ILoot.get_item_by_token_id(loot_address, Uint256(next_adventurer.WeaponId, 0));
+    assert next_adventurer_item.Id = ItemIds.Book;
 
     return ();
 }

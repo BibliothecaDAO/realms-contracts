@@ -204,6 +204,10 @@ func test_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     let loot_token_id = Uint256(1,0);
     ILoot.set_item_by_id(loot_address, loot_token_id, ItemIds.Katana, 20, 0, 0, 0);
 
+    %{
+        stop_prank_loot()
+    %}
+
     let beast_token_id = Uint256(1,0);
     IBeast.attack(beast_address, beast_token_id);
 

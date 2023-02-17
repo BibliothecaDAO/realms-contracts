@@ -133,7 +133,7 @@ func deploy_all{
 
     IRealms.initializer(contracts.realms, 1, 1, contracts.account_1);
     ILords.grant_role(contracts.lords, 1835626100, contracts.account_1);
-    ILords.mint(contracts.lords, contracts.account_1, Uint256(100000000000000000000, 0));
+    ILords.mint(contracts.lords, contracts.account_1, Uint256(200000000000000000000, 0));
     IController.set_address_for_external_contract(contracts.controller, ExternalContractIds.Realms, contracts.realms);
     IController.set_address_for_external_contract(contracts.controller, ExternalContractIds.Lords, contracts.lords);
 
