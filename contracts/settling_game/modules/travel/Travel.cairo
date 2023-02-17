@@ -60,7 +60,7 @@ func TravelAction_2(
 // @param traveller_nested_id: NestedID
 @storage_var
 func cannot_travel(
-    traveller_contract_id: felt, traveller_token_id: felt, traveller_nested_id: felt
+    traveller_contract_id: felt, traveller_token_id: Uint256, traveller_nested_id: felt
 ) -> (cannot_travel: felt) {
 }
 
@@ -119,7 +119,7 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 // @param traveller_nested_id: NestedID
 @external
 func allow_travel{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    traveller_contract_id: felt, traveller_token_id: felt, traveller_nested_id: felt
+    traveller_contract_id: felt, traveller_token_id: Uint256, traveller_nested_id: felt
 ) -> () {
     Module.only_approved();
     cannot_travel.write(traveller_contract_id, traveller_token_id, traveller_nested_id, FALSE);
@@ -133,7 +133,7 @@ func allow_travel{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
 // @param traveller_nested_id: NestedID
 @external
 func forbid_travel{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    traveller_contract_id: felt, traveller_token_id: felt, traveller_nested_id: felt
+    traveller_contract_id: felt, traveller_token_id: Uint256, traveller_nested_id: felt
 ) -> () {
     Module.only_approved();
     cannot_travel.write(traveller_contract_id, traveller_token_id, traveller_nested_id, TRUE);
@@ -290,14 +290,14 @@ func get_travel_distance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
 
 // @notice Assert that an item can travel (army, adventurer), by default all items can travel
 func assert_can_travel{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    traveller_contract_id: felt, traveller_token_id: felt, traveller_nested_id: felt
+    traveller_contract_id: felt, traveller_token_id: Uint256, traveller_nested_id: felt
 ) -> () {
     with_attr error_message("Travel: cannot move this item") {
         let (forbid_to_travel) = cannot_travel.read(
             traveller_contract_id, traveller_token_id, traveller_nested_id
         );
 
-        assert forbid_to_travel = 0;
+        assert forbid_to_travel = FALSE;
     }
     return ();
 }
