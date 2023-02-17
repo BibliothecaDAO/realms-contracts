@@ -1,33 +1,13 @@
 import asyncclick as click
 from realms_cli.caller_invoker import wrapped_send, wrapped_proxy_call
 from realms_cli.config import Config
-from realms_cli.utils import print_over_colums, uint, felt_to_str, convert_unix_time
-from realms_cli.loot.getters import _get_loot, print_loot, print_loot_bid, print_loot_and_bid
-
+from realms_cli.utils import uint
+from realms_cli.loot.getters import _get_loot, print_loot, print_loot_bid, print_loot_and_bid,  _get_adventurer, _get_beast, print_adventurer
+from realms_cli.loot.constants import BEASTS
 
 @click.group()
 def loot():
     pass
-
-@loot.command()
-@click.option("--network", default="goerli")
-async def mint_loot(network):
-    """
-    Mint a Random Loot Item
-    """
-    config = Config(nile_network=network)
-
-    print('🎲 Minting random item ...')
-
-    await wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_Loot",
-        function="mint",
-        arguments=[config.ADMIN_ADDRESS]
-    )
-
-    print('🎲 Minted random item ✅')
 
 
 @loot.command()
@@ -46,44 +26,6 @@ async def get(loot_token_id, network):
     """
 
     await _get_loot(loot_token_id, network)
-
-
-@loot.command()
-@click.option(
-    "--loot_token_id",
-    is_flag=False,
-    metavar="<columns>",
-    type=click.STRING,
-    help="loot_token_id",
-    prompt=True,
-)
-@click.option("--network", default="goerli")
-@click.option('--item', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='item id', prompt=True)
-@click.option('--greatness', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='greatness', prompt=True)
-@click.option('--xp', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='xp', prompt=True)
-@click.option('--adventurer', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='adventurer', prompt=True)
-@click.option('--bag', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='bag', prompt=True)
-async def set_loot(loot_token_id, item, greatness, xp, adventurer, bag, network):
-    """
-    Set Loot Item metadata
-    """
-    config = Config(nile_network=network)
-
-    print('🗡 Setting item by id ...')
-
-    await wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_Loot",
-        function="set_item_by_id",
-        arguments=[*uint(loot_token_id), item, greatness, xp, adventurer, bag]
-    )
-
 
 @loot.command()
 @click.option("--network", default="goerli")
@@ -240,3 +182,340 @@ async def bag(network):
 
     print_loot(all_items)
 
+
+@loot.command()
+@click.option("--network", default="goerli")
+@click.option(
+    "--adventurer_token_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="adventurer id",
+    prompt=True,
+)
+async def health(network, adventurer_token_id):
+    """
+    Purchase health for gold
+    """
+    config = Config(nile_network=network)
+
+    print("🧪 Purchasing health ...")
+
+    await wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_Adventurer",
+        function="purchase_health",
+        arguments=[*uint(adventurer_token_id)],
+    )
+
+    print("🧪 Purchased health ✅")
+
+@loot.command()
+@click.option("--network", default="goerli")
+@click.option(
+    "--adventurer",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="adventurer id",
+    prompt=True,
+)
+@click.option(
+    "--stat",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="stat id",
+    prompt=True,
+)
+async def upgrade(network, adventurer_token_id, stat_id):
+    """
+    Upgrade adventurer stat
+    """
+    config = Config(nile_network=network)
+
+    print("💪 Upgrading stat ...")
+
+    await wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_Adventurer",
+        function="upgrade_stat",
+        arguments=[*uint(adventurer_token_id), stat_id]
+    )
+
+    print("💪 Upgraded stat ✅")
+
+
+@loot.command()
+@click.option("--network", default="goerli")
+@click.option(
+    "--adventurer_token_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="adventurer id",
+    prompt=True,
+)
+async def explore(network, adventurer_token_id):
+    """
+    Explore with adventurer
+    """
+    config = Config(nile_network=network)
+
+    print("👣 Exploring ...")
+
+    await wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_Adventurer",
+        function="explore",
+        arguments=[*uint(adventurer_token_id)],
+    )
+
+    print("👣 Explored ✅")
+
+    out = await _get_adventurer(network, adventurer_token_id)
+
+    if out[23] == "1":
+        print("🧌 You have discovered a beast")
+        await _get_beast(out[26], network)
+    else:
+        print("🤔 You discovered nothing")
+
+
+@loot.command()
+@click.option(
+    "--adventurer_token_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="adventurer id",
+    prompt=True,
+)
+@click.option("--network", default="goerli")
+async def adventurer(adventurer_token_id, network):
+    """
+    Get Adventurer metadata
+    """
+
+    await _get_adventurer(network, adventurer_token_id)
+
+
+@click.command()
+@click.option("--network", default="goerli")
+@click.option(
+    "--adventurer_token_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="adventurer id",
+    prompt=True,
+)
+@click.option(
+    "--item",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="item id",
+    prompt=True,
+)
+async def equip(network, adventurer_token_id, item):
+    """
+    Equip loot item
+    """
+    config = Config(nile_network=network)
+
+    print("🫴 Equiping item ...")
+
+    await wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_Adventurer",
+        function="equip_item",
+        arguments=[*uint(adventurer_token_id), *uint(item)],
+    )
+
+    print("🫴 Equiped item ✅")
+    await _get_adventurer(network, adventurer_token_id)
+
+
+@click.command()
+@click.option("--network", default="goerli")
+@click.option(
+    "--adventurer_token_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="adventurer id",
+    prompt=True,
+)
+@click.option(
+    "--item",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="item id",
+    prompt=True,
+)
+async def unequip(network, adventurer_token_id, item):
+    """
+    Unequip loot item
+    """
+    config = Config(nile_network=network)
+
+    print("🫳 Unequiping item ...")
+
+    await wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_Adventurer",
+        function="unequip_item",
+        arguments=[*uint(adventurer_token_id), *uint(item)],
+    )
+
+    print("🫳 Unequiped item ...")
+    await _get_adventurer(network, adventurer_token_id)    
+
+
+@click.command()
+@click.option("--network", default="goerli")
+async def all_adventurers(network):
+    """
+    Get all your Adventurers you own.
+    """
+    config = Config(nile_network=network)
+
+    out = await wrapped_proxy_call(
+        network=config.nile_network,
+        contract_alias="proxy_Adventurer",
+        abi="artifacts/abis/Adventurer.json",
+        function="balance_of",
+        arguments=[config.USER_ADDRESS],
+    )
+
+    out = out.split(" ")
+
+    all_items = []
+
+    for i in range(0, int(out[0])):
+        item = await wrapped_proxy_call(
+            network=config.nile_network,
+            contract_alias="proxy_Adventurer",
+            abi="artifacts/abis/Adventurer.json",
+            function="token_of_owner_by_index",
+            arguments=[config.USER_ADDRESS, *uint(i)],
+        )
+
+        id = item.split(" ")
+
+        out = await wrapped_proxy_call(
+            network=config.nile_network,
+            contract_alias="proxy_Adventurer",
+            abi="artifacts/abis/Adventurer.json",
+            function="get_adventurer_by_id",
+            arguments=[*uint(id[0])],
+        )
+
+        all_items.append(out)
+
+    print_adventurer(all_items)    
+    
+@click.command()
+@click.option(
+    "--beast_token_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="beast id",
+    prompt=True,
+)
+@click.option("--network", default="goerli")
+async def beast(beast_token_id, network):
+    """
+    Get Beast metadata
+    """
+    await _get_beast(beast_token_id, network)    
+
+@click.command()
+@click.option(
+    "--beast_token_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="beast id",
+    prompt=True,
+)
+@click.option("--network", default="goerli")
+async def attack(beast_token_id, network):
+    """
+    Attack beast
+    """
+    config = Config(nile_network=network)
+
+    print("🧌 Attacking beast ...")
+
+    await wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_Beast",
+        function="attack",
+        arguments=[*uint(beast_token_id)],
+    )
+
+    print("🧌 Attacked beast ✅")
+
+    beast_out = await _get_beast(beast_token_id, network)
+
+    adventurer_out = await _get_adventurer(network, beast_out[7])
+
+    if adventurer_out[4] == "0":
+        print(f"🪦 You have been killed")
+    else:
+        print(
+            f"🤕 You didn't kill and were counterattacked, you have {adventurer_out[7]} health remaining"
+        )
+
+    if beast_out[6] == "0":
+        print(f"💀 You have killed the {BEASTS[str(int(beast_out[0]))]} 🎉")
+    else:
+        print(
+            f"👹 You hurt the {BEASTS[str(int(beast_out[0]))]}, health is now {beast_out[6]}"
+        )
+
+
+@click.command()
+@click.option(
+    "--beast_token_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="beast id",
+    prompt=True,
+)
+@click.option("--network", default="goerli")
+async def flee(beast_token_id, network):
+    """
+    Flee from beast
+    """
+    config = Config(nile_network=network)
+
+    print("🏃‍♂️ Fleeing from beast ...")
+
+    await wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_Beast",
+        function="flee",
+        arguments=[*uint(beast_token_id)],
+    )
+
+    beast_out = await _get_beast(beast_token_id, network)
+
+    adventurer_out = await _get_adventurer(network, beast_out[7])
+
+    if adventurer_out[23] == "0":
+        print(f"🏃‍♂️ You successfully fled from beast ✅")
+    if adventurer_out[23] == "1":
+        print(f"😫 You have been ambushed! Your health is now {adventurer_out[4]}")

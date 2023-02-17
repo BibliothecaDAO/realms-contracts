@@ -198,8 +198,3 @@ cairo-nile = "^0.13.0"
 "travel" = "realms_cli.player.travel.travel"
 "get_travel" = "realms_cli.player.travel.get_travel"
 "travel_time" = "realms_cli.player.travel.travel_time"
-
-
-#----- TO DEPRECATE
-"mint_loot" = "realms_cli.loot.loot.mint_loot"
-"set_loot" = "realms_cli.loot.loot.set_loot"

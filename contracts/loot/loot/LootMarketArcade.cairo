@@ -255,18 +255,12 @@ func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
     let (rnd) = get_random_number();
     let (new_item: Item) = ItemLib.generate_random_item(rnd);
 
-    let (next_id) = counter.read();
+    let (id) = _mint(to, new_item, adventurer_token_id);
 
-    item.write(Uint256(next_id + 1, 0), new_item);
-
-    ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
-
-    item_adventurer_owner.write(Uint256(next_id + 1, 0), adventurer_token_id, TRUE);
-
-    counter.write(next_id + 1);
     return ();
 }
 
+@external
 func mint_from_mart{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
     to: felt, item_id: felt, adventurer_token_id: Uint256
 ) {
@@ -274,18 +268,46 @@ func mint_from_mart{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_
 
     let (new_item: Item) = ItemLib.generate_item_by_id(item_id);
 
+    let (id) = _mint(to, new_item, adventurer_token_id);
+
+    return ();
+}
+
+// @notice Mint adventurer starting weapon
+// @param to: Address to mint the item to
+// @param weapon_id: Weapon ID to mint
+// @return item_token_id: The token id of the minted item
+@external
+func mint_starter_weapon{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    to: felt, weapon_id: felt, adventurer_token_id: Uint256
+) -> (item_token_id: Uint256) {
+    alloc_locals;
+
+    // TODO: Assert the weapon_id is book, wand, club, or short sword
+
+    // fetch new item with random Id
+    let (new_item: Item) = ItemLib.generate_starter_weapon(weapon_id);
+
+    return _mint(to, new_item, adventurer_token_id);
+}
+
+func _mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    to: felt, _item: Item, adventurer_token_id: Uint256
+) -> (item_token_id: Uint256) {
+    alloc_locals;
+
     let (next_id) = counter.read();
 
-    item.write(Uint256(next_id + 1, 0), new_item);
+    item.write(Uint256(next_id + 1, 0), _item);
 
     ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
 
     item_adventurer_owner.write(Uint256(next_id + 1, 0), adventurer_token_id, TRUE);
 
     counter.write(next_id + 1);
-
-    return ();
+    return (Uint256(next_id + 1, 0),);
 }
+
 
 // @notice Update item adventurer
 // @param tokenId: Id of loot item
@@ -316,20 +338,6 @@ func update_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     let updated_item = ItemLib.update_xp(item_, xp);
 
     item.write(tokenId, updated_item);
-    return ();
-}
-
-// @notice Set loot item data by id
-// @param tokenId: Id of loot item
-// @param item_: Data of loot item
-@external
-func set_item_by_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    tokenId: Uint256, item_id: felt, greatness: felt, xp: felt, adventurer: felt, bag_id: felt
-) {
-    alloc_locals;
-    Ownable.assert_only_owner();
-    let (item_) = ItemLib.set_item(item_id, greatness, xp, adventurer, bag_id);
-    item.write(tokenId, item_);
     return ();
 }
 
@@ -371,33 +379,7 @@ func get_item_by_token_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
 // Market
 // --------------------
 
-// @notice Mint adventurer starting weapon
-// @param to: Address to mint the item to
-// @param weapon_id: Weapon ID to mint
-// @return item_token_id: The token id of the minted item
-@external
-func mint_starter_weapon{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    to: felt, weapon_id: felt, adventurer_token_id: Uint256
-) -> (item_token_id: Uint256) {
-    alloc_locals;
 
-    // TODO: Assert the weapon_id is book, wand, club, or short sword
-
-    // fetch new item with random Id
-    let (new_item: Item) = ItemLib.generate_starter_weapon(weapon_id);
-
-    let (next_id) = counter.read();
-
-    item.write(Uint256(next_id + 1, 0), new_item);
-
-    ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
-
-    item_adventurer_owner.write(Uint256(next_id + 1, 0), adventurer_token_id, TRUE);
-
-    counter.write(next_id + 1);
-
-    return (Uint256(next_id + 1, 0),);
-}
 
 // This uses a Seed which is created every 12hrs. From this seed X number of items can be purchased
 // after they have been bidded on.

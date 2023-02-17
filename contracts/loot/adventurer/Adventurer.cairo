@@ -201,21 +201,18 @@ func mint_with_starting_weapon{
 ) -> (adventurer_token_id: Uint256, item_token_id: Uint256) {
     alloc_locals;
 
-
     // Mint new adventurer
-    let (adventurer_token_id) = mint(to, race, home_realm, name, order, image_hash_1, image_hash_2);
-
-    let (loot_address) = Module.get_module_address(ModuleIds.Loot);
-    let (beast_address) = Module.get_module_address(ModuleIds.Beast);
+    let (adventurer_token_id) = mint(to, race, home_realm, name, order, image_hash_1, image_hash_2); 
 
     // Mint starting weapon for the adventurer (book, wand, club, short sword)
-
+    let (loot_address) = Module.get_module_address(ModuleIds.Loot);
     let (item_token_id) = ILoot.mint_starter_weapon(loot_address, to, weapon_id, adventurer_token_id);
 
     // Equip the selected item to the adventurer
     equip_item(adventurer_token_id, item_token_id);
 
     // add STARTING_GOLD to balance
+    let (beast_address) = Module.get_module_address(ModuleIds.Beast); 
     IBeast.add_to_balance(beast_address, adventurer_token_id, STARTING_GOLD);
 
     // Return adventurer token id and item token id
