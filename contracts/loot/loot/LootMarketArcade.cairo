@@ -13,7 +13,7 @@ from openzeppelin.token.erc721.library import ERC721
 from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
 from openzeppelin.upgrades.library import Proxy
 from starkware.cairo.common.bool import TRUE, FALSE
-from contracts.loot.constants.item import Item
+from contracts.loot.constants.item import Item, ItemIds
 from contracts.loot.interfaces.imodules import IModuleController
 from contracts.loot.loot.library import ItemLib
 from contracts.loot.loot.metadata import LootUri
@@ -193,7 +193,8 @@ func setApprovalForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 func transferFrom{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
     from_: felt, to: felt, tokenId: Uint256
 ) {
-    // TODO: can only be called by ItemContract/AdventurerContract/BeastContract
+    // can only be called by ItemContract/AdventurerContract/BeastContract
+    Module.only_approved();
     ERC721Enumerable.transfer_from(from_, to, tokenId);
     return ();
 }
@@ -202,15 +203,16 @@ func transferFrom{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_pt
 func safeTransferFrom{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
     from_: felt, to: felt, tokenId: Uint256, data_len: felt, data: felt*
 ) {
-    // TODO: can only be called by ItemContract/AdventurerContract/BeastContract
+    // can only be called by ItemContract/AdventurerContract/BeastContract
+    Module.only_approved();
     ERC721Enumerable.safe_transfer_from(from_, to, tokenId, data_len, data);
     return ();
 }
 
 @external
 func burn{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(tokenId: Uint256) {
-    // TODO: can only be called by ItemContract/AdventurerContract/BeastContract
-    ERC721.assert_only_token_owner(tokenId);
+    // can only be called by ItemContract/AdventurerContract/BeastContract
+    Module.only_approved();
     ERC721Enumerable._burn(tokenId);
     return ();
 }
@@ -283,7 +285,7 @@ func mint_starter_weapon{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_c
 ) -> (item_token_id: Uint256) {
     alloc_locals;
 
-    // TODO: Assert the weapon_id is book, wand, club, or short sword
+    assert_starter_weapon(weapon_id);
 
     // fetch new item with random Id
     let (new_item: Item) = ItemLib.generate_starter_weapon(weapon_id);
@@ -359,6 +361,30 @@ func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBu
     return (rnd,);  // values from 1 to 101 inclusive
 }
 
+// @notice Asserts that the weapon is a starter weapon
+// @param weapon_id: Id of loot weapon
+func assert_starter_weapon{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
+    weapon_id: felt
+) {
+    // book, wand, club, or short sword
+    if (weapon_id == ItemIds.Book) {
+        return ();
+    }
+    if (weapon_id == ItemIds.Wand) {
+        return ();
+    }
+    if (weapon_id == ItemIds.Club) {
+        return ();
+    }
+    if (weapon_id == ItemIds.ShortSword) {
+        return ();
+    }
+    with_attr error_message("Loot: Item is not a starter weapon") {
+        assert TRUE = FALSE;
+    }
+    return ();
+}
+
 // --------------------
 // Getters
 // --------------------
@@ -378,7 +404,6 @@ func get_item_by_token_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
 // --------------------
 // Market
 // --------------------
-
 
 
 // This uses a Seed which is created every 12hrs. From this seed X number of items can be purchased
@@ -496,6 +521,8 @@ func mint_daily_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     new_items.write(_new_items);
 
     // TODO: send 2 gold to the adventurer whoever calls this
+    // let (caller) = get_caller_address();
+    // IBeast.add_to_balance(beast_address, Uint256(2, 0), 2);
 
     return ();
 }

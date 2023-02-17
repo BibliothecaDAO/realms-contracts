@@ -76,7 +76,8 @@ class Config:
         self.Relics_alias = "proxy_" + ContractAlias.Relics
         self.GoblinTown_alias = "proxy_" + ContractAlias.GoblinTown
 
-        self.Lords_ERC20_Mintable_alias = "proxy_" + ContractAlias.Lords_ERC20_Mintable
+        # @distracteddev to change back
+        self.Lords_ERC20_Mintable_alias = ContractAlias.Lords_ERC20_Mintable
         self.Realms_ERC721_Mintable_alias = "proxy_" + \
             ContractAlias.Realms_ERC721_Mintable
         self.S_Realms_ERC721_Mintable_alias = "proxy_" + \

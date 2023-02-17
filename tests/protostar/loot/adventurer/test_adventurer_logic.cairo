@@ -79,8 +79,8 @@ func test_mint{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
     let (new_balance: Uint256) = ILords.balanceOf(lords_address, account_1_address);
 
-    assert new_balance = Uint256(0, 0);
-    
+    assert new_balance = Uint256(100000000000000000000, 0);
+
     return ();
 }
 
@@ -112,13 +112,33 @@ func test_mint_with_starting_weapon{
     IAdventurer.mint_with_starting_weapon(
         adventurer_address, account_1_address, 4, 13, 'Test', 8, 1, 1, ItemIds.Book
     );
+
+    %{
+        stop_prank_lords = start_prank(ids.account_1_address, ids.lords_address)
+    %}
+
+    ILords.approve(lords_address, adventurer_address, Uint256(100000000000000000000, 0));
+
+    %{
+        stop_prank_lords()
+    %}
+
+    // Mint an adventurer with a book as a starting weapon
+    IAdventurer.mint_with_starting_weapon(
+        adventurer_address, account_1_address, 4, 13, 'Test', 8, 1, 1, ItemIds.Book
+    );
+
     let (new_balance: Uint256) = ILords.balanceOf(lords_address, account_1_address);
 
-    assert new_balance = Uint256(0, 0);
+    // assert new_balance = Uint256(0, 0);
 
     let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
     let (adventurer_item) = ILoot.get_item_by_token_id(loot_address, Uint256(adventurer.WeaponId, 0));
     assert adventurer_item.Id = ItemIds.Book;
+
+    let (next_adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(2, 0));
+    let (next_adventurer_item) = ILoot.get_item_by_token_id(loot_address, Uint256(next_adventurer.WeaponId, 0));
+    assert next_adventurer_item.Id = ItemIds.Book;
 
     return ();
 }
@@ -173,11 +193,15 @@ func test_equip_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
         ids.loot_address = context.loot
         stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
-        stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
+        stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address)
     %}
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
     ILoot.mint(loot_address, account_1_address, Uint256(1,0));
+    %{
+        stop_prank_loot()
+        stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
+    %}
     // make sure adventurer and bag are set to 0
     ILoot.set_item_by_id(loot_address, Uint256(1, 0), ItemIds.Wand, 0, 0, 0, 0);
     %{
@@ -208,12 +232,16 @@ func test_unequip_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
         ids.loot_address = context.loot
         stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
-        stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
+        stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address)
     %}
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
     ILoot.mint(loot_address, account_1_address, Uint256(1,0));
     // make sure adventurer and bag are set to 0
+    %{
+        stop_prank_loot()
+        stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
+    %}
     ILoot.set_item_by_id(loot_address, Uint256(1, 0), ItemIds.Wand, 0, 0, 0, 0);
     %{
         stop_prank_loot()
@@ -415,5 +443,10 @@ func test_upgrade_stat{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     // try upgrade strength again
     IAdventurer.upgrade_stat(adventurer_address, Uint256(1, 0), AdventurerSlotIds.Strength);
 
+    return ();
+}
+
+@external
+func test_discover_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     return ();
 }

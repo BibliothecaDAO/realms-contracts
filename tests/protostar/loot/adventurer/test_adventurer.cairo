@@ -285,3 +285,31 @@ func test_calculate_gold_discovery{syscall_ptr: felt*, pedersen_ptr: HashBuiltin
 
     return ();
 }
+
+// @notice Tests health discovery calculation
+// Health calculation is:
+// 10 + (5 * (rnd % 4))
+@external
+func test_calculate_health_discovery{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+
+    let (health_discovery) = AdventurerLib.calculate_health_discovery(0);
+
+    assert health_discovery = 10;
+
+    return ();
+}
+
+// @notice Tests xp discovery calculation
+// Xp calculation is:
+// 10 + (5 * (rnd % 4))
+@external
+func test_calculate_xp_discovery{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+
+    let (xp_discovery) = AdventurerLib.calculate_xp_discovery(0);
+
+    assert xp_discovery = 10;
+
+    return ();
+}

@@ -566,4 +566,24 @@ namespace AdventurerLib {
 
         return (gold_discovery,);
     }
+
+    func calculate_health_discovery{syscall_ptr: felt*, range_check_ptr}(
+        rnd: felt
+    ) -> (health_discovery: felt) {
+        let (_, discover_multi) = unsigned_div_rem(rnd, 4);
+
+        let health_discovery = 10 + (5 * discover_multi);
+
+        return (health_discovery,);
+    }
+
+    func calculate_xp_discovery{syscall_ptr: felt*, range_check_ptr}(
+        rnd: felt
+    ) -> (xp_discovery: felt) {
+        let (_, discover_multi) = unsigned_div_rem(rnd, 4);
+
+        let xp_discovery = 10 + (5 * discover_multi);
+
+        return (xp_discovery,);
+    }
 }
