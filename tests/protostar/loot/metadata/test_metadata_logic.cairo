@@ -28,7 +28,7 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         context.lords = ids.addresses.lords
         stop_prank_realms = start_prank(ids.addresses.account_1, ids.addresses.realms)
         stop_prank_adventurer = start_prank(ids.addresses.account_1, ids.addresses.adventurer)
-        stop_prank_loot = start_prank(ids.addresses.account_1, ids.addresses.loot)
+        stop_prank_loot = start_prank(ids.addresses.adventurer, ids.addresses.loot)
         stop_prank_lords = start_prank(ids.addresses.account_1, ids.addresses.lords)
     %}
 
@@ -73,7 +73,9 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     %{
         stop_mock()
         stop_prank_lords()
+        stop_prank_loot()
         stop_prank_lords = start_prank(ids.addresses.adventurer, ids.addresses.lords)
+        stop_prank_loot = start_prank(ids.addresses.account_1, ids.addresses.loot)
     %}
 
     // Set tokens to ids above for testing
