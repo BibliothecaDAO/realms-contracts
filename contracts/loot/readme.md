@@ -94,15 +94,15 @@ There is a native dynamic loot market. However there are some rules.
 | Bludgeon | Medium  | Strong |  Low  |
 |  Magic   |   High  |  Low   |Medium |
 
-Blade: 
+### Blade: 
     low vs metal
     medium vs hide
     strong vs cloth
-Bludgeon:
+### Bludgeon:
     medium vs metal
     strong vs hide
     low vs cloth
-Magic:
+### Magic:
     High vs metal
     Low vs hide
     Medium vs cloth

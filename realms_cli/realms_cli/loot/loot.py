@@ -71,8 +71,50 @@ async def market(loot_token_id, network):
     )
     out = out.split(" ")
 
-    print_loot_and_bid(out)
+    print_loot_and_bid([out])
 
+@loot.command()
+@click.option(
+    "--start_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.INT,
+    help="start_id",
+    prompt=True,
+)
+@click.option(
+    "--end_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.INT,
+    help="end_id",
+    prompt=True,
+)
+@click.option("--network", default="goerli")
+async def all_market(start_id, end_id, network):
+    """
+    Get Loot Item metadata
+    """
+    config = Config(nile_network=network)
+
+    items = []
+
+    for i in range((end_id + 1) - start_id):
+        out = await wrapped_proxy_call(
+            network=config.nile_network,
+            contract_alias="proxy_LootMarketArcade",
+            abi='artifacts/abis/LootMarketArcade.json',
+            function="view_unminted_item",
+            arguments=[*uint(i + start_id)],
+        )
+        out = out.split(" ")
+        out.insert(0, str(i + start_id))
+        print(out)
+        
+        items.append(out)
+
+    # print(items)
+    print_loot_and_bid(items)
 
 
 @loot.command()
@@ -303,7 +345,7 @@ async def adventurer(adventurer_token_id, network):
     await _get_adventurer(network, adventurer_token_id)
 
 
-@click.command()
+@loot.command()
 @click.option("--network", default="goerli")
 @click.option(
     "--adventurer_token_id",
@@ -341,7 +383,7 @@ async def equip(network, adventurer_token_id, item):
     await _get_adventurer(network, adventurer_token_id)
 
 
-@click.command()
+@loot.command()
 @click.option("--network", default="goerli")
 @click.option(
     "--adventurer_token_id",
@@ -379,7 +421,7 @@ async def unequip(network, adventurer_token_id, item):
     await _get_adventurer(network, adventurer_token_id)    
 
 
-@click.command()
+@loot.command()
 @click.option("--network", default="goerli")
 async def all_adventurers(network):
     """
@@ -422,7 +464,7 @@ async def all_adventurers(network):
 
     print_adventurer(all_items)    
     
-@click.command()
+@loot.command()
 @click.option(
     "--beast_token_id",
     is_flag=False,
@@ -438,7 +480,7 @@ async def beast(beast_token_id, network):
     """
     await _get_beast(beast_token_id, network)    
 
-@click.command()
+@loot.command()
 @click.option(
     "--beast_token_id",
     is_flag=False,
@@ -485,7 +527,7 @@ async def attack(beast_token_id, network):
         )
 
 
-@click.command()
+@loot.command()
 @click.option(
     "--beast_token_id",
     is_flag=False,
@@ -519,3 +561,30 @@ async def flee(beast_token_id, network):
         print(f"🏃‍♂️ You successfully fled from beast ✅")
     if adventurer_out[23] == "1":
         print(f"😫 You have been ambushed! Your health is now {adventurer_out[4]}")
+
+
+@loot.command()
+@click.option(
+    "--adventurer_token_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="adventurer id",
+    prompt=True,
+)
+@click.option("--network", default="goerli")
+async def balance(network, adventurer_token_id):
+    """
+    Get all your Adventurers you own.
+    """
+    config = Config(nile_network=network)
+
+    out = await wrapped_proxy_call(
+        network=config.nile_network,
+        contract_alias="proxy_Beast",
+        abi="artifacts/abis/Beast.json",
+        function="balance_of",
+        arguments=[*uint(adventurer_token_id)],
+    )
+
+    print(out)

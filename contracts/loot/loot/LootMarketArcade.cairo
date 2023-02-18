@@ -6,7 +6,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.math import unsigned_div_rem
-from starkware.cairo.common.math_cmp import is_le_felt, is_le
+from starkware.cairo.common.math_cmp import is_le_felt, is_le, is_not_zero
 from openzeppelin.access.ownable.library import Ownable
 from openzeppelin.introspection.erc165.library import ERC165
 from openzeppelin.token.erc721.library import ERC721
@@ -30,7 +30,7 @@ from starkware.starknet.common.syscalls import (
 
 from contracts.loot.loot.stats.item import ItemStats
 from contracts.loot.utils.constants import ModuleIds, ExternalContractIds, STARTING_GOLD
-
+from contracts.loot.adventurer.interface import IAdventurer
 from openzeppelin.token.erc721.IERC721 import IERC721
 
 // -----------------------------------
@@ -600,8 +600,8 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     let adventurer_id_as_felt = adventurer_token_id.low;
 
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
-    let (owner) = IERC721.ownerOf(adventurer_address, adventurer_token_id);
-    with_attr error_message("Item Market: You do not own this Adventurer") {
+    let (owner) = IAdventurer.owner_of(adventurer_address, adventurer_token_id);
+    with_attr error_message("Item Market: You do not own this Adventurer") { 
         assert caller = owner;
     }
     // TODO: check adventurer is alive...
@@ -643,14 +643,23 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     let (beast_address) = Module.get_module_address(ModuleIds.Beast);
 
     // subtract gold balance from buyer
+
     IBeast.subtract_from_balance(beast_address, adventurer_token_id, price);
 
-    if (current_bid.bidder == FALSE) {
-    } else {
+    let has_bid = is_not_zero(current_bid.bidder);
+
+    if (has_bid == TRUE) {
         IBeast.add_to_balance(beast_address, Uint256(current_bid.bidder, 0), current_bid.price);
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    } else {
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
     }
 
-    
+
     ItemMerchantUpdate.emit(
         item, market_item_id.low, Bid(price, current_bid.expiry, adventurer_id_as_felt, BidStatus.open, item.Id)
     );
@@ -670,7 +679,7 @@ func claim_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
     // ownly owner of Adventurer can call
     // TODO: we could open this to anyone to call so bids can be cleared by helper accounts...
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
-    let (owner) = IERC721.ownerOf(adventurer_address, adventurer_token_id);
+    let (owner) = IAdventurer.owner_of(adventurer_address, adventurer_token_id);
     with_attr error_message("Item Market: You do not own this Adventurer") {
         assert caller = owner;
     }
