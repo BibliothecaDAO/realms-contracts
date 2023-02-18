@@ -20,6 +20,7 @@ from contracts.loot.loot.metadata import LootUri
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library.library_module import Module
 from contracts.loot.beast.interface import IBeast
+from contracts.loot.loot.stats.combat import CombatStats
 
 from starkware.starknet.common.syscalls import (
     get_block_timestamp,
@@ -32,6 +33,18 @@ from contracts.loot.loot.stats.item import ItemStats
 from contracts.loot.utils.constants import ModuleIds, ExternalContractIds, STARTING_GOLD
 
 from openzeppelin.token.erc721.IERC721 import IERC721
+
+// -----------------------------------
+// Events
+// -----------------------------------
+
+@event
+func ItemXPIncrease(item_token_id: Uint256, item: Item) {
+}
+
+@event
+func ItemGreatnessIncrease(item_token_id: Uint256, item: Item) {
+}
 
 // -----------------------------------
 // Storage
@@ -335,6 +348,26 @@ func set_item_by_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_
     return ();
 }
 
+// @notice Increase xp of an item
+// @param item_token_id: Id of the item
+// @param amount: Amount of xp to increase
+// @return success: Value indicating success
+@external
+func increase_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    item_token_id: Uint256, amount: felt
+) -> (success: felt) {
+    alloc_locals;
+
+    // Only approved modules can increase and items xp
+    Module.only_approved();
+
+    // call internal function for updating xp
+    let (result) = _increase_xp(item_token_id, amount);
+
+    // return result
+    return (result,);
+}
+
 // -----------------------------
 // Internal Loot Specific
 // -----------------------------
@@ -375,6 +408,72 @@ func assert_starter_weapon{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: Ha
         assert TRUE = FALSE;
     }
     return ();
+}
+
+// @notice Increases the "XP" attribute of an item, represented by its unique token ID, by a specified amount.
+// @dev This function updates the XP of the specified item and writes the updated item to the blockchain.
+//      If the XP increase results in a level increase (i.e. the item's "greatness" attribute is increased),
+//      the function also increases the item's greatness attribute and writes the updated item to the blockchain.
+// @param item_token_id Unique token ID of the item to be updated.
+// @param amount The amount by which to increase the item's "XP" attribute.
+// @return success Boolean value indicating whether the function succeeded.
+func _increase_xp{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
+    item_token_id: Uint256, amount: felt
+) -> (success: felt) {
+    alloc_locals;
+
+    // get item
+    let (_item) = get_item_by_token_id(item_token_id);
+
+    // increase xp
+    let item_updated_xp = ItemLib.update_xp(_item, amount);
+
+    // check if item received a greatness increase
+    let (greatness_increased) = CombatStats.check_for_level_increase(
+        item_updated_xp.XP, item_updated_xp.Greatness
+    );
+
+    // if greatness increased
+    if (greatness_increased == TRUE) {
+        // increase greatness
+        let (result) = _increase_greatness(item_token_id, item_updated_xp.Greatness + 1);
+        return (result,);
+    } else {
+        // if greatness did not increase, we we still update XP
+        item.write(item_token_id, item_updated_xp);
+
+        // and emit an XP increase event
+        emit_item_xp_increase(item_token_id);
+
+        // return success
+        return (TRUE,);
+    }
+}
+
+// @notice Increases the "greatness" attribute of an item, represented by its unique token ID, by a specified amount.
+// @dev This function updates the greatness of the specified item and writes the updated item to the blockchain.
+// @param item_token_id Unique token ID of the item to be updated.
+// @param greatness The amount by which to increase the item's "greatness" attribute.
+// @return success Boolean value indicating whether the function succeeded.
+func _increase_greatness{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
+    item_token_id: Uint256, greatness: felt
+) -> (success: felt) {
+    alloc_locals;
+
+    // get item
+    let (_item) = get_item_by_token_id(item_token_id);
+
+    // update greatness
+    let item_updated_greatness = ItemLib.update_greatness(_item, greatness);
+
+    // write to blockchain
+    item.write(item_token_id, item_updated_greatness);
+
+    // emit greatness increase event
+    emit_item_greatness_increase(item_token_id);
+
+    // return success
+    return (TRUE,);
 }
 
 // --------------------
@@ -735,5 +834,29 @@ func assert_can_purchase{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
         assert below_end_index = TRUE;
     }
 
+    return ();
+}
+
+// @notice Emits a greatness increase event for an item
+// @param item_token_id: the token id of the item that increased in greatness
+func emit_item_greatness_increase{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
+    item_token_id: Uint256
+) {
+    // Get item from token id
+    let (item) = get_item_by_token_id(item_token_id);
+    // emit leveled up event
+    ItemGreatnessIncrease.emit(item_token_id, item);
+    return ();
+}
+
+// @notice Emits an xp increase event for an item
+// @param item_token_id: the token id of the item whose xp increased
+func emit_item_xp_increase{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
+    item_token_id: Uint256
+) {
+    // Get item from token id
+    let (item) = get_item_by_token_id(item_token_id);
+    // emit leveled up event
+    ItemXPIncrease.emit(item_token_id, item);
     return ();
 }

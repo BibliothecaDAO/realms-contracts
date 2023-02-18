@@ -23,7 +23,7 @@ func __setup__{syscall_ptr: felt*, range_check_ptr}() {
         context.lords = ids.addresses.lords
         stop_prank_realms = start_prank(ids.addresses.account_1, ids.addresses.realms)
         stop_prank_adventurer = start_prank(ids.addresses.account_1, ids.addresses.adventurer)
-        stop_prank_loot = start_prank(ids.addresses.account_1, ids.addresses.loot)
+        stop_prank_loot = start_prank(ids.addresses.adventurer, ids.addresses.loot)
         stop_prank_lords = start_prank(ids.addresses.account_1, ids.addresses.lords)
     %}
     IRealms.set_realm_data(addresses.realms, Uint256(10, 0), 'Test Realm', 1);
@@ -47,6 +47,8 @@ func __setup__{syscall_ptr: felt*, range_check_ptr}() {
     ILoot.mint(addresses.loot, addresses.account_1, Uint256(1,0));
     %{
         stop_mock()
+        stop_prank_loot()
+        stop_prank_loot = start_prank(ids.addresses.account_1, ids.addresses.loot)
     %}
 
     // Set tokens to ids above for testing

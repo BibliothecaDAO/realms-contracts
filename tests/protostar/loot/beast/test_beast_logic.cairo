@@ -42,7 +42,7 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         stop_prank_realms = start_prank(ids.addresses.account_1, ids.addresses.realms)
         stop_prank_adventurer = start_prank(ids.addresses.account_1, ids.addresses.adventurer)
         stop_prank_lords = start_prank(ids.addresses.account_1, ids.addresses.lords)
-        stop_prank_loot = start_prank(ids.addresses.account_1, ids.addresses.loot)
+        stop_prank_loot = start_prank(ids.addresses.adventurer, ids.addresses.loot)
     %}
 
     ILords.approve(addresses.lords, addresses.adventurer, Uint256(100000000000000000000, 0));
@@ -51,9 +51,13 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     %{
         stop_prank_lords()
     %}
-
     IAdventurer.mint(addresses.adventurer, addresses.account_1, 4, 10, 'Test', 8, 1, 1);
     ILoot.mint(addresses.loot, addresses.account_1, Uint256(1,0));
+    %{
+        stop_prank_loot()
+        stop_prank_loot = start_prank(ids.addresses.account_1, ids.addresses.loot)
+    %}
+
     ILoot.set_item_by_id(addresses.loot, Uint256(1,0), ItemIds.Wand, 10, 0, 0, 0);
     %{
         stop_prank_loot()

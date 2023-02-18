@@ -45,7 +45,7 @@ func test_mint{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         ids.realms_address = context.realms
         stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
-        stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
+        stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address)
     %}
 
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
@@ -110,13 +110,18 @@ func test_set_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
         ids.realms_address = context.realms
         stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
-        stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
+        stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address)
     %}
 
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
 
     ILoot.mint(loot_address, account_1_address, Uint256(1, 0));
+
+    %{
+        stop_prank_loot()
+        stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
+    %}
 
     ILoot.set_item_by_id(loot_address, Uint256(1, 0), 20, 5, 100, 1, 30);
 
@@ -146,7 +151,7 @@ func test_update_adventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
         ids.realms_address = context.realms
         stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
-        stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
+        stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address)
     %}
 
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
