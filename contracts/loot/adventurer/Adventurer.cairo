@@ -635,7 +635,7 @@ func assert_not_dead{
 // @param adventurer_token_id: Id of adventurer
 // @param itemId: Id of the item
 func assert_adventurer_is_owner{
-    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 }(adventurer_token_id: Uint256, itemId: Uint256) {
     alloc_locals;
     let (loot_address) = Module.get_module_address(ModuleIds.Loot);

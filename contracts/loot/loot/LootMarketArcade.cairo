@@ -255,7 +255,8 @@ func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
 
     // fetch new item with random Id
     let (rnd) = get_random_number();
-    let (new_item: Item) = ItemLib.generate_random_item(rnd);
+    let (ts) = get_block_timestamp();
+    let (new_item: Item) = ItemLib.generate_random_item(rnd * ts);
 
     let (id) = _mint(to, new_item, adventurer_token_id);
 
@@ -272,7 +273,7 @@ func mint_from_mart{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_
 
     let (id) = _mint(to, new_item, adventurer_token_id);
 
-    return ();
+    return (); 
 }
 
 // @notice Mint adventurer starting weapon
@@ -459,7 +460,7 @@ const ITEMS_PER_EPOCH_PER_ADVENTUER = 3;
 func ItemMerchantUpdate(item: Item, market_item_id: felt, bid: Bid) {
 }
 
-// returns TRUE if item is owned and in existence is owned
+// returns TRUE if item is owned
 @view
 func item_owner{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256, adventurer_token_id: Uint256
