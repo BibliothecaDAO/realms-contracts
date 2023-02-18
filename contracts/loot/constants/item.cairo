@@ -29,6 +29,14 @@ struct Item {
     Bag: felt,  // Bag ID IF bagged
 }
 
+struct Bid {
+    price: felt,
+    expiry: felt,
+    bidder: felt,
+    status: felt,
+    item_id: felt,
+}
+
 // To provide cleaner numbering with the expectation we'll add more materials
 //    we give each material type it's own number space
 namespace Material {

@@ -4,7 +4,7 @@ from starkware.cairo.common.uint256 import Uint256
 
 from contracts.loot.constants.adventurer import AdventurerState, PackedAdventurerState
 from contracts.loot.constants.beast import Beast, BeastStatic, BeastDynamic
-from contracts.loot.constants.item import Item
+from contracts.loot.constants.item import Item, Bid
 
 @contract_interface
 namespace IController {
@@ -45,6 +45,16 @@ namespace ILoot {
     func get_item_by_token_id(tokenId: Uint256) -> (item: Item) {
     }
     func tokenURI(tokenId: Uint256) -> (tokenURI_len: felt, tokenURI: felt*) {
+    }
+    func mint_daily_items() {
+    }
+    func bid_on_item(market_item_id: Uint256, adventurer_token_id: Uint256, price: felt) {
+    }
+    func claim_item(market_item_id: Uint256, adventurer_token_id: Uint256) {
+    }
+    func item_owner(tokenId: Uint256, adventurer_token_id: Uint256) -> (owner: felt) {
+    }
+    func view_bid(market_item_id: Uint256) -> (bid: Bid) {
     }
 }
 
