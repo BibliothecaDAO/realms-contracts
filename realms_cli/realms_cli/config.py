@@ -77,7 +77,7 @@ class Config:
         self.GoblinTown_alias = "proxy_" + ContractAlias.GoblinTown
 
         # @distracteddev to change back
-        self.Lords_ERC20_Mintable_alias = ContractAlias.Lords_ERC20_Mintable
+        self.Lords_ERC20_Mintable_alias = "proxy_" + ContractAlias.Lords_ERC20_Mintable
         self.Realms_ERC721_Mintable_alias = "proxy_" + \
             ContractAlias.Realms_ERC721_Mintable
         self.S_Realms_ERC721_Mintable_alias = "proxy_" + \
@@ -227,6 +227,7 @@ class Config:
         ]
 
         self.LOOT = [
+            "tokenId", 
             "Id",
             "Slot",
             "Type",
@@ -236,7 +237,7 @@ class Config:
             "Prefix_2",
             "Suffix",
             "Greatness",
-            "CreatedBlock",
+            "Age",
             "XP",
             "Adventurer",
             "Bag",
@@ -304,3 +305,6 @@ class Config:
 
         self.LOOT_ITEMS = ['Pendant',  'Necklace',  'Amulet',  'Silver Ring',  'Bronze Ring',  'Platinum Ring',  'Titanium Ring',  'Gold Ring',  'Ghost Wand',  'Grave Wand',  'Bone Wand',  'Wand',  'Grimoire',  'Chronicle',  'Tome',  'Book',  'Katana',  'Falchion',  'Scimitar',  'Long Sword',  'Short Sword',  'Warhammer',  'Quarterstaff',  'Maul',  'Mace',  'Club',  'Divine Robe',  'Silk Robe',  'Linen Robe',  'Robe',  'Shirt',  'Demon Husk',  'Dragonskin Armor',  'Studded Leather Armor',  'Hard Leather Armor',  'Leather Armor',  'Holy Chestplate',  'Ornate ChestPlate',  'Plate Mail',  'Chain Mail',  'Ring Mail',  'Crown',  'Divine Hood',  'Silk Hood',  'Linen Hood',  'Hood',  'Demon Crown',  'Dragons Crown',  'War Cap',  'Leather Cap',  'Cap',  'Ancient Helm',  'Ornate Helm',  'Great Helm',  'Full Helm',
                            'Helm',  'Brightsilk Sash',  'Silk Sash',  'Wool Sash',  'Linen Sash',  'Sash',  'Demonhide Belt',  'Dragonskin Belt',  'Studded Leather Belt',  'Hard Leather Belt',  'Leather Belt',  'Ornate Belt',  'War Belt',  'Plated Belt',  'Mesh Belt',  'Heavy Belt',  'Divine Slippers',  'Silk Slippers',  'Wool Shoes',  'Linen Shoes',  'Shoes',  'Demonhide Boots',  'Dragonskin Boots',  'Studded Leather Boots',  'Hard Leather Boots',  'Leather Boots',  'Chain Boots',  'Heavy Boots',  'Holy Gauntlets',  'Ornate Gauntlets',  'Gauntlets',  'Divine Gloves',  'Silk Gloves',  'Wool Gloves',  'Linen Gloves',  'Gloves',  'Demons Hands',  'Dragonskin Gloves',  'Studded Leather Gloves',  'Hard Leather Gloves',  'Leather Gloves',  'Holy Greaves',  'Ornate Greaves',  'Greaves',  'Chain Gloves',  'Heavy Gloves']
+
+        self.SLOT = ["Weapon","Chest","Head","Waist","Foot","Hand","Neck","Ring"]
+

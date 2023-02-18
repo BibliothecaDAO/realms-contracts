@@ -6,7 +6,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.math import unsigned_div_rem
-from starkware.cairo.common.math_cmp import is_le_felt, is_le
+from starkware.cairo.common.math_cmp import is_le_felt, is_le, is_not_zero
 from openzeppelin.access.ownable.library import Ownable
 from openzeppelin.introspection.erc165.library import ERC165
 from openzeppelin.token.erc721.library import ERC721
@@ -31,7 +31,7 @@ from starkware.starknet.common.syscalls import (
 
 from contracts.loot.loot.stats.item import ItemStats
 from contracts.loot.utils.constants import ModuleIds, ExternalContractIds, STARTING_GOLD
-
+from contracts.loot.adventurer.interface import IAdventurer
 from openzeppelin.token.erc721.IERC721 import IERC721
 
 // -----------------------------------
@@ -270,7 +270,7 @@ func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
     let (rnd) = get_random_number();
     let (new_item: Item) = ItemLib.generate_random_item(rnd);
 
-    let (next_id) = counter.read();
+    let (id) = _mint(to, new_item, adventurer_token_id);
 
     item.write(Uint256(next_id + 1, 0), new_item);
 
@@ -282,6 +282,7 @@ func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
     return ();
 }
 
+@external
 func mint_from_mart{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
     to: felt, item_id: felt, adventurer_token_id: Uint256
 ) {
@@ -289,18 +290,46 @@ func mint_from_mart{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_
 
     let (new_item: Item) = ItemLib.generate_item_by_id(item_id);
 
+    let (id) = _mint(to, new_item, adventurer_token_id);
+
+    return ();
+}
+
+// @notice Mint adventurer starting weapon
+// @param to: Address to mint the item to
+// @param weapon_id: Weapon ID to mint
+// @return item_token_id: The token id of the minted item
+@external
+func mint_starter_weapon{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    to: felt, weapon_id: felt, adventurer_token_id: Uint256
+) -> (item_token_id: Uint256) {
+    alloc_locals;
+
+    assert_starter_weapon(weapon_id);
+
+    // fetch new item with random Id
+    let (new_item: Item) = ItemLib.generate_starter_weapon(weapon_id);
+
+    return _mint(to, new_item, adventurer_token_id);
+}
+
+func _mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    to: felt, _item: Item, adventurer_token_id: Uint256
+) -> (item_token_id: Uint256) {
+    alloc_locals;
+
     let (next_id) = counter.read();
 
-    item.write(Uint256(next_id + 1, 0), new_item);
+    item.write(Uint256(next_id + 1, 0), _item);
 
     ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
 
     item_adventurer_owner.write(Uint256(next_id + 1, 0), adventurer_token_id, TRUE);
 
     counter.write(next_id + 1);
-
-    return ();
+    return (Uint256(next_id + 1, 0),);
 }
+
 
 // @notice Update item adventurer
 // @param tokenId: Id of loot item
@@ -496,33 +525,6 @@ func get_item_by_token_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
 // Market
 // --------------------
 
-// @notice Mint adventurer starting weapon
-// @param to: Address to mint the item to
-// @param weapon_id: Weapon ID to mint
-// @return item_token_id: The token id of the minted item
-@external
-func mint_starter_weapon{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    to: felt, weapon_id: felt, adventurer_token_id: Uint256
-) -> (item_token_id: Uint256) {
-    alloc_locals;
-
-    assert_starter_weapon(weapon_id);
-
-    // fetch new item with random Id
-    let (new_item: Item) = ItemLib.generate_starter_weapon(weapon_id);
-
-    let (next_id) = counter.read();
-
-    item.write(Uint256(next_id + 1, 0), new_item);
-
-    ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
-
-    item_adventurer_owner.write(Uint256(next_id + 1, 0), adventurer_token_id, TRUE);
-
-    counter.write(next_id + 1);
-
-    return (Uint256(next_id + 1, 0),);
-}
 
 // This uses a Seed which is created every 12hrs. From this seed X number of items can be purchased
 // after they have been bidded on.
@@ -718,8 +720,8 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     let adventurer_id_as_felt = adventurer_token_id.low;
 
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
-    let (owner) = IERC721.ownerOf(adventurer_address, adventurer_token_id);
-    with_attr error_message("Item Market: You do not own this Adventurer") {
+    let (owner) = IAdventurer.owner_of(adventurer_address, adventurer_token_id);
+    with_attr error_message("Item Market: You do not own this Adventurer") { 
         assert caller = owner;
     }
     // TODO: check adventurer is alive...
@@ -761,14 +763,23 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     let (beast_address) = Module.get_module_address(ModuleIds.Beast);
 
     // subtract gold balance from buyer
+
     IBeast.subtract_from_balance(beast_address, adventurer_token_id, price);
 
-    if (current_bid.bidder == FALSE) {
-    } else {
+    let has_bid = is_not_zero(current_bid.bidder);
+
+    if (has_bid == TRUE) {
         IBeast.add_to_balance(beast_address, Uint256(current_bid.bidder, 0), current_bid.price);
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    } else {
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
     }
 
-    
+
     ItemMerchantUpdate.emit(
         item, market_item_id.low, Bid(price, current_bid.expiry, adventurer_id_as_felt, BidStatus.open, item.Id)
     );
@@ -788,7 +799,7 @@ func claim_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
     // ownly owner of Adventurer can call
     // TODO: we could open this to anyone to call so bids can be cleared by helper accounts...
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
-    let (owner) = IERC721.ownerOf(adventurer_address, adventurer_token_id);
+    let (owner) = IAdventurer.owner_of(adventurer_address, adventurer_token_id);
     with_attr error_message("Item Market: You do not own this Adventurer") {
         assert caller = owner;
     }

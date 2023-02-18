@@ -137,24 +137,28 @@ def print_loot_bid(out):
     print_over_colums(pretty_bid_out)    
 
 
-def print_loot_and_bid(out):
+def print_loot_and_bid(out_array):
     config = Config(nile_network='goerli')
-
-    item = out[:13]
-    bid = out[13:17]
-
-    item = format_array(0, item, config.LOOT_ITEMS[int(out[0]) -1])
-    bid = format_array(1, bid, convert_unix_time(int(bid[1])))
-
+    
     table = Table(show_header=True, header_style="bold magenta")
-
     for i, key in enumerate(config.LOOT):
         table.add_column(key)
 
     for i, key in enumerate(config.BID):
-        table.add_column(key)        
+        table.add_column(key)
 
-    table.add_row(*item, *bid)
+    for out in out_array:
+        item = out[:14]
+        bid = out[14:18]
+
+        item = format_array(1, item, config.LOOT_ITEMS[int(out[1]) -1])
+
+        item = format_array(2, item, config.SLOT[int(item[2]) -1])
+
+        bid = format_array(1, bid, convert_unix_time(int(bid[1])))
+       
+
+        table.add_row(*item, *bid)
 
     console.print(table)
 

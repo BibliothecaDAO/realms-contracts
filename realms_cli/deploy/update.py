@@ -1,7 +1,6 @@
 from collections import namedtuple
 from nile.common import get_class_hash
 from realms_cli.caller_invoker import wrapped_send, compile, wrapped_declare
-from realms_cli.deployer import logged_deploy
 from realms_cli.config import Config
 from realms_cli.utils import delete_existing_deployment, delete_existing_declaration
 
@@ -29,8 +28,8 @@ NEW_MODULES = [
     # Contracts("S_Realms_ERC721_Mintable"),
     # Contracts("Resources_ERC1155_Mintable_Burnable"),
     # Contracts("Exchange_ERC20_1155"),
-    Contracts("Adventurer"),
-    # Contracts("LootMarketArcade"),
+    # Contracts("Adventurer"),
+    Contracts("LootMarketArcade"),
     # Contracts("Beast"),
 ]
 
