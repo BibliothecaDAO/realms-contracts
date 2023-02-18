@@ -5,7 +5,7 @@
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.uint256 import Uint256
-from starkware.cairo.common.math import unsigned_div_rem
+from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero
 from starkware.cairo.common.math_cmp import is_le_felt, is_le, is_not_zero
 from openzeppelin.access.ownable.library import Ownable
 from openzeppelin.introspection.erc165.library import ERC165
@@ -13,6 +13,7 @@ from openzeppelin.token.erc721.library import ERC721
 from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
 from openzeppelin.upgrades.library import Proxy
 from starkware.cairo.common.bool import TRUE, FALSE
+from contracts.loot.constants.adventurer import AdventurerState
 from contracts.loot.constants.item import Item, ItemIds
 from contracts.loot.interfaces.imodules import IModuleController
 from contracts.loot.loot.library import ItemLib
@@ -717,7 +718,12 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     with_attr error_message("Item Market: You do not own this Adventurer") { 
         assert caller = owner;
     }
-    // TODO: check adventurer is alive...
+    // check adventurer is alive
+    let (adventurer: AdventurerState) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_token_id);
+
+    with_attr error_message("Adventurer: Adventurer is dead") {
+        assert_not_zero(adventurer.Health);
+    }
 
     // check higher than the base price that is set
     let higer_than_base_price = is_le(BASE_PRICE, price);

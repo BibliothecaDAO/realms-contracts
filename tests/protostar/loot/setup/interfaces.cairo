@@ -46,6 +46,12 @@ namespace ILoot {
     }
     func tokenURI(tokenId: Uint256) -> (tokenURI_len: felt, tokenURI: felt*) {
     }
+    func mint_daily_items() {
+    }
+    func bid_on_item(market_item_id: Uint256, adventurer_token_id: Uint256, price: felt) {
+    }
+    func claim_item(market_item_id: Uint256, adventurer_token_id: Uint256) {
+    }
 }
 
 @contract_interface

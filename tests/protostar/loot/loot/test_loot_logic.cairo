@@ -173,3 +173,34 @@ func test_update_adventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
     return ();
 }
 
+@external
+func test_bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+    local account_1_address;
+    local loot_address;
+    local adventurer_address;
+    local realms_address;
+
+    %{
+        ids.account_1_address = context.account_1
+        ids.loot_address = context.loot
+        ids.adventurer_address = context.adventurer
+        ids.realms_address = context.realms
+        stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
+        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+        stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address)
+    %}
+    // mint item and adventurer
+    ILoot.mint(loot_address, account_1_address, Uint256(1, 0));
+    IAdventurer.mint_with_starting_weapon(
+        adventurer_address, account_1_address, 4, 13, 'Test', 8, 1, 1, ItemIds.Book
+    );
+
+    %{
+        stop_prank_loot()
+        stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
+    %}
+    ILoot.bid_on_item(loot_address, Uint256(1,0), Uint256(1,0), 3);
+
+    return ();
+}
