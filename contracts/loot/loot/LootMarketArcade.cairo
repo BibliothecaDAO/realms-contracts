@@ -272,13 +272,6 @@ func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
 
     let (id) = _mint(to, new_item, adventurer_token_id);
 
-    item.write(Uint256(next_id + 1, 0), new_item);
-
-    ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
-
-    item_adventurer_owner.write(Uint256(next_id + 1, 0), adventurer_token_id, TRUE);
-
-    counter.write(next_id + 1);
     return ();
 }
 
