@@ -146,6 +146,9 @@ def convert_unix_time(unix_time):
 
     # Compare the unix_time with the current time to see if it's in the past
     if unix_time > current_time:
-        return 'open'
+        time_diff = int(unix_time - current_time)
+        hours, remainder = divmod(time_diff, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        return f"open ({minutes}m, {seconds}s left)"
     else:
         return 'closed'
