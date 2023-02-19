@@ -156,10 +156,10 @@ func test_not_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
         stop_prank_beast()
     %}
 
-    // adventurer did 36hp to the beast
-    assert updated_beast.Health = 64;
+    // adventurer did 35hp to the beast
+    assert updated_beast.Health = 65;
     // adventurer took 12 damage from the beasts counter attack
-    assert updated_adventurer.Health = 88;
+    assert updated_adventurer.Health = 85;
 
     // TODO LH: verify neither beast nor adventurer gained xp
 
@@ -315,7 +315,7 @@ func test_flee{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         # 3%4 = 3, therefore fleeing
         stop_mock_flee_random = mock_call(ids.xoroshiro_address, 'next', [3])
         # now we are timsing by timestamp we also need this
-        stop_warp = warp(1, ids.adventurer_address)
+        stop_warp = warp(1, ids.beast_address)
 
     %}
 

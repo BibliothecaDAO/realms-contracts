@@ -31,7 +31,7 @@ namespace TestAdventurerState {
     // evolving stats
     const Health = 100;  //
 
-    const Level = 500;  //
+    const Level = 1;  //
 
     // Physical
     const Strength = 0;

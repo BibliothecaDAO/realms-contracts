@@ -188,7 +188,8 @@ func attack{
     let (weapon) = ILoot.get_item_by_token_id(
         item_address, Uint256(unpacked_adventurer.WeaponId, 0)
     );
-    let (damage_dealt) = CombatStats.calculate_damage_to_beast(beast, weapon, unpacked_adventurer);
+    let (rnd) = get_random_number();
+    let (damage_dealt) = CombatStats.calculate_damage_to_beast(beast, weapon, unpacked_adventurer, rnd);
     // deduct health from beast
     let (beast_static_, beast_dynamic_) = BeastLib.split_data(beast);
     let (updated_health_beast) = BeastLib.deduct_health(damage_dealt, beast_dynamic_);

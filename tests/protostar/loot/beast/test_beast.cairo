@@ -172,6 +172,22 @@ func test_slain{
     return ();
 }
 
+@external
+func test_calculate_critical_damage{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    let (critical_damage) = CombatStats.calculate_critical_damage(20, 1);
+
+    assert critical_damage = 30;
+    return ();
+}
+
+@external
+func test_calculate_adventurer_level_boost{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    let (adventurer_level_damage) = CombatStats.calculate_entity_level_boost(20, 1);
+
+    assert adventurer_level_damage = 22;
+    return ();
+}
+
 // @notice Tests damage to beast calculation
 // Damage Calculation is:
 // Attack = Greatness * (6 - item_rank) * attack_effectiveness
@@ -189,8 +205,11 @@ func test_calculate_damage_to_beast{syscall_ptr: felt*, pedersen_ptr: HashBuilti
     // attack = 8 * (6-4) * 1 = 16
     // defense = 1 * (6-4) = 2
     // 16 - 2 = 14HP damage
-    let (mace_vs_basilik) = CombatStats.calculate_damage_to_beast(xp_1_basilisk, greatness_8_mace, adventurer_state);
-    assert mace_vs_basilik = 14;
+    let (mace_vs_basilik) = CombatStats.calculate_damage_to_beast(xp_1_basilisk, greatness_8_mace, adventurer_state, 1);
+
+    // adventurer boost = 14 * (1 + (1 * 0.1)) = 15
+    // no critical hit
+    assert mace_vs_basilik = 15;
 
     // TODO: Test attacking without weapon (melee)
      // let (weapon) = TestUtils.create_zero_item(); // no weapon (melee attack)
@@ -217,8 +236,11 @@ func test_calculate_damage_from_beast{syscall_ptr: felt*, pedersen_ptr: HashBuil
     // beast_attack = 2 * (6-1) * 1 = 10
     // armor_defense = 1 * (6-4) = 2
     // 10 attack - 2 defense = 8hp damage
-    let (local damage) = CombatStats.calculate_damage_from_beast(beast, armor, adventurer_state);
-    assert damage = 8;
+    let (local damage) = CombatStats.calculate_damage_from_beast(beast, armor, 1);
+
+    // beast level boost = 8 * (1 + 2 * 0.1) = 9
+    // no critical
+    assert damage = 9;
 
     // TODO: Test defending without armor
     // let (armor) = TestUtils.create_zero_item();

@@ -104,7 +104,8 @@ namespace CombatStats {
         armor_type: felt,
         armor_rank: felt,
         armor_greatness: felt,
-        adventurer_level: felt
+        entity_level: felt,
+        rnd: felt
     ) -> (damage: felt) {
         alloc_locals;
 
@@ -126,9 +127,14 @@ namespace CombatStats {
         let dealt_damage = is_le_felt(armor_strength, total_weapon_damage);
         if (dealt_damage == 1) {
             // if it is, damage dealt will be positive so return it
-            // @distracteddev: provide some multi here with adventurer level: e.g. damage * (ad_level * 0.1)
+            // @distracteddev: calculate whether hit is critical, formula = damage * (1.5)^critical
+            let (_, critical_hit_chance) = unsigned_div_rem(rnd, 4);
+            let critical_hit = is_le(critical_hit_chance, 0);
+            // @distracteddev: provide some multi here with adventurer level: e.g. damage + (1 + (level * 0.1))
             let damage_dealt = total_weapon_damage - armor_strength;
-            return (damage_dealt,);
+            let (adventurer_level_damage) = calculate_entity_level_boost(damage_dealt, entity_level);
+            let (critical_damage_dealt) = calculate_critical_damage(adventurer_level_damage, critical_hit);
+            return (critical_damage_dealt,);
         } else {
             // otherwise damage dealt will be negative so we return 0
             return (0,);
@@ -139,7 +145,7 @@ namespace CombatStats {
     // parameters: Item weapon, Item armor
     // returns: damage
     func calculate_damage_from_weapon{syscall_ptr: felt*, range_check_ptr}(
-        weapon: Item, armor: Item, unpacked_adventurer: AdventurerState
+        weapon: Item, armor: Item, unpacked_adventurer: AdventurerState, rnd: felt
     ) -> (damage: felt) {
         alloc_locals;
 
@@ -151,7 +157,7 @@ namespace CombatStats {
 
         // pass details of attack and armor to core damage calculation function
         let (damage_dealt) = calculate_damage(
-            attack_type, weapon.Rank, weapon.Greatness, armor_type, armor.Rank, armor.Greatness, unpacked_adventurer.Level
+            attack_type, weapon.Rank, weapon.Greatness, armor_type, armor.Rank, armor.Greatness, unpacked_adventurer.Level, rnd
         );
 
         // return damage
@@ -160,7 +166,7 @@ namespace CombatStats {
 
     // Calculates damage dealt from a beast by converting beast into a Loot weapon and calling calculate_damage_from_weapon
     func calculate_damage_from_beast{syscall_ptr: felt*, range_check_ptr}(
-        beast: Beast, armor: Item, unpacked_adventurer: AdventurerState
+        beast: Beast, armor: Item, rnd: felt
     ) -> (damage: felt) {
         alloc_locals;
 
@@ -184,7 +190,7 @@ namespace CombatStats {
         // pass details of attack and armor to core damage calculation function
         // @distracteddev: added param to change based on adventurer level
         let (damage_dealt) = calculate_damage(
-            attack_type, beast.Rank, beast.Level, armor_type, armor.Rank, armor.Greatness, unpacked_adventurer.Level
+            attack_type, beast.Rank, beast.Level, armor_type, armor.Rank, armor.Greatness, beast.Level, rnd
         );
 
         // return damage
@@ -193,7 +199,7 @@ namespace CombatStats {
 
     // Calculates damage dealt from a beast by converting beast into a Loot weapon and calling calculate_damage_from_weapon
     func calculate_damage_to_beast{syscall_ptr: felt*, range_check_ptr}(
-        beast: Beast, weapon: Item, unpacked_adventurer: AdventurerState
+        beast: Beast, weapon: Item, unpacked_adventurer: AdventurerState, rnd: felt
     ) -> (damage: felt) {
         alloc_locals;
 
@@ -220,7 +226,7 @@ namespace CombatStats {
         }
 
         let (damage_dealt) = calculate_damage(
-            weapon_type, weapon.Rank, weapon_greatness, armor_type, beast.Rank, beast.Level, unpacked_adventurer.Level
+            weapon_type, weapon.Rank, weapon_greatness, armor_type, beast.Rank, beast.Level, unpacked_adventurer.Level, rnd
         );
 
         // return damage
@@ -229,7 +235,7 @@ namespace CombatStats {
 
     // Calculate damage from an obstacle
     func calculate_damage_from_obstacle{syscall_ptr: felt*, range_check_ptr}(
-        obstacle: Obstacle, armor: Item, unpacked_adventurer: AdventurerState
+        obstacle: Obstacle, armor: Item, rnd
     ) -> (damage: felt) {
         alloc_locals;
 
@@ -241,7 +247,7 @@ namespace CombatStats {
 
         // pass details of attack and armor to core damage calculation function
         let (damage_dealt) = calculate_damage(
-            attack_type, obstacle.Rank, obstacle.Greatness, armor_type, armor.Rank, armor.Greatness, unpacked_adventurer.Level
+            attack_type, obstacle.Rank, obstacle.Greatness, armor_type, armor.Rank, armor.Greatness, 1, rnd
         );
 
         // return damage dealt
@@ -296,6 +302,26 @@ namespace CombatStats {
             return (TRUE,);
         } else {
             return (FALSE,);
+        }
+    }
+
+    func calculate_entity_level_boost{syscall_ptr: felt*, range_check_ptr}(damage: felt, entity_level: felt) -> (
+        entity_level_damage: felt
+    ) {
+        let format_level_boost = damage * (100 + (entity_level * 10));
+        let (entity_level_damage,_) = unsigned_div_rem(format_level_boost, 100); 
+        return (entity_level_damage,);
+    }
+
+    func calculate_critical_damage{syscall_ptr: felt*, range_check_ptr}(damage: felt, critical: felt) -> (
+        crtical_damage: felt
+    ) {
+        if (critical == TRUE) {
+            let format_critical_damage = damage * 150;
+            let (critical_damage,_) = unsigned_div_rem(format_critical_damage, 100); 
+            return (critical_damage,);
+        } else {
+            return (damage,);
         }
     }
 }
