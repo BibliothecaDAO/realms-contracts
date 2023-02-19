@@ -124,7 +124,7 @@ func test_not_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
         # 1%4 = 1, therefore DiscoveryType beast
         stop_mock = mock_call(ids.xoroshiro_address, 'next', [1])
         # now we are timsing by timestamp we also need this 
-        stop_warp = warp(1, ids.adventurer_address)
+        stop_warp_adventurer = warp(1, ids.adventurer_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
     %}
@@ -140,7 +140,8 @@ func test_not_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
     let (local adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_token_id_1);
 
     %{ 
-        stop_warp()
+        stop_warp_adventurer()
+        stop_warp_beast = warp(1, ids.beast_address)
         stop_mock()
         stop_prank_adventurer()
         stop_prank_beast()
@@ -157,6 +158,7 @@ func test_not_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
     %}
 
     // adventurer did 35hp to the beast
+    // adventurer level boost = 35 * (
     assert updated_beast.Health = 65;
     // adventurer took 12 damage from the beasts counter attack
     assert updated_adventurer.Health = 85;

@@ -205,10 +205,12 @@ func attack{
         // get the location the beast attacks
         let (beast_attack_location) = BeastStats.get_attack_location_from_id(beast.Id);
 
+        let (rnd) = get_random_number();
+
         // get the armor the adventurer is wearing at the location the beast attacks
         let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(beast_attack_location, 0));
         let (damage_taken) = CombatStats.calculate_damage_from_beast(
-            beast, armor, unpacked_adventurer
+            beast, armor, rnd
         );
 
         IAdventurer.deduct_health(adventurer_address, adventurer_id, damage_taken);
@@ -305,7 +307,8 @@ func counter_attack{
 
     // get the armor the adventurer has at the armor slot the beast is attacking
     let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(beast_attack_location, 0));
-    let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, armor, unpacked_adventurer);
+    let (rnd) = get_random_number();
+    let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, armor, rnd);
 
     // deduct heatlh from adventurer
     IAdventurer.deduct_health(adventurer_address, adventurer_token_id, damage_taken);
@@ -388,9 +391,11 @@ func flee{
         // get the armor the adventurer is wearing at the location the beast attacks
         let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(beast_attack_location, 0));
 
+        let (damage_rnd) = get_random_number();
+
         // calculate damage taken from beast
         let (damage_taken) = CombatStats.calculate_damage_from_beast(
-            beast, armor, unpacked_adventurer
+            beast, armor, damage_rnd
         );
 
         // update adventurer health
@@ -428,9 +433,11 @@ func flee{
         tempvar range_check_ptr = range_check_ptr;
         tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
     }
+    tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
 
     // TODO: MILESTONE2 Use Beast Speed Stats
-    let (flee_chance) = BeastLib.get_random_flee(rnd);
+    let (flee_rnd) = get_random_number();
+    let (flee_chance) = BeastLib.get_random_flee(flee_rnd);
     let can_flee = is_le(adventurer_speed + 1, flee_chance);
     if (can_flee == TRUE) {
         IAdventurer.update_status(

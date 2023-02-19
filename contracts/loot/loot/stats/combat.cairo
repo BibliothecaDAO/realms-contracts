@@ -130,7 +130,7 @@ namespace CombatStats {
             // @distracteddev: calculate whether hit is critical, formula = damage * (1.5)^critical
             let (_, critical_hit_chance) = unsigned_div_rem(rnd, 4);
             let critical_hit = is_le(critical_hit_chance, 0);
-            // @distracteddev: provide some multi here with adventurer level: e.g. damage + (1 + (level * 0.1))
+            // @distracteddev: provide some multi here with adventurer level: e.g. damage + (1 + ((1 - level) * 0.1))
             let damage_dealt = total_weapon_damage - armor_strength;
             let (adventurer_level_damage) = calculate_entity_level_boost(damage_dealt, entity_level);
             let (critical_damage_dealt) = calculate_critical_damage(adventurer_level_damage, critical_hit);
@@ -190,7 +190,7 @@ namespace CombatStats {
         // pass details of attack and armor to core damage calculation function
         // @distracteddev: added param to change based on adventurer level
         let (damage_dealt) = calculate_damage(
-            attack_type, beast.Rank, beast.Level, armor_type, armor.Rank, armor.Greatness, beast.Level, rnd
+            attack_type, beast.Rank, beast.Level, armor_type, armor.Rank, armor.Greatness, 1, rnd
         );
 
         // return damage
@@ -235,7 +235,7 @@ namespace CombatStats {
 
     // Calculate damage from an obstacle
     func calculate_damage_from_obstacle{syscall_ptr: felt*, range_check_ptr}(
-        obstacle: Obstacle, armor: Item, rnd
+        obstacle: Obstacle, armor: Item
     ) -> (damage: felt) {
         alloc_locals;
 
@@ -247,7 +247,7 @@ namespace CombatStats {
 
         // pass details of attack and armor to core damage calculation function
         let (damage_dealt) = calculate_damage(
-            attack_type, obstacle.Rank, obstacle.Greatness, armor_type, armor.Rank, armor.Greatness, 1, rnd
+            attack_type, obstacle.Rank, obstacle.Greatness, armor_type, armor.Rank, armor.Greatness, 1, 1
         );
 
         // return damage dealt
@@ -308,7 +308,7 @@ namespace CombatStats {
     func calculate_entity_level_boost{syscall_ptr: felt*, range_check_ptr}(damage: felt, entity_level: felt) -> (
         entity_level_damage: felt
     ) {
-        let format_level_boost = damage * (100 + (entity_level * 10));
+        let format_level_boost = damage * (90 + (entity_level * 10));
         let (entity_level_damage,_) = unsigned_div_rem(format_level_boost, 100); 
         return (entity_level_damage,);
     }
