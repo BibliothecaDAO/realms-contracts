@@ -532,10 +532,34 @@ func explore{
         assert unpacked_adventurer.Beast = 0;
     }
 
-    let (rnd) = get_random_number();
-    let (discovery) = AdventurerLib.get_random_discovery(rnd * ts);
+    let (beast_address) = Module.get_module_address(ModuleIds.Beast);
 
     // If the adventurer encounter a beast
+    if (unpacked_adventurer.Level == 0){
+            // we set their status to battle
+        let (new_unpacked_adventurer) = AdventurerLib.update_status(
+            AdventurerStatus.Battle, adventurer_dynamic_ 
+        );
+
+        // get weapon
+        let (starting_beast_id) = AdventurerLib.get_starting_beast_from_weapon();
+
+        // create beast according to the weapon the player has
+        let (beast_id: Uint256) = IBeast.create_starting_beast(beast_address, token_id, starting_beast_id);
+        let (updated_adventurer) = AdventurerLib.assign_beast(
+            beast_id.low, new_unpacked_adventurer
+        );
+        let (packed_adventurer) = AdventurerLib.pack(updated_adventurer);
+
+        adventurer_dynamic.write(token_id, packed_adventurer);
+
+        emit_adventurer_state(token_id);
+
+        return (DiscoveryType.Beast, beast_id.low);
+    }
+
+    let (rnd) = get_random_number();
+    let (discovery) = AdventurerLib.get_random_discovery(rnd * ts);
 
     // we should return the type of discovery here
     if (discovery == DiscoveryType.Beast) {
@@ -544,7 +568,6 @@ func explore{
             AdventurerStatus.Battle, adventurer_dynamic_
         );
         // create beast
-        let (beast_address) = Module.get_module_address(ModuleIds.Beast);
         let (beast_id: Uint256) = IBeast.create(beast_address, token_id);
         let (updated_adventurer) = AdventurerLib.assign_beast(
             beast_id.low, new_unpacked_adventurer

@@ -586,4 +586,24 @@ namespace AdventurerLib {
 
         return (xp_discovery,);
     }
+
+    func get_starting_beast_from_weapon{syscall_ptr: felt*, range_check_ptr}(
+        weapon_id: felt
+    ) -> (beast_id: felt) {
+
+        if (weapon_id == ItemIds.ShortSword) {
+            return(1,);
+        }
+        if (weapon_id == 1) {
+            return(1,);
+        }
+        if (weapon_id == 1) {
+            return(1,);
+        }
+        if (weapon_id == 1) {
+            return(1,);
+        }
+
+        return (0,);
+    }
 }

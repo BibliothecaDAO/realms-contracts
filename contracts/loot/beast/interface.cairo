@@ -8,6 +8,8 @@ from contracts.loot.constants.beast import Beast, BeastDynamic
 namespace IBeast {
     func create(adventurer_token_id: Uint256) -> (beast_token_id: Uint256) {
     }
+    func create_starting_beast(adventurer_token_id: Uint256, beast_id: felt) -> (beast_token_id: Uint256) {
+    }
     func attack(beast_token_id: Uint256) {
     }
     func counter_attack(beast_token_id: Uint256) -> (damage: felt) {

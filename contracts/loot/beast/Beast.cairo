@@ -110,18 +110,51 @@ func create{
 }(adventurer_id: Uint256) -> (beast_token_id: Uint256) {
     alloc_locals;
     Module.only_approved();
-
+    
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
     let (adventurer_state) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_id);
 
-    let (rnd) = get_random_number();
-    let (beast_static_, beast_dynamic_) = BeastLib.create(rnd, adventurer_id.low, adventurer_state);
+    let (random) = get_random_number();
+    let (_, beast_level) = unsigned_div_rem(random, 6);
+    let (_, beast_id) = unsigned_div_rem(random, 17);
+
+    let (beast_static_, beast_dynamic_) = BeastLib.create(beast_id, adventurer_id.low, adventurer_state, beast_level);
+    
+    return _create(adventurer_id, beast_static_, beast_dynamic_);
+}
+
+@external
+func create_starting_beast{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(adventurer_id: Uint256, beast_id: felt) -> (beast_token_id: Uint256) {
+    alloc_locals;
+    Module.only_approved();
+    
+    let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
+    let (adventurer_state) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_id);
+
+    let (beast_static_, beast_dynamic_) = BeastLib.create_start_beast(beast_id, adventurer_id.low, adventurer_state);
+    
+    return _create(adventurer_id, beast_static_, beast_dynamic_);
+}
+
+func _create{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(adventurer_id: Uint256, beast_static_: BeastStatic, beast_dynamic_: BeastDynamic) -> (beast_token_id: Uint256) {
+    alloc_locals;
+
     let (packed_beast) = BeastLib.pack(beast_dynamic_);
+
     let (current_id) = total_supply.read();
+
     let (next_id, _) = uint256_add(current_id, Uint256(1, 0));
+
     beast_static.write(next_id, beast_static_);
+
     beast_dynamic.write(next_id, packed_beast);
+
     total_supply.write(next_id);
+
     return (next_id,);
 }
 
@@ -478,7 +511,9 @@ func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBu
     let (controller) = Module.controller_address();
     let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
     let (rnd) = IXoroshiro.next(xoroshiro_address_);
-    return (rnd,);
+
+    let (ts) = get_block_timestamp();
+    return (rnd * ts,);
 }
 
 // @notice Revert if caller is not adventurer owner

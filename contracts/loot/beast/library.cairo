@@ -21,30 +21,52 @@ from contracts.loot.loot.stats.item import ItemStats
 const BASE_BEAST_LEVEL = 3;
 namespace BeastLib {
     func create{syscall_ptr: felt*, range_check_ptr}(
-        xoroshiro_random: felt, adventurer_id: felt, adventurer_state: AdventurerState
+        beast_id: felt, adventurer_id: felt, adventurer_state: AdventurerState, random_beast_level: felt
     ) -> (beast_static: BeastStatic, beast_dynamic: BeastDynamic) {
         alloc_locals;
-        let (_, random_level) = unsigned_div_rem(xoroshiro_random, 6);
+        // let (_, random_level) = unsigned_div_rem(random, 6);
 
-        let (_, r) = unsigned_div_rem(xoroshiro_random, 17);
+        // let (_, r) = unsigned_div_rem(random, 17);
 
         let is_less_than_base_level = is_le(adventurer_state.Level, BASE_BEAST_LEVEL);
         if (is_less_than_base_level == TRUE) {
             tempvar beast_level = adventurer_state.Level;
         } else {
-            tempvar beast_level = random_level + (adventurer_state.Level - BASE_BEAST_LEVEL);
+            tempvar beast_level = random_beast_level + (adventurer_state.Level - BASE_BEAST_LEVEL);
         }
 
-        // number of beast ids
-        let beast_id = r + 1;
+        // let beast_id = r + 1;
 
-        let BeastId = beast_id;
+        let BeastId = beast_id + 1;
+
         let Health = 100;
         let (Prefix_1) = ItemStats.item_name_prefix(1);
         let (Prefix_2) = ItemStats.item_name_suffix(1);
         let Adventurer = adventurer_id;
         let XP = 0;
         let Level = beast_level;
+        let SlainOnDate = 0;
+
+        return (
+            BeastStatic(Id=BeastId, Prefix_1=Prefix_1, Prefix_2=Prefix_2),
+            BeastDynamic(
+                Health=Health, Adventurer=Adventurer, XP=XP, Level=Level, SlainOnDate=SlainOnDate
+            ),
+        );
+    }
+
+    func create_start_beast{syscall_ptr: felt*, range_check_ptr}(
+        beast_id: felt, adventurer_id: felt, adventurer_state: AdventurerState
+    ) -> (beast_static: BeastStatic, beast_dynamic: BeastDynamic) {
+        alloc_locals;
+
+        let BeastId = beast_id;
+        let Health = 20;
+        let (Prefix_1) = ItemStats.item_name_prefix(1);
+        let (Prefix_2) = ItemStats.item_name_suffix(1);
+        let Adventurer = adventurer_id;
+        let XP = 0;
+        let Level = 1;
         let SlainOnDate = 0;
 
         return (
