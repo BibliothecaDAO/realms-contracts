@@ -64,7 +64,7 @@ namespace BeastLib {
         alloc_locals;
 
         let BeastId = beast_id;
-        let Health = 2;
+        let Health = 10;
         let (Prefix_1) = ItemStats.item_name_prefix(1);
         let (Prefix_2) = ItemStats.item_name_suffix(1);
         let Adventurer = adventurer_id;

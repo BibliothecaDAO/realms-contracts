@@ -110,7 +110,7 @@ func create{
 }(adventurer_id: Uint256) -> (beast_token_id: Uint256) {
     alloc_locals;
     Module.only_approved();
-    
+
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
     let (adventurer_state) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_id);
 
@@ -118,8 +118,10 @@ func create{
     let (_, beast_level) = unsigned_div_rem(random, 6);
     let (_, beast_id) = unsigned_div_rem(random, 17);
 
-    let (beast_static_, beast_dynamic_) = BeastLib.create(beast_id, adventurer_id.low, adventurer_state, beast_level);
-    
+    let (beast_static_, beast_dynamic_) = BeastLib.create(
+        beast_id, adventurer_id.low, adventurer_state, beast_level
+    );
+
     return _create(beast_static_, beast_dynamic_);
 }
 
@@ -129,12 +131,14 @@ func create_starting_beast{
 }(adventurer_id: Uint256, beast_id: felt) -> (beast_token_id: Uint256) {
     alloc_locals;
     Module.only_approved();
-    
+
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
     let (adventurer_state) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_id);
 
-    let (beast_static_, beast_dynamic_) = BeastLib.create_start_beast(beast_id, adventurer_id.low, adventurer_state);
-    
+    let (beast_static_, beast_dynamic_) = BeastLib.create_start_beast(
+        beast_id, adventurer_id.low, adventurer_state
+    );
+
     return _create(beast_static_, beast_dynamic_);
 }
 
@@ -189,7 +193,9 @@ func attack{
         item_address, Uint256(unpacked_adventurer.WeaponId, 0)
     );
     let (rnd) = get_random_number();
-    let (damage_dealt) = CombatStats.calculate_damage_to_beast(beast, weapon, unpacked_adventurer, rnd);
+    let (damage_dealt) = CombatStats.calculate_damage_to_beast(
+        beast, weapon, unpacked_adventurer, rnd
+    );
     // deduct health from beast
     let (beast_static_, beast_dynamic_) = BeastLib.split_data(beast);
     let (updated_health_beast) = BeastLib.deduct_health(damage_dealt, beast_dynamic_);
@@ -209,9 +215,7 @@ func attack{
 
         // get the armor the adventurer is wearing at the location the beast attacks
         let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(beast_attack_location, 0));
-        let (damage_taken) = CombatStats.calculate_damage_from_beast(
-            beast, armor, rnd
-        );
+        let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, armor, rnd);
 
         IAdventurer.deduct_health(adventurer_address, adventurer_id, damage_taken);
 
@@ -243,8 +247,24 @@ func attack{
         // calculate earned XP
         let (beast_level) = BeastLib.calculate_greatness(slain_updated_beast.Level);
         let (beast_rank) = BeastStats.get_rank_from_id(beast.Id);
-        let (xp_gained) = CombatStats.calculate_xp_earned(beast_rank, beast_level);
 
+        // if the adventurer is level 1 we give them 10 XP to get them to level 2 after defeating their first beast
+        if (unpacked_adventurer.Level == 1) {
+            tempvar xp_gained = 10;
+            tempvar syscall_ptr: felt* = syscall_ptr;
+            tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+            tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+            // after level 1 XP earned is based on beast rank and level
+        } else {
+            let (xp_gained) = CombatStats.calculate_xp_earned(beast_rank, beast_level);
+            tempvar xp_gained = xp_gained;
+            tempvar syscall_ptr: felt* = syscall_ptr;
+            tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+            tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+        }
+        tempvar xp_gained = xp_gained;
         // give xp to adventurer
         IAdventurer.increase_xp(adventurer_address, adventurer_id, xp_gained);
 
@@ -257,7 +277,7 @@ func attack{
         let (rnd) = get_random_number();
         let (gold_reward) = BeastLib.calculate_gold_reward(rnd, xp_gained);
         _add_to_balance(adventurer_id, gold_reward);
-        
+
         IAdventurer.update_status(
             adventurer_address, Uint256(beast.Adventurer, 0), AdventurerStatus.Idle
         );
@@ -394,9 +414,7 @@ func flee{
         let (damage_rnd) = get_random_number();
 
         // calculate damage taken from beast
-        let (damage_taken) = CombatStats.calculate_damage_from_beast(
-            beast, armor, damage_rnd
-        );
+        let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, armor, damage_rnd);
 
         // update adventurer health
         IAdventurer.deduct_health(adventurer_address, Uint256(beast.Adventurer, 0), damage_taken);
