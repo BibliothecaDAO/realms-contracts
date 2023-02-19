@@ -4,6 +4,7 @@ from realms_cli.utils import print_over_colums, uint, felt_to_str, convert_unix_
 from realms_cli.loot.constants import BEASTS
 from rich.console import Console
 from rich.table import Table
+import climage
 
 console = Console()
 
@@ -150,3 +151,10 @@ def print_loot_and_bid(out_array):
 def format_array(index, array, value):
         array[index] = value
         return array
+
+
+def print_beast_img(id):
+    print(climage.convert('realms_cli/realms_cli/loot/images/beasts/'+ id + '.png', is_unicode=True))
+
+def print_player():
+    print(climage.convert('realms_cli/realms_cli/loot/images/player.png', is_unicode=True))
