@@ -53,23 +53,28 @@ namespace BeastIds {
     const Griffin = 2;
     const Minotaur = 3;
     const Basilisk = 4;
+    const Gnome = 5;
 
-    const Wraith = 5;
-    const Ghoul = 6;
-    const Goblin = 7;
-    const Skeleton = 8;
+    const Wraith = 6;
+    const Ghoul = 7;
+    const Goblin = 8;
+    const Skeleton = 9;
+    const Golem = 10;
 
-    const Giant = 9;
-    const Yeti = 10;
-    const Orc = 11;
-    const Beserker = 12;
-    const Ogre = 13;
+    const Giant = 11;
+    const Yeti = 12;
+    const Orc = 13;
+    const Beserker = 14;
+    const Ogre = 15;
 
-    const Dragon = 14;
-    const Vampire = 15;
-    const Werewolf = 16;
-    const Spider = 17;
-    const Rat = 18;
+    const Dragon = 16;
+    const Vampire = 17;
+    const Werewolf = 18;
+    const Spider = 19;
+    const Rat = 20;
+
+    // If you add beasts, make sure to update MAX_ID below
+    const MAX_ID = 20;
 }
 
 namespace BeastRank {
@@ -77,11 +82,13 @@ namespace BeastRank {
     const Griffin = 2;
     const Minotaur = 3;
     const Basilisk = 4;
+    const Gnome = 5;
 
     const Wraith = 1;
     const Ghoul = 2;
     const Goblin = 3;
     const Skeleton = 4;
+    const Golem = 5;
 
     const Giant = 1;
     const Yeti = 2;
@@ -101,11 +108,13 @@ namespace BeastAttackType {
     const Griffin = Type.Weapon.magic;
     const Minotaur = Type.Weapon.magic;
     const Basilisk = Type.Weapon.magic;
+    const Gnome = Type.Weapon.magic;
 
     const Wraith = Type.Weapon.magic;
     const Ghoul = Type.Weapon.magic;
     const Goblin = Type.Weapon.magic;
     const Skeleton = Type.Weapon.magic;
+    const Golem = Type.Weapon.magic;
 
     const Giant = Type.Weapon.bludgeon;
     const Yeti = Type.Weapon.bludgeon;
@@ -125,11 +134,13 @@ namespace BeastArmorType {
     const Griffin = Type.Armor.cloth;
     const Minotaur = Type.Armor.cloth;
     const Basilisk = Type.Armor.cloth;
+    const Gnome = Type.Armor.cloth;
 
     const Wraith = Type.Armor.cloth;
     const Ghoul = Type.Armor.cloth;
     const Goblin = Type.Armor.cloth;
     const Skeleton = Type.Armor.cloth;
+    const Golem = Type.Armor.cloth;
 
     const Giant = Type.Armor.metal;
     const Yeti = Type.Armor.metal;

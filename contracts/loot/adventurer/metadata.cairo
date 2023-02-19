@@ -116,10 +116,12 @@ namespace AdventurerUriUtils {
         const Griffin = 'Griffin';
         const Minotaur = 'Minotaur';
         const Basilisk = 'Basilisk';
+        const Gnome = 'Gnome';
         const Wraith = 'Wraith';
         const Ghoul = 'Ghoul';
         const Goblin = 'Goblin';
         const Skeleton = 'Skeleton';
+        const Golem = 'Golem';
         const Giant = 'Giant';
         const Yeti = 'Yeti';
         const Orc = 'Orc';
@@ -976,6 +978,9 @@ namespace AdventurerUri {
         if (beast == BeastIds.Basilisk) {
             assert values[values_index + 2] = AdventurerUriUtils.Beast.Basilisk;
         }
+        if (beast == BeastIds.Gnome) {
+            assert values[values_index + 2] = AdventurerUriUtils.Beast.Gnome;
+        }
         if (beast == BeastIds.Wraith) {
             assert values[values_index + 2] = AdventurerUriUtils.Beast.Wraith;
         }
@@ -987,6 +992,9 @@ namespace AdventurerUri {
         }
         if (beast == BeastIds.Skeleton) {
             assert values[values_index + 2] = AdventurerUriUtils.Beast.Skeleton;
+        }
+        if (beast == BeastIds.Golem) {
+            assert values[values_index + 2] = AdventurerUriUtils.Beast.Golem;
         }
         if (beast == BeastIds.Giant) {
             assert values[values_index + 2] = AdventurerUriUtils.Beast.Giant;
