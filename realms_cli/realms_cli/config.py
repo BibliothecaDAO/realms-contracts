@@ -303,8 +303,21 @@ class Config:
             "Status"
         ]
 
-        self.LOOT_ITEMS = ['Pendant',  'Necklace',  'Amulet',  'Silver Ring',  'Bronze Ring',  'Platinum Ring',  'Titanium Ring',  'Gold Ring',  'Ghost Wand',  'Grave Wand',  'Bone Wand',  'Wand',  'Grimoire',  'Chronicle',  'Tome',  'Book',  'Katana',  'Falchion',  'Scimitar',  'Long Sword',  'Short Sword',  'Warhammer',  'Quarterstaff',  'Maul',  'Mace',  'Club',  'Divine Robe',  'Silk Robe',  'Linen Robe',  'Robe',  'Shirt',  'Demon Husk',  'Dragonskin Armor',  'Studded Leather Armor',  'Hard Leather Armor',  'Leather Armor',  'Holy Chestplate',  'Ornate ChestPlate',  'Plate Mail',  'Chain Mail',  'Ring Mail',  'Crown',  'Divine Hood',  'Silk Hood',  'Linen Hood',  'Hood',  'Demon Crown',  'Dragons Crown',  'War Cap',  'Leather Cap',  'Cap',  'Ancient Helm',  'Ornate Helm',  'Great Helm',  'Full Helm',
-                           'Helm',  'Brightsilk Sash',  'Silk Sash',  'Wool Sash',  'Linen Sash',  'Sash',  'Demonhide Belt',  'Dragonskin Belt',  'Studded Leather Belt',  'Hard Leather Belt',  'Leather Belt',  'Ornate Belt',  'War Belt',  'Plated Belt',  'Mesh Belt',  'Heavy Belt',  'Divine Slippers',  'Silk Slippers',  'Wool Shoes',  'Linen Shoes',  'Shoes',  'Demonhide Boots',  'Dragonskin Boots',  'Studded Leather Boots',  'Hard Leather Boots',  'Leather Boots',  'Chain Boots',  'Heavy Boots',  'Holy Gauntlets',  'Ornate Gauntlets',  'Gauntlets',  'Divine Gloves',  'Silk Gloves',  'Wool Gloves',  'Linen Gloves',  'Gloves',  'Demons Hands',  'Dragonskin Gloves',  'Studded Leather Gloves',  'Hard Leather Gloves',  'Leather Gloves',  'Holy Greaves',  'Ornate Greaves',  'Greaves',  'Chain Gloves',  'Heavy Gloves']
+        self.LOOT_ITEMS = [
+                            'Pendant', 'Necklace', 'Amulet', 'SilverRing', 'BronzeRing', 'PlatinumRing', 'TitaniumRing', 'GoldRing', 'GhostWand',
+                            'GraveWand', 'BoneWand', 'Wand', 'Grimoire', 'Chronicle', 'Tome', 'Book', 'DivineRobe', 'SilkRobe', 'LinenRobe',
+                            'Robe', 'Shirt', 'Crown', 'DivineHood', 'SilkHood', 'LinenHood', 'Hood', 'BrightsilkSash', 'SilkSash', 'WoolSash',
+                            'LinenSash', 'Sash', 'DivineSlippers', 'SilkSlippers', 'WoolShoes', 'LinenShoes', 'Shoes', 'DivineGloves', 'SilkGloves',
+                            'WoolGloves', 'LinenGloves', 'Gloves', 'Katana', 'Falchion', 'Scimitar', 'LongSword', 'ShortSword', 'DemonHusk',
+                            'DragonskinArmor', 'StuddedLeatherArmor', 'HardLeatherArmor', 'LeatherArmor', 'DemonCrown', 'DragonsCrown', 'WarCap',
+                            'LeatherCap', 'Cap', 'DemonhideBelt', 'DragonskinBelt', 'StuddedLeatherBelt', 'HardLeatherBelt', 'LeatherBelt',
+                            'DemonhideBoots', 'DragonskinBoots', 'StuddedLeatherBoots', 'HardLeatherBoots', 'LeatherBoots', 'DemonsHands',
+                            'DragonskinGloves', 'StuddedLeatherGloves', 'HardLeatherGloves', 'LeatherGloves', 'Warhammer', 'Quarterstaff',
+                            'Maul', 'Mace', 'Club', 'HolyChestplate', 'OrnateChestplate', 'PlateMail', 'ChainMail', 'RingMail', 'AncientHelm',
+                            'OrnateHelm', 'GreatHelm', 'FullHelm', 'Helm', 'OrnateBelt', 'WarBelt', 'PlatedBelt', 'MeshBelt', 'HeavyBelt',
+                            'HolyGreaves', 'OrnateGreaves', 'Greaves', 'ChainBoots', 'HeavyBoots', 'HolyGauntlets', 'OrnateGauntlets', 'Gauntlets',
+                            'ChainGloves', 'HeavyGloves'
+                        ]
 
         self.SLOT = ["Weapon","Chest","Head","Waist","Foot","Hand","Neck","Ring"]
 

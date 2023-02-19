@@ -151,9 +151,9 @@ def print_loot_and_bid(out_array):
         item = out[:14]
         bid = out[14:18]
 
-        item = format_array(1, item, config.LOOT_ITEMS[int(out[1]) -1])
+        item = format_array(1, item, config.LOOT_ITEMS[int(out[1]) - 1])
 
-        item = format_array(2, item, config.SLOT[int(item[2]) -1])
+        item = format_array(2, item, config.SLOT[int(item[2]) - 1])
 
         bid = format_array(1, bid, convert_unix_time(int(bid[1])))
        

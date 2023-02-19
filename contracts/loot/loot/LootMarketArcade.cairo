@@ -4,7 +4,7 @@
 %lang starknet
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin
-from starkware.cairo.common.uint256 import Uint256
+from starkware.cairo.common.uint256 import Uint256, uint256_add, uint256_eq
 from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero
 from starkware.cairo.common.math_cmp import is_le_felt, is_le, is_not_zero
 from openzeppelin.access.ownable.library import Ownable
@@ -313,16 +313,16 @@ func _mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
 ) -> (item_token_id: Uint256) {
     alloc_locals;
 
-    let (next_id) = counter.read();
+    let (current_id: Uint256) = totalSupply();
+    let (next_item_id, _) = uint256_add(current_id, Uint256(1, 0));
 
-    item.write(Uint256(next_id + 1, 0), _item);
+    item.write(next_item_id, _item);
 
-    ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
+    ERC721Enumerable._mint(to, next_item_id);
 
-    item_adventurer_owner.write(Uint256(next_id + 1, 0), adventurer_token_id, TRUE);
+    item_adventurer_owner.write(next_item_id, adventurer_token_id, TRUE);
 
-    counter.write(next_id + 1);
-    return (Uint256(next_id + 1, 0),);
+    return (next_item_id,);
 }
 
 

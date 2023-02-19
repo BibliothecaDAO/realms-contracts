@@ -220,7 +220,7 @@ async def bag(network):
             arguments=[*uint(id[0])],
         )
         out = out.split(" ")
-        out.insert(0, str(int(i) + int(id[0])))
+        out.insert(0, str(int(id[0])))
         all_items.append(out)
 
     print_loot(all_items)
