@@ -166,14 +166,15 @@ func attack{
     // check if beast is still alive after the attack
     let beast_is_alive = is_not_zero(updated_health_beast.Health);
 
-    // if the beast is alive
+    // if the beast is alive, it automatically counter attacks
     if (beast_is_alive == TRUE) {
-        // having been attacked, it automatically attacks back
-        let (chest) = ILoot.get_item_by_token_id(
-            item_address, Uint256(unpacked_adventurer.ChestId, 0)
-        );
+        // get the location the beast attacks
+        let (beast_attack_location) = BeastStats.get_attack_location_from_id(beast.Id);
+
+        // get the armor the adventurer is wearing at the location the beast attacks
+        let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(beast_attack_location, 0));
         let (damage_taken) = CombatStats.calculate_damage_from_beast(
-            beast, chest, unpacked_adventurer
+            beast, armor, unpacked_adventurer
         );
 
         IAdventurer.deduct_health(adventurer_address, adventurer_id, damage_taken);
@@ -248,6 +249,9 @@ func counter_attack{
 
     // get beast from token id
     let (beast) = get_beast_by_id(beast_token_id);
+    // get the location this beast attacks
+    let (beast_attack_location) = BeastStats.get_attack_location_from_id(beast.Id);
+
     // get the adventurer token id associated with the beast
     let adventurer_token_id = Uint256(beast.Adventurer, 0);
 
@@ -259,10 +263,14 @@ func counter_attack{
 
     // retreive unpacked adventurer
     let (unpacked_adventurer) = get_adventurer_from_beast(beast_token_id);
-    let (chest) = ILoot.get_item_by_token_id(item_address, Uint256(unpacked_adventurer.ChestId, 0));
-    let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, chest, unpacked_adventurer);
 
+    // get the armor the adventurer has at the armor slot the beast is attacking
+    let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(beast_attack_location, 0));
+    let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, armor, unpacked_adventurer);
+
+    // deduct heatlh from adventurer
     IAdventurer.deduct_health(adventurer_address, adventurer_token_id, damage_taken);
+
     // check if beast counter attack killed adventurer
     let (updated_adventurer) = get_adventurer_from_beast(beast_token_id);
     // if the adventurer is dead
@@ -335,16 +343,23 @@ func flee{
 
     // unless ambush occurs
     if (is_ambushed == TRUE) {
-        let (chest) = ILoot.get_item_by_token_id(
-            item_address, Uint256(unpacked_adventurer.ChestId, 0)
-        );
-        // then calculate damage based on beast
+        // get the location the beast attacks
+        let (beast_attack_location) = BeastStats.get_attack_location_from_id(beast.Id);
+
+        // get the armor the adventurer is wearing at the location the beast attacks
+        let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(beast_attack_location, 0));
+
+        // calculate damage taken from beast
         let (damage_taken) = CombatStats.calculate_damage_from_beast(
-            beast, chest, unpacked_adventurer
+            beast, armor, unpacked_adventurer
         );
+
+        // update adventurer health
         IAdventurer.deduct_health(adventurer_address, Uint256(beast.Adventurer, 0), damage_taken);
+
         // check if beast counter attack killed adventurer
         let (updated_adventurer) = get_adventurer_from_beast(beast_token_id);
+
         // if the adventurer is dead
         if (updated_adventurer.Health == 0) {
             // calculate xp earned from killing adventurer (adventurers are rank 1)

@@ -8,7 +8,7 @@
 %lang starknet
 
 from starkware.cairo.common.registers import get_label_location
-from contracts.loot.constants.item import Type
+from contracts.loot.constants.item import Type, Slot
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 
 struct Beast {
@@ -161,4 +161,30 @@ namespace BeastSlotIds {
     const XP = 2;
     const Level = 3;
     const SlainOnDate = 4;
+}
+
+namespace BeastAttackLocation {
+    const Phoenix = Slot.Head;
+    const Griffin = Slot.Chest;
+    const Minotaur = Slot.Hand;
+    const Basilisk = Slot.Waist;
+    const Gnome = Slot.Foot;
+
+    const Wraith = Slot.Chest;
+    const Ghoul = Slot.Hand;
+    const Goblin = Slot.Waist;
+    const Skeleton = Slot.Foot;
+    const Golem = Slot.Head;
+
+    const Giant = Slot.Hand;
+    const Yeti = Slot.Waist;
+    const Orc = Slot.Foot;
+    const Beserker = Slot.Head;
+    const Ogre = Slot.Chest;
+
+    const Dragon = Slot.Waist;
+    const Vampire = Slot.Foot;
+    const Werewolf = Slot.Head;
+    const Spider = Slot.Chest;
+    const Rat = Slot.Hand;
 }
