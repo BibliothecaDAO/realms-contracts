@@ -535,7 +535,7 @@ func explore{
     let (beast_address) = Module.get_module_address(ModuleIds.Beast);
 
     // If the adventurer encounter a beast
-    if (unpacked_adventurer.Level == 0){
+    if (unpacked_adventurer.XP == 0){
             // we set their status to battle
         let (new_unpacked_adventurer) = AdventurerLib.update_status(
             AdventurerStatus.Battle, adventurer_dynamic_ 

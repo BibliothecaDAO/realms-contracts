@@ -30,7 +30,7 @@ NEW_MODULES = [
     # Contracts("Exchange_ERC20_1155"),
     Contracts("Adventurer"),
     # Contracts("LootMarketArcade"),
-    Contracts("Beast"),
+    # Contracts("Beast"),
 ]
 
 

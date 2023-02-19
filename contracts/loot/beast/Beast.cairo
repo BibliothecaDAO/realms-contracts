@@ -120,7 +120,7 @@ func create{
 
     let (beast_static_, beast_dynamic_) = BeastLib.create(beast_id, adventurer_id.low, adventurer_state, beast_level);
     
-    return _create(adventurer_id, beast_static_, beast_dynamic_);
+    return _create(beast_static_, beast_dynamic_);
 }
 
 @external
@@ -135,12 +135,12 @@ func create_starting_beast{
 
     let (beast_static_, beast_dynamic_) = BeastLib.create_start_beast(beast_id, adventurer_id.low, adventurer_state);
     
-    return _create(adventurer_id, beast_static_, beast_dynamic_);
+    return _create(beast_static_, beast_dynamic_);
 }
 
 func _create{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(adventurer_id: Uint256, beast_static_: BeastStatic, beast_dynamic_: BeastDynamic) -> (beast_token_id: Uint256) {
+}(beast_static_: BeastStatic, beast_dynamic_: BeastDynamic) -> (beast_token_id: Uint256) {
     alloc_locals;
 
     let (packed_beast) = BeastLib.pack(beast_dynamic_);
@@ -254,6 +254,11 @@ func attack{
         let (rnd) = get_random_number();
         let (gold_reward) = BeastLib.calculate_gold_reward(rnd, xp_gained);
         _add_to_balance(adventurer_id, gold_reward);
+        
+        IAdventurer.update_status(
+            adventurer_address, Uint256(beast.Adventurer, 0), AdventurerStatus.Idle
+        );
+        IAdventurer.assign_beast(adventurer_address, Uint256(beast.Adventurer, 0), 0);
         return (damage_dealt, 0);
     }
 }

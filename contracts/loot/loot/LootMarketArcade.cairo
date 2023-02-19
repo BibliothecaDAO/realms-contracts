@@ -582,6 +582,16 @@ func item_owner{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
     return item_adventurer_owner.read(tokenId, adventurer_token_id);
 }
 
+@view
+func get_mint_index{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (number: felt) {
+    return mint_index.read();
+}
+
+@view
+func get_new_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (number: felt) {
+    return new_items.read();
+}
+
 @external
 func mint_daily_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
