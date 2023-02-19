@@ -12,7 +12,7 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.registers import get_label_location
 
-from contracts.loot.constants.beast import BeastAttackType, BeastArmorType, BeastRank
+from contracts.loot.constants.beast import BeastAttackType, BeastArmorType, BeastRank, BeastAttackLocation
 from contracts.loot.constants.rankings import ItemRank
 from contracts.loot.constants.physics import MaterialDensity
 
@@ -106,5 +106,36 @@ namespace BeastStats {
         dw BeastRank.Werewolf;
         dw BeastRank.Spider;
         dw BeastRank.Rat;
+    }
+
+    func get_attack_location_from_id{syscall_ptr: felt*, range_check_ptr}(beast_id: felt) -> (
+        location: felt
+    ) {
+        alloc_locals;
+
+        let (label_location) = get_label_location(labels);
+        return ([label_location + beast_id - 1],);
+
+        labels:
+        dw BeastAttackLocation.Phoenix;
+        dw BeastAttackLocation.Griffin;
+        dw BeastAttackLocation.Minotaur;
+        dw BeastAttackLocation.Basilisk;
+        dw BeastAttackLocation.Gnome;
+        dw BeastAttackLocation.Wraith;
+        dw BeastAttackLocation.Ghoul;
+        dw BeastAttackLocation.Goblin;
+        dw BeastAttackLocation.Skeleton;
+        dw BeastAttackLocation.Golem;
+        dw BeastAttackLocation.Giant;
+        dw BeastAttackLocation.Yeti;
+        dw BeastAttackLocation.Orc;
+        dw BeastAttackLocation.Beserker;
+        dw BeastAttackLocation.Ogre;
+        dw BeastAttackLocation.Dragon;
+        dw BeastAttackLocation.Vampire;
+        dw BeastAttackLocation.Werewolf;
+        dw BeastAttackLocation.Spider;
+        dw BeastAttackLocation.Rat;
     }
 }
