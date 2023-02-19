@@ -239,15 +239,12 @@ namespace CombatStats {
     ) -> (damage: felt) {
         alloc_locals;
 
-        // Get beast type
-        let (attack_type) = ObstacleUtils.get_type_from_id(obstacle.Id);
-
         // Get armor type
         let (armor_type) = ItemStats.item_type(armor.Id);
 
         // pass details of attack and armor to core damage calculation function
         let (damage_dealt) = calculate_damage(
-            attack_type, obstacle.Rank, obstacle.Greatness, armor_type, armor.Rank, armor.Greatness, 1, 1
+            obstacle.Type, obstacle.Rank, obstacle.Greatness, armor_type, armor.Rank, armor.Greatness, 1, 1
         );
 
         // return damage dealt

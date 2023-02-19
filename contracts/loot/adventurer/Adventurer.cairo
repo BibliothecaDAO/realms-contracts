@@ -44,6 +44,7 @@ from contracts.loot.constants.adventurer import (
     DiscoveryType,
 )
 from contracts.loot.constants.beast import Beast
+from contracts.loot.constants.obstacle import ObstacleUtils
 from contracts.loot.interfaces.imodules import IModuleController
 from contracts.loot.loot.stats.combat import CombatStats
 from contracts.loot.utils.general import _uint_to_felt
@@ -587,11 +588,15 @@ func explore{
     }
 
     if (discovery == DiscoveryType.Obstacle) {
-        // hard coded 10HP damage
-        // TODO: pick obstacle
+        // TODO: Obstacle prefixes and greatness
+        // @distracteddev: Picked
         let (rnd) = get_random_number();
         let (_, r) = unsigned_div_rem(rnd * 9231312312, 15);
-        _deduct_health(token_id, 10);
+        let (obstacle) = ObstacleUtils.get_obstacle_from_id(r);
+        let (item_address) = Module.get_module_address(ModuleIds.Loot);
+        let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(obstacle.DamageLocation, 0));
+        let (obstacle_damage) = CombatStats.calculate_damage_from_obstacle(obstacle, armor);
+        _deduct_health(token_id, obstacle_damage);
         return (DiscoveryType.Obstacle, r);
     }
     if (discovery == DiscoveryType.Item) {

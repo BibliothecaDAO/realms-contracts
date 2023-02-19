@@ -35,6 +35,7 @@ from contracts.loot.constants.adventurer import (
     DiscoveryType,
 )
 
+from contracts.loot.constants.obstacle import ObstacleUtils
 from contracts.loot.constants.item import Item, ItemIds
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.constants import SHIFT_41

@@ -195,6 +195,7 @@ namespace TestUtils {
 
         let (type) = ObstacleUtils.get_type_from_id(obstacle_id);
         let (rank) = ObstacleUtils.get_rank_from_id(obstacle_id);
+        let (damage_location) = ObstacleUtils.get_damage_location_from_id(obstacle_id);
         let prefix_1 = 1;
         let prefix_2 = 1;
 
@@ -206,6 +207,7 @@ namespace TestUtils {
             prefix_1,
             prefix_2,
             greatness,
+            damage_location
             ),
         );
     }

@@ -8,7 +8,7 @@
 %lang starknet
 
 from starkware.cairo.common.registers import get_label_location
-from contracts.loot.constants.item import Type
+from contracts.loot.constants.item import Type, Slot
 
 // Structure for the adventurer Obstacle primitive
 struct Obstacle {
@@ -18,6 +18,7 @@ struct Obstacle {
     Prefix_1: felt,  // First part of the name prefix (i.e Tear)
     Prefix_2: felt,  // Second part of the name prefix (i.e Bearer)
     Greatness: felt,  // same as Loot weapons 0-20
+    DamageLocation: felt, // slot id of the damaged armor
 }
 
 namespace ObstacleConstants {
@@ -80,9 +81,47 @@ namespace ObstacleConstants {
         const SpikedPit = Type.Weapon.blade;
         const HiddenArrow = Type.Weapon.blade;
     }
+
+    namespace ObstacleDamageLocation {
+        const DemonicAlter = Slot.Head;
+        const Curse = Slot.Head;
+        const Hex = Slot.Hand;
+        const MagicLock = Slot.Hand;
+        const DarkMist = Slot.Chest;
+
+        const CollapsingCeiling = Slot.Head;
+        const CrushingWalls = Slot.Waist;
+        const Rockslide = Slot.Foot;
+        const TumblingBoulders = Slot.Foot;
+        const SwingingLogs = Slot.Chest;
+
+        const PendulumBlades = Slot.Hand;
+        const FlameJet = Slot.Waist;
+        const PoisonDart = Slot.Chest;
+        const SpikedPit = Slot.Foot;
+        const HiddenArrow = Slot.Waist;
+    }
 }
 
 namespace ObstacleUtils {
+    func get_obstacle_from_id{syscall_ptr: felt*, range_check_ptr}(obstacle_id: felt) -> (obstacle: Obstacle) {
+        alloc_locals;
+        let (obstacle_rank) = get_rank_from_id(obstacle_id);
+        let (obstacle_type) = get_type_from_id(obstacle_id);
+        let (obstacle_damage_location) = get_damage_location_from_id(obstacle_id);
+
+        // TODO: add prefixes and greatness 
+        let obstacle = Obstacle(
+            obstacle_id,
+            obstacle_type,
+            obstacle_rank,
+            1,
+            1,
+            1,
+            obstacle_damage_location,
+        );
+        return (obstacle,);
+    }
     func get_rank_from_id{syscall_ptr: felt*, range_check_ptr}(obstacle_id: felt) -> (rank: felt) {
         alloc_locals;
 
@@ -129,5 +168,29 @@ namespace ObstacleUtils {
         dw ObstacleConstants.ObstacleType.PoisonDart;
         dw ObstacleConstants.ObstacleType.SpikedPit;
         dw ObstacleConstants.ObstacleType.HiddenArrow;
+    }
+
+    func get_damage_location_from_id{syscall_ptr: felt*, range_check_ptr}(obstacle_id: felt) -> (damage_location: felt) {
+        alloc_locals;
+
+        let (label_location) = get_label_location(labels);
+        return ([label_location + obstacle_id - 1],);
+
+        labels:
+        dw ObstacleConstants.ObstacleDamageLocation.DemonicAlter;
+        dw ObstacleConstants.ObstacleDamageLocation.Curse;
+        dw ObstacleConstants.ObstacleDamageLocation.Hex;
+        dw ObstacleConstants.ObstacleDamageLocation.MagicLock;
+        dw ObstacleConstants.ObstacleDamageLocation.DarkMist;
+        dw ObstacleConstants.ObstacleDamageLocation.CollapsingCeiling;
+        dw ObstacleConstants.ObstacleDamageLocation.CrushingWalls;
+        dw ObstacleConstants.ObstacleDamageLocation.Rockslide;
+        dw ObstacleConstants.ObstacleDamageLocation.TumblingBoulders;
+        dw ObstacleConstants.ObstacleDamageLocation.SwingingLogs;
+        dw ObstacleConstants.ObstacleDamageLocation.PendulumBlades;
+        dw ObstacleConstants.ObstacleDamageLocation.FlameJet;
+        dw ObstacleConstants.ObstacleDamageLocation.PoisonDart;
+        dw ObstacleConstants.ObstacleDamageLocation.SpikedPit;
+        dw ObstacleConstants.ObstacleDamageLocation.HiddenArrow;
     }
 }
