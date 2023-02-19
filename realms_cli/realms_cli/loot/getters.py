@@ -74,22 +74,6 @@ def print_adventurer(out_list):
     console.print(table)
 
 
-    # config = Config(nile_network='goerli')
-    # pretty_out = []
-    # for i, key in enumerate(config.ADVENTURER):
-
-    #     # Output names for item name prefix1, prefix2, and suffix
-    #     if i in [25]:
-    #         pretty_out.append(f"{key} : {felt_to_str(int(out[i]))}")
-    #     else:
-    #         pretty_out.append(f"{key} : {int(out[i])}")
-    # print("_____________________________________________________")
-    # print("_____________________*+ " + felt_to_str(int(out[3])) +
-    #       " +*______________________")
-    # print("_____________________________________________________")
-    # print_over_colums(pretty_out)
-
-
 async def _get_loot(loot_token_id, network):
     
     config = Config(nile_network=network)
