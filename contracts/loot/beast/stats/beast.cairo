@@ -30,10 +30,12 @@ namespace BeastStats {
         dw BeastAttackType.Griffin;
         dw BeastAttackType.Minotaur;
         dw BeastAttackType.Basilisk;
+        dw BeastAttackType.Gnome;
         dw BeastAttackType.Wraith;
         dw BeastAttackType.Ghoul;
         dw BeastAttackType.Goblin;
         dw BeastAttackType.Skeleton;
+        dw BeastAttackType.Golem;
         dw BeastAttackType.Giant;
         dw BeastAttackType.Yeti;
         dw BeastAttackType.Orc;
@@ -59,10 +61,12 @@ namespace BeastStats {
         dw BeastArmorType.Griffin;
         dw BeastArmorType.Minotaur;
         dw BeastArmorType.Basilisk;
+        dw BeastArmorType.Gnome;
         dw BeastArmorType.Wraith;
         dw BeastArmorType.Ghoul;
         dw BeastArmorType.Goblin;
         dw BeastArmorType.Skeleton;
+        dw BeastArmorType.Golem;
         dw BeastArmorType.Giant;
         dw BeastArmorType.Yeti;
         dw BeastArmorType.Orc;
@@ -86,10 +90,12 @@ namespace BeastStats {
         dw BeastRank.Griffin;
         dw BeastRank.Minotaur;
         dw BeastRank.Basilisk;
+        dw BeastRank.Gnome;
         dw BeastRank.Wraith;
         dw BeastRank.Ghoul;
         dw BeastRank.Goblin;
         dw BeastRank.Skeleton;
+        dw BeastRank.Golem;
         dw BeastRank.Giant;
         dw BeastRank.Yeti;
         dw BeastRank.Orc;
