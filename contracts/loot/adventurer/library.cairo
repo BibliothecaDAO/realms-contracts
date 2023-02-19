@@ -35,10 +35,10 @@ from contracts.loot.constants.adventurer import (
     DiscoveryType,
 )
 
-from contracts.loot.constants.item import Item
+from contracts.loot.constants.item import Item, ItemIds
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.constants import SHIFT_41
-from contracts.loot.constants.beast import Beast
+from contracts.loot.constants.beast import Beast, BeastIds
 from contracts.loot.loot.stats.combat import CombatStats
 
 
@@ -592,18 +592,17 @@ namespace AdventurerLib {
     ) -> (beast_id: felt) {
 
         if (weapon_id == ItemIds.ShortSword) {
-            return(1,);
+            return(BeastIds.Golem,);
         }
-        if (weapon_id == 1) {
-            return(1,);
+        if (weapon_id == ItemIds.Book) {
+            return(BeastIds.Ogre,);
         }
-        if (weapon_id == 1) {
-            return(1,);
+        if (weapon_id == ItemIds.Wand) {
+            return(BeastIds.Ogre,);
         }
-        if (weapon_id == 1) {
-            return(1,);
+        if (weapon_id == ItemIds.Club) {
+            return(BeastIds.Rat,);
         }
-
         return (0,);
     }
 }
