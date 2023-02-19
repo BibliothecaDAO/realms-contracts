@@ -2,8 +2,9 @@ import asyncclick as click
 from realms_cli.caller_invoker import wrapped_send, wrapped_proxy_call
 from realms_cli.config import Config
 from realms_cli.utils import uint, str_to_felt
-from realms_cli.loot.getters import _get_loot, print_loot, print_loot_and_bid,  _get_adventurer, _get_beast, print_adventurer
+from realms_cli.loot.getters import _get_loot, print_loot, print_loot_and_bid,  _get_adventurer, _get_beast, print_adventurer, print_beast_img, print_player
 from realms_cli.loot.constants import BEASTS
+import time
 
 @click.group()
 def loot():
@@ -321,8 +322,9 @@ async def explore(network, adventurer_token_id):
 
     out = await _get_adventurer(network, adventurer_token_id)
 
-    if out[23] == "1":
+    if out[25] == "1":
         print("🧌 You have discovered a beast")
+        print_beast_img(1)
         await _get_beast(out[26], network)
     else:
         print("🤔 You discovered nothing")
@@ -343,6 +345,7 @@ async def adventurer(adventurer_token_id, network):
     Get Adventurer metadata
     """
 
+    print_player()
     await _get_adventurer(network, adventurer_token_id)
 
 
@@ -498,6 +501,7 @@ async def attack(beast_token_id, network):
     config = Config(nile_network=network)
 
     print("🧌 Attacking beast ...")
+    
 
     await wrapped_send(
         network=config.nile_network,
@@ -523,6 +527,7 @@ async def attack(beast_token_id, network):
     if beast_out[6] == "0":
         print(f"💀 You have killed the {BEASTS[str(int(beast_out[0]))]} 🎉")
     else:
+        print_beast_img(1)
         print(
             f"👹 You hurt the {BEASTS[str(int(beast_out[0]))]}, health is now {beast_out[6]}"
         )
@@ -703,4 +708,26 @@ async def new(
         ],
     )
 
-    print("🤴 Minted adventurer ✅")
+    print_player()
+    print("In the void between worlds, a mighty warrior was born.")
+    time.sleep(2)
+    print("His name was " + name + ", and he was forged from the very fabric of the ether.")
+    time.sleep(2)
+    print("He emerged into the world with a sense of purpose and power, his very presence filling the air with electricity.")
+    time.sleep(2)
+    print("" + name + " knew that he had been born for a reason, and he was eager to discover what that reason was.")
+    time.sleep(2)
+    print("He set out into the unknown, his eyes fixed on the horizon, his heart filled with determination.")
+    time.sleep(2)
+    print("As he journeyed through the strange and wondrous land, he encountered many challenges.")
+    time.sleep(2)
+    print("But " + name + " was not deterred. He was a creature of the void, born to overcome any obstacle that stood in his way.")
+    time.sleep(2)
+    print("And so he pushed on, through fire and ice, through darkness and light, until he reached his ultimate destination.")
+    time.sleep(2)
+    print("There, in the heart of the world, he found his true purpose, his reason for being.")
+    time.sleep(2)
+    print("And with a final surge of power, he fulfilled his destiny, becoming a legend that would be spoken of for generations to come.")
+
+
+
