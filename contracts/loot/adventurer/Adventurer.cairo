@@ -44,7 +44,7 @@ from contracts.loot.constants.adventurer import (
     DiscoveryType,
 )
 from contracts.loot.constants.beast import Beast
-from contracts.loot.constants.obstacle import ObstacleUtils
+from contracts.loot.constants.obstacle import ObstacleUtils, ObstacleConstants
 from contracts.loot.interfaces.imodules import IModuleController
 from contracts.loot.loot.stats.combat import CombatStats
 from contracts.loot.utils.general import _uint_to_felt
@@ -591,7 +591,7 @@ func explore{
         // TODO: Obstacle prefixes and greatness
         // @distracteddev: Picked
         let (rnd) = get_random_number();
-        let (_, r) = unsigned_div_rem(rnd * 9231312312, 15);
+        let (_, r) = unsigned_div_rem(rnd * 9231312312, ObstacleConstants.ObstacleIds.MAX);
         let (obstacle) = ObstacleUtils.get_obstacle_from_id(r);
         let (item_address) = Module.get_module_address(ModuleIds.Loot);
         let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(obstacle.DamageLocation, 0));

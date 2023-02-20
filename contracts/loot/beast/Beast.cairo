@@ -34,7 +34,7 @@ from contracts.loot.constants.adventurer import (
     AdventurerStatus,
     AdventurerSlotIds,
 )
-from contracts.loot.constants.beast import Beast, BeastStatic, BeastDynamic
+from contracts.loot.constants.beast import Beast, BeastStatic, BeastDynamic, BeastIds
 from contracts.loot.interfaces.imodules import IModuleController
 from contracts.loot.loot.ILoot import ILoot
 from contracts.loot.loot.stats.combat import CombatStats
@@ -116,7 +116,7 @@ func create{
 
     let (random) = get_random_number();
     let (_, beast_level) = unsigned_div_rem(random, 6);
-    let (_, beast_id) = unsigned_div_rem(random, 17);
+    let (_, beast_id) = unsigned_div_rem(random, BeastIds.MAX_ID);
 
     let (beast_static_, beast_dynamic_) = BeastLib.create(beast_id, adventurer_id.low, adventurer_state, beast_level);
     
