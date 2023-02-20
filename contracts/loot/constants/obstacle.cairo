@@ -8,6 +8,11 @@
 %lang starknet
 
 from starkware.cairo.common.registers import get_label_location
+from starkware.cairo.common.math import unsigned_div_rem
+from contracts.loot.constants.adventurer import AdventurerState
+from starkware.cairo.common.math_cmp import is_le
+from starkware.cairo.common.bool import TRUE, FALSE
+
 from contracts.loot.constants.item import Type, Slot
 
 // Structure for the adventurer Obstacle primitive
@@ -18,7 +23,7 @@ struct Obstacle {
     Prefix_1: felt,  // First part of the name prefix (i.e Tear)
     Prefix_2: felt,  // Second part of the name prefix (i.e Bearer)
     Greatness: felt,  // same as Loot weapons 0-20
-    DamageLocation: felt, // slot id of the damaged armor
+    DamageLocation: felt,  // slot id of the damaged armor
 }
 
 namespace ObstacleConstants {
@@ -107,21 +112,43 @@ namespace ObstacleConstants {
 }
 
 namespace ObstacleUtils {
-    func get_obstacle_from_id{syscall_ptr: felt*, range_check_ptr}(obstacle_id: felt) -> (obstacle: Obstacle) {
+    const BASE_OBSTACLE_LEVEL = 3;
+    func generate_random_obstacle{syscall_ptr: felt*, range_check_ptr}(
+        adventurer_state: AdventurerState, rnd: felt
+    ) -> (obstacle: Obstacle) {
         alloc_locals;
+
+        // Given the provided random number, we scope it to range of our ObstacleIds
+        let (_, r) = unsigned_div_rem(rnd, ObstacleConstants.ObstacleIds.MAX);
+        let obstacle_id = r + 1;
+
+        // We then determine the greatness/level of the obstacle
+        let is_less_than_base_level = is_le(adventurer_state.Level, BASE_OBSTACLE_LEVEL);
+
+        let (_, obstacle_level_base) = unsigned_div_rem(rnd, 6);
+        // If the adventurer is less than the obstacle base level
+        if (is_less_than_base_level == TRUE) {
+            // the obstacle level is always equal to the adventurer level
+            tempvar obstacle_level = adventurer_state.Level;
+        } else {
+            // if the adventurer's level is higher than the obstacle base level
+            // the level will be plus or minus 3 levels from their level (based on current base obstacle level of 3)
+            tempvar obstacle_level = obstacle_level_base + (
+                adventurer_state.Level - BASE_OBSTACLE_LEVEL
+            );
+        }
+        let level = obstacle_level;
+
+        // obstacle rank is static, based on id
         let (obstacle_rank) = get_rank_from_id(obstacle_id);
+        // obstacle type is static, based on id
         let (obstacle_type) = get_type_from_id(obstacle_id);
+        // obstacle damage location is static, based on id
         let (obstacle_damage_location) = get_damage_location_from_id(obstacle_id);
 
-        // TODO: add prefixes and greatness 
+        // TODO: add prefixes and greatness
         let obstacle = Obstacle(
-            obstacle_id,
-            obstacle_type,
-            obstacle_rank,
-            1,
-            1,
-            1,
-            obstacle_damage_location,
+            obstacle_id, obstacle_type, obstacle_rank, 1, 1, level, obstacle_damage_location
         );
         return (obstacle,);
     }
@@ -173,7 +200,9 @@ namespace ObstacleUtils {
         dw ObstacleConstants.ObstacleType.HiddenArrow;
     }
 
-    func get_damage_location_from_id{syscall_ptr: felt*, range_check_ptr}(obstacle_id: felt) -> (damage_location: felt) {
+    func get_damage_location_from_id{syscall_ptr: felt*, range_check_ptr}(obstacle_id: felt) -> (
+        damage_location: felt
+    ) {
         alloc_locals;
 
         let (label_location) = get_label_location(labels);

@@ -24,7 +24,7 @@ from starkware.starknet.common.syscalls import (
     get_caller_address,
     get_contract_address,
     get_block_timestamp,
-    get_block_number
+    get_block_number,
 )
 
 from openzeppelin.access.ownable.library import Ownable
@@ -597,9 +597,7 @@ func explore{
         // TODO: Obstacle prefixes and greatness
         // @distracteddev: Picked
         let (rnd) = get_random_number();
-        let (_, r) = unsigned_div_rem(rnd, ObstacleConstants.ObstacleIds.MAX);
-        let obstacle_id = r+1;
-        let (obstacle) = ObstacleUtils.get_obstacle_from_id(obstacle_id);
+        let (obstacle) = ObstacleUtils.generate_random_obstacle(unpacked_adventurer, rnd);
         let (item_address) = Module.get_module_address(ModuleIds.Loot);
         // @distracteddev: Should be get equipped item by slot not get item by Id
         let (item_id) = AdventurerLib.get_item_id_at_slot(obstacle.DamageLocation, adventurer_dynamic_);
