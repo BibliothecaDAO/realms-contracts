@@ -124,7 +124,7 @@ func test_not_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
         # 1%4 = 1, therefore DiscoveryType beast
         stop_mock = mock_call(ids.xoroshiro_address, 'next', [1])
         # now we are timsing by timestamp we also need this 
-        stop_warp_adventurer = warp(1, ids.adventurer_address)
+        stop_roll_adventurer = roll(1, ids.adventurer_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
     %}
@@ -140,8 +140,8 @@ func test_not_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
     let (local adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_token_id_1);
 
     %{ 
-        stop_warp_adventurer()
-        stop_warp_beast = warp(1, ids.beast_address)
+        stop_roll_adventurer()
+        stop_roll_beast = roll(1, ids.beast_address)
         stop_mock()
         stop_prank_adventurer()
         stop_prank_beast()
@@ -187,7 +187,7 @@ func test_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         # 1%4 = 1, therefore DiscoveryType beast
         stop_mock = mock_call(ids.xoroshiro_address, 'next', [1])
         # now we are timsing by timestamp we also need this 
-        stop_warp = warp(1, ids.adventurer_address)
+        stop_roll = roll(1, ids.adventurer_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
         stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
@@ -200,7 +200,7 @@ func test_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     IAdventurer.explore(adventurer_address, adventurer_token_id);
 
     %{ 
-        stop_warp()
+        stop_roll()
         stop_mock()
         stop_prank_adventurer()
         stop_prank_beast()
@@ -252,7 +252,7 @@ func test_ambushed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
         # 1%4 = 1, therefore DiscoveryType beast
         stop_mock = mock_call(ids.xoroshiro_address, 'next', [1])
         # now we are timsing by timestamp we also need this 
-        stop_warp = warp(1, ids.adventurer_address)
+        stop_roll = roll(1, ids.adventurer_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
     %}
@@ -263,14 +263,14 @@ func test_ambushed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
 
     %{ 
         stop_mock()
-        stop_warp()
+        stop_roll()
         stop_prank_adventurer()
         stop_prank_beast()
         stop_prank_beast = start_prank(ids.account_1_address, ids.beast_address)
         # 2%4 = 2, therefore not fleeing
         stop_mock_flee_random = mock_call(ids.xoroshiro_address, 'next', [2])
         # now we are timsing by timestamp we also need this 
-        stop_warp = warp(1, ids.adventurer_address)
+        stop_roll = roll(1, ids.adventurer_address)
     %}
 
     IBeast.flee(beast_address, Uint256(1,0));
@@ -299,7 +299,7 @@ func test_flee{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         # 1%4 = 1, therefore DiscoveryType beast
         stop_mock = mock_call(ids.xoroshiro_address, 'next', [1])
         # now we are timsing by timestamp we also need this
-        stop_warp = warp(1, ids.adventurer_address)
+        stop_roll = roll(1, ids.adventurer_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
     %}
@@ -310,14 +310,14 @@ func test_flee{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     %{ 
         stop_mock()
-        stop_warp()
+        stop_roll()
         stop_prank_adventurer()
         stop_prank_beast()
         stop_prank_beast = start_prank(ids.account_1_address, ids.beast_address)
         # 3%4 = 3, therefore fleeing
         stop_mock_flee_random = mock_call(ids.xoroshiro_address, 'next', [3])
         # now we are timsing by timestamp we also need this
-        stop_warp = warp(1, ids.beast_address)
+        stop_roll = roll(1, ids.beast_address)
 
     %}
 

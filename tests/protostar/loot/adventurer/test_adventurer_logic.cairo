@@ -461,7 +461,9 @@ func test_discover_obstacle{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
     local adventurer_address;
     local beast_address;
 
+
     %{
+        from tests.protostar.loot.utils import utils
         ids.account_1_address = context.account_1
         ids.xoroshiro_address = context.xoroshiro
         ids.adventurer_address = context.adventurer
@@ -469,11 +471,12 @@ func test_discover_obstacle{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
         # 1%4 = 1, therefore DiscoveryType beast
         stop_mock = mock_call(ids.xoroshiro_address, 'next', [2])
         # now we are timsing by timestamp we also need this 
-        stop_warp_adventurer = warp(1, ids.adventurer_address)
+        stop_roll_adventurer = roll(1, ids.adventurer_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
         # need to store adventurer level to greater than 1 to avoid starter beast
-        store(ids.adventurer_address, "Ownable_owner", [ids.FAKE_OWNER_ADDR])
+        pa1, pa2, pa3, pa4 = utils.pack_adventurer(utils.build_adventurer_level(2))
+        store(ids.adventurer_address, "adventurer_dynamic", [pa1, pa2, pa3, pa4])
     %}
     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
     let (discovery_type, r) = IAdventurer.explore(adventurer_address, Uint256(1,0));
