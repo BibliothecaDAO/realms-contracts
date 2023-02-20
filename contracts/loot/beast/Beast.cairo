@@ -264,6 +264,12 @@ func attack{
             tempvar range_check_ptr = range_check_ptr;
             tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
         }
+        
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+
         tempvar xp_gained = xp_gained;
         // give xp to adventurer
         IAdventurer.increase_xp(adventurer_address, adventurer_id, xp_gained);
@@ -282,6 +288,7 @@ func attack{
             adventurer_address, Uint256(beast.Adventurer, 0), AdventurerStatus.Idle
         );
         IAdventurer.assign_beast(adventurer_address, Uint256(beast.Adventurer, 0), 0);
+
         return (damage_dealt, 0);
     }
 }
