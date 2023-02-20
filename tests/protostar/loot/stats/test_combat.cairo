@@ -188,6 +188,13 @@ func test_calculate_damage_from_obstacle{
     );
     assert demonhusk_vs_dark_mist = 0;
 
+    let zero_item = Item(0,0,0,0,0,0,0,0,0,0,0,0,0);
+    let (g0_curse) = TestUtils.create_obstacle(ObstacleConstants.ObstacleIds.Curse, 1);
+    let (zero_vs_curse) = CombatStats.calculate_damage_from_obstacle(
+        g0_curse, zero_item
+    );
+    assert zero_vs_curse = 12;
+
     return ();
 }
 

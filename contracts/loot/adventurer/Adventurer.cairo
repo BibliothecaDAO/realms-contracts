@@ -48,6 +48,7 @@ from contracts.loot.constants.adventurer import (
     PackedAdventurerState,
     AdventurerStatus,
     DiscoveryType,
+    ItemDiscoveryType
 )
 from contracts.loot.constants.beast import Beast
 from contracts.loot.constants.obstacle import ObstacleUtils, ObstacleConstants
@@ -89,10 +90,6 @@ func adventurer_balance(adventurer_token_id: Uint256) -> (balance: Uint256) {
 
 @storage_var
 func treasury_address() -> (address: felt) {
-}
-
-@storage_var
-func adventurer(tokenId: Uint256) -> (adventurer: PackedAdventurerState) {
 }
 
 @storage_var
@@ -602,11 +599,13 @@ func explore{
         // TODO: Obstacle prefixes and greatness
         // @distracteddev: Picked
         let (rnd) = get_random_number();
-        let (_, r) = unsigned_div_rem(rnd * 9231312312, ObstacleConstants.ObstacleIds.MAX);
+        let (_, r) = unsigned_div_rem(rnd, ObstacleConstants.ObstacleIds.MAX);
         let obstacle_id = r+1;
         let (obstacle) = ObstacleUtils.get_obstacle_from_id(obstacle_id);
         let (item_address) = Module.get_module_address(ModuleIds.Loot);
-        let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(obstacle.DamageLocation, 0));
+        // @distracteddev: Should be get equipped item by slot not get item by Id
+        let (item_id) = AdventurerLib.get_item_id_at_slot(obstacle.DamageLocation, adventurer_dynamic_);
+        let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(item_id, 0));
         let (obstacle_damage) = CombatStats.calculate_damage_from_obstacle(obstacle, armor);
         _deduct_health(token_id, obstacle_damage);
         return (DiscoveryType.Obstacle, obstacle.Id);
@@ -617,7 +616,7 @@ func explore{
         let (rnd) = get_random_number();
         let (discovery) = AdventurerLib.get_random_discovery(rnd);
 
-        if (discovery == 1) {
+        if (discovery == ItemDiscoveryType.Gold) {
             // add GOLD
             // @distracteddev: formula - 1 + (rnd % 4)
             let (rnd) = get_random_number();
@@ -627,7 +626,7 @@ func explore{
             emit_adventurer_state(token_id);
             return (DiscoveryType.Item, 0);
         }
-        if (discovery == 2) {
+        if (discovery == ItemDiscoveryType.XP) {
             // add XP
             // @distracteddev: formula - 10 + (5 * (rnd % 4))
             let (rnd) = get_random_number();
@@ -635,7 +634,7 @@ func explore{
             _increase_xp(token_id, xp_discovery);
             return (DiscoveryType.Item, 0);
         }
-        if (discovery == 3) {
+        if (discovery == ItemDiscoveryType.Loot) {
             // mint loot items
             let (loot_address) = Module.get_module_address(ModuleIds.Loot);
             let (owner) = owner_of(token_id);
@@ -643,7 +642,7 @@ func explore{
             emit_adventurer_state(token_id);
             return (DiscoveryType.Item, 0);
         }
-        if (discovery == 4) {
+        if (discovery == ItemDiscoveryType.Health) {
             // add health
             // @distracteddev: formula - 10 + (5 * (rnd % 4))
             let (rnd) = get_random_number();

@@ -214,7 +214,10 @@ func attack{
         let (rnd) = get_random_number();
 
         // get the armor the adventurer is wearing at the location the beast attacks
-        let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(beast_attack_location, 0));
+        // @distracteddev: Should be get equipped item by slot not get item by Id
+        let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
+        let (item_id) = AdventurerLib.get_item_id_at_slot(beast_attack_location, adventurer_dynamic_);
+        let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(item_id, 0));
         let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, armor, rnd);
 
         IAdventurer.deduct_health(adventurer_address, adventurer_id, damage_taken);

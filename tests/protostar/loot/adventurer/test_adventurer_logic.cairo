@@ -448,9 +448,101 @@ func test_mint{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 // }
 
 // @external
-// func test_discover_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+// func test_discover_loot{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+//     alloc_locals;
+    
+//     local account_1_address;
+//     local xoroshiro_address;
+//     local adventurer_address;
+//     local beast_address;
+
+//     %{
+//         ids.account_1_address = context.account_1
+//         ids.xoroshiro_address = context.xoroshiro
+//         ids.adventurer_address = context.adventurer
+//         ids.beast_address = context.beast
+//         # 1%4 = 1, therefore DiscoveryType beast
+//         stop_mock = mock_call(ids.xoroshiro_address, 'next', [2])
+//         # now we are timsing by timestamp we also need this 
+//         stop_roll_adventurer = roll(1, ids.adventurer_address)
+//         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+//         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
+//     %}
+
+//     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
+
+//     %{
+//         from tests.protostar.loot.utils import utils
+//         # need to store adventurer level to greater than 1 to avoid starter beast
+//         p1, p2, p3, p4 = utils.pack_adventurer(utils.build_adventurer_level(2))
+//         store(ids.adventurer_address, "adventurer_dynamic", [p1, p2, p3, p4], key=[1,0])
+//     %}
+
+//     let (discovery_type, r) = IAdventurer.explore(adventurer_address, Uint256(1,0));
+
+//     assert discovery_type = DiscoveryType.Item;
+//     assert r = 0;
+
 //     return ();
 // }
+
+@external
+func test_discover_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+    
+    local account_1_address;
+    local xoroshiro_address;
+    local adventurer_address;
+    local beast_address;
+
+    %{
+        ids.account_1_address = context.account_1
+        ids.xoroshiro_address = context.xoroshiro
+        ids.adventurer_address = context.adventurer
+        ids.beast_address = context.beast
+        # 1%4 = 1, therefore DiscoveryType beast
+        stop_mock = mock_call(ids.xoroshiro_address, 'next', [3])
+        # now we are timsing by timestamp we also need this 
+        stop_roll_adventurer = roll(1, ids.adventurer_address)
+        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+        stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
+    %}
+
+    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
+
+    %{
+        from tests.protostar.loot.utils import utils
+        # need to store adventurer level to greater than 1 to avoid starter beast
+        p1, p2, p3, p4 = utils.pack_adventurer(utils.build_adventurer_level(2))
+        store(ids.adventurer_address, "adventurer_dynamic", [p1, p2, p3, p4], key=[1,0])
+    %}
+
+    %{
+        stop_prank_adventurer()
+        stop_prank_adventurer = start_prank(ids.beast_address, ids.adventurer_address)
+    %}
+
+    // deduct health to measure health increase
+    IAdventurer.deduct_health(adventurer_address, Uint256(1,0), 50);
+
+
+    %{
+        stop_prank_adventurer()
+        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+    %}
+
+    let (discovery_type, r) = IAdventurer.explore(adventurer_address, Uint256(1,0));
+
+    assert discovery_type = DiscoveryType.Item;
+    assert r = 0;
+
+    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
+
+    // 50 + (10 + (5 * 3))
+    assert adventurer.Health = 75;
+
+    return ();
+}
 
 @external
 func test_discover_obstacle{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
@@ -463,7 +555,6 @@ func test_discover_obstacle{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
 
 
     %{
-        from tests.protostar.loot.utils import utils
         ids.account_1_address = context.account_1
         ids.xoroshiro_address = context.xoroshiro
         ids.adventurer_address = context.adventurer
@@ -474,21 +565,23 @@ func test_discover_obstacle{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
         stop_roll_adventurer = roll(1, ids.adventurer_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
-        # need to store adventurer level to greater than 1 to avoid starter beast
-        pa1, pa2, pa3, pa4 = utils.pack_adventurer(utils.build_adventurer_level(2))
-        store(ids.adventurer_address, "adventurer_dynamic", [pa1, pa2, pa3, pa4])
     %}
     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
-    let (discovery_type, r) = IAdventurer.explore(adventurer_address, Uint256(1,0));
-
-    assert discovery_type = DiscoveryType.Obstacle;
-    assert r = 2;
-
-    let (local adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
 
     %{
-        print(ids.adventurer.Health)
+        from tests.protostar.loot.utils import utils
+        # need to store adventurer level to greater than 1 to avoid starter beast
+        p1, p2, p3, p4 = utils.pack_adventurer(utils.build_adventurer_level(2))
+        store(ids.adventurer_address, "adventurer_dynamic", [p1, p2, p3, p4], key=[1,0])
     %}
+    let (discovery_type, obstacle_id) = IAdventurer.explore(adventurer_address, Uint256(1,0));
+
+    assert discovery_type = DiscoveryType.Obstacle;
+    assert obstacle_id = 3;
+
+    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1,0));
+
+    assert adventurer.Health = 91;
 
     return();
 }

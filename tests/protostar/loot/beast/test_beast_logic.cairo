@@ -128,9 +128,7 @@ func test_not_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
     %}
-    // discover and create beast
-
-    let (beast_id) = IBeast.create(beast_address, Uint256(1,0));
+    // discover beast
 
     let adventurer_token_id_1 = Uint256(1,0);
     let beast_token_id_1 = Uint256(1,0);
@@ -192,10 +190,7 @@ func test_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
     %}
-    // discover and create beast
-
-    let (beast_id) = IBeast.create(beast_address, Uint256(1,0));
-
+    // discover beast
     let adventurer_token_id = Uint256(1,0);
     IAdventurer.explore(adventurer_address, adventurer_token_id);
 
@@ -256,8 +251,7 @@ func test_ambushed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
     %}
-    // discover and create beast
-    let (beast_id) = IBeast.create(beast_address, Uint256(1,0));
+    // discover beast
 
     IAdventurer.explore(adventurer_address, Uint256(1,0));
 
@@ -303,8 +297,7 @@ func test_flee{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
     %}
-    // discover and create beast
-    let (beast_id) = IBeast.create(beast_address, Uint256(1,0));
+    // discover beast
 
     IAdventurer.explore(adventurer_address, Uint256(1,0));
 
