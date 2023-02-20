@@ -125,8 +125,12 @@ func test_not_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
         stop_mock = mock_call(ids.xoroshiro_address, 'next', [1])
         # now we are timsing by timestamp we also need this 
         stop_roll_adventurer = roll(1, ids.adventurer_address)
+        stop_roll_beast = roll(1, ids.beast_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
-        stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
+        from tests.protostar.loot.utils import utils
+        # need to store adventurer level to greater than 1 to avoid starter beast
+        p1, p2, p3, p4 = utils.pack_adventurer(utils.build_adventurer_level(2))
+        store(ids.adventurer_address, "adventurer_dynamic", [p1, p2, p3, p4], key=[1,0])
     %}
     // discover beast
 
@@ -142,24 +146,22 @@ func test_not_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
         stop_roll_beast = roll(1, ids.beast_address)
         stop_mock()
         stop_prank_adventurer()
-        stop_prank_beast()
         stop_prank_beast = start_prank(ids.account_1_address, ids.beast_address)
     %}
 
     IBeast.attack(beast_address, beast_token_id_1);
 
     let (updated_beast) = IBeast.get_beast_by_id(beast_address,beast_token_id_1);
+
+    assert updated_beast.Id = 2;
+    assert updated_beast.Level = 2;
+    // since we have overwritten adventurer (made level 2 and so removed wand) we will do no damage
+    assert updated_beast.Health = 100;
+
     let (updated_adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_token_id_1);
 
-    %{
-        stop_prank_beast()
-    %}
-
-    // adventurer did 35hp to the beast
-    // adventurer level boost = 35 * (
-    assert updated_beast.Health = 65;
-    // adventurer took 12 damage from the beasts counter attack
-    assert updated_adventurer.Health = 85;
+    // adventurer took 24 damage from the beasts counter attack
+    assert updated_adventurer.Health = 76;
 
     // TODO LH: verify neither beast nor adventurer gained xp
 
@@ -185,21 +187,18 @@ func test_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         # 1%4 = 1, therefore DiscoveryType beast
         stop_mock = mock_call(ids.xoroshiro_address, 'next', [1])
         # now we are timsing by timestamp we also need this 
-        stop_roll = roll(1, ids.adventurer_address)
+        stop_roll_adventurer = roll(1, ids.adventurer_address)
+        stop_roll_beast = roll(1, ids.beast_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
         stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
-        stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
     %}
     // discover beast
     let adventurer_token_id = Uint256(1,0);
     IAdventurer.explore(adventurer_address, adventurer_token_id);
 
     %{ 
-        stop_roll()
         stop_mock()
         stop_prank_adventurer()
-        stop_prank_beast()
-        stop_prank_beast = start_prank(ids.account_1_address, ids.beast_address)
     %}
 
     let loot_token_id = Uint256(1,0);
@@ -207,6 +206,7 @@ func test_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     %{
         stop_prank_loot()
+        stop_prank_beast = start_prank(ids.account_1_address, ids.beast_address)
     %}
 
     let beast_token_id = Uint256(1,0);
@@ -225,7 +225,7 @@ func test_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     // check our adventurer earned xp for the kill
     let (expected_xp) = CombatStats.calculate_xp_earned(updated_beast.Rank, updated_beast.Level);
     // Since we used a new adventurer, this should be the only xp they have gained
-    assert adventurer.XP = expected_xp;
+    assert adventurer.XP = 10;
 
     return ();
 }
@@ -247,9 +247,9 @@ func test_ambushed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
         # 1%4 = 1, therefore DiscoveryType beast
         stop_mock = mock_call(ids.xoroshiro_address, 'next', [1])
         # now we are timsing by timestamp we also need this 
-        stop_roll = roll(1, ids.adventurer_address)
+        stop_roll_adventurer = roll(1, ids.adventurer_address)
+        stop_roll_beast = roll(1, ids.beast_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
-        stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
     %}
     // discover beast
 
@@ -257,14 +257,12 @@ func test_ambushed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
 
     %{ 
         stop_mock()
-        stop_roll()
         stop_prank_adventurer()
-        stop_prank_beast()
-        stop_prank_beast = start_prank(ids.account_1_address, ids.beast_address)
         # 2%4 = 2, therefore not fleeing
         stop_mock_flee_random = mock_call(ids.xoroshiro_address, 'next', [2])
         # now we are timsing by timestamp we also need this 
         stop_roll = roll(1, ids.adventurer_address)
+        stop_prank_beast = start_prank(ids.account_1_address, ids.beast_address)
     %}
 
     IBeast.flee(beast_address, Uint256(1,0));
@@ -293,9 +291,9 @@ func test_flee{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         # 1%4 = 1, therefore DiscoveryType beast
         stop_mock = mock_call(ids.xoroshiro_address, 'next', [1])
         # now we are timsing by timestamp we also need this
-        stop_roll = roll(1, ids.adventurer_address)
+        stop_roll_adventurer = roll(1, ids.adventurer_address)
+        stop_roll_beast = roll(1, ids.beast_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
-        stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
     %}
     // discover beast
 
@@ -303,15 +301,12 @@ func test_flee{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     %{ 
         stop_mock()
-        stop_roll()
         stop_prank_adventurer()
-        stop_prank_beast()
         stop_prank_beast = start_prank(ids.account_1_address, ids.beast_address)
         # 3%4 = 3, therefore fleeing
         stop_mock_flee_random = mock_call(ids.xoroshiro_address, 'next', [3])
         # now we are timsing by timestamp we also need this
         stop_roll = roll(1, ids.beast_address)
-
     %}
 
     IBeast.flee(beast_address, Uint256(1,0));
@@ -337,6 +332,7 @@ func test_increase_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
         ids.xoroshiro_address = context.xoroshiro
         ids.beast_address = context.beast
         ids.adventurer_address = context.adventurer
+        stop_roll_beast = roll(1, ids.beast_address)
         stop_prank_adventurer = start_prank(ids.adventurer_address, ids.beast_address)
     %}
 

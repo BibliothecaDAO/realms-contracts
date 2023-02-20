@@ -521,8 +521,6 @@ func explore{
     // only adventurer owner can explore
     ERC721.assert_only_token_owner(token_id);
 
-    let (ts) = get_block_timestamp();
-
     // unpack adventurer
     let (unpacked_adventurer) = get_adventurer_by_id(token_id);
     let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
