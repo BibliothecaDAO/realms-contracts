@@ -24,6 +24,7 @@ from starkware.starknet.common.syscalls import (
     get_caller_address,
     get_contract_address,
     get_block_timestamp,
+    get_block_number
 )
 
 from openzeppelin.access.ownable.library import Ownable
@@ -576,7 +577,7 @@ func explore{
     }
 
     let (rnd) = get_random_number();
-    let (discovery) = AdventurerLib.get_random_discovery(rnd * ts);
+    let (discovery) = AdventurerLib.get_random_discovery(rnd);
 
     if (discovery == DiscoveryType.Beast) {
         // we set their status to battle
@@ -608,13 +609,13 @@ func explore{
         let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(obstacle.DamageLocation, 0));
         let (obstacle_damage) = CombatStats.calculate_damage_from_obstacle(obstacle, armor);
         _deduct_health(token_id, obstacle_damage);
-        return (DiscoveryType.Obstacle, obstacle_id);
+        return (DiscoveryType.Obstacle, obstacle.Id);
     }
     if (discovery == DiscoveryType.Item) {
         // generate another random 4 numbers
         // this could probably be better
         let (rnd) = get_random_number();
-        let (discovery) = AdventurerLib.get_random_discovery(rnd * 9231312312);
+        let (discovery) = AdventurerLib.get_random_discovery(rnd);
 
         if (discovery == 1) {
             // add GOLD
@@ -697,12 +698,12 @@ func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBu
 ) {
     alloc_locals;
 
-    let (ts) = get_block_timestamp();
+    let (block) = get_block_number();
 
     let (controller) = Module.controller_address();
     let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
     let (rnd) = IXoroshiro.next(xoroshiro_address_);
-    return (rnd * ts,);
+    return (rnd * block,);
 }
 
 // @notice Emit state of adventurer

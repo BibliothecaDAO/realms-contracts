@@ -75,41 +75,43 @@ async def market(loot_token_id, network):
     print_loot_and_bid([out])
 
 @loot.command()
-@click.option(
-    "--start_id",
-    is_flag=False,
-    metavar="<columns>",
-    type=click.INT,
-    help="start_id",
-    prompt=True,
-)
-@click.option(
-    "--end_id",
-    is_flag=False,
-    metavar="<columns>",
-    type=click.INT,
-    help="end_id",
-    prompt=True,
-)
 @click.option("--network", default="goerli")
-async def all_market(start_id, end_id, network):
+async def all_market(network):
     """
     Get Loot Item metadata
     """
     config = Config(nile_network=network)
 
+    current_index = await wrapped_proxy_call(
+            network=config.nile_network,
+            contract_alias="proxy_LootMarketArcade",
+            abi='artifacts/abis/LootMarketArcade.json',
+            function="get_mint_index",
+            arguments=[],
+    )
+
+    new_items = await wrapped_proxy_call(
+            network=config.nile_network,
+            contract_alias="proxy_LootMarketArcade",
+            abi='artifacts/abis/LootMarketArcade.json',
+            function="get_new_items",
+            arguments=[],
+    )
+
+    start = int(current_index) - int(new_items)
+
     items = []
 
-    for i in range((end_id + 1) - start_id):
+    for i in range((int(current_index) + 1) - start):
         out = await wrapped_proxy_call(
             network=config.nile_network,
             contract_alias="proxy_LootMarketArcade",
             abi='artifacts/abis/LootMarketArcade.json',
             function="view_unminted_item",
-            arguments=[*uint(i + start_id)],
+            arguments=[*uint(i + start)],
         )
         out = out.split(" ")
-        out.insert(0, str(i + start_id))
+        out.insert(0, str(i + start))
         print(out)
         
         items.append(out)
@@ -325,7 +327,7 @@ async def explore(ctx, network, adventurer_token_id):
 
     if out[25] == "1":
         print("🧌 You have discovered a beast")
-        print_beast_img(1)
+        print_beast_img(out[26])
         await _get_beast(out[26], network)
     else:
         await ctx.forward(explore)
@@ -489,51 +491,55 @@ async def beast(beast_token_id, network):
 
 @loot.command()
 @click.option(
-    "--beast_token_id",
+    "--adventurer_token_id",
     is_flag=False,
     metavar="<columns>",
     type=click.STRING,
-    help="beast id",
+    help="Adventuer Id",
     prompt=True,
 )
 @click.option("--network", default="goerli")
-async def attack(beast_token_id, network):
+async def attack(adventurer_token_id, network):
     """
     Attack beast
     """
     config = Config(nile_network=network)
 
     print("🧌 Attacking beast ...")
-    
 
-    await wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_Beast",
-        function="attack",
-        arguments=[*uint(beast_token_id)],
-    )
+    adventuer = await _get_adventurer(network, adventurer_token_id)  
 
-    print("🧌 Attacked beast ✅")
-
-    beast_out = await _get_beast(beast_token_id, network)
-
-    adventurer_out = await _get_adventurer(network, beast_out[7])
-
-    if adventurer_out[4] == "0":
-        print(f"🪦 You have been killed")
-    else:
-        print(
-            f"🤕 You didn't kill and were counterattacked, you have {adventurer_out[7]} health remaining"
+    if adventuer[26] != '0':
+        await wrapped_send(
+            network=config.nile_network,
+            signer_alias=config.USER_ALIAS,
+            contract_alias="proxy_Beast",
+            function="attack",
+            arguments=[*uint(adventuer[26])],
         )
 
-    if beast_out[6] == "0":
-        print(f"💀 You have killed the {BEASTS[str(int(beast_out[0]))]} 🎉")
+        print("🧌 Attacked beast ✅")
+
+        beast_out = await _get_beast(adventuer[26], network)
+
+        adventurer_out = await _get_adventurer(network, beast_out[7])
+
+        if adventurer_out[4] == "0":
+            print(f"🪦 You have been killed")
+        else:
+            print(
+                f"🤕 You didn't kill and were counterattacked, you have {adventurer_out[7]} health remaining"
+            )
+
+        if beast_out[6] == "0":
+            print(f"💀 You have killed the {BEASTS[str(int(beast_out[0]))]} 🎉")
+        else:
+            print_beast_img(beast_out[0])
+            print(
+                f"👹 You hurt the {BEASTS[str(int(beast_out[0]))]}, health is now {beast_out[6]}"
+            )
     else:
-        print_beast_img(1)
-        print(
-            f"👹 You hurt the {BEASTS[str(int(beast_out[0]))]}, health is now {beast_out[6]}"
-        )
+        print("You are not in a battle...")        
 
 
 @loot.command()
