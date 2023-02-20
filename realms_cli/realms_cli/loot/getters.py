@@ -1,3 +1,4 @@
+import os
 from realms_cli.caller_invoker import wrapped_proxy_call
 from realms_cli.config import Config
 from realms_cli.utils import print_over_colums, uint, felt_to_str, convert_unix_time
@@ -150,9 +151,11 @@ def format_array(index, array, value):
 
 
 def print_beast_img(id):
-    print(climage.convert('realms_cli/realms_cli/loot/images/beasts/' +
-          str(id) + '.png', is_unicode=True))
-
+    path = 'realms_cli/realms_cli/loot/images/beasts/{}.png'.format(id)
+    if os.path.exists(path):
+        print(climage.convert(path, is_unicode=True))
+    else:
+        print(climage.convert('realms_cli/realms_cli/loot/images/beasts/1.png', is_unicode=True))
 
 def print_player():
     print(climage.convert(

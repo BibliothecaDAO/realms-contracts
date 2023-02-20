@@ -602,19 +602,19 @@ func explore{
         // TODO: Obstacle prefixes and greatness
         // @distracteddev: Picked
         let (rnd) = get_random_number();
-        let (_, r) = unsigned_div_rem(rnd * 9231312312, ObstacleConstants.ObstacleIds.MAX);
+        let (_, r) = unsigned_div_rem(rnd, ObstacleConstants.ObstacleIds.MAX);
         let (obstacle) = ObstacleUtils.get_obstacle_from_id(r);
         let (item_address) = Module.get_module_address(ModuleIds.Loot);
         let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(obstacle.DamageLocation, 0));
         let (obstacle_damage) = CombatStats.calculate_damage_from_obstacle(obstacle, armor);
         _deduct_health(token_id, obstacle_damage);
-        return (DiscoveryType.Obstacle, obstacle_id);
+        return (DiscoveryType.Obstacle, obstacle.Id);
     }
     if (discovery == DiscoveryType.Item) {
         // generate another random 4 numbers
         // this could probably be better
         let (rnd) = get_random_number();
-        let (discovery) = AdventurerLib.get_random_discovery(rnd * 9231312312);
+        let (discovery) = AdventurerLib.get_random_discovery(rnd);
 
         if (discovery == 1) {
             // add GOLD
