@@ -53,7 +53,6 @@ async def _get_adventurer(network, adventurer_token_id):
                                    function="get_adventurer_by_id",
                                    arguments=[*uint(adventurer_token_id)])
 
-
     print_adventurer([out])
     return out.split(" ")
 
@@ -65,7 +64,7 @@ def print_adventurer(out_list):
 
     for i, key in enumerate(config.ADVENTURER):
         table.add_column(key)
-    
+
     for out in out_list:
         out = out.split(" ")
         item = out[:27]
@@ -76,9 +75,9 @@ def print_adventurer(out_list):
 
 
 async def _get_loot(loot_token_id, network):
-    
+
     config = Config(nile_network=network)
-    
+
     out = await wrapped_proxy_call(
         network=config.nile_network,
         contract_alias="proxy_LootMarketArcade",
@@ -89,16 +88,14 @@ async def _get_loot(loot_token_id, network):
     out = out.split(" ")
     print_loot(out)
     return out
-
-
-
+    
 def print_loot(out_list):
     config = Config(nile_network='goerli')
     table = Table(show_header=True, header_style="bold magenta")
 
     for i, key in enumerate(config.LOOT):
         table.add_column(key)
-    
+
     for out in out_list:
         # out = out.split(" ")
         item = out[:14]
@@ -119,12 +116,12 @@ def print_loot_bid(out):
             pretty_bid_out.append(
                 f"{key} : {int(out[i + 13])}")
 
-    print_over_colums(pretty_bid_out)    
+    print_over_colums(pretty_bid_out)
 
 
 def print_loot_and_bid(out_array):
     config = Config(nile_network='goerli')
-    
+
     table = Table(show_header=True, header_style="bold magenta")
     for i, key in enumerate(config.LOOT):
         table.add_column(key)
@@ -141,7 +138,6 @@ def print_loot_and_bid(out_array):
         item = format_array(2, item, config.SLOT[int(item[2]) - 1])
 
         bid = format_array(1, bid, convert_unix_time(int(bid[1])))
-       
 
         table.add_row(*item, *bid)
 
@@ -149,12 +145,15 @@ def print_loot_and_bid(out_array):
 
 
 def format_array(index, array, value):
-        array[index] = value
-        return array
+    array[index] = value
+    return array
 
 
 def print_beast_img(id):
-    print(climage.convert('realms_cli/realms_cli/loot/images/beasts/'+ id + '.png', is_unicode=True))
+    print(climage.convert('realms_cli/realms_cli/loot/images/beasts/' +
+          str(id) + '.png', is_unicode=True))
+
 
 def print_player():
-    print(climage.convert('realms_cli/realms_cli/loot/images/player.png', is_unicode=True))
+    print(climage.convert(
+        'realms_cli/realms_cli/loot/images/player.png', is_unicode=True))

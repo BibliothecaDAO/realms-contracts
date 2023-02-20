@@ -21,7 +21,10 @@ from contracts.loot.loot.stats.item import ItemStats
 const BASE_BEAST_LEVEL = 3;
 namespace BeastLib {
     func create{syscall_ptr: felt*, range_check_ptr}(
-        beast_id: felt, adventurer_id: felt, adventurer_state: AdventurerState, random_beast_level: felt
+        beast_id: felt,
+        adventurer_id: felt,
+        adventurer_state: AdventurerState,
+        random_beast_level: felt,
     ) -> (beast_static: BeastStatic, beast_dynamic: BeastDynamic) {
         alloc_locals;
         // let (_, random_level) = unsigned_div_rem(random, 6);
@@ -61,7 +64,7 @@ namespace BeastLib {
         alloc_locals;
 
         let BeastId = beast_id;
-        let Health = 20;
+        let Health = 10;
         let (Prefix_1) = ItemStats.item_name_prefix(1);
         let (Prefix_2) = ItemStats.item_name_suffix(1);
         let Adventurer = adventurer_id;
@@ -254,19 +257,16 @@ namespace BeastLib {
     func calculate_ambush_chance{syscall_ptr: felt*, range_check_ptr}(
         rnd: felt, beast_health: felt
     ) -> (ambush_chance: felt) {
-
         let (_, r) = unsigned_div_rem(rnd, 2);
-        let (beast_health_multi, _) =  unsigned_div_rem(beast_health, 50);
+        let (beast_health_multi, _) = unsigned_div_rem(beast_health, 50);
         let ambush_chance = r * (1 + beast_health_multi);
 
         return (ambush_chance,);
     }
 
-
-    func calculate_gold_reward{syscall_ptr: felt*, range_check_ptr}(
-        rnd: felt, xp_gained: felt
-    ) -> (gold_reward: felt) {
-
+    func calculate_gold_reward{syscall_ptr: felt*, range_check_ptr}(rnd: felt, xp_gained: felt) -> (
+        gold_reward: felt
+    ) {
         let (_, reward_multi) = unsigned_div_rem(rnd, 4);
         let (xp_correction, xp_factor) = unsigned_div_rem(xp_gained, 4);
         let xp_start = xp_gained - xp_correction;

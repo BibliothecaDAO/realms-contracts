@@ -40,6 +40,9 @@ namespace ObstacleConstants {
         const PoisonDart = 13;
         const SpikedPit = 14;
         const HiddenArrow = 15;
+
+        // update this if you increase the amount
+        const MAX = 15;
     }
 
     namespace ObstacleRank {

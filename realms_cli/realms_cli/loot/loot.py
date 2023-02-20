@@ -302,7 +302,8 @@ async def upgrade(network, adventurer_token_id, stat_id):
     help="adventurer id",
     prompt=True,
 )
-async def explore(network, adventurer_token_id):
+@click.pass_context
+async def explore(ctx, network, adventurer_token_id):
     """
     Explore with adventurer
     """
@@ -327,6 +328,8 @@ async def explore(network, adventurer_token_id):
         print_beast_img(1)
         await _get_beast(out[26], network)
     else:
+        await ctx.forward(explore)
+        await ctx.invoke(explore, ctx=ctx, network=network, adventurer_token_id=adventurer_token_id)
         print("🤔 You discovered nothing")
 
 
@@ -671,7 +674,7 @@ async def new(
         arguments=[config.USER_ADDRESS, 100 * 10**18, 0],  # uint 1  # uint 2
     )
 
-    print("🪙 Minted lords ✅")
+    print("🪙 Harvesting lords ✅")
 
     print("👍 Approving lords to be spent ...")
 
