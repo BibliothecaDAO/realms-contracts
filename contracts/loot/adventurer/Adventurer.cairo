@@ -13,7 +13,12 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_add, uint256_eq
-from starkware.cairo.common.math import unsigned_div_rem, assert_not_equal, assert_not_zero, assert_in_range
+from starkware.cairo.common.math import (
+    unsigned_div_rem,
+    assert_not_equal,
+    assert_not_zero,
+    assert_in_range,
+)
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.starknet.common.syscalls import (
     get_caller_address,
@@ -203,17 +208,19 @@ func mint_with_starting_weapon{
     alloc_locals;
 
     // Mint new adventurer
-    let (adventurer_token_id) = mint(to, race, home_realm, name, order, image_hash_1, image_hash_2); 
+    let (adventurer_token_id) = mint(to, race, home_realm, name, order, image_hash_1, image_hash_2);
 
     // Mint starting weapon for the adventurer (book, wand, club, short sword)
     let (loot_address) = Module.get_module_address(ModuleIds.Loot);
-    let (item_token_id) = ILoot.mint_starter_weapon(loot_address, to, weapon_id, adventurer_token_id);
+    let (item_token_id) = ILoot.mint_starter_weapon(
+        loot_address, to, weapon_id, adventurer_token_id
+    );
 
     // Equip the selected item to the adventurer
     equip_item(adventurer_token_id, item_token_id);
 
     // add STARTING_GOLD to balance
-    let (beast_address) = Module.get_module_address(ModuleIds.Beast); 
+    let (beast_address) = Module.get_module_address(ModuleIds.Beast);
     IBeast.add_to_balance(beast_address, adventurer_token_id, STARTING_GOLD);
 
     // Return adventurer token id and item token id
@@ -433,7 +440,6 @@ func increase_xp{
     return (TRUE,);
 }
 
-
 // @notice Upgrade stat of adventurer
 // @param adventurer_token_id: Id of adventurer
 // @param amount: Amount of xp to increase
@@ -462,7 +468,9 @@ func upgrade_stat{
     // reset upgrading param
     let (updated_upgrade_adventurer) = AdventurerLib.set_upgrading(FALSE, updated_stat_adventurer);
 
-    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(updated_upgrade_adventurer);
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(
+        updated_upgrade_adventurer
+    );
     adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
 
     emit_adventurer_state(adventurer_token_id);
@@ -535,11 +543,11 @@ func explore{
 
     let (beast_address) = Module.get_module_address(ModuleIds.Beast);
 
-    // If the adventurer encounter a beast
-    if (unpacked_adventurer.XP == 0){
-            // we set their status to battle
+    // If this is a newbie adventurer
+    if (unpacked_adventurer.Level == 1) {
+        // we set their status to battle
         let (new_unpacked_adventurer) = AdventurerLib.update_status(
-            AdventurerStatus.Battle, adventurer_dynamic_ 
+            AdventurerStatus.Battle, adventurer_dynamic_
         );
 
         // get weapon
@@ -548,16 +556,19 @@ func explore{
             item_address, Uint256(unpacked_adventurer.WeaponId, 0)
         );
 
-        let (starting_beast_id) = AdventurerLib.get_starting_beast_from_weapon(weapon.Id); 
+        // We give them an easy starting beast (will also have weak armor for their weapon)
+        let (starting_beast_id) = AdventurerLib.get_starting_beast_from_weapon(weapon.Id);
 
         // create beast according to the weapon the player has
-        let (beast_id: Uint256) = IBeast.create_starting_beast(beast_address, token_id, starting_beast_id);
+        let (beast_id: Uint256) = IBeast.create_starting_beast(
+            beast_address, token_id, starting_beast_id
+        );
         let (updated_adventurer) = AdventurerLib.assign_beast(
             beast_id.low, new_unpacked_adventurer
         );
         let (packed_adventurer) = AdventurerLib.pack(updated_adventurer);
 
-        adventurer_dynamic.write(token_id, packed_adventurer); 
+        adventurer_dynamic.write(token_id, packed_adventurer);
 
         emit_adventurer_state(token_id);
 
@@ -566,7 +577,6 @@ func explore{
 
     let (rnd) = get_random_number();
     let (discovery) = AdventurerLib.get_random_discovery(rnd * ts);
-
 
     if (discovery == DiscoveryType.Beast) {
         // we set their status to battle
@@ -601,8 +611,8 @@ func explore{
     }
     if (discovery == DiscoveryType.Item) {
         // generate another random 4 numbers
-        // this could probably be better 
-        let (rnd) = get_random_number(); 
+        // this could probably be better
+        let (rnd) = get_random_number();
         let (discovery) = AdventurerLib.get_random_discovery(rnd * 9231312312);
 
         if (discovery == 1) {
@@ -667,14 +677,14 @@ func assert_not_dead{
 // @notice Revert if adventurer is not item owner
 // @param adventurer_token_id: Id of adventurer
 // @param itemId: Id of the item
-func assert_adventurer_is_owner{
-    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
-}(adventurer_token_id: Uint256, itemId: Uint256) {
+func assert_adventurer_is_owner{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    adventurer_token_id: Uint256, itemId: Uint256
+) {
     alloc_locals;
     let (loot_address) = Module.get_module_address(ModuleIds.Loot);
     let (owner) = ILoot.item_owner(loot_address, itemId, adventurer_token_id);
     with_attr error_message("Adventurer: Adventurer is not item owner") {
-       assert owner = TRUE;
+        assert owner = TRUE;
     }
     return ();
 }
@@ -958,7 +968,9 @@ func _increase_xp{
             updated_xp_adventurer.Level + 1, updated_xp_adventurer
         );
         // allow adventurer to choose a stat to upgrade
-        let (updated_upgrading_adventurer) = AdventurerLib.set_upgrading(TRUE, updated_level_adventurer);
+        let (updated_upgrading_adventurer) = AdventurerLib.set_upgrading(
+            TRUE, updated_level_adventurer
+        );
         let (packed_updated_adventurer: PackedAdventurerState) = AdventurerLib.pack(
             updated_upgrading_adventurer
         );
@@ -1007,7 +1019,7 @@ func _set_upgradable{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(adventurer_token_id: Uint256, upgradable: felt) {
     alloc_locals;
-    
+
     // unpack adventurer
     let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
     let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
