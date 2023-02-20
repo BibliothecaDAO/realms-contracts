@@ -75,41 +75,43 @@ async def market(loot_token_id, network):
     print_loot_and_bid([out])
 
 @loot.command()
-@click.option(
-    "--start_id",
-    is_flag=False,
-    metavar="<columns>",
-    type=click.INT,
-    help="start_id",
-    prompt=True,
-)
-@click.option(
-    "--end_id",
-    is_flag=False,
-    metavar="<columns>",
-    type=click.INT,
-    help="end_id",
-    prompt=True,
-)
 @click.option("--network", default="goerli")
-async def all_market(start_id, end_id, network):
+async def all_market(network):
     """
     Get Loot Item metadata
     """
     config = Config(nile_network=network)
 
+    current_index = await wrapped_proxy_call(
+            network=config.nile_network,
+            contract_alias="proxy_LootMarketArcade",
+            abi='artifacts/abis/LootMarketArcade.json',
+            function="get_mint_index",
+            arguments=[],
+    )
+
+    new_items = await wrapped_proxy_call(
+            network=config.nile_network,
+            contract_alias="proxy_LootMarketArcade",
+            abi='artifacts/abis/LootMarketArcade.json',
+            function="get_new_items",
+            arguments=[],
+    )
+
+    start = int(current_index) - int(new_items)
+
     items = []
 
-    for i in range((end_id + 1) - start_id):
+    for i in range((int(current_index) + 1) - start):
         out = await wrapped_proxy_call(
             network=config.nile_network,
             contract_alias="proxy_LootMarketArcade",
             abi='artifacts/abis/LootMarketArcade.json',
             function="view_unminted_item",
-            arguments=[*uint(i + start_id)],
+            arguments=[*uint(i + start)],
         )
         out = out.split(" ")
-        out.insert(0, str(i + start_id))
+        out.insert(0, str(i + start))
         print(out)
         
         items.append(out)
