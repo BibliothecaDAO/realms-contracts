@@ -472,6 +472,8 @@ func test_discover_obstacle{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
         stop_warp_adventurer = warp(1, ids.adventurer_address)
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
+        # need to store adventurer level to greater than 1 to avoid starter beast
+        store(ids.adventurer_address, "Ownable_owner", [ids.FAKE_OWNER_ADDR])
     %}
     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
     let (discovery_type, r) = IAdventurer.explore(adventurer_address, Uint256(1,0));

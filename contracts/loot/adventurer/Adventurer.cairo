@@ -602,6 +602,7 @@ func explore{
         // @distracteddev: Picked
         let (rnd) = get_random_number();
         let (_, r) = unsigned_div_rem(rnd * 9231312312, ObstacleConstants.ObstacleIds.MAX);
+        let obstacle_id = r+1;
         let (obstacle) = ObstacleUtils.get_obstacle_from_id(r);
         let (item_address) = Module.get_module_address(ModuleIds.Loot);
         let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(obstacle.DamageLocation, 0));
