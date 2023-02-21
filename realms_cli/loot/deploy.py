@@ -46,6 +46,7 @@ TOKEN_CONTRACT_IMPLEMENTATIONS = [
 LORDS = str_to_felt("Lords")
 LORDS_SYMBOL = str_to_felt("LORDS")
 DECIMALS = 18
+MINT_ROLE = 1835626100
 
 # Realms
 REALMS = str_to_felt("Realms")
@@ -173,6 +174,19 @@ async def run(nre):
             LORDS,
             LORDS_SYMBOL,
             DECIMALS,
+            config.ADMIN_ADDRESS,
+        ],
+    )
+
+    # give minting rights to the deployer
+
+    await wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="Lords_ERC20_Mintable",
+        function="grant_role",
+        arguments=[
+            MINT_ROLE,
             config.ADMIN_ADDRESS,
         ],
     )

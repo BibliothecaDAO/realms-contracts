@@ -239,7 +239,15 @@ async def bag(network):
     help="adventurer id",
     prompt=True,
 )
-async def health(network, adventurer_token_id):
+@click.option(
+    "--number",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="number of health potions",
+    prompt=True,
+)
+async def health(network, adventurer_token_id, number):
     """
     Purchase health for gold
     """
@@ -252,7 +260,7 @@ async def health(network, adventurer_token_id):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Adventurer",
         function="purchase_health",
-        arguments=[*uint(adventurer_token_id)],
+        arguments=[*uint(adventurer_token_id), number],
     )
 
     print("🧪 Purchased health ✅")
@@ -543,20 +551,20 @@ async def attack(adventurer_token_id, network):
 
         adventurer_out = await _get_adventurer(network, beast_out[7])
 
-        if adventurer_out[4] == "0":
-            print(f"🪦 You have been killed")
-        else:
-            print(
-                f"🤕 You didn't kill and were counterattacked, you have {adventurer_out[7]} health remaining"
-            )
-
         if beast_out[6] == "0":
             print(f"💀 You have killed the {BEASTS[str(int(beast_out[0]))]} 🎉")
         else:
-            print_beast_img(beast_out[0])
             print(
                 f"👹 You hurt the {BEASTS[str(int(beast_out[0]))]}, health is now {beast_out[6]}"
             )
+            if adventurer_out[4] == "0":
+                print(f"🪦 You have been killed")
+            else:
+                print(
+                    f"🤕 You didn't kill and were counterattacked, you have {adventurer_out[7]} health remaining"
+                )
+
+
     else:
         print("You are not in a battle...")
 
