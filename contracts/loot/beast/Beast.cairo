@@ -17,7 +17,11 @@ from starkware.cairo.common.math import (
 )
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.uint256 import Uint256, uint256_add, uint256_eq
-from starkware.starknet.common.syscalls import get_caller_address, get_block_number, get_block_timestamp
+from starkware.starknet.common.syscalls import (
+    get_caller_address,
+    get_block_number,
+    get_block_timestamp,
+)
 
 from openzeppelin.upgrades.library import Proxy
 from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
@@ -115,11 +119,12 @@ func create{
     let (adventurer_state) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_id);
 
     let (random) = get_random_number();
-    let (_, beast_level) = unsigned_div_rem(random, 6);
+    let (_, beast_level_boost) = unsigned_div_rem(random, 6);
+    let (_, beast_health_boost) = unsigned_div_rem(random, 30);
     let (_, beast_id) = unsigned_div_rem(random, BeastIds.MAX_ID);
 
     let (beast_static_, beast_dynamic_) = BeastLib.create(
-        beast_id, adventurer_id.low, adventurer_state, beast_level
+        beast_id, adventurer_id.low, adventurer_state, beast_level_boost, beast_health_boost
     );
 
     return _create(beast_static_, beast_dynamic_);
@@ -215,8 +220,12 @@ func attack{
 
         // get the armor the adventurer is wearing at the location the beast attacks
         // @distracteddev: Should be get equipped item by slot not get item by Id
-        let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
-        let (item_id) = AdventurerLib.get_item_id_at_slot(beast_attack_location, adventurer_dynamic_);
+        let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(
+            unpacked_adventurer
+        );
+        let (item_id) = AdventurerLib.get_item_id_at_slot(
+            beast_attack_location, adventurer_dynamic_
+        );
         let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(item_id, 0));
         let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, armor, rnd);
 
@@ -267,7 +276,7 @@ func attack{
             tempvar range_check_ptr = range_check_ptr;
             tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
         }
-        
+
         tempvar syscall_ptr: felt* = syscall_ptr;
         tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
         tempvar range_check_ptr = range_check_ptr;

@@ -19,30 +19,35 @@ from contracts.loot.beast.stats.beast import BeastStats
 from contracts.loot.loot.stats.item import ItemStats
 
 const BASE_BEAST_LEVEL = 3;
+const BASE_BEAST_HEALTH = 10;
 namespace BeastLib {
     func create{syscall_ptr: felt*, range_check_ptr}(
         beast_id: felt,
         adventurer_id: felt,
         adventurer_state: AdventurerState,
-        random_beast_level: felt,
+        rnd_level_boost: felt,
+        rnd_health_boost: felt,
     ) -> (beast_static: BeastStatic, beast_dynamic: BeastDynamic) {
         alloc_locals;
-        
+
+        // If the adventurer is less than the beast base level (currently 3)
         let is_less_than_base_level = is_le(adventurer_state.Level, BASE_BEAST_LEVEL);
+        // Set the beast level to the adventurer level
         if (is_less_than_base_level == TRUE) {
             tempvar beast_level = adventurer_state.Level;
         } else {
-            tempvar beast_level = random_beast_level + (adventurer_state.Level - BASE_BEAST_LEVEL);
+            // once the adventurer exceeds base level, beast level will be random but centered around adventurers level
+            tempvar beast_level = rnd_level_boost + (adventurer_state.Level - BASE_BEAST_LEVEL);
         }
+        let Level = beast_level;
 
+        // Beast health is base + the provided rnd health boost
+        let Health = BASE_BEAST_HEALTH + (rnd_health_boost + adventurer_state.Level);
         let BeastId = beast_id + 1;
-
-        let Health = 100;
         let (Prefix_1) = ItemStats.item_name_prefix(1);
         let (Prefix_2) = ItemStats.item_name_suffix(1);
         let Adventurer = adventurer_id;
         let XP = 0;
-        let Level = beast_level;
         let SlainOnDate = 0;
 
         return (
