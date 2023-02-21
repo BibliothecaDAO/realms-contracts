@@ -103,13 +103,25 @@ def bid_on_item(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
 
+def upgrade_stat(sender, app_data, user_data):
+    adventurer = dpg.get_value(tag="upgrade_adventurer_id")
+    stat_id = dpg.get_value(tag="stat_id")
+    command = [
+        "nile",
+        "loot",
+        "upgrade",
+        adventurer,
+        stat_id
+    ]
+    out = subprocess.check_output(command).strip().decode("utf-8")
+
 
 if __name__ == "__main__":
     dpg.create_context()
-    dpg.create_viewport(title="Realms GUI", width=800, height=600)
+    dpg.create_viewport(title="Realms GUI", width=1000, height=800)
     dpg.setup_dearpygui()
 
-    with dpg.window(label="Adventurers", width=800, height=600):
+    with dpg.window(label="Adventurers", width=800, height=800):
         dpg.add_text("Play")
         dpg.add_input_text(label="Adventurer ID", tag="adventurer_id")
         dpg.add_button(label="Explore", callback=explore)
@@ -139,9 +151,17 @@ if __name__ == "__main__":
         dpg.add_spacing(count=4)
         dpg.add_text("Bid On Item")
         dpg.add_input_text(label="Loot Token ID", tag="loot_token_id")
-        dpg.add_input_text(label="Adventurerm ID", tag="bid_adventurer_id")
+        dpg.add_input_text(label="Adventurer ID", tag="bid_adventurer_id")
         dpg.add_input_text(label="Price", tag="bid_price")
         dpg.add_button(label="Bid", callback=bid_on_item)
+        dpg.add_spacing(count=4)
+        dpg.add_separator()
+        dpg.add_spacing(count=4)
+        dpg.add_text("Upgrade Stat")
+        dpg.add_input_text(label="Adventurer ID", tag="upgrade_adventurer_id")
+        dpg.add_input_text(label="Stat ID", tag="stat_id")
+        dpg.add_button(label="Upgrade", callback=upgrade_stat)
+
 
     dpg.show_viewport()
     dpg.start_dearpygui()
