@@ -263,7 +263,10 @@ async def health(network, adventurer_token_id, number):
         arguments=[*uint(adventurer_token_id), number],
     )
 
-    print("🧪 Purchased health ✅")
+    adventurer_out = await _get_adventurer(network, adventurer_token_id)
+
+    print(f"🧪 You bought {number} potions. Your health is now {adventurer_out[7]}")
+
 
 @loot.command()
 @click.option("--network", default="goerli")
@@ -534,34 +537,36 @@ async def attack(adventurer_token_id, network):
 
     print("🧌 Attacking beast ...")
 
-    adventuer = await _get_adventurer(network, adventurer_token_id)  
+    pre_adventuer = await _get_adventurer(network, adventurer_token_id) 
 
-    if adventuer[26] != '0':
+    pre_beast = await _get_beast(pre_adventuer[26], network)
+
+    if pre_adventuer[26] != '0':
         await wrapped_send(
             network=config.nile_network,
             signer_alias=config.USER_ALIAS,
             contract_alias="proxy_Beast",
             function="attack",
-            arguments=[*uint(adventuer[26])],
+            arguments=[*uint(pre_adventuer[26])],
         )
 
         print("🧌 Attacked beast ✅")
 
-        beast_out = await _get_beast(adventuer[26], network)
+        beast_out = await _get_beast(pre_adventuer[26], network)
 
         adventurer_out = await _get_adventurer(network, beast_out[7])
 
         if beast_out[6] == "0":
-            print(f"💀 You have killed the {BEASTS[str(int(beast_out[0]))]} 🎉")
+            print(f"💀 You dealth {pre_beast[6] - beast_out[6]} damage and have killed the {BEASTS[str(int(beast_out[0]))]} 🎉")
         else:
             print(
-                f"👹 You hurt the {BEASTS[str(int(beast_out[0]))]}, health is now {beast_out[6]}"
+                f"👹 You did {pre_beast[6] - beast_out[6]} damage to the {BEASTS[str(int(beast_out[0]))]}, health is now {beast_out[6]}"
             )
             if adventurer_out[4] == "0":
-                print(f"🪦 You have been killed")
+                print(f"🪦 You took {pre_adventuer[7] - adventurer_out[7]} damage and have been killed")
             else:
                 print(
-                    f"🤕 You didn't kill and were counterattacked, you have {adventurer_out[7]} health remaining"
+                    f"🤕 You didn't kill and were counterattacked losing {pre_adventuer[7] - adventurer_out[7]}, you have {adventurer_out[7]} health remaining"
                 )
 
 
