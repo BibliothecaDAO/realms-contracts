@@ -112,12 +112,14 @@ namespace CombatStats {
         const rank_ceiling = 6;
 
         // use weapon rank and greatness to give every item a damage rating of 0-100
+        // TODO: add item weight into damage calculation
         let base_weapon_damage = (rank_ceiling - attack_rank) * attack_greatness;
 
         // Get effectiveness of weapon vs armor
         let (attack_effectiveness) = weapon_vs_armor_efficacy(attack_type, armor_type);
 
         // use armor rank and greatness to give armor a defense rating of 0-100
+        // TODO: add item weight into strength calculation
         let armor_strength = (rank_ceiling - armor_rank) * armor_greatness;
 
         let weapon_damage = base_weapon_damage - armor_strength;
