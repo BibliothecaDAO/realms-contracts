@@ -156,8 +156,8 @@ func test_calculate_damage_from_beast{
     // greatness 10 giant vs greatness 10 leather armor
     let (leather) = TestUtils.create_item(ItemIds.LeatherArmor, 10);
     let (giant) = TestUtils.create_beast(BeastIds.Giant, 10);
-    let (giant_vs_leather) = CombatStats.calculate_damage_from_beast(orc, leather, 1);
-    assert giant_vs_leather = 170;
+    let (giant_vs_leather) = CombatStats.calculate_damage_from_beast(giant, leather, 1);
+    assert giant_vs_leather = 120;
 
     return ();
 }

@@ -102,6 +102,43 @@ func get_adventurer_state{syscall_ptr: felt*, range_check_ptr}() -> (
     );
 }
 
+func create_adventurer{syscall_ptr: felt*, range_check_ptr}(level: felt) -> (
+    adventurer_state: AdventurerState
+) {
+    return (
+        AdventurerState(
+        TestAdventurerState.Race,
+        TestAdventurerState.HomeRealm,
+        TestAdventurerState.Birthdate,
+        TestAdventurerState.Name,
+        TestAdventurerState.Order,
+        TestAdventurerState.ImageHash1,
+        TestAdventurerState.ImageHash2,
+        TestAdventurerState.Health,
+        level,
+        TestAdventurerState.Strength,
+        TestAdventurerState.Dexterity,
+        TestAdventurerState.Vitality,
+        TestAdventurerState.Intelligence,
+        TestAdventurerState.Wisdom,
+        TestAdventurerState.Charisma,
+        TestAdventurerState.Luck,
+        TestAdventurerState.XP,
+        TestAdventurerState.WeaponId,
+        TestAdventurerState.ChestId,
+        TestAdventurerState.HeadId,
+        TestAdventurerState.WaistId,
+        TestAdventurerState.FeetId,
+        TestAdventurerState.HandsId,
+        TestAdventurerState.NeckId,
+        TestAdventurerState.RingId,
+        TestAdventurerState.Status,
+        TestAdventurerState.Beast,
+        TestAdventurerState.Upgrading,
+        ),
+    );
+}
+
 namespace TestUtils {
     // create_item returns an Item corresponding to the provided item_id and greatness
     // parameters: item_id, greatness

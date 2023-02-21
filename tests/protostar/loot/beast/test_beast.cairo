@@ -16,6 +16,7 @@ from contracts.loot.constants.beast import (
 )
 from contracts.loot.loot.stats.combat import CombatStats
 from tests.protostar.loot.test_structs import (
+    create_adventurer,
     get_adventurer_state,
     TestUtils,
     TEST_DAMAGE_HEALTH_REMAINING,
@@ -227,8 +228,6 @@ func test_calculate_damage_to_beast{syscall_ptr: felt*, pedersen_ptr: HashBuilti
 func test_calculate_damage_from_beast{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
 
-    let (adventurer_state) = get_adventurer_state();
-
     let (beast) = TestUtils.create_beast(1, 2); // 2XP Pheonix vs
     let (armor) = TestUtils.create_item(50, 1); // Greatness 1 Hard Leather Armor
     
@@ -243,7 +242,50 @@ func test_calculate_damage_from_beast{syscall_ptr: felt*, pedersen_ptr: HashBuil
     assert damage = 8;
 
     // TODO: Test defending without armor
-    // let (armor) = TestUtils.create_zero_item();
+
+    return ();
+}
+
+// @notice Tests damage from beast calculation in late game
+// Damage Calculation is:
+// Attack = Greatness * (6 - item_rank) * attack_effectiveness
+// Armor = Greatness * (6 - item_rank)
+// Damage Taken = Attack - Armor (can't be negative)
+@external
+func test_calculate_damage_from_beast_late_game{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+
+    let (beast) = TestUtils.create_beast(11, 20); // levl 20 giant (rank 1)
+    let (cloth_armor) = TestUtils.create_item(18, 20); // lvl 20 silk robe (rank 2)
+    
+    // base weapon damage: 100
+    // armor strength: 80
+    // attack effectiveness: 1
+    // total weapon damage: (100 - 80) * 1 = 20
+
+    let (cloth_damage) = CombatStats.calculate_damage_from_beast(beast, cloth_armor, 1);
+
+    assert cloth_damage = 20;
+
+    let (metal_armor) = TestUtils.create_item(78, 20); // lvl 20 ornate chestplate(rank 2)
+    
+    let (metal_damage) = CombatStats.calculate_damage_from_beast(beast, metal_armor, 1);
+
+    assert metal_damage = 40;
+
+    let (hide_armor) = TestUtils.create_item(48, 20); // lvl 20 dragonskin armor (rank 2)
+
+    let (hide_damage) = CombatStats.calculate_damage_from_beast(beast, hide_armor, 1);
+
+    assert hide_damage = 60;
+
+    // TODO: Test defending without armor
+
+    let (no_armor) = TestUtils.create_item(0, 0); // no item
+
+    let (no_armor_damage) = CombatStats.calculate_damage_from_beast(beast, no_armor, 1);
+
+    assert no_armor_damage = 300;
 
     return ();
 }

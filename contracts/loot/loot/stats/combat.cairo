@@ -116,23 +116,25 @@ namespace CombatStats {
 
         // Get effectiveness of weapon vs armor
         let (attack_effectiveness) = weapon_vs_armor_efficacy(attack_type, armor_type);
-        let (total_weapon_damage) = get_attack_effectiveness(
-            attack_effectiveness, base_weapon_damage
-        );
 
         // use armor rank and greatness to give armor a defense rating of 0-100
         let armor_strength = (rank_ceiling - armor_rank) * armor_greatness;
 
+        let weapon_damage = base_weapon_damage - armor_strength;
+
+        let (total_weapon_damage) = get_attack_effectiveness(
+            attack_effectiveness, weapon_damage
+        );
+
         // check if armor strength is less than or equal to weapon damage
-        let dealt_damage = is_le_felt(armor_strength, total_weapon_damage);
+        let dealt_damage = is_le_felt(armor_strength, base_weapon_damage);
         if (dealt_damage == 1) {
             // if it is, damage dealt will be positive so return it
             // @distracteddev: calculate whether hit is critical, formula = damage * (1.5)^critical
             let (_, critical_hit_chance) = unsigned_div_rem(rnd, 4);
             let critical_hit = is_le(critical_hit_chance, 0);
             // @distracteddev: provide some multi here with adventurer level: e.g. damage + (1 + ((1 - level) * 0.1))
-            let damage_dealt = total_weapon_damage - armor_strength;
-            let (adventurer_level_damage) = calculate_entity_level_boost(damage_dealt, entity_level);
+            let (adventurer_level_damage) = calculate_entity_level_boost(total_weapon_damage, entity_level);
             let (critical_damage_dealt) = calculate_critical_damage(adventurer_level_damage, critical_hit);
             return (critical_damage_dealt,);
         } else {
