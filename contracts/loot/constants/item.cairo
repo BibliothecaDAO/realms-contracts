@@ -411,14 +411,14 @@ namespace ItemSlot {
     const PlatedBelt = Slot.Waist;
     const MeshBelt = Slot.Waist;
     const HeavyBelt = Slot.Waist;
-    const HolyGreaves = Slot.Hand;
-    const OrnateGreaves = Slot.Hand;
-    const Greaves = Slot.Hand;
+    const HolyGreaves = Slot.Foot;
+    const OrnateGreaves = Slot.Foot;
+    const Greaves = Slot.Foot;
     const ChainBoots = Slot.Foot;
     const HeavyBoots = Slot.Foot;
-    const HolyGauntlets = Slot.Foot;
-    const OrnateGauntlets = Slot.Foot;
-    const Gauntlets = Slot.Foot;
+    const HolyGauntlets = Slot.Hand;
+    const OrnateGauntlets = Slot.Hand;
+    const Gauntlets = Slot.Hand;
     const ChainGloves = Slot.Hand;
     const HeavyGloves = Slot.Hand;
 }

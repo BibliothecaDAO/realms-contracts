@@ -351,7 +351,26 @@ async def adventurer(adventurer_token_id, network):
     """
 
     print_player()
-    await _get_adventurer(network, adventurer_token_id)
+    _adventurer = await _get_adventurer(network, adventurer_token_id)
+
+    split = _adventurer[17:25]
+
+    all_items = []
+
+    for i in _adventurer[17:25]:
+
+        out = await wrapped_proxy_call(
+            network=network,
+            contract_alias="proxy_LootMarketArcade",
+            abi='artifacts/abis/LootMarketArcade.json',
+            function="get_item_by_token_id",
+            arguments=[*uint(i)],
+        )
+        out = out.split(" ")
+        out.insert(0, str(int(i)))
+        all_items.append(out)
+
+    print_loot(all_items)
 
 
 @loot.command()

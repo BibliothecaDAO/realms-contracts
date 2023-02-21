@@ -98,9 +98,12 @@ def print_loot(out_list):
         table.add_column(key)
 
     for out in out_list:
-        # out = out.split(" ")
         item = out[:14]
-        item = format_array(1, item, config.LOOT_ITEMS[int(out[1]) - 1])
+        if out[0] != '0':
+            item = format_array(1, item, config.LOOT_ITEMS[int(out[1]) - 1])
+        else:
+            item = format_array(1, item, "none")
+
         table.add_row(*item)
 
     console.print(table)
