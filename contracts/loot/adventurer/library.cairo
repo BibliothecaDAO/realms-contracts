@@ -36,7 +36,7 @@ from contracts.loot.constants.adventurer import (
 )
 
 from contracts.loot.constants.obstacle import ObstacleUtils
-from contracts.loot.constants.item import Item, ItemIds
+from contracts.loot.constants.item import Item, ItemIds, Slot
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.constants import SHIFT_41
 from contracts.loot.constants.beast import Beast, BeastIds
@@ -375,6 +375,39 @@ namespace AdventurerLib {
         );
 
         return (updated_adventurer,);
+    }
+
+    func get_item_id_at_slot{syscall_ptr: felt*, range_check_ptr}(
+        slot: felt, unpacked_adventurer: AdventurerDynamic
+    ) -> (item_token_id: felt) {
+        alloc_locals;
+
+        if (slot == Slot.Weapon) {
+            return (unpacked_adventurer.WeaponId,);
+        }
+        if (slot == Slot.Chest) {
+            return (unpacked_adventurer.ChestId,);
+        }
+        if (slot == Slot.Head) {
+            return (unpacked_adventurer.HeadId,);
+        }
+        if (slot == Slot.Waist) {
+            return (unpacked_adventurer.WaistId,);
+        }
+        if (slot == Slot.Foot) {
+            return (unpacked_adventurer.FeetId,);
+        }
+        if (slot == Slot.Hand) {
+            return (unpacked_adventurer.HandsId,);
+        }
+        if (slot == Slot.Neck) {
+            return (unpacked_adventurer.NeckId,);
+        }
+        if (slot == Slot.Ring) {
+            return (unpacked_adventurer.RingId,);
+        }
+
+        return (0,);
     }
 
     func deduct_health{syscall_ptr: felt*, range_check_ptr}(

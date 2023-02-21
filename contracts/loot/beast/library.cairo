@@ -27,18 +27,13 @@ namespace BeastLib {
         random_beast_level: felt,
     ) -> (beast_static: BeastStatic, beast_dynamic: BeastDynamic) {
         alloc_locals;
-        // let (_, random_level) = unsigned_div_rem(random, 6);
-
-        // let (_, r) = unsigned_div_rem(random, 17);
-
+        
         let is_less_than_base_level = is_le(adventurer_state.Level, BASE_BEAST_LEVEL);
         if (is_less_than_base_level == TRUE) {
             tempvar beast_level = adventurer_state.Level;
         } else {
             tempvar beast_level = random_beast_level + (adventurer_state.Level - BASE_BEAST_LEVEL);
         }
-
-        // let beast_id = r + 1;
 
         let BeastId = beast_id + 1;
 

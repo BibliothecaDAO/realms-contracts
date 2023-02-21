@@ -13,10 +13,11 @@ func _uint_to_felt{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
 }
 
 namespace Rarity {
-    const common = 700;
-    const uncommmon = 200;
+    const common = 595;
+    const uncommmon = 300;
     const rare = 90;
     const legendary = 10;
+    const mythic = 5;
 }
 
 namespace RarityId {
@@ -24,6 +25,7 @@ namespace RarityId {
     const uncommmon = 2;
     const rare = 3;
     const legendary = 4;
+    const mythic = 5;
 }
 
 func rare_number_generator{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(

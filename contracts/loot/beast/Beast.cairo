@@ -17,7 +17,7 @@ from starkware.cairo.common.math import (
 )
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.uint256 import Uint256, uint256_add, uint256_eq
-from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
+from starkware.starknet.common.syscalls import get_caller_address, get_block_number, get_block_timestamp
 
 from openzeppelin.upgrades.library import Proxy
 from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
@@ -214,7 +214,10 @@ func attack{
         let (rnd) = get_random_number();
 
         // get the armor the adventurer is wearing at the location the beast attacks
-        let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(beast_attack_location, 0));
+        // @distracteddev: Should be get equipped item by slot not get item by Id
+        let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
+        let (item_id) = AdventurerLib.get_item_id_at_slot(beast_attack_location, adventurer_dynamic_);
+        let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(item_id, 0));
         let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, armor, rnd);
 
         IAdventurer.deduct_health(adventurer_address, adventurer_id, damage_taken);
@@ -561,12 +564,12 @@ func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBu
 ) {
     alloc_locals;
 
+    let (block) = get_block_number();
+
     let (controller) = Module.controller_address();
     let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
     let (rnd) = IXoroshiro.next(xoroshiro_address_);
-
-    let (ts) = get_block_timestamp();
-    return (rnd * ts,);
+    return (rnd * block,);
 }
 
 // @notice Revert if caller is not adventurer owner

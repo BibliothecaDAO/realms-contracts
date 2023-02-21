@@ -176,25 +176,19 @@ namespace CombatStats {
         // Get armor type
         // NOTE: @loothero if no armor then armor type is generic
         if (armor.Id == 0) {
-            let armor_type = Type.Armor.generic;
-            tempvar syscall_ptr: felt* = syscall_ptr;
-            tempvar range_check_ptr = range_check_ptr;
-            tempvar armor_type = armor_type;
+            // force armor_type generic
+            return  calculate_damage(
+                attack_type, beast.Rank, beast.Level, Type.Armor.generic, armor.Rank, armor.Greatness, 1, rnd
+            );
         } else {
             let (armor_type) = ItemStats.item_type(armor.Id);
-            tempvar syscall_ptr: felt* = syscall_ptr;
-            tempvar range_check_ptr = range_check_ptr;
-            tempvar armor_type = armor_type;
+            // pass details of attack and armor to core damage calculation function
+            // @distracteddev: added param to change based on adventurer level
+            // return damage
+            return  calculate_damage(
+                attack_type, beast.Rank, beast.Level, armor_type, armor.Rank, armor.Greatness, 1, rnd
+            );
         }
-
-        // pass details of attack and armor to core damage calculation function
-        // @distracteddev: added param to change based on adventurer level
-        let (damage_dealt) = calculate_damage(
-            attack_type, beast.Rank, beast.Level, armor_type, armor.Rank, armor.Greatness, 1, rnd
-        );
-
-        // return damage
-        return (damage_dealt,);
     }
 
     // Calculates damage dealt from a beast by converting beast into a Loot weapon and calling calculate_damage_from_weapon
@@ -208,29 +202,16 @@ namespace CombatStats {
 
         // If adventurer has no weapon, they get get generic (melee)
         if (weapon.Id == 0) {
-            // Generic will have low effectiveness
-            let weapon_type = Type.Weapon.generic;
-            // and low greatness
-            let weapon_greatness = 1;
-            tempvar syscall_ptr: felt* = syscall_ptr;
-            tempvar range_check_ptr = range_check_ptr;
-            tempvar weapon_type = weapon_type;
-            tempvar weapon_greatness = weapon_greatness;
+            // force generic type and greatness 1
+            return calculate_damage(
+                Type.Weapon.generic, weapon.Rank, 1, armor_type, beast.Rank, beast.Level, unpacked_adventurer.Level, rnd
+            );
         } else {
-            let weapon_type = weapon.Type;
-            let weapon_greatness = weapon.Greatness;
-            tempvar syscall_ptr: felt* = syscall_ptr;
-            tempvar range_check_ptr = range_check_ptr;
-            tempvar weapon_type = weapon_type;
-            tempvar weapon_greatness = weapon_greatness;
+            // return damage
+            return calculate_damage(
+                weapon.Type, weapon.Rank, weapon.Greatness, armor_type, beast.Rank, beast.Level, unpacked_adventurer.Level, rnd
+            );
         }
-
-        let (damage_dealt) = calculate_damage(
-            weapon_type, weapon.Rank, weapon_greatness, armor_type, beast.Rank, beast.Level, unpacked_adventurer.Level, rnd
-        );
-
-        // return damage
-        return (damage_dealt,);
     }
 
     // Calculate damage from an obstacle
@@ -242,13 +223,17 @@ namespace CombatStats {
         // Get armor type
         let (armor_type) = ItemStats.item_type(armor.Id);
 
-        // pass details of attack and armor to core damage calculation function
-        let (damage_dealt) = calculate_damage(
-            obstacle.Type, obstacle.Rank, obstacle.Greatness, armor_type, armor.Rank, armor.Greatness, 1, 1
-        );
-
-        // return damage dealt
-        return (damage_dealt,);
+        if (armor.Id == 0) {
+            // force armor type generic
+            return calculate_damage(
+                obstacle.Type, obstacle.Rank, obstacle.Greatness, Type.Armor.generic, armor.Rank, armor.Greatness, 1, 1
+            );
+        } else {
+            // return damage dealt
+            return calculate_damage(
+                obstacle.Type, obstacle.Rank, obstacle.Greatness, armor_type, armor.Rank, armor.Greatness, 1, 1
+            );
+        }
     }
 
     func calculate_xp_earned{syscall_ptr: felt*, range_check_ptr}(rank: felt, level: felt) -> (

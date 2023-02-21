@@ -37,3 +37,5 @@ func test_obstacle_type{
 
     return ();
 }
+
+// TODO: test obstacle id being generated is as expected, test for adventurer level 1, 2, 3

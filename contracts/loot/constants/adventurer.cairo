@@ -186,7 +186,6 @@ namespace SHIFT_P_4 {
     const _1 = 2 ** 0;
     const _2 = 2 ** 3;
     const _3 = 2 ** 44;
-    const _4 = 2 ** 45;
 }
 
 namespace AdventurerSlotIds {
@@ -241,8 +240,15 @@ namespace DiscoveryType {
     const Nothing = 0;
     const Beast = 1;
     const Obstacle = 2;
-    const Adventurer = 3;
-    const Item = 4;
+    const Item = 3;
+    const Adventurer = 4;
+}
+
+namespace ItemDiscoveryType {
+    const Gold = 0;
+    const XP = 1;
+    const Loot = 2;
+    const Health = 3;
 }
 
 // index for items - used in cast function to set values
