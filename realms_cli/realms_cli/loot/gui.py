@@ -15,7 +15,7 @@ def get_adventurer(sender, app_data, user_data):
     dpg.add_text(out)
 
 def new_adventurer(sender, app_data, user_data):
-    starting_weapon = dpg.get_value("staring_weapon")
+    starting_weapon = dpg.get_value("starting_weapon")
     race = dpg.get_value("race")
     home_realm = dpg.get_value("home_realm")
     name = dpg.get_value("name")
@@ -89,13 +89,28 @@ def mint_daily_items(sender, app_data, user_data):
     # dpg.add_seperator()
         dpg.add_text(out)
 
+def bid_on_item(sender, app_data, user_data):
+    loot_token_id = dpg.get_value(tag="loot_token_id")
+    adventurer = dpg.get_value(tag="bid_adventurer_id")
+    price = dpg.get_value("bid_price")
+    command = [
+        "nile",
+        "loot",
+        "bid",
+        loot_token_id,
+        adventurer,
+        price
+    ]
+    out = subprocess.check_output(command).strip().decode("utf-8")
+
+
 if __name__ == "__main__":
     dpg.create_context()
     dpg.create_viewport(title="Realms GUI", width=800, height=600)
     dpg.setup_dearpygui()
 
     with dpg.window(label="Adventurers", width=800, height=600):
-        dpg.add_text("Adventurers")
+        dpg.add_text("Play")
         dpg.add_input_text(label="Adventurer ID", tag="adventurer_id")
         dpg.add_button(label="Explore", callback=explore)
         dpg.add_same_line()
@@ -103,8 +118,30 @@ if __name__ == "__main__":
         dpg.add_spacing(count=4)
         dpg.add_separator()
         dpg.add_spacing(count=4)
+        dpg.add_text("Purchase Health")
+        dpg.add_input_text(label="Health Potions", tag="potion_number")
+        dpg.add_button(label="Purchase Health", callback=purchase_health)
+        dpg.add_spacing(count=4)
+        dpg.add_separator()
+        dpg.add_spacing(count=4)
+        dpg.add_text("Create Adventurer")
+        dpg.add_input_text(label="Starting Weapon ID", tag="starting_weapon")
+        dpg.add_input_text(label="Race", tag="race")
+        dpg.add_input_text(label="Home Realm", tag="home_realm")
+        dpg.add_input_text(label="Name", tag="name")
+        dpg.add_input_text(label="Order", tag="order")
         dpg.add_button(label="Mint Adventurer", callback=new_adventurer)
+        dpg.add_spacing(count=4)
+        dpg.add_separator()
+        dpg.add_spacing(count=4)
+        dpg.add_text("Items")
         dpg.add_button(label="Mint Daily Loot Items", callback=mint_daily_items)
+        dpg.add_spacing(count=4)
+        dpg.add_text("Bid On Item")
+        dpg.add_input_text(label="Loot Token ID", tag="loot_token_id")
+        dpg.add_input_text(label="Adventurerm ID", tag="bid_adventurer_id")
+        dpg.add_input_text(label="Price", tag="bid_price")
+        dpg.add_button(label="Bid", callback=bid_on_item)
 
     dpg.show_viewport()
     dpg.start_dearpygui()
