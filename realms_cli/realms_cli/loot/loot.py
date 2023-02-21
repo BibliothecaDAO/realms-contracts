@@ -114,7 +114,7 @@ async def all_market(network):
         out.insert(0, str(i + start))
         print(out)
         
-        items.append(out)
+        items.append(out) 
 
     # print(items)
     print_loot_and_bid(items)
@@ -539,7 +539,7 @@ async def attack(adventurer_token_id, network):
                 f"👹 You hurt the {BEASTS[str(int(beast_out[0]))]}, health is now {beast_out[6]}"
             )
     else:
-        print("You are not in a battle...")        
+        print("You are not in a battle...")
 
 
 @loot.command()

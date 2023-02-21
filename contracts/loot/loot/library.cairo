@@ -78,10 +78,10 @@ namespace ItemLib {
     func generate_random_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         rnd: felt
     ) -> (item: Item) {
-        let (_, r) = unsigned_div_rem(rnd, 101);
+        let (_, r) = unsigned_div_rem(rnd, 100);
 
         // set blank item
-        let Id = r;
+        let Id = rnd + 1;
         let (Slot) = ItemStats.item_slot(Id);  // determined by Id
         let (Type) = ItemStats.item_type(Id);  // determined by Id
         let (Material) = ItemStats.item_material(Id);  // determined by Id

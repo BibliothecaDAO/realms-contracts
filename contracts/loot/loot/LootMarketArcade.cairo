@@ -681,9 +681,17 @@ func _get_random_item_from_seed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, 
 ) -> (item: Item) {
     let (_, r) = unsigned_div_rem(daily_seed * market_item_id * SEED_MULTI, NUMBER_LOOT_ITEMS);
 
-    let (new_item: Item) = ItemLib.generate_random_item(r);
 
     return ItemLib.generate_random_item(r);
+}
+
+@view
+func random_item_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    market_item_id: felt, daily_seed: felt
+) -> (item: felt) {
+    let (_, r) = unsigned_div_rem(daily_seed * market_item_id * SEED_MULTI, NUMBER_LOOT_ITEMS);
+
+    return (r,);
 }
 
 @view
