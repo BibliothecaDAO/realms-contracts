@@ -658,7 +658,7 @@ async def flee(adventurer_token_id, network):
 @click.option("--network", default="goerli")
 async def balance(network, adventurer_token_id):
     """
-    Get all your Adventurers you own.
+    Get the balance of gold your Adventurer owns.
     """
     config = Config(nile_network=network)
 

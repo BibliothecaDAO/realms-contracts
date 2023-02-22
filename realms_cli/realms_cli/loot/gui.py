@@ -1,18 +1,47 @@
+import asyncio
 import dearpygui.dearpygui as dpg
 import subprocess
+from realms_cli.config import Config
+from realms_cli.caller_invoker import wrapped_proxy_call
 from realms_cli.loot.constants import ITEMS, RACES, ORDERS, STATS
+from realms_cli.utils import uint
+
+
+async def get_adventurers():
+    config = Config(nile_network="goerli")
+
+    out = await wrapped_proxy_call(
+        network=config.nile_network,
+        contract_alias="proxy_Adventurer",
+        abi="artifacts/abis/Adventurer.json",
+        function="balance_of",
+        arguments=[config.USER_ADDRESS],
+    )
+
+    out = out.split(" ")
+
+    all_ids = []
+
+    for i in range(0, int(out[0])):
+        item = await wrapped_proxy_call(
+            network=config.nile_network,
+            contract_alias="proxy_Adventurer",
+            abi="artifacts/abis/Adventurer.json",
+            function="token_of_owner_by_index",
+            arguments=[config.USER_ADDRESS, *uint(i)],
+        )
+
+        id = item.split(" ")
+
+        all_ids.append(id[0])
+    return all_ids
 
 
 def get_adventurer(sender, app_data, user_data):
     value = dpg.get_value("adventurer_id")
     command = ["nile", "loot", "adventurer", "--adventurer_token_id", value]
-    # output = []
-    # with dpg.window(label="Adventurer Details", width=400, height=300):
-    #     # dpg.add_seperator()
-    #     dpg.add_text(output)
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    # output.append(out)
 
 
 def new_adventurer(sender, app_data, user_data):
@@ -49,9 +78,6 @@ def new_adventurer(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    # with dpg.window(label="Adventurers", width=400, height=300):
-    #     # dpg.add_seperator()
-    #     dpg.add_text(out)
 
 
 def explore(sender, app_data, user_data):
@@ -81,9 +107,6 @@ def attack_beast(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    # with dpg.window(label="Adventurers", width=400, height=300):
-    #     # dpg.add_seperator()
-    #     dpg.add_text(out)
 
 
 def flee(sender, app_data, user_data):
@@ -145,9 +168,6 @@ def purchase_health(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    # with dpg.window(label="Adventurers", width=400, height=300):
-    #     # dpg.add_seperator()
-    #     dpg.add_text(out)
 
 
 def mint_daily_items(sender, app_data, user_data):
@@ -158,9 +178,16 @@ def mint_daily_items(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    # with dpg.window(label="Adventurers", width=400, height=300):
-    #     # dpg.add_seperator()
-    #     dpg.add_text(out)
+
+
+def get_market_items(sender, app_data, user_data):
+    command = [
+        "nile",
+        "loot",
+        "all-market",
+    ]
+    out = subprocess.check_output(command).strip().decode("utf-8")
+    print(out)
 
 
 def bid_on_item(sender, app_data, user_data):
@@ -203,6 +230,8 @@ if __name__ == "__main__":
     dpg.create_context()
     dpg.create_viewport(title="Realms GUI", width=1000, height=800)
     dpg.setup_dearpygui()
+    print("Getting adventurers...")
+    adventurers = asyncio.run(get_adventurers())
 
     with dpg.window(label="Adventurers", width=800, height=800):
         dpg.add_text("Create Adventurer")
@@ -273,8 +302,8 @@ if __name__ == "__main__":
         dpg.add_separator()
         dpg.add_spacer(height=4)
         dpg.add_text("Play")
-        dpg.add_input_text(
-            label="Adventurer ID", tag="adventurer_id", decimal=True, width=100
+        dpg.add_combo(
+            label="Adventurer ID", tag="adventurer_id", items=adventurers, width=100
         )
         with dpg.group(horizontal=True):
             dpg.add_button(label="Explore", callback=explore)
@@ -285,8 +314,11 @@ if __name__ == "__main__":
         dpg.add_separator()
         dpg.add_spacer(height=4)
         dpg.add_text("Purchase Health")
-        dpg.add_input_text(
-            label="Adventurer ID", tag="potions_adventurer_id", decimal=True, width=100
+        dpg.add_combo(
+            label="Adventurer ID",
+            tag="potions_adventurer_id",
+            items=adventurers,
+            width=100,
         )
         dpg.add_slider_int(
             label="Health Potions",
@@ -300,19 +332,21 @@ if __name__ == "__main__":
         dpg.add_separator()
         dpg.add_spacer(height=4)
         dpg.add_text("Items")
-        dpg.add_button(label="Mint Daily Loot Items", callback=mint_daily_items)
+        with dpg.group(horizontal=True):
+            dpg.add_button(label="Mint Daily Loot Items", callback=mint_daily_items)
+            dpg.add_button(label="Get Market Items", callback=mint_daily_items)
         dpg.add_spacer(height=4)
         with dpg.group(horizontal=True):
             with dpg.group():
                 dpg.add_text("Bid On Item")
-                dpg.add_input_text(
-                    label="Loot Token ID", tag="loot_token_id", decimal=True, width=100
-                )
-                dpg.add_input_text(
+                dpg.add_combo(
                     label="Adventurer ID",
                     tag="bid_adventurer_id",
-                    decimal=True,
+                    items=adventurers,
                     width=100,
+                )
+                dpg.add_input_text(
+                    label="Loot Token ID", tag="loot_token_id", decimal=True, width=100
                 )
                 dpg.add_input_text(
                     label="Price",
@@ -324,10 +358,10 @@ if __name__ == "__main__":
                 dpg.add_button(label="Bid", callback=bid_on_item)
             with dpg.group():
                 dpg.add_text("Equip Item")
-                dpg.add_input_text(
+                dpg.add_combo(
                     label="Adventurer ID",
                     tag="equip_adventurer_id",
-                    decimal=True,
+                    items=adventurers,
                     width=100,
                 )
                 dpg.add_input_text(
@@ -339,10 +373,10 @@ if __name__ == "__main__":
                 dpg.add_button(label="Equip", callback=equip_item)
             with dpg.group():
                 dpg.add_text("Unequip Item")
-                dpg.add_input_text(
+                dpg.add_combo(
                     label="Adventurer ID",
                     tag="unequip_adventurer_id",
-                    decimal=True,
+                    items=adventurers,
                     width=100,
                 )
                 dpg.add_input_text(
@@ -356,8 +390,11 @@ if __name__ == "__main__":
         dpg.add_separator()
         dpg.add_spacer(height=4)
         dpg.add_text("Upgrade Stat")
-        dpg.add_input_text(
-            label="Adventurer ID", tag="upgrade_adventurer_id", decimal=True, width=100
+        dpg.add_combo(
+            label="Adventurer ID",
+            tag="upgrade_adventurer_id",
+            items=adventurers,
+            width=100,
         )
         dpg.add_combo(
             label="Stat",
