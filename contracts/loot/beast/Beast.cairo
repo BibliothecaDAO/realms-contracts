@@ -737,7 +737,8 @@ func _subtract_from_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
 func balance_of{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     adventurer_token_id: Uint256
 ) -> (balance: felt) {
-    return goldBalance.read(adventurer_token_id);
+    let (gold_balance) = goldBalance.read(adventurer_token_id);
+    return (gold_balance,);
 }
 
 @view

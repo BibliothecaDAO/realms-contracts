@@ -462,8 +462,8 @@ func test_upgrade_stat{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 //         ids.xoroshiro_address = context.xoroshiro
 //         ids.adventurer_address = context.adventurer
 //         ids.beast_address = context.beast
-//         # 1%4 = 1, therefore DiscoveryType beast
-//         stop_mock = mock_call(ids.xoroshiro_address, 'next', [2])
+//         # 3%4 = 3, therefore DiscoveryType item
+//         stop_mock = mock_call(ids.xoroshiro_address, 'next', [3])
 //         # now we are timsing by timestamp we also need this
 //         stop_roll_adventurer = roll(1, ids.adventurer_address)
 //         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
@@ -501,7 +501,7 @@ func test_discover_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
         ids.xoroshiro_address = context.xoroshiro
         ids.adventurer_address = context.adventurer
         ids.beast_address = context.beast
-        # 1%4 = 1, therefore DiscoveryType beast
+        # 3%4 = 3, therefore DiscoveryType item
         stop_mock = mock_call(ids.xoroshiro_address, 'next', [3])
         # now we are timsing by timestamp we also need this 
         stop_roll_adventurer = roll(1, ids.adventurer_address)
@@ -558,7 +558,7 @@ func test_discover_obstacle{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
         ids.xoroshiro_address = context.xoroshiro
         ids.adventurer_address = context.adventurer
         ids.beast_address = context.beast
-        # 1%4 = 1, therefore DiscoveryType beast
+        # 2%4 = 2, therefore DiscoveryType obstacle
         stop_mock = mock_call(ids.xoroshiro_address, 'next', [2])
         # now we are timsing by timestamp we also need this 
         stop_roll_adventurer = roll(1, ids.adventurer_address)
@@ -589,6 +589,61 @@ func test_discover_obstacle{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
     // (6 - 3) * 2 * 3 = 18HP of damage dealt to adventurer
     // 100HP - 18HP = 82
     assert adventurer.Health = 82;
+
+    return ();
+}
+
+@external
+func test_king_tribute{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+    local account_1_address;
+    local xoroshiro_address;
+    local adventurer_address;
+    local beast_address;
+    local lords_address;
+
+    %{
+        ids.account_1_address = context.account_1
+        ids.xoroshiro_address = context.xoroshiro
+        ids.adventurer_address = context.adventurer
+        ids.beast_address = context.beast
+        ids.lords_address = context.lords
+        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+        stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
+    %}
+    IAdventurer.mint_with_starting_weapon(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, 12);
+
+    let (total_lords) = ILords.balanceOf(lords_address, adventurer_address);
+
+    assert total_lords = Uint256(50000000000000000000,0);
+
+    IAdventurer.become_king(adventurer_address, Uint256(1,0));
+
+    // should fail as not enough time passed
+    %{
+        stop_warp = warp(20000, ids.adventurer_address)
+        expect_revert(error_message="Adventurer: King not active for 12 hours.")
+    %}
+
+    IAdventurer.pay_king_tribute(adventurer_address);
+
+    %{
+        stop_warp()
+        # change timestamp to over tribute duration
+        warp(43201, ids.adventurer_address)
+    %}
+
+    IAdventurer.pay_king_tribute(adventurer_address);
+
+    let (lords_balance) = ILords.balanceOf(lords_address, account_1_address);
+    let (new_total_lords) = ILords.balanceOf(lords_address, adventurer_address);
+
+    // check lords balance has increased by 10% of the pool (account 1 still already has 10)
+    // pool should also have 10% less
+
+    assert new_total_lords = Uint256(45000000000000000000,0);
+    assert lords_balance = Uint256(105000000000000000000,0);
+
 
     return ();
 }

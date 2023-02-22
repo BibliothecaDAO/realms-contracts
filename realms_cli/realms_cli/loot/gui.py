@@ -37,6 +37,12 @@ async def get_adventurers():
     return all_ids
 
 
+def update_adventurer_list(id):
+    global adventurers
+    adventurers.append(id[0])
+    print(adventurers)
+
+
 def get_adventurer(sender, app_data, user_data):
     value = dpg.get_value("adventurer_id")
     command = ["nile", "loot", "adventurer", "--adventurer_token_id", value]
@@ -45,6 +51,7 @@ def get_adventurer(sender, app_data, user_data):
 
 
 def new_adventurer(sender, app_data, user_data):
+    config = Config(nile_network="goerli")
     starting_weapon = dpg.get_value("starting_weapon")
     starting_weapon_id = [
         k for k, v in ITEMS.items() if v == starting_weapon.replace(" ", "")
@@ -78,6 +85,30 @@ def new_adventurer(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
+    out = asyncio.run(
+        wrapped_proxy_call(
+            network=config.nile_network,
+            contract_alias="proxy_Adventurer",
+            abi="artifacts/abis/Adventurer.json",
+            function="balance_of",
+            arguments=[config.USER_ADDRESS],
+        )
+    )
+
+    out = out.split(" ")
+
+    item = asyncio.run(
+        wrapped_proxy_call(
+            network=config.nile_network,
+            contract_alias="proxy_Adventurer",
+            abi="artifacts/abis/Adventurer.json",
+            function="token_of_owner_by_index",
+            arguments=[config.USER_ADDRESS, *uint(out[-1])],
+        )
+    )
+
+    id = item.split(" ")
+    update_adventurer_list(id)
 
 
 def explore(sender, app_data, user_data):
@@ -91,9 +122,6 @@ def explore(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    # with dpg.window(label="Adventurers", width=400, height=300):
-    #     # dpg.add_seperator()
-    #     dpg.add_text(out)
 
 
 def attack_beast(sender, app_data, user_data):
@@ -228,9 +256,10 @@ def upgrade_stat(sender, app_data, user_data):
 
 if __name__ == "__main__":
     dpg.create_context()
-    dpg.create_viewport(title="Realms GUI", width=1000, height=800)
+    dpg.create_viewport(title="Realms GUI", width=800, height=800)
     dpg.setup_dearpygui()
     print("Getting adventurers...")
+    global adventurers
     adventurers = asyncio.run(get_adventurers())
 
     with dpg.window(label="Adventurers", width=800, height=800):

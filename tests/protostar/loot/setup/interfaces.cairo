@@ -102,6 +102,10 @@ namespace IAdventurer {
     }
     func upgrade_stat(adventurer_token_id: Uint256, stat: felt) -> (success: felt) {
     }
+    func become_king(adventurer_token_id: Uint256) -> (success: felt) {
+    }
+    func pay_king_tribute() -> (success: felt) {
+    }
 }
 
 @contract_interface
