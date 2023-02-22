@@ -86,6 +86,51 @@ def attack_beast(sender, app_data, user_data):
     #     dpg.add_text(out)
 
 
+def flee(sender, app_data, user_data):
+    adventurer = dpg.get_value("adventurer_id")
+    command = [
+        "nile",
+        "loot",
+        "flee",
+        "--adventurer_token_id",
+        adventurer,
+    ]
+    out = subprocess.check_output(command).strip().decode("utf-8")
+    print(out)
+
+
+def equip_item(sender, app_data, user_data):
+    adventurer = dpg.get_value("equip_adventurer_id")
+    item = dpg.get_value("equip_loot_token_id")
+    command = [
+        "nile",
+        "loot",
+        "health",
+        "--adventurer_token_id",
+        adventurer,
+        "--loot_token_id",
+        item,
+    ]
+    out = subprocess.check_output(command).strip().decode("utf-8")
+    print(out)
+
+
+def unequip_item(sender, app_data, user_data):
+    adventurer = dpg.get_value("unequip_adventurer_id")
+    item = dpg.get_value("unequip_loot_token_id")
+    command = [
+        "nile",
+        "loot",
+        "health",
+        "--adventurer_token_id",
+        adventurer,
+        "--loot_token_id",
+        item,
+    ]
+    out = subprocess.check_output(command).strip().decode("utf-8")
+    print(out)
+
+
 def purchase_health(sender, app_data, user_data):
     adventurer = dpg.get_value("potions_adventurer_id")
     number = dpg.get_value("potion_number")
@@ -228,19 +273,28 @@ if __name__ == "__main__":
         dpg.add_separator()
         dpg.add_spacer(height=4)
         dpg.add_text("Play")
-        dpg.add_input_text(label="Adventurer ID", tag="adventurer_id", width=100)
+        dpg.add_input_text(
+            label="Adventurer ID", tag="adventurer_id", decimal=True, width=100
+        )
         with dpg.group(horizontal=True):
             dpg.add_button(label="Explore", callback=explore)
             dpg.add_button(label="Attack Beast", callback=attack_beast)
+            dpg.add_button(label="Flee from Beast", callback=flee)
             dpg.add_button(label="Get Adventurer", callback=get_adventurer)
         dpg.add_spacer(height=4)
         dpg.add_separator()
         dpg.add_spacer(height=4)
         dpg.add_text("Purchase Health")
         dpg.add_input_text(
-            label="Adventurer ID", tag="potions_adventurer_id", width=100
+            label="Adventurer ID", tag="potions_adventurer_id", decimal=True, width=100
         )
-        dpg.add_input_text(label="Health Potions", tag="potion_number", width=100)
+        dpg.add_slider_int(
+            label="Health Potions",
+            tag="potion_number",
+            min_value=1,
+            max_value=10,
+            width=100,
+        )
         dpg.add_button(label="Purchase Health", callback=purchase_health)
         dpg.add_spacer(height=4)
         dpg.add_separator()
@@ -248,17 +302,62 @@ if __name__ == "__main__":
         dpg.add_text("Items")
         dpg.add_button(label="Mint Daily Loot Items", callback=mint_daily_items)
         dpg.add_spacer(height=4)
-        dpg.add_text("Bid On Item")
-        dpg.add_input_text(label="Loot Token ID", tag="loot_token_id", width=100)
-        dpg.add_input_text(label="Adventurer ID", tag="bid_adventurer_id", width=100)
-        dpg.add_input_text(label="Price", tag="bid_price", width=100)
-        dpg.add_button(label="Bid", callback=bid_on_item)
+        with dpg.group(horizontal=True):
+            with dpg.group():
+                dpg.add_text("Bid On Item")
+                dpg.add_input_text(
+                    label="Loot Token ID", tag="loot_token_id", decimal=True, width=100
+                )
+                dpg.add_input_text(
+                    label="Adventurer ID",
+                    tag="bid_adventurer_id",
+                    decimal=True,
+                    width=100,
+                )
+                dpg.add_input_text(
+                    label="Price",
+                    tag="bid_price",
+                    decimal=True,
+                    hint="Min 3",
+                    width=100,
+                )
+                dpg.add_button(label="Bid", callback=bid_on_item)
+            with dpg.group():
+                dpg.add_text("Equip Item")
+                dpg.add_input_text(
+                    label="Adventurer ID",
+                    tag="equip_adventurer_id",
+                    decimal=True,
+                    width=100,
+                )
+                dpg.add_input_text(
+                    label="Loot Token ID",
+                    tag="equip_loot_token_id",
+                    decimal=True,
+                    width=100,
+                )
+                dpg.add_button(label="Equip", callback=equip_item)
+            with dpg.group():
+                dpg.add_text("Unequip Item")
+                dpg.add_input_text(
+                    label="Adventurer ID",
+                    tag="unequip_adventurer_id",
+                    decimal=True,
+                    width=100,
+                )
+                dpg.add_input_text(
+                    label="Loot Token ID",
+                    tag="unequip_loot_token_id",
+                    decimal=True,
+                    width=100,
+                )
+                dpg.add_button(label="Unequip", callback=unequip_item)
         dpg.add_spacer(height=4)
         dpg.add_separator()
         dpg.add_spacer(height=4)
         dpg.add_text("Upgrade Stat")
         dpg.add_input_text(
-            label="Adventurer ID", tag="upgrade_adventurer_id", width=100
+            label="Adventurer ID", tag="upgrade_adventurer_id", decimal=True, width=100
         )
         dpg.add_combo(
             label="Stat",

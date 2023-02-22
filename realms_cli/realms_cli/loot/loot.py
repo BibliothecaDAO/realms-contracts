@@ -424,14 +424,14 @@ async def adventurer(adventurer_token_id, network):
     prompt=True,
 )
 @click.option(
-    "--item",
+    "--loot_token_id",
     is_flag=False,
     metavar="<columns>",
     type=click.STRING,
     help="item id",
     prompt=True,
 )
-async def equip(network, adventurer_token_id, item):
+async def equip(network, adventurer_token_id, loot_token_id):
     """
     Equip loot item
     """
@@ -444,7 +444,7 @@ async def equip(network, adventurer_token_id, item):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Adventurer",
         function="equip_item",
-        arguments=[*uint(adventurer_token_id), *uint(item)],
+        arguments=[*uint(adventurer_token_id), *uint(loot_token_id)],
     )
 
     print("🫴 Equiped item ✅")
@@ -462,14 +462,14 @@ async def equip(network, adventurer_token_id, item):
     prompt=True,
 )
 @click.option(
-    "--item",
+    "--loot_token_id",
     is_flag=False,
     metavar="<columns>",
     type=click.STRING,
     help="item id",
     prompt=True,
 )
-async def unequip(network, adventurer_token_id, item):
+async def unequip(network, adventurer_token_id, loot_token_id):
     """
     Unequip loot item
     """
@@ -482,7 +482,7 @@ async def unequip(network, adventurer_token_id, item):
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Adventurer",
         function="unequip_item",
-        arguments=[*uint(adventurer_token_id), *uint(item)],
+        arguments=[*uint(adventurer_token_id), *uint(loot_token_id)],
     )
 
     print("🫳 Unequiped item ...")
@@ -610,15 +610,15 @@ async def attack(adventurer_token_id, network):
 
 @loot.command()
 @click.option(
-    "--beast_token_id",
+    "--adventurer_token_id",
     is_flag=False,
     metavar="<columns>",
     type=click.STRING,
-    help="beast id",
+    help="adventurer id",
     prompt=True,
 )
 @click.option("--network", default="goerli")
-async def flee(beast_token_id, network):
+async def flee(adventurer_token_id, network):
     """
     Flee from beast
     """
@@ -626,20 +626,22 @@ async def flee(beast_token_id, network):
 
     print("🏃‍♂️ Fleeing from beast ...")
 
+    pre_adventurer = await _get_adventurer(network, adventurer_token_id)
+
     await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Beast",
         function="flee",
-        arguments=[*uint(beast_token_id)],
+        arguments=[*uint(pre_adventurer[26])],
     )
 
-    beast_out = await _get_beast(beast_token_id, network)
+    beast_out = await _get_beast(pre_adventurer[26], network)
 
-    adventurer_out = await _get_adventurer(network, beast_out[7])
+    adventurer_out = await _get_adventurer(network, adventurer_token_id)
 
     if adventurer_out[23] == "0":
-        print(f"🏃‍♂️ You successfully fled from beast ✅")
+        print(f"🏃‍♂️ You successfully fled from {BEASTS[str(int(beast_out[0]))]} ✅")
     if adventurer_out[23] == "1":
         print(f"😫 You have been ambushed! Your health is now {adventurer_out[4]}")
 
