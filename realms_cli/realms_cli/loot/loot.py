@@ -828,3 +828,53 @@ async def new(network, item, race, home_realm, name, order, image_hash_1, image_
     print(
         "And with a final surge of power, he fulfilled his destiny, becoming a legend that would be spoken of for generations to come."
     )
+
+
+@loot.command()
+@click.option(
+    "--adventurer_token_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="Adventuer Id",
+    prompt=True,
+)
+@click.option("--network", default="goerli")
+async def become_king(network, adventurer_token_id):
+    """
+    Become adventurer king.
+    """
+    config = Config(nile_network=network)
+
+    print("👑 Applying for king ...")
+
+    await wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_Adventurer",
+        function="become_king",
+        arguments=[*uint(adventurer_token_id)],
+    )
+
+    print("👑 Became King ✅")
+
+
+@loot.command()
+@click.option("--network", default="goerli")
+async def pay_king_tribute(network, adventurer_token_id):
+    """
+    Pay the king his tribute.
+    """
+    config = Config(nile_network=network)
+
+    print("🪙 Paying king their tribute ...")
+
+    await wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_Adventurer",
+        function="pay_king_tribute",
+        arguments=[],
+    )
+
+    print("🪙 King tribute paid ✅")

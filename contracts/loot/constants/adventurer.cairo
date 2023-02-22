@@ -9,6 +9,8 @@ from contracts.loot.constants.item import Item
 from contracts.loot.constants.bag import Bag
 from contracts.loot.constants.beast import Beast
 
+from starkware.cairo.common.uint256 import Uint256
+
 // @notice This is viewable information of the Adventurer. We DO NOT store this on-chain.
 //         This is the object that is returned when requesting the Adventurer by ID.
 struct Adventurer {
@@ -160,6 +162,11 @@ struct AdventurerDynamic {
     Status: felt,
     Beast: felt,
     Upgrading: felt,
+}
+
+struct KingState {
+    AdventurerId: Uint256,
+    StartTime: felt,
 }
 
 struct PackedAdventurerState {

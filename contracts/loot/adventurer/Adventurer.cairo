@@ -12,7 +12,14 @@
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from starkware.cairo.common.uint256 import Uint256, uint256_add, uint256_eq
+from starkware.cairo.common.uint256 import (
+    Uint256, 
+    uint256_add, 
+    uint256_sub, 
+    uint256_eq, 
+    uint256_mul, 
+    uint256_unsigned_div_rem
+)
 from starkware.cairo.common.math import (
     unsigned_div_rem,
     assert_not_equal,
@@ -48,7 +55,8 @@ from contracts.loot.constants.adventurer import (
     PackedAdventurerState,
     AdventurerStatus,
     DiscoveryType,
-    ItemDiscoveryType
+    ItemDiscoveryType,
+    KingState
 )
 from contracts.loot.constants.beast import Beast
 from contracts.loot.constants.obstacle import ObstacleUtils, ObstacleConstants
@@ -57,7 +65,7 @@ from contracts.loot.loot.stats.combat import CombatStats
 from contracts.loot.utils.general import _uint_to_felt
 from contracts.loot.beast.interface import IBeast
 from contracts.loot.loot.ILoot import ILoot
-from contracts.loot.utils.constants import ModuleIds, ExternalContractIds, MINT_COST, STARTING_GOLD
+from contracts.loot.utils.constants import ModuleIds, ExternalContractIds, MINT_COST, STARTING_GOLD, KING_TRIBUTE_PERCENT
 
 // -----------------------------------
 // Events
@@ -95,6 +103,11 @@ func treasury_address() -> (address: felt) {
 @storage_var
 func adventurer_image(tokenId: Uint256) -> (image: felt) {
 }
+
+@storage_var
+func king() -> (king: KingState) {
+}
+
 
 // -----------------------------------
 // Initialize & upgrade
@@ -185,6 +198,7 @@ func mint{
     // send to this contract and set Balance of Adventurer
     let (this) = get_contract_address();
     IERC20.transferFrom(lords_address, caller, this, Uint256(MINT_COST, 0));
+    // @distracteddev: this is now redundant, we can't take away balance every time tribute is distributed
     adventurer_balance.write(next_adventurer_id, Uint256(MINT_COST, 0));
 
     return (next_adventurer_id,);
@@ -653,6 +667,92 @@ func explore{
 
     return (FALSE, 0);
 }
+
+// @notice Become the king
+// @param adventurer_token_id: Id of adventurer
+// @return success: Value indicating success
+@external
+func become_king{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(adventurer_token_id: Uint256) -> (success: felt) {
+    alloc_locals;
+
+    // only adventurer owner can explore
+    ERC721.assert_only_token_owner(adventurer_token_id);
+
+    let (beast_address) = Module.get_module_address(ModuleIds.Beast);
+
+    // unpack adventurer
+    let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
+
+    let (gold_balance) = IBeast.balance_of(beast_address, adventurer_token_id);
+
+    let (king_state) = king.read();
+
+    let (king_balance) = IBeast.balance_of(beast_address, king_state.AdventurerId);
+
+    // same as less than
+    let over_king_check = is_le(king_balance + 1, gold_balance);
+
+    with_attr error_message("Adventurer: Gold balance is not the highest.") {
+        assert over_king_check = TRUE;
+    }
+
+    let (current_time) = get_block_timestamp();
+
+    let new_king = KingState(adventurer_token_id, current_time);
+
+    king.write(new_king);
+    
+    return (TRUE,);
+}
+
+// @notice Pay tribute to the king
+// @return success: Value indicating success
+@external
+func pay_king_tribute{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}() -> (success: felt){
+    alloc_locals;
+    // Anyone can call this function to check king payout (potential for keepers)
+    let (king_state) = king.read();
+
+    let (current_time) = get_block_timestamp();
+
+    let time_duration = current_time - king_state.StartTime;
+
+    // 12 hours = 60 * 60 * 12 = 43200 seconds
+
+    let check_over_duration = is_le(43200, time_duration);
+
+    with_attr error_message("Adventurer: King not active for 12 hours.") {
+        assert check_over_duration = TRUE;
+    }
+
+    // lords
+    let (lords_address) = Module.get_external_contract_address(ExternalContractIds.Lords);
+    let (this) = get_contract_address();
+
+    // calculate tribute
+    let (total_lords) = IERC20.balanceOf(lords_address, this);
+    let (pre_tribute, _) = uint256_mul(Uint256(KING_TRIBUTE_PERCENT,0), total_lords);
+    let (king_tribute, _) = uint256_unsigned_div_rem(pre_tribute, Uint256(100, 0));
+
+    // send to king adventurer owner
+    let (owner: felt) = ERC721.owner_of(king_state.AdventurerId);
+    IERC20.transfer(lords_address, owner, king_tribute);
+
+    // Reset king timer
+    let new_king_state = KingState(
+        king_state.AdventurerId,
+        current_time
+    );
+
+    king.write(new_king_state);
+
+    return (TRUE,);
+}
+
 // -----------------------------
 // Internal Adventurer Specific
 // -----------------------------

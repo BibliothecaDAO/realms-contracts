@@ -11,7 +11,7 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le, assert_nn
 from starkware.starknet.common.syscalls import get_block_timestamp
-from starkware.cairo.common.uint256 import Uint256
+from starkware.cairo.common.uint256 import Uint256, uint256_mul, uint256_unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
@@ -638,5 +638,10 @@ namespace AdventurerLib {
             return(BeastIds.Rat,);
         }
         return (0,);
+    }
+
+    func calculate_king_tribute{syscall_ptr: felt*, range_check_ptr}(
+        tribute_percent: felt, total_balance: Uint256
+    ) -> (king_tribute: Uint256) {
     }
 }
