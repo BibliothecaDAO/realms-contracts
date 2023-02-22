@@ -22,7 +22,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9.6"
+python = "^3.9.0"
 click = "^8.0.4"
 dearpygui="1.8.0"
 cairo-nile = "^0.13.0"
