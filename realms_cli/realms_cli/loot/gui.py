@@ -284,6 +284,29 @@ def upgrade_stat(sender, app_data, user_data):
     print(out)
 
 
+def become_king(sender, app_data, user_data):
+    adventurer = dpg.get_value("potions_adventurer_id").split(" - ")[-1]
+    command = [
+        "nile",
+        "loot",
+        "become_king",
+        "--adventurer_token_id",
+        adventurer,
+    ]
+    out = subprocess.check_output(command).strip().decode("utf-8")
+    print(out)
+
+
+def pay_king_tribute(sender, app_data, user_data):
+    command = [
+        "nile",
+        "loot",
+        "pay_king_tribute",
+    ]
+    out = subprocess.check_output(command).strip().decode("utf-8")
+    print(out)
+
+
 if __name__ == "__main__":
     dpg.create_context()
     dpg.create_viewport(title="Realms GUI", width=800, height=800)
@@ -473,13 +496,20 @@ if __name__ == "__main__":
         dpg.add_spacer(height=4)
         dpg.add_separator()
         dpg.add_spacer(height=4)
-        dpg.add_text("Become King")
-        dpg.add_combo(
-            label="Adventurer ID",
-            tag="king_adventurer_id",
-            items=adventurers,
-            width=100,
-        )
+        dpg.add_text("Kings")
+        dpg.add_spacer(height=4)
+        with dpg.group(horizontal=True):
+            with dpg.group():
+                dpg.add_text("Become King")
+                dpg.add_combo(
+                    label="Adventurer ID",
+                    tag="king_adventurer_id",
+                    items=adventurers,
+                    width=100,
+                )
+                dpg.add_button(label="Become King", callback=become_king)
+            with dpg.group():
+                dpg.add_button(label="Pay King Tribue", callback=pay_king_tribute)
 
     dpg.show_viewport()
     dpg.start_dearpygui()
