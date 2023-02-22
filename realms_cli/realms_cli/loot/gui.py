@@ -4,7 +4,8 @@ import subprocess
 from realms_cli.config import Config
 from realms_cli.caller_invoker import wrapped_proxy_call
 from realms_cli.loot.constants import ITEMS, RACES, ORDERS, STATS
-from realms_cli.utils import uint
+from realms_cli.utils import uint, felt_to_str
+from realms_cli.loot.getters import format_array
 
 
 async def get_adventurers():
@@ -20,7 +21,7 @@ async def get_adventurers():
 
     out = out.split(" ")
 
-    all_ids = []
+    all_adventurers = []
 
     for i in range(0, int(out[0])):
         item = await wrapped_proxy_call(
@@ -33,18 +34,47 @@ async def get_adventurers():
 
         id = item.split(" ")
 
-        all_ids.append(id[0])
-    return all_ids
+        out = await wrapped_proxy_call(
+            network=config.nile_network,
+            contract_alias="proxy_Adventurer",
+            abi="artifacts/abis/Adventurer.json",
+            function="get_adventurer_by_id",
+            arguments=[*uint(id[0])],
+        )
+
+        # print(felt_to_str(int(out[3])))
+        out = out.split(" ")
+        # needing to add to get rid of weird bytecode
+        if out[3].startswith("0x"):
+            out = felt_to_str(int(out[3], 16))
+        else:
+            out = felt_to_str(int(out[3]))
+        all_adventurers.append("".join(out).replace("\x00", "") + " - " + id[0])
+    return all_adventurers
 
 
-def update_adventurer_list(id):
+async def update_adventurer_list(id):
+    config = Config(nile_network="goerli")
+
     global adventurers
-    adventurers.append(id[0])
+
+    out = await wrapped_proxy_call(
+        network=config.nile_network,
+        contract_alias="proxy_Adventurer",
+        abi="artifacts/abis/Adventurer.json",
+        function="get_adventurer_by_id",
+        arguments=[*uint(id[0])],
+    )
+    out = out.split(" ")
+    # needing to add to get rid of weird bytecode
+    adventurers.append(
+        "".join(felt_to_str(int(out[3]))).replace("\x00", "") + " - " + id[0]
+    )
     print(adventurers)
 
 
 def get_adventurer(sender, app_data, user_data):
-    value = dpg.get_value("adventurer_id")
+    value = dpg.get_value("adventurer_id").split(" - ")[-1]
     command = ["nile", "loot", "adventurer", "--adventurer_token_id", value]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
@@ -112,7 +142,7 @@ def new_adventurer(sender, app_data, user_data):
 
 
 def explore(sender, app_data, user_data):
-    adventurer = dpg.get_value("adventurer_id")
+    adventurer = dpg.get_value("adventurer_id").split(" - ")[-1]
     command = [
         "nile",
         "loot",
@@ -125,7 +155,7 @@ def explore(sender, app_data, user_data):
 
 
 def attack_beast(sender, app_data, user_data):
-    adventurer = dpg.get_value("adventurer_id")
+    adventurer = dpg.get_value("adventurer_id").split(" - ")[-1]
     command = [
         "nile",
         "loot",
@@ -138,7 +168,7 @@ def attack_beast(sender, app_data, user_data):
 
 
 def flee(sender, app_data, user_data):
-    adventurer = dpg.get_value("adventurer_id")
+    adventurer = dpg.get_value("adventurer_id").split(" - ")[-1]
     command = [
         "nile",
         "loot",
@@ -151,7 +181,7 @@ def flee(sender, app_data, user_data):
 
 
 def equip_item(sender, app_data, user_data):
-    adventurer = dpg.get_value("equip_adventurer_id")
+    adventurer = dpg.get_value("equip_adventurer_id").split(" - ")[-1]
     item = dpg.get_value("equip_loot_token_id")
     command = [
         "nile",
@@ -167,7 +197,7 @@ def equip_item(sender, app_data, user_data):
 
 
 def unequip_item(sender, app_data, user_data):
-    adventurer = dpg.get_value("unequip_adventurer_id")
+    adventurer = dpg.get_value("unequip_adventurer_id").split(" - ")[-1]
     item = dpg.get_value("unequip_loot_token_id")
     command = [
         "nile",
@@ -183,7 +213,7 @@ def unequip_item(sender, app_data, user_data):
 
 
 def purchase_health(sender, app_data, user_data):
-    adventurer = dpg.get_value("potions_adventurer_id")
+    adventurer = dpg.get_value("potions_adventurer_id").split(" - ")[-1]
     number = dpg.get_value("potion_number")
     command = [
         "nile",
@@ -220,7 +250,7 @@ def get_market_items(sender, app_data, user_data):
 
 def bid_on_item(sender, app_data, user_data):
     loot_token_id = dpg.get_value(tag="loot_token_id")
-    adventurer_id = dpg.get_value(tag="bid_adventurer_id")
+    adventurer_id = dpg.get_value(tag="bid_adventurer_id").split(" - ")[-1]
     price = dpg.get_value("bid_price")
     command = [
         "nile",
@@ -238,7 +268,7 @@ def bid_on_item(sender, app_data, user_data):
 
 
 def upgrade_stat(sender, app_data, user_data):
-    adventurer = dpg.get_value(tag="upgrade_adventurer_id")
+    adventurer = dpg.get_value(tag="upgrade_adventurer_id").split(" - ")[-1]
     stat = dpg.get_value(tag="stat_id")
     stat_id = [k for k, v in STATS.items() if v == stat][0]
     command = [
@@ -440,6 +470,16 @@ if __name__ == "__main__":
             width=100,
         )
         dpg.add_button(label="Upgrade", callback=upgrade_stat)
+        dpg.add_spacer(height=4)
+        dpg.add_separator()
+        dpg.add_spacer(height=4)
+        dpg.add_text("Become King")
+        dpg.add_combo(
+            label="Adventurer ID",
+            tag="king_adventurer_id",
+            items=adventurers,
+            width=100,
+        )
 
     dpg.show_viewport()
     dpg.start_dearpygui()
