@@ -742,6 +742,14 @@ func pay_king_tribute{
     let (owner: felt) = ERC721.owner_of(king_state.AdventurerId);
     IERC20.transfer(lords_address, owner, king_tribute);
 
+    // Reset king timer
+    let new_king_state = KingState(
+        king_state.AdventurerId,
+        current_time
+    );
+
+    king.write(new_king_state);
+
     return (TRUE,);
 }
 

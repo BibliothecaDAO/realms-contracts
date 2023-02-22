@@ -644,6 +644,12 @@ func test_king_tribute{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     assert new_total_lords = Uint256(45000000000000000000,0);
     assert lords_balance = Uint256(105000000000000000000,0);
 
+    // should fail as timer reset
+    %{
+        expect_revert(error_message="Adventurer: King not active for 12 hours.")
+    %}
+
+    IAdventurer.pay_king_tribute(adventurer_address);
 
     return ();
 }
