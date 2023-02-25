@@ -3,9 +3,9 @@ import dearpygui.dearpygui as dpg
 import subprocess
 from realms_cli.config import Config
 from realms_cli.caller_invoker import wrapped_proxy_call
-from realms_cli.loot.constants import ITEMS, RACES, ORDERS, STATS
+from realms_cli.loot.constants import ITEMS, RACES, ORDERS, STATS, BEASTS
 from realms_cli.utils import uint, felt_to_str
-from realms_cli.loot.getters import format_array
+from realms_cli.loot.getters import format_array, _get_beast, _get_adventurer
 
 
 async def get_adventurers():
@@ -75,10 +75,11 @@ async def update_adventurer_list(id):
 
 def get_adventurer(sender, app_data, user_dat):
     value = dpg.get_value("adventurer_id").split(" - ")[-1]
-    command = ["nile", "loot", "adventurer", "--adventurer_token_id", value]
-    out = subprocess.check_output(command).strip().decode("utf-8")
-    print(out)
+    adventurer_out = asyncio.run(_get_adventurer("goerli", value))
+    print(adventurer_out)
     update_gold(value)
+    update_beast(adventurer_out[26])
+    update_health(value)
 
 
 def new_adventurer(sender, app_data, user_data):
@@ -141,6 +142,7 @@ def new_adventurer(sender, app_data, user_data):
     id = item.split(" ")
     update_adventurer_list(id[0])
     update_gold(id[0])
+    update_health(id[0])
 
 
 def explore(sender, app_data, user_data):
@@ -155,6 +157,7 @@ def explore(sender, app_data, user_data):
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
     update_gold(adventurer)
+    update_health(adventurer)
 
 
 def attack_beast(sender, app_data, user_data):
@@ -169,6 +172,7 @@ def attack_beast(sender, app_data, user_data):
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
     update_gold(adventurer)
+    update_health(adventurer)
 
 
 def flee(sender, app_data, user_data):
@@ -182,6 +186,7 @@ def flee(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
+    update_health(adventurer)
 
 
 def equip_item(sender, app_data, user_data):
@@ -226,11 +231,12 @@ def purchase_health(sender, app_data, user_data):
         "--adventurer_token_id",
         adventurer,
         "--number",
-        number,
+        str(number),
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
     update_gold(adventurer)
+    update_health(adventurer)
 
 
 def mint_daily_items(sender, app_data, user_data):
@@ -318,8 +324,22 @@ def update_gold(adventurer_token_id):
     out = subprocess.check_output(command).strip().decode("utf-8")
     out = out.split(" ")
     out = out[-1].split("\n")
-    print(out[-1])
+    print(f"💰 Gold balance is now {out[-1]}")
     dpg.set_value("gold", out[-1])
+
+
+def update_beast(beast_token_id):
+    if beast_token_id != "0":
+        beast_out = asyncio.run(_get_beast(beast_token_id, "goerli"))
+        beast = BEASTS[str(int(beast_out[0]))]
+        print(beast)
+        dpg.set_value("beast", beast)
+
+
+def update_health(adventurer_token_id):
+    adventurer_out = asyncio.run(_get_adventurer("goerli", adventurer_token_id))
+    print(f"💚 Health is now {adventurer_out[7]}")
+    dpg.set_value("health", adventurer_out[7])
 
 
 if __name__ == "__main__":
@@ -417,8 +437,14 @@ if __name__ == "__main__":
                         callback=get_adventurer,
                     )
             with dpg.group():
+                dpg.add_text("Health")
+                dpg.add_text(tag="health", default_value="-", color=[0, 128, 0])
+            with dpg.group():
                 dpg.add_text("Gold")
-                dpg.add_text(tag="gold", default_value="0", color=[255, 215, 0])
+                dpg.add_text(tag="gold", default_value="-", color=[255, 215, 0])
+            with dpg.group():
+                dpg.add_text("Beast")
+                dpg.add_text(tag="beast", default_value="-", color=[178, 34, 34])
         dpg.add_spacer(height=4)
         dpg.add_separator()
         dpg.add_spacer(height=4)
