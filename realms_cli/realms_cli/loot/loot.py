@@ -57,6 +57,8 @@ async def mint_daily_items(network):
         arguments=[],
     )
 
+    print("🗡 Daily items minted ✅")
+
 
 @loot.command()
 @click.option(
@@ -592,9 +594,14 @@ async def attack(adventurer_token_id, network):
                 f"💀 You dealt {str(int(pre_beast[6]) - int(beast_out[6]))} damage and have killed the {BEASTS[str(int(beast_out[0]))]} 🎉"
             )
         else:
-            print(
-                f"👹 You did {str(int(pre_beast[6]) - int(beast_out[6]))} damage to the {BEASTS[str(int(beast_out[0]))]}, its health is now {beast_out[6]}"
-            )
+            if int(pre_beast[6]) - int(beast_out[6]) == 0:
+                print(
+                    f"😖 The {BEASTS[str(int(beast_out[0]))]}'s armor is too strong, you do no damage."
+                )
+            else:
+                print(
+                    f"👹 You did {str(int(pre_beast[6]) - int(beast_out[6]))} damage to the {BEASTS[str(int(beast_out[0]))]}, its health is now {beast_out[6]}"
+                )
             if adventurer_out[4] == "0":
                 print(
                     f"🪦 You took {str(int(pre_adventurer[7]) - int(adventurer_out[7]))} damage and have been killed"
@@ -641,7 +648,7 @@ async def flee(adventurer_token_id, network):
     adventurer_out = await _get_adventurer(network, adventurer_token_id)
 
     if adventurer_out[23] == "0":
-        print(f"🏃‍♂️ You successfully fled from {BEASTS[str(int(beast_out[0]))]} ✅")
+        print(f"🏃‍♂️ You successfully fled from the {BEASTS[str(int(beast_out[0]))]} ✅")
     if adventurer_out[23] == "1":
         print(f"😫 You have been ambushed! Your health is now {adventurer_out[4]}")
 

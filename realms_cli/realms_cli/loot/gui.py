@@ -63,7 +63,7 @@ async def update_adventurer_list(id):
         contract_alias="proxy_Adventurer",
         abi="artifacts/abis/Adventurer.json",
         function="get_adventurer_by_id",
-        arguments=[*uint(id[0])],
+        arguments=[*uint(id)],
     )
     out = out.split(" ")
     # needing to add to get rid of weird bytecode
@@ -73,11 +73,12 @@ async def update_adventurer_list(id):
     print(adventurers)
 
 
-def get_adventurer(sender, app_data, user_data):
+def get_adventurer(sender, app_data, user_dat):
     value = dpg.get_value("adventurer_id").split(" - ")[-1]
     command = ["nile", "loot", "adventurer", "--adventurer_token_id", value]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
+    update_gold(value)
 
 
 def new_adventurer(sender, app_data, user_data):
@@ -138,7 +139,8 @@ def new_adventurer(sender, app_data, user_data):
     )
 
     id = item.split(" ")
-    update_adventurer_list(id)
+    update_adventurer_list(id[0])
+    update_gold(id[0])
 
 
 def explore(sender, app_data, user_data):
@@ -152,6 +154,7 @@ def explore(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
+    update_gold(adventurer)
 
 
 def attack_beast(sender, app_data, user_data):
@@ -165,6 +168,7 @@ def attack_beast(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
+    update_gold(adventurer)
 
 
 def flee(sender, app_data, user_data):
@@ -226,13 +230,14 @@ def purchase_health(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
+    update_gold(adventurer)
 
 
 def mint_daily_items(sender, app_data, user_data):
     command = [
         "nile",
         "loot",
-        "mint_daily_items",
+        "mint-daily-items",
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
@@ -265,6 +270,7 @@ def bid_on_item(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
+    update_gold(adventurer_id)
 
 
 def upgrade_stat(sender, app_data, user_data):
@@ -307,6 +313,15 @@ def pay_king_tribute(sender, app_data, user_data):
     print(out)
 
 
+def update_gold(adventurer_token_id):
+    command = ["nile", "loot", "balance", "--adventurer_token_id", adventurer_token_id]
+    out = subprocess.check_output(command).strip().decode("utf-8")
+    out = out.split(" ")
+    out = out[-1].split("\n")
+    print(out[-1])
+    dpg.set_value("gold", out[-1])
+
+
 if __name__ == "__main__":
     dpg.create_context()
     dpg.create_viewport(title="Realms GUI", width=800, height=800)
@@ -315,7 +330,8 @@ if __name__ == "__main__":
     global adventurers
     adventurers = asyncio.run(get_adventurers())
 
-    with dpg.window(label="Adventurers", width=800, height=800):
+    with dpg.window(tag="Adventurers", label="Adventurers", width=800, height=800):
+        print("Adventurers GUI running ...")
         dpg.add_text("Create Adventurer")
         dpg.add_combo(
             label="Starting Weapon",
@@ -383,40 +399,33 @@ if __name__ == "__main__":
         dpg.add_spacer(height=4)
         dpg.add_separator()
         dpg.add_spacer(height=4)
-        dpg.add_text("Play")
-        dpg.add_combo(
-            label="Adventurer ID", tag="adventurer_id", items=adventurers, width=100
-        )
         with dpg.group(horizontal=True):
-            dpg.add_button(label="Explore", callback=explore)
-            dpg.add_button(label="Attack Beast", callback=attack_beast)
-            dpg.add_button(label="Flee from Beast", callback=flee)
-            dpg.add_button(label="Get Adventurer", callback=get_adventurer)
-        dpg.add_spacer(height=4)
-        dpg.add_separator()
-        dpg.add_spacer(height=4)
-        dpg.add_text("Purchase Health")
-        dpg.add_combo(
-            label="Adventurer ID",
-            tag="potions_adventurer_id",
-            items=adventurers,
-            width=100,
-        )
-        dpg.add_slider_int(
-            label="Health Potions",
-            tag="potion_number",
-            min_value=1,
-            max_value=10,
-            width=100,
-        )
-        dpg.add_button(label="Purchase Health", callback=purchase_health)
+            with dpg.group():
+                dpg.add_text("Play")
+                dpg.add_combo(
+                    label="Adventurer ID",
+                    tag="adventurer_id",
+                    items=adventurers,
+                    width=100,
+                )
+                with dpg.group(horizontal=True):
+                    dpg.add_button(label="Explore", callback=explore)
+                    dpg.add_button(label="Attack Beast", callback=attack_beast)
+                    dpg.add_button(label="Flee from Beast", callback=flee)
+                    dpg.add_button(
+                        label="Get Adventurer",
+                        callback=get_adventurer,
+                    )
+            with dpg.group():
+                dpg.add_text("Gold")
+                dpg.add_text(tag="gold", default_value="0", color=[255, 215, 0])
         dpg.add_spacer(height=4)
         dpg.add_separator()
         dpg.add_spacer(height=4)
         dpg.add_text("Items")
         with dpg.group(horizontal=True):
             dpg.add_button(label="Mint Daily Loot Items", callback=mint_daily_items)
-            dpg.add_button(label="Get Market Items", callback=mint_daily_items)
+            dpg.add_button(label="Get Market Items", callback=get_market_items)
         dpg.add_spacer(height=4)
         with dpg.group(horizontal=True):
             with dpg.group():
@@ -468,31 +477,49 @@ if __name__ == "__main__":
                     width=100,
                 )
                 dpg.add_button(label="Unequip", callback=unequip_item)
-        dpg.add_spacer(height=4)
-        dpg.add_separator()
-        dpg.add_spacer(height=4)
-        dpg.add_text("Upgrade Stat")
-        dpg.add_combo(
-            label="Adventurer ID",
-            tag="upgrade_adventurer_id",
-            items=adventurers,
-            width=100,
-        )
-        dpg.add_combo(
-            label="Stat",
-            tag="stat",
-            items=[
-                "Strength",
-                "Dexterity",
-                "Vitality",
-                "Intelligence",
-                "Wisdom",
-                "Charisma",
-                "Luck",
-            ],
-            width=100,
-        )
-        dpg.add_button(label="Upgrade", callback=upgrade_stat)
+        with dpg.group(horizontal=True):
+            with dpg.group():
+                dpg.add_spacer(height=4)
+                dpg.add_separator()
+                dpg.add_spacer(height=4)
+                dpg.add_text("Upgrade Stat")
+                dpg.add_combo(
+                    label="Adventurer ID",
+                    tag="upgrade_adventurer_id",
+                    items=adventurers,
+                    width=100,
+                )
+                dpg.add_combo(
+                    label="Stat",
+                    tag="stat",
+                    items=[
+                        "Strength",
+                        "Dexterity",
+                        "Vitality",
+                        "Intelligence",
+                        "Wisdom",
+                        "Charisma",
+                        "Luck",
+                    ],
+                    width=100,
+                )
+                dpg.add_button(label="Upgrade", callback=upgrade_stat)
+            with dpg.group():
+                dpg.add_text("Purchase Health")
+                dpg.add_combo(
+                    label="Adventurer ID",
+                    tag="potions_adventurer_id",
+                    items=adventurers,
+                    width=100,
+                )
+                dpg.add_slider_int(
+                    label="Health Potions",
+                    tag="potion_number",
+                    min_value=1,
+                    max_value=10,
+                    width=100,
+                )
+                dpg.add_button(label="Purchase Health", callback=purchase_health)
         dpg.add_spacer(height=4)
         dpg.add_separator()
         dpg.add_spacer(height=4)

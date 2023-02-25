@@ -4,7 +4,7 @@ from realms_cli.caller_invoker import wrapped_send, compile, wrapped_declare
 from realms_cli.config import Config
 from realms_cli.utils import delete_existing_deployment, delete_existing_declaration
 
-Contracts = namedtuple('Contracts', 'name')
+Contracts = namedtuple("Contracts", "name")
 
 # STEPS
 # 0. Set new names in array accordingly to the tuple structure
@@ -29,27 +29,26 @@ NEW_MODULES = [
     # Contracts("Resources_ERC1155_Mintable_Burnable"),
     # Contracts("Exchange_ERC20_1155"),
     Contracts("Adventurer"),
-    Contracts("LootMarketArcade"),
+    # Contracts("LootMarketArcade"),
     Contracts("Beast"),
 ]
 
 
 async def run(nre):
-
     config = Config(nre.network)
 
-    #---------------- SET MODULES  ----------------#
+    # ---------------- SET MODULES  ----------------#
 
     for contract in NEW_MODULES:
-
         delete_existing_deployment(contract.name)
 
         delete_existing_declaration(contract.name)
 
         compile(contract.name)
 
-        await wrapped_declare(config.ADMIN_ALIAS, contract.name, nre.network,
-                              contract.name)
+        await wrapped_declare(
+            config.ADMIN_ALIAS, contract.name, nre.network, contract.name
+        )
 
         class_hash = get_class_hash(contract.name)
 
