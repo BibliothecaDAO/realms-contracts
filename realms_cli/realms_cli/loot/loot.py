@@ -84,6 +84,7 @@ async def market(loot_token_id, network):
         arguments=[*uint(loot_token_id)],
     )
     out = out.split(" ")
+    out.insert(0, "0")
 
     print_loot_and_bid([out])
 
@@ -124,6 +125,7 @@ async def all_market(network):
             function="view_unminted_item",
             arguments=[*uint(i + start)],
         )
+
         out = out.split(" ")
         out.insert(0, str(i + start))
         print(out)
@@ -354,7 +356,7 @@ async def explore(ctx, network, adventurer_token_id):
 
     print("👣 Exploring ...")
 
-    await wrapped_send(
+    send_out = await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Adventurer",
@@ -362,20 +364,22 @@ async def explore(ctx, network, adventurer_token_id):
         arguments=[*uint(adventurer_token_id)],
     )
 
-    print("👣 Explored ✅")
+    print(send_out)
 
-    out = await _get_adventurer(network, adventurer_token_id)
+    # print("👣 Explored ✅")
 
-    if out[25] == "1":
-        print("🧌 You have discovered a beast")
-        print_beast_img(out[26])
-        await _get_beast(out[26], network)
-    else:
-        await ctx.forward(explore)
-        await ctx.invoke(
-            explore, ctx=ctx, network=network, adventurer_token_id=adventurer_token_id
-        )
-        print("🤔 You discovered nothing")
+    # out = await _get_adventurer(network, adventurer_token_id)
+
+    # if out[25] == "1":
+    #     print("🧌 You have discovered a beast")
+    #     print_beast_img(out[26])
+    #     await _get_beast(out[26], network)
+    # else:
+    #     await ctx.forward(explore)
+    #     await ctx.invoke(
+    #         explore, ctx=ctx, network=network, adventurer_token_id=adventurer_token_id
+    #     )
+    #     print("🤔 You discovered nothing")
 
 
 @loot.command()
@@ -835,6 +839,26 @@ async def new(network, item, race, home_realm, name, order, image_hash_1, image_
     print(
         "And with a final surge of power, he fulfilled his destiny, becoming a legend that would be spoken of for generations to come."
     )
+
+
+@loot.command()
+@click.option("--network", default="goerli")
+async def get_king(network):
+    """
+    Get information on the king.
+    """
+    config = Config(nile_network=network)
+
+    print("♔ Getting king info ...")
+
+    out = await wrapped_proxy_call(
+        network=config.nile_network,
+        contract_alias="proxy_Adventurer",
+        abi="artifacts/abis/Adventurer.json",
+        function="get_king",
+        arguments=[],
+    )
+    print(out)
 
 
 @loot.command()

@@ -56,7 +56,7 @@ async def get_adventurers():
 async def update_adventurer_list(id):
     config = Config(nile_network="goerli")
 
-    global adventurers
+    adventurers = await get_adventurers()
 
     out = await wrapped_proxy_call(
         network=config.nile_network,
@@ -71,18 +71,35 @@ async def update_adventurer_list(id):
         "".join(felt_to_str(int(out[3]))).replace("\x00", "") + " - " + id[0]
     )
     print(adventurers)
+    dpg.configure_item("adventurer_id", items=adventurers)
 
 
 def get_adventurer(sender, app_data, user_dat):
+    dpg.add_text(
+        "Getting adventurer",
+        tag="get_adventurer_load",
+        pos=[300, 50],
+        parent="adventurers",
+    )
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
     value = dpg.get_value("adventurer_id").split(" - ")[-1]
     adventurer_out = asyncio.run(_get_adventurer("goerli", value))
     print(adventurer_out)
     update_gold(value)
     update_beast(adventurer_out[26])
     update_health(value)
+    dpg.delete_item("get_adventurer_load")
+    dpg.delete_item("loader")
 
 
 def new_adventurer(sender, app_data, user_data):
+    dpg.add_text(
+        "Minting Adventurer",
+        tag="mint_adventurer_load",
+        pos=[300, 50],
+        parent="adventurers",
+    )
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
     config = Config(nile_network="goerli")
     starting_weapon = dpg.get_value("starting_weapon")
     starting_weapon_id = [
@@ -140,12 +157,16 @@ def new_adventurer(sender, app_data, user_data):
     )
 
     id = item.split(" ")
-    update_adventurer_list(id[0])
-    update_gold(id[0])
-    update_health(id[0])
+    # asyncio.run(update_adventurer_list(id[-1]))
+    # update_gold(id[-1])
+    # update_health(id[-1])
+    dpg.delete_item("mint_adventurer_load")
+    dpg.delete_item("loader")
 
 
 def explore(sender, app_data, user_data):
+    dpg.add_text("Exploring", tag="explore_load", pos=[300, 50], parent="adventurers")
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
     adventurer = dpg.get_value("adventurer_id").split(" - ")[-1]
     command = [
         "nile",
@@ -158,9 +179,15 @@ def explore(sender, app_data, user_data):
     print(out)
     update_gold(adventurer)
     update_health(adventurer)
+    dpg.delete_item("explore_load")
+    dpg.delete_item("loader")
 
 
 def attack_beast(sender, app_data, user_data):
+    dpg.add_text(
+        "Attacking Beast", tag="attack_load", pos=[300, 50], parent="adventurers"
+    )
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
     adventurer = dpg.get_value("adventurer_id").split(" - ")[-1]
     command = [
         "nile",
@@ -173,9 +200,15 @@ def attack_beast(sender, app_data, user_data):
     print(out)
     update_gold(adventurer)
     update_health(adventurer)
+    dpg.delete_item("attack_load")
+    dpg.delete_item("loader")
 
 
 def flee(sender, app_data, user_data):
+    dpg.add_text(
+        "Fleeing from beast", tag="flee_load", pos=[300, 50], parent="adventurers"
+    )
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
     adventurer = dpg.get_value("adventurer_id").split(" - ")[-1]
     command = [
         "nile",
@@ -187,9 +220,15 @@ def flee(sender, app_data, user_data):
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
     update_health(adventurer)
+    dpg.delete_item("flee_load")
+    dpg.delete_item("loader")
 
 
 def equip_item(sender, app_data, user_data):
+    dpg.add_text(
+        "Equipping Item", tag="equip_load", pos=[300, 50], parent="adventurers"
+    )
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
     adventurer = dpg.get_value("equip_adventurer_id").split(" - ")[-1]
     item = dpg.get_value("equip_loot_token_id")
     command = [
@@ -203,9 +242,15 @@ def equip_item(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
+    dpg.delete_item("equip_load")
+    dpg.delete_item("loader")
 
 
 def unequip_item(sender, app_data, user_data):
+    dpg.add_text(
+        "Unequipping Item", tag="unequip_load", pos=[300, 50], parent="adventurers"
+    )
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
     adventurer = dpg.get_value("unequip_adventurer_id").split(" - ")[-1]
     item = dpg.get_value("unequip_loot_token_id")
     command = [
@@ -219,9 +264,18 @@ def unequip_item(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
+    dpg.delete_item("unequip_load")
+    dpg.delete_item("loader")
 
 
 def purchase_health(sender, app_data, user_data):
+    dpg.add_text(
+        "Purchasing Health",
+        tag="purchase_health_load",
+        pos=[300, 50],
+        parent="adventurers",
+    )
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
     adventurer = dpg.get_value("potions_adventurer_id").split(" - ")[-1]
     number = dpg.get_value("potion_number")
     command = [
@@ -237,9 +291,18 @@ def purchase_health(sender, app_data, user_data):
     print(out)
     update_gold(adventurer)
     update_health(adventurer)
+    dpg.delete_item("purchase_health_load")
+    dpg.delete_item("loader")
 
 
 def mint_daily_items(sender, app_data, user_data):
+    dpg.add_text(
+        "Minting daily items",
+        tag="mint_items_load",
+        pos=[300, 50],
+        parent="adventurers",
+    )
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
     command = [
         "nile",
         "loot",
@@ -247,19 +310,63 @@ def mint_daily_items(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
+    dpg.delete_item("mint_items_load")
+    dpg.delete_item("loader")
 
 
-def get_market_items(sender, app_data, user_data):
-    command = [
-        "nile",
-        "loot",
-        "all-market",
-    ]
+async def get_market_items():
+    config = Config(nile_network="goerli")
+
+    current_index = await wrapped_proxy_call(
+        network=config.nile_network,
+        contract_alias="proxy_LootMarketArcade",
+        abi="artifacts/abis/LootMarketArcade.json",
+        function="get_mint_index",
+        arguments=[],
+    )
+
+    new_items = await wrapped_proxy_call(
+        network=config.nile_network,
+        contract_alias="proxy_LootMarketArcade",
+        abi="artifacts/abis/LootMarketArcade.json",
+        function="get_new_items",
+        arguments=[],
+    )
+
+    start = int(current_index) - int(new_items)
+
+    items = []
+
+    for i in range((int(current_index) + 1) - start):
+        out = await wrapped_proxy_call(
+            network=config.nile_network,
+            contract_alias="proxy_LootMarketArcade",
+            abi="artifacts/abis/LootMarketArcade.json",
+            function="view_unminted_item",
+            arguments=[*uint(i + start)],
+        )
+
+        out = out.split(" ")
+        out.insert(0, str(i + start))
+        print(out)
+
+        items.append(f"{config.LOOT_ITEMS[int(out[1])]} - {out[-2]}")
+    return items
+
+
+def get_items():
+    asyncio.run(get_market_items())
+
+
+def get_item_market():
+    loot_token_id = dpg.get_value("item_id")
+    command = ["nile", "loot", "market", "--loot_token_id", loot_token_id]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
 
 
 def bid_on_item(sender, app_data, user_data):
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
     loot_token_id = dpg.get_value(tag="loot_token_id")
     adventurer_id = dpg.get_value(tag="bid_adventurer_id").split(" - ")[-1]
     price = dpg.get_value("bid_price")
@@ -277,9 +384,11 @@ def bid_on_item(sender, app_data, user_data):
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
     update_gold(adventurer_id)
+    dpg.delete_item("loader")
 
 
 def upgrade_stat(sender, app_data, user_data):
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
     adventurer = dpg.get_value(tag="upgrade_adventurer_id").split(" - ")[-1]
     stat = dpg.get_value(tag="stat_id")
     stat_id = [k for k, v in STATS.items() if v == stat][0]
@@ -294,9 +403,21 @@ def upgrade_stat(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
+    dpg.delete_item("loader")
+
+
+def get_king():
+    command = [
+        "nile",
+        "loot",
+        "get-king",
+    ]
+    out = subprocess.check_output(command).strip().decode("utf-8")
+    return out
 
 
 def become_king(sender, app_data, user_data):
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
     adventurer = dpg.get_value("potions_adventurer_id").split(" - ")[-1]
     command = [
         "nile",
@@ -307,9 +428,11 @@ def become_king(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
+    dpg.delete_item("loader")
 
 
 def pay_king_tribute(sender, app_data, user_data):
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
     command = [
         "nile",
         "loot",
@@ -317,6 +440,7 @@ def pay_king_tribute(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
+    dpg.delete_item("loader")
 
 
 def update_gold(adventurer_token_id):
@@ -326,6 +450,31 @@ def update_gold(adventurer_token_id):
     out = out[-1].split("\n")
     print(f"💰 Gold balance is now {out[-1]}")
     dpg.set_value("gold", out[-1])
+    king_out = get_king()
+    if out[-1] > king_out[-1]:
+        dpg.set_value(
+            "your_gold", "You have enough gold to be king!", color=[0, 128, 0]
+        )
+    else:
+        dpg.set_value(
+            "your_gold", "You don't have enough gold to be king.", color=[178, 34, 34]
+        )
+
+
+def update_king():
+    command = [
+        "nile",
+        "loot",
+        "get-king",
+    ]
+    out = subprocess.check_output(command).strip().decode("utf-8")
+    out = out.split(" ")
+    print(out)
+    king_out = out[-3].split("\n")
+    print(f"👑 King is {king_out[-1]}")
+    print(f"💰 King's gold balance is now {out[-1]}")
+    dpg.set_value("king_adventurer", king_out[-1])
+    dpg.set_value("kings_gold", out[-1])
 
 
 def update_beast(beast_token_id):
@@ -347,75 +496,77 @@ if __name__ == "__main__":
     dpg.create_viewport(title="Realms GUI", width=800, height=800)
     dpg.setup_dearpygui()
     print("Getting adventurers...")
-    global adventurers
     adventurers = asyncio.run(get_adventurers())
+    items = asyncio.run(get_market_items())
 
-    with dpg.window(tag="Adventurers", label="Adventurers", width=800, height=800):
+    with dpg.window(tag="adventurers", label="Adventurers", width=800, height=800):
         print("Adventurers GUI running ...")
-        dpg.add_text("Create Adventurer")
-        dpg.add_combo(
-            label="Starting Weapon",
-            tag="starting_weapon",
-            items=(["Book", "Wand", "Club", "Short Sword"]),
-            width=100,
-        )
-        dpg.add_combo(
-            label="Race",
-            tag="race",
-            items=(
-                [
-                    "Elf",
-                    "Fox",
-                    "Giant",
-                    "Human",
-                    "Orc",
-                    "Demon",
-                    "Goblin",
-                    "Fish",
-                    "Cat",
-                    "Frog",
-                ]
-            ),
-            width=100,
-        )
-        dpg.add_input_text(
-            label="Home Realm ID",
-            tag="home_realm",
-            decimal=True,
-            hint="1 - 8000",
-            width=100,
-        )
-        dpg.add_input_text(
-            label="Name",
-            tag="name",
-            width=100,
-        )
-        dpg.add_combo(
-            label="Order",
-            tag="order",
-            items=(
-                [
-                    "Power",
-                    "Giants",
-                    "Titans",
-                    "Skill",
-                    "Perfection",
-                    "Brilliance",
-                    "Enlightenment",
-                    "Protection",
-                    "Twins",
-                    "Reflection",
-                    "Detection",
-                    "Fox",
-                    "Vitriol",
-                    "Fury",
-                    "Rage",
-                    "Anger",
-                ]
-            ),
-            width=100,
-        )
-        dpg.add_button(label="Mint Adventurer", callback=new_adventurer)
+        with dpg.group(horizontal=True):
+            with dpg.group():
+                dpg.add_text("Create Adventurer")
+                dpg.add_combo(
+                    label="Starting Weapon",
+                    tag="starting_weapon",
+                    items=(["Book", "Wand", "Club", "Short Sword"]),
+                    width=100,
+                )
+                dpg.add_combo(
+                    label="Race",
+                    tag="race",
+                    items=(
+                        [
+                            "Elf",
+                            "Fox",
+                            "Giant",
+                            "Human",
+                            "Orc",
+                            "Demon",
+                            "Goblin",
+                            "Fish",
+                            "Cat",
+                            "Frog",
+                        ]
+                    ),
+                    width=100,
+                )
+                dpg.add_input_text(
+                    label="Home Realm ID",
+                    tag="home_realm",
+                    decimal=True,
+                    hint="1 - 8000",
+                    width=100,
+                )
+                dpg.add_input_text(
+                    label="Name",
+                    tag="name",
+                    width=100,
+                )
+                dpg.add_combo(
+                    label="Order",
+                    tag="order",
+                    items=(
+                        [
+                            "Power",
+                            "Giants",
+                            "Titans",
+                            "Skill",
+                            "Perfection",
+                            "Brilliance",
+                            "Enlightenment",
+                            "Protection",
+                            "Twins",
+                            "Reflection",
+                            "Detection",
+                            "Fox",
+                            "Vitriol",
+                            "Fury",
+                            "Rage",
+                            "Anger",
+                        ]
+                    ),
+                    width=100,
+                )
+                dpg.add_button(label="Mint Adventurer", callback=new_adventurer)
         dpg.add_spacer(height=4)
         dpg.add_separator()
         dpg.add_spacer(height=4)
@@ -452,6 +603,15 @@ if __name__ == "__main__":
         with dpg.group(horizontal=True):
             dpg.add_button(label="Mint Daily Loot Items", callback=mint_daily_items)
             dpg.add_button(label="Get Market Items", callback=get_market_items)
+            with dpg.group():
+                dpg.add_text("By Token")
+                dpg.add_combo(
+                    label="Item Id",
+                    tag="item_id",
+                    items=(items),
+                    width=100,
+                )
+                dpg.add_button(label="Get Item", callback=get_item_market)
         dpg.add_spacer(height=4)
         with dpg.group(horizontal=True):
             with dpg.group():
@@ -462,8 +622,11 @@ if __name__ == "__main__":
                     items=adventurers,
                     width=100,
                 )
-                dpg.add_input_text(
-                    label="Loot Token ID", tag="loot_token_id", decimal=True, width=100
+                dpg.add_combo(
+                    label="Loot Token ID",
+                    tag="bid_loot_id",
+                    items=(items),
+                    width=100,
                 )
                 dpg.add_input_text(
                     label="Price",
@@ -481,10 +644,10 @@ if __name__ == "__main__":
                     items=adventurers,
                     width=100,
                 )
-                dpg.add_input_text(
+                dpg.add_combo(
                     label="Loot Token ID",
-                    tag="equip_loot_token_id",
-                    decimal=True,
+                    tag="equip_loot_id",
+                    items=(items),
                     width=100,
                 )
                 dpg.add_button(label="Equip", callback=equip_item)
@@ -496,18 +659,18 @@ if __name__ == "__main__":
                     items=adventurers,
                     width=100,
                 )
-                dpg.add_input_text(
+                dpg.add_combo(
                     label="Loot Token ID",
-                    tag="unequip_loot_token_id",
-                    decimal=True,
+                    tag="unequip_loot_id",
+                    items=(items),
                     width=100,
                 )
                 dpg.add_button(label="Unequip", callback=unequip_item)
+        dpg.add_spacer(height=4)
+        dpg.add_separator()
+        dpg.add_spacer(height=4)
         with dpg.group(horizontal=True):
             with dpg.group():
-                dpg.add_spacer(height=4)
-                dpg.add_separator()
-                dpg.add_spacer(height=4)
                 dpg.add_text("Upgrade Stat")
                 dpg.add_combo(
                     label="Adventurer ID",
@@ -563,6 +726,28 @@ if __name__ == "__main__":
                 dpg.add_button(label="Become King", callback=become_king)
             with dpg.group():
                 dpg.add_button(label="Pay King Tribue", callback=pay_king_tribute)
+            with dpg.group():
+                dpg.add_text("King")
+                with dpg.group(horizontal=True):
+                    with dpg.group():
+                        dpg.add_text("Adventurer")
+                        dpg.add_text(
+                            tag="king_adventurer",
+                            default_value="-",
+                            color=[205, 127, 50],
+                        )
+                    with dpg.group():
+                        dpg.add_text("Gold")
+                        dpg.add_text(
+                            tag="kings_gold", default_value="-", color=[255, 215, 0]
+                        )
+                    with dpg.group():
+                        dpg.add_text(
+                            "You don't have enough gold to be king.",
+                            tag="your_gold",
+                            color=[178, 34, 34],
+                        )
+        update_king()
 
     dpg.show_viewport()
     dpg.start_dearpygui()

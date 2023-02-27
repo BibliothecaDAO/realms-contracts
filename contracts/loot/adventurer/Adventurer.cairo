@@ -849,6 +849,14 @@ func get_adventurer_by_id{
     return (adventurer,);
 }
 
+// @notice Get king state
+// @return king: State of the king
+@view
+func get_king{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}() -> (king_state: KingState) {
+    let (king_state) = king.read();
+    return (king_state,);
+}
+
 // --------------------
 // Base ERC721 Functions
 // --------------------
