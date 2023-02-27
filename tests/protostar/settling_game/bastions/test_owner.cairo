@@ -1,8 +1,16 @@
 %lang starknet
+// starkware
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.alloc import alloc
 from starkware.starknet.common.syscalls import get_contract_address
-from contracts.settling_game.modules.bastions.bastions import spawn_bastions, set_bastion_cooloff
+
+// settling game
+from contracts.settling_game.modules.bastions.bastions import (
+    spawn_bastions,
+    set_bastion_location_cooldown,
+    set_bastion_bonus_type,
+    set_bastion_moving_times,
+)
 from contracts.settling_game.ModuleController import get_arbiter, get_module_address
 from contracts.settling_game.utils.game_structs import (
     TravelInformation,
@@ -38,10 +46,10 @@ func test_spawn_bastions{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
 
     %{
         # check bastions
-        bastion_1 = load(ids.self_address, "bastions", "Bastion", [1, 2])
-        assert bastion_1 == [1, 0, 0]
-        bastion_2 = load(ids.self_address, "bastions", "Bastion", [3, 4])
-        assert bastion_2 == [2, 0, 0]
+        bastion_1_bonus_type = load(ids.self_address, "bastion_bonus_type", "felt", [1, 2])[0]
+        assert bastion_1_bonus_type == 1
+        bastion_2_bonus_type = load(ids.self_address, "bastion_bonus_type", "felt", [3, 4])[0]
+        assert bastion_2_bonus_type == 2
 
         # check coordinates
         bastion_1_id = (1*4) + 2
@@ -58,20 +66,48 @@ func test_spawn_bastions{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
 @external
 func test_deploy{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> () {
     alloc_locals;
+    let (local self_address) = get_contract_address();
     local bastions_address;
     %{ ids.bastions_address = deploy_contract('contracts/settling_game/modules/bastions/Bastions.cairo').contract_address %}
     return ();
 }
 
 @external
-func test_set_cooloff_period{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
-    ) {
+func test_set_bastion_location_cooldown{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+}() -> () {
     alloc_locals;
     let (local self_address) = get_contract_address();
-    set_bastion_cooloff(10);
+    set_bastion_location_cooldown(10, 1);
     %{
-        cooloff_period = load(ids.self_address, "bastion_cooloff", "felt")[0]
-        assert cooloff_period == 10
+        cooldown_period = load(ids.self_address, "bastion_location_cooldown_period", "felt", [1])[0]
+        assert cooldown_period == 10
+    %}
+    return ();
+}
+
+@external
+func test_set_bastion_bonus_type{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    ) -> () {
+    alloc_locals;
+    let (local self_address) = get_contract_address();
+    set_bastion_bonus_type(Point(1, 1), 1);
+    %{
+        bonus_type = load(ids.self_address, "bastion_bonus_type", "felt", [1, 1])[0]
+        assert bonus_type == 1
+    %}
+    return ();
+}
+
+@external
+func test_set_bastion_moving_times{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    ) -> () {
+    alloc_locals;
+    let (local self_address) = get_contract_address();
+    set_bastion_moving_times(1, 10);
+    %{
+        move_time = load(ids.self_address, "bastion_moving_times", "felt", [1])[0]
+        assert move_time == 10
     %}
     return ();
 }

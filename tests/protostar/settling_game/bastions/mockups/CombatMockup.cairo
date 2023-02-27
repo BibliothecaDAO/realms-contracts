@@ -13,6 +13,7 @@ from contracts.settling_game.utils.game_structs import (
     Battalion,
     Army,
 )
+from contracts.settling_game.modules.combat.library import Combat
 
 //
 // @notice Fake Combat contract to mock the combat outcome
@@ -73,4 +74,20 @@ func build_army_without_health() -> (a: Army) {
     tempvar values = new (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     let a = cast(values, Army*);
     return ([a],);
+}
+
+func build_army_without_health_packed{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}() -> (packed_army: felt) {
+    let (army_without_health_unpacked) = build_army_without_health();
+    let (army_without_health_packed) = Combat.pack_army(army_without_health_unpacked);
+    return (army_without_health_packed,);
+}
+
+func build_army_with_health_packed{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}() -> (packed_army: felt) {
+    let (army_with_health_unpacked) = build_army_with_health();
+    let (army_with_health_packed) = Combat.pack_army(army_with_health_unpacked);
+    return (army_with_health_packed,);
 }
