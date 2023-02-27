@@ -452,13 +452,11 @@ def update_gold(adventurer_token_id):
     dpg.set_value("gold", out[-1])
     king_out = get_king()
     if out[-1] > king_out[-1]:
-        dpg.set_value(
-            "your_gold", "You have enough gold to be king!", color=[0, 128, 0]
-        )
+        dpg.set_value("your_gold", "You have enough gold to be king!")
+        dpg.configure_item("your_gold", color=[0, 128, 0])
     else:
-        dpg.set_value(
-            "your_gold", "You don't have enough gold to be king.", color=[178, 34, 34]
-        )
+        dpg.set_value("your_gold", "You don't have enough gold to be king.")
+        dpg.configure_item("your_gold", color=[178, 34, 34])
 
 
 def update_king():
