@@ -5,7 +5,12 @@ from realms_cli.config import Config
 from realms_cli.caller_invoker import wrapped_proxy_call
 from realms_cli.loot.constants import ITEMS, RACES, ORDERS, STATS, BEASTS
 from realms_cli.utils import uint, felt_to_str
-from realms_cli.loot.getters import format_array, _get_beast, _get_adventurer
+from realms_cli.loot.getters import (
+    format_array,
+    _get_beast,
+    _get_adventurer,
+    print_loot_and_bid,
+)
 
 
 async def get_adventurers():
@@ -335,6 +340,7 @@ async def get_market_items():
 
     start = int(current_index) - int(new_items)
 
+    print_items = []
     items = []
 
     for i in range((int(current_index) + 1) - start):
@@ -350,7 +356,9 @@ async def get_market_items():
         out.insert(0, str(i + start))
         print(out)
 
-        items.append(f"{config.LOOT_ITEMS[int(out[1])]} - {out[-2]}")
+        print_items.append(out)
+        items.append(f"{config.LOOT_ITEMS[int(out[1]) - 1]} - {out[-2]}")
+    print_loot_and_bid(print_items)
     return items
 
 
@@ -600,7 +608,7 @@ if __name__ == "__main__":
         dpg.add_text("Items")
         with dpg.group(horizontal=True):
             dpg.add_button(label="Mint Daily Loot Items", callback=mint_daily_items)
-            dpg.add_button(label="Get Market Items", callback=get_market_items)
+            dpg.add_button(label="Get Market Items", callback=get_items)
             with dpg.group():
                 dpg.add_text("By Token")
                 dpg.add_combo(
