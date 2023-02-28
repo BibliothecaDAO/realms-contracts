@@ -84,16 +84,17 @@ def get_adventurer(sender, app_data, user_dat):
     dpg.add_text(
         "Getting adventurer",
         tag="get_adventurer_load",
-        pos=[300, 50],
+        pos=[700, 50],
         parent="adventurers",
     )
-    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
     value = dpg.get_value("adventurer_id").split(" - ")[-1]
     adventurer_out = asyncio.run(_get_adventurer("goerli", value))
     print(adventurer_out)
     update_gold(value)
     update_beast(adventurer_out[26])
     update_health(value)
+    update_equipped_items(adventurer_out)
     dpg.delete_item("get_adventurer_load")
     dpg.delete_item("loader")
 
@@ -102,10 +103,10 @@ def new_adventurer(sender, app_data, user_data):
     dpg.add_text(
         "Minting Adventurer",
         tag="mint_adventurer_load",
-        pos=[300, 50],
+        pos=[700, 50],
         parent="adventurers",
     )
-    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
     config = Config(nile_network="goerli")
     starting_weapon = dpg.get_value("starting_weapon")
     starting_weapon_id = [
@@ -171,8 +172,8 @@ def new_adventurer(sender, app_data, user_data):
 
 
 def explore(sender, app_data, user_data):
-    dpg.add_text("Exploring", tag="explore_load", pos=[300, 50], parent="adventurers")
-    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
+    dpg.add_text("Exploring", tag="explore_load", pos=[700, 50], parent="adventurers")
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
     adventurer = dpg.get_value("adventurer_id").split(" - ")[-1]
     command = [
         "nile",
@@ -193,9 +194,9 @@ def explore(sender, app_data, user_data):
 
 def attack_beast(sender, app_data, user_data):
     dpg.add_text(
-        "Attacking Beast", tag="attack_load", pos=[300, 50], parent="adventurers"
+        "Attacking Beast", tag="attack_load", pos=[700, 50], parent="adventurers"
     )
-    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
     adventurer = dpg.get_value("adventurer_id").split(" - ")[-1]
     command = [
         "nile",
@@ -214,9 +215,9 @@ def attack_beast(sender, app_data, user_data):
 
 def flee(sender, app_data, user_data):
     dpg.add_text(
-        "Fleeing from beast", tag="flee_load", pos=[300, 50], parent="adventurers"
+        "Fleeing from beast", tag="flee_load", pos=[700, 50], parent="adventurers"
     )
-    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
     adventurer = dpg.get_value("adventurer_id").split(" - ")[-1]
     command = [
         "nile",
@@ -236,9 +237,9 @@ def flee(sender, app_data, user_data):
 
 def equip_item(sender, app_data, user_data):
     dpg.add_text(
-        "Equipping Item", tag="equip_load", pos=[300, 50], parent="adventurers"
+        "Equipping Item", tag="equip_load", pos=[700, 50], parent="adventurers"
     )
-    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
     adventurer = dpg.get_value("equip_adventurer_id").split(" - ")[-1]
     item = dpg.get_value("equip_loot_token_id")
     command = [
@@ -258,9 +259,9 @@ def equip_item(sender, app_data, user_data):
 
 def unequip_item(sender, app_data, user_data):
     dpg.add_text(
-        "Unequipping Item", tag="unequip_load", pos=[300, 50], parent="adventurers"
+        "Unequipping Item", tag="unequip_load", pos=[700, 50], parent="adventurers"
     )
-    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
     adventurer = dpg.get_value("unequip_adventurer_id").split(" - ")[-1]
     item = dpg.get_value("unequip_loot_token_id")
     command = [
@@ -282,10 +283,10 @@ def purchase_health(sender, app_data, user_data):
     dpg.add_text(
         "Purchasing Health",
         tag="purchase_health_load",
-        pos=[300, 50],
+        pos=[700, 50],
         parent="adventurers",
     )
-    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
     adventurer = dpg.get_value("potions_adventurer_id").split(" - ")[-1]
     number = dpg.get_value("potion_number")
     command = [
@@ -309,10 +310,10 @@ def mint_daily_items(sender, app_data, user_data):
     dpg.add_text(
         "Minting daily items",
         tag="mint_items_load",
-        pos=[300, 50],
+        pos=[700, 50],
         parent="adventurers",
     )
-    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
     command = [
         "nile",
         "loot",
@@ -379,7 +380,7 @@ def get_item_market():
 
 
 def bid_on_item(sender, app_data, user_data):
-    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
     loot_token_id = dpg.get_value(tag="loot_token_id")
     adventurer_id = dpg.get_value(tag="bid_adventurer_id").split(" - ")[-1]
     price = dpg.get_value("bid_price")
@@ -407,7 +408,7 @@ def upgrade_stat(sender, app_data, user_data):
         pos=[300, 50],
         parent="adventurers",
     )
-    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
     adventurer = dpg.get_value(tag="upgrade_adventurer_id").split(" - ")[-1]
     stat = dpg.get_value(tag="stat_id")
     stat_id = [k for k, v in STATS.items() if v == stat][0]
@@ -443,7 +444,7 @@ def become_king(sender, app_data, user_data):
         pos=[300, 50],
         parent="adventurers",
     )
-    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
     adventurer = dpg.get_value("king_adventurer_id").split(" - ")[-1]
     command = [
         "nile",
@@ -466,7 +467,7 @@ def pay_king_tribute(sender, app_data, user_data):
         pos=[300, 50],
         parent="adventurers",
     )
-    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
     command = [
         "nile",
         "loot",
@@ -536,9 +537,41 @@ def update_health(adventurer_token_id):
     dpg.set_value("health", adventurer_out[7])
 
 
+def update_equipped_items(adventurer_data):
+    config = Config(nile_network="goerli")
+
+    all_items = []
+
+    for i in adventurer_data[17:25]:
+        out = asyncio.run(
+            wrapped_proxy_call(
+                network=config.nile_network,
+                contract_alias="proxy_LootMarketArcade",
+                abi="artifacts/abis/LootMarketArcade.json",
+                function="get_item_by_token_id",
+                arguments=[*uint(i)],
+            )
+        )
+        out = out.split(" ")
+        out.insert(0, str(int(i)))
+        if int(out[1]) == 0:
+            all_items.append("Nothing")
+        else:
+            all_items.append(config.LOOT_ITEMS[int(out[1]) - 1])
+
+    dpg.set_value("weapon", all_items[0])
+    dpg.set_value("chest", all_items[1])
+    dpg.set_value("head", all_items[2])
+    dpg.set_value("waist", all_items[3])
+    dpg.set_value("feet", all_items[4])
+    dpg.set_value("hands", all_items[5])
+    dpg.set_value("neck", all_items[6])
+    dpg.set_value("ring", all_items[7])
+
+
 if __name__ == "__main__":
     dpg.create_context()
-    dpg.create_viewport(title="Realms GUI", width=800, height=800)
+    dpg.create_viewport(title="Realms GUI", width=1000, height=800)
     dpg.setup_dearpygui()
     print("Getting adventurers...")
     adventurers = asyncio.run(get_adventurers())
@@ -612,6 +645,34 @@ if __name__ == "__main__":
                     width=100,
                 )
                 dpg.add_button(label="Mint Adventurer", callback=new_adventurer)
+            # Equipped items display
+            dpg.add_spacer(width=20)
+            with dpg.group():
+                dpg.add_text("Equipped Items")
+                with dpg.group(horizontal=True):
+                    dpg.add_text("Weapon - ")
+                    dpg.add_text(tag="weapon", default_value="Nothing")
+                with dpg.group(horizontal=True):
+                    dpg.add_text("Chest - ")
+                    dpg.add_text(tag="chest", default_value="Nothing")
+                with dpg.group(horizontal=True):
+                    dpg.add_text("Head - ")
+                    dpg.add_text(tag="head", default_value="Nothing")
+                with dpg.group(horizontal=True):
+                    dpg.add_text("Waist - ")
+                    dpg.add_text(tag="waist", default_value="Nothing")
+                with dpg.group(horizontal=True):
+                    dpg.add_text("Feet - ")
+                    dpg.add_text(tag="feet", default_value="Nothing")
+                with dpg.group(horizontal=True):
+                    dpg.add_text("Hands - ")
+                    dpg.add_text(tag="hands", default_value="Nothing")
+                with dpg.group(horizontal=True):
+                    dpg.add_text("Neck - ")
+                    dpg.add_text(tag="neck", default_value="Nothing")
+                with dpg.group(horizontal=True):
+                    dpg.add_text("Ring - ")
+                    dpg.add_text(tag="ring", default_value="Nothing")
         dpg.add_spacer(height=4)
         dpg.add_separator()
         dpg.add_spacer(height=4)
