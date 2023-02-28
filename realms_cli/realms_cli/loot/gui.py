@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import dearpygui.dearpygui as dpg
 import subprocess
 from realms_cli.config import Config
@@ -400,6 +401,12 @@ def bid_on_item(sender, app_data, user_data):
 
 
 def upgrade_stat(sender, app_data, user_data):
+    dpg.add_text(
+        "Upgrading stat",
+        tag="upgrade_stat_load",
+        pos=[300, 50],
+        parent="adventurers",
+    )
     dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
     adventurer = dpg.get_value(tag="upgrade_adventurer_id").split(" - ")[-1]
     stat = dpg.get_value(tag="stat_id")
@@ -415,6 +422,7 @@ def upgrade_stat(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
+    dpg.delete_item("upgrade_stat_load")
     dpg.delete_item("loader")
 
 
@@ -429,21 +437,35 @@ def get_king():
 
 
 def become_king(sender, app_data, user_data):
+    dpg.add_text(
+        "Becoming king",
+        tag="become_king_load",
+        pos=[300, 50],
+        parent="adventurers",
+    )
     dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
-    adventurer = dpg.get_value("potions_adventurer_id").split(" - ")[-1]
+    adventurer = dpg.get_value("king_adventurer_id").split(" - ")[-1]
     command = [
         "nile",
         "loot",
-        "become_king",
+        "become-king",
         "--adventurer_token_id",
         adventurer,
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
+    update_king(adventurer)
+    dpg.delete_item("become_king_load")
     dpg.delete_item("loader")
 
 
 def pay_king_tribute(sender, app_data, user_data):
+    dpg.add_text(
+        "Paying the king",
+        tag="paying_king_load",
+        pos=[300, 50],
+        parent="adventurers",
+    )
     dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[500, 50])
     command = [
         "nile",
@@ -452,6 +474,7 @@ def pay_king_tribute(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
+    dpg.delete_item("paying_king_load")
     dpg.delete_item("loader")
 
 
@@ -463,7 +486,12 @@ def update_gold(adventurer_token_id):
     print(f"💰 Gold balance is now {out[-1]}")
     dpg.set_value("gold", out[-1])
     king_out = get_king()
-    if out[-1] > king_out[-1]:
+    king_out = king_out.split(" ")
+    king_out = king_out[-3].split("\n")
+    if int(king_out[-1]) == int(adventurer_token_id):
+        dpg.set_value("your_gold", "You are the king!")
+        dpg.configure_item("your_gold", color=[0, 128, 0])
+    elif out[-1] > king_out[-1]:
         dpg.set_value("your_gold", "You have enough gold to be king!")
         dpg.configure_item("your_gold", color=[0, 128, 0])
     else:
@@ -479,12 +507,18 @@ def update_king():
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     out = out.split(" ")
-    print(out)
     king_out = out[-3].split("\n")
+    gold_command = ["nile", "loot", "balance", "--adventurer_token_id", king_out[-1]]
+    gold_out = subprocess.check_output(gold_command).strip().decode("utf-8")
+    gold_out = gold_out.split(" ")
+    gold_out = gold_out[-1].split("\n")
+    reign_time = datetime.datetime.fromtimestamp(int(out[-1]))
     print(f"👑 King is {king_out[-1]}")
-    print(f"💰 King's gold balance is now {out[-1]}")
+    print(f"⛳️ Reign started at {reign_time}")
+    print(f"💰 King's gold balance is now {gold_out[-1]}")
     dpg.set_value("king_adventurer", king_out[-1])
-    dpg.set_value("kings_gold", out[-1])
+    dpg.set_value("kings_reign", reign_time)
+    dpg.set_value("kings_gold", gold_out[-1])
 
 
 def update_beast(beast_token_id):
@@ -510,7 +544,7 @@ if __name__ == "__main__":
     adventurers = asyncio.run(get_adventurers())
     items = asyncio.run(get_market_items())
 
-    with dpg.window(tag="adventurers", label="Adventurers", width=800, height=800):
+    with dpg.window(tag="adventurers", label="Adventurers", width=1000, height=800):
         print("Adventurers GUI running ...")
         with dpg.group(horizontal=True):
             with dpg.group():
@@ -747,6 +781,9 @@ if __name__ == "__main__":
                             default_value="-",
                             color=[205, 127, 50],
                         )
+                    with dpg.group():
+                        dpg.add_text("Reign Since")
+                        dpg.add_text(tag="kings_reign", default_value="-")
                     with dpg.group():
                         dpg.add_text("Gold")
                         dpg.add_text(
