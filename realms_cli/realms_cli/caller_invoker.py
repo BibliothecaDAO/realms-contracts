@@ -7,6 +7,7 @@ import re
 import subprocess
 import asyncio
 import os
+import json
 
 from nile.core.declare import declare
 from nile.core.types.account import Account, get_nonce
@@ -337,3 +338,17 @@ async def declare_class(network, contract_name, account, max_fee, overriding_pat
 
 def get_contract_abi(contract_name):
     return f"{ABIS_DIRECTORY}/{contract_name}.json"
+
+
+def get_transaction_result(network, tx_hash):
+    command = [
+        "starknet",
+        "get_transaction_trace",
+        "--hash",
+        tx_hash,
+        "--network",
+        "alpha-goerli",
+    ]
+    out = subprocess.check_output(command).strip().decode("utf-8")
+    out_dict = json.loads(out)
+    return out_dict["function_invocation"]["result"]

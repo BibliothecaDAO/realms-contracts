@@ -634,7 +634,7 @@ func explore{
             let (beast_address) = Module.get_module_address(ModuleIds.Beast);
             IBeast.add_to_balance(beast_address, token_id, gold_discovery);
             emit_adventurer_state(token_id);
-            return (DiscoveryType.Item, 0);
+            return (DiscoveryType.Item, ItemDiscoveryType.Gold);
         }
         if (discovery == ItemDiscoveryType.XP) {
             // add XP
@@ -642,7 +642,7 @@ func explore{
             let (rnd) = get_random_number();
             let (xp_discovery) = AdventurerLib.calculate_xp_discovery(rnd);
             _increase_xp(token_id, xp_discovery);
-            return (DiscoveryType.Item, 0);
+            return (DiscoveryType.Item, ItemDiscoveryType.XP);
         }
         if (discovery == ItemDiscoveryType.Loot) {
             // mint loot items
@@ -650,7 +650,7 @@ func explore{
             let (owner) = owner_of(token_id);
             ILoot.mint(loot_address, owner, token_id);
             emit_adventurer_state(token_id);
-            return (DiscoveryType.Item, 0);
+            return (DiscoveryType.Item, ItemDiscoveryType.Loot);
         }
         if (discovery == ItemDiscoveryType.Health) {
             // add health
@@ -658,7 +658,7 @@ func explore{
             let (rnd) = get_random_number();
             let (health_discovery) = AdventurerLib.calculate_health_discovery(rnd);
             _add_health(token_id, health_discovery);
-            return (DiscoveryType.Item, 0);
+            return (DiscoveryType.Item, ItemDiscoveryType.Health);
         }
 
         // send item

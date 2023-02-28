@@ -166,3 +166,25 @@ STATS = {
     7: "Charisma",
     8: "Luck",
 }
+
+OBSTACLES = {
+    1: "Demonic Alter",
+    2: "Curse",
+    3: "Hex",
+    4: "Magic Lock",
+    5: "Dark Mist",
+    6: "Collapsing Ceiling",
+    7: "Crushing Walls",
+    8: "Rockslide",
+    9: "Tumbling Boulders",
+    10: "Swinging Logs",
+    11: "Pendulum Blades",
+    12: "Flame Jet",
+    13: "Poision Dart",
+    14: "Spiked Pit",
+    15: "Hidden Arrow",
+}
+
+DISCOVERY_TYPES = {0: "Nothing", 1: "Beast", 2: "Obstacle", 3: "Item", 4: "Adventurer"}
+
+ITEM_DISCOVERY_TYPES = {0: "Gold", 1: "XP", 2: "Loot", 3: "Health"}

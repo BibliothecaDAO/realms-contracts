@@ -184,6 +184,8 @@ def explore(sender, app_data, user_data):
     print(out)
     update_gold(adventurer)
     update_health(adventurer)
+    adventurer_out = asyncio.run(_get_adventurer("goerli", adventurer))
+    update_beast(adventurer_out[26])
     dpg.delete_item("explore_load")
     dpg.delete_item("loader")
 
@@ -224,7 +226,9 @@ def flee(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
+    adventurer_out = asyncio.run(_get_adventurer("goerli", adventurer))
     update_health(adventurer)
+    update_beast(adventurer_out[26])
     dpg.delete_item("flee_load")
     dpg.delete_item("loader")
 
@@ -487,8 +491,9 @@ def update_beast(beast_token_id):
     if beast_token_id != "0":
         beast_out = asyncio.run(_get_beast(beast_token_id, "goerli"))
         beast = BEASTS[str(int(beast_out[0]))]
-        print(beast)
         dpg.set_value("beast", beast)
+    else:
+        dpg.set_value("beast", "-")
 
 
 def update_health(adventurer_token_id):

@@ -1,5 +1,10 @@
 import asyncclick as click
-from realms_cli.caller_invoker import wrapped_send, wrapped_proxy_call
+from realms_cli.caller_invoker import (
+    wrapped_send,
+    wrapped_proxy_call,
+    parse_send,
+    get_transaction_result,
+)
 from realms_cli.config import Config
 from realms_cli.utils import uint, str_to_felt
 from realms_cli.loot.getters import (
@@ -12,7 +17,12 @@ from realms_cli.loot.getters import (
     print_beast_img,
     print_player,
 )
-from realms_cli.loot.constants import BEASTS
+from realms_cli.loot.constants import (
+    BEASTS,
+    OBSTACLES,
+    DISCOVERY_TYPES,
+    ITEM_DISCOVERY_TYPES,
+)
 import time
 
 
@@ -356,6 +366,8 @@ async def explore(ctx, network, adventurer_token_id):
 
     print("👣 Exploring ...")
 
+    pre_adventurer = await _get_adventurer(network, adventurer_token_id)
+
     send_out = await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
@@ -364,22 +376,26 @@ async def explore(ctx, network, adventurer_token_id):
         arguments=[*uint(adventurer_token_id)],
     )
 
-    print(send_out)
+    _, tx_hash = parse_send(send_out)
 
-    # print("👣 Explored ✅")
+    result = get_transaction_result(network, tx_hash)
 
-    # out = await _get_adventurer(network, adventurer_token_id)
+    print("👣 Explored ✅")
 
-    # if out[25] == "1":
-    #     print("🧌 You have discovered a beast")
-    #     print_beast_img(out[26])
-    #     await _get_beast(out[26], network)
-    # else:
-    #     await ctx.forward(explore)
-    #     await ctx.invoke(
-    #         explore, ctx=ctx, network=network, adventurer_token_id=adventurer_token_id
-    #     )
-    #     print("🤔 You discovered nothing")
+    adventurer_out = await _get_adventurer(network, adventurer_token_id)
+
+    if int(result[0], 16) == 0:
+        print("🤔 You discovered nothing!")
+    if int(result[0], 16) == 1:
+        print("🧌 You have discovered a beast")
+        print_beast_img(adventurer_out[26])
+        await _get_beast(adventurer_out[26], network)
+    if int(result[0], 16) == 2:
+        print(
+            f"🪤 You were hit by {OBSTACLES[int(result[1],16)]} and took {str(int(pre_adventurer[7]) - int(adventurer_out[7]))} damage!"
+        )
+    if int(result[0], 16) == 3:
+        print(f"🎉 You discovered {ITEM_DISCOVERY_TYPES[int(result[1],16)]}")
 
 
 @loot.command()
@@ -639,7 +655,7 @@ async def flee(adventurer_token_id, network):
 
     pre_adventurer = await _get_adventurer(network, adventurer_token_id)
 
-    await wrapped_send(
+    send_out = await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Beast",
@@ -647,14 +663,23 @@ async def flee(adventurer_token_id, network):
         arguments=[*uint(pre_adventurer[26])],
     )
 
+    _, tx_hash = parse_send(send_out)
+
+    result = get_transaction_result(network, tx_hash)
+
     beast_out = await _get_beast(pre_adventurer[26], network)
 
     adventurer_out = await _get_adventurer(network, adventurer_token_id)
 
-    if adventurer_out[23] == "0":
+    if int(result[0], 16) == 1:
         print(f"🏃‍♂️ You successfully fled from the {BEASTS[str(int(beast_out[0]))]} ✅")
-    if adventurer_out[23] == "1":
-        print(f"😫 You have been ambushed! Your health is now {adventurer_out[4]}")
+    else:
+        if int(pre_adventurer[7]) > int(adventurer_out[7]):
+            print(
+                f"😫 You have been ambushed by the {BEASTS[str(int(beast_out[0]))]} and took {str(int(pre_adventurer[7]) - int(adventurer_out[7]))} damage!"
+            )
+        else:
+            print(f"😮 You did not flee from the {BEASTS[str(int(beast_out[0]))]}!")
 
 
 @loot.command()
