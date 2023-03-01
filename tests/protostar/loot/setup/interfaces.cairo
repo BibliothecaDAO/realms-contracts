@@ -56,6 +56,8 @@ namespace ILoot {
     }
     func view_bid(market_item_id: Uint256) -> (bid: Bid) {
     }
+    func increase_xp(tokenId: Uint256, amount: felt) -> (updated_item: Item) {
+    }
 }
 
 @contract_interface
@@ -133,7 +135,7 @@ namespace IBeast {
     func balance_of(adventurer_token_id: Uint256) -> (res: felt) {
     }
     func add_to_balance(adventurer_token_id: Uint256, addition: felt) {
-    } 
+    }
 }
 
 @contract_interface

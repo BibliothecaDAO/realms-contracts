@@ -13,7 +13,7 @@ namespace ILoot {
         item_token_id: Uint256
     ) {
     }
-    func mint_from_mart(to: felt, weapon_id: felt, adventurer_token_id: Uint256){
+    func mint_from_mart(to: felt, weapon_id: felt, adventurer_token_id: Uint256) {
     }
     func mint(to: felt, adventurer_token_id: Uint256) -> (item_token_id: Uint256) {
     }
@@ -21,6 +21,6 @@ namespace ILoot {
     }
     func get_adventurer_owner(tokenId: Uint256) -> (adventuer_token_id: Uint256) {
     }
-    func increase_xp(tokenId: Uint256, amount: felt) -> (success: felt) {
+    func increase_xp(tokenId: Uint256, amount: felt) -> (updated_item: Item) {
     }
 }

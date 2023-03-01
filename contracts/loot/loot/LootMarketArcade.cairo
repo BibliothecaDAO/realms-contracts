@@ -47,6 +47,14 @@ func ItemXPIncrease(item_token_id: Uint256, item: Item) {
 func ItemGreatnessIncrease(item_token_id: Uint256, item: Item) {
 }
 
+@event
+func ItemNamePrefixesAssigned(item_token_id: Uint256, item: Item) {
+}
+
+@event
+func ItemNameSuffixAssigned(item_token_id: Uint256, item: Item) {
+}
+
 // -----------------------------------
 // Storage
 // -----------------------------------
@@ -287,7 +295,7 @@ func mint_from_mart{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_
 
     let (id) = _mint(to, new_item, adventurer_token_id);
 
-    return (); 
+    return ();
 }
 
 // @notice Mint adventurer starting weapon
@@ -324,7 +332,6 @@ func _mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
 
     return (next_item_id,);
 }
-
 
 // @notice Update item adventurer
 // @param tokenId: Id of loot item
@@ -379,17 +386,17 @@ func set_item_by_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_
 @external
 func increase_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     item_token_id: Uint256, amount: felt
-) -> (success: felt) {
+) -> (updated_item: Item) {
     alloc_locals;
 
     // Only approved modules can increase and items xp
     Module.only_approved();
 
     // call internal function for updating xp
-    let (result) = _increase_xp(item_token_id, amount);
+    let (updated_item) = _increase_xp(item_token_id, amount);
 
     // return result
-    return (result,);
+    return (updated_item,);
 }
 
 // -----------------------------
@@ -443,7 +450,7 @@ func assert_starter_weapon{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: Ha
 // @return success Boolean value indicating whether the function succeeded.
 func _increase_xp{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
     item_token_id: Uint256, amount: felt
-) -> (success: felt) {
+) -> (updated_item: Item) {
     alloc_locals;
 
     // get item
@@ -460,17 +467,66 @@ func _increase_xp{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin
     // if greatness increased
     if (greatness_increased == TRUE) {
         // increase greatness
-        let (result) = _increase_greatness(item_token_id, item_updated_xp.Greatness + 1);
-        return (result,);
+        let (item_updated_greatness) = _increase_greatness(
+            item_token_id, item_updated_xp.Greatness + 1
+        );
+
+        // check if we need to assign special name to the item (at greatness 15 and 19)
+
+        // if the item is below greatness 15
+        let below_greatness_fifteen = is_le(item_updated_greatness.Greatness, 14);
+        if (below_greatness_fifteen == TRUE) {
+            // it's not yet eligible for a special name so just return
+            return (item_updated_greatness,);
+        }
+
+        // if execution makes it here, greatness is 15+
+
+        // if item is greatness 15+ and doesn't have name suffix yet
+        let no_name_suffix = is_le(item_updated_greatness.Suffix, 0);
+        if (no_name_suffix == TRUE) {
+            // assign one
+            let (item_updated_suffix) = _assign_name_suffix(item_token_id);
+
+            // reduce cairo complexity by simply returning here
+            // Should an item increase in greatness from 14->19 in a single
+            // event (very unlikely), item won't get name suffix till greatness 20 - sorry friend your too 1337
+            return (item_updated_suffix,);
+        }
+
+        // if the item is above greatness 19
+        let below_greatness_eighteen = is_le(item_updated_greatness.Greatness, 18);
+        if (below_greatness_eighteen == FALSE) {
+            // and it does not have a name suffix
+            let no_name_prefixes = is_le(item_updated_greatness.Prefix_1, 0);
+            if (no_name_prefixes == TRUE) {
+                // assign one
+                let (item_updated_prefixes) = _assign_name_prefixes(item_token_id);
+
+                // and return updated item
+                return (item_updated_prefixes,);
+
+                // if item already has suffiX
+            } else {
+                // return the item with updated greatness
+                return (item_updated_greatness,);
+            }
+            // if the item is not greatness 19+
+        } else {
+            // return the item with updated greatness
+            return (item_updated_greatness,);
+        }
+
+        // if greatness did not increase
     } else {
-        // if greatness did not increase, we we still update XP
+        // we still update item xp
         item.write(item_token_id, item_updated_xp);
 
         // and emit an XP increase event
         emit_item_xp_increase(item_token_id);
 
-        // return success
-        return (TRUE,);
+        // return item with updated xp
+        return (item_updated_xp,);
     }
 }
 
@@ -481,7 +537,7 @@ func _increase_xp{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin
 // @return success Boolean value indicating whether the function succeeded.
 func _increase_greatness{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
     item_token_id: Uint256, greatness: felt
-) -> (success: felt) {
+) -> (updated_item: Item) {
     alloc_locals;
 
     // get item
@@ -497,7 +553,113 @@ func _increase_greatness{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: Hash
     emit_item_greatness_increase(item_token_id);
 
     // return success
-    return (TRUE,);
+    return (item_updated_greatness,);
+}
+
+// / @dev Assigns a random prefix to the name of an item identified by a given `item_token_id`.
+// /
+// / It generates a random number, uses it as a seed to generate a prefix for the item name,
+// / updates the item with the new name prefix, saves the update to the blockchain,
+// / emits an event indicating that the item name prefix has been assigned, and returns the updated item.
+// /
+// / @param item_token_id The token ID of the item to which a random name prefix should be assigned.
+// /
+// / @return updated_item The updated item with the new name prefix assigned.
+// /
+// / @modifies None
+// /
+// / @variables
+// / - `range_check_ptr: felt*`: A pointer to a `felt` variable used in range checking.
+// / - `syscall_ptr: felt*`: A pointer to a `felt` variable used for making syscalls.
+// / - `pedersen_ptr: HashBuiltin*`: A pointer to a `HashBuiltin` variable used for hashing.
+// / - `_item`: A variable of type `Item` that stores the item retrieved from the blockchain.
+// / - `rnd`: A variable of type `Uint256` that stores a random number generated using the `get_random_number` function.
+// / - `updated_item`: A variable of type `Item` that stores the updated item with the new name prefix assigned.
+// /
+// / @internal_functions_called
+// / - `get_item_by_token_id`: A function that retrieves an item from the blockchain based on its token ID.
+// / - `get_random_number`: A function that generates a random number.
+// / - `ItemLib.assign_item_name_prefixes`: A function that assigns a random prefix to an item name.
+// /
+// / @events_emitted
+// / - `emit_item_name_prefix_assigned`: An event that indicates that the item name prefix has been assigned.
+// /
+// / @exceptions None
+func _assign_name_prefixes{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
+    item_token_id: Uint256
+) -> (updated_item: Item) {
+    alloc_locals;
+
+    // get item
+    let (_item) = get_item_by_token_id(item_token_id);
+
+    // generate random number
+    let (rnd) = get_random_number();
+
+    // use it as seed for item name prefix generation
+    let (updated_item) = ItemLib.assign_item_name_prefixes(_item, rnd);
+
+    // save update to blockchain
+    item.write(item_token_id, updated_item);
+
+    // emit name prefix assigned event
+    emit_item_name_prefix_assigned(item_token_id);
+
+    // return updated item
+    return (updated_item,);
+}
+
+// / @dev Assigns a random suffix to the name of an item identified by a given `item_token_id`.
+// /
+// / It generates a random number, uses it as a seed to generate a suffix for the item name,
+// / updates the item with the new name suffix, saves the update to the blockchain,
+// / emits an event indicating that the item name suffix has been assigned, and returns the updated item.
+// /
+// / @param item_token_id The token ID of the item to which a random name suffix should be assigned.
+// /
+// / @return updated_item The updated item with the new name suffix assigned.
+// /
+// / @modifies None
+// /
+// / @variables
+// / - `range_check_ptr: felt*`: A pointer to a `felt` variable used in range checking.
+// / - `syscall_ptr: felt*`: A pointer to a `felt` variable used for making syscalls.
+// / - `pedersen_ptr: HashBuiltin*`: A pointer to a `HashBuiltin` variable used for hashing.
+// / - `_item`: A variable of type `Item` that stores the item retrieved from the blockchain.
+// / - `rnd`: A variable of type `Uint256` that stores a random number generated using the `get_random_number` function.
+// / - `updated_item`: A variable of type `Item` that stores the updated item with the new name suffix assigned.
+// /
+// / @internal_functions_called
+// / - `get_item_by_token_id`: A function that retrieves an item from the blockchain based on its token ID.
+// / - `get_random_number`: A function that generates a random number.
+// / - `ItemLib.assign_item_name_suffix`: A function that assigns a random suffix to an item name.
+// /
+// / @events_emitted
+// / - `emit_item_suffix_assigned`: An event that indicates that the item name suffix has been assigned.
+// /
+// / @exceptions None
+func _assign_name_suffix{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
+    item_token_id: Uint256
+) -> (updated_item: Item) {
+    alloc_locals;
+
+    // get item
+    let (_item) = get_item_by_token_id(item_token_id);
+
+    // generate random number
+    let (rnd) = get_random_number();
+
+    // use it as seed to generate item name suffix
+    let (updated_item) = ItemLib.assign_item_name_suffix(_item, rnd);
+
+    // save update to blockchain
+    item.write(item_token_id, updated_item);
+
+    // emit item name increase event
+    emit_item_suffix_assigned(item_token_id);
+
+    // return updated item
+    return (updated_item,);
 }
 
 // --------------------
@@ -519,7 +681,6 @@ func get_item_by_token_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
 // --------------------
 // Market
 // --------------------
-
 
 // This uses a Seed which is created every 12hrs. From this seed X number of items can be purchased
 // after they have been bidded on.
@@ -565,7 +726,7 @@ const HOUR = 3600;
 const BID_TIME = HOUR / 2;  // 2 hours
 const SHUFFLE_TIME = 3600 * 6;
 const BASE_PRICE = 3;
-const SEED_MULTI = 5846975; // for psudeo randomness now
+const SEED_MULTI = 5846975;  // for psudeo randomness now
 const NUMBER_LOOT_ITEMS = 101;
 const MINIMUM_ITEMS_EMITTED = 20;
 const ITEMS_PER_EPOCH_PER_ADVENTUER = 3;
@@ -583,12 +744,16 @@ func item_owner{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
 }
 
 @view
-func get_mint_index{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (number: felt) {
+func get_mint_index{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
+    number: felt
+) {
     return mint_index.read();
 }
 
 @view
-func get_new_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (number: felt) {
+func get_new_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
+    number: felt
+) {
     return new_items.read();
 }
 
@@ -607,9 +772,9 @@ func mint_daily_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     let (beast_address) = Module.get_module_address(ModuleIds.Beast);
     let (world_gold_supply) = IBeast.get_world_supply(beast_address);
 
-    let (relative_adventurers_in_world,_) = unsigned_div_rem(world_gold_supply, STARTING_GOLD);
+    let (relative_adventurers_in_world, _) = unsigned_div_rem(world_gold_supply, STARTING_GOLD);
 
-    let less_than_minimum = is_le(relative_adventurers_in_world, MINIMUM_ITEMS_EMITTED);   
+    let less_than_minimum = is_le(relative_adventurers_in_world, MINIMUM_ITEMS_EMITTED);
     if (less_than_minimum == TRUE) {
         tempvar _new_items = 20;
         tempvar syscall_ptr: felt* = syscall_ptr;
@@ -623,7 +788,6 @@ func mint_daily_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     }
 
     tempvar _new_items = _new_items;
-     
 
     // get current index
     let (current_index) = mint_index.read();
@@ -681,7 +845,6 @@ func _get_random_item_from_seed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, 
 ) -> (item: Item) {
     let (_, r) = unsigned_div_rem(daily_seed * market_item_id * SEED_MULTI, NUMBER_LOOT_ITEMS);
 
-
     return ItemLib.generate_random_item(r);
 }
 
@@ -695,9 +858,9 @@ func random_item_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_
 }
 
 @view
-func view_bid{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(market_item_id: Uint256) -> (
-    bid: Bid
-) {
+func view_bid{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    market_item_id: Uint256
+) -> (bid: Bid) {
     return bid.read(market_item_id);
 }
 
@@ -734,11 +897,13 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
     let (owner) = IAdventurer.owner_of(adventurer_address, adventurer_token_id);
-    with_attr error_message("Item Market: You do not own this Adventurer") { 
+    with_attr error_message("Item Market: You do not own this Adventurer") {
         assert caller = owner;
     }
     // check adventurer is alive
-    let (adventurer: AdventurerState) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_token_id);
+    let (adventurer: AdventurerState) = IAdventurer.get_adventurer_by_id(
+        adventurer_address, adventurer_token_id
+    );
 
     with_attr error_message("Adventurer: Adventurer is dead") {
         assert_not_zero(adventurer.Health);
@@ -757,7 +922,10 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 
     // if current expiry = 0 means unbidded = set base time from now + BID_TIME
     if (current_bid.expiry == FALSE) {
-        bid.write(market_item_id, Bid(price, current_time + BID_TIME, adventurer_id_as_felt, BidStatus.open, item.Id));
+        bid.write(
+            market_item_id,
+            Bid(price, current_time + BID_TIME, adventurer_id_as_felt, BidStatus.open, item.Id),
+        );
         return ();
     }
 
@@ -776,7 +944,10 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     assert_can_purchase(market_item_id.low);
 
     // update bid state
-    bid.write(market_item_id, Bid(price, current_bid.expiry, adventurer_id_as_felt, BidStatus.open, item.Id));
+    bid.write(
+        market_item_id,
+        Bid(price, current_bid.expiry, adventurer_id_as_felt, BidStatus.open, item.Id),
+    );
 
     let (beast_address) = Module.get_module_address(ModuleIds.Beast);
 
@@ -797,9 +968,10 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
         tempvar range_check_ptr = range_check_ptr;
     }
 
-
     ItemMerchantUpdate.emit(
-        item, market_item_id.low, Bid(price, current_bid.expiry, adventurer_id_as_felt, BidStatus.open, item.Id)
+        item,
+        market_item_id.low,
+        Bid(price, current_bid.expiry, adventurer_id_as_felt, BidStatus.open, item.Id),
     );
 
     return ();
@@ -841,7 +1013,10 @@ func claim_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
     mint_from_mart(caller, current_bid.item_id, adventurer_token_id);
 
     // this could be optimised
-    bid.write(market_item_id, Bid(current_bid.price, 0, adventurer_token_id.low, BidStatus.closed, current_bid.item_id));
+    bid.write(
+        market_item_id,
+        Bid(current_bid.price, 0, adventurer_token_id.low, BidStatus.closed, current_bid.item_id),
+    );
 
     return ();
 }
@@ -849,7 +1024,6 @@ func claim_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
 func assert_can_purchase{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     market_item_id: felt
 ) {
-
     let (start_index) = mint_index.read();
 
     let (current_items) = new_items.read();
@@ -887,5 +1061,29 @@ func emit_item_xp_increase{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: Ha
     let (item) = get_item_by_token_id(item_token_id);
     // emit leveled up event
     ItemXPIncrease.emit(item_token_id, item);
+    return ();
+}
+
+// @notice Emits an item name prefixes event for an item
+// @param item_token_id: the token id of the item that received a name prefix
+func emit_item_name_prefix_assigned{
+    range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
+}(item_token_id: Uint256) {
+    // Get item from token id
+    let (item) = get_item_by_token_id(item_token_id);
+    // emit item name prefixes assigned event
+    ItemNamePrefixesAssigned.emit(item_token_id, item);
+    return ();
+}
+
+// @notice Emits an item name suffix event for an item
+// @param item_token_id: the token id of the item that received a name suffix
+func emit_item_suffix_assigned{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
+    item_token_id: Uint256
+) {
+    // Get item from token id
+    let (item) = get_item_by_token_id(item_token_id);
+    // emit item name suffix assigned event
+    ItemNameSuffixAssigned.emit(item_token_id, item);
     return ();
 }

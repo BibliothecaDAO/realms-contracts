@@ -205,6 +205,10 @@ func test_generate_name_suffix{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, r
     let (grimoire_name_suffix) = ItemLib.generate_name_suffix(ItemIds.Grimoire, rnd);
     assert grimoire_name_suffix = ItemNameSuffixes.Peak;
 
+    // Warhammers are always "X Bane" Warhammer of Y
+    let (warhammer_name_suffix) = ItemLib.generate_name_suffix(ItemIds.Warhammer, rnd);
+    assert warhammer_name_suffix = ItemNameSuffixes.Bane;
+
     // Divine Hoods can have {Bender, Grasp, Moon, Peak, Shout, Bite} for their name suffix
     // so we assert function does not return any of the other name suffixes
     let (divine_hood_name_suffix) = ItemLib.generate_name_suffix(ItemIds.DivineHood, rnd);

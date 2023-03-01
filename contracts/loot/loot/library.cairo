@@ -307,19 +307,7 @@ namespace ItemLib {
 
         let (_, index) = unsigned_div_rem(new_rnd, NamePrefixLength);
         let (name_prefix) = ItemStats.item_name_prefix(index + 1);
-        // verify if the prefix can be selected
-        // banned prefixes are the ones that will never be selected due to
-        // the greatness >= 19 condition in the original Loot
-        let (is_banned) = ItemStats.loot_banned_name(name_prefix - 1);
-        if (is_banned == 1) {
-            // if banned select the next prefix
-            let new_rnd = new_rnd + 1;
-            let (_, index) = unsigned_div_rem(new_rnd, NamePrefixLength);
-            let (name_prefix) = ItemStats.item_name_prefix(index + 1);
-            return (name_prefix,);
-        } else {
-            return (name_prefix,);
-        }
+        return (name_prefix,);
     }
 
     // @notice Assigns a name suffix to a Loot item using the same schema as the OG Loot Contract
@@ -327,9 +315,9 @@ namespace ItemLib {
     // @param rnd: A random number
     // @return updated_item: The provided item with a canoncially sound name suffix added
     func assign_item_name_suffix{syscall_ptr: felt*, range_check_ptr}(item: Item, rnd: felt) -> (
-        updated_item: Item
+        return_item: Item
     ) {
-        let (updated_name_suffix) = generate_name_suffix(item.id, rnd);
+        let (updated_name_suffix) = generate_name_suffix(item.Id, rnd);
 
         let updated_item = Item(
             Id=item.Id,
@@ -338,8 +326,8 @@ namespace ItemLib {
             Material=item.Material,
             Rank=item.Rank,
             Prefix_1=item.Prefix_1,
-            Prefix_2=updated_name_suffix,
-            Suffix=item.Suffix,
+            Prefix_2=item.Prefix_2,
+            Suffix=updated_name_suffix,
             Greatness=item.Greatness,
             CreatedBlock=item.CreatedBlock,
             XP=item.XP,
@@ -347,7 +335,7 @@ namespace ItemLib {
             Bag=item.Bag,
         );
 
-        return updated_item;
+        return (updated_item,);
     }
 
     // @notice Returns a name suffix for the provided item that is consistent with the Loot Contract
@@ -395,19 +383,36 @@ namespace ItemLib {
 
         let (_, index) = unsigned_div_rem(new_rnd, NameSuffixLength);
         let (name_suffix) = ItemStats.item_name_suffix(index + 1);
-        // verify if the suffix can be selected
-        // banned suffixes are the ones that will never be selected due to
-        // the greatness > 14 condition in the original Loot
-        let (is_banned) = ItemStats.loot_banned_name(name_suffix - 1);
-        if (is_banned == 1) {
-            // if banned select the next suffix
-            let new_rnd = new_rnd + 1;
-            let (_, index) = unsigned_div_rem(new_rnd, NameSuffixLength);
-            let (name_suffix) = ItemStats.item_name_suffix(index + 1);
-            return (name_suffix,);
-        } else {
-            return (name_suffix,);
-        }
+        return (name_suffix,);
+    }
+
+    // @notice Assigns a name prefix to a Loot item using the same schema as the OG Loot Contract
+    // @param item: The Loot Item you want to assign a name prefix to
+    // @param rnd: A random number
+    // @return updated_item: The provided item with a canoncially sound name prefix added
+    func assign_item_name_prefixes{syscall_ptr: felt*, range_check_ptr}(item: Item, rnd: felt) -> (
+        updated_item: Item
+    ) {
+        let (updated_name_prefix) = generate_name_prefix(item.Id, rnd);
+        let (updated_name_suffix) = generate_name_suffix(item.Id, rnd);
+
+        let updated_item = Item(
+            Id=item.Id,
+            Slot=item.Slot,
+            Type=item.Type,
+            Material=item.Material,
+            Rank=item.Rank,
+            Prefix_1=updated_name_prefix,
+            Prefix_2=updated_name_suffix,
+            Suffix=item.Suffix,
+            Greatness=item.Greatness,
+            CreatedBlock=item.CreatedBlock,
+            XP=item.XP,
+            Adventurer=item.Adventurer,
+            Bag=item.Bag,
+        );
+
+        return (updated_item,);
     }
 
     // @notice Assigns a suffix to a Loot item using the same schema as the OG Loot Contract
