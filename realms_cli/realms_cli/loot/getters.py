@@ -9,7 +9,6 @@ import climage
 
 console = Console()
 
-
 async def _get_beast(beast_token_id, network):
     """
     Get Beast metadata

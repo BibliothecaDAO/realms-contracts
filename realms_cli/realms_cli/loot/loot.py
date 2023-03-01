@@ -135,7 +135,6 @@ async def all_market(network):
             function="view_unminted_item",
             arguments=[*uint(i + start)],
         )
-
         out = out.split(" ")
         out.insert(0, str(i + start))
         print(out)
