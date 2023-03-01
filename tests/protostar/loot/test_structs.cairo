@@ -13,6 +13,7 @@ from contracts.loot.constants.beast import Beast, BeastStatic, BeastDynamic
 from contracts.loot.constants.obstacle import Obstacle, ObstacleUtils
 from contracts.loot.beast.stats.beast import BeastStats
 from contracts.loot.loot.stats.item import ItemStats
+from contracts.loot.loot.library import ItemLib
 
 const TEST_WEAPON_TOKEN_ID = 20;
 const TEST_DAMAGE_HEALTH_REMAINING = 50;
@@ -152,9 +153,47 @@ namespace TestUtils {
         let (type) = ItemStats.item_type(item_id);
         let (material) = ItemStats.item_material(item_id);
         let (rank) = ItemStats.item_rank(item_id);
-        let prefix_1 = 1;
-        let prefix_2 = 1;
-        let suffix = 1;
+        let (prefix_1) = ItemLib.generate_name_prefix(item_id, 1);
+        let (prefix_2) = ItemLib.generate_name_suffix(item_id, 1);
+        let (suffix) = ItemLib.generate_item_suffix(item_id, 1);
+        let created_block = 0;
+        let xp = 0;
+        let adventurer = 0;
+        let bag = 0;
+
+        return (
+            Item(
+            item_id,
+            slot,
+            type,
+            material,
+            rank,
+            prefix_1,
+            prefix_2,
+            suffix,
+            greatness,
+            created_block,
+            xp,
+            adventurer,
+            bag
+            ),
+        );
+    }
+    
+    // create_item_with_names returns an Item corresponding to the provided item_id, greatness, prefix_1, prefix_2, suffix
+    // parameters: item_id, greatness, prefix_1, prefix_2, suffix
+    // returns: An Item
+    func create_item_with_names{syscall_ptr: felt*, range_check_ptr}(
+        item_id: felt, greatness: felt, prefix_1: felt, prefix_2: felt, suffix: felt
+    ) -> (
+        item: Item
+    ) {
+        alloc_locals;
+
+        let (slot) = ItemStats.item_slot(item_id);
+        let (type) = ItemStats.item_type(item_id);
+        let (material) = ItemStats.item_material(item_id);
+        let (rank) = ItemStats.item_rank(item_id);
         let created_block = 0;
         let xp = 0;
         let adventurer = 0;

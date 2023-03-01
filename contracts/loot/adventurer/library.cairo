@@ -36,7 +36,7 @@ from contracts.loot.constants.adventurer import (
 )
 
 from contracts.loot.constants.obstacle import ObstacleUtils
-from contracts.loot.constants.item import Item, ItemIds, Slot
+from contracts.loot.constants.item import Item, ItemIds, Slot, ItemSuffixes
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.constants import SHIFT_41
 from contracts.loot.constants.beast import Beast, BeastIds
@@ -643,5 +643,273 @@ namespace AdventurerLib {
     func calculate_king_tribute{syscall_ptr: felt*, range_check_ptr}(
         tribute_percent: felt, total_balance: Uint256
     ) -> (king_tribute: Uint256) {
+    }
+
+    func apply_item_stat_modifier{syscall_ptr: felt*, range_check_ptr}(
+        item: Item, unpacked_adventurer: AdventurerDynamic
+    ) -> (new_unpacked_adventurer: AdventurerDynamic) {
+        //@distracteddev: If item is jewellery (slot is neck or ring) apply luck as greatness
+        // if it also have a prefix and suffix, add another 3
+        if (item.Slot == Slot.Neck) {
+            if (item.Prefix_2 == 0) {
+                let (updated_adventurer: AdventurerDynamic) = cast_state(
+                    AdventurerSlotIds.Luck, unpacked_adventurer.Luck + item.Greatness, unpacked_adventurer
+                );
+                return (updated_adventurer,);
+            }
+            if (item.Suffix == 0) {
+                let (updated_adventurer: AdventurerDynamic) = cast_state(
+                    AdventurerSlotIds.Luck, unpacked_adventurer.Luck + item.Greatness, unpacked_adventurer
+                );
+                return (updated_adventurer,);
+            }
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Luck, unpacked_adventurer.Luck + item.Greatness + 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Slot == Slot.Ring) {
+            if  (item.Prefix_2 == 0) {
+                let (updated_adventurer: AdventurerDynamic) = cast_state(
+                    AdventurerSlotIds.Luck, unpacked_adventurer.Luck + item.Greatness, unpacked_adventurer
+                );
+                return (updated_adventurer,);
+            }
+            if (item.Suffix == 0) {
+                let (updated_adventurer: AdventurerDynamic) = cast_state(
+                    AdventurerSlotIds.Luck, unpacked_adventurer.Luck + item.Greatness, unpacked_adventurer
+                );
+                return (updated_adventurer,);
+            }
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Luck, unpacked_adventurer.Luck + item.Greatness + 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        // else if no prefix and suffix return
+        if  (item.Prefix_2 == 0) {
+            return (unpacked_adventurer,);
+        }
+        if (item.Suffix == 0) {
+            return (unpacked_adventurer,);
+        }
+        // else apply boost of 3 to stat allocation
+        if (item.Suffix == ItemSuffixes.of_Power) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Strength, unpacked_adventurer.Strength + 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Giant) { 
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Vitality, unpacked_adventurer.Vitality + 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Titans) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Dexterity, unpacked_adventurer.Dexterity + 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Skill) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Intelligence, unpacked_adventurer.Intelligence + 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Perfection) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Intelligence, unpacked_adventurer.Intelligence + 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Brilliance) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Intelligence, unpacked_adventurer.Intelligence + 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Enlightenment) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Wisdom, unpacked_adventurer.Wisdom + 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Protection) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Vitality, unpacked_adventurer.Vitality + 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Anger) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Strength, unpacked_adventurer.Strength + 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Rage) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Wisdom, unpacked_adventurer.Wisdom + 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Fury) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Dexterity, unpacked_adventurer.Dexterity + 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Vitriol) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Charisma, unpacked_adventurer.Wisdom + 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_the_Fox) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Intelligence, unpacked_adventurer.Intelligence + 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Detection) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Wisdom, unpacked_adventurer.Wisdom + 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Reflection) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Wisdom, unpacked_adventurer.Wisdom + 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_the_Twins) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Dexterity, unpacked_adventurer.Dexterity + 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        return (unpacked_adventurer,);
+    }
+
+    func remove_item_stat_modifier{syscall_ptr: felt*, range_check_ptr}(
+        item: Item, unpacked_adventurer: AdventurerDynamic
+    ) -> (new_unpacked_adventurer: AdventurerDynamic) {
+        if  (item.Prefix_2 == 0) {
+            return (unpacked_adventurer,);
+        }
+        if (item.Suffix == 0) {
+            return (unpacked_adventurer,);
+        }
+        if (item.Slot == Slot.Neck) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Luck, unpacked_adventurer.Luck - 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Slot == Slot.Ring) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Luck, unpacked_adventurer.Luck - 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Power) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Strength, unpacked_adventurer.Strength - 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Giant) { 
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Vitality, unpacked_adventurer.Vitality - 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Titans) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Dexterity, unpacked_adventurer.Dexterity - 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Skill) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Intelligence, unpacked_adventurer.Intelligence - 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Perfection) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Intelligence, unpacked_adventurer.Intelligence - 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Brilliance) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Intelligence, unpacked_adventurer.Intelligence - 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Enlightenment) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Wisdom, unpacked_adventurer.Wisdom - 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Protection) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Vitality, unpacked_adventurer.Vitality - 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Anger) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Strength, unpacked_adventurer.Strength - 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Rage) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Wisdom, unpacked_adventurer.Wisdom - 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Fury) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Dexterity, unpacked_adventurer.Dexterity - 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Vitriol) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Charisma, unpacked_adventurer.Charisma - 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_the_Fox) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Intelligence, unpacked_adventurer.Intelligence - 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Detection) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Wisdom, unpacked_adventurer.Wisdom - 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_Reflection) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Wisdom, unpacked_adventurer.Wisdom - 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (item.Suffix == ItemSuffixes.of_the_Twins) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Dexterity, unpacked_adventurer.Dexterity - 3, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        return (unpacked_adventurer,);
     }
 }

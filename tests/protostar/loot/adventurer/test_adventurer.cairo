@@ -7,7 +7,17 @@ from starkware.cairo.common.math_cmp import is_nn, is_le
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
 from starkware.cairo.common.pow import pow
 
-from contracts.loot.constants.item import Item, ItemIds, ItemSlot, ItemType, ItemMaterial, Material
+from contracts.loot.constants.item import (
+    Item, 
+    ItemIds, 
+    ItemSlot, 
+    ItemType, 
+    ItemMaterial, 
+    Material,
+    ItemNamePrefixes,
+    ItemNameSuffixes,
+    ItemSuffixes
+)
 from contracts.loot.constants.rankings import ItemRank
 from contracts.loot.loot.stats.item import ItemStats
 from contracts.loot.constants.physics import MaterialDensity
@@ -310,6 +320,46 @@ func test_calculate_xp_discovery{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*,
     let (xp_discovery) = AdventurerLib.calculate_xp_discovery(0);
 
     assert xp_discovery = 10;
+
+    return ();
+}
+
+// @notice Tests apply item stat boost calculation
+@external
+func test_item_stat_boost{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+
+    let (state) = get_adventurer_state();
+
+    let (adventurer_static, adventurer_dynamic) = AdventurerLib.split_data(state);
+
+    // Strength
+    let (strength_item) = TestUtils.create_item_with_names(ItemIds.Katana, 20, 1, 1, ItemSuffixes.of_Power);
+    // Vitality
+    let (vitality_item) = TestUtils.create_item_with_names(ItemIds.Katana, 20, 1, 1, ItemSuffixes.of_Giant);
+    // Dexterity
+    let (dexterity_item) = TestUtils.create_item_with_names(ItemIds.Katana, 20, 1, 1, ItemSuffixes.of_Titans);
+    // Intelligence
+    let (intelligence_item) = TestUtils.create_item_with_names(ItemIds.Katana, 20, 1, 1, ItemSuffixes.of_Skill);
+    // Wisdom
+    let (wisdom_item) = TestUtils.create_item_with_names(ItemIds.Katana, 20, 1, 1, ItemSuffixes.of_Enlightenment);
+    // Luck
+    let (luck_item) = TestUtils.create_item_with_names(ItemIds.Necklace, 20, 1, 1, ItemSuffixes.of_Enlightenment);
+
+    let (strength_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(strength_item, adventurer_dynamic);
+    let (vitality_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(vitality_item, adventurer_dynamic);
+    let (dexterity_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(dexterity_item, adventurer_dynamic);
+    let (intelligence_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(intelligence_item, adventurer_dynamic);
+    let (wisdom_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(wisdom_item, adventurer_dynamic);
+    let (luck_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(luck_item, adventurer_dynamic);
+
+    assert strength_boosted_adventurer.Strength = 3;
+    assert vitality_boosted_adventurer.Vitality = 3;
+    assert dexterity_boosted_adventurer.Dexterity = 3;
+    assert intelligence_boosted_adventurer.Intelligence = 3;
+    assert wisdom_boosted_adventurer.Wisdom = 3;
+    // greatness of necklace is 20, plus it has a prefix and suffix
+    assert luck_boosted_adventurer.Luck = 23;
 
     return ();
 }

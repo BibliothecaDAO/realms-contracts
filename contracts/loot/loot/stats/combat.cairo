@@ -105,6 +105,7 @@ namespace CombatStats {
         armor_rank: felt,
         armor_greatness: felt,
         entity_level: felt,
+        luck: felt,
         rnd: felt
     ) -> (damage: felt) {
         alloc_locals;
@@ -132,9 +133,13 @@ namespace CombatStats {
         let dealt_damage = is_le_felt(armor_strength, base_weapon_damage);
         if (dealt_damage == 1) {
             // if it is, damage dealt will be positive so return it
-            // @distracteddev: calculate whether hit is critical, formula = damage * (1.5)^critical
-            let (_, critical_hit_chance) = unsigned_div_rem(rnd, 4);
-            let critical_hit = is_le(critical_hit_chance, 0);
+            // @distracteddev: calculate whether hit is critical and add luck
+            // luck has a max of 46 (both jewellery fully powered)
+            // 0-9 = 1 in 6, 10-19 = 1 in 5, 20-29 = 1 in 4, 30-39 = 1 in 3, 40-46 = 1 in 2
+            // formula = damage * (1.5 * rand(6 - (luck/10))
+            let (critical_hit_chance, _) = unsigned_div_rem(luck, 10);
+            let (_, critical_rand) = unsigned_div_rem(rnd, (6 - critical_hit_chance));
+            let critical_hit = is_le(critical_rand, 0);
             // @distracteddev: provide some multi here with adventurer level: e.g. damage + (1 + ((1 - level) * 0.1))
             let (adventurer_level_damage) = calculate_entity_level_boost(total_weapon_damage, entity_level);
             let (critical_damage_dealt) = calculate_critical_damage(adventurer_level_damage, critical_hit);
@@ -161,7 +166,7 @@ namespace CombatStats {
 
         // pass details of attack and armor to core damage calculation function
         let (damage_dealt) = calculate_damage(
-            attack_type, weapon.Rank, weapon.Greatness, armor_type, armor.Rank, armor.Greatness, unpacked_adventurer.Level, rnd
+            attack_type, weapon.Rank, weapon.Greatness, armor_type, armor.Rank, armor.Greatness, unpacked_adventurer.Level, unpacked_adventurer.Luck, rnd
         );
 
         // return damage
@@ -182,7 +187,7 @@ namespace CombatStats {
         if (armor.Id == 0) {
             // force armor_type generic
             return  calculate_damage(
-                attack_type, beast.Rank, beast.Level, Type.Armor.generic, armor.Rank, armor.Greatness, 1, rnd
+                attack_type, beast.Rank, beast.Level, Type.Armor.generic, armor.Rank, armor.Greatness, 1, 0, rnd
             );
         } else {
             let (armor_type) = ItemStats.item_type(armor.Id);
@@ -190,7 +195,7 @@ namespace CombatStats {
             // @distracteddev: added param to change based on adventurer level
             // return damage
             return  calculate_damage(
-                attack_type, beast.Rank, beast.Level, armor_type, armor.Rank, armor.Greatness, 1, rnd
+                attack_type, beast.Rank, beast.Level, armor_type, armor.Rank, armor.Greatness, 1, 0, rnd
             );
         }
     }
@@ -208,12 +213,12 @@ namespace CombatStats {
         if (weapon.Id == 0) {
             // force generic type and greatness 1
             return calculate_damage(
-                Type.Weapon.generic, weapon.Rank, 1, armor_type, beast.Rank, beast.Level, unpacked_adventurer.Level, rnd
+                Type.Weapon.generic, weapon.Rank, 1, armor_type, beast.Rank, beast.Level, unpacked_adventurer.Level, unpacked_adventurer.Luck, rnd
             );
         } else {
             // return damage
             return calculate_damage(
-                weapon.Type, weapon.Rank, weapon.Greatness, armor_type, beast.Rank, beast.Level, unpacked_adventurer.Level, rnd
+                weapon.Type, weapon.Rank, weapon.Greatness, armor_type, beast.Rank, beast.Level, unpacked_adventurer.Level, unpacked_adventurer.Luck, rnd
             );
         }
     }
@@ -230,12 +235,12 @@ namespace CombatStats {
         if (armor.Id == 0) {
             // force armor type generic
             return calculate_damage(
-                obstacle.Type, obstacle.Rank, obstacle.Greatness, Type.Armor.generic, armor.Rank, armor.Greatness, 1, 1
+                obstacle.Type, obstacle.Rank, obstacle.Greatness, Type.Armor.generic, armor.Rank, armor.Greatness, 1, 0, 1
             );
         } else {
             // return damage dealt
             return calculate_damage(
-                obstacle.Type, obstacle.Rank, obstacle.Greatness, armor_type, armor.Rank, armor.Greatness, 1, 1
+                obstacle.Type, obstacle.Rank, obstacle.Greatness, armor_type, armor.Rank, armor.Greatness, 1, 0, 1
             );
         }
     }

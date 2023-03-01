@@ -278,8 +278,11 @@ func equip_item{
     // Equip Item
     let (equiped_adventurer) = AdventurerLib.equip_item(token_to_felt, item, adventurer_dynamic_);
 
+    // Add item stat boost
+    let (stat_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(item, equiped_adventurer);
+
     // Pack adventurer and write to chain
-    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(equiped_adventurer);
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(stat_boosted_adventurer);
     adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
 
     let (adventurer_to_felt) = _uint_to_felt(adventurer_token_id);
@@ -336,8 +339,11 @@ func unequip_item{
     // Unequip Item
     let (unequiped_adventurer) = AdventurerLib.unequip_item(item, adventurer_dynamic_);
 
+    // Remove item stat boost
+    let (stat_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(item, unequiped_adventurer);
+
     // Pack adventurer
-    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(unequiped_adventurer);
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(stat_boosted_adventurer);
     adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
 
     // Update item

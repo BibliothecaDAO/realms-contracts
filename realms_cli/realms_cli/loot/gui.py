@@ -90,11 +90,11 @@ def get_adventurer(sender, app_data, user_dat):
     dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
     value = dpg.get_value("adventurer_id").split(" - ")[-1]
     adventurer_out = asyncio.run(_get_adventurer("goerli", value))
-    print(adventurer_out)
     update_gold(value)
     update_beast(adventurer_out[26])
     update_health(value)
     update_equipped_items(adventurer_out)
+    update_stats(adventurer_out)
     dpg.delete_item("get_adventurer_load")
     dpg.delete_item("loader")
 
@@ -245,7 +245,7 @@ def equip_item(sender, app_data, user_data):
     command = [
         "nile",
         "loot",
-        "health",
+        "equip",
         "--adventurer_token_id",
         adventurer,
         "--loot_token_id",
@@ -253,6 +253,8 @@ def equip_item(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
+    adventurer_out = asyncio.run(_get_adventurer("goerli", adventurer))
+    update_stats(adventurer_out)
     dpg.delete_item("equip_load")
     dpg.delete_item("loader")
 
@@ -267,7 +269,7 @@ def unequip_item(sender, app_data, user_data):
     command = [
         "nile",
         "loot",
-        "health",
+        "unequip",
         "--adventurer_token_id",
         adventurer,
         "--loot_token_id",
@@ -275,6 +277,8 @@ def unequip_item(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
+    adventurer_out = asyncio.run(_get_adventurer("goerli", adventurer))
+    update_stats(adventurer_out)
     dpg.delete_item("unequip_load")
     dpg.delete_item("loader")
 
@@ -569,6 +573,15 @@ def update_equipped_items(adventurer_data):
     dpg.set_value("ring", all_items[7])
 
 
+def update_stats(adventurer_data):
+    dpg.set_value("strength", adventurer_data[9])
+    dpg.set_value("dexterity", adventurer_data[10])
+    dpg.set_value("vitality", adventurer_data[11])
+    dpg.set_value("intelligence", adventurer_data[12])
+    dpg.set_value("wisdom", adventurer_data[13])
+    dpg.set_value("luck", adventurer_data[15])
+
+
 if __name__ == "__main__":
     dpg.create_context()
     dpg.create_viewport(title="Realms GUI", width=1000, height=800)
@@ -673,6 +686,28 @@ if __name__ == "__main__":
                 with dpg.group(horizontal=True):
                     dpg.add_text("Ring - ")
                     dpg.add_text(tag="ring", default_value="Nothing")
+            # Stats display
+            dpg.add_spacer(width=20)
+            with dpg.group():
+                dpg.add_text("Adventurer Stats")
+                with dpg.group(horizontal=True):
+                    dpg.add_text("Strength - ")
+                    dpg.add_text(tag="strength", default_value="0")
+                with dpg.group(horizontal=True):
+                    dpg.add_text("Dexterity - ")
+                    dpg.add_text(tag="dexterity", default_value="0")
+                with dpg.group(horizontal=True):
+                    dpg.add_text("Vitality - ")
+                    dpg.add_text(tag="vitality", default_value="0")
+                with dpg.group(horizontal=True):
+                    dpg.add_text("Intelligence - ")
+                    dpg.add_text(tag="intelligence", default_value="0")
+                with dpg.group(horizontal=True):
+                    dpg.add_text("Wisdom - ")
+                    dpg.add_text(tag="wisdom", default_value="0")
+                with dpg.group(horizontal=True):
+                    dpg.add_text("Luck - ")
+                    dpg.add_text(tag="luck", default_value="0")
         dpg.add_spacer(height=4)
         dpg.add_separator()
         dpg.add_spacer(height=4)

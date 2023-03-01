@@ -281,7 +281,7 @@ func test_calculate_damage_from_beast_late_game{syscall_ptr: felt*, pedersen_ptr
 
     // TODO: Test defending without armor
 
-    let (no_armor) = TestUtils.create_item(0, 0); // no item
+    let (no_armor) = TestUtils.create_item_with_names(0, 0, 1, 1, 1); // no item
 
     let (no_armor_damage) = CombatStats.calculate_damage_from_beast(beast, no_armor, 1);
 
