@@ -16,6 +16,8 @@ from contracts.loot.constants.beast import (
 )
 from contracts.loot.loot.stats.combat import CombatStats
 from tests.protostar.loot.test_structs import (
+    create_adventurer,
+    get_adventurer_state,
     TestUtils,
     TEST_DAMAGE_HEALTH_REMAINING,
     TEST_DAMAGE_OVERKILL,
@@ -171,6 +173,22 @@ func test_slain{
     return ();
 }
 
+@external
+func test_calculate_critical_damage{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    let (critical_damage) = CombatStats.calculate_critical_damage(20, 1);
+
+    assert critical_damage = 30;
+    return ();
+}
+
+@external
+func test_calculate_adventurer_level_boost{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    let (adventurer_level_damage) = CombatStats.calculate_entity_level_boost(20, 1);
+
+    assert adventurer_level_damage = 20;
+    return ();
+}
+
 // @notice Tests damage to beast calculation
 // Damage Calculation is:
 // Attack = Greatness * (6 - item_rank) * attack_effectiveness
@@ -180,13 +198,18 @@ func test_slain{
 func test_calculate_damage_to_beast{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
 
+    let (adventurer_state) = get_adventurer_state();
+
     let (greatness_8_mace) = TestUtils.create_item(75, 8); // Greatness 8 Mace (Bludgeon) vs
     let (xp_1_basilisk) = TestUtils.create_beast(4, 1); // Level 1 Basilisk (Magic)
 
     // attack = 8 * (6-4) * 1 = 16
     // defense = 1 * (6-4) = 2
     // 16 - 2 = 14HP damage
-    let (mace_vs_basilik) = CombatStats.calculate_damage_to_beast(xp_1_basilisk, greatness_8_mace);
+    let (mace_vs_basilik) = CombatStats.calculate_damage_to_beast(xp_1_basilisk, greatness_8_mace, adventurer_state, 1);
+
+    // adventurer boost = 14 * (1 + ((1-1) * 0.1)) = 14
+    // no critical hit
     assert mace_vs_basilik = 14;
 
     // TODO: Test attacking without weapon (melee)
@@ -212,11 +235,84 @@ func test_calculate_damage_from_beast{syscall_ptr: felt*, pedersen_ptr: HashBuil
     // beast_attack = 2 * (6-1) * 1 = 10
     // armor_defense = 1 * (6-4) = 2
     // 10 attack - 2 defense = 8hp damage
-    let (local damage) = CombatStats.calculate_damage_from_beast(beast, armor);
+    let (local damage) = CombatStats.calculate_damage_from_beast(beast, armor, 1);
+
+    // beast level boost = 8 * ((1-1) + 2 * 0.1) = 9
+    // no critical
     assert damage = 8;
 
     // TODO: Test defending without armor
-    // let (armor) = TestUtils.create_zero_item();
+
+    return ();
+}
+
+// @notice Tests damage from beast calculation in late game
+// Damage Calculation is:
+// Attack = Greatness * (6 - item_rank) * attack_effectiveness
+// Armor = Greatness * (6 - item_rank)
+// Damage Taken = Attack - Armor (can't be negative)
+@external
+func test_calculate_damage_from_beast_late_game{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+
+    let (beast) = TestUtils.create_beast(11, 20); // levl 20 giant (rank 1)
+    let (cloth_armor) = TestUtils.create_item(18, 20); // lvl 20 silk robe (rank 2)
+    
+    // base weapon damage: 100
+    // armor strength: 80
+    // attack effectiveness: 1
+    // total weapon damage: (100 - 80) * 1 = 20
+
+    let (cloth_damage) = CombatStats.calculate_damage_from_beast(beast, cloth_armor, 1);
+
+    assert cloth_damage = 20;
+
+    let (metal_armor) = TestUtils.create_item(78, 20); // lvl 20 ornate chestplate(rank 2)
+    
+    let (metal_damage) = CombatStats.calculate_damage_from_beast(beast, metal_armor, 1);
+
+    assert metal_damage = 40;
+
+    let (hide_armor) = TestUtils.create_item(48, 20); // lvl 20 dragonskin armor (rank 2)
+
+    let (hide_damage) = CombatStats.calculate_damage_from_beast(beast, hide_armor, 1);
+
+    assert hide_damage = 60;
+
+    // TODO: Test defending without armor
+
+    let (no_armor) = TestUtils.create_item(0, 0); // no item
+
+    let (no_armor_damage) = CombatStats.calculate_damage_from_beast(beast, no_armor, 1);
+
+    assert no_armor_damage = 300;
+
+    return ();
+}
+
+// @notice Tests ambush chance calculation
+// Ambush calculation is:
+// random_number * (health / 50)
+@external
+func test_ambush_chance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+
+    let (ambush_chance) = BeastLib.calculate_ambush_chance(1, 69);
+
+    assert ambush_chance = 2;
+
+    return ();
+}
+
+// @notice Tests ambush chance calculation
+// Ambush calculation is:
+// (xp_gained - (xp_gained/4)) + ((xp_gained/4) * (rand % 4))
+@external
+func test_calculate_gold_reward{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+
+    let (gold_reward) = BeastLib.calculate_gold_reward(0, 5);
+
+    assert gold_reward = 4;
 
     return ();
 }

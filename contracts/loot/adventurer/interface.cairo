@@ -6,7 +6,7 @@ from contracts.loot.constants.adventurer import AdventurerState
 
 @contract_interface
 namespace IAdventurer {
-    func ownerOf(tokenId: Uint256) -> (owner: felt) {
+    func owner_of(tokenId: Uint256) -> (owner: felt) {
     }
     func get_adventurer_by_id(tokenId: Uint256) -> (adventurer: AdventurerState) {
     }

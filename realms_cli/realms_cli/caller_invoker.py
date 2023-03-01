@@ -7,6 +7,7 @@ import re
 import subprocess
 import asyncio
 import os
+import json
 
 from nile.core.declare import declare
 from nile.core.types.account import Account, get_nonce
@@ -16,7 +17,6 @@ from nile.core.call_or_invoke import call_or_invoke
 from nile.utils import hex_address, felt_to_str
 from realms_cli.config import Config
 from starkware.starknet.compiler.compile import compile_starknet_files
-
 
 import logging
 
@@ -59,6 +59,7 @@ async def send_multi(self, to, method, calldata, nonce=None):
         max_fee=str(config.MAX_FEE),
     )
 
+
 # bind it to the account class so that we can use the function when signing
 Account.send_multi = send_multi
 
@@ -81,8 +82,7 @@ def call(network, contract_alias, function, arguments) -> str:
 async def proxy_call(network, contract_alias, abi, function, params) -> str:
     """Nile proxy call function."""
 
-    address, _ = next(deployments.load(
-        contract_alias, network)) or contract_alias
+    address, _ = next(deployments.load(contract_alias, network)) or contract_alias
 
     address = hex_address(address)
 
@@ -99,33 +99,36 @@ async def proxy_call(network, contract_alias, abi, function, params) -> str:
 async def _call_async(network, contract_alias, function, arguments) -> str:
     """Nile async call function."""
 
-    command = " ".join([
-        "nile",
-        "call",
-        "--network",
-        network,
-        contract_alias,
-        function,
-        *map(str, arguments),
-    ])
+    command = " ".join(
+        [
+            "nile",
+            "call",
+            "--network",
+            network,
+            contract_alias,
+            function,
+            *map(str, arguments),
+        ]
+    )
     proc = await asyncio.create_subprocess_shell(
-        command,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE)
+        command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+    )
 
     stdout, stderr = await proc.communicate()
 
     if stderr:
-        print(f'[stderr]\n{stderr.decode()}')
+        print(f"[stderr]\n{stderr.decode()}")
     return stdout.decode()
 
 
 async def _call_sync_manager(network, contract_alias, function, calldata) -> str:
-    """"Helper function to create multiple coroutines."""
-    stdout = await asyncio.gather(*[
-        _call_async(network, contract_alias, function, arguments)
-        for arguments in calldata
-    ])
+    """ "Helper function to create multiple coroutines."""
+    stdout = await asyncio.gather(
+        *[
+            _call_async(network, contract_alias, function, arguments)
+            for arguments in calldata
+        ]
+    )
 
     return stdout
 
@@ -144,7 +147,7 @@ def wrapped_call(network, contract_alias, function, arguments) -> str:
     print("------- CALL ----------------------------------------------------")
     print(f"calling {function} from {contract_alias} with {arguments}")
     out = call(network, contract_alias, function, arguments)
-    print("------- CALL ----------------------------------------------------")
+    print("_________________________________________________________________")
     # return out such that it can be prettified at a higher level
     return out
 
@@ -158,7 +161,7 @@ async def wrapped_proxy_call(network, contract_alias, abi, function, arguments) 
     print("------- CALL ----------------------------------------------------")
     print(f"calling {function} from {contract_alias} with {arguments}")
     out = await proxy_call(network, contract_alias, abi, function, arguments)
-    print("------- CALL ----------------------------------------------------")
+    print("_________________________________________________________________")
     # return out such that it can be prettified at a higher level
     return out
 
@@ -166,9 +169,12 @@ async def wrapped_proxy_call(network, contract_alias, abi, function, arguments) 
 async def send(network, signer_alias, contract_alias, function, arguments) -> str:
     """Nile send function."""
     account = await Account(signer_alias, network)
-    if isinstance(arguments[0], list):
+    if not arguments:
+        return await account.send_multi(contract_alias, function, [])
+    elif isinstance(arguments[0], list):
         return await account.send_multi(contract_alias, function, arguments)
-    return await account.send_multi(contract_alias, function, [arguments])
+    else:
+        return await account.send_multi(contract_alias, function, [arguments])
 
 
 async def wrapped_send(network, signer_alias, contract_alias, function, arguments):
@@ -183,10 +189,14 @@ async def wrapped_send(network, signer_alias, contract_alias, function, argument
     out = await send(network, signer_alias, contract_alias, function, arguments)
     if out:
         _, tx_hash = parse_send(out)
-        get_tx_status(network, tx_hash,)
+        get_tx_status(
+            network,
+            tx_hash,
+        )
     else:
         raise Exception("send message returned None")
     print("------- SEND ----------------------------------------------------")
+    return out
 
 
 def get_tx_status(network, tx_hash: str) -> dict:
@@ -229,9 +239,18 @@ def deploy(network, alias) -> str:
 
 def compile(contract_alias) -> str:
     """Nile call function."""
+    if os.path.dirname(__file__).split("/")[1] == "Users":
+        path = "/" + os.path.join(
+            os.path.dirname(__file__).split("/")[1],
+            os.path.dirname(__file__).split("/")[2],
+            "Documents",
+            "realms",
+            "realms-contracts",
+        )
+    else:
+        path = "/workspaces/realms-contracts"
 
-    location = find_file(
-        '/workspaces/realms-contracts', contract_alias + '.cairo')
+    location = find_file(path, contract_alias + ".cairo")
 
     command = [
         "nile",
@@ -250,20 +269,34 @@ def find_file(root_dir, file_name):
 
 
 async def wrapped_declare(account, contract_name, network, alias):
+    if os.path.dirname(__file__).split("/")[1] == "Users":
+        path = "/" + os.path.join(
+            os.path.dirname(__file__).split("/")[1],
+            os.path.dirname(__file__).split("/")[2],
+            "Documents",
+            "realms",
+            "realms-contracts",
+        )
+    else:
+        path = "/workspaces/realms-contracts"
 
-    location = find_file(
-        '/workspaces/realms-contracts', contract_name + '.cairo')
+    location = find_file(path, contract_name + ".cairo")
 
     account = await Account(account, network)
 
     compile_starknet_files(
-        files=[f"{location}"], debug_info=True, cairo_path=["/workspaces/realms-contracts/lib/cairo_contracts/src"]
+        files=[f"{location}"],
+        debug_info=True,
+        cairo_path=[path + "/lib/cairo_contracts/src"],
     )
 
-    tx_wrapper = await account.declare(contract_name, max_fee=11111111111111)
+    tx_wrapper = await account.declare(contract_name, max_fee=4226601250467000)
     tx_status, declared_hash = await tx_wrapper.execute(watch_mode="track")
 
-    get_tx_status(network, str(tx_wrapper.hash),)
+    get_tx_status(
+        network,
+        str(tx_wrapper.hash),
+    )
 
     return tx_wrapper
 
@@ -276,17 +309,22 @@ async def declare_class(network, contract_name, account, max_fee, overriding_pat
     """
     logging.debug(f"Declaring contract class {contract_name}...")
     class_hash = get_class_hash(
-        contract_name=contract_name, overriding_path=overriding_path)
+        contract_name=contract_name, overriding_path=overriding_path
+    )
     padded_hash = hex_class_hash(class_hash)
     if class_hash_exists(class_hash, network):
         logging.debug(f"Contract class with hash {padded_hash} already exists")
     else:
-        tx = await account.declare(contract_name, max_fee=max_fee, overriding_path=overriding_path)
+        tx = await account.declare(
+            contract_name, max_fee=max_fee, overriding_path=overriding_path
+        )
         tx_status, declared_hash = await tx.execute(watch_mode="track")
 
         if tx_status.status.is_rejected:
             raise Exception(
-                f"Could not declare contract class. Transaction rejected.", tx_status.error_message)
+                f"Could not declare contract class. Transaction rejected.",
+                tx_status.error_message,
+            )
 
         if padded_hash != declared_hash:
             raise Exception(
@@ -300,3 +338,17 @@ async def declare_class(network, contract_name, account, max_fee, overriding_pat
 
 def get_contract_abi(contract_name):
     return f"{ABIS_DIRECTORY}/{contract_name}.json"
+
+
+def get_transaction_result(network, tx_hash):
+    command = [
+        "starknet",
+        "get_transaction_trace",
+        "--hash",
+        tx_hash,
+        "--network",
+        "alpha-goerli",
+    ]
+    out = subprocess.check_output(command).strip().decode("utf-8")
+    out_dict = json.loads(out)
+    return out_dict["function_invocation"]["result"]

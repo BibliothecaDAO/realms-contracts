@@ -31,20 +31,20 @@ namespace TestAdventurerState {
     // evolving stats
     const Health = 100;  //
 
-    const Level = 500;  //
+    const Level = 1;  //
 
     // Physical
-    const Strength = 1000;
-    const Dexterity = 1000;
-    const Vitality = 1000;
+    const Strength = 0;
+    const Dexterity = 0;
+    const Vitality = 0;
 
     // Mental
-    const Intelligence = 1000;
-    const Wisdom = 1000;
-    const Charisma = 1000;
+    const Intelligence = 0;
+    const Wisdom = 0;
+    const Charisma = 0;
 
     // Meta Physical
-    const Luck = 1000;
+    const Luck = 0;
 
     const XP = 1000000;  //
 
@@ -62,6 +62,7 @@ namespace TestAdventurerState {
     // Packed Stats p3
     const Status = AdventurerStatus.Idle;
     const Beast = 0;
+    const Upgrading = 0;
 }
 
 func get_adventurer_state{syscall_ptr: felt*, range_check_ptr}() -> (
@@ -96,6 +97,44 @@ func get_adventurer_state{syscall_ptr: felt*, range_check_ptr}() -> (
         TestAdventurerState.RingId,
         TestAdventurerState.Status,
         TestAdventurerState.Beast,
+        TestAdventurerState.Upgrading,
+        ),
+    );
+}
+
+func create_adventurer{syscall_ptr: felt*, range_check_ptr}(level: felt) -> (
+    adventurer_state: AdventurerState
+) {
+    return (
+        AdventurerState(
+        TestAdventurerState.Race,
+        TestAdventurerState.HomeRealm,
+        TestAdventurerState.Birthdate,
+        TestAdventurerState.Name,
+        TestAdventurerState.Order,
+        TestAdventurerState.ImageHash1,
+        TestAdventurerState.ImageHash2,
+        TestAdventurerState.Health,
+        level,
+        TestAdventurerState.Strength,
+        TestAdventurerState.Dexterity,
+        TestAdventurerState.Vitality,
+        TestAdventurerState.Intelligence,
+        TestAdventurerState.Wisdom,
+        TestAdventurerState.Charisma,
+        TestAdventurerState.Luck,
+        TestAdventurerState.XP,
+        TestAdventurerState.WeaponId,
+        TestAdventurerState.ChestId,
+        TestAdventurerState.HeadId,
+        TestAdventurerState.WaistId,
+        TestAdventurerState.FeetId,
+        TestAdventurerState.HandsId,
+        TestAdventurerState.NeckId,
+        TestAdventurerState.RingId,
+        TestAdventurerState.Status,
+        TestAdventurerState.Beast,
+        TestAdventurerState.Upgrading,
         ),
     );
 }
@@ -193,6 +232,7 @@ namespace TestUtils {
 
         let (type) = ObstacleUtils.get_type_from_id(obstacle_id);
         let (rank) = ObstacleUtils.get_rank_from_id(obstacle_id);
+        let (damage_location) = ObstacleUtils.get_damage_location_from_id(obstacle_id);
         let prefix_1 = 1;
         let prefix_2 = 1;
 
@@ -204,6 +244,7 @@ namespace TestUtils {
             prefix_1,
             prefix_2,
             greatness,
+            damage_location
             ),
         );
     }

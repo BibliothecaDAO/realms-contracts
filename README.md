@@ -11,15 +11,13 @@
   </a>
 </p>
 
-![Realms x Bibliotheca header](/static/realmsxbibliotheca.jpg)
 
 # Realmverse Contracts
 
 ## Realms is an ever-expanding on-chain permission-less gaming Lootverse built on StarkNet. 
 
-### This monorepo contains all of the Contracts (StarkNet/Cairo Ethereum/Solidity) for Bibliotheca DAO, $LORDS, and Realms.
+This monorepo contains all of the Contracts (StarkNet/Cairo Ethereum/Solidity) for Bibliotheca DAO, $LORDS, and Realms.
 
----
 
 # Contracts
 | Directory | Title | Description                     |
@@ -31,20 +29,20 @@
 | [/nft_marketplace](./contracts/nft_marketplace/) | NFT Marketplace | A marketplace for Realms, Dungeons, etc. built on Starknet. |
 | [/lib/guild_contracts](./lib/guild_contracts/) | Guild Contracts | Contracts pulled from Guildly to allow shared player accounts. More info in [Guildly Repo](https://github.com/Guildly/contracts) |
 
----
+
 # Learn more about Realms
 
-## Follow these steps bring a 🔦
+### Follow these steps bring a 🔦
 
-## 1. Visit the [Bibliotheca DAO Site](https://bibliothecadao.xyz/) for an overview of our ecosystem
+1. Visit the [Bibliotheca DAO Site](https://bibliothecadao.xyz/) for an overview of our ecosystem
 
-## 2. The [Master Scroll](https://scroll.bibliothecadao.xyz/). This is our deep dive into everything about the game. The Master Scroll is the source of truth before this readme
+2. The [Master Scroll](https://scroll.bibliothecadao.xyz/). This is our deep dive into everything about the game. The Master Scroll is the source of truth before this readme
 
-## 3. Visit [The Atlas](https://atlas.bibliothecadao.xyz/) to see the Settling game in action
+3. Visit [The Atlas](https://atlas.bibliothecadao.xyz/) to see the Settling game in action
 
-## 4. Get involved at the [Realms x Bibliotheca Discord](https://discord.gg/uQnjZhZPfu)
+4. Get involved at the [Realms x Bibliotheca Discord](https://discord.gg/uQnjZhZPfu)
 
----
+
 
 # Development
 

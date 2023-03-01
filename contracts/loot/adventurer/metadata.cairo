@@ -116,10 +116,12 @@ namespace AdventurerUriUtils {
         const Griffin = 'Griffin';
         const Minotaur = 'Minotaur';
         const Basilisk = 'Basilisk';
+        const Gnome = 'Gnome';
         const Wraith = 'Wraith';
         const Ghoul = 'Ghoul';
         const Goblin = 'Goblin';
         const Skeleton = 'Skeleton';
+        const Golem = 'Golem';
         const Giant = 'Giant';
         const Yeti = 'Yeti';
         const Orc = 'Orc';
@@ -147,28 +149,28 @@ namespace AdventurerUri {
     ) -> (encoded_len: felt, encoded: felt*) {
         alloc_locals;
 
-        let (weapon_item: Item) = ILoot.getItemByTokenId(
+        let (weapon_item: Item) = ILoot.get_item_by_token_id(
             item_address, Uint256(adventurer_data.WeaponId, 0)
         );
-        let (chest_item: Item) = ILoot.getItemByTokenId(
+        let (chest_item: Item) = ILoot.get_item_by_token_id(
             item_address, Uint256(adventurer_data.ChestId, 0)
         );
-        let (head_item: Item) = ILoot.getItemByTokenId(
+        let (head_item: Item) = ILoot.get_item_by_token_id(
             item_address, Uint256(adventurer_data.HeadId, 0)
         );
-        let (waist_item: Item) = ILoot.getItemByTokenId(
+        let (waist_item: Item) = ILoot.get_item_by_token_id(
             item_address, Uint256(adventurer_data.WaistId, 0)
         );
-        let (feet_item: Item) = ILoot.getItemByTokenId(
+        let (feet_item: Item) = ILoot.get_item_by_token_id(
             item_address, Uint256(adventurer_data.FeetId, 0)
         );
-        let (hands_item: Item) = ILoot.getItemByTokenId(
+        let (hands_item: Item) = ILoot.get_item_by_token_id(
             item_address, Uint256(adventurer_data.HandsId, 0)
         );
-        let (neck_item: Item) = ILoot.getItemByTokenId(
+        let (neck_item: Item) = ILoot.get_item_by_token_id(
             item_address, Uint256(adventurer_data.NeckId, 0)
         );
-        let (ring_item: Item) = ILoot.getItemByTokenId(
+        let (ring_item: Item) = ILoot.get_item_by_token_id(
             item_address, Uint256(adventurer_data.RingId, 0)
         );
 
@@ -976,6 +978,9 @@ namespace AdventurerUri {
         if (beast == BeastIds.Basilisk) {
             assert values[values_index + 2] = AdventurerUriUtils.Beast.Basilisk;
         }
+        if (beast == BeastIds.Gnome) {
+            assert values[values_index + 2] = AdventurerUriUtils.Beast.Gnome;
+        }
         if (beast == BeastIds.Wraith) {
             assert values[values_index + 2] = AdventurerUriUtils.Beast.Wraith;
         }
@@ -987,6 +992,9 @@ namespace AdventurerUri {
         }
         if (beast == BeastIds.Skeleton) {
             assert values[values_index + 2] = AdventurerUriUtils.Beast.Skeleton;
+        }
+        if (beast == BeastIds.Golem) {
+            assert values[values_index + 2] = AdventurerUriUtils.Beast.Golem;
         }
         if (beast == BeastIds.Giant) {
             assert values[values_index + 2] = AdventurerUriUtils.Beast.Giant;

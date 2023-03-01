@@ -3,6 +3,7 @@
 
 %lang starknet
 from starkware.cairo.common.alloc import alloc
+from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.uint256 import Uint256
 from starkware.cairo.common.math import unsigned_div_rem
@@ -13,12 +14,13 @@ from openzeppelin.token.erc721.library import ERC721
 from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
 from openzeppelin.upgrades.library import Proxy
 
-from contracts.loot.constants.item import Item
+from contracts.loot.constants.item import Item, ItemIds
 from contracts.loot.interfaces.imodules import IModuleController
 from contracts.loot.loot.library import ItemLib
 from contracts.loot.loot.metadata import LootUri
 from contracts.settling_game.interfaces.ixoroshiro import IXoroshiro
 from contracts.settling_game.library.library_module import Module
+from contracts.loot.loot.stats.combat import CombatStats
 
 from starkware.starknet.common.syscalls import (
     get_block_timestamp,
@@ -29,6 +31,18 @@ from starkware.starknet.common.syscalls import (
 
 from contracts.loot.loot.stats.item import ItemStats
 from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
+
+// -----------------------------------
+// Events
+// -----------------------------------
+
+@event
+func ItemXPIncrease(item_token_id: Uint256, item: Item) {
+}
+
+@event
+func ItemGreatnessIncrease(item_token_id: Uint256, item: Item) {
+}
 
 // -----------------------------------
 // Storage
@@ -155,7 +169,7 @@ func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     alloc_locals;
     let (controller) = Module.controller_address();
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
-    let (item_data) = getItemByTokenId(tokenId);
+    let (item_data) = get_item_by_token_id(tokenId);
     let (tokenURI_len, tokenURI: felt*) = LootUri.build(tokenId, item_data, adventurer_address);
     return (tokenURI_len, tokenURI);
 }
@@ -227,6 +241,10 @@ func renounceOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 func item(tokenId: Uint256) -> (item: Item) {
 }
 
+@storage_var
+func adventurer_owner(tokenId: Uint256) -> (adventurer_token_id: Uint256) {
+}
+
 // -----------------------------
 // External Loot Specific
 // -----------------------------
@@ -234,8 +252,13 @@ func item(tokenId: Uint256) -> (item: Item) {
 // @notice Mint random item
 // @param to: Address to mint the item to
 @external
-func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: felt) {
+func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    to: felt, adventurer_token_id: Uint256
+) {
     alloc_locals;
+
+    // // Only LootMarketArcade and Adventurer
+    // Module.only_approved();
 
     // fetch new item with random Id
     let (rnd) = get_random_number();
@@ -245,17 +268,49 @@ func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(to: f
 
     item.write(Uint256(next_id + 1, 0), new_item);
 
+    adventurer_owner.write(Uint256(next_id + 1, 0), adventurer_token_id);
+
     ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
 
     counter.write(next_id + 1);
     return ();
 }
 
+// @notice Mint adventurer starting weapon
+// @param to: Address to mint the item to
+// @param weapon_id: Weapon ID to mint
+// @return item_token_id: The token id of the minted item
+@external
+func mint_starter_weapon{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
+    to: felt, weapon_id: felt, adventurer_token_id: Uint256
+) -> (item_token_id: Uint256) {
+    alloc_locals;
+
+    Module.only_approved();
+
+    assert_starter_weapon(weapon_id);
+
+    // fetch new item with random Id
+    let (new_item: Item) = ItemLib.generate_starter_weapon(weapon_id);
+
+    let (next_id) = counter.read();
+
+    item.write(Uint256(next_id + 1, 0), new_item);
+
+    adventurer_owner.write(Uint256(next_id + 1, 0), adventurer_token_id);
+
+    ERC721Enumerable._mint(to, Uint256(next_id + 1, 0));
+
+    counter.write(next_id + 1);
+
+    return (Uint256(next_id + 1, 0),);
+}
+
 // @notice Update item adventurer
 // @param tokenId: Id of loot item
 // @param adventurerId: Id of adventurer
 @external
-func updateAdventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func update_adventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256, adventurerId: felt
 ) {
     Module.only_approved();
@@ -271,7 +326,7 @@ func updateAdventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 // @param tokenId: Id of loot item
 // @param xp: Amount of xp to update
 @external
-func updateXP{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func update_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256, xp: felt
 ) {
     Module.only_approved();
@@ -287,7 +342,7 @@ func updateXP{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 // @param tokenId: Id of loot item
 // @param item_: Data of loot item
 @external
-func setItemById{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func set_item_by_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256, item_id: felt, greatness: felt, xp: felt, adventurer: felt, bag_id: felt
 ) {
     alloc_locals;
@@ -297,9 +352,53 @@ func setItemById{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     return ();
 }
 
+// @notice Increase xp of an item
+// @param item_token_id: Id of the item
+// @param amount: Amount of xp to increase
+// @return success: Value indicating success
+@external
+func increase_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    item_token_id: Uint256, amount: felt
+) -> (success: felt) {
+    alloc_locals;
+
+    // Only approved modules can increase and items xp
+    Module.only_approved();
+
+    // call internal function for updating xp
+    let (result) = _increase_xp(item_token_id, amount);
+
+    // return result
+    return (result,);
+}
+
 // -----------------------------
 // Internal Loot Specific
 // -----------------------------
+
+// @notice Asserts that the weapon is a starter weapon
+// @param weapon_id: Id of loot weapon
+func assert_starter_weapon{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
+    weapon_id: felt
+) {
+    // book, wand, club, or short sword
+    if (weapon_id == ItemIds.Book) {
+        return ();
+    }
+    if (weapon_id == ItemIds.Wand) {
+        return ();
+    }
+    if (weapon_id == ItemIds.Club) {
+        return ();
+    }
+    if (weapon_id == ItemIds.ShortSword) {
+        return ();
+    }
+    with_attr error_message("Loot: Item is not a starter weapon") {
+        assert TRUE = FALSE;
+    }
+    return ();
+}
 
 // @notice Get xiroshiro random number
 // @return dice_roll: Random number
@@ -323,10 +422,112 @@ func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBu
 // @param tokenId: Id of the item token
 // @return item: Item data
 @view
-func getItemByTokenId{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+func get_item_by_token_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256
 ) -> (item: Item) {
     let (item_: Item) = item.read(tokenId);
 
     return (item_,);
+}
+
+// @notice Get adventurer owner
+// @param tokenId: Id of the item token
+// @return adventurer_token_id: Id of the adventurer
+@view
+func get_adventurer_owner{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    tokenId: Uint256
+) -> (adventurer_token_id: Uint256) {
+    let (adventurer_token_id) = adventurer_owner.read(tokenId);
+
+    return (adventurer_token_id,);
+}
+
+// @notice Increases the "XP" attribute of an item, represented by its unique token ID, by a specified amount.
+// @dev This function updates the XP of the specified item and writes the updated item to the blockchain.
+//      If the XP increase results in a level increase (i.e. the item's "greatness" attribute is increased),
+//      the function also increases the item's greatness attribute and writes the updated item to the blockchain.
+// @param item_token_id Unique token ID of the item to be updated.
+// @param amount The amount by which to increase the item's "XP" attribute.
+// @return success Boolean value indicating whether the function succeeded.
+func _increase_xp{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
+    item_token_id: Uint256, amount: felt
+) -> (success: felt) {
+    alloc_locals;
+
+    // get item
+    let (_item) = get_item_by_token_id(item_token_id);
+
+    // increase xp
+    let item_updated_xp = ItemLib.update_xp(_item, amount);
+
+    // check if item received a greatness increase
+    let (greatness_increased) = CombatStats.check_for_level_increase(
+        item_updated_xp.XP, item_updated_xp.Greatness
+    );
+
+    // if greatness increased
+    if (greatness_increased == TRUE) {
+        // increase greatness
+        let (result) = _increase_greatness(item_token_id, item_updated_xp.Greatness + 1);
+        return (result,);
+    } else {
+        // if greatness did not increase, we we still update XP
+        item.write(item_token_id, item_updated_xp);
+
+        // and emit an XP increase event
+        emit_item_xp_increase(item_token_id);
+
+        // return success
+        return (TRUE,);
+    }
+}
+
+// @notice Increases the "greatness" attribute of an item, represented by its unique token ID, by a specified amount.
+// @dev This function updates the greatness of the specified item and writes the updated item to the blockchain.
+// @param item_token_id Unique token ID of the item to be updated.
+// @param greatness The amount by which to increase the item's "greatness" attribute.
+// @return success Boolean value indicating whether the function succeeded.
+func _increase_greatness{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
+    item_token_id: Uint256, greatness: felt
+) -> (success: felt) {
+    alloc_locals;
+
+    // get item
+    let (_item) = get_item_by_token_id(item_token_id);
+
+    // update greatness
+    let item_updated_greatness = ItemLib.update_greatness(_item, greatness);
+
+    // write to blockchain
+    item.write(item_token_id, item_updated_greatness);
+
+    // emit greatness increase event
+    emit_item_greatness_increase(item_token_id);
+
+    // return success
+    return (TRUE,);
+}
+
+// @notice Emits a greatness increase event for an item
+// @param item_token_id: the token id of the item that increased in greatness
+func emit_item_greatness_increase{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
+    item_token_id: Uint256
+) {
+    // Get item from token id
+    let (item) = get_item_by_token_id(item_token_id);
+    // emit leveled up event
+    ItemGreatnessIncrease.emit(item_token_id, item);
+    return ();
+}
+
+// @notice Emits an xp increase event for an item
+// @param item_token_id: the token id of the item whose xp increased
+func emit_item_xp_increase{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
+    item_token_id: Uint256
+) {
+    // Get item from token id
+    let (item) = get_item_by_token_id(item_token_id);
+    // emit leveled up event
+    ItemXPIncrease.emit(item_token_id, item);
+    return ();
 }

@@ -19,6 +19,6 @@ ENV CAIRO_PATH=/loot/realms-contracts/lib/cairo_contracts/src
 WORKDIR /loot/realms-contracts/
 RUN pip3 install realms_cli/
 
-RUN curl -L https://raw.githubusercontent.com/software-mansion/protostar/master/install.sh | bash
+RUN curl -L https://raw.githubusercontent.com/software-mansion/protostar/master/install.sh | bash -s -- -v 0.8.1
 RUN curl -L https://foundry.paradigm.xyz | bash
 RUN /root/.foundry/bin/foundryup

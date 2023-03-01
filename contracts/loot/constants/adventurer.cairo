@@ -9,6 +9,8 @@ from contracts.loot.constants.item import Item
 from contracts.loot.constants.bag import Bag
 from contracts.loot.constants.beast import Beast
 
+from starkware.cairo.common.uint256 import Uint256
+
 // @notice This is viewable information of the Adventurer. We DO NOT store this on-chain.
 //         This is the object that is returned when requesting the Adventurer by ID.
 struct Adventurer {
@@ -50,9 +52,9 @@ struct Adventurer {
     Level: felt,  // 1- 100
     Order: felt,  // 1 - 16
 
-    // TODO: Update adventurer pack/unpack to include this new attribute
     Status: felt,  // {Idle, Battling, Traveling, Questing, Dead}
     Beast: felt,  // tokenId of the beast the adventurer is battling
+    Upgrading: felt,
 
     // TODO: Consider storing adventurer location information
 }
@@ -104,6 +106,7 @@ struct AdventurerState {
 
     Status: felt,
     Beast: felt,
+    Upgrading: felt,
 }
 
 // @notice This is immutable information stored on-chain
@@ -158,6 +161,12 @@ struct AdventurerDynamic {
 
     Status: felt,
     Beast: felt,
+    Upgrading: felt,
+}
+
+struct KingState {
+    AdventurerId: Uint256,
+    StartTime: felt,
 }
 
 struct PackedAdventurerState {
@@ -183,6 +192,7 @@ namespace SHIFT_P_1 {
 namespace SHIFT_P_4 {
     const _1 = 2 ** 0;
     const _2 = 2 ** 3;
+    const _3 = 2 ** 44;
 }
 
 namespace AdventurerSlotIds {
@@ -222,6 +232,7 @@ namespace AdventurerSlotIds {
     // Packed Stats p4
     const Status = 18;
     const Beast = 19;
+    const Upgrading = 20;
 }
 
 namespace AdventurerStatus {
@@ -236,8 +247,15 @@ namespace DiscoveryType {
     const Nothing = 0;
     const Beast = 1;
     const Obstacle = 2;
-    const Adventurer = 3;
-    const Item = 4;
+    const Item = 3;
+    const Adventurer = 4;
+}
+
+namespace ItemDiscoveryType {
+    const Gold = 0;
+    const XP = 1;
+    const Loot = 2;
+    const Health = 3;
 }
 
 // index for items - used in cast function to set values

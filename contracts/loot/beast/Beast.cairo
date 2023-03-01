@@ -9,10 +9,19 @@
 %lang starknet
 from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
-from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_not_equal
+from starkware.cairo.common.math import (
+    unsigned_div_rem,
+    assert_not_zero,
+    assert_not_equal,
+    assert_nn,
+)
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.uint256 import Uint256, uint256_add, uint256_eq
-from starkware.starknet.common.syscalls import get_caller_address, get_block_timestamp
+from starkware.starknet.common.syscalls import (
+    get_caller_address,
+    get_block_number,
+    get_block_timestamp,
+)
 
 from openzeppelin.upgrades.library import Proxy
 from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
@@ -29,7 +38,7 @@ from contracts.loot.constants.adventurer import (
     AdventurerStatus,
     AdventurerSlotIds,
 )
-from contracts.loot.constants.beast import Beast, BeastStatic, BeastDynamic
+from contracts.loot.constants.beast import Beast, BeastStatic, BeastDynamic, BeastIds
 from contracts.loot.interfaces.imodules import IModuleController
 from contracts.loot.loot.ILoot import ILoot
 from contracts.loot.loot.stats.combat import CombatStats
@@ -103,15 +112,58 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 func create{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(adventurer_id: Uint256) -> (beast_token_id: Uint256) {
+    alloc_locals;
     Module.only_approved();
-    let (rnd) = get_random_number();
-    let (beast_static_, beast_dynamic_) = BeastLib.create(rnd, adventurer_id.low);
+
+    let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
+    let (adventurer_state) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_id);
+
+    let (random) = get_random_number();
+    let (_, beast_level_boost) = unsigned_div_rem(random, 6);
+    let (_, beast_health_boost) = unsigned_div_rem(random, 30);
+    let (_, beast_id) = unsigned_div_rem(random, BeastIds.MAX_ID);
+
+    let (beast_static_, beast_dynamic_) = BeastLib.create(
+        beast_id, adventurer_id.low, adventurer_state, beast_level_boost, beast_health_boost
+    );
+
+    return _create(beast_static_, beast_dynamic_);
+}
+
+@external
+func create_starting_beast{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(adventurer_id: Uint256, beast_id: felt) -> (beast_token_id: Uint256) {
+    alloc_locals;
+    Module.only_approved();
+
+    let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
+    let (adventurer_state) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_id);
+
+    let (beast_static_, beast_dynamic_) = BeastLib.create_start_beast(
+        beast_id, adventurer_id.low, adventurer_state
+    );
+
+    return _create(beast_static_, beast_dynamic_);
+}
+
+func _create{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(beast_static_: BeastStatic, beast_dynamic_: BeastDynamic) -> (beast_token_id: Uint256) {
+    alloc_locals;
+
     let (packed_beast) = BeastLib.pack(beast_dynamic_);
+
     let (current_id) = total_supply.read();
+
     let (next_id, _) = uint256_add(current_id, Uint256(1, 0));
+
     beast_static.write(next_id, beast_static_);
+
     beast_dynamic.write(next_id, packed_beast);
+
     total_supply.write(next_id);
+
     return (next_id,);
 }
 
@@ -142,8 +194,13 @@ func attack{
 
     // calculate damage
     let (item_address) = Module.get_module_address(ModuleIds.Loot);
-    let (weapon) = ILoot.getItemByTokenId(item_address, Uint256(unpacked_adventurer.WeaponId, 0));
-    let (damage_dealt) = CombatStats.calculate_damage_to_beast(beast, weapon);
+    let (weapon) = ILoot.get_item_by_token_id(
+        item_address, Uint256(unpacked_adventurer.WeaponId, 0)
+    );
+    let (rnd) = get_random_number();
+    let (damage_dealt) = CombatStats.calculate_damage_to_beast(
+        beast, weapon, unpacked_adventurer, rnd
+    );
     // deduct health from beast
     let (beast_static_, beast_dynamic_) = BeastLib.split_data(beast);
     let (updated_health_beast) = BeastLib.deduct_health(damage_dealt, beast_dynamic_);
@@ -154,11 +211,24 @@ func attack{
     // check if beast is still alive after the attack
     let beast_is_alive = is_not_zero(updated_health_beast.Health);
 
-    // if the beast is alive
+    // if the beast is alive, it automatically counter attacks
     if (beast_is_alive == TRUE) {
-        // having been attacked, it automatically attacks back
-        let (chest) = ILoot.getItemByTokenId(item_address, Uint256(unpacked_adventurer.ChestId, 0));
-        let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, chest);
+        // get the location the beast attacks
+        let (beast_attack_location) = BeastStats.get_attack_location_from_id(beast.Id);
+
+        let (rnd) = get_random_number();
+
+        // get the armor the adventurer is wearing at the location the beast attacks
+        // @distracteddev: Should be get equipped item by slot not get item by Id
+        let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(
+            unpacked_adventurer
+        );
+        let (item_id) = AdventurerLib.get_item_id_at_slot(
+            beast_attack_location, adventurer_dynamic_
+        );
+        let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(item_id, 0));
+        let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, armor, rnd);
+
         IAdventurer.deduct_health(adventurer_address, adventurer_id, damage_taken);
 
         // check if beast counter attack killed adventurer
@@ -168,7 +238,7 @@ func attack{
             // calculate xp earned from killing adventurer (adventurers are rank 1)
             let (xp_gained) = CombatStats.calculate_xp_earned(1, updated_adventurer.Level);
             // increase beast xp and writes
-            increase_xp(beast_token_id, updated_health_beast, xp_gained);
+            _increase_xp(beast_token_id, updated_health_beast, xp_gained);
             tempvar syscall_ptr: felt* = syscall_ptr;
             tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
             tempvar range_check_ptr = range_check_ptr;
@@ -186,12 +256,51 @@ func attack{
         let (current_time) = get_block_timestamp();
         let (slain_updated_beast) = BeastLib.slay(current_time, updated_health_beast);
 
-        // grant adventurer xp
+        // calculate earned XP
         let (beast_level) = BeastLib.calculate_greatness(slain_updated_beast.Level);
         let (beast_rank) = BeastStats.get_rank_from_id(beast.Id);
-        let (xp_gained) = CombatStats.calculate_xp_earned(beast_rank, beast_level);
 
+        // if the adventurer is level 1 we give them 10 XP to get them to level 2 after defeating their first beast
+        if (unpacked_adventurer.Level == 1) {
+            tempvar xp_gained = 10;
+            tempvar syscall_ptr: felt* = syscall_ptr;
+            tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+            tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+            // after level 1 XP earned is based on beast rank and level
+        } else {
+            let (xp_gained) = CombatStats.calculate_xp_earned(beast_rank, beast_level);
+            tempvar xp_gained = xp_gained;
+            tempvar syscall_ptr: felt* = syscall_ptr;
+            tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+            tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+        }
+
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+
+        tempvar xp_gained = xp_gained;
+        // give xp to adventurer
         IAdventurer.increase_xp(adventurer_address, adventurer_id, xp_gained);
+
+        // and to items
+        _allocate_xp_to_items(item_address, unpacked_adventurer, xp_gained);
+
+        // drop gold
+        // @distracteddev: add randomness to reward
+        // formula: (xp_gained  - (xp_gained / 4)) + ((xp_gained / 4) * (rand % 4))
+        let (rnd) = get_random_number();
+        let (gold_reward) = BeastLib.calculate_gold_reward(rnd, xp_gained);
+        _add_to_balance(adventurer_id, gold_reward);
+
+        IAdventurer.update_status(
+            adventurer_address, Uint256(beast.Adventurer, 0), AdventurerStatus.Idle
+        );
+        IAdventurer.assign_beast(adventurer_address, Uint256(beast.Adventurer, 0), 0);
+
         return (damage_dealt, 0);
     }
 }
@@ -220,6 +329,9 @@ func counter_attack{
 
     // get beast from token id
     let (beast) = get_beast_by_id(beast_token_id);
+    // get the location this beast attacks
+    let (beast_attack_location) = BeastStats.get_attack_location_from_id(beast.Id);
+
     // get the adventurer token id associated with the beast
     let adventurer_token_id = Uint256(beast.Adventurer, 0);
 
@@ -231,10 +343,15 @@ func counter_attack{
 
     // retreive unpacked adventurer
     let (unpacked_adventurer) = get_adventurer_from_beast(beast_token_id);
-    let (chest) = ILoot.getItemByTokenId(item_address, Uint256(unpacked_adventurer.ChestId, 0));
-    let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, chest);
 
+    // get the armor the adventurer has at the armor slot the beast is attacking
+    let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(beast_attack_location, 0));
+    let (rnd) = get_random_number();
+    let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, armor, rnd);
+
+    // deduct heatlh from adventurer
     IAdventurer.deduct_health(adventurer_address, adventurer_token_id, damage_taken);
+
     // check if beast counter attack killed adventurer
     let (updated_adventurer) = get_adventurer_from_beast(beast_token_id);
     // if the adventurer is dead
@@ -243,7 +360,7 @@ func counter_attack{
         let (xp_gained) = CombatStats.calculate_xp_earned(1, updated_adventurer.Level);
         // increase beast xp and writes
         let (_, beast_dynamic_) = BeastLib.split_data(beast);
-        increase_xp(beast_token_id, beast_dynamic_, xp_gained);
+        _increase_xp(beast_token_id, beast_dynamic_, xp_gained);
 
         tempvar syscall_ptr: felt* = syscall_ptr;
         tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
@@ -261,11 +378,10 @@ func counter_attack{
 
 // @notice Flee adventurer from beast
 // @param beast_token_id: Id of beast
-// TODO: return boolean to indicate if user was able to flee
 @external
 func flee{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(beast_token_id: Uint256) {
+}(beast_token_id: Uint256) -> (fled: felt) {
     alloc_locals;
 
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
@@ -286,19 +402,20 @@ func flee{
     // TODO: We need a function to calculate the weight of all the adventurer equipment
     let weight_of_equipment = 0;
 
-    // TODO: Wrap this with overflow protection
     let adventurer_speed = unpacked_adventurer.Dexterity - weight_of_equipment;
-
-    // Adventurer ambush resistance is based on wisdom plus luck
-    let ambush_resistance = unpacked_adventurer.Wisdom + unpacked_adventurer.Luck;
+    assert_nn(adventurer_speed);
 
     let (rnd) = get_random_number();
-    let (ambush_chance) = BeastLib.get_random_ambush(rnd);
 
     // TODO Milestone2: Factor in beast health for the ambush chance and for flee chance
     // Short-term (while we are using rng) would be to base rng on beast health. The
     // lower the beast health, the lower the chance it will ambush and the easier
     // it will be to flee.
+    // @distracteddev: simple calculation, random: (0,1) * (health/50): (0, 1, 2)
+    let (ambush_chance) = BeastLib.calculate_ambush_chance(rnd, beast.Health);
+
+    // Adventurer ambush resistance is based on wisdom plus luck
+    let ambush_resistance = unpacked_adventurer.Wisdom + unpacked_adventurer.Luck;
 
     // adventurer is ambushed if their ambush resistance is less than random number
     let is_ambushed = is_le(ambush_chance, ambush_resistance);
@@ -307,19 +424,30 @@ func flee{
 
     // unless ambush occurs
     if (is_ambushed == TRUE) {
-        let (chest) = ILoot.getItemByTokenId(item_address, Uint256(unpacked_adventurer.ChestId, 0));
-        // then calculate damage based on beast
-        let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, chest);
+        // get the location the beast attacks
+        let (beast_attack_location) = BeastStats.get_attack_location_from_id(beast.Id);
+
+        // get the armor the adventurer is wearing at the location the beast attacks
+        let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(beast_attack_location, 0));
+
+        let (damage_rnd) = get_random_number();
+
+        // calculate damage taken from beast
+        let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, armor, damage_rnd);
+
+        // update adventurer health
         IAdventurer.deduct_health(adventurer_address, Uint256(beast.Adventurer, 0), damage_taken);
+
         // check if beast counter attack killed adventurer
         let (updated_adventurer) = get_adventurer_from_beast(beast_token_id);
+
         // if the adventurer is dead
         if (updated_adventurer.Health == 0) {
             // calculate xp earned from killing adventurer (adventurers are rank 1)
             let (xp_gained) = CombatStats.calculate_xp_earned(1, updated_adventurer.Level);
             // increase beast xp and writes
             let (_, beast_dynamic_) = BeastLib.split_data(beast);
-            increase_xp(beast_token_id, beast_dynamic_, xp_gained);
+            _increase_xp(beast_token_id, beast_dynamic_, xp_gained);
 
             tempvar syscall_ptr: felt* = syscall_ptr;
             tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
@@ -342,20 +470,20 @@ func flee{
         tempvar range_check_ptr = range_check_ptr;
         tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
     }
+    tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
 
     // TODO: MILESTONE2 Use Beast Speed Stats
-    let (flee_chance) = BeastLib.get_random_flee(rnd);
+    let (flee_rnd) = get_random_number();
+    let (flee_chance) = BeastLib.get_random_flee(flee_rnd);
     let can_flee = is_le(adventurer_speed + 1, flee_chance);
     if (can_flee == TRUE) {
         IAdventurer.update_status(
             adventurer_address, Uint256(beast.Adventurer, 0), AdventurerStatus.Idle
         );
         IAdventurer.assign_beast(adventurer_address, Uint256(beast.Adventurer, 0), 0);
-        // adventurer was able to flee
-        return ();
+        return (TRUE,);
     } else {
-        // adventurer was not able to flee
-        return ();
+        return (FALSE,);
     }
 }
 
@@ -396,6 +524,16 @@ func increase_xp{
 
     Module.only_approved();
 
+    return _increase_xp(beast_token_id, beast_dynamic_, amount);
+}
+
+func _increase_xp{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(beast_token_id: Uint256, beast_dynamic_: BeastDynamic, amount: felt) -> (
+    returned_beast_dynamic: BeastDynamic
+) {
+    alloc_locals;
+
     // increase beast xp
     let (updated_xp_beast) = BeastLib.increase_xp(amount, beast_dynamic_);
 
@@ -435,10 +573,12 @@ func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBu
 ) {
     alloc_locals;
 
+    let (block) = get_block_number();
+
     let (controller) = Module.controller_address();
     let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
     let (rnd) = IXoroshiro.next(xoroshiro_address_);
-    return (rnd,);
+    return (rnd * block,);
 }
 
 // @notice Revert if caller is not adventurer owner
@@ -449,7 +589,7 @@ func assert_adventurer_owner{
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
 
     let (caller) = get_caller_address();
-    let (owner) = IAdventurer.ownerOf(adventurer_address, adventurer_id);
+    let (owner) = IAdventurer.owner_of(adventurer_address, adventurer_id);
 
     with_attr error_message("Beast: Only adventurer owner can attack") {
         assert caller = owner;
@@ -525,4 +665,224 @@ func get_total_supply{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_chec
 ) {
     let (total_supply: Uint256) = ERC721Enumerable.total_supply();
     return (total_supply,);
+}
+
+// gold functions
+
+@storage_var
+func goldBalance(tokenId: Uint256) -> (balance: felt) {
+}
+
+@storage_var
+func worldSupply() -> (balance: felt) {
+}
+
+@external
+func add_to_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    adventurer_token_id: Uint256, addition: felt
+) {
+    Module.only_approved();
+
+    _add_to_balance(adventurer_token_id, addition);
+    return ();
+}
+
+func _add_to_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    adventurer_token_id: Uint256, addition: felt
+) {
+    let (current_balance) = balance_of(adventurer_token_id);
+
+    goldBalance.write(adventurer_token_id, current_balance + addition);
+
+    let (supply) = worldSupply.read();
+    worldSupply.write(supply + addition);
+
+    return ();
+}
+
+@external
+func subtract_from_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    adventurer_token_id: Uint256, subtraction: felt
+) {
+    Module.only_approved();
+
+    _subtract_from_balance(adventurer_token_id, subtraction);
+
+    return ();
+}
+
+func _subtract_from_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    adventurer_token_id: Uint256, subtraction: felt
+) {
+    let (current_balance) = balance_of(adventurer_token_id);
+
+    let negative = is_le(current_balance - subtraction, 0);
+
+    // add in overflow assert so you can't spend more than what you have.
+    with_attr error_message("Beast: Not enough gold in balance.") {
+        assert negative = FALSE;
+    }
+
+    goldBalance.write(adventurer_token_id, current_balance - subtraction);
+
+    let (supply) = worldSupply.read();
+    let new_supply = supply - subtraction;
+    assert_nn(new_supply);
+    worldSupply.write(supply - subtraction);
+
+    return ();
+}
+
+@view
+func balance_of{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    adventurer_token_id: Uint256
+) -> (balance: felt) {
+    let (gold_balance) = goldBalance.read(adventurer_token_id);
+    return (gold_balance,);
+}
+
+@view
+func get_world_supply{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
+    balance: felt
+) {
+    return worldSupply.read();
+}
+
+// @notice Grants XP to the items equipped by the given adventurer.
+// @dev This function grants XP to the equipped weapon and armor items of the adventurer.
+//     If the adventurer has a weapon, head armor, chest armor, hand armor, foot armor, waist armor, ring, or necklace equipped,
+//     the corresponding equipped item will receive the XP.
+// @param item_address The address of the item contract.
+// @param unpacked_adventurer The AdventurerState struct representing the adventurer.
+// @param xp The amount of XP to be granted to the equipped items.
+func _allocate_xp_to_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    item_address: felt, unpacked_adventurer: AdventurerState, xp: felt
+) {
+    alloc_locals;
+
+    // If adventurer has a weapon
+    let weapon_equipped = is_not_zero(unpacked_adventurer.WeaponId);
+    if (weapon_equipped == TRUE) {
+        let (weapon_result) = ILoot.increase_xp(
+            item_address, Uint256(unpacked_adventurer.WeaponId, 0), xp
+        );
+
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    } else {
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    }
+
+    // if adventurer is wearing head armor
+    let head_armor_equipped = is_not_zero(unpacked_adventurer.HeadId);
+    if (head_armor_equipped == TRUE) {
+        // grant it xp
+
+        let (head_armor_result) = ILoot.increase_xp(
+            item_address, Uint256(unpacked_adventurer.HeadId, 0), xp
+        );
+
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    } else {
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    }
+
+    // if adventurer is wearing chest armor
+    let chest_armor_equipped = is_not_zero(unpacked_adventurer.ChestId);
+    if (chest_armor_equipped == TRUE) {
+        // grant it xp
+        ILoot.increase_xp(item_address, Uint256(unpacked_adventurer.ChestId, 0), xp);
+
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    } else {
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    }
+
+    // if adventurer is wearing hand armor
+    let hand_armor_equipped = is_not_zero(unpacked_adventurer.HandsId);
+    if (hand_armor_equipped == TRUE) {
+        // grant it xp
+        ILoot.increase_xp(item_address, Uint256(unpacked_adventurer.HandsId, 0), xp);
+
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    } else {
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    }
+
+    // if adventurer is wearing foot armor
+    let foot_armor_equipped = is_not_zero(unpacked_adventurer.FeetId);
+    if (foot_armor_equipped == TRUE) {
+        // grant it xp
+        ILoot.increase_xp(item_address, Uint256(unpacked_adventurer.FeetId, 0), xp);
+
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    } else {
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    }
+
+    // if adventurer is wearing waist armor
+    let waist_armor_equipped = is_not_zero(unpacked_adventurer.WaistId);
+    if (waist_armor_equipped == TRUE) {
+        // grant it xp
+        ILoot.increase_xp(item_address, Uint256(unpacked_adventurer.WaistId, 0), xp);
+
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    } else {
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    }
+
+    // if adventurer is wearing a ring
+    let ring_equipped = is_not_zero(unpacked_adventurer.RingId);
+    if (ring_equipped == TRUE) {
+        // grant it xp
+        ILoot.increase_xp(item_address, Uint256(unpacked_adventurer.RingId, 0), xp);
+
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    } else {
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    }
+
+    // if adventurer is wearing a necklace
+    let necklace_equipped = is_not_zero(unpacked_adventurer.NeckId);
+    if (necklace_equipped == TRUE) {
+        // grant it xp
+        ILoot.increase_xp(item_address, Uint256(unpacked_adventurer.NeckId, 0), xp);
+
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    } else {
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    }
+
+    return ();
 }
