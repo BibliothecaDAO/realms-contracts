@@ -21,6 +21,8 @@ if file_does_not_exist "goerli.accounts.json"; then
     echo "$json" > "goerli.accounts.json"
 
     # Write the JSON output to a file
+    echo "export MAX_FEE=8989832783197500" > "realms_cli/.env.nile"
+    echo "export STARKNET_NETWORK=goerli" > "realms_cli/.env.nile"
     echo "export STARKNET_PRIVATE_KEY=${private_key}" > "realms_cli/.env.nile"
 
     echo "${address}:/usr/local/lib/python3.9/site-packages/nile/artifacts/abis/Account.json:STARKNET_PRIVATE_KEY" > goerli.deployments.txt
