@@ -567,8 +567,7 @@ def update_equipped_items(adventurer_data):
     dpg.set_value("hands", all_items[5])
     dpg.set_value("neck", all_items[6])
     dpg.set_value("ring", all_items[7])
-
-
+    
 def update_stats(adventurer_data):
     dpg.set_value("strength", adventurer_data[9])
     dpg.set_value("dexterity", adventurer_data[10])
