@@ -71,7 +71,11 @@ def print_adventurer(out_list):
     for out in out_list:
         out = out.split(" ")
         item = out[:27]
-        item = format_array(3, item, felt_to_str(int(out[3])))
+        if out[3].startswith("0x"):
+            out = felt_to_str(int(out[3], 16))
+        else:
+            out = felt_to_str(int(out[3]))
+        item = format_array(3, item, out)
         table.add_row(*item)
 
     console.print(table)

@@ -36,7 +36,13 @@ if file_does_not_exist "goerli.accounts.json"; then
     # Print success message to console
     echo "File 'goerli.deployments.txt' created successfully."
 
-    nile compile contracts/loot
+    curl -L https://raw.githubusercontent.com/software-mansion/protostar/master/install.sh | bash
+
+    current_dir=$(pwd)
+
+    export CAIRO_PATH="$CAIRO_PATH:$current_dir/lib/cairo_graphs/src:$current_dir/lib/cairo_contracts/src:$current_dir/lib/cairo_math_64x61/contracts:$current_dir/lib/guild_contracts"
+
+    nile compile --directory contracts/loot
     nile compile contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo
 
     source realms_cli/.env.nile

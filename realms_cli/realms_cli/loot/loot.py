@@ -769,7 +769,7 @@ async def balance(network, adventurer_token_id):
 )
 async def new(network, item, race, home_realm, name, order, image_hash_1, image_hash_2):
     """
-    Mint a Random Loot Item
+    Mint a new adventurer
     """
     config = Config(nile_network=network)
 

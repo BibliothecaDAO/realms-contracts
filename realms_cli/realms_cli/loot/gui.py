@@ -59,25 +59,19 @@ async def get_adventurers():
     return all_adventurers
 
 
-async def update_adventurer_list(id):
-    config = Config(nile_network="goerli")
+def get_items():
+    asyncio.run(get_market_items())
 
+
+async def update_adventurer_list():
     adventurers = await get_adventurers()
-
-    out = await wrapped_proxy_call(
-        network=config.nile_network,
-        contract_alias="proxy_Adventurer",
-        abi="artifacts/abis/Adventurer.json",
-        function="get_adventurer_by_id",
-        arguments=[*uint(id)],
-    )
-    out = out.split(" ")
-    # needing to add to get rid of weird bytecode
-    adventurers.append(
-        "".join(felt_to_str(int(out[3]))).replace("\x00", "") + " - " + id[0]
-    )
-    print(adventurers)
     dpg.configure_item("adventurer_id", items=adventurers)
+    dpg.configure_item("bid_adventurer_id", items=adventurers)
+    dpg.configure_item("equip_adventurer_id", items=adventurers)
+    dpg.configure_item("unequip_adventurer_id", items=adventurers)
+    dpg.configure_item("upgrade_adventurer_id", items=adventurers)
+    dpg.configure_item("potions_adventurer_id", items=adventurers)
+    dpg.configure_item("king_adventurer_id", items=adventurers)
 
 
 def get_adventurer(sender, app_data, user_dat):
@@ -164,9 +158,9 @@ def new_adventurer(sender, app_data, user_data):
     )
 
     id = item.split(" ")
-    # asyncio.run(update_adventurer_list(id[-1]))
-    # update_gold(id[-1])
-    # update_health(id[-1])
+    asyncio.run(update_adventurer_list())
+    update_gold(id[-1])
+    update_health(id[-1])
     dpg.delete_item("mint_adventurer_load")
     dpg.delete_item("loader")
 
@@ -325,6 +319,7 @@ def mint_daily_items(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
+    update_items()
     dpg.delete_item("mint_items_load")
     dpg.delete_item("loader")
 
@@ -372,8 +367,9 @@ async def get_market_items():
     return items
 
 
-def get_items():
-    asyncio.run(get_market_items())
+def update_items():
+    items = asyncio.run(get_market_items())
+    dpg.configure_item("loot_token_id", items=items)
 
 
 def get_item_market():
@@ -828,8 +824,6 @@ if __name__ == "__main__":
                         "Vitality",
                         "Intelligence",
                         "Wisdom",
-                        "Charisma",
-                        "Luck",
                     ],
                     width=100,
                 )
