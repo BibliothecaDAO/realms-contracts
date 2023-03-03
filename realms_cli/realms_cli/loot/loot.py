@@ -307,7 +307,8 @@ async def health(network, adventurer_token_id, number):
 
     adventurer_out = await _get_adventurer(network, adventurer_token_id)
 
-    print(f"🧪 You bought {number} potions. Your health is now {adventurer_out[7]}")
+    print(
+        f"🧪 You bought {number} potions. Your health is now {adventurer_out[7]}")
 
 
 @loot.command()
@@ -672,14 +673,16 @@ async def flee(adventurer_token_id, network):
     adventurer_out = await _get_adventurer(network, adventurer_token_id)
 
     if int(result[0], 16) == 1:
-        print(f"🏃‍♂️ You successfully fled from the {BEASTS[str(int(beast_out[0]))]} ✅")
+        print(
+            f"🏃‍♂️ You successfully fled from the {BEASTS[str(int(beast_out[0]))]} ✅")
     else:
         if int(pre_adventurer[7]) > int(adventurer_out[7]):
             print(
                 f"😫 You have been ambushed by the {BEASTS[str(int(beast_out[0]))]} and took {str(int(pre_adventurer[7]) - int(adventurer_out[7]))} damage!"
             )
         else:
-            print(f"😮 You did not flee from the {BEASTS[str(int(beast_out[0]))]}!")
+            print(
+                f"😮 You did not flee from the {BEASTS[str(int(beast_out[0]))]}!")
 
 
 @loot.command()
@@ -868,19 +871,19 @@ async def new(network, item, race, home_realm, name, order, image_hash_1, image_
 
 @loot.command()
 @click.option("--network", default="goerli")
-async def get_king(network):
+async def get_theif(network):
     """
-    Get information on the king.
+    Get information about the theif
     """
     config = Config(nile_network=network)
 
-    print("♔ Getting king info ...")
+    print("♔ Getting theif info ...")
 
     out = await wrapped_proxy_call(
         network=config.nile_network,
         contract_alias="proxy_Adventurer",
         abi="artifacts/abis/Adventurer.json",
-        function="get_king",
+        function="get_theif",
         arguments=[],
     )
     print(out)
@@ -896,41 +899,70 @@ async def get_king(network):
     prompt=True,
 )
 @click.option("--network", default="goerli")
-async def become_king(network, adventurer_token_id):
+async def rob_king(network, adventurer_token_id):
     """
-    Become adventurer king.
+    Attempt to rob the king
     """
     config = Config(nile_network=network)
 
-    print("👑 Applying for king ...")
+    print("👑 Attempting to rob the king ...")
 
     await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Adventurer",
-        function="become_king",
+        function="rob_king",
         arguments=[*uint(adventurer_token_id)],
     )
 
-    print("👑 Became King ✅")
+    print("👑 heist in progress ✅")
+
+
+@loot.command()
+@click.option(
+    "--adventurer_token_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="Adventuer Id",
+    prompt=True,
+)
+@click.option("--network", default="goerli")
+async def kill_theif(network, adventurer_token_id):
+    """
+    Kill the theif
+    """
+    config = Config(nile_network=network)
+
+    print("👑 Kill the theif ...")
+
+    await wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.USER_ALIAS,
+        contract_alias="proxy_Adventurer",
+        function="kill_theif",
+        arguments=[*uint(adventurer_token_id)],
+    )
+
+    print("👑 successfully killed the theif ✅")
 
 
 @loot.command()
 @click.option("--network", default="goerli")
-async def pay_king_tribute(network, adventurer_token_id):
+async def claim_king_loot(network, adventurer_token_id):
     """
-    Pay the king his tribute.
+    Claim loot from robbing the king
     """
     config = Config(nile_network=network)
 
-    print("🪙 Paying king their tribute ...")
+    print("🪙 Claiming loot from king ...")
 
     await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Adventurer",
-        function="pay_king_tribute",
+        function="claim_king_loot",
         arguments=[],
     )
 
-    print("🪙 King tribute paid ✅")
+    print("🪙 Loot claimed ✅")

@@ -123,7 +123,10 @@ namespace CombatStats {
         // TODO: add item weight into strength calculation
         let armor_strength = (rank_ceiling - armor_rank) * armor_greatness;
 
-        let weapon_damage = base_weapon_damage - armor_strength;
+        // @distracteddev
+        // even if the weapon damage is the same as the best armour it needs to do some damage at least
+        // here I will just add plus 1 for now, not in favour of beast or adventurer
+        let weapon_damage = (base_weapon_damage - armor_strength) + 1;
 
         let (total_weapon_damage) = get_attack_effectiveness(
             attack_effectiveness, weapon_damage
