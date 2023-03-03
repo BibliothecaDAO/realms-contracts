@@ -659,7 +659,7 @@ func test_king_tribute{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 
     assert total_lords = Uint256(50000000000000000000, 0);
 
-    IAdventurer.become_king(adventurer_address, Uint256(1, 0));
+    IAdventurer.rob_king(adventurer_address, Uint256(1, 0));
 
     // should fail as not enough time passed
     %{
@@ -667,7 +667,7 @@ func test_king_tribute{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
         expect_revert(error_message="Adventurer: King not active for 12 hours.")
     %}
 
-    IAdventurer.pay_king_tribute(adventurer_address);
+    IAdventurer.claim_king_loot(adventurer_address);
 
     %{
         stop_warp()
@@ -675,7 +675,7 @@ func test_king_tribute{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
         warp(43201, ids.adventurer_address)
     %}
 
-    IAdventurer.pay_king_tribute(adventurer_address);
+    IAdventurer.claim_king_loot(adventurer_address);
 
     let (lords_balance) = ILords.balanceOf(lords_address, account_1_address);
     let (new_total_lords) = ILords.balanceOf(lords_address, adventurer_address);
@@ -689,13 +689,13 @@ func test_king_tribute{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     // should fail as timer reset
     %{ expect_revert(error_message="Adventurer: King not active for 12 hours.") %}
 
-    IAdventurer.pay_king_tribute(adventurer_address);
+    IAdventurer.claim_king_loot(adventurer_address);
 
     return ();
 }
 
 @external
-func test_kill_king{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+func test_kill_theif{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
     local account_1_address;
     local xoroshiro_address;
@@ -728,14 +728,14 @@ func test_kill_king{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_
     );
 
     // The usurper immediately makes a claim for the crown with their starting 20 gold
-    IAdventurer.become_king(adventurer_address, usurper_tokenid);
+    IAdventurer.rob_king(adventurer_address, usurper_tokenid);
 
     // Meanwhile the king slayer goes exploring and stumbles upon 100 gold!
     IBeast.add_to_balance(beast_address, kingslayer_tokenid, 100);
 
     // At this point the fate of usurper is in the hands of the king slayer
     // who hesistates no longer than a single cpu cycle to kill the usurper
-    IAdventurer.kill_king(adventurer_address, kingslayer_tokenid);
+    IAdventurer.kill_theif(adventurer_address, kingslayer_tokenid);
 
     // verify usurper has paid the iron price for their failed grab for the crown
     let (dead_usurper) = IAdventurer.get_adventurer_by_id(adventurer_address, usurper_tokenid);

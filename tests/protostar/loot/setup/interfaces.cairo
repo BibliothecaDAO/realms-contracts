@@ -104,11 +104,11 @@ namespace IAdventurer {
     }
     func upgrade_stat(adventurer_token_id: Uint256, stat: felt) -> (success: felt) {
     }
-    func become_king(adventurer_token_id: Uint256) -> (success: felt) {
+    func rob_king(adventurer_token_id: Uint256) -> (success: felt) {
     }
-    func kill_king(adventurer_token_id: Uint256) -> (success: felt) {
+    func kill_theif(adventurer_token_id: Uint256) -> (success: felt) {
     }
-    func pay_king_tribute() -> (success: felt) {
+    func claim_king_loot() -> (success: felt) {
     }
 }
 

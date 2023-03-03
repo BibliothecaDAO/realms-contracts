@@ -56,7 +56,7 @@ from contracts.loot.constants.adventurer import (
     AdventurerStatus,
     DiscoveryType,
     ItemDiscoveryType,
-    KingState,
+    TheifState,
 )
 from contracts.loot.constants.beast import Beast
 from contracts.loot.constants.obstacle import ObstacleUtils, ObstacleConstants
@@ -70,8 +70,8 @@ from contracts.loot.utils.constants import (
     ExternalContractIds,
     MINT_COST,
     STARTING_GOLD,
-    KING_TRIBUTE_PERCENT,
-    KING_HOLD_PERIOD,
+    KING_HIEST_REWARD_PERCENT,
+    KING_HIEST_DELAY,
 )
 
 // -----------------------------------
@@ -84,6 +84,22 @@ func NewAdventurerState(adventurer_id: Uint256, adveturer_state: AdventurerState
 
 @event
 func AdventurerLeveledUp(adventurer_id: Uint256, adveturer_state: AdventurerState) {
+}
+
+@event
+func AdventurerInitiatedKingHiest(adventurer_id: Uint256, adveturer_state: AdventurerState) {
+}
+
+@event
+func AdventurerRobbedKing(adventurer_id: Uint256, adveturer_state: AdventurerState) {
+}
+
+@event
+func AdventurerDiedRobbingKing(adventurer_id: Uint256, adveturer_state: AdventurerState) {
+}
+
+@event
+func AdventurerKilledTheif(adventurer_id: Uint256, adveturer_state: AdventurerState) {
 }
 
 // -----------------------------------
@@ -112,7 +128,7 @@ func adventurer_image(tokenId: Uint256) -> (image: felt) {
 }
 
 @storage_var
-func king() -> (king: KingState) {
+func theif() -> (theif: TheifState) {
 }
 
 // -----------------------------------
@@ -690,11 +706,11 @@ func explore{
     return (FALSE, 0);
 }
 
-// @notice Become the king
+// @notice Attempt to rob the king
 // @param adventurer_token_id: Id of adventurer
 // @return success: Value indicating success
 @external
-func become_king{
+func rob_king{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(adventurer_token_id: Uint256) -> (success: felt) {
     alloc_locals;
@@ -709,9 +725,9 @@ func become_king{
 
     let (gold_balance) = IBeast.balance_of(beast_address, adventurer_token_id);
 
-    let (king_state) = king.read();
+    let (theif_state) = theif.read();
 
-    let (king_balance) = IBeast.balance_of(beast_address, king_state.AdventurerId);
+    let (king_balance) = IBeast.balance_of(beast_address, theif_state.AdventurerId);
 
     // same as less than
     let over_king_check = is_le(king_balance + 1, gold_balance);
@@ -722,9 +738,11 @@ func become_king{
 
     let (current_time) = get_block_timestamp();
 
-    let new_king = KingState(adventurer_token_id, current_time);
+    let new_theif = TheifState(adventurer_token_id, current_time);
 
-    king.write(new_king);
+    emit_initiated_king_hiest(adventurer_token_id);
+
+    theif.write(new_theif);
 
     return (TRUE,);
 }
@@ -733,7 +751,7 @@ func become_king{
 // @param adventurer_token_id: Id of adventurer
 // @return success: Value indicating success
 @external
-func kill_king{
+func kill_theif{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(adventurer_token_id: Uint256) -> (success: felt) {
     alloc_locals;
@@ -748,9 +766,9 @@ func kill_king{
 
     let (gold_balance) = IBeast.balance_of(beast_address, adventurer_token_id);
 
-    let (king_state) = king.read();
+    let (theif_state) = theif.read();
 
-    let (king_balance) = IBeast.balance_of(beast_address, king_state.AdventurerId);
+    let (king_balance) = IBeast.balance_of(beast_address, theif_state.AdventurerId);
 
     with_attr error_message("Adventurer: There is no king to kill.") {
         assert_not_zero(king_balance);
@@ -763,8 +781,20 @@ func kill_king{
         assert over_king_check = TRUE;
     }
 
-    // kill the fool who tried to take the crown
-    let (result) = _deduct_health(king_state.AdventurerId, 1000);
+    // kill the theif
+    let (result) = _deduct_health(theif_state.AdventurerId, 1000);
+
+    // emit event to capture adventurer dieing while trying to rob the king
+    emit_died_robbing_king(theif_state.AdventurerId);
+
+    // emit event capturing the adventurer who caught the robber
+    emit_killed_theif(adventurer_token_id);
+
+    // clear theif state
+    let clear_theif_state = TheifState(Uint256(0, 0), 0);
+
+    // update blockchain
+    theif.write(clear_theif_state);
 
     return (result,);
 }
@@ -772,20 +802,20 @@ func kill_king{
 // @notice Pay tribute to the king
 // @return success: Value indicating success
 @external
-func pay_king_tribute{
+func claim_king_loot{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }() -> (success: felt) {
     alloc_locals;
-    // Anyone can call this function to check king payout (potential for keepers)
-    let (king_state) = king.read();
+    // Anyone can call this function to check payout for robbing king (potential for keepers)
+    let (theif_state) = theif.read();
 
     let (current_time) = get_block_timestamp();
 
-    let time_duration = current_time - king_state.StartTime;
+    let time_duration = current_time - theif_state.StartTime;
 
-    let check_over_duration = is_le(KING_HOLD_PERIOD, time_duration);
+    let check_over_duration = is_le(KING_HIEST_DELAY, time_duration);
 
-    with_attr error_message("Adventurer: King not active for 48 hours.") {
+    with_attr error_message("Adventurer: King hiest still in progress") {
         assert check_over_duration = TRUE;
     }
 
@@ -793,19 +823,23 @@ func pay_king_tribute{
     let (lords_address) = Module.get_external_contract_address(ExternalContractIds.Lords);
     let (this) = get_contract_address();
 
-    // calculate tribute
+    // calculate bounty from hiest
     let (total_lords) = IERC20.balanceOf(lords_address, this);
-    let (pre_tribute, _) = uint256_mul(Uint256(KING_TRIBUTE_PERCENT, 0), total_lords);
+    let (pre_tribute, _) = uint256_mul(Uint256(KING_HIEST_REWARD_PERCENT, 0), total_lords);
     let (king_tribute, _) = uint256_unsigned_div_rem(pre_tribute, Uint256(100, 0));
 
-    // send to king adventurer owner
-    let (owner: felt) = ERC721.owner_of(king_state.AdventurerId);
+    // send to the theif
+    let (owner: felt) = ERC721.owner_of(theif_state.AdventurerId);
     IERC20.transfer(lords_address, owner, king_tribute);
 
-    // Reset king timer
-    let new_king_state = KingState(king_state.AdventurerId, current_time);
+    // emit event capturing an adventuring successfully robbing the king
+    emit_robbed_king(theif_state.AdventurerId);
 
-    king.write(new_king_state);
+    // clear theif state so theif is no longer able to be assissnated
+    let clear_theif_state = TheifState(Uint256(0, 0), 0);
+
+    // update blockchain
+    theif.write(clear_theif_state);
 
     return (TRUE,);
 }
@@ -883,6 +917,54 @@ func emit_adventurer_leveled_up{
     return ();
 }
 
+// @notice Emits an initiated king hiest event for the adventurer
+// @param adventurer_token_id: the token id of the adventurer
+func emit_initiated_king_hiest{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(adventurer_token_id: Uint256) {
+    // Get adventurer from token id
+    let (new_adventurer) = get_adventurer_by_id(adventurer_token_id);
+    // emit event
+    AdventurerInitiatedKingHiest.emit(adventurer_token_id, new_adventurer);
+    return ();
+}
+
+// @notice Emits a king robbery event for the adventurer
+// @param adventurer_token_id: the token id of the adventurer
+func emit_robbed_king{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(adventurer_token_id: Uint256) {
+    // Get adventurer from token id
+    let (new_adventurer) = get_adventurer_by_id(adventurer_token_id);
+    // emit event
+    AdventurerRobbedKing.emit(adventurer_token_id, new_adventurer);
+    return ();
+}
+
+// @notice Emits a died robbing king event for the adventurer
+// @param adventurer_token_id: the token id of the adventurer
+func emit_died_robbing_king{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(adventurer_token_id: Uint256) {
+    // Get adventurer from token id
+    let (new_adventurer) = get_adventurer_by_id(adventurer_token_id);
+    // emit event
+    AdventurerDiedRobbingKing.emit(adventurer_token_id, new_adventurer);
+    return ();
+}
+
+// @notice Emits an initiated king hiest event for the adventurer
+// @param adventurer_token_id: the token id of the adventurer
+func emit_killed_theif{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(adventurer_token_id: Uint256) {
+    // Get adventurer from token id
+    let (new_adventurer) = get_adventurer_by_id(adventurer_token_id);
+    // emit event
+    AdventurerKilledTheif.emit(adventurer_token_id, new_adventurer);
+    return ();
+}
+
 // --------------------
 // Getters
 // --------------------
@@ -906,14 +988,14 @@ func get_adventurer_by_id{
     return (adventurer,);
 }
 
-// @notice Get king state
-// @return king: State of the king
+// @notice Get theif state
+// @return theif: State of the theif
 @view
-func get_king{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}() -> (
-    king_state: KingState
+func get_theif{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}() -> (
+    theif_state: TheifState
 ) {
-    let (king_state) = king.read();
-    return (king_state,);
+    let (theif_state) = theif.read();
+    return (theif_state,);
 }
 
 // --------------------
