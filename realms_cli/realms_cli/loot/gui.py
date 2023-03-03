@@ -370,6 +370,9 @@ async def get_market_items():
 def update_items():
     items = asyncio.run(get_market_items())
     dpg.configure_item("loot_token_id", items=items)
+    dpg.configure_item("bid_loot_id", items=items)
+    dpg.configure_item("equip_loot_id", items=items)
+    dpg.configure_item("unequip_loot_id", items=items)
 
 
 def get_item_market():
@@ -441,7 +444,7 @@ def become_king(sender, app_data, user_data):
     dpg.add_text(
         "Becoming king",
         tag="become_king_load",
-        pos=[300, 50],
+        pos=[700, 50],
         parent="adventurers",
     )
     dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
@@ -455,7 +458,7 @@ def become_king(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    update_king(adventurer)
+    update_king()
     dpg.delete_item("become_king_load")
     dpg.delete_item("loader")
 
@@ -464,7 +467,7 @@ def pay_king_tribute(sender, app_data, user_data):
     dpg.add_text(
         "Paying the king",
         tag="paying_king_load",
-        pos=[300, 50],
+        pos=[700, 50],
         parent="adventurers",
     )
     dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
@@ -514,7 +517,12 @@ def update_king():
     gold_out = gold_out.split(" ")
     gold_out = gold_out[-1].split("\n")
     reign_time = datetime.datetime.fromtimestamp(int(out[-1]))
-    print(f"👑 King is {king_out[-1]}")
+    adventurer_out = asyncio.run(_get_adventurer("goerli", king_out[-1]))
+    if adventurer_out[3].startswith("0x"):
+        adventurer_out = felt_to_str(int(adventurer_out[3], 16))
+    else:
+        adventurer_out = felt_to_str(int(adventurer_out[3]))
+    print(f"👑 King is {adventurer_out} - {king_out[-1]}")
     print(f"⛳️ Reign started at {reign_time}")
     print(f"💰 King's gold balance is now {gold_out[-1]}")
     dpg.set_value("king_adventurer", king_out[-1])
@@ -567,7 +575,8 @@ def update_equipped_items(adventurer_data):
     dpg.set_value("hands", all_items[5])
     dpg.set_value("neck", all_items[6])
     dpg.set_value("ring", all_items[7])
-    
+
+
 def update_stats(adventurer_data):
     dpg.set_value("strength", adventurer_data[9])
     dpg.set_value("dexterity", adventurer_data[10])
