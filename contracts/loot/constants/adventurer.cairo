@@ -164,7 +164,7 @@ struct AdventurerDynamic {
     Upgrading: felt,
 }
 
-struct KingState {
+struct TheifState {
     AdventurerId: Uint256,
     StartTime: felt,
 }
