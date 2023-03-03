@@ -290,6 +290,8 @@ async def wrapped_declare(account, contract_name, network, alias):
         cairo_path=[path + "/lib/cairo_contracts/src"],
     )
 
+    compile(contract_name)
+
     tx_wrapper = await account.declare(contract_name, max_fee=4226601250467000)
     tx_status, declared_hash = await tx_wrapper.execute(watch_mode="track")
 
