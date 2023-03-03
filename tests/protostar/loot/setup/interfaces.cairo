@@ -106,6 +106,8 @@ namespace IAdventurer {
     }
     func become_king(adventurer_token_id: Uint256) -> (success: felt) {
     }
+    func kill_king(adventurer_token_id: Uint256) -> (success: felt) {
+    }
     func pay_king_tribute() -> (success: felt) {
     }
 }

@@ -17,7 +17,7 @@ from contracts.loot.constants.adventurer import (
     PackedAdventurerState,
     AdventurerStatus,
     DiscoveryType,
-    ItemDiscoveryType
+    ItemDiscoveryType,
 )
 from contracts.loot.adventurer.library import AdventurerLib
 
@@ -49,7 +49,7 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         stop_prank_lords = start_prank(ids.addresses.account_1, ids.addresses.lords)
     %}
 
-    ILords.approve(addresses.lords, addresses.adventurer, Uint256(100000000000000000000, 0));
+    ILords.approve(addresses.lords, addresses.adventurer, Uint256(1000000000000000000000, 0));
 
     %{ stop_prank_lords() %}
 
@@ -453,12 +453,12 @@ func test_upgrade_stat{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 // func test_discover_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
 //     alloc_locals;
 
-//     local account_1_address;
+// local account_1_address;
 //     local xoroshiro_address;
 //     local adventurer_address;
 //     local beast_address;
 
-//     %{
+// %{
 //         ids.account_1_address = context.account_1
 //         ids.xoroshiro_address = context.xoroshiro
 //         ids.adventurer_address = context.adventurer
@@ -471,33 +471,33 @@ func test_upgrade_stat{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 //         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
 //     %}
 
-//     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
+// IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
 
-//     %{
+// %{
 //         from tests.protostar.loot.utils import utils
 //         # need to store adventurer level to greater than 1 to avoid starter beast
 //         p1, p2, p3, p4 = utils.pack_adventurer(utils.build_adventurer_level(2))
 //         store(ids.adventurer_address, "adventurer_dynamic", [p1, p2, p3, p4], key=[1,0])
 //     %}
 
-//     let (discovery_type, r) = IAdventurer.explore(adventurer_address, Uint256(1,0));
+// let (discovery_type, r) = IAdventurer.explore(adventurer_address, Uint256(1,0));
 
-//     assert discovery_type = DiscoveryType.Item;
+// assert discovery_type = DiscoveryType.Item;
 //     assert r = ItemDiscoveryType.XP;
 
-//     return ();
+// return ();
 // }
 
 // @external
 // func test_discover_loot{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
 //     alloc_locals;
 
-//     local account_1_address;
+// local account_1_address;
 //     local xoroshiro_address;
 //     local adventurer_address;
 //     local beast_address;
 
-//     %{
+// %{
 //         ids.account_1_address = context.account_1
 //         ids.xoroshiro_address = context.xoroshiro
 //         ids.adventurer_address = context.adventurer
@@ -510,21 +510,21 @@ func test_upgrade_stat{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 //         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
 //     %}
 
-//     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
+// IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
 
-//     %{
+// %{
 //         from tests.protostar.loot.utils import utils
 //         # need to store adventurer level to greater than 1 to avoid starter beast
 //         p1, p2, p3, p4 = utils.pack_adventurer(utils.build_adventurer_level(2))
 //         store(ids.adventurer_address, "adventurer_dynamic", [p1, p2, p3, p4], key=[1,0])
 //     %}
 
-//     let (discovery_type, r) = IAdventurer.explore(adventurer_address, Uint256(1,0));
+// let (discovery_type, r) = IAdventurer.explore(adventurer_address, Uint256(1,0));
 
-//     assert discovery_type = DiscoveryType.Item;
+// assert discovery_type = DiscoveryType.Item;
 //     assert r = ItemDiscoveryType.Loot;
 
-//     return ();
+// return ();
 // }
 
 @external
@@ -651,13 +651,15 @@ func test_king_tribute{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
     %}
-    IAdventurer.mint_with_starting_weapon(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, 12);
+    IAdventurer.mint_with_starting_weapon(
+        adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, 12
+    );
 
     let (total_lords) = ILords.balanceOf(lords_address, adventurer_address);
 
-    assert total_lords = Uint256(50000000000000000000,0);
+    assert total_lords = Uint256(50000000000000000000, 0);
 
-    IAdventurer.become_king(adventurer_address, Uint256(1,0));
+    IAdventurer.become_king(adventurer_address, Uint256(1, 0));
 
     // should fail as not enough time passed
     %{
@@ -681,15 +683,63 @@ func test_king_tribute{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     // check lords balance has increased by 10% of the pool (account 1 still already has 10)
     // pool should also have 10% less
 
-    assert new_total_lords = Uint256(45000000000000000000,0);
-    assert lords_balance = Uint256(105000000000000000000,0);
+    assert new_total_lords = Uint256(45000000000000000000, 0);
+    assert lords_balance = Uint256(105000000000000000000, 0);
 
     // should fail as timer reset
-    %{
-        expect_revert(error_message="Adventurer: King not active for 12 hours.")
-    %}
+    %{ expect_revert(error_message="Adventurer: King not active for 12 hours.") %}
 
     IAdventurer.pay_king_tribute(adventurer_address);
+
+    return ();
+}
+
+@external
+func test_kill_king{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+    local account_1_address;
+    local xoroshiro_address;
+    local adventurer_address;
+    local beast_address;
+    local lords_address;
+
+    %{
+        ids.account_1_address = context.account_1
+        ids.xoroshiro_address = context.xoroshiro
+        ids.adventurer_address = context.adventurer
+        ids.beast_address = context.beast
+        ids.lords_address = context.lords
+        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+        stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
+    %}
+
+    // Start the game with two adventurers
+
+    // Adventurer One (aka the usurper)
+    let usurper_tokenid = Uint256(1, 0);
+    IAdventurer.mint_with_starting_weapon(
+        adventurer_address, account_1_address, 4, 10, 'usurper', 8, 1, 1, 12
+    );
+
+    // Adventurer Two (aka the king slayer)
+    let kingslayer_tokenid = Uint256(2, 0);
+    IAdventurer.mint_with_starting_weapon(
+        adventurer_address, account_1_address, 4, 10, 'kingslayer', 8, 1, 1, 12
+    );
+
+    // The usurper immediately makes a claim for the crown with their starting 20 gold
+    IAdventurer.become_king(adventurer_address, usurper_tokenid);
+
+    // Meanwhile the king slayer goes exploring and stumbles upon 100 gold!
+    IBeast.add_to_balance(beast_address, kingslayer_tokenid, 100);
+
+    // At this point the fate of usurper is in the hands of the king slayer
+    // who hesistates no longer than a single cpu cycle to kill the usurper
+    IAdventurer.kill_king(adventurer_address, kingslayer_tokenid);
+
+    // verify usurper has paid the iron price for their failed grab for the crown
+    let (dead_usurper) = IAdventurer.get_adventurer_by_id(adventurer_address, usurper_tokenid);
+    assert dead_usurper.Health = 0;
 
     return ();
 }
@@ -703,7 +753,7 @@ func test_king_tribute{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 //     local beast_address;
 //     local lords_address;
 
-//     %{
+// %{
 //         ids.account_1_address = context.account_1
 //         ids.xoroshiro_address = context.xoroshiro
 //         ids.adventurer_address = context.adventurer
@@ -716,7 +766,7 @@ func test_king_tribute{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 //     %}
 //     IAdventurer.mint_with_starting_weapon(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, 12);
 
-//     let (adventurer) = 
+// let (adventurer) =
 
-//     return ()
+// return ()
 // }
