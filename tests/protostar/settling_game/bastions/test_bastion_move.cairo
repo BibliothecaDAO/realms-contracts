@@ -403,17 +403,9 @@ func test_bastion_move_verify_moving_times{
     const ARRIVAL_BLOCK = 10;
     %{ stop_roll = roll(10) %}
 
-    // change location of the army to be on bastion location
-    %{
-        store(context.self_address, "coordinates", [ids.X, ids.Y], 
-                   [ids.ExternalContractIds.S_Realms, ids.REALM_ID_1, 0, ids.ARMY_ID_1])
-    %}
-
-    // make army currently moving
-    %{
-        store(context.self_address, "bastion_army_location", 
-                   [ids.ARRIVAL_BLOCK, ids.STAGING_AREA_ID], [ids.REALM_ID_1, 0, ids.ARMY_ID_1])
-    %}
+    //
+    // STAGING TO CENTRAL SQUARE
+    //
 
     // conquer all 4 towers
     %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
@@ -421,37 +413,119 @@ func test_bastion_move_verify_moving_times{
     %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_3_ID]) %}
     %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_4_ID]) %}
 
-    let (time_staging_area_tower) = get_move_block_time(
-        Point(X, Y), STAGING_AREA_ID, TOWER_1_ID, ORDER_OF_GIANTS
-    );
-    %{ assert ids.time_staging_area_tower == 25 %}
-
-    let (time_staging_area_central_square) = get_move_block_time(
+    // attacking central square
+    let (time) = get_move_block_time(
         Point(X, Y), STAGING_AREA_ID, CENTRAL_SQUARE_ID, ORDER_OF_GIANTS
     );
-    %{ assert ids.time_staging_area_central_square == 35 %}
+    %{ assert ids.time == 35 %}
 
-    let (time_central_square_staging_area) = get_move_block_time(
+    let (time) = get_move_block_time(
         Point(X, Y), CENTRAL_SQUARE_ID, STAGING_AREA_ID, ORDER_OF_GIANTS
     );
-    %{ assert ids.time_central_square_staging_area == 35 %}
+    %{ assert ids.time == 35 %}
 
-    let (time_tower_staging_area) = get_move_block_time(
-        Point(X, Y), TOWER_1_ID, STAGING_AREA_ID, ORDER_OF_GIANTS
-    );
-    %{ assert ids.time_tower_staging_area == 25 %}
+    // defending cetnral square
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.CENTRAL_SQUARE_ID]) %}
 
-    // going from same order tower to same order tower
-    let (time_tower_tower_same_order) = get_move_block_time(
-        Point(X, Y), TOWER_1_ID, TOWER_2_ID, ORDER_OF_GIANTS
+    let (time) = get_move_block_time(
+        Point(X, Y), STAGING_AREA_ID, CENTRAL_SQUARE_ID, ORDER_OF_GIANTS
     );
-    %{ assert ids.time_tower_tower_same_order == 10 %}
+    %{ assert ids.time == 35 %}
 
-    // going from tower to different order tower
-    let (time_tower_tower_different_order) = get_move_block_time(
-        Point(X, Y), TOWER_1_ID, TOWER_2_ID, ORDER_OF_FURY
+    let (time) = get_move_block_time(
+        Point(X, Y), CENTRAL_SQUARE_ID, STAGING_AREA_ID, ORDER_OF_GIANTS
     );
-    %{ assert ids.time_tower_tower_different_order == 25 %}
+    %{ assert ids.time == 35 %}
+
+    //
+    // STAGING TO TOWER
+    //
+    // same order
+    let (time) = get_move_block_time(Point(X, Y), STAGING_AREA_ID, TOWER_1_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 %}
+
+    let (time) = get_move_block_time(Point(X, Y), TOWER_1_ID, STAGING_AREA_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 %}
+
+    // different order
+    let (time) = get_move_block_time(Point(X, Y), STAGING_AREA_ID, TOWER_1_ID, ORDER_OF_FURY);
+    %{ assert ids.time == 25 %}
+
+    let (time) = get_move_block_time(Point(X, Y), TOWER_1_ID, STAGING_AREA_ID, ORDER_OF_FURY);
+    %{ assert ids.time == 25 %}
+
+    //
+    // TOWER TO CENTRAL SQUARE
+    //
+
+    // same order for tower and central square
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.CENTRAL_SQUARE_ID]) %}
+
+    let (time) = get_move_block_time(Point(X, Y), CENTRAL_SQUARE_ID, TOWER_1_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 %}
+
+    let (time) = get_move_block_time(Point(X, Y), CENTRAL_SQUARE_ID, TOWER_1_ID, ORDER_OF_FURY);
+    %{ assert ids.time == 10 %}
+
+    let (time) = get_move_block_time(Point(X, Y), TOWER_1_ID, CENTRAL_SQUARE_ID, ORDER_OF_FURY);
+    %{ assert ids.time == 10 %}
+
+    // different order for tower and central square
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.CENTRAL_SQUARE_ID]) %}
+
+    // order of giants
+    let (time) = get_move_block_time(Point(X, Y), CENTRAL_SQUARE_ID, TOWER_1_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 %}
+
+    let (time) = get_move_block_time(Point(X, Y), TOWER_1_ID, CENTRAL_SQUARE_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 %}
+
+    // order of fury
+    let (time) = get_move_block_time(Point(X, Y), CENTRAL_SQUARE_ID, TOWER_1_ID, ORDER_OF_FURY);
+    %{ assert ids.time == 10 %}
+
+    // need to conquer all 4 to go from defending tower to attacking central square
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_2_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_3_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_4_ID]) %}
+    let (time) = get_move_block_time(Point(X, Y), TOWER_1_ID, CENTRAL_SQUARE_ID, ORDER_OF_FURY);
+    %{ assert ids.time == 10 %}
+
+    //
+    // TOWER TO TOWER
+    //
+    // same order for both tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_2_ID]) %}
+
+    // defending
+    let (time) = get_move_block_time(Point(X, Y), TOWER_1_ID, TOWER_2_ID, ORDER_OF_FURY);
+    %{ assert ids.time == 10 %}
+
+    let (time) = get_move_block_time(Point(X, Y), TOWER_2_ID, TOWER_1_ID, ORDER_OF_FURY);
+    %{ assert ids.time == 10 %}
+
+    // attacking
+    let (time) = get_move_block_time(Point(X, Y), TOWER_1_ID, TOWER_2_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 %}
+
+    let (time) = get_move_block_time(Point(X, Y), TOWER_2_ID, TOWER_1_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 %}
+
+    // different order for both tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_2_ID]) %}
+
+    // from attacking place to defending place
+    let (time) = get_move_block_time(Point(X, Y), TOWER_1_ID, TOWER_2_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 %}
+
+    // from defending place to attacking place
+    let (time) = get_move_block_time(Point(X, Y), TOWER_1_ID, TOWER_2_ID, ORDER_OF_FURY);
+    %{ assert ids.time == 25 %}
 
     return ();
 }

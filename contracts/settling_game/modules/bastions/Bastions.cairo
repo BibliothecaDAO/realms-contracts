@@ -825,6 +825,10 @@ func get_move_block_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
     point: Point, current_location: felt, next_location: felt, mover_order: felt
 ) -> (block_time: felt) {
     alloc_locals;
+    let (current_location_defender) = bastion_location_defending_order.read(
+        point, current_location
+    );
+    let (next_location_defender) = bastion_location_defending_order.read(point, next_location);
     // location 5 = central square
     if (next_location == 5) {
         let (tower_1_defending_order) = bastion_location_defending_order.read(point, 1);
@@ -839,9 +843,8 @@ func get_move_block_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
             tower_3_defending_order,
             tower_4_defending_order,
         );
-        let (central_square_defending_order) = bastion_location_defending_order.read(point, 5);
         // if mover order is the same as the central square defending order
-        if (central_square_defending_order == mover_order) {
+        if (next_location_defender == mover_order) {
             with_attr error_message(
                     "Bastions: Central square defending order needs to have at least one tower") {
                 assert_le(1, number_of_conquered_towers);
@@ -851,10 +854,17 @@ func get_move_block_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
                     MovingTimes.DistanceStagingAreaCentralSquare
                 );
             } else {
+                // towers
                 // if not 0, it has to be one of the towers because i already no hes not on location 5
-                let (moving_time) = bastion_moving_times.read(
-                    MovingTimes.DistanceTowerCentralSquare
-                );
+                if (current_location_defender == mover_order) {
+                    let (moving_time) = bastion_moving_times.read(
+                        MovingTimes.DistanceTowerCentralSquare
+                    );
+                } else {
+                    let (moving_time) = bastion_moving_times.read(
+                        MovingTimes.DistanceTowerGateCentralSquare
+                    );
+                }
             }
         } else {
             // if not the same order as the central square defending order, need to verify
@@ -868,9 +878,7 @@ func get_move_block_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
                     MovingTimes.DistanceStagingAreaCentralSquare
                 );
             } else {
-                let (moving_time) = bastion_moving_times.read(
-                    MovingTimes.DistanceTowerCentralSquare
-                );
+                let (moving_time) = bastion_moving_times.read(MovingTimes.DistanceTowerInnerGate);
             }
         }
     } else {
@@ -887,34 +895,64 @@ func get_move_block_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
             }
         } else {
             // if you are moving to towers
-            let (current_location_defender) = bastion_location_defending_order.read(
-                point, current_location
-            );
-            let (next_location_defender) = bastion_location_defending_order.read(
-                point, next_location
-            );
-            let current_location_order_difference = current_location_defender - mover_order;
-            let next_location_order_difference = next_location_defender - mover_order;
             // if you move from staging area to towers
             if (current_location == 0) {
                 let (moving_time) = bastion_moving_times.read(MovingTimes.DistanceStagingAreaTower);
             } else {
                 // you can only move to adjacent towers
-                let (is_adjacent_tower) = Bastions.is_adjacent_tower(
-                    current_location, next_location
-                );
-                with_attr error_message("Bastions: Can only move from tower to adjacent tower") {
-                    assert is_adjacent_tower = TRUE;
-                }
-                // if you move from your order tower to another of your order tower
-                if (is_not_zero(current_location_order_difference + next_location_order_difference) == 0) {
-                    let (moving_time) = bastion_moving_times.read(
-                        MovingTimes.DistanceTowerTowerSameOrder
-                    );
+                if (current_location == 5) {
+                    if (next_location_defender == mover_order) {
+                        if (current_location_defender == mover_order) {
+                            let (moving_time) = bastion_moving_times.read(
+                                MovingTimes.DistanceTowerCentralSquare
+                            );
+                        } else {
+                            let (moving_time) = bastion_moving_times.read(
+                                MovingTimes.DistanceTowerInnerGate
+                            );
+                        }
+                    } else {
+                        if (current_location_defender == mover_order) {
+                            let (moving_time) = bastion_moving_times.read(
+                                MovingTimes.DistanceTowerGateCentralSquare
+                            );
+                        } else {
+                            let (moving_time) = bastion_moving_times.read(
+                                MovingTimes.DistanceInnerGateTowerGate
+                            );
+                        }
+                    }
                 } else {
-                    let (moving_time) = bastion_moving_times.read(
-                        MovingTimes.DistanceTowerTowerDifferentOrder
+                    let (is_adjacent_tower) = Bastions.is_adjacent_tower(
+                        current_location, next_location
                     );
+                    with_attr error_message(
+                            "Bastions: Can only move from tower to adjacent tower") {
+                        assert is_adjacent_tower = TRUE;
+                    }
+                    // if you move from your order tower to another of your order tower
+                    // if (is_not_zero(current_location_order_difference + next_location_order_difference) == 0) {
+                    if (next_location_defender == mover_order) {
+                        if (current_location_defender == mover_order) {
+                            let (moving_time) = bastion_moving_times.read(
+                                MovingTimes.DistanceTowerTower
+                            );
+                        } else {
+                            let (moving_time) = bastion_moving_times.read(
+                                MovingTimes.DistanceGateTower
+                            );
+                        }
+                    } else {
+                        if (current_location_defender == mover_order) {
+                            let (moving_time) = bastion_moving_times.read(
+                                MovingTimes.DistanceGateTower
+                            );
+                        } else {
+                            let (moving_time) = bastion_moving_times.read(
+                                MovingTimes.DistanceGateGate
+                            );
+                        }
+                    }
                 }
             }
         }

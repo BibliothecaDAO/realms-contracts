@@ -72,11 +72,15 @@ func setup{
 
     // set moving times
     // assuming 1 block = 1 minute
-    %{ store(ids.self_address, "bastion_moving_times", [35], [ids.MovingTimes.DistanceStagingAreaCentralSquare]) %}
-    %{ store(ids.self_address, "bastion_moving_times", [10], [ids.MovingTimes.DistanceTowerCentralSquare]) %}
-    %{ store(ids.self_address, "bastion_moving_times", [10], [ids.MovingTimes.DistanceTowerTowerSameOrder]) %}
-    %{ store(ids.self_address, "bastion_moving_times", [25], [ids.MovingTimes.DistanceTowerTowerDifferentOrder]) %}
-    %{ store(ids.self_address, "bastion_moving_times", [25], [ids.MovingTimes.DistanceStagingAreaTower]) %}
+    %{ store(ids.self_address, "bastion_moving_times", [35], [ids.MovingTimes.DistanceStagingAreaCentralSquare]) %}  // 35
+    %{ store(ids.self_address, "bastion_moving_times", [10], [ids.MovingTimes.DistanceTowerCentralSquare]) %}  // 10
+    %{ store(ids.self_address, "bastion_moving_times", [25], [ids.MovingTimes.DistanceTowerGateCentralSquare]) %}  // 25
+    %{ store(ids.self_address, "bastion_moving_times", [25], [ids.MovingTimes.DistanceGateGate]) %}  // 25
+    %{ store(ids.self_address, "bastion_moving_times", [25], [ids.MovingTimes.DistanceGateTower]) %}  // 25
+    %{ store(ids.self_address, "bastion_moving_times", [10], [ids.MovingTimes.DistanceTowerTower]) %}  // 10
+    %{ store(ids.self_address, "bastion_moving_times", [25], [ids.MovingTimes.DistanceStagingAreaTower]) %}  // 25
+    %{ store(ids.self_address, "bastion_moving_times", [10], [ids.MovingTimes.DistanceTowerInnerGate]) %}  // 10
+    %{ store(ids.self_address, "bastion_moving_times", [25], [ids.MovingTimes.DistanceInnerGateTowerGate]) %}  // 25
 
     // set cooldown periods
     %{ store(ids.self_address, "bastion_location_cooldown_period", [ids.TOWER_COOLDOWN_PERIOD], [ids.TOWER_1_ID]) %}
