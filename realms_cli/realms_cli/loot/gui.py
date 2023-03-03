@@ -467,7 +467,7 @@ def kill_theif(sender, app_data, user_data):
     dpg.add_text(
         "Kill the theif robbing the king",
         tag="killing_theif_load",
-        pos=[300, 50],
+        pos=[700, 50],
         parent="adventurers",
     )
     dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
@@ -490,7 +490,7 @@ def claim_king_loot(sender, app_data, user_data):
     dpg.add_text(
         "Claim loot from robbing king",
         tag="claiming_king_loot",
-        pos=[300, 50],
+        pos=[700, 50],
         parent="adventurers",
     )
     dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
