@@ -65,7 +65,7 @@ from contracts.loot.loot.stats.combat import CombatStats
 from contracts.loot.utils.general import _uint_to_felt
 from contracts.loot.beast.interface import IBeast
 from contracts.loot.loot.ILoot import ILoot
-from contracts.loot.utils.constants import ModuleIds, ExternalContractIds, MINT_COST, STARTING_GOLD, KING_TRIBUTE_PERCENT
+from contracts.loot.utils.constants import ModuleIds, ExternalContractIds, MINT_COST, MINT_COST_INTERFACE, STARTING_GOLD, KING_TRIBUTE_PERCENT
 
 // -----------------------------------
 // Events
@@ -163,8 +163,11 @@ func mint{
     order: felt,
     image_hash_1: felt,
     image_hash_2: felt,
+    interface_address: felt
 ) -> (adventurer_token_id: Uint256) {
     alloc_locals;
+
+    assert_not_zero(interface_address);
 
     let (controller) = Module.controller_address();
     let (caller) = get_caller_address();
@@ -195,11 +198,14 @@ func mint{
     // send to Nexus
     let (treasury) = Module.get_external_contract_address(ExternalContractIds.Treasury);
     IERC20.transferFrom(lords_address, caller, treasury, Uint256(MINT_COST, 0));
+
+    // send to interface provider
+    IERC20.transferFrom(lords_address, caller, interface_address, Uint256(MINT_COST_INTERFACE, 0));
     // send to this contract and set Balance of Adventurer
     let (this) = get_contract_address();
     IERC20.transferFrom(lords_address, caller, this, Uint256(MINT_COST, 0));
     // @distracteddev: this is now redundant, we can't take away balance every time tribute is distributed
-    adventurer_balance.write(next_adventurer_id, Uint256(MINT_COST, 0));
+    // adventurer_balance.write(next_adventurer_id, Uint256(MINT_COST, 0));
 
     return (next_adventurer_id,);
 }
@@ -216,11 +222,12 @@ func mint_with_starting_weapon{
     image_hash_1: felt,
     image_hash_2: felt,
     weapon_id: felt,
+    interface_address: felt
 ) -> (adventurer_token_id: Uint256, item_token_id: Uint256) {
     alloc_locals;
 
     // Mint new adventurer
-    let (adventurer_token_id) = mint(to, race, home_realm, name, order, image_hash_1, image_hash_2);
+    let (adventurer_token_id) = mint(to, race, home_realm, name, order, image_hash_1, image_hash_2, interface_address); 
 
     // Mint starting weapon for the adventurer (book, wand, club, short sword)
     let (loot_address) = Module.get_module_address(ModuleIds.Loot);

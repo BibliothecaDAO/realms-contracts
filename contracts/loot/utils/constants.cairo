@@ -10,7 +10,8 @@ namespace ExternalContractIds {
     const Treasury = 3;
 }
 
-const MINT_COST = 50000000000000000000;
+const MINT_COST = 40000000000000000000;
+const MINT_COST_INTERFACE = 10000000000000000000;
 
 const STARTING_GOLD = 20;
 
