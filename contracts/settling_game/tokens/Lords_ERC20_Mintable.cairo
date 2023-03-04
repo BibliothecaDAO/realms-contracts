@@ -11,41 +11,21 @@ from openzeppelin.access.accesscontrol.library import AccessControl
 from openzeppelin.token.erc20.library import ERC20
 from openzeppelin.utils.constants.library import DEFAULT_ADMIN_ROLE
 
-from openzeppelin.access.ownable.library import Ownable
-
-from openzeppelin.upgrades.library import Proxy
-
 // roles used to validate access to mint and burn_away functions
 const MINT_ROLE = 'mint';
 const BURN_AWAY_ROLE = 'burn_away';
 
-
-
-
-@external
-func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+@constructor
+func constructor{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     name: felt, symbol: felt, decimals: felt, admin: felt
 ) {
     ERC20.initializer(name, symbol, decimals);
 
     AccessControl.initializer();
     AccessControl._grant_role(DEFAULT_ADMIN_ROLE, admin);
-    
-    Ownable.initializer(admin);
-    Proxy.initializer(admin);
 
     return ();
 }
-
-@external
-func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    new_implementation: felt
-) {
-    Ownable.assert_only_owner();
-    Proxy._set_implementation_hash(new_implementation);
-    return ();
-}
-
 
 //
 // Getters

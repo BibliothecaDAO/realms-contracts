@@ -64,7 +64,7 @@ LOOT_SYMBOL = str_to_felt("LOOT")
 async def run(nre):
     config = Config(nre.network)
 
-    # # ---------------- CONTROLLERS  ----------------#
+    # # # ---------------- CONTROLLERS  ----------------#
     # for contract in CONTROLLER_CONTRACT_IMPLEMENTATIONS:
     #     compile(contract.name)
     #     await wrapped_declare(
@@ -138,7 +138,7 @@ async def run(nre):
     #     arguments=[xoroshiro],
     # )
 
-    # # ---------------- MODULE IMPLEMENTATIONS  ----------------#
+    # # # ---------------- MODULE IMPLEMENTATIONS  ----------------#
     # for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
     #     compile(contract.alias)
     #     await wrapped_declare(
@@ -155,7 +155,7 @@ async def run(nre):
     #         calldata=[class_hash],
     #     )
 
-    # #---------------- TOKEN IMPLEMENTATIONS  ----------------#
+    # # #---------------- TOKEN IMPLEMENTATIONS  ----------------#
     # for contract in TOKEN_CONTRACT_IMPLEMENTATIONS:
     #     compile(contract.alias)
     #     await wrapped_declare(
@@ -191,7 +191,7 @@ async def run(nre):
     #     ],
     # )
 
-    # give minting rights to the deployer
+    # # give minting rights to the deployer
 
     # await wrapped_send(
     #     network=config.nile_network,
@@ -200,11 +200,11 @@ async def run(nre):
     #     function="grant_role",
     #     arguments=[
     #         MINT_ROLE,
-    #         config.ADMIN_ADDRESS,
+    #         config.USER_ADDRESS,
     #     ],
     # )
 
-    # ---------------- INIT MODULES  ----------------#
+    # # ---------------- INIT MODULES  ----------------#
 
     # deployment, _ = safe_load_deployment("proxy_ModuleController_Loot", nre.network)
 
@@ -259,7 +259,7 @@ async def run(nre):
     #     ],
     # )
 
-    # ---------------- SET MODULES ----------------#
+    # # ---------------- SET MODULES ----------------#
 
     # module_contract_setup = []
     # for module in MODULE_CONTRACT_IMPLEMENTATIONS:
@@ -276,7 +276,7 @@ async def run(nre):
     #     arguments=module_contract_setup,
     # )
 
-    # # # #---------------- WRITE LIST ----------------#
+    # # # # #---------------- WRITE LIST ----------------#
 
     # write_list = [
     #     [ModuleId.Loot.value, ModuleId.Adventurer.value],
@@ -294,22 +294,22 @@ async def run(nre):
     #     arguments=write_list,
     # )
 
-    # ---------------- SET EXTERNAL CONTRACT ADDRESSES ----------------#
+    # # ---------------- SET EXTERNAL CONTRACT ADDRESSES ----------------#
 
-    lords_deployment, _ = safe_load_deployment("proxy_Lords_ERC20_Mintable", nre.network)
+    # lords_deployment, _ = safe_load_deployment("Lords_ERC20_Mintable", nre.network)
 
-    realms_deployment, _ = safe_load_deployment(
-        "proxy_Realms_ERC721_Mintable", nre.network
-    )
+    # realms_deployment, _ = safe_load_deployment(
+    #     "proxy_Realms_ERC721_Mintable", nre.network
+    # )
 
-    await wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="proxy_Arbiter_Loot",
-        function="set_external_contract_address",
-        arguments=[
-            [realms_deployment, ExternalContractIds.Realms_ERC721_Mintable.value],
-            [lords_deployment, ExternalContractIds.Lords_ERC20_Mintable.value],
-            [config.ADMIN_ADDRESS, ExternalContractIds.Treasury.value],
-        ],
-    )
+    # await wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="proxy_Arbiter_Loot",
+    #     function="set_external_contract_address",
+    #     arguments=[
+    #         [realms_deployment, ExternalContractIds.Realms_ERC721_Mintable.value],
+    #         [lords_deployment, ExternalContractIds.Lords_ERC20_Mintable.value],
+    #         [config.ADMIN_ADDRESS, ExternalContractIds.Treasury.value],
+    #     ],
+    # )
