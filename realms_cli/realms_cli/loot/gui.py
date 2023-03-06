@@ -71,7 +71,7 @@ async def update_adventurer_list():
     dpg.configure_item("unequip_adventurer_id", items=adventurers)
     dpg.configure_item("upgrade_adventurer_id", items=adventurers)
     dpg.configure_item("potions_adventurer_id", items=adventurers)
-    dpg.configure_item("theif_adventurer_id", items=adventurers)
+    dpg.configure_item("thief_adventurer_id", items=adventurers)
 
 
 def get_adventurer(sender, app_data, user_dat):
@@ -430,11 +430,11 @@ def upgrade_stat(sender, app_data, user_data):
     dpg.delete_item("loader")
 
 
-def get_theif():
+def get_thief():
     command = [
         "nile",
         "loot",
-        "get-theif",
+        "get-thief",
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     return out
@@ -448,7 +448,7 @@ def rob_king(sender, app_data, user_data):
         parent="adventurers",
     )
     dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
-    adventurer = dpg.get_value("theif_adventurer_id").split(" - ")[-1]
+    adventurer = dpg.get_value("thief_adventurer_id").split(" - ")[-1]
     command = [
         "nile",
         "loot",
@@ -458,31 +458,31 @@ def rob_king(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    update_theif(adventurer)
+    update_thief(adventurer)
     dpg.delete_item("robbing_king_load")
     dpg.delete_item("loader")
 
 
-def kill_theif(sender, app_data, user_data):
+def kill_thief(sender, app_data, user_data):
     dpg.add_text(
-        "Kill the theif robbing the king",
-        tag="killing_theif_load",
+        "Kill the thief robbing the king",
+        tag="killing_thief_load",
         pos=[700, 50],
         parent="adventurers",
     )
     dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
-    adventurer = dpg.get_value("theif_adventurer_id").split(" - ")[-1]
+    adventurer = dpg.get_value("thief_adventurer_id").split(" - ")[-1]
     command = [
         "nile",
         "loot",
-        "kill-theif",
+        "kill-thief",
         "--adventurer_token_id",
         adventurer,
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    update_theif(adventurer)
-    dpg.delete_item("killing_theif_load")
+    update_thief(adventurer)
+    dpg.delete_item("killing_thief_load")
     dpg.delete_item("loader")
 
 
@@ -512,7 +512,7 @@ def update_gold(adventurer_token_id):
     out = out[-1].split("\n")
     print(f"💰 Gold balance is now {out[-1]}")
     dpg.set_value("gold", out[-1])
-    king_out = get_theif()
+    king_out = get_thief()
     king_out = king_out.split(" ")
     king_out = king_out[-3].split("\n")
     if int(king_out[-1]) == int(adventurer_token_id):
@@ -526,14 +526,15 @@ def update_gold(adventurer_token_id):
         dpg.configure_item("your_gold", color=[178, 34, 34])
 
 
-def update_theif():
+def update_thief():
     command = [
         "nile",
         "loot",
-        "get-theif",
+        "get-thief",
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     out = out.split(" ")
+    print(out)
     king_out = out[-3].split("\n")
     gold_command = ["nile", "loot", "balance", "--adventurer_token_id", king_out[-1]]
     gold_out = subprocess.check_output(gold_command).strip().decode("utf-8")
@@ -548,9 +549,9 @@ def update_theif():
     print(f"👑 King is {adventurer_out} - {king_out[-1]}")
     print(f"⛳️ Reign started at {reign_time}")
     print(f"💰 King's gold balance is now {gold_out[-1]}")
-    dpg.set_value("king_adventurer", king_out[-1])
-    dpg.set_value("kings_reign", reign_time)
-    dpg.set_value("kings_gold", gold_out[-1])
+    dpg.set_value("thief_adventurer", king_out[-1])
+    dpg.set_value("thieves_reign", reign_time)
+    dpg.set_value("thieves_gold", gold_out[-1])
 
 
 def update_beast(beast_token_id):
@@ -885,7 +886,7 @@ if __name__ == "__main__":
                 dpg.add_text("Rob King")
                 dpg.add_combo(
                     label="Adventurer ID",
-                    tag="theif_adventurer_id",
+                    tag="thief_adventurer_id",
                     items=adventurers,
                     width=100,
                 )
@@ -898,17 +899,17 @@ if __name__ == "__main__":
                     with dpg.group():
                         dpg.add_text("Adventurer")
                         dpg.add_text(
-                            tag="theif_adventurer",
+                            tag="thief_adventurer",
                             default_value="-",
                             color=[205, 127, 50],
                         )
                     with dpg.group():
                         dpg.add_text("Reign Since")
-                        dpg.add_text(tag="theifs_reign", default_value="-")
+                        dpg.add_text(tag="thieves_reign", default_value="-")
                     with dpg.group():
                         dpg.add_text("Gold")
                         dpg.add_text(
-                            tag="thiefs_gold", default_value="-", color=[255, 215, 0]
+                            tag="thieves_gold", default_value="-", color=[255, 215, 0]
                         )
                     with dpg.group():
                         dpg.add_text(
@@ -916,7 +917,7 @@ if __name__ == "__main__":
                             tag="your_gold",
                             color=[178, 34, 34],
                         )
-        update_theif()
+        update_thief()
 
     dpg.show_viewport()
     dpg.start_dearpygui()

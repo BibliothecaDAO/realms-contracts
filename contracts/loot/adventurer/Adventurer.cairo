@@ -128,7 +128,7 @@ func adventurer_image(tokenId: Uint256) -> (image: felt) {
 }
 
 @storage_var
-func theif() -> (theif: TheifState) {
+func thief() -> (thief: TheifState) {
 }
 
 // -----------------------------------
@@ -725,9 +725,9 @@ func rob_king{
 
     let (gold_balance) = IBeast.balance_of(beast_address, adventurer_token_id);
 
-    let (theif_state) = theif.read();
+    let (thief_state) = thief.read();
 
-    let (king_balance) = IBeast.balance_of(beast_address, theif_state.AdventurerId);
+    let (king_balance) = IBeast.balance_of(beast_address, thief_state.AdventurerId);
 
     // same as less than
     let over_king_check = is_le(king_balance + 1, gold_balance);
@@ -738,11 +738,11 @@ func rob_king{
 
     let (current_time) = get_block_timestamp();
 
-    let new_theif = TheifState(adventurer_token_id, current_time);
+    let new_thief = TheifState(adventurer_token_id, current_time);
 
     emit_initiated_king_hiest(adventurer_token_id);
 
-    theif.write(new_theif);
+    thief.write(new_thief);
 
     return (TRUE,);
 }
@@ -751,7 +751,7 @@ func rob_king{
 // @param adventurer_token_id: Id of adventurer
 // @return success: Value indicating success
 @external
-func kill_theif{
+func kill_thief{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(adventurer_token_id: Uint256) -> (success: felt) {
     alloc_locals;
@@ -766,9 +766,9 @@ func kill_theif{
 
     let (gold_balance) = IBeast.balance_of(beast_address, adventurer_token_id);
 
-    let (theif_state) = theif.read();
+    let (thief_state) = thief.read();
 
-    let (king_balance) = IBeast.balance_of(beast_address, theif_state.AdventurerId);
+    let (king_balance) = IBeast.balance_of(beast_address, thief_state.AdventurerId);
 
     with_attr error_message("Adventurer: There is no king to kill.") {
         assert_not_zero(king_balance);
@@ -781,20 +781,20 @@ func kill_theif{
         assert over_king_check = TRUE;
     }
 
-    // kill the theif
-    let (result) = _deduct_health(theif_state.AdventurerId, 1000);
+    // kill the thief
+    let (result) = _deduct_health(thief_state.AdventurerId, 1000);
 
     // emit event to capture adventurer dieing while trying to rob the king
-    emit_died_robbing_king(theif_state.AdventurerId);
+    emit_died_robbing_king(thief_state.AdventurerId);
 
     // emit event capturing the adventurer who caught the robber
-    emit_killed_theif(adventurer_token_id);
+    emit_killed_thief(adventurer_token_id);
 
-    // clear theif state
-    let clear_theif_state = TheifState(Uint256(0, 0), 0);
+    // clear thief state
+    let clear_thief_state = TheifState(Uint256(0, 0), 0);
 
     // update blockchain
-    theif.write(clear_theif_state);
+    thief.write(clear_thief_state);
 
     return (result,);
 }
@@ -807,11 +807,11 @@ func claim_king_loot{
 }() -> (success: felt) {
     alloc_locals;
     // Anyone can call this function to check payout for robbing king (potential for keepers)
-    let (theif_state) = theif.read();
+    let (thief_state) = thief.read();
 
     let (current_time) = get_block_timestamp();
 
-    let time_duration = current_time - theif_state.StartTime;
+    let time_duration = current_time - thief_state.StartTime;
 
     let check_over_duration = is_le(KING_HIEST_DELAY, time_duration);
 
@@ -828,18 +828,18 @@ func claim_king_loot{
     let (pre_tribute, _) = uint256_mul(Uint256(KING_HIEST_REWARD_PERCENT, 0), total_lords);
     let (king_tribute, _) = uint256_unsigned_div_rem(pre_tribute, Uint256(100, 0));
 
-    // send to the theif
-    let (owner: felt) = ERC721.owner_of(theif_state.AdventurerId);
+    // send to the thief
+    let (owner: felt) = ERC721.owner_of(thief_state.AdventurerId);
     IERC20.transfer(lords_address, owner, king_tribute);
 
     // emit event capturing an adventuring successfully robbing the king
-    emit_robbed_king(theif_state.AdventurerId);
+    emit_robbed_king(thief_state.AdventurerId);
 
-    // clear theif state so theif is no longer able to be assissnated
-    let clear_theif_state = TheifState(Uint256(0, 0), 0);
+    // clear thief state so thief is no longer able to be assissnated
+    let clear_thief_state = TheifState(Uint256(0, 0), 0);
 
     // update blockchain
-    theif.write(clear_theif_state);
+    thief.write(clear_thief_state);
 
     return (TRUE,);
 }
@@ -955,7 +955,7 @@ func emit_died_robbing_king{
 
 // @notice Emits an initiated king hiest event for the adventurer
 // @param adventurer_token_id: the token id of the adventurer
-func emit_killed_theif{
+func emit_killed_thief{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(adventurer_token_id: Uint256) {
     // Get adventurer from token id
@@ -988,14 +988,14 @@ func get_adventurer_by_id{
     return (adventurer,);
 }
 
-// @notice Get theif state
-// @return theif: State of the theif
+// @notice Get thief state
+// @return thief: State of the thief
 @view
-func get_theif{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}() -> (
-    theif_state: TheifState
+func get_thief{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}() -> (
+    thief_state: TheifState
 ) {
-    let (theif_state) = theif.read();
-    return (theif_state,);
+    let (thief_state) = thief.read();
+    return (thief_state,);
 }
 
 // --------------------

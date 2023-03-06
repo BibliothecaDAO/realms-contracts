@@ -307,8 +307,7 @@ async def health(network, adventurer_token_id, number):
 
     adventurer_out = await _get_adventurer(network, adventurer_token_id)
 
-    print(
-        f"🧪 You bought {number} potions. Your health is now {adventurer_out[7]}")
+    print(f"🧪 You bought {number} potions. Your health is now {adventurer_out[7]}")
 
 
 @loot.command()
@@ -673,16 +672,14 @@ async def flee(adventurer_token_id, network):
     adventurer_out = await _get_adventurer(network, adventurer_token_id)
 
     if int(result[0], 16) == 1:
-        print(
-            f"🏃‍♂️ You successfully fled from the {BEASTS[str(int(beast_out[0]))]} ✅")
+        print(f"🏃‍♂️ You successfully fled from the {BEASTS[str(int(beast_out[0]))]} ✅")
     else:
         if int(pre_adventurer[7]) > int(adventurer_out[7]):
             print(
                 f"😫 You have been ambushed by the {BEASTS[str(int(beast_out[0]))]} and took {str(int(pre_adventurer[7]) - int(adventurer_out[7]))} damage!"
             )
         else:
-            print(
-                f"😮 You did not flee from the {BEASTS[str(int(beast_out[0]))]}!")
+            print(f"😮 You did not flee from the {BEASTS[str(int(beast_out[0]))]}!")
 
 
 @loot.command()
@@ -871,19 +868,19 @@ async def new(network, item, race, home_realm, name, order, image_hash_1, image_
 
 @loot.command()
 @click.option("--network", default="goerli")
-async def get_theif(network):
+async def get_thief(network):
     """
-    Get information about the theif
+    Get information about the thief
     """
     config = Config(nile_network=network)
 
-    print("♔ Getting theif info ...")
+    print("♔ Getting thief info ...")
 
     out = await wrapped_proxy_call(
         network=config.nile_network,
         contract_alias="proxy_Adventurer",
         abi="artifacts/abis/Adventurer.json",
-        function="get_theif",
+        function="get_thief",
         arguments=[],
     )
     print(out)
@@ -928,23 +925,23 @@ async def rob_king(network, adventurer_token_id):
     prompt=True,
 )
 @click.option("--network", default="goerli")
-async def kill_theif(network, adventurer_token_id):
+async def kill_thief(network, adventurer_token_id):
     """
-    Kill the theif
+    Kill the thief
     """
     config = Config(nile_network=network)
 
-    print("👑 Kill the theif ...")
+    print("👑 Kill the thief ...")
 
     await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Adventurer",
-        function="kill_theif",
+        function="kill_thief",
         arguments=[*uint(adventurer_token_id)],
     )
 
-    print("👑 successfully killed the theif ✅")
+    print("👑 successfully killed the thief ✅")
 
 
 @loot.command()
