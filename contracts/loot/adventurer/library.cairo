@@ -455,7 +455,7 @@ namespace AdventurerLib {
 
         // update adventurer xp
         let (updated_adventurer: AdventurerDynamic) = cast_state(
-            AdventurerSlotIds.XP, xp, unpacked_adventurer
+            AdventurerSlotIds.XP, xp + unpacked_adventurer.XP, unpacked_adventurer
         );
 
         // return updated adventurer
@@ -526,7 +526,7 @@ namespace AdventurerLib {
     ) -> (discovery: felt) {
         alloc_locals;
 
-        let (_, r) = unsigned_div_rem(xoroshiro_random, 4);
+        let (_, r) = unsigned_div_rem(xoroshiro_random, 2);
         return (r,);  // values from 0 to 3 inclusive
     }
 

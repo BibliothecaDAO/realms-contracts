@@ -920,6 +920,23 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     // read current bid
     let (current_bid) = bid.read(market_item_id);
 
+    // subtract gold balance from buyer
+    let (beast_address) = Module.get_module_address(ModuleIds.Beast);
+    IBeast.subtract_from_balance(beast_address, adventurer_token_id, price);
+
+    let has_bid = is_not_zero(current_bid.bidder);
+
+    if (has_bid == TRUE) {
+        IBeast.add_to_balance(beast_address, Uint256(current_bid.bidder, 0), current_bid.price);
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    } else {
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    }
+
     // if current expiry = 0 means unbidded = set base time from now + BID_TIME
     if (current_bid.expiry == FALSE) {
         bid.write(
@@ -943,30 +960,13 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 
     assert_can_purchase(market_item_id.low);
 
+
+
     // update bid state
     bid.write(
         market_item_id,
         Bid(price, current_bid.expiry, adventurer_id_as_felt, BidStatus.open, item.Id),
     );
-
-    let (beast_address) = Module.get_module_address(ModuleIds.Beast);
-
-    // subtract gold balance from buyer
-
-    IBeast.subtract_from_balance(beast_address, adventurer_token_id, price);
-
-    let has_bid = is_not_zero(current_bid.bidder);
-
-    if (has_bid == TRUE) {
-        IBeast.add_to_balance(beast_address, Uint256(current_bid.bidder, 0), current_bid.price);
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-    } else {
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-    }
 
     ItemMerchantUpdate.emit(
         item,

@@ -253,9 +253,8 @@ namespace DiscoveryType {
 
 namespace ItemDiscoveryType {
     const Gold = 0;
-    const XP = 1;
-    const Loot = 2;
-    const Health = 3;
+    const Loot = 1;
+    const Health = 2;
 }
 
 // index for items - used in cast function to set values

@@ -682,14 +682,7 @@ func explore{
             emit_adventurer_state(token_id);
             return (DiscoveryType.Item, ItemDiscoveryType.Gold);
         }
-        if (discovery == ItemDiscoveryType.XP) {
-            // add XP
-            // @distracteddev: formula - 10 + (5 * (rnd % 4))
-            let (rnd) = get_random_number();
-            let (xp_discovery) = AdventurerLib.calculate_xp_discovery(rnd);
-            _increase_xp(token_id, xp_discovery);
-            return (DiscoveryType.Item, ItemDiscoveryType.XP);
-        }
+
         if (discovery == ItemDiscoveryType.Loot) {
             // mint loot items
             let (loot_address) = Module.get_module_address(ModuleIds.Loot);
@@ -711,7 +704,13 @@ func explore{
         return (DiscoveryType.Item, 0);
     }
 
-    return (FALSE, 0);
+    // add XP
+    // @distracteddev: formula - 10 + (5 * (rnd % 4))
+    let (rnd) = get_random_number();
+    let (xp_discovery) = AdventurerLib.calculate_xp_discovery(rnd);
+    _increase_xp(token_id, xp_discovery);
+            
+    return (DiscoveryType.Item, 1);
 }
 
 // @notice Attempt to rob the king
