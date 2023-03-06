@@ -817,7 +817,7 @@ async def new(network, item, race, home_realm, name, order, image_hash_1, image_
             image_hash_1,
             image_hash_2,
             item,
-            config.USER_ADDRESS
+            config.USER_ADDRESS,
         ],
     )
 
@@ -947,7 +947,7 @@ async def kill_thief(network, adventurer_token_id):
 
 @loot.command()
 @click.option("--network", default="goerli")
-async def claim_king_loot(network, adventurer_token_id):
+async def claim_king_loot(network):
     """
     Claim loot from robbing the king
     """

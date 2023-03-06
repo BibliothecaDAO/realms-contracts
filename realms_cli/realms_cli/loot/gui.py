@@ -458,7 +458,7 @@ def rob_king(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    update_thief(adventurer)
+    update_thief()
     dpg.delete_item("robbing_king_load")
     dpg.delete_item("loader")
 
@@ -481,7 +481,7 @@ def kill_thief(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    update_thief(adventurer)
+    update_thief()
     dpg.delete_item("killing_thief_load")
     dpg.delete_item("loader")
 
@@ -494,11 +494,7 @@ def claim_king_loot(sender, app_data, user_data):
         parent="adventurers",
     )
     dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
-    command = [
-        "nile",
-        "loot",
-        "claim_king_loot",
-    ]
+    command = ["nile", "loot", "claim-king-loot"]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
     dpg.delete_item("claiming_king_loot")
@@ -913,9 +909,8 @@ if __name__ == "__main__":
                         )
                     with dpg.group():
                         dpg.add_text(
-                            "You don't have enough gold to be king.",
+                            "Please get adventurer data.",
                             tag="your_gold",
-                            color=[178, 34, 34],
                         )
         update_thief()
 

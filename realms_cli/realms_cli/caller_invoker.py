@@ -32,15 +32,22 @@ async def send_multi(self, to, method, calldata, nonce=None):
 
     calldata = [[int(x) for x in c] for c in calldata]
 
+    if not calldata:
+        calls = [[target_address, method, calldata]]
+    else:
+        calls = [[target_address, method, c] for c in calldata]
+
     if nonce is None:
         nonce = await get_nonce(self.address, self.network)
 
     (execute_calldata, sig_r, sig_s) = self.signer.sign_invoke(
         sender=self.address,
-        calls=[[target_address, method, c] for c in calldata],
+        calls=calls,
         nonce=nonce,
         max_fee=config.MAX_FEE,
     )
+
+    print([[target_address, method, c] for c in calldata])
 
     # params = []
     # # params.append(str(len(call_array)))
