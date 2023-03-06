@@ -157,7 +157,7 @@ async def all_market(network):
     prompt=True,
 )
 @click.option(
-    "--adventurer_token_id",
+    "--adventurer",
     is_flag=False,
     metavar="<columns>",
     type=click.STRING,
@@ -169,7 +169,7 @@ async def all_market(network):
     is_flag=False,
     metavar="<columns>",
     type=click.STRING,
-    help="price for item, must be greater than past bid or above 10",
+    help="price for item, must be greater than past bid or above 2",
     prompt=True,
 )
 async def bid(network, loot_token_id, adventurer, price):
@@ -179,14 +179,26 @@ async def bid(network, loot_token_id, adventurer, price):
     config = Config(nile_network=network)
 
     print("🗡 Bidding on Item ...")
+    
+    token_ids = [c.strip() for c in loot_token_id.split(',')]
+    prices = [c.strip() for c in price.split(',')]
 
-    await wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_LootMarketArcade",
-        function="bid_on_item",
-        arguments=[*uint(loot_token_id), *uint(adventurer), price],
-    )
+    if len(token_ids) > 1:
+        await wrapped_send(
+            network=config.nile_network,
+            signer_alias=config.USER_ALIAS,
+            contract_alias="proxy_LootMarketArcade",
+            function="bid_on_item",
+            arguments=[[*uint(token_id), *uint(adventurer), price] for token_id, price in zip(token_ids, prices)],
+        )
+    else:
+        await wrapped_send(
+            network=config.nile_network,
+            signer_alias=config.USER_ALIAS,
+            contract_alias="proxy_LootMarketArcade",
+            function="bid_on_item",
+            arguments=[*uint(token_ids[0]), *uint(adventurer), prices[0]],
+        )  
 
 
 @loot.command()
@@ -215,14 +227,24 @@ async def claim(network, loot_token_id, adventurer):
 
     print("🗡 Claiming item ...")
 
-    await wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_LootMarketArcade",
-        function="claim_item",
-        arguments=[*uint(loot_token_id), *uint(adventurer)],
-    )
+    token_ids = [c.strip() for c in loot_token_id.split(',')]
 
+    if len(token_ids) > 1:
+        await wrapped_send(
+            network=config.nile_network,
+            signer_alias=config.USER_ALIAS,
+            contract_alias="proxy_LootMarketArcade",
+            function="claim_item",
+            arguments=[[*uint(token_id), *uint(adventurer)] for token_id in token_ids],
+        )
+    else:
+        await wrapped_send(
+            network=config.nile_network,
+            signer_alias=config.USER_ALIAS,
+            contract_alias="proxy_LootMarketArcade",
+            function="claim_item",
+            arguments=[*uint(token_ids[0]), *uint(adventurer)],
+        )
 
 @loot.command()
 @click.option("--network", default="goerli")
@@ -450,7 +472,7 @@ async def adventurer(adventurer_token_id, network):
     is_flag=False,
     metavar="<columns>",
     type=click.STRING,
-    help="item id",
+    help="Loot item ids seperated by a comma",
     prompt=True,
 )
 async def equip(network, adventurer_token_id, loot_token_id):
@@ -461,13 +483,32 @@ async def equip(network, adventurer_token_id, loot_token_id):
 
     print("🫴 Equiping item ...")
 
-    await wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.USER_ALIAS,
-        contract_alias="proxy_Adventurer",
-        function="equip_item",
-        arguments=[*uint(adventurer_token_id), *uint(loot_token_id)],
-    )
+    # await wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.USER_ALIAS,
+    #     contract_alias="proxy_Adventurer",
+    #     function="equip_item",
+    #     arguments=[*uint(adventurer_token_id), *uint(loot_token_id)],
+    # )
+
+    token_ids = [c.strip() for c in loot_token_id.split(',')]
+
+    if len(token_ids) > 1:
+        await wrapped_send(
+            network=config.nile_network,
+            signer_alias=config.USER_ALIAS,
+            contract_alias="proxy_Adventurer",
+            function="equip_item",
+            arguments=[[*uint(adventurer_token_id), *uint(token_id)] for token_id in token_ids],
+        )
+    else:
+        await wrapped_send(
+            network=config.nile_network,
+            signer_alias=config.USER_ALIAS,
+            contract_alias="proxy_Adventurer",
+            function="equip_item",
+            arguments=[*uint(adventurer_token_id), *uint(loot_token_id)],
+        )
 
     print("🫴 Equiped item ✅")
     await _get_adventurer(network, adventurer_token_id)
