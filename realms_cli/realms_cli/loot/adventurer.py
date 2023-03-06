@@ -114,6 +114,7 @@ async def new_adventurer(
             image_hash_1,
             image_hash_2,
             item,
+            config.USER_ADDRESS
         ],
     )
 
