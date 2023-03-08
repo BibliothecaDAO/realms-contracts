@@ -243,6 +243,7 @@ def equip_item(sender, app_data, user_data):
     adventurer = dpg.get_value("equip_adventurer_id").split(" - ")[-1]
     item = dpg.get_value("equip_loot_token_id").split(" - ")[-1]
     loot_ids = dpg.get_value("equip_multi_loot_ids")
+    # Need to add logic that checks if equipped and unequips
     if loot_ids != "":
         command = [
             "nile",

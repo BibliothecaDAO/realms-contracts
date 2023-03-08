@@ -39,6 +39,11 @@ if file_does_not_exist "goerli.accounts.json"; then
 
     curl -L https://raw.githubusercontent.com/software-mansion/protostar/master/install.sh | bash
 
+    # Activate protostar path in mac
+    source ~/.bashrc
+
+    protostar install
+
     current_dir=$(pwd)
 
     export CAIRO_PATH="$CAIRO_PATH:$current_dir/lib/cairo_graphs/src:$current_dir/lib/cairo_contracts/src:$current_dir/lib/cairo_math_64x61/contracts:$current_dir/lib/guild_contracts"
