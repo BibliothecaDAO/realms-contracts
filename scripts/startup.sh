@@ -53,6 +53,9 @@ if file_does_not_exist "goerli.accounts.json"; then
 
     source realms_cli/.env.nile
 else
+    # print user already has file
+    read "You already have goerli.accounts.json file"
+
     source realms_cli/.env.nile        
 fi
 
