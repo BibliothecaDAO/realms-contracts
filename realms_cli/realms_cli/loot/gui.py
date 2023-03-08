@@ -469,7 +469,7 @@ def rob_king(sender, app_data, user_data):
     dpg.add_text(
         "Attempt to rob the king",
         tag="robbing_king_load",
-        pos=[300, 50],
+        pos=[700, 50],
         parent="adventurers",
     )
     dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
@@ -560,18 +560,25 @@ def update_thief():
     gold_out = subprocess.check_output(gold_command).strip().decode("utf-8")
     gold_out = gold_out.split(" ")
     gold_out = gold_out[-1].split("\n")
-    reign_time = datetime.datetime.fromtimestamp(int(out[-1]))
-    adventurer_out = asyncio.run(_get_adventurer("goerli", king_out[-1]))
-    if adventurer_out[3].startswith("0x"):
-        adventurer_out = felt_to_str(int(adventurer_out[3], 16))
+    print(out)
+    if out[0] != "0":
+        heist_time = datetime.datetime.fromtimestamp(int(out[-1]))
+        adventurer_out = asyncio.run(_get_adventurer("goerli", king_out[-1]))
+        if adventurer_out[3].startswith("0x"):
+            adventurer_out = felt_to_str(int(adventurer_out[3], 16))
+        else:
+            adventurer_out = felt_to_str(int(adventurer_out[3]))
+        print(f"👑 King is {adventurer_out} - {king_out[-1]}")
+        print(f"⛳️ Reign started at {heist_time}")
+        print(f"💰 King's gold balance is now {gold_out[-1]}")
+        dpg.set_value("thief_adventurer", king_out[-1])
+        dpg.set_value("thieves_reign", heist_time)
+        dpg.set_value("thieves_gold", gold_out[-1])
     else:
-        adventurer_out = felt_to_str(int(adventurer_out[3]))
-    print(f"👑 King is {adventurer_out} - {king_out[-1]}")
-    print(f"⛳️ Reign started at {reign_time}")
-    print(f"💰 King's gold balance is now {gold_out[-1]}")
-    dpg.set_value("thief_adventurer", king_out[-1])
-    dpg.set_value("thieves_reign", reign_time)
-    dpg.set_value("thieves_gold", gold_out[-1])
+        print(f"🥷 There is no thief")
+        dpg.set_value("thief_adventurer", "-")
+        dpg.set_value("thieves_reign", "-")
+        dpg.set_value("thieves_gold", "-")
 
 
 def update_beast(beast_token_id):
