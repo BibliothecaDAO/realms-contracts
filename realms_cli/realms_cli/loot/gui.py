@@ -560,8 +560,7 @@ def update_thief():
     gold_out = subprocess.check_output(gold_command).strip().decode("utf-8")
     gold_out = gold_out.split(" ")
     gold_out = gold_out[-1].split("\n")
-    print(out)
-    if out[0] != "0":
+    if king_out[-1] != "0":
         heist_time = datetime.datetime.fromtimestamp(int(out[-1]))
         adventurer_out = asyncio.run(_get_adventurer("goerli", king_out[-1]))
         if adventurer_out[3].startswith("0x"):
