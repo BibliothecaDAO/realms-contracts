@@ -218,7 +218,7 @@ func test_bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     // mint item and adventurer
     ILoot.mint(loot_address, account_1_address, Uint256(1, 0));
     IAdventurer.mint_with_starting_weapon(
-        adventurer_address, account_1_address, 4, 13, 'Test', 8, 1, 1, ItemIds.Book
+        adventurer_address, account_1_address, 4, 13, 'Test', 8, 1, 1, ItemIds.Book, account_1_address
     );
 
     %{
@@ -257,7 +257,7 @@ func test_claim_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     // mint item and adventurer
     ILoot.mint(loot_address, account_1_address, Uint256(1, 0));
     IAdventurer.mint_with_starting_weapon(
-        adventurer_address, account_1_address, 4, 13, 'Test', 8, 1, 1, ItemIds.Book
+        adventurer_address, account_1_address, 4, 13, 'Test', 8, 1, 1, ItemIds.Book, account_1_address
     );
 
     %{
@@ -298,7 +298,7 @@ func test_increase_greatness{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, ran
     let item_token_id = Uint256(1, 0);
     ILoot.mint(loot_address, account_1_address, item_token_id);
     IAdventurer.mint_with_starting_weapon(
-        adventurer_address, account_1_address, 4, 13, 'Test', 8, 1, 1, ItemIds.Book
+        adventurer_address, account_1_address, 4, 13, 'Test', 8, 1, 1, ItemIds.Book, account_1_address
     );
 
     ILoot.increase_xp(loot_address, item_token_id, 10);

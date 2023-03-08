@@ -667,10 +667,10 @@ func explore{
         return (DiscoveryType.Obstacle, obstacle.Id);
     }
     if (discovery == DiscoveryType.Item) {
-        // generate another random 4 numbers
+        // generate another random 3 numbers
         // this could probably be better
         let (rnd) = get_random_number();
-        let (discovery) = AdventurerLib.get_random_discovery(rnd);
+        let (discovery) = AdventurerLib.get_item_discovery(rnd);
 
         if (discovery == ItemDiscoveryType.Gold) {
             // add GOLD
@@ -710,7 +710,7 @@ func explore{
     let (xp_discovery) = AdventurerLib.calculate_xp_discovery(rnd);
     _increase_xp(token_id, xp_discovery);
             
-    return (DiscoveryType.Item, 1);
+    return (DiscoveryType.Nothing, 0);
 }
 
 // @notice Attempt to rob the king

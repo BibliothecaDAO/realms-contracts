@@ -125,7 +125,7 @@ func test_calculate_damage_from_weapon{syscall_ptr: felt*, range_check_ptr}() {
     let (g20_katana) = TestUtils.create_item(ItemIds.Katana, 20);
     let (g0_shirt) = TestUtils.create_item(ItemIds.Shirt, 0);
     let (katana_vs_shirt) = CombatStats.calculate_damage_from_weapon(g20_katana, g0_shirt, adventurer_state, 1);
-    assert katana_vs_shirt = 300;
+    assert katana_vs_shirt = 303;
 
     // greatness 3 short sword vs greatness 18 holy chestplate
     // zero damage - "Tis but a scratch"
@@ -151,13 +151,13 @@ func test_calculate_damage_from_beast{
     let (orc) = TestUtils.create_beast(BeastIds.Orc, 20);
     let (shirt) = TestUtils.create_item(ItemIds.Shirt, 0);
     let (orc_vs_shirt) = CombatStats.calculate_damage_from_beast(orc, shirt, 1);
-    assert orc_vs_shirt = 60;
+    assert orc_vs_shirt = 61;
 
     // greatness 10 giant vs greatness 10 leather armor
     let (leather) = TestUtils.create_item(ItemIds.LeatherArmor, 10);
     let (giant) = TestUtils.create_beast(BeastIds.Giant, 10);
     let (giant_vs_leather) = CombatStats.calculate_damage_from_beast(giant, leather, 1);
-    assert giant_vs_leather = 120;
+    assert giant_vs_leather = 123;
 
     return ();
 }
@@ -177,7 +177,7 @@ func test_calculate_damage_from_obstacle{
     let (ring_mail_vs_demonic_alter) = CombatStats.calculate_damage_from_obstacle(
         g20_demonic_alter, g0_ring_mail
     );
-    assert ring_mail_vs_demonic_alter = 300;
+    assert ring_mail_vs_demonic_alter = 303;
 
     // greatness 20 demonhusk vs greatness 0 dark midst
     // min damage - "You call this an obstacle!? This mist is soothing on my demon flesh"
@@ -193,7 +193,7 @@ func test_calculate_damage_from_obstacle{
     let (zero_vs_curse) = CombatStats.calculate_damage_from_obstacle(
         g0_curse, zero_item
     );
-    assert zero_vs_curse = 12;
+    assert zero_vs_curse = 15;
 
     return ();
 }

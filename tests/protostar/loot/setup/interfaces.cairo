@@ -72,6 +72,7 @@ namespace IAdventurer {
         order: felt,
         image_hash_1: felt,
         image_hash_2: felt,
+        interface_address: felt
     ) -> (adventurer_token_id: Uint256) {
     }
     func mint_with_starting_weapon(
@@ -83,6 +84,7 @@ namespace IAdventurer {
         image_hash_1: felt,
         image_hash_2: felt,
         weapon_id: felt,
+        interface_address: felt
     ) -> (adventurer_token_id: Uint256, item_token_id: Uint256) {
     }
 
@@ -106,7 +108,7 @@ namespace IAdventurer {
     }
     func rob_king(adventurer_token_id: Uint256) -> (success: felt) {
     }
-    func kill_theif(adventurer_token_id: Uint256) -> (success: felt) {
+    func kill_thief(adventurer_token_id: Uint256) -> (success: felt) {
     }
     func claim_king_loot() -> (success: felt) {
     }

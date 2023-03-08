@@ -157,7 +157,7 @@ async def all_market(network):
     prompt=True,
 )
 @click.option(
-    "--adventurer",
+    "--adventurer_token_id",
     is_flag=False,
     metavar="<columns>",
     type=click.STRING,
@@ -172,16 +172,16 @@ async def all_market(network):
     help="price for item, must be greater than past bid or above 2",
     prompt=True,
 )
-async def bid(network, loot_token_id, adventurer, price):
+async def bid(network, loot_token_id, adventurer_token_id, price):
     """
     Bid on an item. You can only bid on an item that is currently for sale and has not expired in bid.
     """
     config = Config(nile_network=network)
 
     print("🗡 Bidding on Item ...")
-    
-    token_ids = [c.strip() for c in loot_token_id.split(',')]
-    prices = [c.strip() for c in price.split(',')]
+
+    token_ids = [c.strip() for c in loot_token_id.split(",")]
+    prices = [c.strip() for c in price.split(",")]
 
     if len(token_ids) > 1:
         await wrapped_send(
@@ -189,7 +189,10 @@ async def bid(network, loot_token_id, adventurer, price):
             signer_alias=config.USER_ALIAS,
             contract_alias="proxy_LootMarketArcade",
             function="bid_on_item",
-            arguments=[[*uint(token_id), *uint(adventurer), price] for token_id, price in zip(token_ids, prices)],
+            arguments=[
+                [*uint(token_id), *uint(adventurer_token_id), price]
+                for token_id, price in zip(token_ids, prices)
+            ],
         )
     else:
         await wrapped_send(
@@ -197,8 +200,8 @@ async def bid(network, loot_token_id, adventurer, price):
             signer_alias=config.USER_ALIAS,
             contract_alias="proxy_LootMarketArcade",
             function="bid_on_item",
-            arguments=[*uint(token_ids[0]), *uint(adventurer), prices[0]],
-        )  
+            arguments=[*uint(token_ids[0]), *uint(adventurer_token_id), prices[0]],
+        )
 
 
 @loot.command()
@@ -212,7 +215,7 @@ async def bid(network, loot_token_id, adventurer, price):
     prompt=True,
 )
 @click.option(
-    "--adventurer",
+    "--adventurer_token_id",
     is_flag=False,
     metavar="<columns>",
     type=click.STRING,
@@ -227,7 +230,7 @@ async def claim(network, loot_token_id, adventurer):
 
     print("🗡 Claiming item ...")
 
-    token_ids = [c.strip() for c in loot_token_id.split(',')]
+    token_ids = [c.strip() for c in loot_token_id.split(",")]
 
     if len(token_ids) > 1:
         await wrapped_send(
@@ -245,6 +248,7 @@ async def claim(network, loot_token_id, adventurer):
             function="claim_item",
             arguments=[*uint(token_ids[0]), *uint(adventurer)],
         )
+
 
 @loot.command()
 @click.option("--network", default="goerli")
@@ -491,7 +495,7 @@ async def equip(network, adventurer_token_id, loot_token_id):
     #     arguments=[*uint(adventurer_token_id), *uint(loot_token_id)],
     # )
 
-    token_ids = [c.strip() for c in loot_token_id.split(',')]
+    token_ids = [c.strip() for c in loot_token_id.split(",")]
 
     if len(token_ids) > 1:
         await wrapped_send(
@@ -499,7 +503,9 @@ async def equip(network, adventurer_token_id, loot_token_id):
             signer_alias=config.USER_ALIAS,
             contract_alias="proxy_Adventurer",
             function="equip_item",
-            arguments=[[*uint(adventurer_token_id), *uint(token_id)] for token_id in token_ids],
+            arguments=[
+                [*uint(adventurer_token_id), *uint(token_id)] for token_id in token_ids
+            ],
         )
     else:
         await wrapped_send(

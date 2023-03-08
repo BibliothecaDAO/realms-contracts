@@ -208,9 +208,9 @@ func test_calculate_damage_to_beast{syscall_ptr: felt*, pedersen_ptr: HashBuilti
     // 16 - 2 = 14HP damage
     let (mace_vs_basilik) = CombatStats.calculate_damage_to_beast(xp_1_basilisk, greatness_8_mace, adventurer_state, 1);
 
-    // adventurer boost = 14 * (1 + ((1-1) * 0.1)) = 14
+    // adventurer boost = 14 * (1 + ((1-1) * 0.1)) + 1 = 14
     // no critical hit
-    assert mace_vs_basilik = 14;
+    assert mace_vs_basilik = 15;
 
     // TODO: Test attacking without weapon (melee)
      // let (weapon) = TestUtils.create_zero_item(); // no weapon (melee attack)
@@ -234,12 +234,12 @@ func test_calculate_damage_from_beast{syscall_ptr: felt*, pedersen_ptr: HashBuil
     
     // beast_attack = 2 * (6-1) * 1 = 10
     // armor_defense = 1 * (6-4) = 2
-    // 10 attack - 2 defense = 8hp damage
+    // 10 attack - 2 defense + 1 = 9hp damage
     let (local damage) = CombatStats.calculate_damage_from_beast(beast, armor, 1);
 
     // beast level boost = 8 * ((1-1) + 2 * 0.1) = 9
     // no critical
-    assert damage = 8;
+    assert damage = 9;
 
     // TODO: Test defending without armor
 
@@ -265,27 +265,25 @@ func test_calculate_damage_from_beast_late_game{syscall_ptr: felt*, pedersen_ptr
 
     let (cloth_damage) = CombatStats.calculate_damage_from_beast(beast, cloth_armor, 1);
 
-    assert cloth_damage = 20;
+    assert cloth_damage = 21;
 
     let (metal_armor) = TestUtils.create_item(78, 20); // lvl 20 ornate chestplate(rank 2)
     
     let (metal_damage) = CombatStats.calculate_damage_from_beast(beast, metal_armor, 1);
 
-    assert metal_damage = 40;
+    assert metal_damage = 42;
 
     let (hide_armor) = TestUtils.create_item(48, 20); // lvl 20 dragonskin armor (rank 2)
 
     let (hide_damage) = CombatStats.calculate_damage_from_beast(beast, hide_armor, 1);
 
-    assert hide_damage = 60;
-
-    // TODO: Test defending without armor
+    assert hide_damage = 63;
 
     let (no_armor) = TestUtils.create_item_with_names(0, 0, 1, 1, 1); // no item
 
     let (no_armor_damage) = CombatStats.calculate_damage_from_beast(beast, no_armor, 1);
 
-    assert no_armor_damage = 300;
+    assert no_armor_damage = 303;
 
     return ();
 }

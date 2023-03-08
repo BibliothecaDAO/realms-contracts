@@ -47,8 +47,6 @@ async def send_multi(self, to, method, calldata, nonce=None):
         max_fee=config.MAX_FEE,
     )
 
-    print([[target_address, method, c] for c in calldata])
-
     # params = []
     # # params.append(str(len(call_array)))
     # # params.extend([str(elem) for sublist in call_array for elem in sublist])

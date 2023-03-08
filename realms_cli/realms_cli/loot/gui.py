@@ -89,6 +89,7 @@ def get_adventurer(sender, app_data, user_dat):
     update_health(value)
     update_equipped_items(adventurer_out)
     update_stats(adventurer_out)
+    update_level_xp(adventurer_out)
     dpg.delete_item("get_adventurer_load")
     dpg.delete_item("loader")
 
@@ -180,8 +181,9 @@ def explore(sender, app_data, user_data):
     print(out)
     update_gold(adventurer)
     update_health(adventurer)
-    adventurer_out = asyncio.run(_get_adventurer("goerli", adventurer))
+    adventurer_out = asyncio.run(_get_adventurer("goerli", value=adventurer))
     update_beast(adventurer_out[26])
+    update_level_xp(adventurer_out)
     dpg.delete_item("explore_load")
     dpg.delete_item("loader")
 
@@ -203,6 +205,9 @@ def attack_beast(sender, app_data, user_data):
     print(out)
     update_gold(adventurer)
     update_health(adventurer)
+    adventurer_out = asyncio.run(_get_adventurer("goerli", value=adventurer))
+    update_beast(adventurer_out[26])
+    update_level_xp(adventurer_out)
     dpg.delete_item("attack_load")
     dpg.delete_item("loader")
 
@@ -359,24 +364,23 @@ async def get_market_items():
 
         out = out.split(" ")
         out.insert(0, str(i + start))
-        print(out)
 
         print_items.append(out)
-        items.append(f"{config.LOOT_ITEMS[int(out[1]) - 1]} - {out[-2]}")
+        items.append(f"{config.LOOT_ITEMS[int(out[1]) - 1]} - {out[0]}")
     print_loot_and_bid(print_items)
     return items
 
 
 def update_items():
     items = asyncio.run(get_market_items())
-    dpg.configure_item("loot_token_id", items=items)
-    dpg.configure_item("bid_loot_id", items=items)
-    dpg.configure_item("equip_loot_id", items=items)
-    dpg.configure_item("unequip_loot_id", items=items)
+    dpg.configure_item("item_id", items=(items))
+    dpg.configure_item("bid_loot_id", items=(items))
+    dpg.configure_item("equip_loot_id", items=(items))
+    dpg.configure_item("unequip_loot_id", items=(items))
 
 
 def get_item_market():
-    loot_token_id = dpg.get_value("item_id")
+    loot_token_id = dpg.get_value("item_id").split(" - ")[-1]
     command = ["nile", "loot", "market", "--loot_token_id", loot_token_id]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
@@ -384,8 +388,8 @@ def get_item_market():
 
 def bid_on_item(sender, app_data, user_data):
     dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
-    loot_token_id = dpg.get_value(tag="loot_token_id")
-    adventurer_id = dpg.get_value(tag="bid_adventurer_id").split(" - ")[-1]
+    loot_token_id = dpg.get_value("bid_loot_id").split(" - ")[-1]
+    adventurer_id = dpg.get_value("bid_adventurer_id").split(" - ")[-1]
     price = dpg.get_value("bid_price")
     command = [
         "nile",
@@ -404,6 +408,26 @@ def bid_on_item(sender, app_data, user_data):
     dpg.delete_item("loader")
 
 
+def claim_item(sender, app_data, user_data):
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
+    loot_token_id = dpg.get_value("bid_loot_id").split(" - ")[-1]
+    adventurer_id = dpg.get_value("bid_adventurer_id").split(" - ")[-1]
+    price = dpg.get_value("bid_price")
+    command = [
+        "nile",
+        "loot",
+        "claim",
+        "--loot_token_id",
+        loot_token_id,
+        "--adventurer_token_id",
+        adventurer_id,
+    ]
+    out = subprocess.check_output(command).strip().decode("utf-8")
+    print(out)
+    update_gold(adventurer_id)
+    dpg.delete_item("loader")
+
+
 def upgrade_stat(sender, app_data, user_data):
     dpg.add_text(
         "Upgrading stat",
@@ -412,8 +436,8 @@ def upgrade_stat(sender, app_data, user_data):
         parent="adventurers",
     )
     dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
-    adventurer = dpg.get_value(tag="upgrade_adventurer_id").split(" - ")[-1]
-    stat = dpg.get_value(tag="stat_id")
+    adventurer = dpg.get_value("upgrade_adventurer_id").split(" - ")[-1]
+    stat = dpg.get_value("stat")
     stat_id = [k for k, v in STATS.items() if v == stat][0]
     command = [
         "nile",
@@ -422,10 +446,11 @@ def upgrade_stat(sender, app_data, user_data):
         "--adventurer_token_id",
         adventurer,
         "--stat_id",
-        stat_id,
+        str(stat_id),
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
-    print(out)
+    adventurer_out = asyncio.run(_get_adventurer("goerli", adventurer))
+    update_stats(adventurer_out)
     dpg.delete_item("upgrade_stat_load")
     dpg.delete_item("loader")
 
@@ -530,7 +555,6 @@ def update_thief():
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     out = out.split(" ")
-    print(out)
     king_out = out[-3].split("\n")
     gold_command = ["nile", "loot", "balance", "--adventurer_token_id", king_out[-1]]
     gold_out = subprocess.check_output(gold_command).strip().decode("utf-8")
@@ -563,6 +587,11 @@ def update_health(adventurer_token_id):
     adventurer_out = asyncio.run(_get_adventurer("goerli", adventurer_token_id))
     print(f"💚 Health is now {adventurer_out[7]}")
     dpg.set_value("health", adventurer_out[7])
+
+
+def update_level_xp(adventurer_data):
+    dpg.set_value("level", adventurer_data[8])
+    dpg.set_value("xp", adventurer_data[16])
 
 
 def update_equipped_items(adventurer_data):
@@ -761,6 +790,15 @@ if __name__ == "__main__":
             with dpg.group():
                 dpg.add_text("Beast")
                 dpg.add_text(tag="beast", default_value="-", color=[178, 34, 34])
+            with dpg.group():
+                dpg.add_text("Progression")
+                with dpg.group(horizontal=True):
+                    with dpg.group(horizontal=True):
+                        dpg.add_text("Level")
+                        dpg.add_text(tag="level", default_value="-")
+                    with dpg.group(horizontal=True):
+                        dpg.add_text("XP")
+                        dpg.add_text(tag="xp", default_value="-")
         dpg.add_spacer(height=4)
         dpg.add_separator()
         dpg.add_spacer(height=4)
@@ -800,7 +838,9 @@ if __name__ == "__main__":
                     hint="Min 3",
                     width=100,
                 )
-                dpg.add_button(label="Bid", callback=bid_on_item)
+                with dpg.group(horizontal=True):
+                    dpg.add_button(label="Bid", callback=bid_on_item)
+                    dpg.add_button(label="Claim", callback=claim_item)
             with dpg.group():
                 dpg.add_text("Equip Item")
                 dpg.add_combo(

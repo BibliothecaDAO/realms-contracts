@@ -76,12 +76,13 @@ def mint_realm(realm_token_id, network):
    - Windows: https://www.python.org/downloads/release/python-3916/
    - Mac: Intall homebrew, then `brew install python@3.9`
    - Linux: https://linuxize.com/post/how-to-install-python-3-9-on-ubuntu-20-04/?utm_content=cmp-true
-2. `python3 -m venv survivorvenv` or `python -m venv survivorvenv`
-3. - `source survivorvenv/bin/activate` on mac/linux
+2. Insstall virtual environment package with `pip install virtualenv` or `pip3 install virtualenv`
+3. `python3 -m venv survivorvenv` or `python -m venv survivorvenv`
+4. - `source survivorvenv/bin/activate` on mac/linux
    - `survivorvenv\Scripts\activate` on windows
-4. `pip3 install realms_cli/` or `pip install realms_cli/`
+5. `pip install realms_cli/` or `pip3 install realms_cli/`
 
-   If fastecdsa fails then libraries needed for fastecdsa:
+   **_If fastecdsa fails then libraries needed for fastecdsa then do the following, otherwise skip:_**
 
    - On mac: `brew install gmp gcc`
    - On linux: `sudo apt install gmp python-dev libgmp3-dev`
@@ -91,5 +92,5 @@ def mint_realm(realm_token_id, network):
        If fastecdsa architect error then run (happens on mac sometimes):
        export ARCHFLAGS="-arch x86_64"
 
-5. `./scripts/startup.sh`
-6. `python realms_cli/realms_cli/loot/gui.py`
+6. `./scripts/startup.sh`
+7. `python realms_cli/realms_cli/loot/gui.py`
