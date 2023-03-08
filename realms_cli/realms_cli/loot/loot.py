@@ -222,7 +222,7 @@ async def bid(network, loot_token_id, adventurer_token_id, price):
     help="adventurer id for the bid, you have to bid as an adventurer not a wallet",
     prompt=True,
 )
-async def claim(network, loot_token_id, adventurer):
+async def claim(network, loot_token_id, adventurer_token_id):
     """
     Claim item. You can only claim past the expiry time.
     """
@@ -238,7 +238,9 @@ async def claim(network, loot_token_id, adventurer):
             signer_alias=config.USER_ALIAS,
             contract_alias="proxy_LootMarketArcade",
             function="claim_item",
-            arguments=[[*uint(token_id), *uint(adventurer)] for token_id in token_ids],
+            arguments=[
+                [*uint(token_id), *uint(adventurer_token_id)] for token_id in token_ids
+            ],
         )
     else:
         await wrapped_send(
@@ -246,7 +248,7 @@ async def claim(network, loot_token_id, adventurer):
             signer_alias=config.USER_ALIAS,
             contract_alias="proxy_LootMarketArcade",
             function="claim_item",
-            arguments=[*uint(token_ids[0]), *uint(adventurer)],
+            arguments=[*uint(token_ids[0]), *uint(adventurer_token_id)],
         )
 
 
@@ -486,14 +488,6 @@ async def equip(network, adventurer_token_id, loot_token_id):
     config = Config(nile_network=network)
 
     print("🫴 Equiping item ...")
-
-    # await wrapped_send(
-    #     network=config.nile_network,
-    #     signer_alias=config.USER_ALIAS,
-    #     contract_alias="proxy_Adventurer",
-    #     function="equip_item",
-    #     arguments=[*uint(adventurer_token_id), *uint(loot_token_id)],
-    # )
 
     token_ids = [c.strip() for c in loot_token_id.split(",")]
 

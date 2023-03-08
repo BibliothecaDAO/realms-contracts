@@ -74,9 +74,9 @@ def mint_realm(realm_token_id, network):
 
 1. Install python3.9
    - Windows: https://www.python.org/downloads/release/python-3916/
-   - Mac: Intall homebrew, then `brew install python@3.9`
+   - Mac: Intall homebrew `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"`, then `brew install python@3.9`
    - Linux: https://linuxize.com/post/how-to-install-python-3-9-on-ubuntu-20-04/?utm_content=cmp-true
-2. Insstall virtual environment package with `pip install virtualenv` or `pip3 install virtualenv`
+2. Install virtual environment package with `pip install virtualenv` or `pip3 install virtualenv`
 3. `python3 -m venv survivorvenv` or `python -m venv survivorvenv`
 4. - `source survivorvenv/bin/activate` on mac/linux
    - `survivorvenv\Scripts\activate` on windows
