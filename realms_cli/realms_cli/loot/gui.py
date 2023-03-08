@@ -11,6 +11,7 @@ from realms_cli.loot.getters import (
     _get_beast,
     _get_adventurer,
     print_loot_and_bid,
+    print_loot,
 )
 
 
@@ -181,7 +182,7 @@ def explore(sender, app_data, user_data):
     print(out)
     update_gold(adventurer)
     update_health(adventurer)
-    adventurer_out = asyncio.run(_get_adventurer("goerli", value=adventurer))
+    adventurer_out = asyncio.run(_get_adventurer("goerli", adventurer))
     update_beast(adventurer_out[26])
     update_level_xp(adventurer_out)
     dpg.delete_item("explore_load")
@@ -289,7 +290,7 @@ def unequip_item(sender, app_data, user_data):
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
     adventurer_out = asyncio.run(_get_adventurer("goerli", adventurer))
-    update_stats(adventurer_out)
+    update_equipped_items(adventurer_out)
     dpg.delete_item("unequip_load")
     dpg.delete_item("loader")
 
@@ -336,7 +337,7 @@ def mint_daily_items(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    update_items()
+    update_market_items()
     dpg.delete_item("mint_items_load")
     dpg.delete_item("loader")
 
@@ -383,10 +384,59 @@ async def get_market_items():
     return items
 
 
-def update_items():
+async def get_owned_items():
+    config = Config(nile_network="goerli")
+    print("🗡 Getting owned items ...")
+
+    out = await wrapped_proxy_call(
+        network=config.nile_network,
+        contract_alias="proxy_LootMarketArcade",
+        abi="artifacts/abis/LootMarketArcade.json",
+        function="balanceOf",
+        arguments=[config.USER_ADDRESS],
+    )
+
+    out = out.split(" ")
+
+    all_items = []
+
+    print_items = []
+
+    for i in range(0, int(out[0])):
+        item = await wrapped_proxy_call(
+            network=config.nile_network,
+            contract_alias="proxy_LootMarketArcade",
+            abi="artifacts/abis/LootMarketArcade.json",
+            function="tokenOfOwnerByIndex",
+            arguments=[config.USER_ADDRESS, *uint(i)],
+        )
+
+        id = item.split(" ")
+
+        out = await wrapped_proxy_call(
+            network=config.nile_network,
+            contract_alias="proxy_LootMarketArcade",
+            abi="artifacts/abis/LootMarketArcade.json",
+            function="get_item_by_token_id",
+            arguments=[*uint(id[0])],
+        )
+        out = out.split(" ")
+        out.insert(0, str(int(id[0])))
+        print_items.append(out)
+        all_items.append(f"{config.LOOT_ITEMS[int(out[1]) - 1]} - {out[0]}")
+
+    print_loot(print_items)
+    return all_items
+
+
+def update_market_items():
     items = asyncio.run(get_market_items())
     dpg.configure_item("item_id", items=(items))
     dpg.configure_item("bid_loot_id", items=(items))
+
+
+def update_owned_items():
+    items = asyncio.run(get_owned_items())
     dpg.configure_item("equip_loot_id", items=(items))
     dpg.configure_item("unequip_loot_id", items=(items))
 
@@ -475,6 +525,7 @@ def claim_item(sender, app_data, user_data):
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
     update_gold(adventurer_id)
+    update_owned_items()
     dpg.delete_item("claim_item_load")
     dpg.delete_item("loader")
 
@@ -698,7 +749,8 @@ if __name__ == "__main__":
     dpg.setup_dearpygui()
     print("Getting adventurers...")
     adventurers = asyncio.run(get_adventurers())
-    items = asyncio.run(get_market_items())
+    market_items = asyncio.run(get_market_items())
+    owned_items = asyncio.run(get_owned_items())
 
     with dpg.window(tag="adventurers", label="Adventurers", width=1000, height=1000):
         print("Adventurers GUI running ...")
@@ -868,7 +920,7 @@ if __name__ == "__main__":
                 dpg.add_combo(
                     label="Item Id",
                     tag="item_id",
-                    items=(items),
+                    items=(market_items),
                     width=100,
                 )
                 dpg.add_button(label="Get Item", callback=get_item_market)
@@ -885,7 +937,7 @@ if __name__ == "__main__":
                 dpg.add_combo(
                     label="Loot Token ID",
                     tag="bid_loot_id",
-                    items=(items),
+                    items=(market_items),
                     width=100,
                 )
                 dpg.add_input_text(
@@ -915,7 +967,7 @@ if __name__ == "__main__":
                 dpg.add_combo(
                     label="Loot Token ID",
                     tag="equip_loot_token_id",
-                    items=(items),
+                    items=(owned_items),
                     width=100,
                 )
                 dpg.add_input_text(
@@ -936,7 +988,7 @@ if __name__ == "__main__":
                 dpg.add_combo(
                     label="Loot Token ID",
                     tag="unequip_loot_token_id",
-                    items=(items),
+                    items=(owned_items),
                     width=100,
                 )
                 dpg.add_button(label="Unequip", callback=unequip_item)

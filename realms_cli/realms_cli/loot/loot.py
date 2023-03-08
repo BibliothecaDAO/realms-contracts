@@ -260,7 +260,7 @@ async def bag(network):
     """
     config = Config(nile_network=network)
 
-    print("🗡 Claiming item ...")
+    print("🗡 Getting owned items ...")
 
     out = await wrapped_proxy_call(
         network=config.nile_network,
