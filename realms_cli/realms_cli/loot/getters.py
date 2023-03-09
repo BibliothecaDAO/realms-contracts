@@ -81,6 +81,20 @@ def print_adventurer(out_list):
     console.print(table)
 
 
+async def _get_gold_balance(network, adventurer_token_id):
+    config = Config(nile_network=network)
+
+    out = await wrapped_proxy_call(
+        network=config.nile_network,
+        contract_alias="proxy_Beast",
+        abi="artifacts/abis/Beast.json",
+        function="balance_of",
+        arguments=[*uint(adventurer_token_id)],
+    )
+
+    return out
+
+
 async def _get_loot(loot_token_id, network):
     config = Config(nile_network=network)
 

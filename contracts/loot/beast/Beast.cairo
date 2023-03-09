@@ -716,11 +716,11 @@ func _subtract_from_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
 ) {
     let (current_balance) = balance_of(adventurer_token_id);
 
-    let negative = is_le(current_balance - subtraction, 0);
+    let check_balance = is_le(0, current_balance - subtraction);
 
     // add in overflow assert so you can't spend more than what you have.
     with_attr error_message("Beast: Not enough gold in balance.") {
-        assert negative = FALSE;
+        assert check_balance = TRUE;
     }
 
     goldBalance.write(adventurer_token_id, current_balance - subtraction);

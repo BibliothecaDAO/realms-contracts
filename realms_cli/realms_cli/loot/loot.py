@@ -16,6 +16,7 @@ from realms_cli.loot.getters import (
     print_adventurer,
     print_beast_img,
     print_player,
+    _get_gold_balance,
 )
 from realms_cli.loot.constants import (
     BEASTS,
@@ -396,6 +397,8 @@ async def explore(ctx, network, adventurer_token_id):
 
     pre_adventurer = await _get_adventurer(network, adventurer_token_id)
 
+    pre_gold = await _get_gold_balance(network, adventurer_token_id)
+
     send_out = await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
@@ -412,9 +415,11 @@ async def explore(ctx, network, adventurer_token_id):
 
     adventurer_out = await _get_adventurer(network, adventurer_token_id)
 
+    gold_out = await _get_gold_balance(network, adventurer_token_id)
+
     if int(result[0], 16) == 0:
         print(
-            f"🤔 You discovered nothing, but got some {str(int(pre_adventurer[16]) - int(adventurer_out[16]))} xp anyway!"
+            f"🤔 You discovered nothing, but got {str(int(adventurer_out[16]) - int(pre_adventurer[16]))} xp anyway!"
         )
     if int(result[0], 16) == 1:
         print("🧌 You have discovered a beast")
@@ -425,7 +430,15 @@ async def explore(ctx, network, adventurer_token_id):
             f"🪤 You were hit by {OBSTACLES[int(result[1],16)]} and took {str(int(pre_adventurer[7]) - int(adventurer_out[7]))} damage!"
         )
     if int(result[0], 16) == 3:
-        print(f"🎉 You discovered {ITEM_DISCOVERY_TYPES[int(result[1],16)]}")
+        print(f"🎉 You discovered loot!")
+        if int(result[1], 16) == 0:
+            print(f"🤑 You discovered {str(int(pre_gold) - int(gold_out))} gold")
+        if int(result[1], 16) == 1:
+            print(f"🗡️ You discovered an item!")
+        if int(result[1], 16) == 2:
+            print(
+                f"🧪 You discovered a potion for {str(int(adventurer_out[7]) - int(pre_adventurer[7]))} health!"
+            )
 
 
 @loot.command()
