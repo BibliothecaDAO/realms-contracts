@@ -413,7 +413,9 @@ async def explore(ctx, network, adventurer_token_id):
     adventurer_out = await _get_adventurer(network, adventurer_token_id)
 
     if int(result[0], 16) == 0:
-        print("🤔 You discovered nothing!")
+        print(
+            f"🤔 You discovered nothing, but got some {str(int(pre_adventurer[16]) - int(adventurer_out[16]))} xp anyway!"
+        )
     if int(result[0], 16) == 1:
         print("🧌 You have discovered a beast")
         print_beast_img(adventurer_out[26])
