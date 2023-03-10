@@ -353,6 +353,32 @@ namespace AdventurerLib {
         return ([cast_adventurer],);
     }
 
+    // helper to get value at location in State
+    func get_state{syscall_ptr: felt*, range_check_ptr}(
+        index: felt, unpacked_adventurer: AdventurerDynamic
+    ) -> (value: felt) {
+        alloc_locals;
+        let (__fp__, _) = get_fp_and_pc();
+
+        let adventurer_fields: felt* = &unpacked_adventurer;
+        let value = adventurer_fields[index];
+
+        return (value,);
+    }
+
+    func get_item{syscall_ptr: felt*, range_check_ptr}(
+        item: Item, unpacked_adventurer: AdventurerDynamic
+    ) -> (item_id: felt) {
+        alloc_locals;
+
+        // pass index shift and Item slot to find what item to update
+        let (item_id) = get_state(
+            ItemShift + item.Slot, unpacked_adventurer
+        );
+
+        return (item_id,);
+    }
+
     func equip_item{syscall_ptr: felt*, range_check_ptr}(
         item_token_id: felt, item: Item, unpacked_adventurer: AdventurerDynamic
     ) -> (new_unpacked_adventurer: AdventurerDynamic) {

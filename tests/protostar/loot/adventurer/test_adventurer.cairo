@@ -153,6 +153,22 @@ func test_cast{
 }
 
 @external
+func test_get_state{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+
+    let (state) = get_adventurer_state();
+
+    let (adventurer_static, adventurer_dynamic) = AdventurerLib.split_data(state);
+
+    let (c) = AdventurerLib.get_state(0, adventurer_dynamic);
+
+    // Get 100 health
+    assert c = 100;
+    
+    return ();
+}
+
+@external
 func test_equip{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }() {

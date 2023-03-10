@@ -216,6 +216,27 @@ func test_equip_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     );
     assert adventurer_item.Id = ItemIds.Wand;
 
+    // try equiping item to same slot
+
+    %{
+        stop_prank_loot()
+        stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address)
+    %}
+
+    ILoot.mint(loot_address, account_1_address, Uint256(1, 0));
+
+    %{
+        stop_prank_loot()
+        stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
+    %}
+
+    // make sure adventurer and bag are set to 0
+    ILoot.set_item_by_id(loot_address, Uint256(1, 0), ItemIds.GhostWand, 0, 0, 0, 0);
+
+    %{ expect_revert(error_message="Adventurer: Item already equipped in slot")%}
+
+    IAdventurer.equip_item(adventurer_address, Uint256(1, 0), Uint256(1, 0));
+
     return ();
 }
 

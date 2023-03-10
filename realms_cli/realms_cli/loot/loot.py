@@ -432,7 +432,7 @@ async def explore(ctx, network, adventurer_token_id):
     if int(result[0], 16) == 3:
         print(f"🎉 You discovered loot!")
         if int(result[1], 16) == 0:
-            print(f"🤑 You discovered {str(int(pre_gold) - int(gold_out))} gold")
+            print(f"🤑 You discovered {str(int(gold_out) - int(pre_gold))} gold")
         if int(result[1], 16) == 1:
             print(f"🗡️ You discovered an item!")
         if int(result[1], 16) == 2:

@@ -57,6 +57,7 @@ from contracts.loot.constants.adventurer import (
     DiscoveryType,
     ItemDiscoveryType,
     TheifState,
+    ItemShift,
 )
 from contracts.loot.constants.beast import Beast
 from contracts.loot.constants.obstacle import ObstacleUtils, ObstacleConstants
@@ -301,6 +302,13 @@ func equip_item{
     let (owner) = IERC721.ownerOf(loot_address, item_token_id);
     let (caller) = get_caller_address();
     assert owner = caller;
+
+    // Check the adventurer does not currently hold anything in slot
+    let (equipped_item) = AdventurerLib.get_item(item, adventurer_dynamic_);
+    
+    with_attr error_message("Adventurer: Item already equipped in slot") {
+        assert equipped_item = FALSE;
+    }
 
     // Convert token to Felt
     let (token_to_felt) = _uint_to_felt(item_token_id);

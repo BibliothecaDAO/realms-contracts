@@ -50,6 +50,8 @@ if file_does_not_exist "goerli.accounts.json"; then
 
     nile compile --directory contracts/loot
     nile compile contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo
+    nile compile contracts/settling_game/tokens/Realms_ERC721_Mintable.cairo
+    nile compile contracts/settling_game/proxy/PROXY_Logic.cairo
 
     source realms_cli/.env.nile
 else
