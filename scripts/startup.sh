@@ -60,7 +60,9 @@ if file_does_not_exist "goerli.accounts.json"; then
 
     export CAIRO_PATH="$CAIRO_PATH:$current_dir/lib/cairo_graphs/src:$current_dir/lib/cairo_contracts/src:$current_dir/lib/cairo_math_64x61/contracts:$current_dir/lib/guild_contracts"
 
-    nile compile --directory contracts/loot
+    nile compile contracts/loot/adventurer/Adventurer.cairo
+    nile compile contracts/loot/beast/Beast.cairo
+    nile compile contracts/loot/loot/LootMarketArcade.cairo
     nile compile contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo
     nile compile contracts/settling_game/tokens/Realms_ERC721_Mintable.cairo
     nile compile contracts/settling_game/proxy/PROXY_Logic.cairo
