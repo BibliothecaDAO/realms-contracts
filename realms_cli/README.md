@@ -77,10 +77,13 @@ def mint_realm(realm_token_id, network):
    - Mac: Intall homebrew `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"`, then `brew install python@3.9`
    - Linux: https://linuxize.com/post/how-to-install-python-3-9-on-ubuntu-20-04/?utm_content=cmp-true
 2. Install virtual environment package with `pip install virtualenv` or `pip3 install virtualenv`
-3. `python3 -m venv survivorvenv` or `python -m venv survivorvenv`
-4. - `source survivorvenv/bin/activate` on mac/linux
+3. Install git, https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
+4. Clone realms repo: `git clone https://github.com/BibliothecaDAO/realms-contracts.git`
+5. Switch to the development branch `git checkout feat/adventurer-mart`
+6. `python3 -m venv survivorvenv` or `python -m venv survivorvenv`
+7. - `source survivorvenv/bin/activate` on mac/linux
    - `survivorvenv\Scripts\activate` on windows
-5. `pip install realms_cli/` or `pip3 install realms_cli/`
+8. `pip install realms_cli/` or `pip3 install realms_cli/`
 
    **_If fastecdsa fails then libraries needed for fastecdsa then do the following, otherwise skip:_**
 
@@ -92,5 +95,5 @@ def mint_realm(realm_token_id, network):
        If fastecdsa architect error then run (happens on mac sometimes):
        export ARCHFLAGS="-arch x86_64"
 
-6. `./scripts/startup.sh`
-7. `python realms_cli/realms_cli/loot/gui.py`
+9. `./scripts/startup.sh`
+10. `python realms_cli/realms_cli/loot/gui.py`
