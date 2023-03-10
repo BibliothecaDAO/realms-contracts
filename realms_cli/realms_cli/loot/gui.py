@@ -667,10 +667,10 @@ def update_thief():
             adventurer_out = felt_to_str(int(adventurer_out[3]))
         print(f"👑 King is {adventurer_out} - {king_out[-1]}")
         print(f"⛳️ Reign started at {heist_time}")
-        print(f"💰 King's gold balance is now {gold_out[-1]}")
+        print(f"💰 King's gold balance is now {gold_out}")
         dpg.set_value("thief_adventurer", king_out[-1])
         dpg.set_value("thieves_reign", heist_time)
-        dpg.set_value("thieves_gold", gold_out[-1])
+        dpg.set_value("thieves_gold", gold_out)
     else:
         print(f"🥷 There is no thief")
         dpg.set_value("thief_adventurer", "-")
