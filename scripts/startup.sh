@@ -43,14 +43,18 @@ if file_does_not_exist "goerli.accounts.json"; then
 
     curl -L https://raw.githubusercontent.com/software-mansion/protostar/master/install.sh | bash
 
-    # Activate protostar path in mac
-    if [ -n "$ZSH_VERSION" ]; then
+    case $SHELL in
+    */zsh) 
+        # assume Zsh
         source ~/.zshrc
-    elif [ -n "$BASH_VERSION" ]; then
+        ;;
+    */bash)
+        # assume Bash
         source ~/.bashrc
-    else
-    # assume something else
-    fi
+        ;;
+    *)
+        # assume something else
+    esac
 
     protostar install
 
@@ -64,7 +68,7 @@ if file_does_not_exist "goerli.accounts.json"; then
     source realms_cli/.env.nile
 else
     # print user already has file
-    read "You already have goerli.accounts.json file"
+    read -p "You already have goerli.accounts.json file"
 
     source realms_cli/.env.nile        
 fi

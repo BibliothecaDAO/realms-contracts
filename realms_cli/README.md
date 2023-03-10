@@ -99,7 +99,7 @@ def mint_realm(realm_token_id, network):
 10. `./scripts/startup.sh`  
     Here you will need to enter your private key and address of the testnet wallet you want to use to play the game. The private key can be taken in the settings of your wallet, this should be a long number.
 11. `python realms_cli/realms_cli/loot/gui.py`
-12. If the above runs, contact distracteddev to get give you a minter role.
+12. If the above runs, contact distracteddev to give you a minter role.
 
 Once you are initially set up, if you close the session you will need to activate some things again to run:
 

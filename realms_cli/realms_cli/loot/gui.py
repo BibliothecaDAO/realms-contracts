@@ -657,10 +657,7 @@ def update_thief():
     out = subprocess.check_output(command).strip().decode("utf-8")
     out = out.split(" ")
     king_out = out[-3].split("\n")
-    gold_command = ["nile", "loot", "balance", "--adventurer_token_id", king_out[-1]]
-    gold_out = subprocess.check_output(gold_command).strip().decode("utf-8")
-    gold_out = gold_out.split(" ")
-    gold_out = gold_out[-1].split("\n")
+    gold_out = asyncio.run(_get_gold_balance("goerli", king_out[-1]))
     if king_out[-1] != "0":
         heist_time = datetime.datetime.fromtimestamp(int(out[-1]))
         adventurer_out = asyncio.run(_get_adventurer("goerli", king_out[-1]))
