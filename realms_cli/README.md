@@ -104,6 +104,6 @@ def mint_realm(realm_token_id, network):
 Once you are initially set up, if you close the session you will need to activate some things again to run:
 
 `git pull`  
-`source survivorvenv/bin/activate`
-`pip install realms_cli/`
+`source survivorvenv/bin/activate`  
+`pip install realms_cli/`  
 `source realms_cli/.env.nile`
