@@ -44,7 +44,13 @@ if file_does_not_exist "goerli.accounts.json"; then
     curl -L https://raw.githubusercontent.com/software-mansion/protostar/master/install.sh | bash
 
     # Activate protostar path in mac
-    source ~/.bashrc
+    if [ -n "$ZSH_VERSION" ]; then
+        source ~/.zshrc
+    elif [ -n "$BASH_VERSION" ]; then
+        source ~/.bashrc
+    else
+    # assume something else
+    fi
 
     protostar install
 
