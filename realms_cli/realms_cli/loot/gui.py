@@ -640,7 +640,7 @@ def update_gold(adventurer_token_id):
     if int(king_out[-1]) == int(adventurer_token_id):
         dpg.set_value("your_gold", "You are the king!")
         dpg.configure_item("your_gold", color=[0, 128, 0])
-    elif gold_out > king_out[-1]:
+    elif int(gold_out) > int(king_out[-1]):
         dpg.set_value("your_gold", "You have enough gold to be king!")
         dpg.configure_item("your_gold", color=[0, 128, 0])
     else:
