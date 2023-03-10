@@ -25,14 +25,18 @@ if file_does_not_exist "goerli.accounts.json"; then
     echo "export STARKNET_NETWORK=goerli" > "realms_cli/.env.nile"
     echo "export STARKNET_PRIVATE_KEY=${private_key}" > "realms_cli/.env.nile"
 
-    echo "${address}:/usr/local/lib/python3.9/site-packages/nile/artifacts/abis/Account.json:STARKNET_PRIVATE_KEY
-0x0069969ff7e92c67d57927d1aca0b114cf2e1d1ff61440e9dc1f36f2b3241179:artifacts/abis/PROXY_Logic.json:proxy_Arbiter_Loot
-0x044bf83de260761cc82442fe7cca9b6cc769749aa171ce04443f5f93e6d74b03:artifacts/abis/PROXY_Logic.json:proxy_ModuleController_Loot
-0x02043e0a1f5dea8a5d22cccbae31738ee139e56e8b43b9bde5b095bc20a1cb36:artifacts/abis/xoroshiro128_starstar.json:xoroshiro128_starstar
-0x047ce016a470b9fb3fd212ac0ce8e7cf035919a715e3381cfff9624eec1a3815:artifacts/abis/PROXY_Logic.json:proxy_Adventurer
-0x01b73f18ffe0364d5634ddebdd6a428110a183861e4bf962b7e6f69bb9ddc1e5:artifacts/abis/PROXY_Logic.json:proxy_LootMarketArcade
-0x0372dc195187c789a4f97487911fb3db895d180b2fc53bfa69f85f933e8424e6:artifacts/abis/PROXY_Logic.json:proxy_Beast
-0x0012c7b2514421e3c7c215287b7338fd6c59ae64d7b0be64a7887b9641f78c8f:artifacts/abis/Lords_ERC20_Mintable.json:Lords_ERC20_Mintable" > goerli.deployments.txt
+    current_dir=$(pwd)
+    base_dir=$(cd .. "$current_dir")
+
+    echo "${address}:$base_dir/survivorvenv/lib/python3.9/site-packages/nile/artifacts/abis/Account.json:STARKNET_PRIVATE_KEY
+0x07895e3320c1f1c62a73d465c8f4a412ae2042c55d0f274e8992518509c3cd1f:artifacts/abis/PROXY_Logic.json:proxy_Arbiter_Loot
+0x05cd498ac61b8b8fd72c9225cfff4b14a35486dd7727928f26d044996fc0824d:artifacts/abis/PROXY_Logic.json:proxy_ModuleController_Loot
+0x0761b04b53668ee5098c0d1f3d1c380b9d524b602569638012a6d6eb45fb6d1f:artifacts/abis/xoroshiro128_starstar.json:xoroshiro128_starstar
+0x035d755a23ec72df90819f584d9a1849bbc21fa77f96d25e03f1736883895248:artifacts/abis/PROXY_Logic.json:proxy_Adventurer
+0x065669e15c8f1a7f17b7062e4eb1b709b922b931b93c59577f1848a85c30ab1f:artifacts/abis/PROXY_Logic.json:proxy_LootMarketArcade
+0x000f4dbfe5d15792aa91025e42ee1d74c22bdeb1eef0b9bc19a37216377290c1:artifacts/abis/PROXY_Logic.json:proxy_Beast
+0x077d8cc306aee2bcf765026b995e17245e2afa95a52e53dee42f83b683c9b6f6:artifacts/abis/PROXY_Logic.json:proxy_Realms_ERC721_Mintable
+0x023b86be0b3da5c2fdbd80d1d57f1b54391588ba338acecdd014a208d47ba9ca:artifacts/abis/Lords_ERC20_Mintable.json:Lords_ERC20_Mintable" > goerli.deployments.txt
 
     # Print success message to console
     echo "File 'goerli.deployments.txt' created successfully."
@@ -43,8 +47,6 @@ if file_does_not_exist "goerli.accounts.json"; then
     source ~/.bashrc
 
     protostar install
-
-    current_dir=$(pwd)
 
     export CAIRO_PATH="$CAIRO_PATH:$current_dir/lib/cairo_graphs/src:$current_dir/lib/cairo_contracts/src:$current_dir/lib/cairo_math_64x61/contracts:$current_dir/lib/guild_contracts"
 

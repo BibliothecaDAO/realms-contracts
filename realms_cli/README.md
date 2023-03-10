@@ -72,21 +72,13 @@ def mint_realm(realm_token_id, network):
 
 ## Running GUI
 
-1. Install python3.9
+1. Check python version with `python --version`, if not 3.9 then install python3.9
    - Windows: https://www.python.org/downloads/release/python-3916/
-   - Mac: Intall homebrew `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"`, then `brew install python@3.9`
+   - Mac: Intall homebrew  
+     `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"`  
+     then `brew install python@3.9`
    - Linux: https://linuxize.com/post/how-to-install-python-3-9-on-ubuntu-20-04/?utm_content=cmp-true
-2. Install virtual environment package with `pip install virtualenv` or `pip3 install virtualenv`
-3. Install git, https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
-4. Clone realms repo: `git clone https://github.com/BibliothecaDAO/realms-contracts.git`
-5. Switch to the development branch `git checkout feat/adventurer-mart`
-6. `python3 -m venv survivorvenv` or `python -m venv survivorvenv`
-7. - `source survivorvenv/bin/activate` on mac/linux
-   - `survivorvenv\Scripts\activate` on windows
-8. `pip install realms_cli/` or `pip3 install realms_cli/`
-
-   **_If fastecdsa fails then libraries needed for fastecdsa then do the following, otherwise skip:_**
-
+2. Install gmp
    - On mac: `brew install gmp gcc`
    - On linux: `sudo apt install gmp python-dev libgmp3-dev`
    - On windows:
@@ -94,6 +86,24 @@ def mint_realm(realm_token_id, network):
      - gcc: https://www.guru99.com/c-gcc-install.html
        If fastecdsa architect error then run (happens on mac sometimes):
        export ARCHFLAGS="-arch x86_64"
+3. Install virtual environment package with  
+   `pip install virtualenv` or `pip3 install virtualenv` or `pip3.9 install virtualenv`
+4. Install git, https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
+5. Clone realms repo: `git clone https://github.com/BibliothecaDAO/realms-contracts.git`
+6. Switch to the development branch `git checkout feat/adventurer-mart`
+7. `python3 -m venv survivorvenv` or `python -m venv survivorvenv` or `python3.9 -m venv survivorvenv`
+8. - `source survivorvenv/bin/activate` on mac/linux
+   - `survivorvenv\Scripts\activate` on windows
+9. `pip install realms_cli/` or `pip3 install realms_cli/`
 
-9. `./scripts/startup.sh`
-10. `python realms_cli/realms_cli/loot/gui.py`
+10. `./scripts/startup.sh`  
+    Here you will need to enter your private key and address of the testnet wallet you want to use to play the game. The private key can be taken in the settings of your wallet, this should be a long number.
+11. `python realms_cli/realms_cli/loot/gui.py`
+12. If the above runs, contact distracteddev to get give you a minter role.
+
+Once you are initially set up, if you close the session you will need to activate some things again to run:
+
+`git pull`  
+`source survivorvenv/bin/activate`
+`pip install realms_cli/`
+`source realms_cli/.env.nile`

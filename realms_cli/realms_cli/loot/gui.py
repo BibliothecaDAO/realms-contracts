@@ -12,6 +12,7 @@ from realms_cli.loot.getters import (
     _get_adventurer,
     print_loot_and_bid,
     print_loot,
+    _get_gold_balance,
 )
 
 
@@ -630,19 +631,16 @@ def claim_king_loot(sender, app_data, user_data):
 
 
 def update_gold(adventurer_token_id):
-    command = ["nile", "loot", "balance", "--adventurer_token_id", adventurer_token_id]
-    out = subprocess.check_output(command).strip().decode("utf-8")
-    out = out.split(" ")
-    out = out[-1].split("\n")
-    print(f"💰 Gold balance is now {out[-1]}")
-    dpg.set_value("gold", out[-1])
+    gold_out = asyncio.run(_get_gold_balance("goerli", adventurer_token_id))
+    print(f"💰 Gold balance is now {gold_out}")
+    dpg.set_value("gold", gold_out)
     king_out = get_thief()
     king_out = king_out.split(" ")
     king_out = king_out[-3].split("\n")
     if int(king_out[-1]) == int(adventurer_token_id):
         dpg.set_value("your_gold", "You are the king!")
         dpg.configure_item("your_gold", color=[0, 128, 0])
-    elif out[-1] > king_out[-1]:
+    elif gold_out > king_out[-1]:
         dpg.set_value("your_gold", "You have enough gold to be king!")
         dpg.configure_item("your_gold", color=[0, 128, 0])
     else:
