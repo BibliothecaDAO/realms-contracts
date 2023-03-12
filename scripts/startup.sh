@@ -41,7 +41,7 @@ if file_does_not_exist "goerli.accounts.json"; then
     # Print success message to console
     echo "File 'goerli.deployments.txt' created successfully."
 
-    curl -L https://raw.githubusercontent.com/software-mansion/protostar/master/install.sh | bash
+    curl -L https://raw.githubusercontent.com/software-mansion/protostar/master/install.sh | bash -s -- -v 0.8.1
 
     case $SHELL in
     */zsh) 
