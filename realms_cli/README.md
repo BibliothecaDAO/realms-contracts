@@ -86,20 +86,21 @@ def mint_realm(realm_token_id, network):
      - gcc: https://www.guru99.com/c-gcc-install.html
        If fastecdsa architect error then run (happens on mac sometimes):
        export ARCHFLAGS="-arch x86_64"
-3. Install virtual environment package with  
+3. If linux, install gl `sudo apt-get update && sudo apt-get install -y libgl1-mesa-glx `
+4. Install virtual environment package with  
    `pip install virtualenv` or `pip3 install virtualenv` or `pip3.9 install virtualenv`
-4. Install git, https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
-5. Clone realms repo: `git clone https://github.com/BibliothecaDAO/realms-contracts.git`
-6. Switch to the development branch `git checkout feat/adventurer-mart`
-7. `python3 -m venv survivorvenv` or `python -m venv survivorvenv` or `python3.9 -m venv survivorvenv`
-8. - `source survivorvenv/bin/activate` on mac/linux
+5. Install git, https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
+6. Clone realms repo: `git clone https://github.com/BibliothecaDAO/realms-contracts.git`
+7. Switch to the development branch `git checkout feat/adventurer-mart`
+8. `python3 -m venv survivorvenv` or `python -m venv survivorvenv` or `python3.9 -m venv survivorvenv`
+9. - `source survivorvenv/bin/activate` on mac/linux
    - `survivorvenv\Scripts\activate` on windows
-9. `pip install realms_cli/` or `pip3 install realms_cli/`
+10. `pip install realms_cli/` or `pip3 install realms_cli/`
 
-10. `./scripts/startup.sh`  
+11. `./scripts/startup.sh`  
     Here you will need to enter your private key and address of the testnet wallet you want to use to play the game. The private key can be taken in the settings of your wallet, this should be a long number.
-11. `python realms_cli/realms_cli/loot/gui.py`
-12. If the above runs, contact distracteddev to give you a minter role.
+12. `python realms_cli/realms_cli/loot/gui.py`
+13. If the above runs, contact distracteddev to give you a minter role.
 
 Once you are initially set up, if you close the session you will need to activate some things again to run:
 

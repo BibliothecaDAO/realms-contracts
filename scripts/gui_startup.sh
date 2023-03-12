@@ -28,7 +28,7 @@ if file_does_not_exist "goerli.accounts.json"; then
     current_dir=$(pwd)
     base_dir=$(cd .. "$current_dir")
 
-    echo "${address}:/usr/local/lib/python3.9/site-packages/nile/artifacts/abis/Account.json:STARKNET_PRIVATE_KEY
+    echo "${address}:$base_dir/survivorvenv/lib/python3.9/site-packages/nile/artifacts/abis/Account.json:STARKNET_PRIVATE_KEY
 0x07895e3320c1f1c62a73d465c8f4a412ae2042c55d0f274e8992518509c3cd1f:artifacts/abis/PROXY_Logic.json:proxy_Arbiter_Loot
 0x05cd498ac61b8b8fd72c9225cfff4b14a35486dd7727928f26d044996fc0824d:artifacts/abis/PROXY_Logic.json:proxy_ModuleController_Loot
 0x0761b04b53668ee5098c0d1f3d1c380b9d524b602569638012a6d6eb45fb6d1f:artifacts/abis/xoroshiro128_starstar.json:xoroshiro128_starstar
@@ -66,6 +66,8 @@ if file_does_not_exist "goerli.accounts.json"; then
     nile compile contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo
     nile compile contracts/settling_game/tokens/Realms_ERC721_Mintable.cairo
     nile compile contracts/settling_game/proxy/PROXY_Logic.cairo
+
+    export ARCHFLAGS="-arch x86_64"
 
     source realms_cli/.env.nile
 else
