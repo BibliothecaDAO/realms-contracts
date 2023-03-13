@@ -678,7 +678,7 @@ async def attack(adventurer_token_id, network):
                 print(
                     f"👹 You did {str(int(pre_beast[6]) - int(beast_out[6]))} damage to the {BEASTS[str(int(beast_out[0]))]}, its health is now {beast_out[6]}"
                 )
-            if adventurer_out[4] == "0":
+            if adventurer_out[7] == "0":
                 print(
                     f"🪦 You took {str(int(pre_adventurer[7]) - int(adventurer_out[7]))} damage and have been killed"
                 )

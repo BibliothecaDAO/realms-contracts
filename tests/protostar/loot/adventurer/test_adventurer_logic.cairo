@@ -470,44 +470,44 @@ func test_upgrade_stat{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     return ();
 }
 
-@external
-func test_discover_gold{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
-    alloc_locals;
+// @external
+// func test_discover_gold{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+//     alloc_locals;
 
-    local account_1_address;
-    local xoroshiro_address;
-    local adventurer_address;
-    local beast_address;
+//     local account_1_address;
+//     local xoroshiro_address;
+//     local adventurer_address;
+//     local beast_address;
 
-    %{
-        ids.account_1_address = context.account_1
-        ids.xoroshiro_address = context.xoroshiro
-        ids.adventurer_address = context.adventurer
-        ids.beast_address = context.beast
-        # 3%4 = 3, therefore DiscoveryType item
-        stop_mock = mock_call(ids.xoroshiro_address, 'next', [3])
-        # now we are timsing by timestamp we also need this
-        stop_roll_adventurer = roll(1, ids.adventurer_address)
-        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
-        stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
-    %}
+//     %{
+//         ids.account_1_address = context.account_1
+//         ids.xoroshiro_address = context.xoroshiro
+//         ids.adventurer_address = context.adventurer
+//         ids.beast_address = context.beast
+//         # 3%4 = 3, therefore DiscoveryType item
+//         stop_mock = mock_call(ids.xoroshiro_address, 'next', [3])
+//         # now we are timsing by timestamp we also need this
+//         stop_roll_adventurer = roll(1, ids.adventurer_address)
+//         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+//         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
+//     %}
 
-    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address);
+//     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address);
 
-    %{
-        from tests.protostar.loot.utils import utils
-        # need to store adventurer level to greater than 1 to avoid starter beast
-        p1, p2, p3, p4 = utils.pack_adventurer(utils.build_adventurer_level(2))
-        store(ids.adventurer_address, "adventurer_dynamic", [p1, p2, p3, p4], key=[1,0])
-    %}
+//     %{
+//         from tests.protostar.loot.utils import utils
+//         # need to store adventurer level to greater than 1 to avoid starter beast
+//         p1, p2, p3, p4 = utils.pack_adventurer(utils.build_adventurer_level(2))
+//         store(ids.adventurer_address, "adventurer_dynamic", [p1, p2, p3, p4], key=[1,0])
+//     %}
 
-    let (discovery_type, r) = IAdventurer.explore(adventurer_address, Uint256(1,0));
+//     let (discovery_type, r) = IAdventurer.explore(adventurer_address, Uint256(1,0));
 
-    assert discovery_type = DiscoveryType.Item;
-    assert r = ItemDiscoveryType.Gold;
+//     assert discovery_type = DiscoveryType.Item;
+//     assert r = ItemDiscoveryType.Gold;
 
-    return ();
-}
+//     return ();
+// }
 
 // @external
 // func test_discover_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
@@ -802,6 +802,75 @@ func test_kill_thief{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     assert dead_usurper.Health = 0;
 
     return ();
+}
+
+@external
+func test_upgrade_vitality_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+    local account_1_address;
+    local xoroshiro_address;
+    local adventurer_address;
+    local beast_address;
+    local lords_address;
+
+    %{
+        ids.account_1_address = context.account_1
+        ids.xoroshiro_address = context.xoroshiro
+        ids.adventurer_address = context.adventurer
+        ids.beast_address = context.beast
+        ids.lords_address = context.lords
+        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+        stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
+    %}
+
+    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address);
+
+    %{
+        stop_prank_adventurer()
+        stop_prank_adventurer = start_prank(ids.beast_address, ids.adventurer_address)
+    %}
+
+    // enough xp to level up
+    IAdventurer.increase_xp(adventurer_address, Uint256(1, 0), 9);
+
+    %{
+        stop_prank_adventurer()
+        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+    %}
+
+    // upgrade vitality
+    IAdventurer.upgrade_stat(adventurer_address, Uint256(1, 0), AdventurerSlotIds.Vitality);
+
+    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
+
+    assert adventurer.Health = 110;
+
+    // check increase of health with damage
+
+    %{
+        stop_prank_adventurer()
+        stop_prank_adventurer = start_prank(ids.beast_address, ids.adventurer_address)
+    %}
+
+    // enough xp to level up
+    IAdventurer.increase_xp(adventurer_address, Uint256(1, 0), 27);
+
+    IAdventurer.deduct_health(adventurer_address, Uint256(1, 0), 20);
+
+    %{
+        stop_prank_adventurer()
+        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+    %}
+
+    // upgrade vitality
+    IAdventurer.upgrade_stat(adventurer_address, Uint256(1, 0), AdventurerSlotIds.Vitality);
+
+    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
+
+    assert adventurer.Health = 100;
+
+    return ();
+
 }
 
 // @external

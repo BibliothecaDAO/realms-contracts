@@ -529,16 +529,43 @@ func upgrade_stat{
     // upgrade stat
     let (updated_stat_adventurer) = AdventurerLib.update_statistics(stat, adventurer_dynamic_);
 
+    // if stat chosen to upgrade is vitality then increase current health and max health by 10
+    if (stat == AdventurerSlotIds.Vitality) {
+        // we get max health based on vitality
+        let max_health = 100 + (10 * updated_stat_adventurer.Vitality);
+        let check_health_over_cap = is_le(max_health, updated_stat_adventurer.Health + 10);
+
+        // cap health at 100 + (10 * vitality)
+        if (check_health_over_cap == TRUE) {
+            let add_amount = max_health - updated_stat_adventurer.Health;
+            let (new_adventurer) = AdventurerLib.add_health(add_amount, updated_stat_adventurer);
+            // reset upgrading param
+            let (updated_upgrade_adventurer) = AdventurerLib.set_upgrading(FALSE, new_adventurer);
+            let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(
+                updated_upgrade_adventurer
+            );
+            adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
+            emit_adventurer_state(adventurer_token_id);
+            return (TRUE,);
+        } else {
+            let (new_adventurer) = AdventurerLib.add_health(10, updated_stat_adventurer);
+            // reset upgrading param
+            let (updated_upgrade_adventurer) = AdventurerLib.set_upgrading(FALSE, new_adventurer);
+            let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(
+                updated_upgrade_adventurer
+            );
+            adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
+            emit_adventurer_state(adventurer_token_id);
+            return (TRUE,);
+        }
+    }
     // reset upgrading param
     let (updated_upgrade_adventurer) = AdventurerLib.set_upgrading(FALSE, updated_stat_adventurer);
-
     let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(
         updated_upgrade_adventurer
     );
     adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
-
     emit_adventurer_state(adventurer_token_id);
-
     return (TRUE,);
 }
 
@@ -1257,11 +1284,13 @@ func _add_health{
     let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
     let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
 
-    let check_health_over_100 = is_le(100, adventurer_dynamic_.Health + amount);
+    // we get max health based on vitality
+    let max_health = 100 + (10 * adventurer_dynamic_.Vitality);
+    let check_health_over_cap = is_le(max_health, adventurer_dynamic_.Health + amount);
 
-    // cap health at 100
-    if (check_health_over_100 == TRUE) {
-        let add_amount = 100 - adventurer_dynamic_.Health;
+    // cap health at 100 + (10 * vitality)
+    if (check_health_over_cap == TRUE) {
+        let add_amount = max_health - adventurer_dynamic_.Health;
         let (new_adventurer) = AdventurerLib.add_health(add_amount, adventurer_dynamic_);
         let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
         adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
