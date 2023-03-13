@@ -439,8 +439,8 @@ def update_market_items():
 
 def update_owned_items():
     items = asyncio.run(get_owned_items())
-    dpg.configure_item("equip_loot_id", items=(items))
-    dpg.configure_item("unequip_loot_id", items=(items))
+    dpg.configure_item("equip_loot_token_id", items=(items))
+    dpg.configure_item("unequip_loot_token_id", items=(items))
 
 
 def get_item_market():
@@ -462,13 +462,13 @@ def bid_on_item(sender, app_data, user_data):
     adventurer_id = dpg.get_value("bid_adventurer_id").split(" - ")[-1]
     loot_ids = dpg.get_value("multi_loot_ids")
     price = dpg.get_value("bid_price")
-    if loot_ids != "":
+    if loot_ids == "":
         command = [
             "nile",
             "loot",
             "bid",
             "--loot_token_id",
-            loot_ids,
+            loot_token_id,
             "--adventurer_token_id",
             adventurer_id,
             "--price",
@@ -480,7 +480,7 @@ def bid_on_item(sender, app_data, user_data):
             "loot",
             "bid",
             "--loot_token_id",
-            loot_token_id,
+            loot_ids,
             "--adventurer_token_id",
             adventurer_id,
             "--price",
@@ -945,9 +945,8 @@ if __name__ == "__main__":
                 dpg.add_input_text(
                     label="Price",
                     tag="bid_price",
-                    decimal=True,
-                    hint="Min 3",
-                    width=100,
+                    hint="Min 3 - For multi 3,3...",
+                    width=200,
                 )
                 with dpg.group(horizontal=True):
                     dpg.add_button(label="Bid", callback=bid_on_item)

@@ -184,6 +184,8 @@ async def bid(network, loot_token_id, adventurer_token_id, price):
     token_ids = [c.strip() for c in loot_token_id.split(",")]
     prices = [c.strip() for c in price.split(",")]
 
+    print(len(token_ids))
+
     if len(token_ids) > 1:
         await wrapped_send(
             network=config.nile_network,
