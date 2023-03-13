@@ -92,7 +92,11 @@ def mint_realm(realm_token_id, network):
 5. Install git, https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
 6. Clone realms repo: `git clone https://github.com/BibliothecaDAO/realms-contracts.git`
 7. Switch to the development branch `git checkout feat/adventurer-mart`
-8. `python3 -m venv survivorvenv` or `python -m venv survivorvenv` or `python3.9 -m venv survivorvenv`
+8. Ensure your terminal current directory is `realms-contracts`, either open in vscode or type `cd realms-contracts`.
+
+   Now create a new environement
+   `python3 -m venv survivorvenv` or `python -m venv survivorvenv` or `python3.9 -m venv survivorvenv`
+
 9. - `source survivorvenv/bin/activate` on mac/linux
    - `survivorvenv\Scripts\activate` on windows
 10. `pip install realms_cli/` or `pip3 install realms_cli/`
