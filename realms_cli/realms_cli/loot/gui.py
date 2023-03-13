@@ -207,7 +207,7 @@ def attack_beast(sender, app_data, user_data):
     print(out)
     update_gold(adventurer)
     update_health(adventurer)
-    adventurer_out = asyncio.run(_get_adventurer("goerli", value=adventurer))
+    adventurer_out = asyncio.run(_get_adventurer("goerli", adventurer))
     update_beast(adventurer_out[26])
     update_level_xp(adventurer_out)
     dpg.delete_item("attack_load")

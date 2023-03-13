@@ -203,7 +203,7 @@ namespace CombatStats {
         }
     }
 
-    // Calculates damage dealt from a beast by converting beast into a Loot weapon and calling calculate_damage_from_weapon
+    // Calculates damage dealt to a beast by using equipped Loot weapon and calling calculate_damage_from_weapon
     func calculate_damage_to_beast{syscall_ptr: felt*, range_check_ptr}(
         beast: Beast, weapon: Item, unpacked_adventurer: AdventurerState, rnd: felt
     ) -> (damage: felt) {
