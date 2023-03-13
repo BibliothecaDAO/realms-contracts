@@ -398,13 +398,6 @@ func flee{
         assert unpacked_adventurer.Status = AdventurerStatus.Battle;
     }
 
-    // Adventurer Speed is Dexterity - Weight of all equipped items
-    // TODO: We need a function to calculate the weight of all the adventurer equipment
-    let weight_of_equipment = 0;
-
-    let adventurer_speed = unpacked_adventurer.Dexterity - weight_of_equipment;
-    assert_nn(adventurer_speed);
-
     let (rnd) = get_random_number();
 
     // TODO Milestone2: Factor in beast health for the ambush chance and for flee chance
@@ -472,15 +465,34 @@ func flee{
     }
     tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
 
-    // TODO: MILESTONE2 Use Beast Speed Stats
+    //
+    // Core Flee Logic
+    //
+    // TODO: Calculate the weight of all the adventurer equipment:
+    // let weight_of_equipment = getEquipmentWeight(adventurer_token_id)
+    // as part of the above, we need to add attack and defense modifier to heavier equipment to offset weight cost
+    let weight_of_equipment = 0;
+
+    // adventurer speed is dexterity minus weight of equipment
+    let adventurer_speed = unpacked_adventurer.Dexterity - weight_of_equipment;
+    assert_nn(adventurer_speed);
+
+    // To see if adventurer can flee, we roll a dice
     let (flee_rnd) = get_random_number();
-    let (flee_chance) = BeastLib.get_random_flee(flee_rnd);
-    let can_flee = is_le(adventurer_speed + 1, flee_chance);
+    // between zero and the adventurers level
+    let (_, flee_chance) = unsigned_div_rem(flee_rnd, unpacked_adventurer.Level);
+
+    // if the adventurers speed is greater than the dice roll
+    let can_flee = is_le(flee_chance, adventurer_speed + 1);
     if (can_flee == TRUE) {
+        // they get away so set their status back to idle
         IAdventurer.update_status(
             adventurer_address, Uint256(beast.Adventurer, 0), AdventurerStatus.Idle
         );
+        // zero out the beast assigned to the adventurer
         IAdventurer.assign_beast(adventurer_address, Uint256(beast.Adventurer, 0), 0);
+
+        // TODO: seems like this is worthy of an event
         return (TRUE,);
     } else {
         return (FALSE,);
