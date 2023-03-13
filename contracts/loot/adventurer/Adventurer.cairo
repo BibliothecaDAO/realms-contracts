@@ -305,10 +305,23 @@ func equip_item{
 
     // Check the adventurer does not currently hold anything in slot
     let (equipped_item) = AdventurerLib.get_item(item, adventurer_dynamic_);
-    
-    with_attr error_message("Adventurer: Item already equipped in slot") {
-        assert equipped_item = FALSE;
+
+    let check_equipped_item = is_not_zero(equipped_item);
+
+    if (check_equipped_item == TRUE) {
+        unequip_item(adventurer_token_id, Uint256(equipped_item, 0));
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr; 
+        tempvar syscall_ptr: felt* = syscall_ptr; 
+        tempvar range_check_ptr = range_check_ptr; 
+        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+    } else {
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr; 
+        tempvar syscall_ptr: felt* = syscall_ptr; 
+        tempvar range_check_ptr = range_check_ptr; 
+        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
     }
+
+    tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
 
     // Convert token to Felt
     let (token_to_felt) = _uint_to_felt(item_token_id);
