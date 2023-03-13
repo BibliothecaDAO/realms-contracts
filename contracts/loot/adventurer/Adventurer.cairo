@@ -56,7 +56,7 @@ from contracts.loot.constants.adventurer import (
     AdventurerStatus,
     DiscoveryType,
     ItemDiscoveryType,
-    TheifState,
+    ThiefState,
     ItemShift,
 )
 from contracts.loot.constants.beast import Beast
@@ -101,7 +101,7 @@ func AdventurerDiedRobbingKing(adventurer_id: Uint256, adveturer_state: Adventur
 }
 
 @event
-func AdventurerKilledTheif(adventurer_id: Uint256, adveturer_state: AdventurerState) {
+func AdventurerKilledThief(adventurer_id: Uint256, adveturer_state: AdventurerState) {
 }
 
 // -----------------------------------
@@ -130,7 +130,7 @@ func adventurer_image(tokenId: Uint256) -> (image: felt) {
 }
 
 @storage_var
-func thief() -> (thief: TheifState) {
+func thief() -> (thief: ThiefState) {
 }
 
 // -----------------------------------
@@ -753,7 +753,7 @@ func rob_king{
 
     let (current_time) = get_block_timestamp();
 
-    let new_thief = TheifState(adventurer_token_id, current_time);
+    let new_thief = ThiefState(adventurer_token_id, current_time);
 
     emit_initiated_king_hiest(adventurer_token_id);
 
@@ -806,7 +806,7 @@ func kill_thief{
     emit_killed_thief(adventurer_token_id);
 
     // clear thief state
-    let clear_thief_state = TheifState(Uint256(0, 0), 0);
+    let clear_thief_state = ThiefState(Uint256(0, 0), 0);
 
     // update blockchain
     thief.write(clear_thief_state);
@@ -851,7 +851,7 @@ func claim_king_loot{
     emit_robbed_king(thief_state.AdventurerId);
 
     // clear thief state so thief is no longer able to be assissnated
-    let clear_thief_state = TheifState(Uint256(0, 0), 0);
+    let clear_thief_state = ThiefState(Uint256(0, 0), 0);
 
     // update blockchain
     thief.write(clear_thief_state);
@@ -976,7 +976,7 @@ func emit_killed_thief{
     // Get adventurer from token id
     let (new_adventurer) = get_adventurer_by_id(adventurer_token_id);
     // emit event
-    AdventurerKilledTheif.emit(adventurer_token_id, new_adventurer);
+    AdventurerKilledThief.emit(adventurer_token_id, new_adventurer);
     return ();
 }
 
@@ -1007,7 +1007,7 @@ func get_adventurer_by_id{
 // @return thief: State of the thief
 @view
 func get_thief{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}() -> (
-    thief_state: TheifState
+    thief_state: ThiefState
 ) {
     let (thief_state) = thief.read();
     return (thief_state,);
