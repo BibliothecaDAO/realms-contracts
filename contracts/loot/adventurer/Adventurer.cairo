@@ -661,6 +661,12 @@ func explore{
         // We give them an easy starting beast (will also have weak armor for their weapon)
         let (starting_beast_id) = AdventurerLib.get_starting_beast_from_weapon(weapon.Id);
 
+        // assert starting weapon
+        let check_not_zero = is_not_zero(starting_beast_id);
+        with_attr error_message("Adventurer: Not holding a starting weapon") {
+            assert check_not_zero = TRUE;
+        }
+
         // create beast according to the weapon the player has
         let (beast_id: Uint256) = IBeast.create_starting_beast(
             beast_address, token_id, starting_beast_id
@@ -705,18 +711,24 @@ func explore{
         let (rnd) = get_random_number();
         let (obstacle) = ObstacleUtils.generate_random_obstacle(unpacked_adventurer, rnd);
         let (item_address) = Module.get_module_address(ModuleIds.Loot);
-        // To see if adventurer can flee, we roll a dice
+        // To see if adventurer can dodge, we roll a dice
         let (dodge_rnd) = get_random_number();
         // between zero and the adventurers level
-        let (_, dodge_chance) = unsigned_div_rem(dodge_rnd, unpacked_adventurer.Intelligence);
-        // @distracteddev: Should be get equipped item by slot not get item by Id
-        let (item_id) = AdventurerLib.get_item_id_at_slot(
-            obstacle.DamageLocation, adventurer_dynamic_
-        );
-        let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(item_id, 0));
-        let (obstacle_damage) = CombatStats.calculate_damage_from_obstacle(obstacle, armor);
-        _deduct_health(token_id, obstacle_damage);
-        return (DiscoveryType.Obstacle, obstacle.Id);
+        let (_, dodge_chance) = unsigned_div_rem(dodge_rnd, unpacked_adventurer.Level);
+        // if the adventurers intelligence
+        let can_dodge = is_le(dodge_chance, unpacked_adventurer.Intelligence + 1);
+        if (can_dodge == TRUE) {
+            return (DiscoveryType.Obstacle, obstacle.Id);
+        } else {
+            // @distracteddev: Should be get equipped item by slot not get item by Id
+            let (item_id) = AdventurerLib.get_item_id_at_slot(
+                obstacle.DamageLocation, adventurer_dynamic_
+            );
+            let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(item_id, 0));
+            let (obstacle_damage) = CombatStats.calculate_damage_from_obstacle(obstacle, armor);
+            _deduct_health(token_id, obstacle_damage);
+            return (DiscoveryType.Obstacle, obstacle.Id);
+        }
     }
     if (discovery == DiscoveryType.Item) {
         // generate another random 3 numbers

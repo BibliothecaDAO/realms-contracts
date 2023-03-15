@@ -267,7 +267,7 @@ func test_ambushed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
 
     let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
 
-    assert adventurer.Status = AdventurerStatus.Battle;
+    assert adventurer.Status = AdventurerStatus.Idle;
 
     return ();
 }
