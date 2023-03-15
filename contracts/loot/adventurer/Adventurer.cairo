@@ -705,6 +705,10 @@ func explore{
         let (rnd) = get_random_number();
         let (obstacle) = ObstacleUtils.generate_random_obstacle(unpacked_adventurer, rnd);
         let (item_address) = Module.get_module_address(ModuleIds.Loot);
+        // To see if adventurer can flee, we roll a dice
+        let (dodge_rnd) = get_random_number();
+        // between zero and the adventurers level
+        let (_, dodge_chance) = unsigned_div_rem(dodge_rnd, unpacked_adventurer.Intelligence);
         // @distracteddev: Should be get equipped item by slot not get item by Id
         let (item_id) = AdventurerLib.get_item_id_at_slot(
             obstacle.DamageLocation, adventurer_dynamic_

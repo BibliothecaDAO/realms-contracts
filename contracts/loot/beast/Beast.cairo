@@ -119,7 +119,7 @@ func create{
     let (adventurer_state) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_id);
 
     let (random) = get_random_number();
-    let (_, beast_level_boost) = unsigned_div_rem(random, 6);
+    let (_, beast_level_boost) = unsigned_div_rem(random, 4);
     let (_, beast_health_boost) = unsigned_div_rem(random, 30);
     let (_, beast_id) = unsigned_div_rem(random, BeastIds.MAX_ID);
 
