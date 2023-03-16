@@ -73,7 +73,7 @@ from contracts.loot.utils.constants import (
     MINT_COST_INTERFACE,
     STARTING_GOLD,
     KING_HIEST_REWARD_PERCENT,
-    KING_HIEST_DELAY
+    KING_HIEST_DELAY,
 )
 
 // -----------------------------------
@@ -187,7 +187,7 @@ func mint{
     order: felt,
     image_hash_1: felt,
     image_hash_2: felt,
-    interface_address: felt
+    interface_address: felt,
 ) -> (adventurer_token_id: Uint256) {
     alloc_locals;
 
@@ -246,12 +246,14 @@ func mint_with_starting_weapon{
     image_hash_1: felt,
     image_hash_2: felt,
     weapon_id: felt,
-    interface_address: felt
+    interface_address: felt,
 ) -> (adventurer_token_id: Uint256, item_token_id: Uint256) {
     alloc_locals;
 
     // Mint new adventurer
-    let (adventurer_token_id) = mint(to, race, home_realm, name, order, image_hash_1, image_hash_2, interface_address); 
+    let (adventurer_token_id) = mint(
+        to, race, home_realm, name, order, image_hash_1, image_hash_2, interface_address
+    );
 
     // Mint starting weapon for the adventurer (book, wand, club, short sword)
     let (loot_address) = Module.get_module_address(ModuleIds.Loot);
@@ -310,14 +312,14 @@ func equip_item{
 
     if (check_equipped_item == TRUE) {
         unequip_item(adventurer_token_id, Uint256(equipped_item, 0));
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr; 
-        tempvar syscall_ptr: felt* = syscall_ptr; 
-        tempvar range_check_ptr = range_check_ptr; 
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar range_check_ptr = range_check_ptr;
         tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
     } else {
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr; 
-        tempvar syscall_ptr: felt* = syscall_ptr; 
-        tempvar range_check_ptr = range_check_ptr; 
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar range_check_ptr = range_check_ptr;
         tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
     }
 
@@ -709,8 +711,14 @@ func explore{
         // TODO: Obstacle prefixes and greatness
         // @distracteddev: Picked
         let (rnd) = get_random_number();
+
+        // generate random obstacle
         let (obstacle) = ObstacleUtils.generate_random_obstacle(unpacked_adventurer, rnd);
-        let (item_address) = Module.get_module_address(ModuleIds.Loot);
+
+        // adventurer gets XP regardless of the outcome
+        let (xp_gained) = CombatStats.calculate_xp_earned(obstacle.Rank, obstacle.Greatness);
+        _increase_xp(token_id, xp_gained);
+
         // To see if adventurer can dodge, we roll a dice
         let (dodge_rnd) = get_random_number();
         // between zero and the adventurers level
@@ -724,6 +732,7 @@ func explore{
             let (item_id) = AdventurerLib.get_item_id_at_slot(
                 obstacle.DamageLocation, adventurer_dynamic_
             );
+            let (item_address) = Module.get_module_address(ModuleIds.Loot);
             let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(item_id, 0));
             let (obstacle_damage) = CombatStats.calculate_damage_from_obstacle(obstacle, armor);
             _deduct_health(token_id, obstacle_damage);
@@ -773,7 +782,7 @@ func explore{
     let (rnd) = get_random_number();
     let (xp_discovery) = AdventurerLib.calculate_xp_discovery(rnd);
     _increase_xp(token_id, xp_discovery);
-            
+
     return (DiscoveryType.Nothing, 0);
 }
 
