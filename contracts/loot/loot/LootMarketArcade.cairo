@@ -1039,14 +1039,22 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     with_attr error_message("Item Market: You do not own this Adventurer") {
         assert caller = owner;
     }
-    // check adventurer is alive
+
     let (adventurer: AdventurerState) = IAdventurer.get_adventurer_by_id(
         adventurer_address, adventurer_token_id
     );
 
+    // check adventurer is alive
     with_attr error_message("Adventurer: Adventurer is dead") {
         assert_not_zero(adventurer.Health);
     }
+
+    // check adventurer is at least level 2
+    let check_ge_2 = is_le(2, adventurer.Level);
+    with_attr error_message("Adventurer: Adventurer level not high enough.") {
+        assert check_ge_2 = TRUE;
+    }
+
 
     // check higher than the base price that is set
     let higer_than_base_price = is_le(BASE_PRICE, price);
