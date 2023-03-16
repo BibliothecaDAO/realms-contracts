@@ -107,51 +107,52 @@ namespace CombatStats {
         entity_level: felt,
         strength: felt,
         luck: felt,
-        rnd: felt
+        rnd: felt,
     ) -> (damage: felt) {
         alloc_locals;
 
         const rank_ceiling = 6;
+        const minimum_damage = 3;
 
         // use weapon rank and greatness to give every item a damage rating of 0-100
         // TODO: add item weight into damage calculation
-        let base_weapon_damage = (rank_ceiling - attack_rank) * attack_greatness;
-
-        // Get effectiveness of weapon vs armor
-        let (attack_effectiveness) = weapon_vs_armor_efficacy(attack_type, armor_type);
+        let attack_hp = (rank_ceiling - attack_rank) * attack_greatness;
 
         // use armor rank and greatness to give armor a defense rating of 0-100
         // TODO: add item weight into strength calculation
-        let armor_strength = (rank_ceiling - armor_rank) * armor_greatness;
+        let defense_hp = (rank_ceiling - armor_rank) * armor_greatness;
 
-        // @distracteddev
-        // even if the weapon damage is the same as the best armour it needs to do some damage at least
-        // here I will just add plus 1 for now, not in favour of beast or adventurer
-        let weapon_damage = (base_weapon_damage - armor_strength) + 1;
-
-        let (total_weapon_damage) = get_attack_effectiveness(
-            attack_effectiveness, weapon_damage
-        );
-
-        // check if armor strength is less than or equal to weapon damage
-        let dealt_damage = is_le_felt(armor_strength, base_weapon_damage);
-        if (dealt_damage == 1) {
-            // if it is, damage dealt will be positive so return it
-            // @distracteddev: calculate whether hit is critical and add luck
-            // luck has a max of 46 (both jewellery fully powered)
-            // 0-9 = 1 in 6, 10-19 = 1 in 5, 20-29 = 1 in 4, 30-39 = 1 in 3, 40-46 = 1 in 2
-            // formula = damage * (1.5 * rand(6 - (luck/10))
-            let (critical_hit_chance, _) = unsigned_div_rem(luck, 10);
-            let (_, critical_rand) = unsigned_div_rem(rnd, (6 - critical_hit_chance));
-            let critical_hit = is_le(critical_rand, 0);
-            // @distracteddev: provide some multi here with adventurer level: e.g. damage + (1 + ((1 - level) * 0.1))
-            let (adventurer_level_damage) = calculate_entity_level_boost(total_weapon_damage, entity_level + strength);
-            let (critical_damage_dealt) = calculate_critical_damage(adventurer_level_damage, critical_hit);
-            return (critical_damage_dealt,);
+        // if armor hitpoints is less than weapon hitpoints, then damage was dealt
+        let dealt_below_minimum_damage = is_le_felt(defense_hp + minimum_damage, attack_hp);
+        if (dealt_below_minimum_damage == TRUE) {
+            // then we use that for our weapon damage
+            tempvar temp_weapon_damage = attack_hp - defense_hp;
         } else {
-            // otherwise damage dealt will be negative so we return 0
-            return (0,);
+            // if base damage is 0 or below, use minimum damage of 3
+            tempvar temp_weapon_damage = minimum_damage;
         }
+
+        let weapon_damage = temp_weapon_damage;
+
+        // account for elemental effectiveness
+        let (attack_effectiveness) = weapon_vs_armor_efficacy(attack_type, armor_type);
+        let (total_weapon_damage) = get_attack_effectiveness(attack_effectiveness, weapon_damage);
+
+        // @distracteddev: calculate whether hit is critical and add luck
+        // luck has a max of 46 (both jewellery fully powered)
+        // 0-9 = 1 in 6, 10-19 = 1 in 5, 20-29 = 1 in 4, 30-39 = 1 in 3, 40-46 = 1 in 2
+        // formula = damage * (1.5 * rand(6 - (luck/10))
+        let (critical_hit_chance, _) = unsigned_div_rem(luck, 10);
+        let (_, critical_rand) = unsigned_div_rem(rnd, (6 - critical_hit_chance));
+        let critical_hit = is_le(critical_rand, 0);
+        // @distracteddev: provide some multi here with adventurer level: e.g. damage + (1 + ((1 - level) * 0.1))
+        let (adventurer_level_damage) = calculate_entity_level_boost(
+            total_weapon_damage, entity_level + strength
+        );
+        let (critical_damage_dealt) = calculate_critical_damage(
+            adventurer_level_damage, critical_hit
+        );
+        return (critical_damage_dealt,);
     }
 
     // calculate_damage_from_weapon calculates the damage a weapon inflicts against a specific piece of armor
@@ -170,7 +171,16 @@ namespace CombatStats {
 
         // pass details of attack and armor to core damage calculation function
         let (damage_dealt) = calculate_damage(
-            attack_type, weapon.Rank, weapon.Greatness, armor_type, armor.Rank, armor.Greatness, unpacked_adventurer.Level, unpacked_adventurer.Strength, unpacked_adventurer.Luck, rnd
+            attack_type,
+            weapon.Rank,
+            weapon.Greatness,
+            armor_type,
+            armor.Rank,
+            armor.Greatness,
+            unpacked_adventurer.Level,
+            unpacked_adventurer.Strength,
+            unpacked_adventurer.Luck,
+            rnd,
         );
 
         // return damage
@@ -190,16 +200,34 @@ namespace CombatStats {
         // NOTE: @loothero if no armor then armor type is generic
         if (armor.Id == 0) {
             // force armor_type generic
-            return  calculate_damage(
-                attack_type, beast.Rank, beast.Level, Type.Armor.generic, armor.Rank, armor.Greatness, 1, 0, 0, rnd
+            return calculate_damage(
+                attack_type,
+                beast.Rank,
+                beast.Level,
+                Type.Armor.generic,
+                armor.Rank,
+                armor.Greatness,
+                1,
+                0,
+                0,
+                rnd,
             );
         } else {
             let (armor_type) = ItemStats.item_type(armor.Id);
             // pass details of attack and armor to core damage calculation function
             // @distracteddev: added param to change based on adventurer level
             // return damage
-            return  calculate_damage(
-                attack_type, beast.Rank, beast.Level, armor_type, armor.Rank, armor.Greatness, 1, 0, 0, rnd
+            return calculate_damage(
+                attack_type,
+                beast.Rank,
+                beast.Level,
+                armor_type,
+                armor.Rank,
+                armor.Greatness,
+                1,
+                0,
+                0,
+                rnd,
             );
         }
     }
@@ -217,12 +245,30 @@ namespace CombatStats {
         if (weapon.Id == 0) {
             // force generic type and greatness 1
             return calculate_damage(
-                Type.Weapon.generic, weapon.Rank, 1, armor_type, beast.Rank, beast.Level, unpacked_adventurer.Level, unpacked_adventurer.Strength, unpacked_adventurer.Luck, rnd
+                Type.Weapon.generic,
+                weapon.Rank,
+                1,
+                armor_type,
+                beast.Rank,
+                beast.Level,
+                unpacked_adventurer.Level,
+                unpacked_adventurer.Strength,
+                unpacked_adventurer.Luck,
+                rnd,
             );
         } else {
             // return damage
             return calculate_damage(
-                weapon.Type, weapon.Rank, weapon.Greatness, armor_type, beast.Rank, beast.Level, unpacked_adventurer.Level,  unpacked_adventurer.Strength, unpacked_adventurer.Luck, rnd
+                weapon.Type,
+                weapon.Rank,
+                weapon.Greatness,
+                armor_type,
+                beast.Rank,
+                beast.Level,
+                unpacked_adventurer.Level,
+                unpacked_adventurer.Strength,
+                unpacked_adventurer.Luck,
+                rnd,
             );
         }
     }
@@ -239,12 +285,30 @@ namespace CombatStats {
         if (armor.Id == 0) {
             // force armor type generic
             return calculate_damage(
-                obstacle.Type, obstacle.Rank, obstacle.Greatness, Type.Armor.generic, armor.Rank, armor.Greatness, 1, 0, 0, 1
+                obstacle.Type,
+                obstacle.Rank,
+                obstacle.Greatness,
+                Type.Armor.generic,
+                armor.Rank,
+                armor.Greatness,
+                1,
+                0,
+                0,
+                1,
             );
         } else {
             // return damage dealt
             return calculate_damage(
-                obstacle.Type, obstacle.Rank, obstacle.Greatness, armor_type, armor.Rank, armor.Greatness, 1, 0, 0, 1
+                obstacle.Type,
+                obstacle.Rank,
+                obstacle.Greatness,
+                armor_type,
+                armor.Rank,
+                armor.Greatness,
+                1,
+                0,
+                0,
+                1,
             );
         }
     }
@@ -300,20 +364,20 @@ namespace CombatStats {
         }
     }
 
-    func calculate_entity_level_boost{syscall_ptr: felt*, range_check_ptr}(damage: felt, entity_level: felt) -> (
-        entity_level_damage: felt
-    ) {
+    func calculate_entity_level_boost{syscall_ptr: felt*, range_check_ptr}(
+        damage: felt, entity_level: felt
+    ) -> (entity_level_damage: felt) {
         let format_level_boost = damage * (90 + (entity_level * 10));
-        let (entity_level_damage,_) = unsigned_div_rem(format_level_boost, 100); 
+        let (entity_level_damage, _) = unsigned_div_rem(format_level_boost, 100);
         return (entity_level_damage,);
     }
 
-    func calculate_critical_damage{syscall_ptr: felt*, range_check_ptr}(damage: felt, critical: felt) -> (
-        crtical_damage: felt
-    ) {
+    func calculate_critical_damage{syscall_ptr: felt*, range_check_ptr}(
+        damage: felt, critical: felt
+    ) -> (crtical_damage: felt) {
         if (critical == TRUE) {
             let format_critical_damage = damage * 150;
-            let (critical_damage,_) = unsigned_div_rem(format_critical_damage, 100); 
+            let (critical_damage, _) = unsigned_div_rem(format_critical_damage, 100);
             return (critical_damage,);
         } else {
             return (damage,);
