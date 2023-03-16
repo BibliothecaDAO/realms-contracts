@@ -78,7 +78,9 @@ func test_mint{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     let (local allowance: Uint256) = ILords.allowance(
         lords_address, account_1_address, adventurer_address
     );
-    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address);
+    IAdventurer.mint(
+        adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address
+    );
     let (new_balance: Uint256) = ILords.balanceOf(lords_address, account_1_address);
 
     assert new_balance = Uint256(120000000000000000000, 0);
@@ -112,7 +114,16 @@ func test_mint_with_starting_weapon{
 
     // Mint an adventurer with a book as a starting weapon
     IAdventurer.mint_with_starting_weapon(
-        adventurer_address, account_1_address, 4, 13, 'Test', 8, 1, 1, ItemIds.Book, account_1_address
+        adventurer_address,
+        account_1_address,
+        4,
+        13,
+        'Test',
+        8,
+        1,
+        1,
+        ItemIds.Book,
+        account_1_address,
     );
 
     %{ stop_prank_lords = start_prank(ids.account_1_address, ids.lords_address) %}
@@ -123,7 +134,16 @@ func test_mint_with_starting_weapon{
 
     // Mint an adventurer with a book as a starting weapon
     IAdventurer.mint_with_starting_weapon(
-        adventurer_address, account_1_address, 4, 13, 'Test', 8, 1, 1, ItemIds.Book, account_1_address
+        adventurer_address,
+        account_1_address,
+        4,
+        13,
+        'Test',
+        8,
+        1,
+        1,
+        ItemIds.Book,
+        account_1_address,
     );
 
     let (new_balance: Uint256) = ILords.balanceOf(lords_address, account_1_address);
@@ -172,7 +192,16 @@ func test_mint_non_starting_weapon{syscall_ptr: felt*, pedersen_ptr: HashBuiltin
 
     // Test minting adventurer with a non starting weapon
     IAdventurer.mint_with_starting_weapon(
-        adventurer_address, account_1_address, 4, 13, 'Test', 8, 1, 1, ItemIds.Katana, account_1_address
+        adventurer_address,
+        account_1_address,
+        4,
+        13,
+        'Test',
+        8,
+        1,
+        1,
+        ItemIds.Katana,
+        account_1_address,
     );
 
     return ();
@@ -197,7 +226,9 @@ func test_equip_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
         stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address)
     %}
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
-    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address);
+    IAdventurer.mint(
+        adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address
+    );
     ILoot.mint(loot_address, account_1_address, Uint256(1, 0));
     %{
         stop_prank_loot()
@@ -262,7 +293,9 @@ func test_unequip_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
         stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address)
     %}
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
-    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address);
+    IAdventurer.mint(
+        adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address
+    );
     ILoot.mint(loot_address, account_1_address, Uint256(1, 0));
     // make sure adventurer and bag are set to 0
     %{
@@ -304,7 +337,9 @@ func test_deduct_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_ch
     %}
 
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
-    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address);
+    IAdventurer.mint(
+        adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address
+    );
 
     %{
         stop_prank_adventurer()
@@ -336,7 +371,9 @@ func test_increase_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     %}
 
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
-    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address);
+    IAdventurer.mint(
+        adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address
+    );
 
     %{
         stop_prank_adventurer()
@@ -377,7 +414,9 @@ func test_purchase_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
     %}
 
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
-    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address);
+    IAdventurer.mint(
+        adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address
+    );
 
     %{
         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
@@ -443,7 +482,9 @@ func test_upgrade_stat{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     %}
 
     IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
-    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address);
+    IAdventurer.mint(
+        adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address
+    );
 
     %{
         stop_prank_adventurer()
@@ -477,12 +518,12 @@ func test_upgrade_stat{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 // func test_discover_gold{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
 //     alloc_locals;
 
-//     local account_1_address;
+// local account_1_address;
 //     local xoroshiro_address;
 //     local adventurer_address;
 //     local beast_address;
 
-//     %{
+// %{
 //         ids.account_1_address = context.account_1
 //         ids.xoroshiro_address = context.xoroshiro
 //         ids.adventurer_address = context.adventurer
@@ -495,33 +536,33 @@ func test_upgrade_stat{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 //         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
 //     %}
 
-//     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address);
+// IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address);
 
-//     %{
+// %{
 //         from tests.protostar.loot.utils import utils
 //         # need to store adventurer level to greater than 1 to avoid starter beast
 //         p1, p2, p3, p4 = utils.pack_adventurer(utils.build_adventurer_level(2))
 //         store(ids.adventurer_address, "adventurer_dynamic", [p1, p2, p3, p4], key=[1,0])
 //     %}
 
-//     let (discovery_type, r) = IAdventurer.explore(adventurer_address, Uint256(1,0));
+// let (discovery_type, r) = IAdventurer.explore(adventurer_address, Uint256(1,0));
 
-//     assert discovery_type = DiscoveryType.Item;
+// assert discovery_type = DiscoveryType.Item;
 //     assert r = ItemDiscoveryType.Gold;
 
-//     return ();
+// return ();
 // }
 
 // @external
 // func test_discover_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
 //     alloc_locals;
 
-//     local account_1_address;
+// local account_1_address;
 //     local xoroshiro_address;
 //     local adventurer_address;
 //     local beast_address;
 
-//     %{
+// %{
 //         ids.account_1_address = context.account_1
 //         ids.xoroshiro_address = context.xoroshiro
 //         ids.adventurer_address = context.adventurer
@@ -534,21 +575,21 @@ func test_upgrade_stat{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 //         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
 //     %}
 
-//     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
+// IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1);
 
-//     %{
+// %{
 //         from tests.protostar.loot.utils import utils
 //         # need to store adventurer level to greater than 1 to avoid starter beast
 //         p1, p2, p3, p4 = utils.pack_adventurer(utils.build_adventurer_level(2))
 //         store(ids.adventurer_address, "adventurer_dynamic", [p1, p2, p3, p4], key=[1,0])
 //     %}
 
-//     let (discovery_type, r) = IAdventurer.explore(adventurer_address, Uint256(1,0));
+// let (discovery_type, r) = IAdventurer.explore(adventurer_address, Uint256(1,0));
 
-//     assert discovery_type = DiscoveryType.Item;
+// assert discovery_type = DiscoveryType.Item;
 //     assert r = ItemDiscoveryType.XP;
 
-//     return ();
+// return ();
 // }
 
 // @external
@@ -594,57 +635,57 @@ func test_upgrade_stat{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 // func test_discover_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
 //     alloc_locals;
 
-//     local account_1_address;
+// local account_1_address;
 //     local xoroshiro_address;
 //     local adventurer_address;
 //     local beast_address;
 
-//     %{
+// %{
 //         ids.account_1_address = context.account_1
 //         ids.xoroshiro_address = context.xoroshiro
 //         ids.adventurer_address = context.adventurer
 //         ids.beast_address = context.beast
 //         # 3%4 = 3, therefore DiscoveryType item
 //         stop_mock = mock_call(ids.xoroshiro_address, 'next', [3])
-//         # now we are timsing by timestamp we also need this 
+//         # now we are timsing by timestamp we also need this
 //         stop_roll_adventurer = roll(1, ids.adventurer_address)
 //         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
 //         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
 //     %}
 
-//     IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address);
+// IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address);
 
-//     %{
+// %{
 //         from tests.protostar.loot.utils import utils
 //         # need to store adventurer level to greater than 1 to avoid starter beast
 //         p1, p2, p3, p4 = utils.pack_adventurer(utils.build_adventurer_level(2))
 //         store(ids.adventurer_address, "adventurer_dynamic", [p1, p2, p3, p4], key=[1,0])
 //     %}
 
-//     %{
+// %{
 //         stop_prank_adventurer()
 //         stop_prank_adventurer = start_prank(ids.beast_address, ids.adventurer_address)
 //     %}
 
-//     // deduct health to measure health increase
+// // deduct health to measure health increase
 //     IAdventurer.deduct_health(adventurer_address, Uint256(1, 0), 50);
 
-//     %{
+// %{
 //         stop_prank_adventurer()
 //         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
 //     %}
 
-//     let (discovery_type, r) = IAdventurer.explore(adventurer_address, Uint256(1, 0));
+// let (discovery_type, r) = IAdventurer.explore(adventurer_address, Uint256(1, 0));
 
-//     assert discovery_type = DiscoveryType.Item;
+// assert discovery_type = DiscoveryType.Item;
 //     assert r = ItemDiscoveryType.Health;
 
-//     let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
+// let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
 
-//     // 50 + (10 + (5 * 3))
+// // 50 + (10 + (5 * 3))
 //     assert adventurer.Health = 75;
 
-//     return ();
+// return ();
 // }
 
 @external
@@ -668,7 +709,9 @@ func test_discover_obstacle{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
     %}
-    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address);
+    IAdventurer.mint(
+        adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address
+    );
 
     %{
         from tests.protostar.loot.utils import utils
@@ -695,6 +738,9 @@ func test_discover_obstacle{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
 
     // can dodge chance is 0 so adventurer due to random so adventurer dodges
     assert adventurer.Health = 100;
+
+    // assert adventurer gained XP
+    assert adventurer.XP = 6;
 
     return ();
 }
@@ -811,7 +857,8 @@ func test_kill_thief{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
 }
 
 @external
-func test_upgrade_vitality_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+func test_upgrade_vitality_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    ) {
     alloc_locals;
     local account_1_address;
     local xoroshiro_address;
@@ -829,7 +876,9 @@ func test_upgrade_vitality_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
         stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
     %}
 
-    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address);
+    IAdventurer.mint(
+        adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address
+    );
 
     %{
         stop_prank_adventurer()
@@ -876,7 +925,6 @@ func test_upgrade_vitality_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
     assert adventurer.Health = 100;
 
     return ();
-
 }
 
 // @external
@@ -930,8 +978,9 @@ func test_equipped_non_starter{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, r
 
     %{ expect_revert(error_message="Adventurer: Not holding a starting weapon") %}
 
-
-    IAdventurer.mint(adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address);
+    IAdventurer.mint(
+        adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address
+    );
 
     ILoot.mint(loot_address, account_1_address, Uint256(1, 0));
     %{
@@ -948,7 +997,7 @@ func test_equipped_non_starter{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, r
 
     IAdventurer.equip_item(adventurer_address, Uint256(1, 0), Uint256(1, 0));
 
-    IAdventurer.explore(adventurer_address, Uint256(1,0));
+    IAdventurer.explore(adventurer_address, Uint256(1, 0));
 
     return ();
 }
