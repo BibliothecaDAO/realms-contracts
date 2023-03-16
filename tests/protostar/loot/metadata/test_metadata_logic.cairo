@@ -50,7 +50,8 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         'Test', 
         8, 
         'QmUn4BZtz4tw3rzpZHpT2oE',
-        'o6guw2FxsiPEyvfRFnUJWzZ'
+        'o6guw2FxsiPEyvfRFnUJWzZ',
+        addresses.account_1
     );
 
 

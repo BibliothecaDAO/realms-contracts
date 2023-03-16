@@ -43,7 +43,7 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     IRealms.set_realm_data(addresses.realms, Uint256(13, 0), 'Test Realm', 1);
 
     %{ stop_prank_lords() %}
-    IAdventurer.mint(addresses.adventurer, addresses.account_1, 4, 10, 'Test', 8, 1, 1);
+    IAdventurer.mint(addresses.adventurer, addresses.account_1, 4, 10, 'Test', 8, 1, 1, addresses.account_1);
     ILoot.mint(addresses.loot, addresses.account_1, Uint256(1, 0));
     %{
         stop_prank_loot()
@@ -157,7 +157,7 @@ func test_not_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
     );
 
     // adventurer took 24 damage from the beasts counter attack
-    assert updated_adventurer.Health = 76;
+    assert updated_adventurer.Health = 73;
 
     // TODO LH: verify neither beast nor adventurer gained xp
 
@@ -267,7 +267,7 @@ func test_ambushed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
 
     let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
 
-    assert adventurer.Status = AdventurerStatus.Battle;
+    assert adventurer.Status = AdventurerStatus.Idle;
 
     return ();
 }

@@ -119,7 +119,7 @@ func create{
     let (adventurer_state) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_id);
 
     let (random) = get_random_number();
-    let (_, beast_level_boost) = unsigned_div_rem(random, 6);
+    let (_, beast_level_boost) = unsigned_div_rem(random, 4);
     let (_, beast_health_boost) = unsigned_div_rem(random, 30);
     let (_, beast_id) = unsigned_div_rem(random, BeastIds.MAX_ID);
 
@@ -398,13 +398,6 @@ func flee{
         assert unpacked_adventurer.Status = AdventurerStatus.Battle;
     }
 
-    // Adventurer Speed is Dexterity - Weight of all equipped items
-    // TODO: We need a function to calculate the weight of all the adventurer equipment
-    let weight_of_equipment = 0;
-
-    let adventurer_speed = unpacked_adventurer.Dexterity - weight_of_equipment;
-    assert_nn(adventurer_speed);
-
     let (rnd) = get_random_number();
 
     // TODO Milestone2: Factor in beast health for the ambush chance and for flee chance
@@ -472,15 +465,34 @@ func flee{
     }
     tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
 
-    // TODO: MILESTONE2 Use Beast Speed Stats
+    //
+    // Core Flee Logic
+    //
+    // TODO: Calculate the weight of all the adventurer equipment:
+    // let weight_of_equipment = getEquipmentWeight(adventurer_token_id)
+    // as part of the above, we need to add attack and defense modifier to heavier equipment to offset weight cost
+    let weight_of_equipment = 0;
+
+    // adventurer speed is dexterity minus weight of equipment
+    let adventurer_speed = unpacked_adventurer.Dexterity - weight_of_equipment;
+    assert_nn(adventurer_speed);
+
+    // To see if adventurer can flee, we roll a dice
     let (flee_rnd) = get_random_number();
-    let (flee_chance) = BeastLib.get_random_flee(flee_rnd);
-    let can_flee = is_le(adventurer_speed + 1, flee_chance);
+    // between zero and the adventurers level
+    let (_, flee_chance) = unsigned_div_rem(flee_rnd, unpacked_adventurer.Level);
+
+    // if the adventurers speed is greater than the dice roll
+    let can_flee = is_le(flee_chance, adventurer_speed + 1);
     if (can_flee == TRUE) {
+        // they get away so set their status back to idle
         IAdventurer.update_status(
             adventurer_address, Uint256(beast.Adventurer, 0), AdventurerStatus.Idle
         );
+        // zero out the beast assigned to the adventurer
         IAdventurer.assign_beast(adventurer_address, Uint256(beast.Adventurer, 0), 0);
+
+        // TODO: seems like this is worthy of an event
         return (TRUE,);
     } else {
         return (FALSE,);
@@ -716,11 +728,11 @@ func _subtract_from_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
 ) {
     let (current_balance) = balance_of(adventurer_token_id);
 
-    let negative = is_le(current_balance - subtraction, 0);
+    let check_balance = is_le(0, current_balance - subtraction);
 
     // add in overflow assert so you can't spend more than what you have.
     with_attr error_message("Beast: Not enough gold in balance.") {
-        assert negative = FALSE;
+        assert check_balance = TRUE;
     }
 
     goldBalance.write(adventurer_token_id, current_balance - subtraction);

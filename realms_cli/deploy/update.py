@@ -31,7 +31,7 @@ NEW_MODULES = [
     # Contracts("Lords_ERC20_Mintable"),
     Contracts("Adventurer"),
     # Contracts("LootMarketArcade"),
-    # Contracts("Beast"),
+    Contracts("Beast"),
 ]
 
 
@@ -44,8 +44,6 @@ async def run(nre):
         delete_existing_deployment(contract.name)
 
         delete_existing_declaration(contract.name)
-
-        compile(contract.name)
 
         await wrapped_declare(
             config.ADMIN_ALIAS, contract.name, nre.network, contract.name

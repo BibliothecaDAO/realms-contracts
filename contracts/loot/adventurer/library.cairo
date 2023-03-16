@@ -353,6 +353,32 @@ namespace AdventurerLib {
         return ([cast_adventurer],);
     }
 
+    // helper to get value at location in State
+    func get_state{syscall_ptr: felt*, range_check_ptr}(
+        index: felt, unpacked_adventurer: AdventurerDynamic
+    ) -> (value: felt) {
+        alloc_locals;
+        let (__fp__, _) = get_fp_and_pc();
+
+        let adventurer_fields: felt* = &unpacked_adventurer;
+        let value = adventurer_fields[index];
+
+        return (value,);
+    }
+
+    func get_item{syscall_ptr: felt*, range_check_ptr}(
+        item: Item, unpacked_adventurer: AdventurerDynamic
+    ) -> (item_id: felt) {
+        alloc_locals;
+
+        // pass index shift and Item slot to find what item to update
+        let (item_id) = get_state(
+            ItemShift + item.Slot, unpacked_adventurer
+        );
+
+        return (item_id,);
+    }
+
     func equip_item{syscall_ptr: felt*, range_check_ptr}(
         item_token_id: felt, item: Item, unpacked_adventurer: AdventurerDynamic
     ) -> (new_unpacked_adventurer: AdventurerDynamic) {
@@ -526,8 +552,17 @@ namespace AdventurerLib {
     ) -> (discovery: felt) {
         alloc_locals;
 
-        let (_, r) = unsigned_div_rem(xoroshiro_random, 2);
+        let (_, r) = unsigned_div_rem(xoroshiro_random, 4);
         return (r,);  // values from 0 to 3 inclusive
+    }
+
+    func get_item_discovery{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
+        xoroshiro_random: felt
+    ) -> (discovery: felt) {
+        alloc_locals;
+
+        let (_, r) = unsigned_div_rem(xoroshiro_random, 3);
+        return (r,);  // values from 0 to 2 inclusive
     }
 
     func update_statistics{syscall_ptr: felt*, range_check_ptr}(

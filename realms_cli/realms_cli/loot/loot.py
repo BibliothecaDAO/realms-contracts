@@ -16,6 +16,7 @@ from realms_cli.loot.getters import (
     print_adventurer,
     print_beast_img,
     print_player,
+    _get_gold_balance,
 )
 from realms_cli.loot.constants import (
     BEASTS,
@@ -157,7 +158,7 @@ async def all_market(network):
     prompt=True,
 )
 @click.option(
-    "--adventurer",
+    "--adventurer_token_id",
     is_flag=False,
     metavar="<columns>",
     type=click.STRING,
@@ -172,16 +173,18 @@ async def all_market(network):
     help="price for item, must be greater than past bid or above 2",
     prompt=True,
 )
-async def bid(network, loot_token_id, adventurer, price):
+async def bid(network, loot_token_id, adventurer_token_id, price):
     """
     Bid on an item. You can only bid on an item that is currently for sale and has not expired in bid.
     """
     config = Config(nile_network=network)
 
     print("🗡 Bidding on Item ...")
-    
-    token_ids = [c.strip() for c in loot_token_id.split(',')]
-    prices = [c.strip() for c in price.split(',')]
+
+    token_ids = [c.strip() for c in loot_token_id.split(",")]
+    prices = [c.strip() for c in price.split(",")]
+
+    print(len(token_ids))
 
     if len(token_ids) > 1:
         await wrapped_send(
@@ -189,7 +192,10 @@ async def bid(network, loot_token_id, adventurer, price):
             signer_alias=config.USER_ALIAS,
             contract_alias="proxy_LootMarketArcade",
             function="bid_on_item",
-            arguments=[[*uint(token_id), *uint(adventurer), price] for token_id, price in zip(token_ids, prices)],
+            arguments=[
+                [*uint(token_id), *uint(adventurer_token_id), price]
+                for token_id, price in zip(token_ids, prices)
+            ],
         )
     else:
         await wrapped_send(
@@ -197,8 +203,8 @@ async def bid(network, loot_token_id, adventurer, price):
             signer_alias=config.USER_ALIAS,
             contract_alias="proxy_LootMarketArcade",
             function="bid_on_item",
-            arguments=[*uint(token_ids[0]), *uint(adventurer), prices[0]],
-        )  
+            arguments=[*uint(token_ids[0]), *uint(adventurer_token_id), prices[0]],
+        )
 
 
 @loot.command()
@@ -212,14 +218,14 @@ async def bid(network, loot_token_id, adventurer, price):
     prompt=True,
 )
 @click.option(
-    "--adventurer",
+    "--adventurer_token_id",
     is_flag=False,
     metavar="<columns>",
     type=click.STRING,
     help="adventurer id for the bid, you have to bid as an adventurer not a wallet",
     prompt=True,
 )
-async def claim(network, loot_token_id, adventurer):
+async def claim(network, loot_token_id, adventurer_token_id):
     """
     Claim item. You can only claim past the expiry time.
     """
@@ -227,7 +233,7 @@ async def claim(network, loot_token_id, adventurer):
 
     print("🗡 Claiming item ...")
 
-    token_ids = [c.strip() for c in loot_token_id.split(',')]
+    token_ids = [c.strip() for c in loot_token_id.split(",")]
 
     if len(token_ids) > 1:
         await wrapped_send(
@@ -235,7 +241,9 @@ async def claim(network, loot_token_id, adventurer):
             signer_alias=config.USER_ALIAS,
             contract_alias="proxy_LootMarketArcade",
             function="claim_item",
-            arguments=[[*uint(token_id), *uint(adventurer)] for token_id in token_ids],
+            arguments=[
+                [*uint(token_id), *uint(adventurer_token_id)] for token_id in token_ids
+            ],
         )
     else:
         await wrapped_send(
@@ -243,8 +251,9 @@ async def claim(network, loot_token_id, adventurer):
             signer_alias=config.USER_ALIAS,
             contract_alias="proxy_LootMarketArcade",
             function="claim_item",
-            arguments=[*uint(token_ids[0]), *uint(adventurer)],
+            arguments=[*uint(token_ids[0]), *uint(adventurer_token_id)],
         )
+
 
 @loot.command()
 @click.option("--network", default="goerli")
@@ -254,7 +263,7 @@ async def bag(network):
     """
     config = Config(nile_network=network)
 
-    print("🗡 Claiming item ...")
+    print("🗡 Getting owned items ...")
 
     out = await wrapped_proxy_call(
         network=config.nile_network,
@@ -329,8 +338,7 @@ async def health(network, adventurer_token_id, number):
 
     adventurer_out = await _get_adventurer(network, adventurer_token_id)
 
-    print(
-        f"🧪 You bought {number} potions. Your health is now {adventurer_out[7]}")
+    print(f"🧪 You bought {number} potions. Your health is now {adventurer_out[7]}")
 
 
 @loot.command()
@@ -391,6 +399,8 @@ async def explore(ctx, network, adventurer_token_id):
 
     pre_adventurer = await _get_adventurer(network, adventurer_token_id)
 
+    pre_gold = await _get_gold_balance(network, adventurer_token_id)
+
     send_out = await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
@@ -407,8 +417,12 @@ async def explore(ctx, network, adventurer_token_id):
 
     adventurer_out = await _get_adventurer(network, adventurer_token_id)
 
+    gold_out = await _get_gold_balance(network, adventurer_token_id)
+
     if int(result[0], 16) == 0:
-        print("🤔 You discovered nothing!")
+        print(
+            f"🤔 You discovered nothing, but got {str(int(adventurer_out[16]) - int(pre_adventurer[16]))} xp anyway!"
+        )
     if int(result[0], 16) == 1:
         print("🧌 You have discovered a beast")
         print_beast_img(adventurer_out[26])
@@ -418,7 +432,15 @@ async def explore(ctx, network, adventurer_token_id):
             f"🪤 You were hit by {OBSTACLES[int(result[1],16)]} and took {str(int(pre_adventurer[7]) - int(adventurer_out[7]))} damage!"
         )
     if int(result[0], 16) == 3:
-        print(f"🎉 You discovered {ITEM_DISCOVERY_TYPES[int(result[1],16)]}")
+        print(f"🎉 You discovered loot!")
+        if int(result[1], 16) == 0:
+            print(f"🤑 You discovered {str(int(gold_out) - int(pre_gold))} gold")
+        if int(result[1], 16) == 1:
+            print(f"🗡️ You discovered an item!")
+        if int(result[1], 16) == 2:
+            print(
+                f"🧪 You discovered a potion for {str(int(adventurer_out[7]) - int(pre_adventurer[7]))} health!"
+            )
 
 
 @loot.command()
@@ -484,15 +506,7 @@ async def equip(network, adventurer_token_id, loot_token_id):
 
     print("🫴 Equiping item ...")
 
-    # await wrapped_send(
-    #     network=config.nile_network,
-    #     signer_alias=config.USER_ALIAS,
-    #     contract_alias="proxy_Adventurer",
-    #     function="equip_item",
-    #     arguments=[*uint(adventurer_token_id), *uint(loot_token_id)],
-    # )
-
-    token_ids = [c.strip() for c in loot_token_id.split(',')]
+    token_ids = [c.strip() for c in loot_token_id.split(",")]
 
     if len(token_ids) > 1:
         await wrapped_send(
@@ -500,7 +514,9 @@ async def equip(network, adventurer_token_id, loot_token_id):
             signer_alias=config.USER_ALIAS,
             contract_alias="proxy_Adventurer",
             function="equip_item",
-            arguments=[[*uint(adventurer_token_id), *uint(token_id)] for token_id in token_ids],
+            arguments=[
+                [*uint(adventurer_token_id), *uint(token_id)] for token_id in token_ids
+            ],
         )
     else:
         await wrapped_send(
@@ -664,7 +680,7 @@ async def attack(adventurer_token_id, network):
                 print(
                     f"👹 You did {str(int(pre_beast[6]) - int(beast_out[6]))} damage to the {BEASTS[str(int(beast_out[0]))]}, its health is now {beast_out[6]}"
                 )
-            if adventurer_out[4] == "0":
+            if adventurer_out[7] == "0":
                 print(
                     f"🪦 You took {str(int(pre_adventurer[7]) - int(adventurer_out[7]))} damage and have been killed"
                 )
@@ -714,16 +730,14 @@ async def flee(adventurer_token_id, network):
     adventurer_out = await _get_adventurer(network, adventurer_token_id)
 
     if int(result[0], 16) == 1:
-        print(
-            f"🏃‍♂️ You successfully fled from the {BEASTS[str(int(beast_out[0]))]} ✅")
+        print(f"🏃‍♂️ You successfully fled from the {BEASTS[str(int(beast_out[0]))]} ✅")
     else:
         if int(pre_adventurer[7]) > int(adventurer_out[7]):
             print(
                 f"😫 You have been ambushed by the {BEASTS[str(int(beast_out[0]))]} and took {str(int(pre_adventurer[7]) - int(adventurer_out[7]))} damage!"
             )
         else:
-            print(
-                f"😮 You did not flee from the {BEASTS[str(int(beast_out[0]))]}!")
+            print(f"😮 You did not flee from the {BEASTS[str(int(beast_out[0]))]}!")
 
 
 @loot.command()
@@ -861,7 +875,7 @@ async def new(network, item, race, home_realm, name, order, image_hash_1, image_
             image_hash_1,
             image_hash_2,
             item,
-            config.USER_ADDRESS
+            config.USER_ADDRESS,
         ],
     )
 
@@ -913,19 +927,19 @@ async def new(network, item, race, home_realm, name, order, image_hash_1, image_
 
 @loot.command()
 @click.option("--network", default="goerli")
-async def get_theif(network):
+async def get_thief(network):
     """
-    Get information about the theif
+    Get information about the thief
     """
     config = Config(nile_network=network)
 
-    print("♔ Getting theif info ...")
+    print("♔ Getting thief info ...")
 
     out = await wrapped_proxy_call(
         network=config.nile_network,
         contract_alias="proxy_Adventurer",
         abi="artifacts/abis/Adventurer.json",
-        function="get_theif",
+        function="get_thief",
         arguments=[],
     )
     print(out)
@@ -970,28 +984,28 @@ async def rob_king(network, adventurer_token_id):
     prompt=True,
 )
 @click.option("--network", default="goerli")
-async def kill_theif(network, adventurer_token_id):
+async def kill_thief(network, adventurer_token_id):
     """
-    Kill the theif
+    Kill the thief
     """
     config = Config(nile_network=network)
 
-    print("👑 Kill the theif ...")
+    print("👑 Kill the thief ...")
 
     await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Adventurer",
-        function="kill_theif",
+        function="kill_thief",
         arguments=[*uint(adventurer_token_id)],
     )
 
-    print("👑 successfully killed the theif ✅")
+    print("👑 successfully killed the thief ✅")
 
 
 @loot.command()
 @click.option("--network", default="goerli")
-async def claim_king_loot(network, adventurer_token_id):
+async def claim_king_loot(network):
     """
     Claim loot from robbing the king
     """

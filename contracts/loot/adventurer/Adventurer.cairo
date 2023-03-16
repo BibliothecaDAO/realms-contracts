@@ -56,7 +56,8 @@ from contracts.loot.constants.adventurer import (
     AdventurerStatus,
     DiscoveryType,
     ItemDiscoveryType,
-    TheifState,
+    ThiefState,
+    ItemShift,
 )
 from contracts.loot.constants.beast import Beast
 from contracts.loot.constants.obstacle import ObstacleUtils, ObstacleConstants
@@ -72,7 +73,7 @@ from contracts.loot.utils.constants import (
     MINT_COST_INTERFACE,
     STARTING_GOLD,
     KING_HIEST_REWARD_PERCENT,
-    KING_HIEST_DELAY
+    KING_HIEST_DELAY,
 )
 
 // -----------------------------------
@@ -100,7 +101,7 @@ func AdventurerDiedRobbingKing(adventurer_id: Uint256, adveturer_state: Adventur
 }
 
 @event
-func AdventurerKilledTheif(adventurer_id: Uint256, adveturer_state: AdventurerState) {
+func AdventurerKilledThief(adventurer_id: Uint256, adveturer_state: AdventurerState) {
 }
 
 // -----------------------------------
@@ -129,7 +130,7 @@ func adventurer_image(tokenId: Uint256) -> (image: felt) {
 }
 
 @storage_var
-func theif() -> (theif: TheifState) {
+func thief() -> (thief: ThiefState) {
 }
 
 // -----------------------------------
@@ -186,7 +187,7 @@ func mint{
     order: felt,
     image_hash_1: felt,
     image_hash_2: felt,
-    interface_address: felt
+    interface_address: felt,
 ) -> (adventurer_token_id: Uint256) {
     alloc_locals;
 
@@ -245,12 +246,14 @@ func mint_with_starting_weapon{
     image_hash_1: felt,
     image_hash_2: felt,
     weapon_id: felt,
-    interface_address: felt
+    interface_address: felt,
 ) -> (adventurer_token_id: Uint256, item_token_id: Uint256) {
     alloc_locals;
 
     // Mint new adventurer
-    let (adventurer_token_id) = mint(to, race, home_realm, name, order, image_hash_1, image_hash_2, interface_address); 
+    let (adventurer_token_id) = mint(
+        to, race, home_realm, name, order, image_hash_1, image_hash_2, interface_address
+    );
 
     // Mint starting weapon for the adventurer (book, wand, club, short sword)
     let (loot_address) = Module.get_module_address(ModuleIds.Loot);
@@ -301,6 +304,26 @@ func equip_item{
     let (owner) = IERC721.ownerOf(loot_address, item_token_id);
     let (caller) = get_caller_address();
     assert owner = caller;
+
+    // Check the adventurer does not currently hold anything in slot
+    let (equipped_item) = AdventurerLib.get_item(item, adventurer_dynamic_);
+
+    let check_equipped_item = is_not_zero(equipped_item);
+
+    if (check_equipped_item == TRUE) {
+        unequip_item(adventurer_token_id, Uint256(equipped_item, 0));
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+    } else {
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+    }
+
+    tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
 
     // Convert token to Felt
     let (token_to_felt) = _uint_to_felt(item_token_id);
@@ -521,16 +544,43 @@ func upgrade_stat{
     // upgrade stat
     let (updated_stat_adventurer) = AdventurerLib.update_statistics(stat, adventurer_dynamic_);
 
+    // if stat chosen to upgrade is vitality then increase current health and max health by 10
+    if (stat == AdventurerSlotIds.Vitality) {
+        // we get max health based on vitality
+        let max_health = 100 + (10 * updated_stat_adventurer.Vitality);
+        let check_health_over_cap = is_le(max_health, updated_stat_adventurer.Health + 10);
+
+        // cap health at 100 + (10 * vitality)
+        if (check_health_over_cap == TRUE) {
+            let add_amount = max_health - updated_stat_adventurer.Health;
+            let (new_adventurer) = AdventurerLib.add_health(add_amount, updated_stat_adventurer);
+            // reset upgrading param
+            let (updated_upgrade_adventurer) = AdventurerLib.set_upgrading(FALSE, new_adventurer);
+            let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(
+                updated_upgrade_adventurer
+            );
+            adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
+            emit_adventurer_state(adventurer_token_id);
+            return (TRUE,);
+        } else {
+            let (new_adventurer) = AdventurerLib.add_health(10, updated_stat_adventurer);
+            // reset upgrading param
+            let (updated_upgrade_adventurer) = AdventurerLib.set_upgrading(FALSE, new_adventurer);
+            let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(
+                updated_upgrade_adventurer
+            );
+            adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
+            emit_adventurer_state(adventurer_token_id);
+            return (TRUE,);
+        }
+    }
     // reset upgrading param
     let (updated_upgrade_adventurer) = AdventurerLib.set_upgrading(FALSE, updated_stat_adventurer);
-
     let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(
         updated_upgrade_adventurer
     );
     adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
-
     emit_adventurer_state(adventurer_token_id);
-
     return (TRUE,);
 }
 
@@ -613,6 +663,12 @@ func explore{
         // We give them an easy starting beast (will also have weak armor for their weapon)
         let (starting_beast_id) = AdventurerLib.get_starting_beast_from_weapon(weapon.Id);
 
+        // assert starting weapon
+        let check_not_zero = is_not_zero(starting_beast_id);
+        with_attr error_message("Adventurer: Not holding a starting weapon") {
+            assert check_not_zero = TRUE;
+        }
+
         // create beast according to the weapon the player has
         let (beast_id: Uint256) = IBeast.create_starting_beast(
             beast_address, token_id, starting_beast_id
@@ -655,22 +711,39 @@ func explore{
         // TODO: Obstacle prefixes and greatness
         // @distracteddev: Picked
         let (rnd) = get_random_number();
+
+        // generate random obstacle
         let (obstacle) = ObstacleUtils.generate_random_obstacle(unpacked_adventurer, rnd);
-        let (item_address) = Module.get_module_address(ModuleIds.Loot);
-        // @distracteddev: Should be get equipped item by slot not get item by Id
-        let (item_id) = AdventurerLib.get_item_id_at_slot(
-            obstacle.DamageLocation, adventurer_dynamic_
-        );
-        let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(item_id, 0));
-        let (obstacle_damage) = CombatStats.calculate_damage_from_obstacle(obstacle, armor);
-        _deduct_health(token_id, obstacle_damage);
-        return (DiscoveryType.Obstacle, obstacle.Id);
+
+        // adventurer gets XP regardless of the outcome
+        let (xp_gained) = CombatStats.calculate_xp_earned(obstacle.Rank, obstacle.Greatness);
+        _increase_xp(token_id, xp_gained);
+
+        // To see if adventurer can dodge, we roll a dice
+        let (dodge_rnd) = get_random_number();
+        // between zero and the adventurers level
+        let (_, dodge_chance) = unsigned_div_rem(dodge_rnd, unpacked_adventurer.Level);
+        // if the adventurers intelligence
+        let can_dodge = is_le(dodge_chance, unpacked_adventurer.Intelligence + 1);
+        if (can_dodge == TRUE) {
+            return (DiscoveryType.Obstacle, obstacle.Id);
+        } else {
+            // @distracteddev: Should be get equipped item by slot not get item by Id
+            let (item_id) = AdventurerLib.get_item_id_at_slot(
+                obstacle.DamageLocation, adventurer_dynamic_
+            );
+            let (item_address) = Module.get_module_address(ModuleIds.Loot);
+            let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(item_id, 0));
+            let (obstacle_damage) = CombatStats.calculate_damage_from_obstacle(obstacle, armor);
+            _deduct_health(token_id, obstacle_damage);
+            return (DiscoveryType.Obstacle, obstacle.Id);
+        }
     }
     if (discovery == DiscoveryType.Item) {
-        // generate another random 4 numbers
+        // generate another random 3 numbers
         // this could probably be better
         let (rnd) = get_random_number();
-        let (discovery) = AdventurerLib.get_random_discovery(rnd);
+        let (discovery) = AdventurerLib.get_item_discovery(rnd);
 
         if (discovery == ItemDiscoveryType.Gold) {
             // add GOLD
@@ -709,8 +782,8 @@ func explore{
     let (rnd) = get_random_number();
     let (xp_discovery) = AdventurerLib.calculate_xp_discovery(rnd);
     _increase_xp(token_id, xp_discovery);
-            
-    return (DiscoveryType.Item, 1);
+
+    return (DiscoveryType.Nothing, 0);
 }
 
 // @notice Attempt to rob the king
@@ -732,9 +805,9 @@ func rob_king{
 
     let (gold_balance) = IBeast.balance_of(beast_address, adventurer_token_id);
 
-    let (theif_state) = theif.read();
+    let (thief_state) = thief.read();
 
-    let (king_balance) = IBeast.balance_of(beast_address, theif_state.AdventurerId);
+    let (king_balance) = IBeast.balance_of(beast_address, thief_state.AdventurerId);
 
     // same as less than
     let over_king_check = is_le(king_balance + 1, gold_balance);
@@ -745,11 +818,11 @@ func rob_king{
 
     let (current_time) = get_block_timestamp();
 
-    let new_theif = TheifState(adventurer_token_id, current_time);
+    let new_thief = ThiefState(adventurer_token_id, current_time);
 
     emit_initiated_king_hiest(adventurer_token_id);
 
-    theif.write(new_theif);
+    thief.write(new_thief);
 
     return (TRUE,);
 }
@@ -758,7 +831,7 @@ func rob_king{
 // @param adventurer_token_id: Id of adventurer
 // @return success: Value indicating success
 @external
-func kill_theif{
+func kill_thief{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(adventurer_token_id: Uint256) -> (success: felt) {
     alloc_locals;
@@ -773,9 +846,9 @@ func kill_theif{
 
     let (gold_balance) = IBeast.balance_of(beast_address, adventurer_token_id);
 
-    let (theif_state) = theif.read();
+    let (thief_state) = thief.read();
 
-    let (king_balance) = IBeast.balance_of(beast_address, theif_state.AdventurerId);
+    let (king_balance) = IBeast.balance_of(beast_address, thief_state.AdventurerId);
 
     with_attr error_message("Adventurer: There is no king to kill.") {
         assert_not_zero(king_balance);
@@ -788,20 +861,20 @@ func kill_theif{
         assert over_king_check = TRUE;
     }
 
-    // kill the theif
-    let (result) = _deduct_health(theif_state.AdventurerId, 1000);
+    // kill the thief
+    let (result) = _deduct_health(thief_state.AdventurerId, 1000);
 
     // emit event to capture adventurer dieing while trying to rob the king
-    emit_died_robbing_king(theif_state.AdventurerId);
+    emit_died_robbing_king(thief_state.AdventurerId);
 
     // emit event capturing the adventurer who caught the robber
-    emit_killed_theif(adventurer_token_id);
+    emit_killed_thief(adventurer_token_id);
 
-    // clear theif state
-    let clear_theif_state = TheifState(Uint256(0, 0), 0);
+    // clear thief state
+    let clear_thief_state = ThiefState(Uint256(0, 0), 0);
 
     // update blockchain
-    theif.write(clear_theif_state);
+    thief.write(clear_thief_state);
 
     return (result,);
 }
@@ -814,11 +887,11 @@ func claim_king_loot{
 }() -> (success: felt) {
     alloc_locals;
     // Anyone can call this function to check payout for robbing king (potential for keepers)
-    let (theif_state) = theif.read();
+    let (thief_state) = thief.read();
 
     let (current_time) = get_block_timestamp();
 
-    let time_duration = current_time - theif_state.StartTime;
+    let time_duration = current_time - thief_state.StartTime;
 
     let check_over_duration = is_le(KING_HIEST_DELAY, time_duration);
 
@@ -835,18 +908,18 @@ func claim_king_loot{
     let (pre_tribute, _) = uint256_mul(Uint256(KING_HIEST_REWARD_PERCENT, 0), total_lords);
     let (king_tribute, _) = uint256_unsigned_div_rem(pre_tribute, Uint256(100, 0));
 
-    // send to the theif
-    let (owner: felt) = ERC721.owner_of(theif_state.AdventurerId);
+    // send to the thief
+    let (owner: felt) = ERC721.owner_of(thief_state.AdventurerId);
     IERC20.transfer(lords_address, owner, king_tribute);
 
     // emit event capturing an adventuring successfully robbing the king
-    emit_robbed_king(theif_state.AdventurerId);
+    emit_robbed_king(thief_state.AdventurerId);
 
-    // clear theif state so theif is no longer able to be assissnated
-    let clear_theif_state = TheifState(Uint256(0, 0), 0);
+    // clear thief state so thief is no longer able to be assissnated
+    let clear_thief_state = ThiefState(Uint256(0, 0), 0);
 
     // update blockchain
-    theif.write(clear_theif_state);
+    thief.write(clear_thief_state);
 
     return (TRUE,);
 }
@@ -962,13 +1035,13 @@ func emit_died_robbing_king{
 
 // @notice Emits an initiated king hiest event for the adventurer
 // @param adventurer_token_id: the token id of the adventurer
-func emit_killed_theif{
+func emit_killed_thief{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(adventurer_token_id: Uint256) {
     // Get adventurer from token id
     let (new_adventurer) = get_adventurer_by_id(adventurer_token_id);
     // emit event
-    AdventurerKilledTheif.emit(adventurer_token_id, new_adventurer);
+    AdventurerKilledThief.emit(adventurer_token_id, new_adventurer);
     return ();
 }
 
@@ -995,14 +1068,14 @@ func get_adventurer_by_id{
     return (adventurer,);
 }
 
-// @notice Get theif state
-// @return theif: State of the theif
+// @notice Get thief state
+// @return thief: State of the thief
 @view
-func get_theif{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}() -> (
-    theif_state: TheifState
+func get_thief{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}() -> (
+    thief_state: ThiefState
 ) {
-    let (theif_state) = theif.read();
-    return (theif_state,);
+    let (thief_state) = thief.read();
+    return (thief_state,);
 }
 
 // --------------------
@@ -1249,11 +1322,13 @@ func _add_health{
     let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
     let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
 
-    let check_health_over_100 = is_le(100, adventurer_dynamic_.Health + amount);
+    // we get max health based on vitality
+    let max_health = 100 + (10 * adventurer_dynamic_.Vitality);
+    let check_health_over_cap = is_le(max_health, adventurer_dynamic_.Health + amount);
 
-    // cap health at 100
-    if (check_health_over_100 == TRUE) {
-        let add_amount = 100 - adventurer_dynamic_.Health;
+    // cap health at 100 + (10 * vitality)
+    if (check_health_over_cap == TRUE) {
+        let add_amount = max_health - adventurer_dynamic_.Health;
         let (new_adventurer) = AdventurerLib.add_health(add_amount, adventurer_dynamic_);
         let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
         adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
