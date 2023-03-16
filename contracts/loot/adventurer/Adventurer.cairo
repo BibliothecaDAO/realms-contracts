@@ -727,6 +727,7 @@ func explore{
             let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(item_id, 0));
             let (obstacle_damage) = CombatStats.calculate_damage_from_obstacle(obstacle, armor);
             _deduct_health(token_id, obstacle_damage);
+            ILoot.allocate_xp_to_items(item_address, unpacked_adventurer, obstacle_damage);
             return (DiscoveryType.Obstacle, obstacle.Id);
         }
     }
