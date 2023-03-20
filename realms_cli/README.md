@@ -99,16 +99,13 @@ def mint_realm(realm_token_id, network):
 
 9. - `source survivorvenv/bin/activate` on mac/linux
    - `survivorvenv\Scripts\activate` on windows
-10. `pip install realms_cli/` or `pip3 install realms_cli/`
-
-11. `./scripts/startup.sh`  
+10. `./scripts/startup.sh`  
     Here you will need to enter your private key and address of the testnet wallet you want to use to play the game. The private key can be taken in the settings of your wallet, this should be a long number.
-12. `python realms_cli/realms_cli/loot/gui.py`
-13. If the above runs, contact distracteddev to give you a minter role.
+11. `python realms_cli/realms_cli/loot/gui.py`
+12. If the above runs, contact distracteddev to give you a minter role.
 
-Once you are initially set up, if you close the session you will need to activate some things again to run:
+Once you are initially set up, if you close the session you will need to activate some things again to run. Also pull any changes that have been made:
 
 `git pull`  
 `source survivorvenv/bin/activate`  
-`pip install realms_cli/`  
-`source realms_cli/.env.nile`
+`.scripts/gui_startup.sh`
