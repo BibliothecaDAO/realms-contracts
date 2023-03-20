@@ -509,8 +509,8 @@ def claim_item(sender, app_data, user_data):
 
 def claim_equip_item(sender, app_data, user_data):
     dpg.add_text(
-        "Claiming item",
-        tag="claim_item_load",
+        "Claiming and equipping item",
+        tag="claim_equip_item_load",
         pos=[700, 50],
         parent="adventurers",
     )
@@ -522,7 +522,7 @@ def claim_equip_item(sender, app_data, user_data):
         command = [
             "nile",
             "loot",
-            "claim",
+            "claim_equip",
             "--loot_token_id",
             loot_ids,
             "--adventurer_token_id",
@@ -532,29 +532,7 @@ def claim_equip_item(sender, app_data, user_data):
         command = [
             "nile",
             "loot",
-            "claim",
-            "--loot_token_id",
-            loot_token_id,
-            "--adventurer_token_id",
-            adventurer_id,
-        ]
-    out = subprocess.check_output(command).strip().decode("utf-8")
-    print(out)
-    if loot_ids != "":
-        command = [
-            "nile",
-            "loot",
-            "equip",
-            "--loot_token_id",
-            loot_ids,
-            "--adventurer_token_id",
-            adventurer_id,
-        ]
-    else:
-        command = [
-            "nile",
-            "loot",
-            "equip",
+            "claim_equip",
             "--loot_token_id",
             loot_token_id,
             "--adventurer_token_id",
@@ -566,7 +544,7 @@ def claim_equip_item(sender, app_data, user_data):
     update_equipped_items(adventurer_out)
     update_gold(adventurer_id)
     update_owned_items()
-    dpg.delete_item("claim_item_load")
+    dpg.delete_item("claim_equip_item_load")
     dpg.delete_item("loader")
 
 

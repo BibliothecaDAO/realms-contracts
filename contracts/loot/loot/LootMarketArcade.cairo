@@ -603,6 +603,12 @@ func _increase_xp{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin
         item_updated_xp.XP, item_updated_xp.Greatness
     );
 
+    // we still update item xp
+    item.write(item_token_id, item_updated_xp);
+
+    // and emit an XP increase event
+    emit_item_xp_increase(item_token_id);
+
     // if greatness increased
     if (greatness_increased == TRUE) {
         // increase greatness
@@ -657,16 +663,9 @@ func _increase_xp{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin
         }
 
         // if greatness did not increase
-    } else {
-        // we still update item xp
-        item.write(item_token_id, item_updated_xp);
-
-        // and emit an XP increase event
-        emit_item_xp_increase(item_token_id);
-
-        // return item with updated xp
-        return (item_updated_xp,);
-    }
+    } 
+    
+    return (item_updated_xp,);
 }
 
 // @notice Increases the "greatness" attribute of an item, represented by its unique token ID, by a specified amount.
