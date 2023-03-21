@@ -91,23 +91,23 @@ namespace ObstacleConstants {
     }
 
     namespace ObstacleDamageLocation {
-        const DemonicAlter = Slot.Head;
+        const DemonicAlter = Slot.Chest;
         const Curse = Slot.Head;
         const Hex = Slot.Hand;
-        const MagicLock = Slot.Hand;
-        const DarkMist = Slot.Chest;
+        const MagicLock = Slot.Waist;
+        const DarkMist = Slot.Foot;
 
         const CollapsingCeiling = Slot.Head;
-        const CrushingWalls = Slot.Waist;
-        const Rockslide = Slot.Foot;
+        const CrushingWalls = Slot.Chest;
+        const Rockslide = Slot.Waist;
         const TumblingBoulders = Slot.Foot;
-        const SwingingLogs = Slot.Chest;
+        const SwingingLogs = Slot.Hand;
 
-        const PendulumBlades = Slot.Hand;
-        const FlameJet = Slot.Waist;
-        const PoisonDart = Slot.Chest;
-        const SpikedPit = Slot.Foot;
-        const HiddenArrow = Slot.Waist;
+        const PendulumBlades = Slot.Waist;
+        const FlameJet = Slot.Foot;
+        const PoisonDart = Slot.Hand;
+        const SpikedPit = Slot.Chest;
+        const HiddenArrow = Slot.Head;
     }
 }
 

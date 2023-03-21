@@ -20,9 +20,9 @@ json=$(python3 scripts/get_public_key_from_private_key.py "$private_key" "$addre
 echo "$json" > "goerli.accounts.json"
 
 # Write the JSON output to a file
-echo "export MAX_FEE=8989832783197500" > "realms_cli/.env.nile"
-echo "export STARKNET_NETWORK=goerli" > "realms_cli/.env.nile"
-echo "export STARKNET_PRIVATE_KEY=${private_key}" > "realms_cli/.env.nile"
+echo "export MAX_FEE=9999439013963000
+export STARKNET_NETWORK=goerli
+export STARKNET_PRIVATE_KEY=${private_key}" > realms_cli/.env.nile
 
 current_dir=$(pwd)
 

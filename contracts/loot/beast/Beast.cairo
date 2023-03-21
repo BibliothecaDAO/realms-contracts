@@ -405,13 +405,13 @@ func flee{
     // lower the beast health, the lower the chance it will ambush and the easier
     // it will be to flee.
     // @distracteddev: simple calculation, random: (0,1) * (health/50): (0, 1, 2)
-    let (ambush_chance) = BeastLib.calculate_ambush_chance(rnd, beast.Health);
+    let (ambush_chance) = BeastLib.calculate_ambush_chance(rnd, beast.Health, unpacked_adventurer.Level);
 
     // Adventurer ambush resistance is based on wisdom plus luck
     let ambush_resistance = unpacked_adventurer.Wisdom + unpacked_adventurer.Luck;
 
     // adventurer is ambushed if their ambush resistance is less than random number
-    let is_ambushed = is_le(ambush_chance, ambush_resistance);
+    let is_ambushed = is_le(ambush_resistance, ambush_chance);
 
     let (item_address) = Module.get_module_address(ModuleIds.Loot);
 
