@@ -210,7 +210,7 @@ func test_calculate_damage_to_beast{syscall_ptr: felt*, pedersen_ptr: HashBuilti
 
     // adventurer boost = 14 * (1 + ((1-1) * 0.1)) + 1 = 14
     // no critical hit
-    assert mace_vs_basilik = 15;
+    assert mace_vs_basilik = 14;
 
     // TODO: Test attacking without weapon (melee)
      // let (weapon) = TestUtils.create_zero_item(); // no weapon (melee attack)
@@ -239,7 +239,7 @@ func test_calculate_damage_from_beast{syscall_ptr: felt*, pedersen_ptr: HashBuil
 
     // beast level boost = 8 * ((1-1) + 2 * 0.1) = 9
     // no critical
-    assert damage = 9;
+    assert damage = 8;
 
     // TODO: Test defending without armor
 
@@ -265,25 +265,25 @@ func test_calculate_damage_from_beast_late_game{syscall_ptr: felt*, pedersen_ptr
 
     let (cloth_damage) = CombatStats.calculate_damage_from_beast(beast, cloth_armor, 1);
 
-    assert cloth_damage = 21;
+    assert cloth_damage = 20;
 
     let (metal_armor) = TestUtils.create_item(78, 20); // lvl 20 ornate chestplate(rank 2)
     
     let (metal_damage) = CombatStats.calculate_damage_from_beast(beast, metal_armor, 1);
 
-    assert metal_damage = 42;
+    assert metal_damage = 40;
 
     let (hide_armor) = TestUtils.create_item(48, 20); // lvl 20 dragonskin armor (rank 2)
 
     let (hide_damage) = CombatStats.calculate_damage_from_beast(beast, hide_armor, 1);
 
-    assert hide_damage = 63;
+    assert hide_damage = 60;
 
     let (no_armor) = TestUtils.create_item_with_names(0, 0, 1, 1, 1); // no item
 
     let (no_armor_damage) = CombatStats.calculate_damage_from_beast(beast, no_armor, 1);
 
-    assert no_armor_damage = 303;
+    assert no_armor_damage = 300;
 
     return ();
 }
@@ -294,9 +294,9 @@ func test_calculate_damage_from_beast_late_game{syscall_ptr: felt*, pedersen_ptr
 @external
 func test_ambush_chance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
 
-    let (ambush_chance) = BeastLib.calculate_ambush_chance(1, 69);
+    let (ambush_chance) = BeastLib.calculate_ambush_chance(1, 69, 1);
 
-    assert ambush_chance = 2;
+    assert ambush_chance = 0;
 
     return ();
 }

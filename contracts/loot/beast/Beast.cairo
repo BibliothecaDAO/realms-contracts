@@ -287,7 +287,7 @@ func attack{
         IAdventurer.increase_xp(adventurer_address, adventurer_id, xp_gained);
 
         // and to items
-        _allocate_xp_to_items(item_address, unpacked_adventurer, xp_gained);
+        ILoot.allocate_xp_to_items(item_address, unpacked_adventurer, xp_gained);
 
         // drop gold
         // @distracteddev: add randomness to reward
@@ -405,13 +405,13 @@ func flee{
     // lower the beast health, the lower the chance it will ambush and the easier
     // it will be to flee.
     // @distracteddev: simple calculation, random: (0,1) * (health/50): (0, 1, 2)
-    let (ambush_chance) = BeastLib.calculate_ambush_chance(rnd, beast.Health);
+    let (ambush_chance) = BeastLib.calculate_ambush_chance(rnd, beast.Health, unpacked_adventurer.Level);
 
     // Adventurer ambush resistance is based on wisdom plus luck
     let ambush_resistance = unpacked_adventurer.Wisdom + unpacked_adventurer.Luck;
 
     // adventurer is ambushed if their ambush resistance is less than random number
-    let is_ambushed = is_le(ambush_chance, ambush_resistance);
+    let is_ambushed = is_le(ambush_resistance, ambush_chance);
 
     let (item_address) = Module.get_module_address(ModuleIds.Loot);
 
@@ -758,143 +758,4 @@ func get_world_supply{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     balance: felt
 ) {
     return worldSupply.read();
-}
-
-// @notice Grants XP to the items equipped by the given adventurer.
-// @dev This function grants XP to the equipped weapon and armor items of the adventurer.
-//     If the adventurer has a weapon, head armor, chest armor, hand armor, foot armor, waist armor, ring, or necklace equipped,
-//     the corresponding equipped item will receive the XP.
-// @param item_address The address of the item contract.
-// @param unpacked_adventurer The AdventurerState struct representing the adventurer.
-// @param xp The amount of XP to be granted to the equipped items.
-func _allocate_xp_to_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    item_address: felt, unpacked_adventurer: AdventurerState, xp: felt
-) {
-    alloc_locals;
-
-    // If adventurer has a weapon
-    let weapon_equipped = is_not_zero(unpacked_adventurer.WeaponId);
-    if (weapon_equipped == TRUE) {
-        let (weapon_result) = ILoot.increase_xp(
-            item_address, Uint256(unpacked_adventurer.WeaponId, 0), xp
-        );
-
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-    } else {
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-    }
-
-    // if adventurer is wearing head armor
-    let head_armor_equipped = is_not_zero(unpacked_adventurer.HeadId);
-    if (head_armor_equipped == TRUE) {
-        // grant it xp
-
-        let (head_armor_result) = ILoot.increase_xp(
-            item_address, Uint256(unpacked_adventurer.HeadId, 0), xp
-        );
-
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-    } else {
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-    }
-
-    // if adventurer is wearing chest armor
-    let chest_armor_equipped = is_not_zero(unpacked_adventurer.ChestId);
-    if (chest_armor_equipped == TRUE) {
-        // grant it xp
-        ILoot.increase_xp(item_address, Uint256(unpacked_adventurer.ChestId, 0), xp);
-
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-    } else {
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-    }
-
-    // if adventurer is wearing hand armor
-    let hand_armor_equipped = is_not_zero(unpacked_adventurer.HandsId);
-    if (hand_armor_equipped == TRUE) {
-        // grant it xp
-        ILoot.increase_xp(item_address, Uint256(unpacked_adventurer.HandsId, 0), xp);
-
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-    } else {
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-    }
-
-    // if adventurer is wearing foot armor
-    let foot_armor_equipped = is_not_zero(unpacked_adventurer.FeetId);
-    if (foot_armor_equipped == TRUE) {
-        // grant it xp
-        ILoot.increase_xp(item_address, Uint256(unpacked_adventurer.FeetId, 0), xp);
-
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-    } else {
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-    }
-
-    // if adventurer is wearing waist armor
-    let waist_armor_equipped = is_not_zero(unpacked_adventurer.WaistId);
-    if (waist_armor_equipped == TRUE) {
-        // grant it xp
-        ILoot.increase_xp(item_address, Uint256(unpacked_adventurer.WaistId, 0), xp);
-
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-    } else {
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-    }
-
-    // if adventurer is wearing a ring
-    let ring_equipped = is_not_zero(unpacked_adventurer.RingId);
-    if (ring_equipped == TRUE) {
-        // grant it xp
-        ILoot.increase_xp(item_address, Uint256(unpacked_adventurer.RingId, 0), xp);
-
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-    } else {
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-    }
-
-    // if adventurer is wearing a necklace
-    let necklace_equipped = is_not_zero(unpacked_adventurer.NeckId);
-    if (necklace_equipped == TRUE) {
-        // grant it xp
-        ILoot.increase_xp(item_address, Uint256(unpacked_adventurer.NeckId, 0), xp);
-
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-    } else {
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-    }
-
-    return ();
 }

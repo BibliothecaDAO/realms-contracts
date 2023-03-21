@@ -138,32 +138,7 @@ def new_adventurer(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    out = asyncio.run(
-        wrapped_proxy_call(
-            network=config.nile_network,
-            contract_alias="proxy_Adventurer",
-            abi="artifacts/abis/Adventurer.json",
-            function="balance_of",
-            arguments=[config.USER_ADDRESS],
-        )
-    )
-
-    out = out.split(" ")
-
-    item = asyncio.run(
-        wrapped_proxy_call(
-            network=config.nile_network,
-            contract_alias="proxy_Adventurer",
-            abi="artifacts/abis/Adventurer.json",
-            function="token_of_owner_by_index",
-            arguments=[config.USER_ADDRESS, *uint(out[-1])],
-        )
-    )
-
-    id = item.split(" ")
     asyncio.run(update_adventurer_list())
-    update_gold(id[-1])
-    update_health(id[-1])
     dpg.delete_item("mint_adventurer_load")
     dpg.delete_item("loader")
 
@@ -529,6 +504,47 @@ def claim_item(sender, app_data, user_data):
     update_gold(adventurer_id)
     update_owned_items()
     dpg.delete_item("claim_item_load")
+    dpg.delete_item("loader")
+
+
+def claim_equip_item(sender, app_data, user_data):
+    dpg.add_text(
+        "Claiming and equipping item",
+        tag="claim_equip_item_load",
+        pos=[700, 50],
+        parent="adventurers",
+    )
+    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
+    loot_token_id = dpg.get_value("bid_loot_id").split(" - ")[-1]
+    adventurer_id = dpg.get_value("bid_adventurer_id").split(" - ")[-1]
+    loot_ids = dpg.get_value("multi_loot_ids")
+    if loot_ids != "":
+        command = [
+            "nile",
+            "loot",
+            "claim_equip",
+            "--loot_token_id",
+            loot_ids,
+            "--adventurer_token_id",
+            adventurer_id,
+        ]
+    else:
+        command = [
+            "nile",
+            "loot",
+            "claim_equip",
+            "--loot_token_id",
+            loot_token_id,
+            "--adventurer_token_id",
+            adventurer_id,
+        ]
+    out = subprocess.check_output(command).strip().decode("utf-8")
+    print(out)
+    adventurer_out = asyncio.run(_get_adventurer("goerli", adventurer_id))
+    update_equipped_items(adventurer_out)
+    update_gold(adventurer_id)
+    update_owned_items()
+    dpg.delete_item("claim_equip_item_load")
     dpg.delete_item("loader")
 
 
@@ -951,6 +967,7 @@ if __name__ == "__main__":
                 with dpg.group(horizontal=True):
                     dpg.add_button(label="Bid", callback=bid_on_item)
                     dpg.add_button(label="Claim", callback=claim_item)
+                    dpg.add_button(label="Claim and Equip", callback=claim_equip_item)
             with dpg.group():
                 dpg.add_text("Equip Item")
                 dpg.add_combo(

@@ -224,7 +224,18 @@ func test_bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     %{
         stop_prank_loot()
         stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
+        expect_revert(error_message="Adventurer: Adventurer level not high enough.")
     %}
+
+    ILoot.bid_on_item(loot_address, Uint256(1, 0), Uint256(1, 0), 3);
+
+    %{
+        from tests.protostar.loot.utils import utils
+        # force adventurers to be level 2 to bid on an item
+        p1, p2, p3, p4 = utils.pack_adventurer(utils.build_adventurer_level(2))
+        store(ids.adventurer_address, "adventurer_dynamic", [p1, p2, p3, p4], key=[1,0])
+    %}
+
     ILoot.bid_on_item(loot_address, Uint256(1, 0), Uint256(1, 0), 3);
 
     let (bid) = ILoot.view_bid(loot_address, Uint256(1, 0));
@@ -263,6 +274,10 @@ func test_claim_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     %{
         stop_prank_loot()
         stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
+        from tests.protostar.loot.utils import utils
+        # force adventurers to be level 2 to bid on an item
+        p1, p2, p3, p4 = utils.pack_adventurer(utils.build_adventurer_level(2))
+        store(ids.adventurer_address, "adventurer_dynamic", [p1, p2, p3, p4], key=[1,0])
     %}
     ILoot.bid_on_item(loot_address, Uint256(1, 0), Uint256(1, 0), 3);
 

@@ -255,9 +255,9 @@ namespace BeastLib {
     }
 
     func calculate_ambush_chance{syscall_ptr: felt*, range_check_ptr}(
-        rnd: felt, beast_health: felt
+        rnd: felt, beast_health: felt, adventurer_level: felt
     ) -> (ambush_chance: felt) {
-        let (_, r) = unsigned_div_rem(rnd, 2);
+        let (_, r) = unsigned_div_rem(rnd, adventurer_level);
         let (beast_health_multi, _) = unsigned_div_rem(beast_health, 50);
         let ambush_chance = r * (1 + beast_health_multi);
 

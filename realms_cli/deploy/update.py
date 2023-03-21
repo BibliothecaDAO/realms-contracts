@@ -29,10 +29,10 @@ NEW_MODULES = [
     # Contracts("Resources_ERC1155_Mintable_Burnable"),
     # Contracts("Exchange_ERC20_1155"),
     # Contracts("Lords_ERC20_Mintable"),
-    # Contracts("Adventurer"),
-    # Contracts("LootMarketArcade"),
-    # Contracts("Beast"),
     Contracts("Bastions"),
+    Contracts("Adventurer"),
+    Contracts("LootMarketArcade"),
+    Contracts("Beast"),
 ]
 
 

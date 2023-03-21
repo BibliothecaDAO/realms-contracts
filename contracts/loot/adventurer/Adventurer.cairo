@@ -284,6 +284,8 @@ func equip_item{
     // only adventurer owner can equip
     ERC721.assert_only_token_owner(adventurer_token_id);
 
+    assert_not_dead(adventurer_token_id);
+
     // unpack adventurer
     let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
     let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
@@ -373,6 +375,8 @@ func unequip_item{
 
     // only adventurer owner can unequip
     ERC721.assert_only_token_owner(adventurer_token_id);
+
+    assert_not_dead(adventurer_token_id);
 
     // unpack adventurer
     let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
@@ -531,6 +535,8 @@ func upgrade_stat{
     // only adventurer owner can upgrade stat
     ERC721.assert_only_token_owner(adventurer_token_id);
 
+    assert_not_dead(adventurer_token_id);
+
     // unpack adventurer
     let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
     let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
@@ -599,6 +605,8 @@ func purchase_health{
     ERC721.assert_only_token_owner(adventurer_token_id);
 
     // check the adventurer can purchase health
+    assert_not_dead(adventurer_token_id);
+
     let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
     let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
 
@@ -736,6 +744,7 @@ func explore{
             let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(item_id, 0));
             let (obstacle_damage) = CombatStats.calculate_damage_from_obstacle(obstacle, armor);
             _deduct_health(token_id, obstacle_damage);
+            ILoot.allocate_xp_to_items(item_address, unpacked_adventurer, obstacle_damage);
             return (DiscoveryType.Obstacle, obstacle.Id);
         }
     }
@@ -798,6 +807,8 @@ func rob_king{
     // only adventurer owner can explore
     ERC721.assert_only_token_owner(adventurer_token_id);
 
+    assert_not_dead(adventurer_token_id);
+
     let (beast_address) = Module.get_module_address(ModuleIds.Beast);
 
     // unpack adventurer
@@ -838,6 +849,8 @@ func kill_thief{
 
     // only adventurer owner can explore
     ERC721.assert_only_token_owner(adventurer_token_id);
+
+    assert_not_dead(adventurer_token_id);
 
     let (beast_address) = Module.get_module_address(ModuleIds.Beast);
 
