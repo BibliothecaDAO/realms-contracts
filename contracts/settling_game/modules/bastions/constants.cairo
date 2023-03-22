@@ -9,6 +9,6 @@ namespace MovingTimes {
     const DistanceGateTower = 5;  // 25
     const DistanceTowerTower = 6;  // 10
     const DistanceStagingAreaTower = 7;  // 25
-    const DistanceTowerInnerGate = 8;  // 10
+    const DistanceTowerInnerGate = 8;  // 25
     const DistanceInnerGateTowerGate = 9;  // 25
 }

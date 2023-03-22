@@ -855,14 +855,21 @@ func get_move_block_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
                 );
             } else {
                 // towers
-                // if not 0, it has to be one of the towers because i already no hes not on location 5
+                // if not 0, it has to be one of the towers because i already know hes not on location 5
                 if (current_location_defender == mover_order) {
                     let (moving_time) = bastion_moving_times.read(
                         MovingTimes.DistanceTowerCentralSquare
                     );
                 } else {
-                    let (moving_time) = bastion_moving_times.read(
-                        MovingTimes.DistanceTowerGateCentralSquare
+                    // if you are on a tower gate, you need to through the closest tower
+                    // TODO: is it the same to go from central square as defender to tower? and to staging area
+                    let (moving_time) = Bastions.find_shortest_path_from_tower_to_central_square(
+                        mover_order,
+                        current_location,
+                        tower_1_defending_order,
+                        tower_2_defending_order,
+                        tower_3_defending_order,
+                        tower_4_defending_order,
                     );
                 }
             }
@@ -886,9 +893,20 @@ func get_move_block_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
         if (next_location == 0) {
             // if you are on central square
             if (current_location == 5) {
-                let (moving_time) = bastion_moving_times.read(
-                    MovingTimes.DistanceStagingAreaCentralSquare
-                );
+                // TODO: test that
+                if (current_location_defender == mover_order) {
+                    let (moving_time) = bastion_moving_times.read(
+                        MovingTimes.DistanceStagingAreaCentralSquare
+                    );
+                } else {
+                    with_attr error_message(
+                            "Bastions: attacker cannot move out of inner gate if does not hold all 4 towers") {
+                        assert number_of_conquered_towers = 4;
+                    }
+                    let (moving_time) = bastion_moving_times.read(
+                        MovingTimes.DistanceStagingAreaCentralSquare
+                    );
+                }
             } else {
                 // you are on a tower
                 let (moving_time) = bastion_moving_times.read(MovingTimes.DistanceStagingAreaTower);
@@ -907,6 +925,11 @@ func get_move_block_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
                                 MovingTimes.DistanceTowerCentralSquare
                             );
                         } else {
+                            // TODO: test that
+                            with_attr error_message(
+                                    "Bastions: attacker cannot move out of inner gate if does not hold all 4 towers") {
+                                assert number_of_conquered_towers = 4;
+                            }
                             let (moving_time) = bastion_moving_times.read(
                                 MovingTimes.DistanceTowerInnerGate
                             );
