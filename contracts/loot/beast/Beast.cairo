@@ -398,29 +398,22 @@ func flee{
         assert unpacked_adventurer.Status = AdventurerStatus.Battle;
     }
 
-    let (rnd) = get_random_number();
+    // Ambush rng is scoped between zero and (adventurers level -1)
+    let (ambush_rnd) = get_random_number();
+    let (_, ambush_chance) = unsigned_div_rem(ambush_rnd, unpacked_adventurer.Level);
 
-    // TODO Milestone2: Factor in beast health for the ambush chance and for flee chance
-    // Short-term (while we are using rng) would be to base rng on beast health. The
-    // lower the beast health, the lower the chance it will ambush and the easier
-    // it will be to flee.
-    // @distracteddev: simple calculation, random: (0,1) * (health/50): (0, 1, 2)
-    let (ambush_chance) = BeastLib.calculate_ambush_chance(rnd, beast.Health, unpacked_adventurer.Level);
+    // if the adventurers wisdom is higher than the ambush rnd, they avoid ambush
+    let avoided_ambush = is_le(ambush_chance, unpacked_adventurer.Wisdom + 1);
 
-    // Adventurer ambush resistance is based on wisdom plus luck
-    let ambush_resistance = unpacked_adventurer.Wisdom + unpacked_adventurer.Luck;
+    // if they do not avoid
+    if (avoided_ambush == FALSE) {
+        // they take damage
 
-    // adventurer is ambushed if their ambush resistance is less than random number
-    let is_ambushed = is_le(ambush_resistance, ambush_chance);
-
-    let (item_address) = Module.get_module_address(ModuleIds.Loot);
-
-    // unless ambush occurs
-    if (is_ambushed == TRUE) {
         // get the location the beast attacks
         let (beast_attack_location) = BeastStats.get_attack_location_from_id(beast.Id);
 
         // get the armor the adventurer is wearing at the location the beast attacks
+        let (item_address) = Module.get_module_address(ModuleIds.Loot);
         let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(beast_attack_location, 0));
 
         let (damage_rnd) = get_random_number();
