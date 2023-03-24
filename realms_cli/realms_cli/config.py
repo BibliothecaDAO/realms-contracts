@@ -77,7 +77,7 @@ class Config:
         self.GoblinTown_alias = "proxy_" + ContractAlias.GoblinTown
 
         # @distracteddev to change back
-        self.Lords_ERC20_Mintable_alias = "proxy_" + ContractAlias.Lords_ERC20_Mintable
+        self.Lords_ERC20_Mintable_alias = ContractAlias.Lords_ERC20_Mintable
         self.Realms_ERC721_Mintable_alias = (
             "proxy_" + ContractAlias.Realms_ERC721_Mintable
         )
@@ -135,8 +135,10 @@ class Config:
         self.S_REALMS_ADDRESS, _ = safe_load_deployment(
             ContractAlias.S_Realms_ERC721_Mintable, self.nile_network
         )
-        self.CRYPTS_ADDRESS, _ = safe_load_deployment("crypts", self.nile_network)
-        self.S_CRYPTS_ADDRESS, _ = safe_load_deployment("s_crypts", self.nile_network)
+        self.CRYPTS_ADDRESS, _ = safe_load_deployment(
+            "crypts", self.nile_network)
+        self.S_CRYPTS_ADDRESS, _ = safe_load_deployment(
+            "s_crypts", self.nile_network)
 
         self.LORDS_PROXY_ADDRESS, _ = safe_load_deployment(
             "proxy_" + ContractAlias.Lords_ERC20_Mintable, self.nile_network
@@ -439,4 +441,5 @@ class Config:
             "HeavyGloves",
         ]
 
-        self.SLOT = ["Weapon", "Chest", "Head", "Waist", "Foot", "Hand", "Neck", "Ring"]
+        self.SLOT = ["Weapon", "Chest", "Head",
+                     "Waist", "Foot", "Hand", "Neck", "Ring"]
