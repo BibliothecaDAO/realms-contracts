@@ -898,7 +898,7 @@ func test_upgrade_vitality_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
 
     let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
 
-    assert adventurer.Health = 110;
+    assert adventurer.Health = 120;
 
     // check increase of health with damage
 
@@ -910,7 +910,7 @@ func test_upgrade_vitality_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
     // enough xp to level up
     IAdventurer.increase_xp(adventurer_address, Uint256(1, 0), 27);
 
-    IAdventurer.deduct_health(adventurer_address, Uint256(1, 0), 20);
+    IAdventurer.deduct_health(adventurer_address, Uint256(1, 0), 40);
 
     %{
         stop_prank_adventurer()

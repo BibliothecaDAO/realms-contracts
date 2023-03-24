@@ -550,13 +550,13 @@ func upgrade_stat{
     // upgrade stat
     let (updated_stat_adventurer) = AdventurerLib.update_statistics(stat, adventurer_dynamic_);
 
-    // if stat chosen to upgrade is vitality then increase current health and max health by 10
+    // if stat chosen to upgrade is vitality then increase current health and max health by 20
     if (stat == AdventurerSlotIds.Vitality) {
         // we get max health based on vitality
-        let max_health = 100 + (10 * updated_stat_adventurer.Vitality);
-        let check_health_over_cap = is_le(max_health, updated_stat_adventurer.Health + 10);
+        let max_health = 100 + (20 * updated_stat_adventurer.Vitality);
+        let check_health_over_cap = is_le(max_health, updated_stat_adventurer.Health + 20);
 
-        // cap health at 100 + (10 * vitality)
+        // cap health at 100 + (20 * vitality)
         if (check_health_over_cap == TRUE) {
             let add_amount = max_health - updated_stat_adventurer.Health;
             let (new_adventurer) = AdventurerLib.add_health(add_amount, updated_stat_adventurer);
@@ -1335,10 +1335,10 @@ func _add_health{
     let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
 
     // we get max health based on vitality
-    let max_health = 100 + (10 * adventurer_dynamic_.Vitality);
+    let max_health = 100 + (20 * adventurer_dynamic_.Vitality);
     let check_health_over_cap = is_le(max_health, adventurer_dynamic_.Health + amount);
 
-    // cap health at 100 + (10 * vitality)
+    // cap health at 100 + (20 * vitality)
     if (check_health_over_cap == TRUE) {
         let add_amount = max_health - adventurer_dynamic_.Health;
         let (new_adventurer) = AdventurerLib.add_health(add_amount, adventurer_dynamic_);
