@@ -42,7 +42,6 @@ from contracts.settling_game.utils.constants import SHIFT_41
 from contracts.loot.constants.beast import Beast, BeastIds
 from contracts.loot.loot.stats.combat import CombatStats
 
-
 namespace AdventurerLib {
     func birth{syscall_ptr: felt*, range_check_ptr}(
         race: felt,
@@ -302,7 +301,7 @@ namespace AdventurerLib {
         // ---------- p4 ---------#
         let (Status) = unpack_data(packed_adventurer.p4, 0, 7);  // 3
         let (Beast) = unpack_data(packed_adventurer.p4, 3, 2199023255551);  // 41
-        let (Upgrading) = unpack_data(packed_adventurer.p4, 44, 1); // 1
+        let (Upgrading) = unpack_data(packed_adventurer.p4, 44, 1);  // 1
 
         return (
             AdventurerDynamic(
@@ -372,9 +371,7 @@ namespace AdventurerLib {
         alloc_locals;
 
         // pass index shift and Item slot to find what item to update
-        let (item_id) = get_state(
-            ItemShift + item.Slot, unpacked_adventurer
-        );
+        let (item_id) = get_state(ItemShift + item.Slot, unpacked_adventurer);
 
         return (item_id,);
     }
@@ -590,7 +587,9 @@ namespace AdventurerLib {
         }
         if (stat == AdventurerSlotIds.Intelligence) {
             let (updated_adventurer: AdventurerDynamic) = cast_state(
-                AdventurerSlotIds.Intelligence, unpacked_adventurer.Intelligence + 1, unpacked_adventurer
+                AdventurerSlotIds.Intelligence,
+                unpacked_adventurer.Intelligence + 1,
+                unpacked_adventurer,
             );
             return (updated_adventurer,);
         }
@@ -616,7 +615,6 @@ namespace AdventurerLib {
     func set_upgrading{syscall_ptr: felt*, range_check_ptr}(
         upgrading: felt, unpacked_adventurer: AdventurerDynamic
     ) -> (new_unpacked_adventurer: AdventurerDynamic) {
-
         // set upgrade status
         let (updated_adventurer: AdventurerDynamic) = cast_state(
             AdventurerSlotIds.Upgrading, upgrading, unpacked_adventurer
@@ -624,11 +622,10 @@ namespace AdventurerLib {
 
         return (updated_adventurer,);
     }
-    
-    func calculate_gold_discovery{syscall_ptr: felt*, range_check_ptr}(
-        rnd: felt
-    ) -> (gold_discovery: felt) {
 
+    func calculate_gold_discovery{syscall_ptr: felt*, range_check_ptr}(rnd: felt) -> (
+        gold_discovery: felt
+    ) {
         let (_, discover_multi) = unsigned_div_rem(rnd, 4);
 
         let gold_discovery = 1 + discover_multi;
@@ -636,9 +633,9 @@ namespace AdventurerLib {
         return (gold_discovery,);
     }
 
-    func calculate_health_discovery{syscall_ptr: felt*, range_check_ptr}(
-        rnd: felt
-    ) -> (health_discovery: felt) {
+    func calculate_health_discovery{syscall_ptr: felt*, range_check_ptr}(rnd: felt) -> (
+        health_discovery: felt
+    ) {
         let (_, discover_multi) = unsigned_div_rem(rnd, 4);
 
         let health_discovery = 10 + (5 * discover_multi);
@@ -646,31 +643,30 @@ namespace AdventurerLib {
         return (health_discovery,);
     }
 
-    func calculate_xp_discovery{syscall_ptr: felt*, range_check_ptr}(
-        rnd: felt
-    ) -> (xp_discovery: felt) {
-        let (_, discover_multi) = unsigned_div_rem(rnd, 4);
+    func calculate_xp_discovery{syscall_ptr: felt*, range_check_ptr}(rnd: felt) -> (
+        xp_discovery: felt
+    ) {
+        let (_, discover_multi) = unsigned_div_rem(rnd, 10);
 
-        let xp_discovery = 10 + (5 * discover_multi);
+        let xp_discovery = 1 + discover_multi;
 
         return (xp_discovery,);
     }
 
-    func get_starting_beast_from_weapon{syscall_ptr: felt*, range_check_ptr}(
-        weapon_id: felt
-    ) -> (beast_id: felt) {
-
+    func get_starting_beast_from_weapon{syscall_ptr: felt*, range_check_ptr}(weapon_id: felt) -> (
+        beast_id: felt
+    ) {
         if (weapon_id == ItemIds.ShortSword) {
-            return(BeastIds.Golem,);
+            return (BeastIds.Golem,);
         }
         if (weapon_id == ItemIds.Book) {
-            return(BeastIds.Ogre,);
+            return (BeastIds.Ogre,);
         }
         if (weapon_id == ItemIds.Wand) {
-            return(BeastIds.Ogre,);
+            return (BeastIds.Ogre,);
         }
         if (weapon_id == ItemIds.Club) {
-            return(BeastIds.Rat,);
+            return (BeastIds.Rat,);
         }
         return (0,);
     }
@@ -683,46 +679,58 @@ namespace AdventurerLib {
     func apply_item_stat_modifier{syscall_ptr: felt*, range_check_ptr}(
         item: Item, unpacked_adventurer: AdventurerDynamic
     ) -> (new_unpacked_adventurer: AdventurerDynamic) {
-        //@distracteddev: If item is jewellery (slot is neck or ring) apply luck as greatness
+        // @distracteddev: If item is jewellery (slot is neck or ring) apply luck as greatness
         // if it also have a prefix and suffix, add another 3
         if (item.Slot == Slot.Neck) {
             if (item.Prefix_2 == 0) {
                 let (updated_adventurer: AdventurerDynamic) = cast_state(
-                    AdventurerSlotIds.Luck, unpacked_adventurer.Luck + item.Greatness, unpacked_adventurer
+                    AdventurerSlotIds.Luck,
+                    unpacked_adventurer.Luck + item.Greatness,
+                    unpacked_adventurer,
                 );
                 return (updated_adventurer,);
             }
             if (item.Suffix == 0) {
                 let (updated_adventurer: AdventurerDynamic) = cast_state(
-                    AdventurerSlotIds.Luck, unpacked_adventurer.Luck + item.Greatness, unpacked_adventurer
+                    AdventurerSlotIds.Luck,
+                    unpacked_adventurer.Luck + item.Greatness,
+                    unpacked_adventurer,
                 );
                 return (updated_adventurer,);
             }
             let (updated_adventurer: AdventurerDynamic) = cast_state(
-                AdventurerSlotIds.Luck, unpacked_adventurer.Luck + item.Greatness + 3, unpacked_adventurer
+                AdventurerSlotIds.Luck,
+                unpacked_adventurer.Luck + item.Greatness + 3,
+                unpacked_adventurer,
             );
             return (updated_adventurer,);
         }
         if (item.Slot == Slot.Ring) {
-            if  (item.Prefix_2 == 0) {
+            if (item.Prefix_2 == 0) {
                 let (updated_adventurer: AdventurerDynamic) = cast_state(
-                    AdventurerSlotIds.Luck, unpacked_adventurer.Luck + item.Greatness, unpacked_adventurer
+                    AdventurerSlotIds.Luck,
+                    unpacked_adventurer.Luck + item.Greatness,
+                    unpacked_adventurer,
                 );
                 return (updated_adventurer,);
             }
             if (item.Suffix == 0) {
                 let (updated_adventurer: AdventurerDynamic) = cast_state(
-                    AdventurerSlotIds.Luck, unpacked_adventurer.Luck + item.Greatness, unpacked_adventurer
+                    AdventurerSlotIds.Luck,
+                    unpacked_adventurer.Luck + item.Greatness,
+                    unpacked_adventurer,
                 );
                 return (updated_adventurer,);
             }
             let (updated_adventurer: AdventurerDynamic) = cast_state(
-                AdventurerSlotIds.Luck, unpacked_adventurer.Luck + item.Greatness + 3, unpacked_adventurer
+                AdventurerSlotIds.Luck,
+                unpacked_adventurer.Luck + item.Greatness + 3,
+                unpacked_adventurer,
             );
             return (updated_adventurer,);
         }
         // else if no prefix and suffix return
-        if  (item.Prefix_2 == 0) {
+        if (item.Prefix_2 == 0) {
             return (unpacked_adventurer,);
         }
         if (item.Suffix == 0) {
@@ -735,7 +743,7 @@ namespace AdventurerLib {
             );
             return (updated_adventurer,);
         }
-        if (item.Suffix == ItemSuffixes.of_Giant) { 
+        if (item.Suffix == ItemSuffixes.of_Giant) {
             let (updated_adventurer: AdventurerDynamic) = cast_state(
                 AdventurerSlotIds.Vitality, unpacked_adventurer.Vitality + 3, unpacked_adventurer
             );
@@ -749,19 +757,25 @@ namespace AdventurerLib {
         }
         if (item.Suffix == ItemSuffixes.of_Skill) {
             let (updated_adventurer: AdventurerDynamic) = cast_state(
-                AdventurerSlotIds.Intelligence, unpacked_adventurer.Intelligence + 3, unpacked_adventurer
+                AdventurerSlotIds.Intelligence,
+                unpacked_adventurer.Intelligence + 3,
+                unpacked_adventurer,
             );
             return (updated_adventurer,);
         }
         if (item.Suffix == ItemSuffixes.of_Perfection) {
             let (updated_adventurer: AdventurerDynamic) = cast_state(
-                AdventurerSlotIds.Intelligence, unpacked_adventurer.Intelligence + 3, unpacked_adventurer
+                AdventurerSlotIds.Intelligence,
+                unpacked_adventurer.Intelligence + 3,
+                unpacked_adventurer,
             );
             return (updated_adventurer,);
         }
         if (item.Suffix == ItemSuffixes.of_Brilliance) {
             let (updated_adventurer: AdventurerDynamic) = cast_state(
-                AdventurerSlotIds.Intelligence, unpacked_adventurer.Intelligence + 3, unpacked_adventurer
+                AdventurerSlotIds.Intelligence,
+                unpacked_adventurer.Intelligence + 3,
+                unpacked_adventurer,
             );
             return (updated_adventurer,);
         }
@@ -803,7 +817,9 @@ namespace AdventurerLib {
         }
         if (item.Suffix == ItemSuffixes.of_the_Fox) {
             let (updated_adventurer: AdventurerDynamic) = cast_state(
-                AdventurerSlotIds.Intelligence, unpacked_adventurer.Intelligence + 3, unpacked_adventurer
+                AdventurerSlotIds.Intelligence,
+                unpacked_adventurer.Intelligence + 3,
+                unpacked_adventurer,
             );
             return (updated_adventurer,);
         }
@@ -831,7 +847,7 @@ namespace AdventurerLib {
     func remove_item_stat_modifier{syscall_ptr: felt*, range_check_ptr}(
         item: Item, unpacked_adventurer: AdventurerDynamic
     ) -> (new_unpacked_adventurer: AdventurerDynamic) {
-        if  (item.Prefix_2 == 0) {
+        if (item.Prefix_2 == 0) {
             return (unpacked_adventurer,);
         }
         if (item.Suffix == 0) {
@@ -855,7 +871,7 @@ namespace AdventurerLib {
             );
             return (updated_adventurer,);
         }
-        if (item.Suffix == ItemSuffixes.of_Giant) { 
+        if (item.Suffix == ItemSuffixes.of_Giant) {
             let (updated_adventurer: AdventurerDynamic) = cast_state(
                 AdventurerSlotIds.Vitality, unpacked_adventurer.Vitality - 3, unpacked_adventurer
             );
@@ -869,19 +885,25 @@ namespace AdventurerLib {
         }
         if (item.Suffix == ItemSuffixes.of_Skill) {
             let (updated_adventurer: AdventurerDynamic) = cast_state(
-                AdventurerSlotIds.Intelligence, unpacked_adventurer.Intelligence - 3, unpacked_adventurer
+                AdventurerSlotIds.Intelligence,
+                unpacked_adventurer.Intelligence - 3,
+                unpacked_adventurer,
             );
             return (updated_adventurer,);
         }
         if (item.Suffix == ItemSuffixes.of_Perfection) {
             let (updated_adventurer: AdventurerDynamic) = cast_state(
-                AdventurerSlotIds.Intelligence, unpacked_adventurer.Intelligence - 3, unpacked_adventurer
+                AdventurerSlotIds.Intelligence,
+                unpacked_adventurer.Intelligence - 3,
+                unpacked_adventurer,
             );
             return (updated_adventurer,);
         }
         if (item.Suffix == ItemSuffixes.of_Brilliance) {
             let (updated_adventurer: AdventurerDynamic) = cast_state(
-                AdventurerSlotIds.Intelligence, unpacked_adventurer.Intelligence - 3, unpacked_adventurer
+                AdventurerSlotIds.Intelligence,
+                unpacked_adventurer.Intelligence - 3,
+                unpacked_adventurer,
             );
             return (updated_adventurer,);
         }
@@ -923,7 +945,9 @@ namespace AdventurerLib {
         }
         if (item.Suffix == ItemSuffixes.of_the_Fox) {
             let (updated_adventurer: AdventurerDynamic) = cast_state(
-                AdventurerSlotIds.Intelligence, unpacked_adventurer.Intelligence - 3, unpacked_adventurer
+                AdventurerSlotIds.Intelligence,
+                unpacked_adventurer.Intelligence - 3,
+                unpacked_adventurer,
             );
             return (updated_adventurer,);
         }

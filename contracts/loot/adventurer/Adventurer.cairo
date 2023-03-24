@@ -786,8 +786,7 @@ func explore{
         return (DiscoveryType.Item, 0);
     }
 
-    // add XP
-    // @distracteddev: formula - 10 + (5 * (rnd % 4))
+    // Discover 1-10XP
     let (rnd) = get_random_number();
     let (xp_discovery) = AdventurerLib.calculate_xp_discovery(rnd);
     _increase_xp(token_id, xp_discovery);
