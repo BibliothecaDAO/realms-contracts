@@ -397,6 +397,37 @@ func test_bastion_move_central_square_all_towers_conquered{
 }
 
 @external
+func test_bastion_move_from_inner_gate_to_tower_if_not_conquered_all_towers_should_fail{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+}() -> () {
+    // put army on tower 1
+    // same order for tower and central square
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.CENTRAL_SQUARE_ID]) %}
+
+    %{ expect_revert(error_message="Bastions: attacker cannot move out of inner gate if does not hold all 4 towers") %}
+    let (time) = get_move_block_time(Point(X, Y), CENTRAL_SQUARE_ID, TOWER_1_ID, ORDER_OF_GIANTS);
+
+    return ();
+}
+
+@external
+func test_bastion_move_from_inner_gate_to_staging_area_if_not_conquered_all_towers_should_fail{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+}() -> () {
+    // put army on tower 1
+    // same order for tower and central square
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.CENTRAL_SQUARE_ID]) %}
+
+    %{ expect_revert(error_message="Bastions: attacker cannot move out of inner gate if does not hold all 4 towers") %}
+    let (time) = get_move_block_time(
+        Point(X, Y), CENTRAL_SQUARE_ID, STAGING_AREA_ID, ORDER_OF_GIANTS
+    );
+
+    return ();
+}
+
+@external
 func test_bastion_move_verify_moving_times{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 }() -> () {
@@ -424,7 +455,7 @@ func test_bastion_move_verify_moving_times{
     );
     %{ assert ids.time == 35 %}
 
-    // defending cetnral square
+    // defending central square
     %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.CENTRAL_SQUARE_ID]) %}
 
     let (time) = get_move_block_time(
@@ -462,9 +493,6 @@ func test_bastion_move_verify_moving_times{
     %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
     %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.CENTRAL_SQUARE_ID]) %}
 
-    let (time) = get_move_block_time(Point(X, Y), CENTRAL_SQUARE_ID, TOWER_1_ID, ORDER_OF_GIANTS);
-    %{ assert ids.time == 25 %}
-
     let (time) = get_move_block_time(Point(X, Y), CENTRAL_SQUARE_ID, TOWER_1_ID, ORDER_OF_FURY);
     %{ assert ids.time == 10 %}
 
@@ -479,20 +507,68 @@ func test_bastion_move_verify_moving_times{
     let (time) = get_move_block_time(Point(X, Y), CENTRAL_SQUARE_ID, TOWER_1_ID, ORDER_OF_GIANTS);
     %{ assert ids.time == 25 %}
 
+    // tower 1 gate to central square
+    // does not have current tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
+    // has opposite tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_3_ID]) %}
+    // if has one adjacent tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_2_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_4_ID]) %}
     let (time) = get_move_block_time(Point(X, Y), TOWER_1_ID, CENTRAL_SQUARE_ID, ORDER_OF_GIANTS);
-    %{ assert ids.time == 25 %}
+    %{ assert ids.time == 25 + 10 %}
+    // if has one adjacent tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_2_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_4_ID]) %}
+    let (time) = get_move_block_time(Point(X, Y), TOWER_1_ID, CENTRAL_SQUARE_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 + 10 %}
+    // if has two adjacent towers
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_4_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_2_ID]) %}
+    let (time) = get_move_block_time(Point(X, Y), TOWER_1_ID, CENTRAL_SQUARE_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 + 10 %}
+    // if has no adjacent tower so goes to opposite tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_4_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_2_ID]) %}
+    let (time) = get_move_block_time(Point(X, Y), TOWER_1_ID, CENTRAL_SQUARE_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 + 25 + 10 %}
+
+    // tower 2 gate to central square
+    // does not have current tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_2_ID]) %}
+    // has opposite tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_4_ID]) %}
+    // if has one adjacent tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_3_ID]) %}
+    let (time) = get_move_block_time(Point(X, Y), TOWER_2_ID, CENTRAL_SQUARE_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 + 10 %}
+    // if has one adjacent tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_3_ID]) %}
+    let (time) = get_move_block_time(Point(X, Y), TOWER_2_ID, CENTRAL_SQUARE_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 + 10 %}
+    // if has two adjacent towers
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_3_ID]) %}
+    let (time) = get_move_block_time(Point(X, Y), TOWER_2_ID, CENTRAL_SQUARE_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 + 10 %}
+    // if has no adjacent tower so goes to opposite tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_3_ID]) %}
+    let (time) = get_move_block_time(Point(X, Y), TOWER_2_ID, CENTRAL_SQUARE_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 + 25 + 10 %}
 
     // order of fury
-    let (time) = get_move_block_time(Point(X, Y), CENTRAL_SQUARE_ID, TOWER_1_ID, ORDER_OF_FURY);
-    %{ assert ids.time == 10 %}
-
-    // need to conquer all 4 to go from defending tower to attacking central square
+    // need to conquer all 4 to go from defending tower to attacking central square or to go out of central square
     %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
     %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_2_ID]) %}
     %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_3_ID]) %}
     %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_4_ID]) %}
     let (time) = get_move_block_time(Point(X, Y), TOWER_1_ID, CENTRAL_SQUARE_ID, ORDER_OF_FURY);
-    %{ assert ids.time == 10 %}
+    %{ assert ids.time == 25 %}
+    let (time) = get_move_block_time(Point(X, Y), CENTRAL_SQUARE_ID, TOWER_1_ID, ORDER_OF_FURY);
+    %{ assert ids.time == 25 %}
 
     //
     // TOWER TO TOWER

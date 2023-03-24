@@ -250,9 +250,11 @@ func bastion_take_location{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range
 
         // check that the defending order does not have any more troops there
         let (order_count) = bastion_location_order_count.read(point, location, defending_order);
-        let (max_moving_time) = bastion_moving_times.read(
-            MovingTimes.DistanceStagingAreaCentralSquare
-        );
+
+        // max moving time would be to go from tower gate to central square through an opposite tower
+        let (d1) = bastion_moving_times.read(MovingTimes.DistanceGateGate);
+        let (d2) = bastion_moving_times.read(MovingTimes.DistanceTowerCentralSquare);
+        let max_moving_time = 2 * d1 + 2;
 
         // verify if there is at least one settled army
         with_attr error_message("Bastions: There are still settled defenders in the location") {
@@ -829,20 +831,21 @@ func get_move_block_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
         point, current_location
     );
     let (next_location_defender) = bastion_location_defending_order.read(point, next_location);
+
+    let (tower_1_defending_order) = bastion_location_defending_order.read(point, 1);
+    let (tower_2_defending_order) = bastion_location_defending_order.read(point, 2);
+    let (tower_3_defending_order) = bastion_location_defending_order.read(point, 3);
+    let (tower_4_defending_order) = bastion_location_defending_order.read(point, 4);
+
+    let (local number_of_conquered_towers) = Bastions.number_of_conquered_towers(
+        mover_order,
+        tower_1_defending_order,
+        tower_2_defending_order,
+        tower_3_defending_order,
+        tower_4_defending_order,
+    );
     // location 5 = central square
     if (next_location == 5) {
-        let (tower_1_defending_order) = bastion_location_defending_order.read(point, 1);
-        let (tower_2_defending_order) = bastion_location_defending_order.read(point, 2);
-        let (tower_3_defending_order) = bastion_location_defending_order.read(point, 3);
-        let (tower_4_defending_order) = bastion_location_defending_order.read(point, 4);
-
-        let (number_of_conquered_towers) = Bastions.number_of_conquered_towers(
-            mover_order,
-            tower_1_defending_order,
-            tower_2_defending_order,
-            tower_3_defending_order,
-            tower_4_defending_order,
-        );
         // if mover order is the same as the central square defending order
         if (next_location_defender == mover_order) {
             with_attr error_message(
@@ -861,8 +864,14 @@ func get_move_block_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
                         MovingTimes.DistanceTowerCentralSquare
                     );
                 } else {
+                    let (distance_gate_tower) = bastion_moving_times.read(
+                        MovingTimes.DistanceGateTower
+                    );
+                    let (distance_tower_cs) = bastion_moving_times.read(
+                        MovingTimes.DistanceTowerCentralSquare
+                    );
                     // if you are on a tower gate, you need to through the closest tower
-                    // TODO: is it the same to go from central square as defender to tower? and to staging area
+                    // you need to go through a tower to enter CS but you don't need to go through a tower to exit
                     let (moving_time) = Bastions.find_shortest_path_from_tower_to_central_square(
                         mover_order,
                         current_location,
@@ -870,6 +879,8 @@ func get_move_block_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
                         tower_2_defending_order,
                         tower_3_defending_order,
                         tower_4_defending_order,
+                        distance_gate_tower,
+                        distance_tower_cs,
                     );
                 }
             }
@@ -893,7 +904,6 @@ func get_move_block_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
         if (next_location == 0) {
             // if you are on central square
             if (current_location == 5) {
-                // TODO: test that
                 if (current_location_defender == mover_order) {
                     let (moving_time) = bastion_moving_times.read(
                         MovingTimes.DistanceStagingAreaCentralSquare
@@ -919,13 +929,14 @@ func get_move_block_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
             } else {
                 // you can only move to adjacent towers
                 if (current_location == 5) {
+                    // CS defender can move as he wants
                     if (next_location_defender == mover_order) {
                         if (current_location_defender == mover_order) {
                             let (moving_time) = bastion_moving_times.read(
                                 MovingTimes.DistanceTowerCentralSquare
                             );
                         } else {
-                            // TODO: test that
+                            // attackers can only move from CS if all towers are taken
                             with_attr error_message(
                                     "Bastions: attacker cannot move out of inner gate if does not hold all 4 towers") {
                                 assert number_of_conquered_towers = 4;
@@ -935,26 +946,25 @@ func get_move_block_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
                             );
                         }
                     } else {
-                        if (current_location_defender == mover_order) {
-                            let (moving_time) = bastion_moving_times.read(
-                                MovingTimes.DistanceTowerGateCentralSquare
-                            );
-                        } else {
-                            let (moving_time) = bastion_moving_times.read(
-                                MovingTimes.DistanceInnerGateTowerGate
-                            );
+                        with_attr error_message(
+                                "Bastions: attacker cannot move out of inner gate if does not hold all 4 towers") {
+                            assert current_location_defender = mover_order;
                         }
+                        let (moving_time) = bastion_moving_times.read(
+                            MovingTimes.DistanceTowerInnerGate
+                        );
                     }
                 } else {
+                    // going from tower to tower
                     let (is_adjacent_tower) = Bastions.is_adjacent_tower(
                         current_location, next_location
                     );
+                    // TODO: maybe in the future add a way to move to non adjacent tower
                     with_attr error_message(
                             "Bastions: Can only move from tower to adjacent tower") {
                         assert is_adjacent_tower = TRUE;
                     }
                     // if you move from your order tower to another of your order tower
-                    // if (is_not_zero(current_location_order_difference + next_location_order_difference) == 0) {
                     if (next_location_defender == mover_order) {
                         if (current_location_defender == mover_order) {
                             let (moving_time) = bastion_moving_times.read(
@@ -1059,7 +1069,7 @@ func set_bastion_moving_times{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, ra
 // Getters
 // -----------------------------------
 
-@external
+@view
 func get_bastion_location_defending_order{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 }(point: Point, location: felt) -> (defending_order: felt) {
@@ -1069,7 +1079,7 @@ func get_bastion_location_defending_order{
 
 // @dev You can use this to identify when an order has taken a Bastion so that you can
 // @dev distribute the bonus accordingly
-@external
+@view
 func get_bastion_location_cooldown_end{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 }(point: Point, location: felt) -> (cooldown_end: felt) {
@@ -1077,7 +1087,7 @@ func get_bastion_location_cooldown_end{
     return (cooldown_end,);
 }
 
-@external
+@view
 func get_bastion_bonus_type{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     point: Point
 ) -> (bonus_type: felt) {

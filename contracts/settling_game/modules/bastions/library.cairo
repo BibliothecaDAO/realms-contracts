@@ -1,14 +1,16 @@
 %lang starknet
 
 from starkware.cairo.common.math import abs_value
-from starkware.cairo.common.math_cmp import is_not_zero
+from starkware.cairo.common.math_cmp import is_not_zero, is_le
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.bool import TRUE, FALSE
 
 from contracts.settling_game.modules.bastions.constants import MovingTimes
 
 namespace Bastions {
-    // TODO: do the same from central square to tower
+    // TODO: see if we want to allow travel to non adjacent towers
+    // find_shortest_path_from_tower_to_opposite_tower
+
     func find_shortest_path_from_tower_to_central_square{
         syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     }(
@@ -18,59 +20,50 @@ namespace Bastions {
         tower_2_defending_order: felt,
         tower_3_defending_order: felt,
         tower_4_defending_order: felt,
+        distance_gate_tower: felt,
+        distance_tower_cs: felt,
     ) -> (moving_time: felt) {
         alloc_locals;
-        // location 1 = north tower
+        // if location 1 = north tower
         // adjacent = tower 4 (west) and tower 2 (east)
-        local moving_times: felt;
-        if (current_location == 1) {
-            let is_defending_tower_2 = is_not_zero(tower_2_defending_order - order);
-            let is_defending_tower_4 = is_not_zero(tower_4_defending_order - order);
-            let number_of_adjacent_towers_defending = is_defending_tower_2 + is_defending_tower_4;
-            if (is_le(1, number_of_adjacent_towers_defending) == 1) {
-                moving_times = MovingTimes.DistanceGateTower + MovingTimes.DistanceTowerCentralSquare;
-            } else {
-                moving_times = MovingTimes.DistanceGateTower + MovingTimes.DistanceGateTower + MovingTimes.DistanceTowerCentralSquare;
-            }
-            return moving_times;
-        }
+        // oppposite = 3 south tower
+        let is_not_location_1 = is_not_zero(current_location - 1);
+        let is_not_location_3 = is_not_zero(current_location - 3);
+        let is_location_1_or_3 = is_le(is_not_location_1 + is_not_location_3, 1);
 
-        if (current_location == 2) {
-            let is_defending_tower_1 = is_not_zero(tower_1_defending_order - order);
-            let is_defending_tower_3 = is_not_zero(tower_3_defending_order - order);
-            let number_of_adjacent_towers_defending = is_defending_tower_1 + is_defending_tower_3;
-            if (is_le(1, number_of_adjacent_towers_defending) == 1) {
-                moving_times = MovingTimes.DistanceGateTower + MovingTimes.DistanceTowerCentralSquare;
+        // if is location 1 or 3
+        if (is_location_1_or_3 == 1) {
+            let is_not_defending_tower_2 = is_not_zero(tower_2_defending_order - order);
+            let is_not_defending_tower_4 = is_not_zero(tower_4_defending_order - order);
+            let number_of_adjacent_towers_not_defending = is_not_defending_tower_2 +
+                is_not_defending_tower_4;
+            let has_at_least_one_adjacent_tower = is_le(number_of_adjacent_towers_not_defending, 1);
+            if (has_at_least_one_adjacent_tower == 1) {
+                local moving_times = distance_gate_tower + distance_tower_cs;
+                return (moving_times,);
             } else {
-                moving_times = MovingTimes.DistanceGateTower + MovingTimes.DistanceGateTower + MovingTimes.DistanceTowerCentralSquare;
+                local moving_times = distance_gate_tower * 2;
+                local moving_times = moving_times + distance_tower_cs;
+                return (moving_times,);
             }
-            return moving_times;
-        }
-
-        if (current_location == 3) {
-            let is_defending_tower_2 = is_not_zero(tower_2_defending_order - order);
-            let is_defending_tower_4 = is_not_zero(tower_4_defending_order - order);
-            let number_of_adjacent_towers_defending = is_defending_tower_2 + is_defending_tower_4;
-            if (is_le(1, number_of_adjacent_towers_defending) == 1) {
-                moving_times = MovingTimes.DistanceGateTower + MovingTimes.DistanceTowerCentralSquare;
+        } else {
+            // if not has to be location 2 or 4
+            let is_not_defending_tower_1 = is_not_zero(tower_1_defending_order - order);
+            let is_not_defending_tower_3 = is_not_zero(tower_3_defending_order - order);
+            let number_of_adjacent_towers_not_defending = is_not_defending_tower_1 +
+                is_not_defending_tower_3;
+            let has_at_least_one_adjacent_tower = is_le(number_of_adjacent_towers_not_defending, 1);
+            if (has_at_least_one_adjacent_tower == 1) {
+                local moving_times = distance_gate_tower + distance_tower_cs;
+                return (moving_times,);
             } else {
-                moving_times = MovingTimes.DistanceGateTower + MovingTimes.DistanceGateTower + MovingTimes.DistanceTowerCentralSquare;
+                local moving_times = distance_gate_tower * 2;
+                local moving_times = moving_times + distance_tower_cs;
+                return (moving_times,);
             }
-            return moving_times;
-        }
-
-        if (current_location == 4) {
-            let is_defending_tower_1 = is_not_zero(tower_1_defending_order - order);
-            let is_defending_tower_3 = is_not_zero(tower_3_defending_order - order);
-            let number_of_adjacent_towers_defending = is_defending_tower_1 + is_defending_tower_3;
-            if (is_le(1, number_of_adjacent_towers_defending) == 1) {
-                moving_times = MovingTimes.DistanceGateTower + MovingTimes.DistanceTowerCentralSquare;
-            } else {
-                moving_times = MovingTimes.DistanceGateTower + MovingTimes.DistanceGateTower + MovingTimes.DistanceTowerCentralSquare;
-            }
-            return moving_times;
         }
     }
+
     // Can only move from one tower/gate to an adjacent tower/gate
     func is_adjacent_tower{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         current_location: felt, next_location: felt
@@ -108,5 +101,3 @@ namespace Bastions {
         return (4 - number_of_unconquered_towers,);
     }
 }
-
-// TODO: create function that check what is the closest tower (if not current one).
