@@ -8,10 +8,10 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
 from starkware.cairo.common.alloc import alloc
+from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math import unsigned_div_rem, assert_not_zero, assert_le, assert_nn
 from starkware.starknet.common.syscalls import get_block_timestamp
-from starkware.cairo.common.uint256 import Uint256
-from starkware.cairo.common.bool import TRUE, FALSE
+from starkware.cairo.common.uint256 import Uint256, uint256_mul, uint256_unsigned_div_rem
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.lang.compiler.lib.registers import get_fp_and_pc
@@ -35,11 +35,13 @@ from contracts.loot.constants.adventurer import (
     DiscoveryType,
 )
 
-from contracts.loot.constants.item import Item
+from contracts.loot.constants.obstacle import ObstacleUtils
+from contracts.loot.constants.item import Item, ItemIds, Slot
 from contracts.settling_game.utils.general import unpack_data
 from contracts.settling_game.utils.constants import SHIFT_41
-from contracts.loot.constants.beast import Beast
+from contracts.loot.constants.beast import Beast, BeastIds
 from contracts.loot.loot.stats.combat import CombatStats
+
 
 namespace AdventurerLib {
     func birth{syscall_ptr: felt*, range_check_ptr}(
@@ -88,6 +90,7 @@ namespace AdventurerLib {
 
         let Status = AdventurerStatus.Idle;
         let Beast = 0;
+        let Upgrading = 0;
 
         return (
             AdventurerStatic(
@@ -120,6 +123,7 @@ namespace AdventurerLib {
                 RingId=RingId,
                 Status=Status,
                 Beast=Beast,
+                Upgrading=Upgrading,
             ),
         );
     }
@@ -155,6 +159,7 @@ namespace AdventurerLib {
             adventurer_dynamic.RingId,
             adventurer_dynamic.Status,
             adventurer_dynamic.Beast,
+            adventurer_dynamic.Upgrading,
         );
 
         return (adventurer,);
@@ -194,6 +199,7 @@ namespace AdventurerLib {
             adventurer.RingId,
             adventurer.Status,
             adventurer.Beast,
+            adventurer.Upgrading,
         );
 
         return (adventurer_static, adventurer_dynamic);
@@ -236,6 +242,7 @@ namespace AdventurerLib {
 
         let Status = unpacked_adventurer_state.Status * SHIFT_P_4._1;
         let Beast = unpacked_adventurer_state.Beast * SHIFT_P_4._2;
+        let Upgrading = unpacked_adventurer_state.Upgrading * SHIFT_P_4._3;
 
         // packing
         // let p1 = XP + Luck + Charisma + Wisdom + Intelligence + Vitality + Dexterity + Strength + Level + Health;
@@ -245,7 +252,7 @@ namespace AdventurerLib {
         let p2 = Weapon + Chest + Head + Waist;
         // let p3 = Ring + Neck + Hands + Feet;
         let p3 = Feet + Hands + Neck + Ring;
-        let p4 = Status + Beast;
+        let p4 = Status + Beast + Upgrading;
 
         let packedAdventurer = PackedAdventurerState(p1, p2, p3, p4);
 
@@ -295,6 +302,7 @@ namespace AdventurerLib {
         // ---------- p4 ---------#
         let (Status) = unpack_data(packed_adventurer.p4, 0, 7);  // 3
         let (Beast) = unpack_data(packed_adventurer.p4, 3, 2199023255551);  // 41
+        let (Upgrading) = unpack_data(packed_adventurer.p4, 44, 1); // 1
 
         return (
             AdventurerDynamic(
@@ -318,6 +326,7 @@ namespace AdventurerLib {
                 RingId=RingId,
                 Status=Status,
                 Beast=Beast,
+                Upgrading=Upgrading,
             ),
         );
     }
@@ -368,6 +377,39 @@ namespace AdventurerLib {
         return (updated_adventurer,);
     }
 
+    func get_item_id_at_slot{syscall_ptr: felt*, range_check_ptr}(
+        slot: felt, unpacked_adventurer: AdventurerDynamic
+    ) -> (item_token_id: felt) {
+        alloc_locals;
+
+        if (slot == Slot.Weapon) {
+            return (unpacked_adventurer.WeaponId,);
+        }
+        if (slot == Slot.Chest) {
+            return (unpacked_adventurer.ChestId,);
+        }
+        if (slot == Slot.Head) {
+            return (unpacked_adventurer.HeadId,);
+        }
+        if (slot == Slot.Waist) {
+            return (unpacked_adventurer.WaistId,);
+        }
+        if (slot == Slot.Foot) {
+            return (unpacked_adventurer.FeetId,);
+        }
+        if (slot == Slot.Hand) {
+            return (unpacked_adventurer.HandsId,);
+        }
+        if (slot == Slot.Neck) {
+            return (unpacked_adventurer.NeckId,);
+        }
+        if (slot == Slot.Ring) {
+            return (unpacked_adventurer.RingId,);
+        }
+
+        return (0,);
+    }
+
     func deduct_health{syscall_ptr: felt*, range_check_ptr}(
         damage: felt, unpacked_adventurer: AdventurerDynamic
     ) -> (new_unpacked_adventurer: AdventurerDynamic) {
@@ -388,6 +430,20 @@ namespace AdventurerLib {
                 AdventurerSlotIds.Health, 0, unpacked_adventurer
             );
         }
+
+        return (updated_adventurer,);
+    }
+
+    // loaf
+    func add_health{syscall_ptr: felt*, range_check_ptr}(
+        health: felt, unpacked_adventurer: AdventurerDynamic
+    ) -> (new_unpacked_adventurer: AdventurerDynamic) {
+        alloc_locals;
+
+        // set new health to previous health - damage dealt
+        let (updated_adventurer: AdventurerDynamic) = cast_state(
+            AdventurerSlotIds.Health, unpacked_adventurer.Health + health, unpacked_adventurer
+        );
 
         return (updated_adventurer,);
     }
@@ -475,14 +531,117 @@ namespace AdventurerLib {
     }
 
     func update_statistics{syscall_ptr: felt*, range_check_ptr}(
-        item_token_id: felt, item: Item, unpacked_adventurer: AdventurerDynamic
+        stat: felt, unpacked_adventurer: AdventurerDynamic
     ) -> (new_unpacked_adventurer: AdventurerDynamic) {
         alloc_locals;
 
-        // cast state into felt array
-        // make adjustment to felt at index
-        // cast back into adventuerState
+        if (stat == AdventurerSlotIds.Strength) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Strength, unpacked_adventurer.Strength + 1, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (stat == AdventurerSlotIds.Dexterity) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Dexterity, unpacked_adventurer.Dexterity + 1, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (stat == AdventurerSlotIds.Vitality) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Vitality, unpacked_adventurer.Vitality + 1, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (stat == AdventurerSlotIds.Intelligence) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Intelligence, unpacked_adventurer.Intelligence + 1, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (stat == AdventurerSlotIds.Wisdom) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Wisdom, unpacked_adventurer.Wisdom + 1, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+        if (stat == AdventurerSlotIds.Charisma) {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Charisma, unpacked_adventurer.Charisma + 1, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        } else {
+            let (updated_adventurer: AdventurerDynamic) = cast_state(
+                AdventurerSlotIds.Luck, unpacked_adventurer.Luck + 1, unpacked_adventurer
+            );
+            return (updated_adventurer,);
+        }
+    }
 
+    func set_upgrading{syscall_ptr: felt*, range_check_ptr}(
+        upgrading: felt, unpacked_adventurer: AdventurerDynamic
+    ) -> (new_unpacked_adventurer: AdventurerDynamic) {
+
+        // set upgrade status
+        let (updated_adventurer: AdventurerDynamic) = cast_state(
+            AdventurerSlotIds.Upgrading, upgrading, unpacked_adventurer
+        );
+
+        return (updated_adventurer,);
+    }
+    
+    func calculate_gold_discovery{syscall_ptr: felt*, range_check_ptr}(
+        rnd: felt
+    ) -> (gold_discovery: felt) {
+
+        let (_, discover_multi) = unsigned_div_rem(rnd, 4);
+
+        let gold_discovery = 1 + discover_multi;
+
+        return (gold_discovery,);
+    }
+
+    func calculate_health_discovery{syscall_ptr: felt*, range_check_ptr}(
+        rnd: felt
+    ) -> (health_discovery: felt) {
+        let (_, discover_multi) = unsigned_div_rem(rnd, 4);
+
+        let health_discovery = 10 + (5 * discover_multi);
+
+        return (health_discovery,);
+    }
+
+    func calculate_xp_discovery{syscall_ptr: felt*, range_check_ptr}(
+        rnd: felt
+    ) -> (xp_discovery: felt) {
+        let (_, discover_multi) = unsigned_div_rem(rnd, 4);
+
+        let xp_discovery = 10 + (5 * discover_multi);
+
+        return (xp_discovery,);
+    }
+
+    func get_starting_beast_from_weapon{syscall_ptr: felt*, range_check_ptr}(
+        weapon_id: felt
+    ) -> (beast_id: felt) {
+
+        if (weapon_id == ItemIds.ShortSword) {
+            return(BeastIds.Golem,);
+        }
+        if (weapon_id == ItemIds.Book) {
+            return(BeastIds.Ogre,);
+        }
+        if (weapon_id == ItemIds.Wand) {
+            return(BeastIds.Ogre,);
+        }
+        if (weapon_id == ItemIds.Club) {
+            return(BeastIds.Rat,);
+        }
         return (0,);
+    }
+
+    func calculate_king_tribute{syscall_ptr: felt*, range_check_ptr}(
+        tribute_percent: felt, total_balance: Uint256
+    ) -> (king_tribute: Uint256) {
     }
 }

@@ -13,20 +13,58 @@ from starkware.cairo.common.pow import pow
 
 from contracts.settling_game.utils.general import unpack_data
 
-from contracts.loot.constants.adventurer import Adventurer
+from contracts.loot.constants.adventurer import Adventurer, AdventurerState
 from contracts.loot.constants.beast import Beast, BeastStatic, BeastDynamic, SHIFT_P, BeastSlotIds
 from contracts.loot.beast.stats.beast import BeastStats
 from contracts.loot.loot.stats.item import ItemStats
 
+const BASE_BEAST_LEVEL = 3;
+const BASE_BEAST_HEALTH = 10;
 namespace BeastLib {
     func create{syscall_ptr: felt*, range_check_ptr}(
-        xoroshiro_random: felt, adventurer_id: felt
+        beast_id: felt,
+        adventurer_id: felt,
+        adventurer_state: AdventurerState,
+        rnd_level_boost: felt,
+        rnd_health_boost: felt,
     ) -> (beast_static: BeastStatic, beast_dynamic: BeastDynamic) {
-        let (_, r) = unsigned_div_rem(xoroshiro_random, 17);  // number of beast ids
-        let beast_id = r + 1;
+        alloc_locals;
+
+        // If the adventurer is less than the beast base level (currently 3)
+        let is_less_than_base_level = is_le(adventurer_state.Level, BASE_BEAST_LEVEL);
+        // Set the beast level to the adventurer level
+        if (is_less_than_base_level == TRUE) {
+            tempvar beast_level = adventurer_state.Level;
+        } else {
+            // once the adventurer exceeds base level, beast level will be random but centered around adventurers level
+            tempvar beast_level = rnd_level_boost + (adventurer_state.Level - BASE_BEAST_LEVEL);
+        }
+        let Level = beast_level;
+
+        // Beast health is base + the provided rnd health boost
+        let Health = BASE_BEAST_HEALTH + (rnd_health_boost + adventurer_state.Level);
+        let BeastId = beast_id + 1;
+        let (Prefix_1) = ItemStats.item_name_prefix(1);
+        let (Prefix_2) = ItemStats.item_name_suffix(1);
+        let Adventurer = adventurer_id;
+        let XP = 0;
+        let SlainOnDate = 0;
+
+        return (
+            BeastStatic(Id=BeastId, Prefix_1=Prefix_1, Prefix_2=Prefix_2),
+            BeastDynamic(
+                Health=Health, Adventurer=Adventurer, XP=XP, Level=Level, SlainOnDate=SlainOnDate
+            ),
+        );
+    }
+
+    func create_start_beast{syscall_ptr: felt*, range_check_ptr}(
+        beast_id: felt, adventurer_id: felt, adventurer_state: AdventurerState
+    ) -> (beast_static: BeastStatic, beast_dynamic: BeastDynamic) {
+        alloc_locals;
 
         let BeastId = beast_id;
-        let Health = 100;
+        let Health = 10;
         let (Prefix_1) = ItemStats.item_name_prefix(1);
         let (Prefix_2) = ItemStats.item_name_suffix(1);
         let Adventurer = adventurer_id;
@@ -175,15 +213,6 @@ namespace BeastLib {
         return (updated_slain_on_beast,);
     }
 
-    func get_random_ambush{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
-        xoroshiro_random: felt
-    ) -> (discovery: felt) {
-        alloc_locals;
-
-        let (_, r) = unsigned_div_rem(xoroshiro_random, 2);
-        return (r,);  // values from 0 to 1 inclusive
-    }
-
     func get_random_flee{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
         xoroshiro_random: felt
     ) -> (discovery: felt) {
@@ -223,5 +252,27 @@ namespace BeastLib {
 
         // return updated adventurer
         return (updated_beast,);
+    }
+
+    func calculate_ambush_chance{syscall_ptr: felt*, range_check_ptr}(
+        rnd: felt, beast_health: felt
+    ) -> (ambush_chance: felt) {
+        let (_, r) = unsigned_div_rem(rnd, 2);
+        let (beast_health_multi, _) = unsigned_div_rem(beast_health, 50);
+        let ambush_chance = r * (1 + beast_health_multi);
+
+        return (ambush_chance,);
+    }
+
+    func calculate_gold_reward{syscall_ptr: felt*, range_check_ptr}(rnd: felt, xp_gained: felt) -> (
+        gold_reward: felt
+    ) {
+        let (_, reward_multi) = unsigned_div_rem(rnd, 4);
+        let (xp_correction, xp_factor) = unsigned_div_rem(xp_gained, 4);
+        let xp_start = xp_gained - xp_correction;
+
+        let gold_reward = xp_start + (xp_correction * reward_multi);
+
+        return (gold_reward,);
     }
 }

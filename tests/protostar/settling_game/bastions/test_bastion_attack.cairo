@@ -8,11 +8,16 @@ from starkware.starknet.common.syscalls import get_contract_address, get_block_n
 // settling game
 from contracts.settling_game.modules.bastions.constants import MovingTimes
 from contracts.settling_game.modules.bastions.bastions import bastion_attack
-from contracts.settling_game.modules.travel.travel import set_coordinates
+from contracts.settling_game.modules.travel.travel import (
+    set_coordinates,
+    forbid_travel,
+    allow_travel,
+)
 from contracts.settling_game.modules.combat.interface import ICombat
 from contracts.settling_game.ModuleController import (
     get_module_address,
     get_external_contract_address,
+    has_write_access,
 )
 from contracts.settling_game.tokens.Realms_ERC721_Mintable import fetch_realm_data
 from contracts.settling_game.utils.constants import CCombat
@@ -26,8 +31,8 @@ from contracts.settling_game.utils.game_structs import (
 from contracts.settling_game.utils.general import unpack_data
 
 from tests.protostar.settling_game.bastions.setup import setup
+
 // mockups
-from tests.protostar.settling_game.bastions.mockups.TravelMockup import forbid_travel, allow_travel
 from tests.protostar.settling_game.bastions.mockups.CombatMockup import (
     get_realm_army_combat_data,
     initiate_combat_approved_module,

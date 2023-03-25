@@ -13,7 +13,12 @@ from contracts.settling_game.modules.bastions.bastions import (
     bastion_take_location,
 )
 from contracts.settling_game.modules.combat.library import Combat
-from contracts.settling_game.modules.travel.travel import set_coordinates, get_coordinates
+from contracts.settling_game.modules.travel.travel import (
+    set_coordinates,
+    get_coordinates,
+    forbid_travel,
+    allow_travel,
+)
 from contracts.settling_game.modules.combat.interface import ICombat
 from contracts.settling_game.ModuleController import (
     get_module_address,
@@ -41,7 +46,6 @@ from tests.protostar.settling_game.bastions.mockups.CombatMockup import (
     build_army_with_health,
     army_data_by_id,
 )
-from tests.protostar.settling_game.bastions.mockups.TravelMockup import forbid_travel, allow_travel
 
 const X = 3;
 const Y = 4;

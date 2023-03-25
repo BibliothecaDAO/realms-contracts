@@ -17,7 +17,7 @@ async def logged_deploy(network, account, contract_name, alias, calldata):
         unique=False,
         calldata=calldata,
         alias=alias,
-        max_fee=11111111111111
+        max_fee=4226601250467000
     )
 
     await tx_wrapper.execute(watch_mode='track')

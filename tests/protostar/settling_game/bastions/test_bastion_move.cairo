@@ -8,7 +8,12 @@ from starkware.starknet.common.syscalls import get_contract_address
 // settling game
 from contracts.settling_game.modules.bastions.constants import MovingTimes
 from contracts.settling_game.modules.bastions.bastions import bastion_move, get_move_block_time
-from contracts.settling_game.modules.travel.travel import set_coordinates, get_coordinates
+from contracts.settling_game.modules.travel.travel import (
+    set_coordinates,
+    get_coordinates,
+    forbid_travel,
+    allow_travel,
+)
 from contracts.settling_game.modules.combat.interface import ICombat
 from contracts.settling_game.ModuleController import (
     get_module_address,
@@ -37,7 +42,6 @@ from tests.protostar.settling_game.bastions.mockups.CombatMockup import (
     build_army_with_health,
     army_data_by_id,
 )
-from tests.protostar.settling_game.bastions.mockups.TravelMockup import forbid_travel, allow_travel
 
 const X = 3;
 const Y = 4;

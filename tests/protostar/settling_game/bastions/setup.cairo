@@ -91,10 +91,20 @@ func setup{
     // Module Controller
     // module address
     %{ store(ids.self_address, "module_controller_address", [ids.self_address]) %}
+    // travel
     %{ store(ids.self_address, "address_of_module_id", [ids.self_address], [ids.ModuleIds.Travel]) %}
+    // combat
     %{ store(ids.self_address, "address_of_module_id", [ids.self_address], [ids.ModuleIds.L06_Combat]) %}
+    // realms
     %{ store(ids.self_address, "address_of_module_id", [ids.self_address], [ids.ModuleIds.Realms_Token]) %}
+    // bastion
     %{ store(ids.self_address, "address_of_module_id", [ids.self_address], [ids.ModuleIds.Bastions]) %}
+
+    // anyone can write to anyone
+    %{ store(ids.self_address, "address_of_module_id", [ids.self_address], [1]) %}
+    %{ store(ids.self_address, "module_id_of_address", [1], [ids.self_address]) %}
+    %{ store(ids.self_address, "can_write_to", [1], [1, 1]) %}
+
     // external contract address
     %{ store(ids.self_address, "external_contract_table", [ids.self_address], [ids.ExternalContractIds.Realms]) %}
     %{ store(ids.self_address, "external_contract_table", [ids.self_address], [ids.ExternalContractIds.S_Realms]) %}

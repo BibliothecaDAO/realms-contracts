@@ -95,7 +95,7 @@ func deploy_all{
         ids.contracts.beast = deploy_contract("./contracts/settling_game/proxy/PROXY_LOGIC.cairo",
             [declared.class_hash]
         ).contract_address
-        declared = declare("./contracts/loot/loot/Loot.cairo")
+        declared = declare("./contracts/loot/loot/LootMarketArcade.cairo")
         ids.contracts.loot = deploy_contract("./contracts/settling_game/proxy/PROXY_LOGIC.cairo",
             [declared.class_hash]
         ).contract_address
@@ -103,11 +103,11 @@ func deploy_all{
         ids.contracts.realms = deploy_contract("./contracts/settling_game/proxy/PROXY_LOGIC.cairo",
             [declared.class_hash]
         ).contract_address
-        declared = declare("./contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo")
-        ids.contracts.lords = deploy_contract("./contracts/settling_game/proxy/PROXY_LOGIC.cairo",
-            [declared.class_hash]
+        ids.contracts.lords = deploy_contract("./contracts/settling_game/tokens/Lords_ERC20_Mintable.cairo",
+            [1, 1, 18, ids.contracts.account_1]
         ).contract_address
         stop_prank_controller = start_prank(ids.contracts.account_1, ids.contracts.controller)
+        stop_prank_lords = start_prank(ids.contracts.account_1, ids.contracts.lords)
     %}
     IController.initializer(contracts.controller, contracts.account_1, contracts.account_1);
     IController.set_xoroshiro(contracts.controller, contracts.xoroshiro);
@@ -126,14 +126,17 @@ func deploy_all{
     ILoot.initializer(contracts.loot, 1, 1, contracts.controller, contracts.account_1);
     IController.set_address_for_module_id(contracts.controller, ModuleIds.Loot, contracts.loot);
     IController.set_write_access(contracts.controller, ModuleIds.Loot, ModuleIds.Adventurer);
+    IController.set_write_access(contracts.controller, ModuleIds.Loot, ModuleIds.Beast);
 
     IRealms.initializer(contracts.realms, 1, 1, contracts.account_1);
-    ILords.initializer(contracts.lords, 1, 1, 18, Uint256(100000000000000000000, 0), contracts.account_1, contracts.account_1);
+    ILords.grant_role(contracts.lords, 1835626100, contracts.account_1);
+    ILords.mint(contracts.lords, contracts.account_1, Uint256(200000000000000000000, 0));
     IController.set_address_for_external_contract(contracts.controller, ExternalContractIds.Realms, contracts.realms);
     IController.set_address_for_external_contract(contracts.controller, ExternalContractIds.Lords, contracts.lords);
 
     %{
         stop_prank_controller()
+        stop_prank_lords()
     %}
 
     return contracts;

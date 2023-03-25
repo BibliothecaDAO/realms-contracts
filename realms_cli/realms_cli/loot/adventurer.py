@@ -1,201 +1,296 @@
 import asyncclick as click
-from realms_cli.caller_invoker import wrapped_proxy_call, wrapped_send
+from realms_cli.caller_invoker import wrapped_send, wrapped_proxy_call
 from realms_cli.config import Config
-from realms_cli.utils import print_over_colums,  uint, felt_to_str, str_to_felt, strhex_as_felt
-
+from realms_cli.utils import uint, str_to_felt
+from realms_cli.loot.getters import _get_adventurer, _get_beast, print_adventurer
 
 @click.command()
 @click.option("--network", default="goerli")
-@click.option('--race', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='adventurer race', prompt=True)
-@click.option('--home_realm', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='adventurer home realm', prompt=True)
-@click.option('--name', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='adventurer name', prompt=True)
-@click.option('--order', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='adventurer order', prompt=True)
-@click.option('--image_hash_1', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='adventurer image hash part 1', prompt=True)
-@click.option('--image_hash_2', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='adventurer image hash part 2', prompt=True)
-async def mint_adventurer(network, race, home_realm, name, order, image_hash_1, image_hash_2):
+@click.option(
+    "--item",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="adventurer item to start",
+    prompt=True,
+)
+@click.option(
+    "--race",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="adventurer race",
+    prompt=True,
+)
+@click.option(
+    "--home_realm",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="adventurer home realm",
+    prompt=True,
+)
+@click.option(
+    "--name",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="adventurer name",
+    prompt=True,
+)
+@click.option(
+    "--order",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="adventurer order",
+    prompt=True,
+)
+@click.option(
+    "--image_hash_1",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="adventurer image hash part 1",
+    prompt=True,
+)
+@click.option(
+    "--image_hash_2",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="adventurer image hash part 2",
+    prompt=True,
+)
+async def new_adventurer(
+    network, item, race, home_realm, name, order, image_hash_1, image_hash_2
+):
     """
     Mint a Random Loot Item
     """
     config = Config(nile_network=network)
 
-    print('🪙 Minting lords ...')
+    print("🪙 Minting lords ...")
 
     await wrapped_send(
         network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
+        signer_alias=config.USER_ALIAS,
         contract_alias=config.Lords_ERC20_Mintable_alias,
         function="mint",
-        arguments=[
-            config.ADMIN_ADDRESS,
-            100 * 10 ** 18,           # uint 1
-            0                         # uint 2
-        ]
+        arguments=[config.USER_ADDRESS, 100 * 10**18, 0],  # uint 1  # uint 2
     )
 
-    print('🪙 Minted lords ✅')
+    print("🪙 Minted lords ✅")
 
-    print('👍 Approving lords to be spent ...')
+    print("👍 Approving lords to be spent ...")
 
     await wrapped_send(
         network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
+        signer_alias=config.USER_ALIAS,
         contract_alias=config.Lords_ERC20_Mintable_alias,
         function="approve",
         arguments=[
             config.ADVENTURER_PROXY_ADDRESS,
-            100 * 10 ** 18,       # uint 1
-            0,                    # uint 2
-        ]
+            100 * 10**18,  # uint 1
+            0,  # uint 2
+        ],
     )
 
-    # print('👍 Approved lords to be spent ✅')
+    print("👍 Approved lords to be spent ✅")
 
-    # print('🤴 Minting adventurer ...')
+    print("🤴 Minting adventurer ...")
 
     await wrapped_send(
         network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
+        signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Adventurer",
-        function="mint",
+        function="mint_with_starting_weapon",
         arguments=[
-            config.ADMIN_ADDRESS,
-            str_to_felt(race),
-            str_to_felt(home_realm),
+            config.USER_ADDRESS,
+            race,
+            home_realm,
             str_to_felt(name),
-            str_to_felt(order),
-            str_to_felt(image_hash_1),
-            str_to_felt(image_hash_2)
-        ]
+            order,
+            image_hash_1,
+            image_hash_2,
+            item,
+        ],
     )
 
-    print('🤴 Minted adventurer ✅')
+    print("🤴 Minted adventurer ✅")
 
 
 @click.command()
-@click.argument("adventurer_token_id", nargs=1)
+@click.option(
+    "--adventurer_token_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="adventurer id",
+    prompt=True,
+)
 @click.option("--network", default="goerli")
 async def get_adventurer(adventurer_token_id, network):
     """
     Get Adventurer metadata
     """
-    config = Config(nile_network=network)
 
-    out = await wrapped_proxy_call(
-        network=config.nile_network,
-        contract_alias="proxy_Adventurer",
-        abi='artifacts/abis/Adventurer.json',
-        function="get_adventurer_by_id",
-        arguments=[*uint(adventurer_token_id)]
-    )
-
-    out = out.split(" ")
-
-    pretty_out = []
-    for i, key in enumerate(config.ADVENTURER):
-
-        # Output names for item name prefix1, prefix2, and suffix
-        if i in [25]:
-            pretty_out.append(
-                f"{key} : {felt_to_str(int(out[i]))}")
-        else:
-            pretty_out.append(
-                f"{key} : {int(out[i])}")
-    print("_____________________________________________________")
-    print("_____________________*+ " +
-          felt_to_str(int(out[3])) + " +*______________________")
-    print("_____________________________________________________")
-    print_over_colums(pretty_out)
+    await _get_adventurer(network, adventurer_token_id)
 
 
 @click.command()
 @click.option("--network", default="goerli")
-@click.option('--adventurer', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='adventurer id', prompt=True)
-@click.option('--item', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='item id', prompt=True)
-async def equip(network, adventurer, item):
+@click.option(
+    "--adventurer_token_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="adventurer id",
+    prompt=True,
+)
+@click.option(
+    "--item",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="item id",
+    prompt=True,
+)
+async def equip(network, adventurer_token_id, item):
     """
     Equip loot item
     """
     config = Config(nile_network=network)
 
-    print('🫴 Equiping item ...')
+    print("🫴 Equiping item ...")
 
     await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Adventurer",
         function="equip_item",
-        arguments=[*uint(adventurer), *uint(item)]
+        arguments=[*uint(adventurer_token_id), *uint(item)],
     )
 
-    print('🫴 Equiped item ✅')
+    print("🫴 Equiped item ✅")
+    await _get_adventurer(network, adventurer_token_id)
 
 
 @click.command()
 @click.option("--network", default="goerli")
-@click.option('--adventurer', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='adventurer id', prompt=True)
-@click.option('--item', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='item id', prompt=True)
-async def unequip(network, adventurer, item):
+@click.option(
+    "--adventurer_token_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="adventurer id",
+    prompt=True,
+)
+@click.option(
+    "--item",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="item id",
+    prompt=True,
+)
+async def unequip(network, adventurer_token_id, item):
     """
     Unequip loot item
     """
     config = Config(nile_network=network)
 
-    print('🫳 Unequiping item ...')
+    print("🫳 Unequiping item ...")
 
     await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Adventurer",
         function="unequip_item",
-        arguments=[*uint(adventurer), *uint(item)]
+        arguments=[*uint(adventurer_token_id), *uint(item)],
     )
 
-    print('🫳 Unequiped item ...')
+    print("🫳 Unequiped item ...")
+    await _get_adventurer(network, adventurer_token_id)
 
 
 @click.command()
 @click.option("--network", default="goerli")
-@click.option('--adventurer', is_flag=False,
-              metavar='<columns>', type=click.STRING, help='adventurer id', prompt=True)
-async def explore(network, adventurer):
+@click.option(
+    "--adventurer_token_id",
+    is_flag=False,
+    metavar="<columns>",
+    type=click.STRING,
+    help="adventurer id",
+    prompt=True,
+)
+async def explore(network, adventurer_token_id):
     """
     Explore with adventurer
     """
     config = Config(nile_network=network)
 
-    print('👣 Exploring ...')
+    print("👣 Exploring ...")
 
     await wrapped_send(
         network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
+        signer_alias=config.USER_ALIAS,
         contract_alias="proxy_Adventurer",
         function="explore",
-        arguments=[*uint(adventurer)]
+        arguments=[*uint(adventurer_token_id)],
     )
 
-    print('👣 Explored ✅')
+    print("👣 Explored ✅")
+
+    out = await _get_adventurer(network, adventurer_token_id)
+
+    if out[23] == "1":
+        print("🧌 You have discovered a beast")
+        await _get_beast(out[26], network)
+    else:
+        print("🤔 You discovered nothing")
+
+
+
+@click.command()
+@click.option("--network", default="goerli")
+async def all_adventurers(network):
+    """
+    Get all your Adventurers you own.
+    """
+    config = Config(nile_network=network)
 
     out = await wrapped_proxy_call(
         network=config.nile_network,
         contract_alias="proxy_Adventurer",
-        abi='artifacts/abis/Adventurer.json',
-        function="get_adventurer_by_id",
-        arguments=[*uint(adventurer)]
+        abi="artifacts/abis/Adventurer.json",
+        function="balance_of",
+        arguments=[config.USER_ADDRESS],
     )
 
     out = out.split(" ")
 
-    if out[23] == '1':
-        print("🧌 You have discovered a beast")
-    else:
-        print("🤔 You discovered nothing")
+    all_items = []
+
+    for i in range(0, int(out[0])):
+        item = await wrapped_proxy_call(
+            network=config.nile_network,
+            contract_alias="proxy_Adventurer",
+            abi="artifacts/abis/Adventurer.json",
+            function="token_of_owner_by_index",
+            arguments=[config.USER_ADDRESS, *uint(i)],
+        )
+
+        id = item.split(" ")
+
+        out = await wrapped_proxy_call(
+            network=config.nile_network,
+            contract_alias="proxy_Adventurer",
+            abi="artifacts/abis/Adventurer.json",
+            function="get_adventurer_by_id",
+            arguments=[*uint(id[0])],
+        )
+
+        all_items.append(out)
+
+    print_adventurer(all_items)
