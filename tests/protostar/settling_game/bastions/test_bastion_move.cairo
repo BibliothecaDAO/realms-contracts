@@ -300,6 +300,46 @@ func test_bastion_move_from_tower_to_non_adjacent_tower_should_fail{
 }
 
 @external
+func test_bastion_move_should_update_location{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+}() -> () {
+    // change location of the army to be on bastion location
+    %{
+        store(context.self_address, "coordinates", [ids.X, ids.Y], 
+                   [ids.ExternalContractIds.S_Realms, ids.REALM_ID_1, 0, ids.ARMY_ID_1])
+    %}
+
+    // put army on tower 1
+    %{
+        store(context.self_address, "bastion_army_location", 
+                   [ 0, ids.TOWER_1_ID], [ids.REALM_ID_1, 0, ids.ARMY_ID_1])
+    %}
+
+    %{ stop_prank_callable = start_prank(caller_address=context.self_address) %}
+    // MOVE
+    bastion_move(Point(X, Y), TOWER_2_ID, Uint256(REALM_ID_1, 0), ARMY_ID_1);
+
+    %{ location = load(context.self_address, "bastion_army_location", "ArmyLocationData", [ids.REALM_ID_1, 0, ids.ARMY_ID_1]) %}
+    %{ assert location[1] == ids.TOWER_2_ID %}
+
+    // MOVE
+    %{ stop_roll = roll(25) %}
+    bastion_move(Point(X, Y), STAGING_AREA_ID, Uint256(REALM_ID_1, 0), ARMY_ID_1);
+
+    %{ location = load(context.self_address, "bastion_army_location", "ArmyLocationData", [ids.REALM_ID_1, 0, ids.ARMY_ID_1]) %}
+    %{ assert location[1] == ids.STAGING_AREA_ID %}
+
+    // MOVE
+    %{ stop_roll = roll(50) %}
+    bastion_move(Point(X, Y), TOWER_4_ID, Uint256(REALM_ID_1, 0), ARMY_ID_1);
+
+    %{ location = load(context.self_address, "bastion_army_location", "ArmyLocationData", [ids.REALM_ID_1, 0, ids.ARMY_ID_1]) %}
+    %{ assert location[1] == ids.TOWER_4_ID %}
+
+    return ();
+}
+
+@external
 func test_bastion_move_should_replace_if_current_movers_at_index{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 }() -> () {

@@ -551,8 +551,8 @@ func bastion_move{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
     // don't change previous location storage if they were on 0 location (staging area)
     let is_not_on_staging_area = is_not_zero(army_location_data.location);
     if (is_not_on_staging_area == TRUE) {
-        // if true, then army was not settled yet, remove one from there
         if (previous_loc_mover_data.arrival_block == army_location_data.arrival_block) {
+            // if true, then army was not settled yet, remove one from there
             current_movers.write(
                 point,
                 army_location_data.location,
@@ -633,11 +633,15 @@ func bastion_move{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
         }
     } else {
         // if they are going to staging area, remove the travel restrain from Travel module
+        // TODO: this allows armies to go out of the bastion before having to wait to arrive at staging area
         ITravel.allow_travel(travel_address, ExternalContractIds.S_Realms, realm_id, army_id);
         tempvar syscall_ptr = syscall_ptr;
         tempvar pedersen_ptr = pedersen_ptr;
         tempvar range_check_ptr = range_check_ptr;
     }
+    bastion_army_location.write(
+        realm_id, army_id, ArmyLocationData(next_arrival_block, next_location)
+    );
     // emit event
     BastionArmyMoved.emit(point, army_location_data.location, next_location, realm_id, army_id);
     return ();
