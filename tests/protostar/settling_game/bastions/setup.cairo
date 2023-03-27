@@ -2,6 +2,7 @@
 
 from starkware.starknet.common.syscalls import get_contract_address, get_block_number
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
+from starkware.cairo.common.uint256 import Uint256
 
 from contracts.settling_game.utils.game_structs import ExternalContractIds, ModuleIds
 from contracts.settling_game.modules.bastions.constants import MovingTimes
@@ -55,6 +56,13 @@ const TOWER_4_ID = 4;
 
 // central square
 const CENTRAL_SQUARE_ID = 5;
+
+@view
+func ownerOf{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(tokenId: Uint256) -> (
+    owner: felt
+) {
+    return (0,);
+}
 
 func setup{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*

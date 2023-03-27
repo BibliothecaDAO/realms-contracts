@@ -378,6 +378,8 @@ func bastion_attack{
 
     // Does not verify that the owner is right and order is not the same because already done in combat module
     let (combat_address) = Module.get_module_address(ModuleIds.L06_Combat);
+
+    Module.ERC721_owner_check(attacking_realm_id, ExternalContractIds.S_Realms);
     ICombat.initiate_combat_approved_module(
         combat_address, attacking_army_id, attacking_realm_id, defending_army_id, defending_realm_id
     );

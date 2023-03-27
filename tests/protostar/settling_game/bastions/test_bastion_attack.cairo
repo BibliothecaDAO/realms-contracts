@@ -30,7 +30,7 @@ from contracts.settling_game.utils.game_structs import (
 )
 from contracts.settling_game.utils.general import unpack_data
 
-from tests.protostar.settling_game.bastions.setup import setup
+from tests.protostar.settling_game.bastions.setup import setup, ownerOf
 
 // mockups
 from tests.protostar.settling_game.bastions.mockups.CombatMockup import (
