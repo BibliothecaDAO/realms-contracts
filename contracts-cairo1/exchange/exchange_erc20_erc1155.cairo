@@ -6,16 +6,44 @@ mod Exchange_ERC20_ERC1155 {
     use starknet::contract_address_const;
     use starknet::ContractAddress;
     use starknet::ContractAddressZeroable;
+    use array::ArrayTrait;
+    use exchange::ERC1155Contract;
 
     struct Storage {
         currency_address: ContractAddress,
         token_address: ContractAddress,
         currency_reserves: LegacyMap::<u256, u256>,
-        lp_reserves: u256,
+        lp_reserves: LegacyMap::<u256, u256>,
         lp_fee_thousands: u256,
         royalty_fee_thousands: u256,
         royalty_fee_address: ContractAddress,
     }
+
+    //TODO: Remove when u256 literals are supported.
+    fn as_u256(high: u128, low: u128) -> u256 {
+        u256 { low, high }
+    }
+
+    #[abi]
+    trait IERC20 {
+        fn transfer_from(
+            from: ContractAddress,
+            to: ContractAddress,
+            value: u256,
+        );
+    }
+
+    #[abi]
+    trait IERC1155 {
+        fn safe_transfer_from(
+            from: ContractAddress,
+            to: ContractAddress,
+            id: u256,
+            value: u256,
+            data: Array<u256>,
+        );
+    }
+
 //##############
 // CONSTRUCTOR #
 //##############
@@ -55,26 +83,27 @@ mod Exchange_ERC20_ERC1155 {
         token_amounts: Array<u256>,
     ) {
 
-        assert(currency_amounts.len() == token_ids.len(), 'currency_amounts and token_ids must be same length');
-        assert(currency_amounts.len() == token_amounts.len(), 'currency_amounts and token_amounts must be same length');
+        assert(currency_amounts.len() == token_ids.len(), 'not same length 1');
+        assert(currency_amounts.len() == token_amounts.len(), 'not same length 2');
         let caller = starknet::get_caller_address();
         let contract = starknet::get_contract_address();
         let currency_address_ = currency_address::read();
         let token_address_ = token_address::read();
-        let reserve_ = currency_reserves::read(token_id.at(0));
-        assert(reserve_ == 0, 'initial liquidity can only be added once');
+        let reserve_ = currency_reserves::read(*token_ids.at(0_usize));
+        assert(reserve_ == as_u256(0_u128, 0_u128), 'reserve must be 0');
 
-        IERC20.transfer_from(currency_address_, caller, contract, currency_amounts.at(0));
+        IERC20Dispatcher { contract_address: currency_address_ }.transfer_from(caller, contract, *currency_amounts.at(0_usize));
         
         let mut data_ = ArrayTrait::new();
-        data_.append(0);
+        data_.append(as_u256(0_u128, 0_u128));
 
-        IERC1155.safe_transfer_from(token_address_, caller, contract, token_ids.at(0), token_amounts.at(0), data_);
+        IERC1155Dispatcher { contract_address: token_address_ }.safe_transfer_from(caller, contract, *token_ids.at(0_usize), *token_amounts.at(0_usize), data_);
 
-        assert(1000_u256 < currency_amounts.at(0), 'currency_amounts must be greater than 1000');
-        currency_reserves::write(token_id.at(0), currency_amounts.at(0));
-        lp_reserves::write(token_id.at(0), currency_amounts.at(0));
-        ERC1155._mint(caller, token_id.at(0), currency_amounts.at(0), 1, data_);
+        assert(as_u256(1000_u128, 0_u128) < *currency_amounts.at(0_usize), 'amount too small');
+        currency_reserves::write(*token_ids.at(0_usize), *currency_amounts.at(0_usize));
+        lp_reserves::write(*token_ids.at(0_usize), *currency_amounts.at(0_usize));
+        //TODO: remove when openzeppelin ERC1155 library is supported
+        ERC1155._mint(caller, *token_ids.at(0_usize), *currency_amounts.at(0_usize), 1, data_);
         //TODO emit event
         
         currency_amounts.pop_front();
