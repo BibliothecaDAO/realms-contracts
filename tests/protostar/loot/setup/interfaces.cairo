@@ -155,3 +155,9 @@ namespace ILords {
     func grant_role(role: felt, to: felt) {
     }
 }
+
+@contract_interface
+namespace IXoroshiro {
+    func next() -> (rnd: felt) {
+    }
+}
