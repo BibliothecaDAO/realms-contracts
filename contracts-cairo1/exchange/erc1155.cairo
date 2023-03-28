@@ -1,5 +1,5 @@
 #[contract]
-mod ERC1155Contract {
+mod ERC1155 {
     use zeroable::Zeroable;
     use starknet::get_caller_address;
     use starknet::contract_address_const;

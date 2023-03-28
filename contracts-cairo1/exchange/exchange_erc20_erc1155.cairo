@@ -7,7 +7,36 @@ mod Exchange_ERC20_ERC1155 {
     use starknet::ContractAddress;
     use starknet::ContractAddressZeroable;
     use array::ArrayTrait;
-    use exchange::ERC1155Contract;
+    use array::SpanTrait;
+    use dict::Felt252DictTrait;
+    use option::OptionTrait;
+    use option::OptionTraitImpl;
+    use core::ec;
+    use core::traits::TryInto;
+    use core::traits::Into;
+    use box::BoxTrait;
+    use clone::Clone;
+    use array::ArrayTCloneImpl;
+    // use src::exchange::ERC1155;
+    // TODO remove this
+
+    mod ERC1155 {
+        use zeroable::Zeroable;
+        use starknet::get_caller_address;
+        use starknet::contract_address_const;
+        use starknet::ContractAddress;
+        use starknet::ContractAddressZeroable;
+        use array::ArrayTrait;
+
+        fn _mint(
+            to: ContractAddress,
+            id: u256,
+            value: u256,
+            data: Array<felt252>,
+        ) {
+
+        }
+    }
 
     struct Storage {
         currency_address: ContractAddress,
@@ -40,7 +69,7 @@ mod Exchange_ERC20_ERC1155 {
             to: ContractAddress,
             id: u256,
             value: u256,
-            data: Array<u256>,
+            data: Array<felt252>,
         );
     }
 
@@ -78,9 +107,9 @@ mod Exchange_ERC20_ERC1155 {
 //#####
     #[external]
     fn initial_liquidity(
-        currency_amounts: Array<u256>,
-        token_ids: Array<u256>,
-        token_amounts: Array<u256>,
+        mut currency_amounts: Array<u256>,
+        mut token_ids: Array<u256>,
+        mut token_amounts: Array<u256>,
     ) {
 
         assert(currency_amounts.len() == token_ids.len(), 'not same length 1');
@@ -95,15 +124,15 @@ mod Exchange_ERC20_ERC1155 {
         IERC20Dispatcher { contract_address: currency_address_ }.transfer_from(caller, contract, *currency_amounts.at(0_usize));
         
         let mut data_ = ArrayTrait::new();
-        data_.append(as_u256(0_u128, 0_u128));
+        data_.append(0);
 
-        IERC1155Dispatcher { contract_address: token_address_ }.safe_transfer_from(caller, contract, *token_ids.at(0_usize), *token_amounts.at(0_usize), data_);
+        IERC1155Dispatcher { contract_address: token_address_ }.safe_transfer_from(caller, contract, *token_ids.at(0_usize), *token_amounts.at(0_usize), (@data_).clone());
 
         assert(as_u256(1000_u128, 0_u128) < *currency_amounts.at(0_usize), 'amount too small');
         currency_reserves::write(*token_ids.at(0_usize), *currency_amounts.at(0_usize));
         lp_reserves::write(*token_ids.at(0_usize), *currency_amounts.at(0_usize));
         //TODO: remove when openzeppelin ERC1155 library is supported
-        ERC1155._mint(caller, *token_ids.at(0_usize), *currency_amounts.at(0_usize), 1, data_);
+        ERC1155::_mint(caller, *token_ids.at(0_usize), *currency_amounts.at(0_usize), (@data_).clone());
         //TODO emit event
         
         currency_amounts.pop_front();
