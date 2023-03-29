@@ -1,4 +1,3 @@
-#[contract]
 mod ERC1155 {
     use zeroable::Zeroable;
     use starknet::get_caller_address;
@@ -7,7 +6,6 @@ mod ERC1155 {
     use starknet::ContractAddressZeroable;
     use array::ArrayTrait;
 
-    #[external]
     fn _mint(
         to: ContractAddress,
         id: u256,

@@ -17,26 +17,7 @@ mod Exchange_ERC20_ERC1155 {
     use box::BoxTrait;
     use clone::Clone;
     use array::ArrayTCloneImpl;
-    // use src::exchange::ERC1155;
-    // TODO remove this
-
-    mod ERC1155 {
-        use zeroable::Zeroable;
-        use starknet::get_caller_address;
-        use starknet::contract_address_const;
-        use starknet::ContractAddress;
-        use starknet::ContractAddressZeroable;
-        use array::ArrayTrait;
-
-        fn _mint(
-            to: ContractAddress,
-            id: u256,
-            value: u256,
-            data: Array<felt252>,
-        ) {
-
-        }
-    }
+    use realms::exchange::ERC1155::ERC1155;
 
     struct Storage {
         currency_address: ContractAddress,
