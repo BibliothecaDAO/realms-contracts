@@ -1,0 +1,7 @@
+[package]
+name = "realms"
+version = "0.1.0"
+description = ""
+homepage = ""
+
+[[target.starknet-contract]]
