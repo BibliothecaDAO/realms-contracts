@@ -92,6 +92,15 @@ mod Exchange_ERC20_ERC1155 {
         mut token_ids: Array<u256>,
         mut token_amounts: Array<u256>,
     ) {
+        // TODO remove this when compiler can automatically handle withdraw_gas_all
+        match gas::withdraw_gas_all(get_builtin_costs()) {
+            Option::Some(_) => {},
+            Option::None(_) => {
+                let mut data = ArrayTrait::new();
+                data.append(0);
+                panic(data);
+            },
+        }
 
         assert(currency_amounts.len() == token_ids.len(), 'not same length 1');
         assert(currency_amounts.len() == token_amounts.len(), 'not same length 2');
