@@ -1,1 +1,3 @@
 mod exchange;
+
+mod tests;
