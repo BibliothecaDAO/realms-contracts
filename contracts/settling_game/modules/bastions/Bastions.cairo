@@ -73,7 +73,12 @@ struct ArmyLocationData {
 // Emited every time an army moves from one location to another
 @event
 func BastionArmyMoved(
-    point: Point, previous_location: felt, next_location: felt, realm_id: Uint256, army_id: felt
+    point: Point,
+    previous_location: felt,
+    next_location: felt,
+    arrival_block: felt,
+    realm_id: Uint256,
+    army_id: felt,
 ) {
 }
 
@@ -648,7 +653,9 @@ func bastion_move{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
         realm_id, army_id, ArmyLocationData(next_arrival_block, next_location)
     );
     // emit event
-    BastionArmyMoved.emit(point, army_location_data.location, next_location, realm_id, army_id);
+    BastionArmyMoved.emit(
+        point, army_location_data.location, next_location, next_arrival_block, realm_id, army_id
+    );
     return ();
 }
 

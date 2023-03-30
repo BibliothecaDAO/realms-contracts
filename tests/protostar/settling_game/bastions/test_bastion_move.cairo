@@ -384,7 +384,7 @@ func test_bastion_move_should_replace_if_current_movers_at_index{
     // expect event
     %{
         expect_events({"name": "BastionArmyMoved", "data": 
-                           [ids.X, ids.Y, ids.STAGING_AREA_ID, ids.TOWER_1_ID, ids.REALM_ID_1, 0, ids.ARMY_ID_1]})
+                           [ids.X, ids.Y, ids.STAGING_AREA_ID, ids.TOWER_1_ID, 25, ids.REALM_ID_1, 0, ids.ARMY_ID_1]})
     %}
 
     // should be at index 25, because current block = 0 and it takes 25 blocks to arrive
@@ -405,7 +405,7 @@ func test_bastion_move_should_replace_if_current_movers_at_index{
     // expect event
     %{
         expect_events({"name": "BastionArmyMoved", "data": 
-                           [ids.X, ids.Y, ids.STAGING_AREA_ID, ids.TOWER_1_ID, ids.REALM_ID_1, 0, ids.ARMY_ID_2]})
+                           [ids.X, ids.Y, ids.STAGING_AREA_ID, ids.TOWER_1_ID, 25 + 35, ids.REALM_ID_1, 0, ids.ARMY_ID_2]})
     %}
 
     // verify replacement in current movers
@@ -459,7 +459,7 @@ func test_bastion_move_central_square_all_towers_conquered{
     // expect event
     %{
         expect_events({"name": "BastionArmyMoved", "data": 
-                           [ids.X, ids.Y, ids.STAGING_AREA_ID, ids.CENTRAL_SQUARE_ID, ids.REALM_ID_1, 0, ids.ARMY_ID_1]})
+                           [ids.X, ids.Y, ids.STAGING_AREA_ID, ids.CENTRAL_SQUARE_ID, 35 + ids.ARRIVAL_BLOCK, ids.REALM_ID_1, 0, ids.ARMY_ID_1]})
     %}
     return ();
 }
