@@ -30,4 +30,7 @@ namespace ITravel {
         traveller_contract_id: felt, traveller_token_id: Uint256, traveller_nested_id: felt
     ) -> () {
     }
+
+    func assert_arrived(contract_id: felt, token_id: Uint256, nested_id: felt) {
+    }
 }

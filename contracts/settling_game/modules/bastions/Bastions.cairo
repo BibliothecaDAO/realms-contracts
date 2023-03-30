@@ -511,7 +511,10 @@ func bastion_move{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
     let (army_coordinates) = ITravel.get_coordinates(
         travel_address, ExternalContractIds.S_Realms, realm_id, army_id
     );
+
+    // assert travel
     Travel.assert_same_points(army_coordinates, point);
+    ITravel.assert_arrived(travel_address, ExternalContractIds.S_Realms, realm_id, army_id);
 
     // get army location data (arrival block and location)
     let (army_location_data) = bastion_army_location.read(realm_id, army_id);
@@ -729,6 +732,9 @@ func update_storage_destroyed_army{syscall_ptr: felt*, pedersen_ptr: HashBuiltin
     );
 
     let (travel_address) = Module.get_module_address(ModuleIds.Travel);
+
+    // DISCUSS: set the army back to its realm when dead with
+    // set coordinates
 
     // allow destroyed army_id to travel again because it is not in bastion anymore
     ITravel.allow_travel(

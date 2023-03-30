@@ -13,6 +13,7 @@ from contracts.settling_game.modules.travel.travel import (
     get_coordinates,
     forbid_travel,
     allow_travel,
+    assert_arrived,
 )
 from contracts.settling_game.modules.combat.interface import ICombat
 from contracts.settling_game.ModuleController import (
@@ -131,6 +132,29 @@ func test_bastion_move_wrong_coordinates_should_fail{
 }() -> () {
     %{ stop_prank_callable = start_prank(caller_address=context.self_address) %}
     %{ expect_revert(error_message="TRAVEL: You are not at this destination") %}
+
+    // MOVE
+    bastion_move(Point(X, Y), TOWER_1_ID, Uint256(REALM_ID_1, 0), ARMY_ID_1);
+    return ();
+}
+
+@external
+func test_bastion_move_travel_not_arrived_should_fail{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+}() -> () {
+    // change location of the army to be on bastion location
+    %{
+        store(context.self_address, "coordinates", [ids.X, ids.Y], 
+                   [ids.ExternalContractIds.S_Realms, ids.REALM_ID_1, 0, ids.ARMY_ID_1])
+    %}
+
+    %{
+        store(context.self_address, "travel_information", [0, 0, 0, 0, 100], 
+                    [3, ids.REALM_ID_1, 0, ids.ARMY_ID_1])
+    %}
+
+    %{ stop_prank_callable = start_prank(caller_address=context.self_address) %}
+    %{ expect_revert(error_message="TRAVEL: You are mid travel. You cannot change course!") %}
 
     // MOVE
     bastion_move(Point(X, Y), TOWER_1_ID, Uint256(REALM_ID_1, 0), ARMY_ID_1);
