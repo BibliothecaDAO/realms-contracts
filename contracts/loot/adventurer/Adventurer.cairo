@@ -81,27 +81,35 @@ from contracts.loot.utils.constants import (
 // -----------------------------------
 
 @event
-func NewAdventurerState(adventurer_id: Uint256, adveturer_state: AdventurerState) {
+func MintAdventurer(adventurer_id: Uint256, owner: felt) {
 }
 
 @event
-func AdventurerLeveledUp(adventurer_id: Uint256, adveturer_state: AdventurerState) {
+func UpdateAdventurerState(adventurer_id: Uint256, adventurer_state: AdventurerState) {
 }
 
 @event
-func AdventurerInitiatedKingHiest(adventurer_id: Uint256, adveturer_state: AdventurerState) {
+func AdventurerLeveledUp(adventurer_id: Uint256, level: felt) {
 }
 
 @event
-func AdventurerRobbedKing(adventurer_id: Uint256, adveturer_state: AdventurerState) {
+func Discovery(adventurer_id: Uint256, discovery_type: felt, sub_discovery_type: felt, entity_id: Uint256, output_amount: felt) {
 }
 
 @event
-func AdventurerDiedRobbingKing(adventurer_id: Uint256, adveturer_state: AdventurerState) {
+func AdventurerInitiatedKingHiest(adventurer_id: Uint256, adventurer_state: AdventurerState) {
 }
 
 @event
-func AdventurerKilledThief(adventurer_id: Uint256, adveturer_state: AdventurerState) {
+func AdventurerRobbedKing(adventurer_id: Uint256, adventurer_state: AdventurerState) {
+}
+
+@event
+func AdventurerDiedRobbingKing(adventurer_id: Uint256, adventurer_state: AdventurerState) {
+}
+
+@event
+func AdventurerKilledThief(adventurer_id: Uint256, adventurer_state: AdventurerState) {
 }
 
 // -----------------------------------
@@ -228,8 +236,8 @@ func mint{
     // send to this contract and set Balance of Adventurer
     let (this) = get_contract_address();
     IERC20.transferFrom(lords_address, caller, this, Uint256(MINT_COST, 0));
-    // @distracteddev: this is now redundant, we can't take away balance every time tribute is distributed
-    // adventurer_balance.write(next_adventurer_id, Uint256(MINT_COST, 0));
+    MintAdventurer.emit(next_adventurer_id, caller);
+    emit_adventurer_state(next_adventurer_id);
 
     return (next_adventurer_id,);
 }
@@ -267,6 +275,7 @@ func mint_with_starting_weapon{
     // add STARTING_GOLD to balance
     let (beast_address) = Module.get_module_address(ModuleIds.Beast);
     IBeast.add_to_balance(beast_address, adventurer_token_id, STARTING_GOLD);
+    emit_adventurer_state(adventurer_token_id);
 
     // Return adventurer token id and item token id
     return (adventurer_token_id, item_token_id);
@@ -689,7 +698,7 @@ func explore{
         adventurer_dynamic.write(token_id, packed_adventurer);
 
         emit_adventurer_state(token_id);
-
+        Discovery.emit(token_id, DiscoveryType.Beast, 0, beast_id, 1);
         return (DiscoveryType.Beast, beast_id.low);
     }
 
@@ -711,7 +720,7 @@ func explore{
         adventurer_dynamic.write(token_id, packed_adventurer);
 
         emit_adventurer_state(token_id);
-
+        Discovery.emit(token_id, DiscoveryType.Beast, 0, beast_id, 1);
         return (DiscoveryType.Beast, beast_id.low);
     }
 
@@ -734,6 +743,7 @@ func explore{
         // if the adventurers intelligence
         let can_dodge = is_le(dodge_chance, unpacked_adventurer.Intelligence + 1);
         if (can_dodge == TRUE) {
+            Discovery.emit(token_id, DiscoveryType.Obstacle, obstacle.Id, Uint256(0,0), 0);
             return (DiscoveryType.Obstacle, obstacle.Id);
         } else {
             // @distracteddev: Should be get equipped item by slot not get item by Id
@@ -745,6 +755,7 @@ func explore{
             let (obstacle_damage) = CombatStats.calculate_damage_from_obstacle(obstacle, armor);
             _deduct_health(token_id, obstacle_damage);
             ILoot.allocate_xp_to_items(item_address, unpacked_adventurer, obstacle_damage);
+            Discovery.emit(token_id, DiscoveryType.Obstacle, obstacle.Id, Uint256(0,0), obstacle_damage);
             return (DiscoveryType.Obstacle, obstacle.Id);
         }
     }
@@ -762,6 +773,7 @@ func explore{
             let (beast_address) = Module.get_module_address(ModuleIds.Beast);
             IBeast.add_to_balance(beast_address, token_id, gold_discovery);
             emit_adventurer_state(token_id);
+            Discovery.emit(token_id, DiscoveryType.Item, ItemDiscoveryType.Gold, Uint256(0,0), gold_discovery);
             return (DiscoveryType.Item, ItemDiscoveryType.Gold);
         }
 
@@ -769,8 +781,9 @@ func explore{
             // mint loot items
             let (loot_address) = Module.get_module_address(ModuleIds.Loot);
             let (owner) = owner_of(token_id);
-            ILoot.mint(loot_address, owner, token_id);
+            let (loot_token_id) = ILoot.mint(loot_address, owner, token_id);
             emit_adventurer_state(token_id);
+            Discovery.emit(token_id, DiscoveryType.Item, ItemDiscoveryType.Loot, loot_token_id, 1);
             return (DiscoveryType.Item, ItemDiscoveryType.Loot);
         }
         if (discovery == ItemDiscoveryType.Health) {
@@ -779,6 +792,7 @@ func explore{
             let (rnd) = get_random_number();
             let (health_discovery) = AdventurerLib.calculate_health_discovery(rnd);
             _add_health(token_id, health_discovery);
+            Discovery.emit(token_id, DiscoveryType.Item, ItemDiscoveryType.Health, Uint256(0,0), health_discovery);
             return (DiscoveryType.Item, ItemDiscoveryType.Health);
         }
 
@@ -790,6 +804,7 @@ func explore{
     let (rnd) = get_random_number();
     let (xp_discovery) = AdventurerLib.calculate_xp_discovery(rnd);
     _increase_xp(token_id, xp_discovery);
+    Discovery.emit(token_id, DiscoveryType.Nothing, 0, Uint256(0,0), xp_discovery);
 
     return (DiscoveryType.Nothing, 0);
 }
@@ -976,12 +991,12 @@ func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBu
 ) {
     alloc_locals;
 
-    let (block) = get_block_number();
+    // let (block) = get_block_number();
 
     let (controller) = Module.controller_address();
     let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
     let (rnd) = IXoroshiro.next(xoroshiro_address_);
-    return (rnd * block,);
+    return (rnd,);
 }
 
 // @notice Emit state of adventurer
@@ -992,7 +1007,7 @@ func emit_adventurer_state{
     // Get new adventurer
     let (new_adventurer) = get_adventurer_by_id(adventurer_token_id);
 
-    NewAdventurerState.emit(adventurer_token_id, new_adventurer);
+    UpdateAdventurerState.emit(adventurer_token_id, new_adventurer);
 
     return ();
 }
@@ -1005,7 +1020,7 @@ func emit_adventurer_leveled_up{
     // Get adventurer from token id
     let (new_adventurer) = get_adventurer_by_id(adventurer_token_id);
     // emit leveled up event
-    AdventurerLeveledUp.emit(adventurer_token_id, new_adventurer);
+    AdventurerLeveledUp.emit(adventurer_token_id, new_adventurer.Level);
     return ();
 }
 

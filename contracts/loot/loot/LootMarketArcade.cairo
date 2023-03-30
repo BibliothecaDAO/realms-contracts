@@ -40,19 +40,27 @@ from openzeppelin.token.erc721.IERC721 import IERC721
 // -----------------------------------
 
 @event
-func ItemXPIncrease(item_token_id: Uint256, item: Item) {
+func UpdateItemState(item_token_id: Uint256, item: Item) {
 }
 
 @event
-func ItemGreatnessIncrease(item_token_id: Uint256, item: Item) {
+func ItemXPIncrease(item_token_id: Uint256) {
 }
 
 @event
-func ItemNamePrefixesAssigned(item_token_id: Uint256, item: Item) {
+func ItemGreatnessIncrease(item_token_id: Uint256) {
 }
 
 @event
-func ItemNameSuffixAssigned(item_token_id: Uint256, item: Item) {
+func ItemNamePrefixesAssigned(item_token_id: Uint256) {
+}
+
+@event
+func ItemNameSuffixAssigned(item_token_id: Uint256) {
+}
+
+@event
+func ClaimItem(market_token_id: Uint256, item_token_id: Uint256, adventurer_token_id: Uint256) {
 }
 
 // -----------------------------------
@@ -271,7 +279,7 @@ func item_adventurer_owner(tokenId: Uint256, adventurerId: Uint256) -> (owner: f
 @external
 func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
     to: felt, adventurer_token_id: Uint256
-) {
+) -> (id: Uint256) {
     alloc_locals;
     Module.only_approved();
 
@@ -282,20 +290,20 @@ func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
 
     let (id) = _mint(to, new_item, adventurer_token_id);
 
-    return ();
+    return (id,);
 }
 
 @external
 func mint_from_mart{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
     to: felt, item_id: felt, adventurer_token_id: Uint256
-) {
+) -> (id: Uint256) {
     alloc_locals;
 
     let (new_item: Item) = ItemLib.generate_item_by_id(item_id);
 
     let (id) = _mint(to, new_item, adventurer_token_id);
 
-    return ();
+    return (id,);
 }
 
 // @notice Mint adventurer starting weapon
@@ -553,7 +561,7 @@ func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBu
     let (controller) = Module.controller_address();
     let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
     let (rnd) = IXoroshiro.next(xoroshiro_address_);
-    return (rnd,);  // values from 1 to 101 inclusive
+    return (rnd,);
 }
 
 // @notice Asserts that the weapon is a starter weapon
@@ -1156,13 +1164,15 @@ func claim_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
     }
 
     // we pass in the current_bid.item_id
-    mint_from_mart(caller, current_bid.item_id, adventurer_token_id);
+    let (item_id) = mint_from_mart(caller, current_bid.item_id, adventurer_token_id);
 
     // this could be optimised
     bid.write(
         market_item_id,
         Bid(current_bid.price, 0, adventurer_token_id.low, BidStatus.closed, current_bid.item_id),
     );
+
+    ClaimItem.emit(market_item_id, item_id, adventurer_token_id);
 
     return ();
 }
@@ -1194,7 +1204,7 @@ func emit_item_greatness_increase{range_check_ptr, syscall_ptr: felt*, pedersen_
     // Get item from token id
     let (item) = get_item_by_token_id(item_token_id);
     // emit leveled up event
-    ItemGreatnessIncrease.emit(item_token_id, item);
+    ItemGreatnessIncrease.emit(item_token_id);
     return ();
 }
 
@@ -1206,7 +1216,7 @@ func emit_item_xp_increase{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: Ha
     // Get item from token id
     let (item) = get_item_by_token_id(item_token_id);
     // emit leveled up event
-    ItemXPIncrease.emit(item_token_id, item);
+    ItemXPIncrease.emit(item_token_id);
     return ();
 }
 
@@ -1218,7 +1228,7 @@ func emit_item_name_prefix_assigned{
     // Get item from token id
     let (item) = get_item_by_token_id(item_token_id);
     // emit item name prefixes assigned event
-    ItemNamePrefixesAssigned.emit(item_token_id, item);
+    ItemNamePrefixesAssigned.emit(item_token_id);
     return ();
 }
 
@@ -1230,6 +1240,6 @@ func emit_item_suffix_assigned{range_check_ptr, syscall_ptr: felt*, pedersen_ptr
     // Get item from token id
     let (item) = get_item_by_token_id(item_token_id);
     // emit item name suffix assigned event
-    ItemNameSuffixAssigned.emit(item_token_id, item);
+    ItemNameSuffixAssigned.emit(item_token_id);
     return ();
 }

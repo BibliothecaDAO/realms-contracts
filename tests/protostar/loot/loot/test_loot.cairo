@@ -11,7 +11,7 @@ from contracts.loot.loot.stats.item import ItemStats
 func setup_generate_name_prefix{syscall_ptr: felt*, range_check_ptr}() {
     %{
         given(
-            rnd = strategy.integers(0, 101),
+            rnd = strategy.integers(1, 101),
         )
     %}
     return ();
@@ -182,7 +182,7 @@ func test_generate_name_prefix{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, r
 func setup_generate_name_suffix{syscall_ptr: felt*, range_check_ptr}() {
     %{
         given(
-            rnd = strategy.integers(0, 101),
+            rnd = strategy.integers(1, 101),
         )
     %}
     return ();

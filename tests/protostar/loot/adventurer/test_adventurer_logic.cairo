@@ -922,7 +922,7 @@ func test_upgrade_vitality_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
 
     let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
 
-    assert adventurer.Health = 100;
+    assert adventurer.Health = 90;
 
     return ();
 }

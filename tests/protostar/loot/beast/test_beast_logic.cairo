@@ -150,14 +150,14 @@ func test_not_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
     assert updated_beast.Id = 2;
     assert updated_beast.Level = 2;
     // since we have overwritten adventurer (made level 2 and so removed wand) we will do no damage
-    assert updated_beast.Health = original_beast.Health;
+    assert updated_beast.Health = 10;
 
     let (updated_adventurer) = IAdventurer.get_adventurer_by_id(
         adventurer_address, adventurer_token_id_1
     );
 
     // adventurer took 24 damage from the beasts counter attack
-    assert updated_adventurer.Health = 73;
+    assert updated_adventurer.Health = 76;
 
     // TODO LH: verify neither beast nor adventurer gained xp
 

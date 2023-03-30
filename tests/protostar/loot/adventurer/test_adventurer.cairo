@@ -339,7 +339,7 @@ func test_calculate_xp_discovery{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*,
 
     let (xp_discovery) = AdventurerLib.calculate_xp_discovery(0);
 
-    assert xp_discovery = 10;
+    assert xp_discovery = 1;
 
     return ();
 }

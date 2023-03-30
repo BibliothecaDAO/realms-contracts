@@ -49,11 +49,31 @@ from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
 // -----------------------------------
 
 @event
-func NewBeastState(beast_token_id: Uint256, beast_state: Beast) {
+func CreateBeast(beast_token_id: Uint256, adventurer_token_id: Uint256) {
 }
 
 @event
-func BeastLevelUp(beast_token_id: Uint256, beast_state: Beast) {
+func UpdateBeastState(beast_token_id: Uint256, beast_state: Beast) {
+}
+
+@event
+func BeastLevelUp(beast_token_id: Uint256, beast_level: felt) {
+}
+
+@event
+func BeastAttacked(beast_token_id: Uint256, adventurer_token_id: Uint256, damage: felt) {
+}
+
+@event
+func AdventurerAttacked(beast_token_id: Uint256, adventurer_token_id: Uint256, damage: felt) { 
+}
+
+@event
+func FledBeast(beast_token_id: Uint256, adventuer_token_id: Uint256) {
+}
+
+@event
+func AdventurerAmbushed(beast_token_id: Uint256, adventurer_token_id: Uint256, damage: felt) {
 }
 
 // -----------------------------------
@@ -207,6 +227,7 @@ func attack{
     let (packed_beast) = BeastLib.pack(updated_health_beast);
     beast_dynamic.write(beast_token_id, packed_beast);
     emit_beast_state(beast_token_id);
+    BeastAttacked.emit(beast_token_id, adventurer_id, damage_dealt);
 
     // check if beast is still alive after the attack
     let beast_is_alive = is_not_zero(updated_health_beast.Health);
@@ -230,6 +251,7 @@ func attack{
         let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, armor, rnd);
 
         IAdventurer.deduct_health(adventurer_address, adventurer_id, damage_taken);
+        AdventurerAttacked.emit(beast_token_id, adventurer_id, damage_taken);
 
         // check if beast counter attack killed adventurer
         let (updated_adventurer) = get_adventurer_from_beast(beast_token_id);
@@ -351,6 +373,7 @@ func counter_attack{
 
     // deduct heatlh from adventurer
     IAdventurer.deduct_health(adventurer_address, adventurer_token_id, damage_taken);
+    AdventurerAttacked.emit(beast_token_id, adventurer_token_id, damage_taken);
 
     // check if beast counter attack killed adventurer
     let (updated_adventurer) = get_adventurer_from_beast(beast_token_id);
@@ -423,6 +446,7 @@ func flee{
 
         // update adventurer health
         IAdventurer.deduct_health(adventurer_address, Uint256(beast.Adventurer, 0), damage_taken);
+        AdventurerAmbushed.emit(beast_token_id, Uint256(beast.Adventurer, 0), damage_taken);
 
         // check if beast counter attack killed adventurer
         let (updated_adventurer) = get_adventurer_from_beast(beast_token_id);
@@ -485,7 +509,7 @@ func flee{
         // zero out the beast assigned to the adventurer
         IAdventurer.assign_beast(adventurer_address, Uint256(beast.Adventurer, 0), 0);
 
-        // TODO: seems like this is worthy of an event
+        FledBeast.emit(beast_token_id, Uint256(beast.Adventurer, 0));
         return (TRUE,);
     } else {
         return (FALSE,);
@@ -578,12 +602,12 @@ func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBu
 ) {
     alloc_locals;
 
-    let (block) = get_block_number();
+    // let (block) = get_block_number();
 
     let (controller) = Module.controller_address();
     let (xoroshiro_address_) = IModuleController.get_xoroshiro(controller);
     let (rnd) = IXoroshiro.next(xoroshiro_address_);
-    return (rnd * block,);
+    return (rnd,);
 }
 
 // @notice Revert if caller is not adventurer owner
@@ -609,7 +633,7 @@ func emit_beast_state{
 }(beast_token_id: Uint256) {
     // Get the beast
     let (beast) = get_beast_by_id(beast_token_id);
-    NewBeastState.emit(beast_token_id, beast);
+    UpdateBeastState.emit(beast_token_id, beast);
     return ();
 }
 
@@ -620,7 +644,8 @@ func emit_beast_level_up{
 }(beast_token_id: Uint256) {
     // Get beast and emit level up event with beast details
     let (beast) = get_beast_by_id(beast_token_id);
-    BeastLevelUp.emit(beast_token_id, beast);
+    UpdateBeastState.emit(beast_token_id, beast);
+    BeastLevelUp.emit(beast_token_id, beast.Level);
     return ();
 }
 
