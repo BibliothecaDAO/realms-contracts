@@ -18,6 +18,7 @@ mod Exchange_ERC20_ERC1155 {
     use clone::Clone;
     use array::ArrayTCloneImpl;
     use realms::exchange::ERC1155::ERC1155;
+    use realms::utils::helper::check_gas;
 
     struct Storage {
         currency_address: ContractAddress,
@@ -52,6 +53,11 @@ mod Exchange_ERC20_ERC1155 {
             value: u256,
             data: Array<felt252>,
         );
+
+        fn balance_of(
+            account: ContractAddress,
+            id: u256,
+        ) -> u256;
     }
 
 //##############
@@ -92,14 +98,10 @@ mod Exchange_ERC20_ERC1155 {
         mut token_ids: Array<u256>,
         mut token_amounts: Array<u256>,
     ) {
-        // TODO remove this when compiler can automatically handle withdraw_gas_all
-        match gas::withdraw_gas_all(get_builtin_costs()) {
-            Option::Some(_) => {},
-            Option::None(_) => {
-                let mut data = ArrayTrait::new();
-                data.append(0);
-                panic(data);
-            },
+        check_gas();
+
+        if (currency_amounts.len() == 0_usize) {
+            return ();
         }
 
         assert(currency_amounts.len() == token_ids.len(), 'not same length 1');
@@ -137,11 +139,48 @@ mod Exchange_ERC20_ERC1155 {
     }
 
     #[external]
-    fn add_liquidity() {
-
+    fn add_liquidity(
+        mut currency_amounts: Array<u256>,
+        mut token_ids: Array<u256>,
+        mut token_amounts: Array<u256>,
+        deadline: felt252,
+    ) {
+        assert(currency_amounts.len() == token_ids.len(), 'not same length 1');
+        assert(currency_amounts.len() == token_amounts.len(), 'not same length 2');
+        let info = starknet::get_block_info().unbox();
+        assert(info.block_timestamp < deadline.try_into().unwrap(), 'deadline passed');
+        return add_liquidity_loop(
+            currency_amounts,
+            token_ids,
+            token_amounts,
+        );
+        
     }
 
-    fn add_liquidity_loop() {
+    fn add_liquidity_loop(
+        mut currency_amounts: Array<u256>,
+        mut token_ids: Array<u256>,
+        mut token_amounts: Array<u256>,
+    ) {
+        check_gas();
+        if (currency_amounts.len() == 0_usize) {
+            return ();
+        }
+        let caller = starknet::get_caller_address();
+        let contract = starknet::get_contract_address();
+        let currency_address_ = currency_address::read();
+        let token_address_ = token_address::read();
+        let currency_reserve_ = currency_reserves::read(*token_ids.at(0_usize));
+
+        let lp_reserve_ = lp_reserves::read(*token_ids.at(0_usize));
+
+        let token_reserve_ = IERC1155Dispatcher { contract_address: token_address_ }.balance_of(contract, *token_ids.at(0_usize));
+
+        // Ensure this method is only called for subsequent liquidity adds
+        assert(lp_reserve_ > as_u256(0_u128, 0_u128), 'lp reserve must be > 0');
+        
+
+
 
     }
 
@@ -212,23 +251,23 @@ mod Exchange_ERC20_ERC1155 {
 //##########
 
     #[view]
-    fn get_currency_address() {
-
+    fn get_currency_address() -> ContractAddress {
+        return currency_address::read();
     }
 
     #[view]
-    fn get_token_address() {
-
+    fn get_token_address() -> ContractAddress {
+        return token_address::read();
     }
 
     #[view]
-    fn get_currency_reserves() {
-
+    fn get_currency_reserves(token_id: u256) -> u256 {
+        return currency_reserves::read(token_id);
     }
 
     #[view]
-    fn get_lp_fee_thousands() {
-
+    fn get_lp_fee_thousands() -> u256 {
+        return lp_fee_thousands::read();
     }
 
     #[view]
@@ -237,6 +276,7 @@ mod Exchange_ERC20_ERC1155 {
     }
 
     fn get_all_sell_price_loop() {
+        check_gas();
 
     }
 
