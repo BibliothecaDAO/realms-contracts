@@ -19,6 +19,8 @@ mod Exchange_ERC20_ERC1155 {
     use array::ArrayTCloneImpl;
     use realms::exchange::ERC1155::ERC1155;
     use realms::utils::helper::check_gas;
+    use integer::u256_overflow_mul;
+    use integer::u256_overflowing_add;
 
     struct Storage {
         currency_address: ContractAddress,
@@ -140,17 +142,17 @@ mod Exchange_ERC20_ERC1155 {
 
     #[external]
     fn add_liquidity(
-        mut currency_amounts: Array<u256>,
+        mut max_currency_amounts: Array<u256>,
         mut token_ids: Array<u256>,
         mut token_amounts: Array<u256>,
         deadline: felt252,
     ) {
-        assert(currency_amounts.len() == token_ids.len(), 'not same length 1');
-        assert(currency_amounts.len() == token_amounts.len(), 'not same length 2');
+        assert(max_currency_amounts.len() == token_ids.len(), 'not same length 1');
+        assert(max_currency_amounts.len() == token_amounts.len(), 'not same length 2');
         let info = starknet::get_block_info().unbox();
         assert(info.block_timestamp < deadline.try_into().unwrap(), 'deadline passed');
         return add_liquidity_loop(
-            currency_amounts,
+            max_currency_amounts,
             token_ids,
             token_amounts,
         );
@@ -158,28 +160,65 @@ mod Exchange_ERC20_ERC1155 {
     }
 
     fn add_liquidity_loop(
-        mut currency_amounts: Array<u256>,
+        mut max_currency_amounts: Array<u256>,
         mut token_ids: Array<u256>,
         mut token_amounts: Array<u256>,
     ) {
         check_gas();
-        if (currency_amounts.len() == 0_usize) {
+        if (max_currency_amounts.len() == 0_usize) {
             return ();
         }
         let caller = starknet::get_caller_address();
         let contract = starknet::get_contract_address();
         let currency_address_ = currency_address::read();
         let token_address_ = token_address::read();
+
         let currency_reserve_ = currency_reserves::read(*token_ids.at(0_usize));
-
         let lp_reserve_ = lp_reserves::read(*token_ids.at(0_usize));
-
         let token_reserve_ = IERC1155Dispatcher { contract_address: token_address_ }.balance_of(contract, *token_ids.at(0_usize));
 
         // Ensure this method is only called for subsequent liquidity adds
         assert(lp_reserve_ > as_u256(0_u128, 0_u128), 'lp reserve must be > 0');
         
+        // Required price calc
+        // X/Y = dx/dy
+        // dx = X*dy/Y
+        let (numerator, mul_overflow) = u256_overflow_mul(currency_reserve_, *token_amounts.at(0_usize));
+        assert(!mul_overflow, 'mul overflow');
 
+        // let currency_amount_ = u256_div(numerator, token_reserve_); //TODO: check for div by 0
+        let currency_amount_ = as_u256(0_u128, 0_u128);
+        assert(currency_amount_ <= *max_currency_amounts.at(0_usize), 'amount too high');
+
+        // Transfer currency to contract
+        IERC20Dispatcher { contract_address: currency_address_ }.transfer_from(caller, contract, currency_amount_);
+
+        IERC1155Dispatcher { contract_address: token_address_ }.safe_transfer_from(caller, contract, *token_ids.at(0_usize), *token_amounts.at(0_usize), ArrayTrait::new());
+
+        // Update the new currency and LP reserves
+        let (new_currency_reserve, add_overflow) = u256_overflowing_add(currency_reserve_, currency_amount_);
+        assert(!add_overflow, 'add overflow');
+        currency_reserves::write(*token_ids.at(0_usize), new_currency_reserve);
+
+        let (new_lp_reserve, add_overflow) = u256_overflowing_add(lp_reserve_, currency_amount_);
+        assert(!add_overflow, 'add overflow');
+        lp_reserves::write(*token_ids.at(0_usize), new_lp_reserve);
+
+        // Mint LP tokens to caller
+        ERC1155::_mint(caller, *token_ids.at(0_usize), currency_amount_, ArrayTrait::new());
+
+        // TODO Emit Event
+
+        max_currency_amounts.pop_front();
+        token_ids.pop_front();
+        token_amounts.pop_front();
+
+        return add_liquidity_loop(
+            max_currency_amounts,
+            token_ids,
+            token_amounts,
+        );        
+        
 
 
     }
