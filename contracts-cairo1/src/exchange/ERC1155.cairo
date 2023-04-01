@@ -14,4 +14,12 @@ mod ERC1155 {
     ) {
 
     }
+
+    fn _burn(
+        from: ContractAddress,
+        id: u256,
+        value: u256,
+    ) {
+        
+    }
 }
