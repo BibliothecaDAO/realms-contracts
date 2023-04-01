@@ -202,6 +202,10 @@ mod Exchange_ERC20_ERC1155 {
         assert(!mul_overflow, 'mul overflow');
         // let lp_amount_ = u256_div(numerator, currency_reserve_); //TODO: not support yet
         let lp_amount_ = as_u256(0_u128, 0_u128); // TODO: remove when div is supported
+
+        //TODO:  add if ERC1155 do not support totalSupply
+        // lp_reserves::write(*token_ids.at(0_usize), *currency_amounts.at(0_usize));
+        
         // Mint LP tokens to caller
         ERC1155::_mint(caller, *token_ids.at(0_usize), lp_amount_, ArrayTrait::new());
 
