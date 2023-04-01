@@ -17,3 +17,8 @@ fn check_gas() {
         }
     }
 }
+
+//TODO: Remove when u256 literals are supported.
+fn as_u256(high: u128, low: u128) -> u256 {
+    u256 { low, high }
+}

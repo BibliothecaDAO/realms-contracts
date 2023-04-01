@@ -22,21 +22,21 @@ mod Exchange_ERC20_ERC1155 {
     use integer::u256_overflow_mul;
     use integer::u256_overflowing_add;
     use integer::u256_overflow_sub;
+    use realms::utils::helper::as_u256;
+
+    use realms::exchange::library::AMM;
 
     struct Storage {
         currency_address: ContractAddress,
         token_address: ContractAddress,
         currency_reserves: LegacyMap::<u256, u256>,
         token_reserves: LegacyMap::<u256, u256>,
-        lp_fee_thousands: u256,
-        royalty_fee_thousands: u256,
+        lp_fee_thousand: u256,
+        royalty_fee_thousand: u256,
         royalty_fee_address: ContractAddress,
     }
 
-    //TODO: Remove when u256 literals are supported.
-    fn as_u256(high: u128, low: u128) -> u256 {
-        u256 { low, high }
-    }
+
 
     #[abi]
     trait IERC20 {
@@ -77,15 +77,15 @@ mod Exchange_ERC20_ERC1155 {
         uri: felt252,
         currency_address_: ContractAddress,
         token_address_: ContractAddress,
-        lp_fee_thousands_: u256,
-        royalty_fee_thousands_: u256,
+        lp_fee_thousand_: u256,
+        royalty_fee_thousand_: u256,
         royalty_fee_address_: ContractAddress,
         proxy_admin: ContractAddress,
     ) {
         currency_address::write(currency_address_);
         token_address::write(token_address_);
-        lp_fee_thousands::write(lp_fee_thousands_);
-        // set_royalty_info(royalty_fee_thousands_, royalty_fee_address_);
+        lp_fee_thousand::write(lp_fee_thousand_);
+        // set_royalty_info(royalty_fee_thousand_, royalty_fee_address_);
         //TODO proxy logic
         //TODO ownable initializer
         //TODO ERC1155 initializer
@@ -279,8 +279,7 @@ mod Exchange_ERC20_ERC1155 {
         let lp_total_supply_ = get_lp_supply(*token_ids.at(0_usize));
         let token_reserve_ = IERC1155Dispatcher { contract_address: token_address_ }.balance_of(contract, *token_ids.at(0_usize));
 
-        // Ensure this method is only called for subsequent liquidity adds
-        assert(lp_total_supply_ > as_u256(0_u128, 0_u128), 'lp reserve must be > 0');
+        assert(lp_total_supply_ > *lp_amounts.at(0_usize), 'insufficient lp supply');
 
 
         let (numerator, mul_overflow) = u256_overflow_mul(currency_reserve_, *lp_amounts.at(0_usize));
@@ -334,19 +333,92 @@ mod Exchange_ERC20_ERC1155 {
 // BUY TOKENS #
 //#############
     #[external]
-    fn buy_tokens() {
+    fn buy_tokens(
+        mut max_currency_amounts: Array<u256>,
+        mut token_ids: Array<u256>,
+        mut token_amounts: Array<u256>,
+        deadline: felt252,
+    ) -> u256 {
+        assert(max_currency_amounts.len() == token_ids.len(), 'not same length 1');
+        assert(max_currency_amounts.len() == token_amounts.len(), 'not same length 2');
+        let info = starknet::get_block_info().unbox();
+        assert(info.block_timestamp < deadline.try_into().unwrap(), 'deadline passed');
+        
+        let currency_amount = buy_tokens_loop(
+            token_ids,
+            token_amounts,
+        );
+        assert(currency_amount <= *max_currency_amounts.at(0_usize), 'amount too high');
+
+        return currency_amount;
 
     }
 
-    fn buy_tokens_loop() {
+    fn buy_tokens_loop(
+        mut token_ids: Array<u256>,
+        mut token_amounts: Array<u256>,
+    ) -> u256 {
+        check_gas();
+        if (token_ids.len() == 0_usize) {
+            return as_u256(0_u128, 0_u128);
+        }
+        let caller = starknet::get_caller_address();
+        let contract = starknet::get_contract_address();
+        let currency_address_ = currency_address::read();
+        let token_address_ = token_address::read();
 
+        let currency_reserve_ = currency_reserves::read(*token_ids.at(0_usize));
+        let token_reserve_ = token_reserves::read(*token_ids.at(0_usize));
+
+        let lp_fee_thousand_ = lp_fee_thousand::read();
+
+        let currency_amount_sans_royal_ = AMM::get_buy_price(
+            *token_amounts.at(0_usize),
+            currency_reserve_,
+            token_reserve_,
+            lp_fee_thousand_,
+        );
+
+        let royalty_ = get_royalty_for_price(
+            currency_amount_sans_royal_,
+        );
+
+        let currency_amount_ = currency_amount_sans_royal_ + royalty_;
+
+        // Update reserve 
+        let (new_currency_reserve, add_overflow) = u256_overflowing_add(currency_reserve_, currency_amount_);
+        assert(!add_overflow, 'add overflow');
+        currency_reserves::write(*token_ids.at(0_usize), new_currency_reserve);
+
+        // Transfer currency from caller
+        IERC20Dispatcher { contract_address: currency_address_ }.transfer_from(caller, contract, currency_amount_);
+        // Royalty transfer
+        IERC20Dispatcher { contract_address: currency_address_ }.transfer_from(caller, royalty_fee_address::read(), royalty_);
+
+        // Transfer token to caller
+        IERC1155Dispatcher { contract_address: token_address_ }.safe_transfer_from(contract, caller, *token_ids.at(0_usize), *token_amounts.at(0_usize), ArrayTrait::new());
+
+        // TODO Emit Event
+
+        token_ids.pop_front();
+        token_amounts.pop_front();
+
+        let mut currency_total_ = buy_tokens_loop(
+            token_ids,
+            token_amounts,
+        );
+        let (new_currency_total, add_overflow) = u256_overflowing_add(currency_total_, currency_amount_);
+        assert(!add_overflow, 'add overflow');
+        return new_currency_total;
     }
 
 //##############
 // SELL TOKENS #
 //##############
     #[external]
-    fn sell_tokens() {
+    fn sell_tokens(
+        
+    ) {
 
     }
 
@@ -359,8 +431,14 @@ mod Exchange_ERC20_ERC1155 {
 //################
 
     #[view]
-    fn get_royalty_for_price() {
+    fn get_royalty_for_price(amount_sans_royalty: u256) -> u256 {
+        let royalty_fee_thousand_ = royalty_fee_thousand::read();
+        let (royalty, mul_overflow) = u256_overflow_mul(amount_sans_royalty, royalty_fee_thousand_);
+        assert(!mul_overflow, 'mul overflow');
 
+        // let (royalty, div_overflow) = u256_overflowing_div(royalty, as_u256(1000_u128, 0_u128)); // TODO: not support yet
+        let royalty = as_u256(0_u128, 0_u128); // TODO: remove this line
+        return royalty;
     }
 
     #[view]
@@ -403,8 +481,8 @@ mod Exchange_ERC20_ERC1155 {
     }
 
     #[view]
-    fn get_lp_fee_thousands() -> u256 {
-        return lp_fee_thousands::read();
+    fn get_lp_fee_thousand() -> u256 {
+        return lp_fee_thousand::read();
     }
 
     #[view]
