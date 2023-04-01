@@ -124,7 +124,10 @@ mod Exchange_ERC20_ERC1155 {
 
         assert(as_u256(1000_u128, 0_u128) < *currency_amounts.at(0_usize), 'amount too small');
         currency_reserves::write(*token_ids.at(0_usize), *currency_amounts.at(0_usize));
-        lp_reserves::write(*token_ids.at(0_usize), *currency_amounts.at(0_usize));
+        
+        //TODO:  add if ERC1155 do not support totalSupply
+        // lp_reserves::write(*token_ids.at(0_usize), *currency_amounts.at(0_usize));
+
         //TODO: remove when openzeppelin ERC1155 library is supported
         ERC1155::_mint(caller, *token_ids.at(0_usize), *currency_amounts.at(0_usize), (@data_).clone());
         //TODO emit event
@@ -174,7 +177,7 @@ mod Exchange_ERC20_ERC1155 {
         let token_address_ = token_address::read();
 
         let currency_reserve_ = currency_reserves::read(*token_ids.at(0_usize));
-        let lp_total_supply_ = lp_total_supply::read();
+        let lp_total_supply_ = get_lp_supply(*token_ids.at(0_usize));
         let token_reserve_ = IERC1155Dispatcher { contract_address: token_address_ }.balance_of(contract, *token_ids.at(0_usize));
 
         // Ensure this method is only called for subsequent liquidity adds
@@ -263,7 +266,7 @@ mod Exchange_ERC20_ERC1155 {
         let token_address_ = token_address::read();
 
         let currency_reserve_ = currency_reserves::read(*token_ids.at(0_usize));
-        let lp_reserve_ = lp_reserves::read(*token_ids.at(0_usize));
+        let lp_reserve_ = get_lp_supply(*token_ids.at(0_usize));
         let token_reserve_ = IERC1155Dispatcher { contract_address: token_address_ }.balance_of(contract, *token_ids.at(0_usize));
 
         
@@ -405,6 +408,11 @@ mod Exchange_ERC20_ERC1155 {
     #[view]
     fn isApprovedForAll() {
 
+    }
+
+    #[view]
+    fn get_lp_supply(token_id: u256) -> u256 {
+        return as_u256(1_u128, 0_u128); // TODO: need implement base on ERC1155 library
     }
 
 //
