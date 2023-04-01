@@ -26,7 +26,7 @@ mod Exchange_ERC20_ERC1155 {
         currency_address: ContractAddress,
         token_address: ContractAddress,
         currency_reserves: LegacyMap::<u256, u256>,
-        lp_reserves: LegacyMap::<u256, u256>,
+        token_reserves: LegacyMap::<u256, u256>,
         lp_fee_thousands: u256,
         royalty_fee_thousands: u256,
         royalty_fee_address: ContractAddress,
@@ -174,11 +174,11 @@ mod Exchange_ERC20_ERC1155 {
         let token_address_ = token_address::read();
 
         let currency_reserve_ = currency_reserves::read(*token_ids.at(0_usize));
-        let lp_reserve_ = lp_reserves::read(*token_ids.at(0_usize));
+        let lp_total_supply_ = lp_total_supply::read();
         let token_reserve_ = IERC1155Dispatcher { contract_address: token_address_ }.balance_of(contract, *token_ids.at(0_usize));
 
         // Ensure this method is only called for subsequent liquidity adds
-        assert(lp_reserve_ > as_u256(0_u128, 0_u128), 'lp reserve must be > 0');
+        assert(lp_total_supply_ > as_u256(0_u128, 0_u128), 'lp reserve must be > 0');
         
         // Required price calc
         // X/Y = dx/dy
@@ -186,8 +186,8 @@ mod Exchange_ERC20_ERC1155 {
         let (numerator, mul_overflow) = u256_overflow_mul(currency_reserve_, *token_amounts.at(0_usize));
         assert(!mul_overflow, 'mul overflow');
 
-        // let currency_amount_ = u256_div(numerator, token_reserve_); //TODO: check for div by 0
-        let currency_amount_ = as_u256(0_u128, 0_u128);
+        // let currency_amount_ = u256_div(numerator, token_reserve_); //TODO: not support yet
+        let currency_amount_ = as_u256(0_u128, 0_u128);  // TODO: remove when div is supported
         assert(currency_amount_ <= *max_currency_amounts.at(0_usize), 'amount too high');
 
         // Transfer currency to contract
@@ -195,17 +195,20 @@ mod Exchange_ERC20_ERC1155 {
 
         IERC1155Dispatcher { contract_address: token_address_ }.safe_transfer_from(caller, contract, *token_ids.at(0_usize), *token_amounts.at(0_usize), ArrayTrait::new());
 
-        // Update the new currency and LP reserves
+        let (numerator, mul_overflow) = u256_overflow_mul(lp_total_supply_, currency_amount_);
+        assert(!mul_overflow, 'mul overflow');
+        // let lp_amount_ = u256_div(numerator, currency_reserve_); //TODO: not support yet
+        let lp_amount_ = as_u256(0_u128, 0_u128); // TODO: remove when div is supported
+        // Mint LP tokens to caller
+        ERC1155::_mint(caller, *token_ids.at(0_usize), lp_amount_, ArrayTrait::new());
+
         let (new_currency_reserve, add_overflow) = u256_overflowing_add(currency_reserve_, currency_amount_);
         assert(!add_overflow, 'add overflow');
         currency_reserves::write(*token_ids.at(0_usize), new_currency_reserve);
 
-        let (new_lp_reserve, add_overflow) = u256_overflowing_add(lp_reserve_, currency_amount_);
+        let (new_token_reserve, add_overflow) = u256_overflowing_add(token_reserve_, *token_amounts.at(0_usize));
         assert(!add_overflow, 'add overflow');
-        lp_reserves::write(*token_ids.at(0_usize), new_lp_reserve);
-
-        // Mint LP tokens to caller
-        ERC1155::_mint(caller, *token_ids.at(0_usize), currency_amount_, ArrayTrait::new());
+        token_reserves::write(*token_ids.at(0_usize), new_token_reserve);
 
         // TODO Emit Event
 
@@ -224,12 +227,46 @@ mod Exchange_ERC20_ERC1155 {
     }
 
     #[external]
-    fn remove_liquidity() {
-
+    fn remove_liquidity(
+        mut min_currency_amounts: Array<u256>,
+        mut token_ids: Array<u256>,
+        mut min_token_amounts: Array<u256>,
+        mut lp_amounts: Array<u256>,
+        deadline: felt252,
+    ) {
+        assert(min_currency_amounts.len() == token_ids.len(), 'not same length 1');
+        assert(min_currency_amounts.len() == min_token_amounts.len(), 'not same length 2');
+        assert(min_currency_amounts.len() == lp_amounts.len(), 'not same length 3');
+        let info = starknet::get_block_info().unbox();
+        assert(info.block_timestamp < deadline.try_into().unwrap(), 'deadline passed');
+        return remove_liquidity_loop(
+            min_currency_amounts,
+            token_ids,
+            min_token_amounts,
+            lp_amounts,
+        );
     }
 
-    fn remove_liquidity_loop() {
+    fn remove_liquidity_loop(
+        mut min_currency_amounts: Array<u256>,
+        mut token_ids: Array<u256>,
+        mut min_token_amounts: Array<u256>,
+        mut lp_amounts: Array<u256>,
+    ) {
+        check_gas();
+        if (min_currency_amounts.len() == 0_usize) {
+            return ();
+        }
+        let caller = starknet::get_caller_address();
+        let contract = starknet::get_contract_address();
+        let currency_address_ = currency_address::read();
+        let token_address_ = token_address::read();
 
+        let currency_reserve_ = currency_reserves::read(*token_ids.at(0_usize));
+        let lp_reserve_ = lp_reserves::read(*token_ids.at(0_usize));
+        let token_reserve_ = IERC1155Dispatcher { contract_address: token_address_ }.balance_of(contract, *token_ids.at(0_usize));
+
+        
     }
 
 //#############
