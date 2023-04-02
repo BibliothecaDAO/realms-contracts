@@ -24,6 +24,7 @@ mod Exchange_ERC20_ERC1155 {
     use realms::utils::helper::as_u256;
 
     use openzeppelin::token::erc1155::ERC1155;  // TODO: remove when openzeppelin ERC1155 library is supported
+    use openzeppelin::introspection::erc165::ERC165Contract; // TODO: remove when openzeppelin ERC165 library is supported
 
     use realms::exchange::library::AMM;
 
@@ -528,10 +529,26 @@ mod Exchange_ERC20_ERC1155 {
 // RECEIVERS #
 //############
 
-    //TODO: the receiver name is not correct
     #[external]
-    fn onERC1155Received() {
+    fn onERC1155Received(
+        operator: ContractAddress,
+        from: ContractAddress,
+        id: u256,
+        value: u256,
+        data: Array<felt252>
+    ) -> u32 {
+        return 0_u32; // TODO: return value
+    }
 
+    #[external]
+    fn onERC1155BatchReceived(
+    operator: ContractAddress,
+    from: ContractAddress,
+    ids: Array<u256>,
+    values: Array<u256>,
+    data: Array<felt252>
+    ) -> u32 {
+        return 0_u32; // TODO: return value
     }
 
 //##########
@@ -605,24 +622,45 @@ mod Exchange_ERC20_ERC1155 {
 //########################
 
     #[view]
-    fn supports_interface(interface_id: u32) -> bool {
-        ERC1155::supports_interface(interface_id)
+    fn supportsInterface(interface_id: u32) -> bool {
+        ERC165Contract::supports_interface(interface_id)
     }
 
-    // #[view]
-    // fn balance_of() {
-    //     ERC1155::balance_of();
-    // }
 
-    // #[view]
-    // fn balance_of_batch() {
 
-    // }
+    #[view]
+    fn balanceOf(
+        account: ContractAddress,
+        token_id: u256,
+    ) -> u256 {
+        ERC1155::balance_of(account, token_id)
+    }
 
-    // #[view]
-    // fn is_approved_for_all() {
+    #[view]
+    fn balanceOfBatch(
+        accounts: Array<ContractAddress>,
+        token_ids: Array<u256>,
+    ) -> Array<u256> {
+        ERC1155::balance_of_batch(accounts, token_ids)
+    }
 
-    // }
+    #[view]
+    fn isApprovedForAll(
+        account: ContractAddress,
+        operator: ContractAddress,
+    ) -> bool {
+        ERC1155::is_approved_for_all(account, operator)
+    }
+
+    #[view]
+    fn uri(token_id: u256) -> felt252 {
+        return ERC1155::uri(token_id);
+    }
+
+    #[view]
+    fn owner() -> felt252 {
+        return 0; // TODO: need implement base on Ownable library
+    }
 
     #[view]
     fn get_lp_supply(token_id: u256) -> u256 {
@@ -633,18 +671,48 @@ mod Exchange_ERC20_ERC1155 {
 // Externals
 //
     #[external]
-    fn setApprovalForAll() {
-
+    fn setApprovalForAll(
+        operator: ContractAddress,
+        approved: bool,
+    ) {
+        ERC1155::set_approval_for_all(
+            operator,
+            approved,
+        );
     }
 
     #[external]
-    fn safeTransferFrom() {
-
+    fn safeTransferFrom(
+        from: ContractAddress,
+        to: ContractAddress,
+        token_id: u256,
+        amount: u256,
+        data: Array<felt252>,
+    ) {
+        ERC1155::safe_transfer_from(
+            from,
+            to,
+            token_id,
+            amount,
+            data,
+        );
     }
 
     #[external]
-    fn safeBatchTransferFrom() {
-
+    fn safeBatchTransferFrom(
+        from: ContractAddress,
+        to: ContractAddress,
+        token_ids: Array<u256>,
+        amounts: Array<u256>,
+        data: Array<felt252>,
+    ) {
+        ERC1155::safe_batch_transfer_from(
+            from,
+            to,
+            token_ids,
+            amounts,
+            data,
+        );
     }
 
 //########
