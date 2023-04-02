@@ -17,14 +17,13 @@ mod Exchange_ERC20_ERC1155 {
     use box::BoxTrait;
     use clone::Clone;
     use array::ArrayTCloneImpl;
-    // use realms::exchange::ERC1155::ERC1155;
     use realms::utils::helper::check_gas;
     use integer::u256_overflow_mul;
     use integer::u256_overflowing_add;
     use integer::u256_overflow_sub;
     use realms::utils::helper::as_u256;
 
-    use openzeppelin::token::erc1155::ERC1155;
+    use openzeppelin::token::erc1155::ERC1155;  // TODO: remove when openzeppelin ERC1155 library is supported
 
     use realms::exchange::library::AMM;
 

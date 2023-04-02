@@ -1,5 +1,5 @@
 
-use realms::exchange::Exchange_ERC20_ERC1155::Exchange_ERC20_ERC1155;
+use realms::exchange::exchange::Exchange_ERC20_ERC1155;
 use starknet::contract_address_const;
 use starknet::ContractAddress;
 use starknet::testing::set_caller_address;
