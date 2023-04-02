@@ -23,8 +23,8 @@ mod Exchange_ERC20_ERC1155 {
     use integer::u256_overflow_sub;
     use realms::utils::helper::as_u256;
 
-    use openzeppelin::token::erc1155::ERC1155;  // TODO: remove when openzeppelin ERC1155 library is supported
-    use openzeppelin::introspection::erc165::ERC165Contract; // TODO: remove when openzeppelin ERC165 library is supported
+    use realms::exchange::library_erc1155::ERC1155;  // TODO: remove when openzeppelin ERC1155 library is supported
+    // use openzeppelin::introspection::erc165::ERC165Contract; // TODO: remove when openzeppelin ERC165 library is supported
 
     use realms::exchange::library::AMM;
 
@@ -623,7 +623,8 @@ mod Exchange_ERC20_ERC1155 {
 
     #[view]
     fn supportsInterface(interface_id: u32) -> bool {
-        ERC165Contract::supports_interface(interface_id)
+        // ERC165Contract::supports_interface(interface_id)
+        return true; // TODO: need implement base on ERC165
     }
 
 
