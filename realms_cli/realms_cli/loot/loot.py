@@ -502,7 +502,7 @@ async def explore(ctx, network, adventurer_token_id):
 
     _, tx_hash = parse_send(send_out)
 
-    result = get_transaction_result(network, tx_hash)
+    result = await get_transaction_result(network, tx_hash)
 
     print("👣 Explored ✅")
 
@@ -817,7 +817,7 @@ async def flee(adventurer_token_id, network):
 
     _, tx_hash = parse_send(send_out)
 
-    result = get_transaction_result(network, tx_hash)
+    result = await get_transaction_result(network, tx_hash)
 
     beast_out = await _get_beast(pre_adventurer[26], network)
 

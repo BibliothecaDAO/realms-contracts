@@ -8,19 +8,31 @@ import subprocess
 import asyncio
 import os
 import json
+import sys
+import io
+import time
+from types import SimpleNamespace
 
 from nile.core.types.account import Account, get_nonce
 from nile import deployments
 from nile.core.call_or_invoke import call_or_invoke
-from nile.utils import hex_address
+from nile.starknet_cli import set_command_args
+from nile.utils import hex_address, normalize_number
+from nile.utils.status import status
 from realms_cli.config import Config
 from starkware.starknet.compiler.compile import compile_starknet_files
+from starkware.starknet.cli import starknet_cli
+from starkware.starknet.cli.starknet_cli import NETWORKS
 
 import logging
 
-from nile.common import get_class_hash, ABIS_DIRECTORY
+from nile.common import get_class_hash, ABIS_DIRECTORY, is_alias
 from nile.deployments import class_hash_exists
 from nile.utils import hex_class_hash
+from nile.starknet_cli.deploy_account import (
+    deploy_account_no_wallet,
+    update_deploy_account_context,
+)
 
 
 async def send_multi(self, to, method, calldata, nonce=None):
@@ -35,8 +47,18 @@ async def send_multi(self, to, method, calldata, nonce=None):
     else:
         calls = [[target_address, method, c] for c in calldata]
 
-    if nonce is None:
-        nonce = await get_nonce(self.address, self.network)
+    if self.network == "devnet":
+        if nonce is None:
+            if not str(self.address).startswith("0x"):
+                contract_address = hex(int(self.address))
+            output_nonce = await execute_call(
+                "get_nonce", self.network, contract_address=contract_address
+            )
+            nonce = int(output_nonce)
+
+    else:
+        if nonce is None:
+            nonce = await get_nonce(self.address, self.network)
 
     (execute_calldata, sig_r, sig_s) = self.signer.sign_invoke(
         sender=self.address,
@@ -45,12 +67,16 @@ async def send_multi(self, to, method, calldata, nonce=None):
         max_fee=config.MAX_FEE,
     )
 
-    # params = []
-    # # params.append(str(len(call_array)))
-    # # params.extend([str(elem) for sublist in call_array for elem in sublist])
-    # params.append(str(len(calldata)))
-    # params.extend([str(param) for param in calldata])
-    # params.append(str(nonce))
+    if self.network == "devnet":
+        return await wrapped_call_or_invoke(
+            contract=self.address,
+            type="invoke",
+            method="__execute__",
+            params=execute_calldata,
+            network=self.network,
+            signature=[str(sig_r), str(sig_s)],
+            max_fee=str(config.MAX_FEE),
+        )
 
     return await call_or_invoke(
         contract=self.address,
@@ -89,14 +115,25 @@ async def proxy_call(network, contract_alias, abi, function, params) -> str:
 
     address = hex_address(address)
 
-    return await call_or_invoke(
-        contract=address,
-        type="call",
-        method=function,
-        params=params,
-        network=network,
-        abi=abi,
-    )
+    if network == "devnet":
+        return await wrapped_call_or_invoke(
+            contract=address,
+            type="call",
+            method=function,
+            params=params,
+            network=network,
+            abi=abi,
+        )
+
+    else:
+        return await call_or_invoke(
+            contract=address,
+            type="call",
+            method=function,
+            params=params,
+            network=network,
+            abi=abi,
+        )
 
 
 async def _call_async(network, contract_alias, function, arguments) -> str:
@@ -190,14 +227,17 @@ async def wrapped_send(network, signer_alias, contract_alias, function, argument
     print("------- SEND ----------------------------------------------------")
     print(f"invoking {function} from {contract_alias} with {arguments}")
     out = await send(network, signer_alias, contract_alias, function, arguments)
-    if out:
-        _, tx_hash = parse_send(out)
-        get_tx_status(
-            network,
-            tx_hash,
-        )
+    if network != "devnet":
+        if out:
+            _, tx_hash = parse_send(out)
+            get_tx_status(
+                network,
+                tx_hash,
+            )
+        else:
+            raise Exception("send message returned None")
     else:
-        raise Exception("send message returned None")
+        time.sleep(5)
     print("------- SEND ----------------------------------------------------")
     return out
 
@@ -345,17 +385,145 @@ def get_contract_abi(contract_name):
     return f"{ABIS_DIRECTORY}/{contract_name}.json"
 
 
-def get_transaction_result(network, tx_hash):
-    command = [
-        "starknet",
-        "get_transaction_trace",
-        "--hash",
-        tx_hash,
-        "--network",
-        "alpha-goerli",
-    ]
-    out = subprocess.check_output(command).strip().decode("utf-8")
-    out_dict = json.loads(out)
-    return out_dict["function_invocation"]["result"]
+async def get_transaction_result(network, tx_hash):
+    if network == "devnet":
+        output = await execute_call("get_transaction_trace", network, hash=tx_hash)
+        return output
+    else:
+        command = [
+            "starknet",
+            "get_transaction_trace",
+            "--hash",
+            tx_hash,
+            "--network",
+            "alpha-goerli",
+        ]
+        out = subprocess.check_output(command).strip().decode("utf-8")
+        out_dict = json.loads(out)
+        return out_dict["function_invocation"]["result"]
 
 
+async def wrapped_call_or_invoke(
+    contract,
+    type,
+    method,
+    params,
+    network,
+    abi=None,
+    signature=None,
+    max_fee=None,
+    query_flag=None,
+    watch_mode=None,
+):
+    """
+    Call or invoke functions of StarkNet smart contracts.
+    @param contract: can be an address or an alias.
+    @param type: can be either call or invoke.
+    @param method: the targeted function.
+    @param params: the targeted function arguments.
+    @param network: goerli, goerli2, integration, mainnet, or predefined networks file.
+    @param signature: optional signature for invoke transactions.
+    @param max_fee: optional max fee for invoke transactions.
+    @param query_flag: either simulate or estimate_fee.
+    @param watch_mode: either track or debug.
+    """
+    if abi is None or is_alias(contract):
+        address, abi = next(deployments.load(contract, network))
+    else:
+        address = contract
+
+    try:
+        output = await execute_call(
+            type,
+            network,
+            inputs=params,
+            signature=signature,
+            max_fee=max_fee,
+            query_flag=query_flag,
+            address=hex_address(address),
+            abi=abi,
+            method=method,
+        )
+    except BaseException as err:
+        if "max_fee must be bigger than 0." in str(err):
+            logging.error(
+                """
+                \n😰 Whoops, looks like max fee is missing. Try with:\n
+                --max_fee=`MAX_FEE`
+                """
+            )
+            return
+        else:
+            logging.error(err)
+            return
+
+    if type != "call" and output:
+        logging.info(output)
+        if not query_flag and watch_mode:
+            transaction_hash = _get_transaction_hash(output)
+            return await status(normalize_number(transaction_hash), network, watch_mode)
+
+    return output
+
+
+async def execute_call(cmd_name, network, **kwargs):
+    """Build and execute call to starknet_cli."""
+    args = set_context(network)
+    command_args = set_command_args(**kwargs)
+    cmd = getattr(starknet_cli, cmd_name)
+
+    if cmd_name == "deploy_account":
+        args = update_deploy_account_context(args, **kwargs)
+        cmd = deploy_account_no_wallet
+
+    return await capture_stdout(cmd(args=args, command_args=command_args))
+
+
+def set_context(network):
+    """Set context args for StarkNet CLI call."""
+    args = {
+        "gateway_url": get_gateway_url(network),
+        "feeder_gateway_url": get_feeder_url(network),
+        "wallet": "",
+        "network_id": network,
+        "account_dir": None,
+        "account": None,
+    }
+    ret_obj = SimpleNamespace(**args)
+    return ret_obj
+
+
+def get_gateway_url(network):
+    """Return gateway URL for specified network."""
+    config = Config(nile_network=network)
+    if network in config.NETWORKS:
+        return config.GATEWAYS.get(network)
+    else:
+        network = "alpha-" + network
+        return f"https://{NETWORKS[network]}/gateway"
+
+
+def get_feeder_url(network):
+    """Return feeder gateway URL for specified network."""
+    config = Config(nile_network=network)
+    if network in config.NETWORKS:
+        return config.GATEWAYS.get(network)
+    else:
+        network = "alpha-" + network
+        return f"https://{NETWORKS[network]}/feeder_gateway"
+
+
+def _get_transaction_hash(string):
+    match = re.search(r"Transaction hash: (0x[\da-f]{1,64})", string)
+    return match.groups()[0] if match else None
+
+
+async def capture_stdout(func):
+    """Return the stdout during the passed function call."""
+    stdout = sys.stdout
+    sys.stdout = io.StringIO()
+    await func
+    output = sys.stdout.getvalue()
+    sys.stdout = stdout
+    result = output.rstrip()
+    return result

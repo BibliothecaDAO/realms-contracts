@@ -62,7 +62,16 @@ class Config:
     def __init__(self, nile_network: str):
         self.nile_network = "127.0.0.1" if nile_network == "localhost" else nile_network
 
-        self.MAX_FEE = 9999439013963000
+        self.NETWORKS = ["localhost", "goerli2", "devnet", "integration"]
+
+        self.GATEWAYS = {
+            "localhost": "http://127.0.0.1:5050/",
+            "goerli2": "https://alpha4-2.starknet.io",
+            "integration": "https://external.integration.starknet.io",
+            "devnet": "http://3.215.42.99:5050",
+        }
+
+        self.MAX_FEE = 29999439013963000
 
         self.Arbiter_alias = "proxy_" + ContractAlias.Arbiter
         self.Module_Controller_alias = "proxy_" + ContractAlias.ModuleController
@@ -135,10 +144,8 @@ class Config:
         self.S_REALMS_ADDRESS, _ = safe_load_deployment(
             ContractAlias.S_Realms_ERC721_Mintable, self.nile_network
         )
-        self.CRYPTS_ADDRESS, _ = safe_load_deployment(
-            "crypts", self.nile_network)
-        self.S_CRYPTS_ADDRESS, _ = safe_load_deployment(
-            "s_crypts", self.nile_network)
+        self.CRYPTS_ADDRESS, _ = safe_load_deployment("crypts", self.nile_network)
+        self.S_CRYPTS_ADDRESS, _ = safe_load_deployment("s_crypts", self.nile_network)
 
         self.LORDS_PROXY_ADDRESS, _ = safe_load_deployment(
             "proxy_" + ContractAlias.Lords_ERC20_Mintable, self.nile_network
@@ -441,5 +448,4 @@ class Config:
             "HeavyGloves",
         ]
 
-        self.SLOT = ["Weapon", "Chest", "Head",
-                     "Waist", "Foot", "Hand", "Neck", "Ring"]
+        self.SLOT = ["Weapon", "Chest", "Head", "Waist", "Foot", "Hand", "Neck", "Ring"]
