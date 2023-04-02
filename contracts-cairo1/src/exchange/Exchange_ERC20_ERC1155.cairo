@@ -372,7 +372,7 @@ mod Exchange_ERC20_ERC1155 {
 
         let lp_fee_thousand_ = lp_fee_thousand::read();
 
-        let currency_amount_sans_royal_ = AMM::get_buy_price(
+        let currency_amount_sans_royal_ = AMM::get_currency_amount_when_buy(
             *token_amounts.at(0_usize),
             currency_reserve_,
             token_reserve_,
@@ -454,7 +454,7 @@ mod Exchange_ERC20_ERC1155 {
 
         let lp_fee_thousand_ = lp_fee_thousand::read();
 
-        let currency_amount_sans_royal_ = AMM::get_sell_price(
+        let currency_amount_sans_royal_ = AMM::get_currency_amount_when_sell(
             *token_amounts.at(0_usize),
             currency_reserve_,
             token_reserve_,
