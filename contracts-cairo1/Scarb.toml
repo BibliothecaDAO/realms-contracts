@@ -5,6 +5,3 @@ description = ""
 homepage = ""
 
 [[target.starknet-contract]]
-
-[dependencies]
-openzeppelin = { path = "./openzeppelin" }

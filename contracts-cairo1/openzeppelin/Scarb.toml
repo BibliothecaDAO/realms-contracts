@@ -1,8 +1,0 @@
-[package]
-name = "openzeppelin"
-version = "0.1.0"
-description = ""
-homepage = ""
-
-[lib]
-name="openzeppelin"
