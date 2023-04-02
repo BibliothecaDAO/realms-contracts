@@ -17,12 +17,14 @@ mod Exchange_ERC20_ERC1155 {
     use box::BoxTrait;
     use clone::Clone;
     use array::ArrayTCloneImpl;
-    use realms::exchange::ERC1155::ERC1155;
+    // use realms::exchange::ERC1155::ERC1155;
     use realms::utils::helper::check_gas;
     use integer::u256_overflow_mul;
     use integer::u256_overflowing_add;
     use integer::u256_overflow_sub;
     use realms::utils::helper::as_u256;
+
+    use openzeppelin::token::erc1155::ERC1155;
 
     use realms::exchange::library::AMM;
 
@@ -37,35 +39,38 @@ mod Exchange_ERC20_ERC1155 {
     }
 
 
-
     #[abi]
     trait IERC20 {
-        fn transfer_from(
-            from: ContractAddress,
-            to: ContractAddress,
-            value: u256,
-        );
-
-        fn transfer(
-            to: ContractAddress,
-            value: u256,
-        );
+        fn name() -> felt252;
+        fn symbol() -> felt252;
+        fn decimals() -> u8;
+        fn total_supply() -> u256;
+        fn balance_of(account: ContractAddress) -> u256;
+        fn allowance(owner: ContractAddress, spender: ContractAddress) -> u256;
+        fn transfer(recipient: ContractAddress, amount: u256) -> bool;
+        fn transfer_from(sender: ContractAddress, recipient: ContractAddress, amount: u256) -> bool;
+        fn approve(spender: ContractAddress, amount: u256) -> bool;
     }
 
     #[abi]
     trait IERC1155 {
+        // IERC1155
+        fn balance_of(account: ContractAddress, id: u256) -> u256;
+        fn balance_of_batch(accounts: Array<ContractAddress>, ids: Array<u256>) -> Array<u256>;
+        fn is_approved_for_all(account: ContractAddress, operator: ContractAddress) -> bool;
+        fn set_approval_for_all(operator: ContractAddress, approved: bool);
         fn safe_transfer_from(
+            from: ContractAddress, to: ContractAddress, id: u256, amount: u256, data: Array<felt252>
+        );
+        fn safe_batch_transfer_from(
             from: ContractAddress,
             to: ContractAddress,
-            id: u256,
-            value: u256,
-            data: Array<felt252>,
+            ids: Array<u256>,
+            amounts: Array<u256>,
+            data: Array<felt252>
         );
-
-        fn balance_of(
-            account: ContractAddress,
-            id: u256,
-        ) -> u256;
+        // IERC1155MetadataURI
+        fn uri(id: u256) -> felt252;
     }
 
 //##############
@@ -379,7 +384,7 @@ mod Exchange_ERC20_ERC1155 {
             lp_fee_thousand_,
         );
 
-        let royalty_ = get_royalty_for_price(
+        let royalty_ = get_royalty_with_amount(
             currency_amount_sans_royal_,
         );
 
@@ -461,7 +466,7 @@ mod Exchange_ERC20_ERC1155 {
             lp_fee_thousand_,
         );
 
-        let royalty_ = get_royalty_for_price(
+        let royalty_ = get_royalty_with_amount(
             currency_amount_sans_royal_,
         );
 
@@ -500,7 +505,7 @@ mod Exchange_ERC20_ERC1155 {
 //################
 
     #[view]
-    fn get_royalty_for_price(amount_sans_royalty: u256) -> u256 {
+    fn get_royalty_with_amount(amount_sans_royalty: u256) -> u256 {
         let royalty_fee_thousand_ = royalty_fee_thousand::read();
         let (royalty, mul_overflow) = u256_overflow_mul(amount_sans_royalty, royalty_fee_thousand_);
         assert(!mul_overflow, 'mul overflow');
@@ -550,6 +555,11 @@ mod Exchange_ERC20_ERC1155 {
     }
 
     #[view]
+    fn get_token_reserves(token_id: u256) -> u256 {
+        return token_reserves::read(token_id);
+    }
+
+    #[view]
     fn get_lp_fee_thousand() -> u256 {
         return lp_fee_thousand::read();
     }
@@ -596,24 +606,24 @@ mod Exchange_ERC20_ERC1155 {
 //########################
 
     #[view]
-    fn supportsInterface() {
-
+    fn supports_interface(interface_id: u32) -> bool {
+        ERC1155::supports_interface(interface_id)
     }
 
-    #[view]
-    fn balanceOf() {
+    // #[view]
+    // fn balance_of() {
+    //     ERC1155::balance_of();
+    // }
 
-    }
+    // #[view]
+    // fn balance_of_batch() {
 
-    #[view]
-    fn balanceOfBatch() {
+    // }
 
-    }
+    // #[view]
+    // fn is_approved_for_all() {
 
-    #[view]
-    fn isApprovedForAll() {
-
-    }
+    // }
 
     #[view]
     fn get_lp_supply(token_id: u256) -> u256 {

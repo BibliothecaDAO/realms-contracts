@@ -147,6 +147,23 @@ mod ERC1155 {
         }
     }
 
+    fn _mint(
+        to: ContractAddress,
+        id: u256,
+        value: u256,
+        data: Array<felt252>,
+    ) {
+
+    }
+
+    fn _burn(
+        from: ContractAddress,
+        id: u256,
+        value: u256,
+    ) {
+        
+    }
+
     #[view]
     fn supports_interface(interface_id: u32) -> bool {
         erc165::ERC165Contract::supports_interface(interface_id)
