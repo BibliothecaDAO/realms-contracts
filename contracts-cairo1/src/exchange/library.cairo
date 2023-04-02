@@ -39,9 +39,17 @@ impl AMMImpl of AMM {
         let (denominator, mul_overflow) = u256_overflow_mul(denominator, fee_multiplier_);
         assert(!mul_overflow, 'mul overflow');
 
-        // let quotient = numerator / denominator; // TODO fix this
-        let quotient = as_u256(0_u128, 0_u128);
-        return quotient;
+        // need to round up the result
+        // TODO: div not support yet
+        // let (amount, rem) = u256_overflowing_div(numerator, denominator);
+        // if (rem > 0) {
+        //     let (amount, add_overflow) = u256_overflowing_add(amount, 1);
+        //     assert(!add_overflow, 'add overflow');
+        // }
+
+        let amount = as_u256(0_u128, 0_u128);
+
+        return amount;
     }
 
     
