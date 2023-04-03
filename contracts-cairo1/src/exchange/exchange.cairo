@@ -581,13 +581,50 @@ mod Exchange_ERC20_ERC1155 {
     }
 
     #[view]
-    fn get_all_sell_price() {
-
+    fn get_all_currency_amount_when_sell(
+        token_ids: Array<u256>,
+        token_amounts: Array<u256>,
+    ) -> Array<u256> {
+        let mut currency_amounts_ = ArrayTrait::new();
+    
+        get_all_currency_amount_when_sell_loop(
+            token_ids,
+            token_amounts,
+            ref currency_amounts_,
+        );
+        return currency_amounts_;
     }
 
-    fn get_all_sell_price_loop() {
+    fn get_all_currency_amount_when_sell_loop(
+        mut token_ids: Array<u256>,
+        mut token_amounts: Array<u256>,
+        ref currency_amounts_: Array<u256>,
+    ) {
         check_gas();
-
+        if (token_ids.len() == 0_usize) {
+            return ();
+        }
+        let currency_reserve_ = currency_reserves::read(*token_ids.at(0_usize));
+        let token_reserve_ = token_reserves::read(*token_ids.at(0_usize));
+        let lp_fee_thousand_ = lp_fee_thousand::read();
+        let currency_amount_sans_royal_ = AMM::get_currency_amount_when_sell(
+            *token_amounts.at(0_usize),
+            currency_reserve_,
+            token_reserve_,
+            lp_fee_thousand_,
+        );
+        let royalty_ = get_royalty_with_amount(
+            currency_amount_sans_royal_,
+        );
+        let currency_amount_ = currency_amount_sans_royal_ - royalty_;
+        currency_amounts_.append(currency_amount_);
+        token_ids.pop_front();
+        token_amounts.pop_front();
+        get_all_currency_amount_when_sell_loop(
+            token_ids,
+            token_amounts,
+            ref currency_amounts_,
+        );
     }
 
     #[view]
@@ -720,13 +757,21 @@ mod Exchange_ERC20_ERC1155 {
 // ADMIN #
 //########
     #[external]
-    fn set_royalty_info() {
+    fn set_royalty_info(
+        royalty_fee_thousand: u256,
+    ) {
+        // TODO: check admin
 
+        royalty_fee_thousand::write(royalty_fee_thousand);
     }
 
     #[external]
-    fn set_lp_info() {
+    fn set_lp_info(
+        lp_fee_thousand: u256,
+    ) {
+        //TODO: check admin
 
+        lp_fee_thousand::write(lp_fee_thousand);
     }
 
     #[view]
