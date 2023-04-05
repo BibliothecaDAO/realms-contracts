@@ -22,6 +22,7 @@ mod Exchange_ERC20_ERC1155 {
     use integer::u256_overflowing_add;
     use integer::u256_overflow_sub;
     use realms::utils::helper::as_u256;
+    use realms::utils::helper::u256_sqrt;
 
     use realms::exchange::library_erc1155::ERC1155;  // TODO: remove when openzeppelin ERC1155 library is supported
     // use openzeppelin::introspection::erc165::ERC165Contract; // TODO: remove when openzeppelin ERC165 library is supported
@@ -90,69 +91,24 @@ mod Exchange_ERC20_ERC1155 {
         currency_address::write(currency_address_);
         token_address::write(token_address_);
         lp_fee_thousand::write(lp_fee_thousand_);
-        // set_royalty_info(royalty_fee_thousand_, royalty_fee_address_);
+        set_royalty_info(royalty_fee_thousand_, royalty_fee_address_);
         //TODO proxy logic
         //TODO ownable initializer
+
         //TODO ERC1155 initializer
+        
         //TODO ERC165 interface register
     }
 
     #[external]
     fn upgrade() {
-
+        //TODO: Ownable check
+        //Proxy set implementation
     }
 
 //#####
 // LP #
 //#####
-    #[external]
-    fn initial_liquidity(
-        mut currency_amounts: Array<u256>,
-        mut token_ids: Array<u256>,
-        mut token_amounts: Array<u256>,
-    ) {
-        check_gas();
-
-        if (currency_amounts.len() == 0_usize) {
-            return ();
-        }
-
-        assert(currency_amounts.len() == token_ids.len(), 'not same length 1');
-        assert(currency_amounts.len() == token_amounts.len(), 'not same length 2');
-        let caller = starknet::get_caller_address();
-        let contract = starknet::get_contract_address();
-        let currency_address_ = currency_address::read();
-        let token_address_ = token_address::read();
-        let reserve_ = currency_reserves::read(*token_ids.at(0_usize));
-        assert(reserve_ == as_u256(0_u128, 0_u128), 'reserve must be 0');
-
-        IERC20Dispatcher { contract_address: currency_address_ }.transfer_from(caller, contract, *currency_amounts.at(0_usize));
-        
-        let mut data_ = ArrayTrait::new();
-        data_.append(0);
-
-        IERC1155Dispatcher { contract_address: token_address_ }.safe_transfer_from(caller, contract, *token_ids.at(0_usize), *token_amounts.at(0_usize), (@data_).clone());
-
-        assert(as_u256(1000_u128, 0_u128) < *currency_amounts.at(0_usize), 'amount too small');
-        currency_reserves::write(*token_ids.at(0_usize), *currency_amounts.at(0_usize));
-        
-        //TODO:  add if ERC1155 do not support totalSupply
-        // lp_reserves::write(*token_ids.at(0_usize), *currency_amounts.at(0_usize));
-
-        //TODO: remove when openzeppelin ERC1155 library is supported
-        ERC1155::_mint(caller, *token_ids.at(0_usize), *currency_amounts.at(0_usize), (@data_).clone());
-        //TODO emit event
-        
-        currency_amounts.pop_front();
-        token_ids.pop_front();
-        token_amounts.pop_front();
-
-        initial_liquidity(
-            currency_amounts,
-            token_ids,
-            token_amounts,
-        )
-    }
 
     #[external]
     fn add_liquidity(
@@ -191,35 +147,51 @@ mod Exchange_ERC20_ERC1155 {
         let lp_total_supply_ = get_lp_supply(*token_ids.at(0_usize));
         let token_reserve_ = IERC1155Dispatcher { contract_address: token_address_ }.balance_of(contract, *token_ids.at(0_usize));
 
-        // Ensure this method is only called for subsequent liquidity adds
-        assert(lp_total_supply_ > as_u256(0_u128, 0_u128), 'lp reserve must be > 0');
-        
-        // Required price calc
-        // X/Y = dx/dy
-        // dx = X*dy/Y
-        let (numerator, mul_overflow) = u256_overflow_mul(currency_reserve_, *token_amounts.at(0_usize));
-        assert(!mul_overflow, 'mul overflow');
+        let mut currency_amount_ = as_u256(0_u128, 0_u128);
+        if (lp_total_supply_ == as_u256(0_u128, 0_u128)) {
+            currency_amount_ = *max_currency_amounts.at(0_usize);
 
-        // let currency_amount_ = u256_div(numerator, token_reserve_); //TODO: not support yet
-        let currency_amount_ = as_u256(0_u128, 0_u128);  // TODO: remove when div is supported
-        assert(currency_amount_ <= *max_currency_amounts.at(0_usize), 'amount too high');
+            let (square, mul_overflow) = u256_overflow_mul(*max_currency_amounts.at(0_usize), *token_amounts.at(0_usize));
+            assert(!mul_overflow, 'mul overflow');
+            let sqrt = u256_sqrt(square);
+            let (lp_amount_, sub_overflow) = u256_overflow_sub(sqrt, as_u256(1000_u128, 0_u128));
+            assert(!sub_overflow, 'sub overflow');
+            IERC20Dispatcher { contract_address: currency_address_ }.transfer_from(caller, contract, currency_amount_);
 
-        // Transfer currency to contract
-        IERC20Dispatcher { contract_address: currency_address_ }.transfer_from(caller, contract, currency_amount_);
+            IERC1155Dispatcher { contract_address: token_address_ }.safe_transfer_from(caller, contract, *token_ids.at(0_usize), *token_amounts.at(0_usize), ArrayTrait::new());
 
-        IERC1155Dispatcher { contract_address: token_address_ }.safe_transfer_from(caller, contract, *token_ids.at(0_usize), *token_amounts.at(0_usize), ArrayTrait::new());
+            ERC1155::_mint(caller, *token_ids.at(0_usize), lp_amount_, ArrayTrait::new());
 
-        let (numerator, mul_overflow) = u256_overflow_mul(lp_total_supply_, currency_amount_);
-        assert(!mul_overflow, 'mul overflow');
-        // let lp_amount_ = u256_div(numerator, currency_reserve_); //TODO: not support yet
-        let lp_amount_ = as_u256(0_u128, 0_u128); // TODO: remove when div is supported
+            // permanently lock the first MINIMUM_LIQUIDITY tokens
+            ERC1155::_mint(contract_address_const::<0>(), *token_ids.at(0_usize), as_u256(1000_u128, 0_u128), ArrayTrait::new());
 
-        //TODO:  add if ERC1155 do not support totalSupply
-        // lp_reserves::write(*token_ids.at(0_usize), *currency_amounts.at(0_usize));
-        
-        // Mint LP tokens to caller
-        ERC1155::_mint(caller, *token_ids.at(0_usize), lp_amount_, ArrayTrait::new());
+        } else {
+            // Required price calc
+            // X/Y = dx/dy
+            // dx = X*dy/Y
+            let (numerator, mul_overflow) = u256_overflow_mul(currency_reserve_, *token_amounts.at(0_usize));
+            assert(!mul_overflow, 'mul overflow');
 
+            // let currency_amount_ = u256_div(numerator, token_reserve_); //TODO: not support yet
+            currency_amount_ = as_u256(0_u128, 0_u128);  // TODO: remove when div is supported
+            assert(currency_amount_ <= *max_currency_amounts.at(0_usize), 'amount too high');
+
+            // Transfer currency to contract
+            IERC20Dispatcher { contract_address: currency_address_ }.transfer_from(caller, contract, currency_amount_);
+
+            IERC1155Dispatcher { contract_address: token_address_ }.safe_transfer_from(caller, contract, *token_ids.at(0_usize), *token_amounts.at(0_usize), ArrayTrait::new());
+
+            let (numerator, mul_overflow) = u256_overflow_mul(lp_total_supply_, currency_amount_);
+            assert(!mul_overflow, 'mul overflow');
+            // let lp_amount_ = u256_div(numerator, currency_reserve_); //TODO: not support yet
+            let lp_amount_ = as_u256(0_u128, 0_u128); // TODO: remove when div is supported
+
+            //TODO:  add if ERC1155 do not support totalSupply
+            // lp_reserves::write(*token_ids.at(0_usize), *currency_amounts.at(0_usize));
+            
+            // Mint LP tokens to caller
+            ERC1155::_mint(caller, *token_ids.at(0_usize), lp_amount_, ArrayTrait::new());
+        }
         let (new_currency_reserve, add_overflow) = u256_overflowing_add(currency_reserve_, currency_amount_);
         assert(!add_overflow, 'add overflow');
         currency_reserves::write(*token_ids.at(0_usize), new_currency_reserve);
@@ -227,6 +199,9 @@ mod Exchange_ERC20_ERC1155 {
         let (new_token_reserve, add_overflow) = u256_overflowing_add(token_reserve_, *token_amounts.at(0_usize));
         assert(!add_overflow, 'add overflow');
         token_reserves::write(*token_ids.at(0_usize), new_token_reserve);
+
+        // TODO update LP total supply
+
 
         // TODO Emit Event
 
@@ -772,11 +747,13 @@ mod Exchange_ERC20_ERC1155 {
 //########
     #[external]
     fn set_royalty_info(
-        royalty_fee_thousand: u256,
+        royalty_fee_thousand_: u256,
+        royalty_fee_address_: ContractAddress,
     ) {
         // TODO: check admin
 
-        royalty_fee_thousand::write(royalty_fee_thousand);
+        royalty_fee_thousand::write(royalty_fee_thousand_);
+        royalty_fee_address::write(royalty_fee_address_);
     }
 
     #[external]
