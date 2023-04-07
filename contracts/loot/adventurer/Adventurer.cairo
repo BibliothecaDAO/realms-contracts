@@ -97,19 +97,7 @@ func Discovery(adventurer_id: Uint256, discovery_type: felt, sub_discovery_type:
 }
 
 @event
-func AdventurerInitiatedKingHiest(adventurer_id: Uint256, adventurer_state: AdventurerState) {
-}
-
-@event
-func AdventurerRobbedKing(adventurer_id: Uint256, adventurer_state: AdventurerState) {
-}
-
-@event
-func AdventurerDiedRobbingKing(adventurer_id: Uint256, adventurer_state: AdventurerState) {
-}
-
-@event
-func AdventurerKilledThief(adventurer_id: Uint256, adventurer_state: AdventurerState) {
+func UpdateThiefState(thief_state: ThiefState) {
 }
 
 // -----------------------------------
@@ -843,9 +831,9 @@ func rob_king{
 
     let (current_time) = get_block_timestamp();
 
-    let new_thief = ThiefState(adventurer_token_id, current_time);
+    let new_thief = ThiefState(adventurer_token_id, current_time, gold_balance);
 
-    emit_initiated_king_hiest(adventurer_token_id);
+    UpdateThiefState.emit(new_thief);
 
     thief.write(new_thief);
 
@@ -891,14 +879,16 @@ func kill_thief{
     // kill the thief
     let (result) = _deduct_health(thief_state.AdventurerId, 1000);
 
-    // emit event to capture adventurer dieing while trying to rob the king
-    emit_died_robbing_king(thief_state.AdventurerId);
+    let (adventurer) = get_adventurer_by_id(adventurer_token_id);
 
-    // emit event capturing the adventurer who caught the robber
-    emit_killed_thief(adventurer_token_id);
+    // emit event to capture adventurer dieing while trying to rob the king
+    UpdateAdventurerState.emit(adventurer_token_id, adventurer);
 
     // clear thief state
-    let clear_thief_state = ThiefState(Uint256(0, 0), 0);
+    let clear_thief_state = ThiefState(Uint256(0, 0), 0, 0);
+
+    // emit event to capture theif has now been reset
+    UpdateThiefState.emit(clear_thief_state);
 
     // update blockchain
     thief.write(clear_thief_state);
@@ -939,11 +929,11 @@ func claim_king_loot{
     let (owner: felt) = ERC721.owner_of(thief_state.AdventurerId);
     IERC20.transfer(lords_address, owner, king_tribute);
 
-    // emit event capturing an adventuring successfully robbing the king
-    emit_robbed_king(thief_state.AdventurerId);
-
     // clear thief state so thief is no longer able to be assissnated
-    let clear_thief_state = ThiefState(Uint256(0, 0), 0);
+    let clear_thief_state = ThiefState(Uint256(0, 0), 0, 0);
+
+    // emit event capturing an adventurer successfully robbing the king
+    UpdateThiefState.emit(clear_thief_state);
 
     // update blockchain
     thief.write(clear_thief_state);
@@ -1021,54 +1011,6 @@ func emit_adventurer_leveled_up{
     let (new_adventurer) = get_adventurer_by_id(adventurer_token_id);
     // emit leveled up event
     AdventurerLeveledUp.emit(adventurer_token_id, new_adventurer.Level);
-    return ();
-}
-
-// @notice Emits an initiated king hiest event for the adventurer
-// @param adventurer_token_id: the token id of the adventurer
-func emit_initiated_king_hiest{
-    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(adventurer_token_id: Uint256) {
-    // Get adventurer from token id
-    let (new_adventurer) = get_adventurer_by_id(adventurer_token_id);
-    // emit event
-    AdventurerInitiatedKingHiest.emit(adventurer_token_id, new_adventurer);
-    return ();
-}
-
-// @notice Emits a king robbery event for the adventurer
-// @param adventurer_token_id: the token id of the adventurer
-func emit_robbed_king{
-    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(adventurer_token_id: Uint256) {
-    // Get adventurer from token id
-    let (new_adventurer) = get_adventurer_by_id(adventurer_token_id);
-    // emit event
-    AdventurerRobbedKing.emit(adventurer_token_id, new_adventurer);
-    return ();
-}
-
-// @notice Emits a died robbing king event for the adventurer
-// @param adventurer_token_id: the token id of the adventurer
-func emit_died_robbing_king{
-    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(adventurer_token_id: Uint256) {
-    // Get adventurer from token id
-    let (new_adventurer) = get_adventurer_by_id(adventurer_token_id);
-    // emit event
-    AdventurerDiedRobbingKing.emit(adventurer_token_id, new_adventurer);
-    return ();
-}
-
-// @notice Emits an initiated king hiest event for the adventurer
-// @param adventurer_token_id: the token id of the adventurer
-func emit_killed_thief{
-    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(adventurer_token_id: Uint256) {
-    // Get adventurer from token id
-    let (new_adventurer) = get_adventurer_by_id(adventurer_token_id);
-    // emit event
-    AdventurerKilledThief.emit(adventurer_token_id, new_adventurer);
     return ();
 }
 

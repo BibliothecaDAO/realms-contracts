@@ -12,13 +12,16 @@ import sys
 import io
 import time
 from types import SimpleNamespace
+from collections import namedtuple
 
 from nile.core.types.account import Account, get_nonce
 from nile import deployments
+from nile.core.declare import alias_exists
 from nile.core.call_or_invoke import call_or_invoke
+from nile.core.types.transactions import DeclareTransaction
 from nile.starknet_cli import set_command_args
 from nile.utils import hex_address, normalize_number
-from nile.utils.status import status
+from nile.utils.status import TransactionStatus, TxStatus
 from realms_cli.config import Config
 from starkware.starknet.compiler.compile import compile_starknet_files
 from starkware.starknet.cli import starknet_cli
@@ -26,7 +29,7 @@ from starkware.starknet.cli.starknet_cli import NETWORKS
 
 import logging
 
-from nile.common import get_class_hash, ABIS_DIRECTORY, is_alias
+from nile.common import get_class_hash, ABIS_DIRECTORY, is_alias, DECLARATIONS_FILENAME, parse_information
 from nile.deployments import class_hash_exists
 from nile.utils import hex_class_hash
 from nile.starknet_cli.deploy_account import (
@@ -237,7 +240,8 @@ async def wrapped_send(network, signer_alias, contract_alias, function, argument
         else:
             raise Exception("send message returned None")
     else:
-        time.sleep(5)
+        _, tx_hash = parse_send(out)
+        tx_status = await status(tx_hash, network)
     print("------- SEND ----------------------------------------------------")
     return out
 
@@ -312,6 +316,7 @@ def find_file(root_dir, file_name):
 
 
 async def wrapped_declare(account, contract_name, network, alias):
+    config = Config(nile_network=network)
     if os.path.dirname(__file__).split("/")[1] == "Users":
         path = "/" + os.path.join(
             os.path.dirname(__file__).split("/")[1],
@@ -335,15 +340,53 @@ async def wrapped_declare(account, contract_name, network, alias):
 
     compile(contract_name)
 
-    tx_wrapper = await account.declare(contract_name, max_fee=4226601250467000)
-    tx_status, declared_hash = await tx_wrapper.execute(watch_mode="track")
+    # If devnet we need to write the call and check declerations manually
+    if network == "devnet":
+        print(f"🚀 Declaring {contract_name}")
 
-    get_tx_status(
-        network,
-        str(tx_wrapper.hash),
-    )
+        if alias_exists(alias, network):
+            file = f"{network}.{DECLARATIONS_FILENAME}"
+            raise Exception(f"Alias {alias} already exists in {file}")
+        max_fee, nonce, _ = await _process_arguments(account, config.MAX_FEE, None)
+        # Create the transaction
+        transaction = DeclareTransaction(
+            account_address=account.address,
+            contract_to_submit=contract_name,
+            max_fee=max_fee or 0,
+            nonce=nonce,
+            network=network,
+            overriding_path=False,
+        )
 
-    return tx_wrapper
+        sig_r, sig_s = account.signer.sign(message_hash=transaction._get_tx_hash())
+
+        type_specific_args = transaction._get_execute_call_args()
+
+        output = await execute_call(
+            "declare",
+            network,
+            signature=[sig_r, sig_s],
+            max_fee=config.MAX_FEE,
+            query_flag=None,
+            **type_specific_args
+        )
+        class_hash, tx_hash = parse_information(output)
+        padded_hash = hex_class_hash(class_hash)
+
+        print(f"⏳ Successfully sent declaration of {contract_name} as {padded_hash}")
+        print(f"🧾 Transaction hash: {hex(tx_hash)}")
+
+        deployments.register_class_hash(class_hash, network, alias)
+    else:
+        tx_wrapper = await account.declare(contract_name, max_fee=config.MAX_FEE)
+
+    if network != "devnet":
+        get_tx_status(
+            network,
+            str(tx_wrapper.hash),
+        )
+    else:
+        time.sleep(5)
 
 
 async def declare_class(network, contract_name, account, max_fee, overriding_path=None):
@@ -388,7 +431,8 @@ def get_contract_abi(contract_name):
 async def get_transaction_result(network, tx_hash):
     if network == "devnet":
         output = await execute_call("get_transaction_trace", network, hash=tx_hash)
-        return output
+        out_dict = json.loads(output)
+        return out_dict["function_invocation"]["result"]
     else:
         command = [
             "starknet",
@@ -527,3 +571,74 @@ async def capture_stdout(func):
     sys.stdout = stdout
     result = output.rstrip()
     return result
+
+async def _process_arguments(account, max_fee, nonce, calldata=None):
+    if max_fee is not None:
+        max_fee = int(max_fee)
+
+    if nonce is None:
+        if not str(account.address).startswith("0x"):
+            contract_address = hex(int(account.address))
+        output_nonce = await execute_call(
+            "get_nonce", account.network, contract_address=contract_address
+        )
+        nonce = int(output_nonce)
+
+
+    if calldata is not None:
+        calldata = [normalize_number(x) for x in calldata]
+
+    return max_fee, nonce, calldata
+
+_TransactionReceipt = namedtuple("TransactionReceipt", ["tx_hash", "status", "receipt"])
+
+async def status(
+    tx_hash, network, watch_mode=None, contracts_file=None
+) -> TransactionStatus:
+    """Fetch a transaction status.
+    Optionally track until resolved (accepted on L2 or rejected) and/or
+    use available artifacts to help locate the error. Debug implies track.
+    """
+    print(f"⏳ Transaction hash: {hex_class_hash(tx_hash)}")
+    print("⏳ Querying the network for transaction status...")
+
+    while True:
+        tx_status = await execute_call(
+            "tx_status", network, hash=hex_class_hash(tx_hash)
+        )
+        raw_receipt = json.loads(tx_status)
+        receipt = _get_tx_receipt(tx_hash, raw_receipt, watch_mode)
+
+        if receipt is not None:
+            break
+
+    if not receipt.status.is_rejected:
+        return TransactionStatus(tx_hash, receipt.status, None)
+
+    error_message = receipt.receipt["tx_failure_reason"]["error_message"]
+
+    print(f"🧾 Error message:\n{error_message}")
+
+    return TransactionStatus(tx_hash, receipt.status, error_message)
+
+def _get_tx_receipt(tx_hash, raw_receipt, watch_mode) -> _TransactionReceipt:
+    receipt = _TransactionReceipt(
+        tx_hash, TxStatus.from_receipt(raw_receipt), raw_receipt
+    )
+
+    if receipt.status.is_rejected:
+        print(f"❌ Transaction status: {receipt.status}")
+        return receipt
+
+    log_output = f"Transaction status: {receipt.status}"
+
+    if receipt.status.is_accepted:
+        print(f"✅ {log_output}. No error in transaction.")
+        return receipt
+
+    if watch_mode is None:
+        print(f"🕒 {log_output}.")
+        return receipt
+
+    print(f"🕒 {log_output}. Trying again in {20} seconds...")
+    time.sleep(20)

@@ -2,6 +2,7 @@ import asyncio
 import datetime
 import dearpygui.dearpygui as dpg
 import subprocess
+import argparse
 from realms_cli.config import Config
 from realms_cli.caller_invoker import wrapped_proxy_call
 from realms_cli.loot.constants import ITEMS, RACES, ORDERS, STATS, BEASTS
@@ -16,8 +17,7 @@ from realms_cli.loot.getters import (
 )
 
 
-async def get_adventurers():
-    config = Config(nile_network="goerli")
+async def get_adventurers(config):
 
     out = await wrapped_proxy_call(
         network=config.nile_network,
@@ -76,7 +76,7 @@ async def update_adventurer_list():
     dpg.configure_item("thief_adventurer_id", items=adventurers)
 
 
-def get_adventurer(sender, app_data, user_dat):
+def get_adventurer(config):
     dpg.add_text(
         "Getting adventurer",
         tag="get_adventurer_load",
@@ -85,7 +85,7 @@ def get_adventurer(sender, app_data, user_dat):
     )
     dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
     value = dpg.get_value("adventurer_id").split(" - ")[-1]
-    adventurer_out = asyncio.run(_get_adventurer("goerli", value))
+    adventurer_out = asyncio.run(_get_adventurer(config.nile_network, value))
     update_gold(value)
     update_beast(adventurer_out[26])
     update_health(value)
@@ -96,7 +96,7 @@ def get_adventurer(sender, app_data, user_dat):
     dpg.delete_item("loader")
 
 
-def new_adventurer(sender, app_data, user_data):
+def new_adventurer(config):
     dpg.add_text(
         "Minting Adventurer",
         tag="mint_adventurer_load",
@@ -104,7 +104,6 @@ def new_adventurer(sender, app_data, user_data):
         parent="adventurers",
     )
     dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
-    config = Config(nile_network="goerli")
     starting_weapon = dpg.get_value("starting_weapon")
     starting_weapon_id = [
         k for k, v in ITEMS.items() if v == starting_weapon.replace(" ", "")
@@ -756,13 +755,20 @@ def update_stats(adventurer_data):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Gui accepts a network param to switch between"
+    )
+    parser.add_argument("network", help="Network of Starknet to interact the gui with.")
+    args = parser.parse_args()
+    print(f"Running on {args.network}")
+    config = Config(nile_network=args.network)
     dpg.create_context()
     dpg.create_viewport(title="Realms GUI", width=1000, height=1000)
     dpg.setup_dearpygui()
     print("Getting adventurers...")
-    adventurers = asyncio.run(get_adventurers())
-    market_items = asyncio.run(get_market_items())
-    owned_items = asyncio.run(get_owned_items())
+    adventurers = asyncio.run(get_adventurers(config))
+    market_items = asyncio.run(get_market_items(config))
+    owned_items = asyncio.run(get_owned_items(config))
 
     with dpg.window(tag="adventurers", label="Adventurers", width=1000, height=1000):
         print("Adventurers GUI running ...")

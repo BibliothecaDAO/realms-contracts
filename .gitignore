@@ -148,6 +148,7 @@ goerli.declarations.txt
 goerli.accounts.json
 goerli.accounts.json.backup
 devnet.accounts.json
+devnet.declarations.txt
 devnet.deployments.txt
 #we create this file if user opts to create new account via our setup script
 account_details.txt

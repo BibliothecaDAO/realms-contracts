@@ -60,7 +60,7 @@ func ItemNameSuffixAssigned(item_token_id: Uint256) {
 }
 
 @event
-func ClaimItem(market_token_id: Uint256, item_token_id: Uint256, adventurer_token_id: Uint256) {
+func ClaimItem(market_token_id: Uint256, item_token_id: Uint256, adventurer_token_id: Uint256, owner: felt) {
 }
 
 // -----------------------------------
@@ -1172,7 +1172,7 @@ func claim_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
         Bid(current_bid.price, 0, adventurer_token_id.low, BidStatus.closed, current_bid.item_id),
     );
 
-    ClaimItem.emit(market_item_id, item_id, adventurer_token_id);
+    ClaimItem.emit(market_item_id, item_id, adventurer_token_id, caller);
 
     return ();
 }

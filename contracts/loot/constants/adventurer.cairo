@@ -167,6 +167,7 @@ struct AdventurerDynamic {
 struct ThiefState {
     AdventurerId: Uint256,
     StartTime: felt,
+    Gold: felt,
 }
 
 struct PackedAdventurerState {

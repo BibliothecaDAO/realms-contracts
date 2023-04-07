@@ -49,7 +49,7 @@ from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
 // -----------------------------------
 
 @event
-func CreateBeast(beast_token_id: Uint256, adventurer_token_id: Uint256) {
+func CreateBeast(beast_token_id: Uint256, beast_state: Beast) {
 }
 
 @event
@@ -147,7 +147,9 @@ func create{
         beast_id, adventurer_id.low, adventurer_state, beast_level_boost, beast_health_boost
     );
 
-    return _create(beast_static_, beast_dynamic_);
+    let (beast_token_id) = _create(beast_static_, beast_dynamic_);
+
+    return (beast_token_id,);
 }
 
 @external
@@ -183,6 +185,10 @@ func _create{
     beast_dynamic.write(next_id, packed_beast);
 
     total_supply.write(next_id);
+
+    let (beast) = BeastLib.aggregate_data(beast_static_, beast_dynamic_);
+
+    CreateBeast.emit(next_id, beast);
 
     return (next_id,);
 }
@@ -277,6 +283,8 @@ func attack{
         // update beast with slain details
         let (current_time) = get_block_timestamp();
         let (slain_updated_beast) = BeastLib.slay(current_time, updated_health_beast);
+        let (packed_slain_beast) = BeastLib.pack(slain_updated_beast);
+        beast_dynamic.write(beast_token_id, packed_slain_beast);
 
         // calculate earned XP
         let (beast_level) = BeastLib.calculate_greatness(slain_updated_beast.Level);
