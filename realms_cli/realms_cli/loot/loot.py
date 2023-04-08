@@ -510,31 +510,59 @@ async def explore(ctx, network, adventurer_token_id):
 
     gold_out = await _get_gold_balance(network, adventurer_token_id)
 
-    if int(result[1], 16) == 0:
-        print(
-            f"🤔 You discovered nothing, but got {str(int(adventurer_out[16]) - int(pre_adventurer[16]))} xp anyway!"
-        )
-    if int(result[1], 16) == 1:
-        print("🧌 You have discovered a beast")
-        print_beast_img(adventurer_out[26])
-        await _get_beast(adventurer_out[26], network)
-    if int(result[1], 16) == 2:
-        if int(pre_adventurer[7]) - int(adventurer_out[7]) == 0:
-            print(f"🥷 You discovered {OBSTACLES[int(result[2],16)]}, but avoided it!")
-        else:
+    if network == "devnet": 
+        if int(result[1], 16) == 0:
             print(
-                f"🪤 You were hit by {OBSTACLES[int(result[2],16)]} and took {str(int(pre_adventurer[7]) - int(adventurer_out[7]))} damage!"
+                f"🤔 You discovered nothing, but got {str(int(adventurer_out[16]) - int(pre_adventurer[16]))} xp anyway!"
             )
-    if int(result[1], 16) == 3:
-        print(f"🎉 You discovered loot!")
-        if int(result[2], 16) == 0:
-            print(f"🤑 You discovered {str(int(gold_out) - int(pre_gold))} gold")
-        if int(result[2], 16) == 1:
-            print(f"🗡️ You discovered an item!")
-        if int(result[2], 16) == 2:
+        if int(result[1], 16) == 1:
+            print("🧌 You have discovered a beast")
+            print_beast_img(adventurer_out[26])
+            await _get_beast(adventurer_out[26], network)
+        if int(result[1], 16) == 2:
+            if int(pre_adventurer[7]) - int(adventurer_out[7]) == 0:
+                print(f"🥷 You discovered {OBSTACLES[int(result[2],16)]}, but avoided it!")
+            else:
+                print(
+                    f"🪤 You were hit by {OBSTACLES[int(result[2],16)]} and took {str(int(pre_adventurer[7]) - int(adventurer_out[7]))} damage!"
+                )
+        if int(result[1], 16) == 3:
+            print(f"🎉 You discovered loot!")
+            if int(result[2], 16) == 0:
+                print(f"🤑 You discovered {str(int(gold_out) - int(pre_gold))} gold")
+            if int(result[2], 16) == 1:
+                print(f"🗡️ You discovered an item!")
+            if int(result[2], 16) == 2:
+                print(
+                    f"🧪 You discovered a potion for {str(int(adventurer_out[7]) - int(pre_adventurer[7]))} health!"
+                )
+
+    else:
+        if int(result[0], 16) == 0:
             print(
-                f"🧪 You discovered a potion for {str(int(adventurer_out[7]) - int(pre_adventurer[7]))} health!"
+                f"🤔 You discovered nothing, but got {str(int(adventurer_out[16]) - int(pre_adventurer[16]))} xp anyway!"
             )
+        if int(result[0], 16) == 1:
+            print("🧌 You have discovered a beast")
+            print_beast_img(adventurer_out[26])
+            await _get_beast(adventurer_out[26], network)
+        if int(result[0], 16) == 2:
+            if int(pre_adventurer[7]) - int(adventurer_out[7]) == 0:
+                print(f"🥷 You discovered {OBSTACLES[int(result[1],16)]}, but avoided it!")
+            else:
+                print(
+                    f"🪤 You were hit by {OBSTACLES[int(result[1],16)]} and took {str(int(pre_adventurer[7]) - int(adventurer_out[7]))} damage!"
+                )
+        if int(result[0], 16) == 3:
+            print(f"🎉 You discovered loot!")
+            if int(result[1], 16) == 0:
+                print(f"🤑 You discovered {str(int(gold_out) - int(pre_gold))} gold")
+            if int(result[1], 16) == 1:
+                print(f"🗡️ You discovered an item!")
+            if int(result[1], 16) == 2:
+                print(
+                    f"🧪 You discovered a potion for {str(int(adventurer_out[7]) - int(pre_adventurer[7]))} health!"
+                )
 
 
 @loot.command()

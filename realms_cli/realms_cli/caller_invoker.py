@@ -378,7 +378,8 @@ async def wrapped_declare(account, contract_name, network, alias):
 
         deployments.register_class_hash(class_hash, network, alias)
     else:
-        tx_wrapper = await account.declare(contract_name, max_fee=config.MAX_FEE)
+        tx_wrapper = await account.declare(contract_name, max_fee=4226601250467000)
+        tx_status, declared_hash = await tx_wrapper.execute(watch_mode="track")
 
     if network != "devnet":
         get_tx_status(
@@ -387,6 +388,40 @@ async def wrapped_declare(account, contract_name, network, alias):
         )
     else:
         time.sleep(5)
+
+# async def wrapped_declare(account, contract_name, network, alias):
+#     if os.path.dirname(__file__).split("/")[1] == "Users":
+#         path = "/" + os.path.join(
+#             os.path.dirname(__file__).split("/")[1],
+#             os.path.dirname(__file__).split("/")[2],
+#             "Documents",
+#             "realms",
+#             "realms-contracts",
+#         )
+#     else:
+#         path = "/workspaces/realms-contracts"
+
+#     location = find_file(path, contract_name + ".cairo")
+
+#     account = await Account(account, network)
+
+#     compile_starknet_files(
+#         files=[f"{location}"],
+#         debug_info=True,
+#         cairo_path=[path + "/lib/cairo_contracts/src"],
+#     )
+
+#     compile(contract_name)
+
+#     tx_wrapper = await account.declare(contract_name, max_fee=4226601250467000)
+#     tx_status, declared_hash = await tx_wrapper.execute(watch_mode="track")
+
+#     get_tx_status(
+#         network,
+#         str(tx_wrapper.hash),
+#     )
+
+#     return tx_wrapper
 
 
 async def declare_class(network, contract_name, account, max_fee, overriding_path=None):

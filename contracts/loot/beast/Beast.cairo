@@ -76,6 +76,10 @@ func FledBeast(beast_token_id: Uint256, adventuer_token_id: Uint256) {
 func AdventurerAmbushed(beast_token_id: Uint256, adventurer_token_id: Uint256, damage: felt) {
 }
 
+@event 
+func UpdateGoldBalance(adventuer_token_id: Uint256, balance: felt) {
+}
+
 // -----------------------------------
 // Storage
 // -----------------------------------
@@ -732,6 +736,8 @@ func _add_to_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
 
     goldBalance.write(adventurer_token_id, current_balance + addition);
 
+    UpdateGoldBalance.emit(adventurer_token_id, current_balance + addition);
+
     let (supply) = worldSupply.read();
     worldSupply.write(supply + addition);
 
@@ -762,6 +768,8 @@ func _subtract_from_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
     }
 
     goldBalance.write(adventurer_token_id, current_balance - subtraction);
+
+    UpdateGoldBalance.emit(adventurer_token_id, current_balance - subtraction);
 
     let (supply) = worldSupply.read();
     let new_supply = supply - subtraction;

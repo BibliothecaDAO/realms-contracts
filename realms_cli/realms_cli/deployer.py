@@ -13,6 +13,7 @@ from nile.utils import hex_address, normalize_number, hex_class_hash
 
 
 async def logged_deploy(network, account, contract_name, alias, calldata):
+    config = Config(nile_network=network)
     print(f"deploying {alias} contract")
 
     account = await Account(account, network)
@@ -22,8 +23,6 @@ async def logged_deploy(network, account, contract_name, alias, calldata):
     # If devnet we need to write the call and check declerations manually
     if network == "devnet":
         print(f"🚀 Deploying {contract_name}")
-
-        config = Config(nile_network=network)
         
         max_fee, nonce, _ = await _process_arguments(account, config.MAX_FEE, None)
 
