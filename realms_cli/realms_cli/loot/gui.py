@@ -61,12 +61,12 @@ async def get_adventurers(config):
     return all_adventurers
 
 
-def get_items():
-    asyncio.run(get_market_items())
+def get_items(config):
+    asyncio.run(get_market_items(config))
 
 
-async def update_adventurer_list():
-    adventurers = await get_adventurers()
+async def update_adventurer_list(config):
+    adventurers = await get_adventurers(config)
     dpg.configure_item("adventurer_id", items=adventurers)
     dpg.configure_item("bid_adventurer_id", items=adventurers)
     dpg.configure_item("equip_adventurer_id", items=adventurers)
@@ -86,12 +86,12 @@ def get_adventurer(config):
     dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
     value = dpg.get_value("adventurer_id").split(" - ")[-1]
     adventurer_out = asyncio.run(_get_adventurer(config.nile_network, value))
-    update_gold(value)
-    update_beast(adventurer_out[26])
-    update_health(value)
-    update_equipped_items(adventurer_out)
-    update_stats(adventurer_out)
-    update_level_xp(adventurer_out)
+    update_gold(config, value)
+    update_beast(config, adventurer_out[26])
+    update_health(config, value)
+    update_equipped_items(config, adventurer_out)
+    update_stats(config, adventurer_out)
+    update_level_xp(config, adventurer_out)
     dpg.delete_item("get_adventurer_load")
     dpg.delete_item("loader")
 
@@ -137,12 +137,12 @@ def new_adventurer(config):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    asyncio.run(update_adventurer_list())
+    asyncio.run(update_adventurer_list(config))
     dpg.delete_item("mint_adventurer_load")
     dpg.delete_item("loader")
 
 
-def explore(sender, app_data, user_data):
+def explore(config):
     dpg.add_text("Exploring", tag="explore_load", pos=[700, 50], parent="adventurers")
     dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
     adventurer = dpg.get_value("adventurer_id").split(" - ")[-1]
@@ -155,16 +155,16 @@ def explore(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    update_gold(adventurer)
-    update_health(adventurer)
-    adventurer_out = asyncio.run(_get_adventurer("goerli", adventurer))
-    update_beast(adventurer_out[26])
-    update_level_xp(adventurer_out)
+    update_gold(config, adventurer)
+    update_health(config, adventurer)
+    adventurer_out = asyncio.run(_get_adventurer(config.nile_network, adventurer))
+    update_beast(config, adventurer_out[26])
+    update_level_xp(config, adventurer_out)
     dpg.delete_item("explore_load")
     dpg.delete_item("loader")
 
 
-def attack_beast(sender, app_data, user_data):
+def attack_beast(config):
     dpg.add_text(
         "Attacking Beast", tag="attack_load", pos=[700, 50], parent="adventurers"
     )
@@ -179,16 +179,16 @@ def attack_beast(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    update_gold(adventurer)
-    update_health(adventurer)
-    adventurer_out = asyncio.run(_get_adventurer("goerli", adventurer))
-    update_beast(adventurer_out[26])
-    update_level_xp(adventurer_out)
+    update_gold(config, adventurer)
+    update_health(config, adventurer)
+    adventurer_out = asyncio.run(_get_adventurer(config.nile_network, adventurer))
+    update_beast(config, adventurer_out[26])
+    update_level_xp(config, adventurer_out)
     dpg.delete_item("attack_load")
     dpg.delete_item("loader")
 
 
-def flee(sender, app_data, user_data):
+def flee(config):
     dpg.add_text(
         "Fleeing from beast", tag="flee_load", pos=[700, 50], parent="adventurers"
     )
@@ -203,14 +203,14 @@ def flee(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    adventurer_out = asyncio.run(_get_adventurer("goerli", adventurer))
-    update_health(adventurer)
-    update_beast(adventurer_out[26])
+    adventurer_out = asyncio.run(_get_adventurer(config.nile_network, adventurer))
+    update_health(config, adventurer)
+    update_beast(config, adventurer_out[26])
     dpg.delete_item("flee_load")
     dpg.delete_item("loader")
 
 
-def equip_item(sender, app_data, user_data):
+def equip_item(config):
     dpg.add_text(
         "Equipping Item", tag="equip_load", pos=[700, 50], parent="adventurers"
     )
@@ -241,13 +241,13 @@ def equip_item(sender, app_data, user_data):
         ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    adventurer_out = asyncio.run(_get_adventurer("goerli", adventurer))
-    update_equipped_items(adventurer_out)
+    adventurer_out = asyncio.run(_get_adventurer(config.nile_network, adventurer))
+    update_equipped_items(config, adventurer_out)
     dpg.delete_item("equip_load")
     dpg.delete_item("loader")
 
 
-def unequip_item(sender, app_data, user_data):
+def unequip_item(config):
     dpg.add_text(
         "Unequipping Item", tag="unequip_load", pos=[700, 50], parent="adventurers"
     )
@@ -265,13 +265,13 @@ def unequip_item(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    adventurer_out = asyncio.run(_get_adventurer("goerli", adventurer))
-    update_equipped_items(adventurer_out)
+    adventurer_out = asyncio.run(_get_adventurer(config.nile_network, adventurer))
+    update_equipped_items(config, adventurer_out)
     dpg.delete_item("unequip_load")
     dpg.delete_item("loader")
 
 
-def purchase_health(sender, app_data, user_data):
+def purchase_health(config):
     dpg.add_text(
         "Purchasing Health",
         tag="purchase_health_load",
@@ -292,13 +292,13 @@ def purchase_health(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    update_gold(adventurer)
-    update_health(adventurer)
+    update_gold(config, adventurer)
+    update_health(config, adventurer)
     dpg.delete_item("purchase_health_load")
     dpg.delete_item("loader")
 
 
-def mint_daily_items(sender, app_data, user_data):
+def mint_daily_items(config):
     dpg.add_text(
         "Minting daily items",
         tag="mint_items_load",
@@ -313,14 +313,12 @@ def mint_daily_items(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    update_market_items()
+    update_market_items(config)
     dpg.delete_item("mint_items_load")
     dpg.delete_item("loader")
 
 
-async def get_market_items():
-    config = Config(nile_network="goerli")
-
+async def get_market_items(config):
     current_index = await wrapped_proxy_call(
         network=config.nile_network,
         contract_alias="proxy_LootMarketArcade",
@@ -360,8 +358,7 @@ async def get_market_items():
     return items
 
 
-async def get_owned_items():
-    config = Config(nile_network="goerli")
+async def get_owned_items(config):
     print("🗡 Getting owned items ...")
 
     out = await wrapped_proxy_call(
@@ -405,14 +402,14 @@ async def get_owned_items():
     return all_items
 
 
-def update_market_items():
-    items = asyncio.run(get_market_items())
+def update_market_items(config):
+    items = asyncio.run(get_market_items(config))
     dpg.configure_item("item_id", items=(items))
     dpg.configure_item("bid_loot_id", items=(items))
 
 
-def update_owned_items():
-    items = asyncio.run(get_owned_items())
+def update_owned_items(config):
+    items = asyncio.run(get_owned_items(config))
     dpg.configure_item("equip_loot_token_id", items=(items))
     dpg.configure_item("unequip_loot_token_id", items=(items))
 
@@ -424,7 +421,7 @@ def get_item_market():
     print(out)
 
 
-def bid_on_item(sender, app_data, user_data):
+def bid_on_item(config):
     dpg.add_text(
         "Bidding on item",
         tag="bid_item_load",
@@ -462,12 +459,12 @@ def bid_on_item(sender, app_data, user_data):
         ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    update_gold(adventurer_id)
+    update_gold(config, adventurer_id)
     dpg.delete_item("bid_item_load")
     dpg.delete_item("loader")
 
 
-def claim_item(sender, app_data, user_data):
+def claim_item(config):
     dpg.add_text(
         "Claiming item",
         tag="claim_item_load",
@@ -500,13 +497,13 @@ def claim_item(sender, app_data, user_data):
         ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    update_gold(adventurer_id)
-    update_owned_items()
+    update_gold(config, adventurer_id)
+    update_owned_items(config)
     dpg.delete_item("claim_item_load")
     dpg.delete_item("loader")
 
 
-def claim_equip_item(sender, app_data, user_data):
+def claim_equip_item(config):
     dpg.add_text(
         "Claiming and equipping item",
         tag="claim_equip_item_load",
@@ -539,15 +536,15 @@ def claim_equip_item(sender, app_data, user_data):
         ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    adventurer_out = asyncio.run(_get_adventurer("goerli", adventurer_id))
-    update_equipped_items(adventurer_out)
-    update_gold(adventurer_id)
-    update_owned_items()
+    adventurer_out = asyncio.run(_get_adventurer(config.nile_network, adventurer_id))
+    update_equipped_items(config, adventurer_out)
+    update_gold(config, adventurer_id)
+    update_owned_items(config)
     dpg.delete_item("claim_equip_item_load")
     dpg.delete_item("loader")
 
 
-def upgrade_stat(sender, app_data, user_data):
+def upgrade_stat(config):
     dpg.add_text(
         "Upgrading stat",
         tag="upgrade_stat_load",
@@ -568,8 +565,8 @@ def upgrade_stat(sender, app_data, user_data):
         str(stat_id),
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
-    adventurer_out = asyncio.run(_get_adventurer("goerli", adventurer))
-    update_stats(adventurer_out)
+    adventurer_out = asyncio.run(_get_adventurer(config.nile_network, adventurer))
+    update_stats(config, adventurer_out)
     dpg.delete_item("upgrade_stat_load")
     dpg.delete_item("loader")
 
@@ -584,7 +581,7 @@ def get_thief():
     return out
 
 
-def rob_king(sender, app_data, user_data):
+def rob_king(config):
     dpg.add_text(
         "Attempt to rob the king",
         tag="robbing_king_load",
@@ -602,12 +599,12 @@ def rob_king(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    update_thief()
+    update_thief(config)
     dpg.delete_item("robbing_king_load")
     dpg.delete_item("loader")
 
 
-def kill_thief(sender, app_data, user_data):
+def kill_thief(config):
     dpg.add_text(
         "Kill the thief robbing the king",
         tag="killing_thief_load",
@@ -625,12 +622,12 @@ def kill_thief(sender, app_data, user_data):
     ]
     out = subprocess.check_output(command).strip().decode("utf-8")
     print(out)
-    update_thief()
+    update_thief(config)
     dpg.delete_item("killing_thief_load")
     dpg.delete_item("loader")
 
 
-def claim_king_loot(sender, app_data, user_data):
+def claim_king_loot():
     dpg.add_text(
         "Claim loot from robbing king",
         tag="claiming_king_loot",
@@ -645,8 +642,8 @@ def claim_king_loot(sender, app_data, user_data):
     dpg.delete_item("loader")
 
 
-def update_gold(adventurer_token_id):
-    gold_out = asyncio.run(_get_gold_balance("goerli", adventurer_token_id))
+def update_gold(config, adventurer_token_id):
+    gold_out = asyncio.run(_get_gold_balance(config.nile_network, adventurer_token_id))
     print(f"💰 Gold balance is now {gold_out}")
     dpg.set_value("gold", gold_out)
     king_out = get_thief()
@@ -663,7 +660,7 @@ def update_gold(adventurer_token_id):
         dpg.configure_item("your_gold", color=[178, 34, 34])
 
 
-def update_thief():
+def update_thief(config):
     command = [
         "nile",
         "loot",
@@ -672,10 +669,10 @@ def update_thief():
     out = subprocess.check_output(command).strip().decode("utf-8")
     out = out.split(" ")
     king_out = out[-3].split("\n")
-    gold_out = asyncio.run(_get_gold_balance("goerli", king_out[-1]))
+    gold_out = asyncio.run(_get_gold_balance(config.nile_network, king_out[-1]))
     if king_out[-1] != "0":
         heist_time = datetime.datetime.fromtimestamp(int(out[-1]))
-        adventurer_out = asyncio.run(_get_adventurer("goerli", king_out[-1]))
+        adventurer_out = asyncio.run(_get_adventurer(config.nile_network, king_out[-1]))
         if adventurer_out[3].startswith("0x"):
             adventurer_out = felt_to_str(int(adventurer_out[3], 16))
         else:
@@ -693,17 +690,17 @@ def update_thief():
         dpg.set_value("thieves_gold", "-")
 
 
-def update_beast(beast_token_id):
+def update_beast(config, beast_token_id):
     if beast_token_id != "0":
-        beast_out = asyncio.run(_get_beast(beast_token_id, "goerli"))
+        beast_out = asyncio.run(_get_beast(beast_token_id, config.nile_network))
         beast = BEASTS[str(int(beast_out[0]))]
         dpg.set_value("beast", beast)
     else:
         dpg.set_value("beast", "-")
 
 
-def update_health(adventurer_token_id):
-    adventurer_out = asyncio.run(_get_adventurer("goerli", adventurer_token_id))
+def update_health(config, adventurer_token_id):
+    adventurer_out = asyncio.run(_get_adventurer(config.nile_network, adventurer_token_id))
     print(f"💚 Health is now {adventurer_out[7]}")
     dpg.set_value("health", adventurer_out[7])
 
@@ -713,8 +710,8 @@ def update_level_xp(adventurer_data):
     dpg.set_value("xp", adventurer_data[16])
 
 
-def update_equipped_items(adventurer_data):
-    config = Config(nile_network="goerli")
+def update_equipped_items(config, adventurer_data):
+    config = Config(config.nile_network)
 
     all_items = []
 
@@ -837,7 +834,7 @@ if __name__ == "__main__":
                     ),
                     width=100,
                 )
-                dpg.add_button(label="Mint Adventurer", callback=new_adventurer)
+                dpg.add_button(label="Mint Adventurer", callback=new_adventurer(config))
             # Equipped items display
             dpg.add_spacer(width=20)
             with dpg.group():
@@ -1091,7 +1088,7 @@ if __name__ == "__main__":
                             "Please get adventurer data.",
                             tag="your_gold",
                         )
-        update_thief()
+        update_thief(config)
 
     dpg.show_viewport()
     dpg.start_dearpygui()

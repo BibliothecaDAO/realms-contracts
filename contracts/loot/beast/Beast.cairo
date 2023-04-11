@@ -69,7 +69,7 @@ func AdventurerAttacked(beast_token_id: Uint256, adventurer_token_id: Uint256, d
 }
 
 @event
-func FledBeast(beast_token_id: Uint256, adventuer_token_id: Uint256) {
+func FledBeast(beast_token_id: Uint256, adventurer_token_id: Uint256) {
 }
 
 @event
@@ -77,7 +77,7 @@ func AdventurerAmbushed(beast_token_id: Uint256, adventurer_token_id: Uint256, d
 }
 
 @event 
-func UpdateGoldBalance(adventuer_token_id: Uint256, balance: felt) {
+func UpdateGoldBalance(adventurer_token_id: Uint256, balance: felt) {
 }
 
 // -----------------------------------
