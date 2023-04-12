@@ -740,12 +740,18 @@ func update_storage_destroyed_army{syscall_ptr: felt*, pedersen_ptr: HashBuiltin
 
     let (travel_address) = Module.get_module_address(ModuleIds.Travel);
 
-    // DISCUSS: set the army back to its realm when dead with
-    // set coordinates
-
     // allow destroyed army_id to travel again because it is not in bastion anymore
     ITravel.allow_travel(
         travel_address, ExternalContractIds.S_Realms, destroyed_realm_id, destroyed_army_id
+    );
+
+    // DISCUSS: set the army back to its realm when dead
+    // set coordinates back to 0
+    ITravel.reset_coordinates(
+        contract_address=travel_address,
+        contract_id=ExternalContractIds.S_Realms,
+        token_id=destroyed_realm_id,
+        nested_id=destroyed_army_id,
     );
 
     return ();

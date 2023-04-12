@@ -184,11 +184,13 @@ func travel{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         destination_contract_id, destination_token_id, destination_nested_id
     );
 
+    // update coordinates
+    coordinates.write(
+        traveller_contract_id, traveller_token_id, traveller_nested_id, destination_coordinates
+    );
+
     // if no current location set, use the home coordinates
     if (traveller_coordinates.x == 0) {
-        coordinates.write(
-            traveller_contract_id, traveller_token_id, traveller_nested_id, destination_coordinates
-        );
         let (traveller_coordinates: Point) = get_coordinates(
             traveller_contract_id, traveller_token_id, 0
         );
@@ -204,11 +206,6 @@ func travel{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     }
 
     tempvar traveller_coordinates = traveller_coordinates;
-
-    // get current information
-    let (traveller_current_information: TravelInformation) = get_travel_information(
-        traveller_contract_id, traveller_token_id, traveller_nested_id
-    );
 
     // get current information
     let (traveller_current_information: TravelInformation) = get_travel_information(
@@ -242,6 +239,15 @@ func travel{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
         time,
     );
 
+    return ();
+}
+
+@external
+func reset_coordinates{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    contract_id: felt, token_id: Uint256, nested_id: felt
+) {
+    Module.only_approved();
+    coordinates.write(contract_id, token_id, nested_id, Point(0, 0));
     return ();
 }
 
