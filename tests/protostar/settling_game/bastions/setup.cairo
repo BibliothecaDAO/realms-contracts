@@ -2,6 +2,7 @@
 
 from starkware.starknet.common.syscalls import get_contract_address, get_block_number
 from starkware.cairo.common.cairo_builtins import HashBuiltin, BitwiseBuiltin
+from starkware.cairo.common.uint256 import Uint256
 
 from contracts.settling_game.utils.game_structs import ExternalContractIds, ModuleIds
 from contracts.settling_game.modules.bastions.constants import MovingTimes
@@ -56,6 +57,13 @@ const TOWER_4_ID = 4;
 // central square
 const CENTRAL_SQUARE_ID = 5;
 
+@view
+func ownerOf{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(tokenId: Uint256) -> (
+    owner: felt
+) {
+    return (0,);
+}
+
 func setup{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }() -> () {
@@ -74,12 +82,11 @@ func setup{
     // assuming 1 block = 1 minute
     %{ store(ids.self_address, "bastion_moving_times", [35], [ids.MovingTimes.DistanceStagingAreaCentralSquare]) %}  // 35
     %{ store(ids.self_address, "bastion_moving_times", [10], [ids.MovingTimes.DistanceTowerCentralSquare]) %}  // 10
-    %{ store(ids.self_address, "bastion_moving_times", [25], [ids.MovingTimes.DistanceTowerGateCentralSquare]) %}  // 25
     %{ store(ids.self_address, "bastion_moving_times", [25], [ids.MovingTimes.DistanceGateGate]) %}  // 25
     %{ store(ids.self_address, "bastion_moving_times", [25], [ids.MovingTimes.DistanceGateTower]) %}  // 25
     %{ store(ids.self_address, "bastion_moving_times", [10], [ids.MovingTimes.DistanceTowerTower]) %}  // 10
     %{ store(ids.self_address, "bastion_moving_times", [25], [ids.MovingTimes.DistanceStagingAreaTower]) %}  // 25
-    %{ store(ids.self_address, "bastion_moving_times", [10], [ids.MovingTimes.DistanceTowerInnerGate]) %}  // 10
+    %{ store(ids.self_address, "bastion_moving_times", [25], [ids.MovingTimes.DistanceTowerInnerGate]) %}  // 25
     %{ store(ids.self_address, "bastion_moving_times", [25], [ids.MovingTimes.DistanceInnerGateTowerGate]) %}  // 25
 
     // set cooldown periods
@@ -92,10 +99,20 @@ func setup{
     // Module Controller
     // module address
     %{ store(ids.self_address, "module_controller_address", [ids.self_address]) %}
+    // travel
     %{ store(ids.self_address, "address_of_module_id", [ids.self_address], [ids.ModuleIds.Travel]) %}
+    // combat
     %{ store(ids.self_address, "address_of_module_id", [ids.self_address], [ids.ModuleIds.L06_Combat]) %}
+    // realms
     %{ store(ids.self_address, "address_of_module_id", [ids.self_address], [ids.ModuleIds.Realms_Token]) %}
+    // bastion
     %{ store(ids.self_address, "address_of_module_id", [ids.self_address], [ids.ModuleIds.Bastions]) %}
+
+    // anyone can write to anyone
+    %{ store(ids.self_address, "address_of_module_id", [ids.self_address], [1]) %}
+    %{ store(ids.self_address, "module_id_of_address", [1], [ids.self_address]) %}
+    %{ store(ids.self_address, "can_write_to", [1], [1, 1]) %}
+
     // external contract address
     %{ store(ids.self_address, "external_contract_table", [ids.self_address], [ids.ExternalContractIds.Realms]) %}
     %{ store(ids.self_address, "external_contract_table", [ids.self_address], [ids.ExternalContractIds.S_Realms]) %}

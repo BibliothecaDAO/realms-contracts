@@ -315,6 +315,8 @@ func initiate_combat{
 ) -> (combat_outcome: felt) {
     alloc_locals;
 
+    Module.ERC721_owner_check(attacking_realm_id, ExternalContractIds.S_Realms);
+
     with_attr error_message("Combat: Cannot initiate combat") {
         let (can_attack) = Realm_can_be_attacked(
             attacking_army_id, attacking_realm_id, defending_army_id, defending_realm_id
@@ -381,7 +383,6 @@ func combat{
     defending_realm_id: Uint256,
 ) -> (combat_outcome: felt) {
     alloc_locals;
-    Module.ERC721_owner_check(attacking_realm_id, ExternalContractIds.S_Realms);
 
     // Check attacking Army is on same position as defending Army
     let (travel_module) = Module.get_module_address(ModuleIds.Travel);

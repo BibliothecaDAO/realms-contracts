@@ -8,11 +8,17 @@ from starkware.starknet.common.syscalls import get_contract_address, get_block_n
 // settling game
 from contracts.settling_game.modules.bastions.constants import MovingTimes
 from contracts.settling_game.modules.bastions.bastions import bastion_attack
-from contracts.settling_game.modules.travel.travel import set_coordinates
+from contracts.settling_game.modules.travel.travel import (
+    set_coordinates,
+    forbid_travel,
+    allow_travel,
+    reset_coordinates,
+)
 from contracts.settling_game.modules.combat.interface import ICombat
 from contracts.settling_game.ModuleController import (
     get_module_address,
     get_external_contract_address,
+    has_write_access,
 )
 from contracts.settling_game.tokens.Realms_ERC721_Mintable import fetch_realm_data
 from contracts.settling_game.utils.constants import CCombat
@@ -25,9 +31,9 @@ from contracts.settling_game.utils.game_structs import (
 )
 from contracts.settling_game.utils.general import unpack_data
 
-from tests.protostar.settling_game.bastions.setup import setup
+from tests.protostar.settling_game.bastions.setup import setup, ownerOf
+
 // mockups
-from tests.protostar.settling_game.bastions.mockups.TravelMockup import forbid_travel, allow_travel
 from tests.protostar.settling_game.bastions.mockups.CombatMockup import (
     get_realm_army_combat_data,
     initiate_combat_approved_module,
@@ -338,6 +344,18 @@ func test_bastion_attack_kill_defending_army_take_location{
     // set block number to 10 so that both armies are arrived
     %{ stop_roll = roll(10) %}
 
+    // place both armies on same coordinates
+    // set order of giants as defending order
+    %{ store(context.self_address, "coordinates", [1, 1], [3, ids.REALM_ID_1, 0, ids.ARMY_ID_1]) %}
+    %{ store(context.self_address, "coordinates", [1, 1], [3, ids.REALM_ID_3, 0, ids.ARMY_ID_1]) %}
+    // verify coordinates
+    %{ coordinates_1 = load(context.self_address, "coordinates", "Point", [3, ids.REALM_ID_1, 0, ids.ARMY_ID_1]) %}
+    %{ coordinates_2 = load(context.self_address, "coordinates", "Point", [3, ids.REALM_ID_3, 0, ids.ARMY_ID_1]) %}
+    %{
+        assert coordinates_1 == [1, 1]
+        assert coordinates_2 == [1, 1]
+    %}
+
     // set order of giants as defending order
     %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
 
@@ -388,6 +406,14 @@ func test_bastion_attack_kill_defending_army_take_location{
                            [ids.X, ids.Y, ids.TOWER_1_ID, ids.ORDER_OF_RAGE, ids.current_block + ids.TOWER_COOLDOWN_PERIOD]})
     %}
 
+    // verify killed army coordinates
+    %{ coordinates_1 = load(context.self_address, "coordinates", "Point", [3, ids.REALM_ID_1, 0, ids.ARMY_ID_1]) %}
+    %{ coordinates_2 = load(context.self_address, "coordinates", "Point", [3, ids.REALM_ID_3, 0, ids.ARMY_ID_1]) %}
+    %{
+        assert coordinates_1 == [0, 0]
+        assert coordinates_2 == [1, 1]
+    %}
+
     return ();
 }
 
@@ -397,6 +423,18 @@ func test_bastion_attack_kill_attacking_and_defending_set_no_defending_order{
 }() -> () {
     // set block number to 10 so that both armies are arrived
     %{ stop_roll = roll(10) %}
+
+    // place both armies on same coordinates
+    // set order of giants as defending order
+    %{ store(context.self_address, "coordinates", [1, 1], [3, ids.REALM_ID_1, 0, ids.ARMY_ID_1]) %}
+    %{ store(context.self_address, "coordinates", [1, 1], [3, ids.REALM_ID_3, 0, ids.ARMY_ID_1]) %}
+    // verify coordinates
+    %{ coordinates_1 = load(context.self_address, "coordinates", "Point", [3, ids.REALM_ID_1, 0, ids.ARMY_ID_1]) %}
+    %{ coordinates_2 = load(context.self_address, "coordinates", "Point", [3, ids.REALM_ID_3, 0, ids.ARMY_ID_1]) %}
+    %{
+        assert coordinates_1 == [1, 1]
+        assert coordinates_2 == [1, 1]
+    %}
 
     // set order of giants as defending order
     %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
@@ -437,6 +475,15 @@ func test_bastion_attack_kill_attacking_and_defending_set_no_defending_order{
         expect_events({"name": "BastionLocationTaken", "data": 
                            [ids.X, ids.Y, ids.TOWER_1_ID, 0, ids.current_block + ids.TOWER_COOLDOWN_PERIOD]})
     %}
+
+    // verify killed army coordinates
+    %{ coordinates_1 = load(context.self_address, "coordinates", "Point", [3, ids.REALM_ID_1, 0, ids.ARMY_ID_1]) %}
+    %{ coordinates_2 = load(context.self_address, "coordinates", "Point", [3, ids.REALM_ID_3, 0, ids.ARMY_ID_1]) %}
+    %{
+        assert coordinates_1 == [0, 0]
+        assert coordinates_2 == [0, 0]
+    %}
+
     return ();
 }
 

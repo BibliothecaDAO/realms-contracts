@@ -21,6 +21,9 @@ namespace ITravel {
     func set_coordinates(contract_id: felt, token_id: Uint256, nested_id: felt, point: Point) {
     }
 
+    func reset_coordinates(contract_id: felt, token_id: Uint256, nested_id: felt) {
+    }
+
     func forbid_travel(
         traveller_contract_id: felt, traveller_token_id: Uint256, traveller_nested_id: felt
     ) {
@@ -29,5 +32,8 @@ namespace ITravel {
     func allow_travel(
         traveller_contract_id: felt, traveller_token_id: Uint256, traveller_nested_id: felt
     ) -> () {
+    }
+
+    func assert_arrived(contract_id: felt, token_id: Uint256, nested_id: felt) {
     }
 }

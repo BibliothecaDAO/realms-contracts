@@ -11,6 +11,7 @@ stdout-on-success = true
 # This section is explained in the "Project compilation" guide.
 ["protostar.contracts"]
 main = ["./contracts/settling_game/Arbiter.cairo"]
+Bastions = ["./contracts/settling_game/modules/bastions/Bastions.cairo"]
 
 ["protostar.build"]
 cairo-path = ["./lib/cairo_contracts/src", "./lib/cairo_graphs/src"]

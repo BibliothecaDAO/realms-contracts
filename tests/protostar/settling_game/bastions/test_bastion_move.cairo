@@ -8,7 +8,13 @@ from starkware.starknet.common.syscalls import get_contract_address
 // settling game
 from contracts.settling_game.modules.bastions.constants import MovingTimes
 from contracts.settling_game.modules.bastions.bastions import bastion_move, get_move_block_time
-from contracts.settling_game.modules.travel.travel import set_coordinates, get_coordinates
+from contracts.settling_game.modules.travel.travel import (
+    set_coordinates,
+    get_coordinates,
+    forbid_travel,
+    allow_travel,
+    assert_arrived,
+)
 from contracts.settling_game.modules.combat.interface import ICombat
 from contracts.settling_game.ModuleController import (
     get_module_address,
@@ -37,7 +43,6 @@ from tests.protostar.settling_game.bastions.mockups.CombatMockup import (
     build_army_with_health,
     army_data_by_id,
 )
-from tests.protostar.settling_game.bastions.mockups.TravelMockup import forbid_travel, allow_travel
 
 const X = 3;
 const Y = 4;
@@ -127,6 +132,29 @@ func test_bastion_move_wrong_coordinates_should_fail{
 }() -> () {
     %{ stop_prank_callable = start_prank(caller_address=context.self_address) %}
     %{ expect_revert(error_message="TRAVEL: You are not at this destination") %}
+
+    // MOVE
+    bastion_move(Point(X, Y), TOWER_1_ID, Uint256(REALM_ID_1, 0), ARMY_ID_1);
+    return ();
+}
+
+@external
+func test_bastion_move_travel_not_arrived_should_fail{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+}() -> () {
+    // change location of the army to be on bastion location
+    %{
+        store(context.self_address, "coordinates", [ids.X, ids.Y], 
+                   [ids.ExternalContractIds.S_Realms, ids.REALM_ID_1, 0, ids.ARMY_ID_1])
+    %}
+
+    %{
+        store(context.self_address, "travel_information", [0, 0, 0, 0, 100], 
+                    [3, ids.REALM_ID_1, 0, ids.ARMY_ID_1])
+    %}
+
+    %{ stop_prank_callable = start_prank(caller_address=context.self_address) %}
+    %{ expect_revert(error_message="TRAVEL: You are mid travel. You cannot change course!") %}
 
     // MOVE
     bastion_move(Point(X, Y), TOWER_1_ID, Uint256(REALM_ID_1, 0), ARMY_ID_1);
@@ -296,6 +324,46 @@ func test_bastion_move_from_tower_to_non_adjacent_tower_should_fail{
 }
 
 @external
+func test_bastion_move_should_update_location{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+}() -> () {
+    // change location of the army to be on bastion location
+    %{
+        store(context.self_address, "coordinates", [ids.X, ids.Y], 
+                   [ids.ExternalContractIds.S_Realms, ids.REALM_ID_1, 0, ids.ARMY_ID_1])
+    %}
+
+    // put army on tower 1
+    %{
+        store(context.self_address, "bastion_army_location", 
+                   [ 0, ids.TOWER_1_ID], [ids.REALM_ID_1, 0, ids.ARMY_ID_1])
+    %}
+
+    %{ stop_prank_callable = start_prank(caller_address=context.self_address) %}
+    // MOVE
+    bastion_move(Point(X, Y), TOWER_2_ID, Uint256(REALM_ID_1, 0), ARMY_ID_1);
+
+    %{ location = load(context.self_address, "bastion_army_location", "ArmyLocationData", [ids.REALM_ID_1, 0, ids.ARMY_ID_1]) %}
+    %{ assert location[1] == ids.TOWER_2_ID %}
+
+    // MOVE
+    %{ stop_roll = roll(25) %}
+    bastion_move(Point(X, Y), STAGING_AREA_ID, Uint256(REALM_ID_1, 0), ARMY_ID_1);
+
+    %{ location = load(context.self_address, "bastion_army_location", "ArmyLocationData", [ids.REALM_ID_1, 0, ids.ARMY_ID_1]) %}
+    %{ assert location[1] == ids.STAGING_AREA_ID %}
+
+    // MOVE
+    %{ stop_roll = roll(50) %}
+    bastion_move(Point(X, Y), TOWER_4_ID, Uint256(REALM_ID_1, 0), ARMY_ID_1);
+
+    %{ location = load(context.self_address, "bastion_army_location", "ArmyLocationData", [ids.REALM_ID_1, 0, ids.ARMY_ID_1]) %}
+    %{ assert location[1] == ids.TOWER_4_ID %}
+
+    return ();
+}
+
+@external
 func test_bastion_move_should_replace_if_current_movers_at_index{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 }() -> () {
@@ -316,7 +384,7 @@ func test_bastion_move_should_replace_if_current_movers_at_index{
     // expect event
     %{
         expect_events({"name": "BastionArmyMoved", "data": 
-                           [ids.X, ids.Y, ids.STAGING_AREA_ID, ids.TOWER_1_ID, ids.REALM_ID_1, 0, ids.ARMY_ID_1]})
+                           [ids.X, ids.Y, ids.STAGING_AREA_ID, ids.TOWER_1_ID, 25, ids.REALM_ID_1, 0, ids.ARMY_ID_1]})
     %}
 
     // should be at index 25, because current block = 0 and it takes 25 blocks to arrive
@@ -337,7 +405,7 @@ func test_bastion_move_should_replace_if_current_movers_at_index{
     // expect event
     %{
         expect_events({"name": "BastionArmyMoved", "data": 
-                           [ids.X, ids.Y, ids.STAGING_AREA_ID, ids.TOWER_1_ID, ids.REALM_ID_1, 0, ids.ARMY_ID_2]})
+                           [ids.X, ids.Y, ids.STAGING_AREA_ID, ids.TOWER_1_ID, 25 + 35, ids.REALM_ID_1, 0, ids.ARMY_ID_2]})
     %}
 
     // verify replacement in current movers
@@ -391,8 +459,39 @@ func test_bastion_move_central_square_all_towers_conquered{
     // expect event
     %{
         expect_events({"name": "BastionArmyMoved", "data": 
-                           [ids.X, ids.Y, ids.STAGING_AREA_ID, ids.CENTRAL_SQUARE_ID, ids.REALM_ID_1, 0, ids.ARMY_ID_1]})
+                           [ids.X, ids.Y, ids.STAGING_AREA_ID, ids.CENTRAL_SQUARE_ID, 35 + ids.ARRIVAL_BLOCK, ids.REALM_ID_1, 0, ids.ARMY_ID_1]})
     %}
+    return ();
+}
+
+@external
+func test_bastion_move_from_inner_gate_to_tower_if_not_conquered_all_towers_should_fail{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+}() -> () {
+    // put army on tower 1
+    // same order for tower and central square
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.CENTRAL_SQUARE_ID]) %}
+
+    %{ expect_revert(error_message="Bastions: attacker cannot move out of inner gate if does not hold all 4 towers") %}
+    let (time) = get_move_block_time(Point(X, Y), CENTRAL_SQUARE_ID, TOWER_1_ID, ORDER_OF_GIANTS);
+
+    return ();
+}
+
+@external
+func test_bastion_move_from_inner_gate_to_staging_area_if_not_conquered_all_towers_should_fail{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+}() -> () {
+    // put army on tower 1
+    // same order for tower and central square
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.CENTRAL_SQUARE_ID]) %}
+
+    %{ expect_revert(error_message="Bastions: attacker cannot move out of inner gate if does not hold all 4 towers") %}
+    let (time) = get_move_block_time(
+        Point(X, Y), CENTRAL_SQUARE_ID, STAGING_AREA_ID, ORDER_OF_GIANTS
+    );
+
     return ();
 }
 
@@ -424,7 +523,7 @@ func test_bastion_move_verify_moving_times{
     );
     %{ assert ids.time == 35 %}
 
-    // defending cetnral square
+    // defending central square
     %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.CENTRAL_SQUARE_ID]) %}
 
     let (time) = get_move_block_time(
@@ -462,9 +561,6 @@ func test_bastion_move_verify_moving_times{
     %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
     %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.CENTRAL_SQUARE_ID]) %}
 
-    let (time) = get_move_block_time(Point(X, Y), CENTRAL_SQUARE_ID, TOWER_1_ID, ORDER_OF_GIANTS);
-    %{ assert ids.time == 25 %}
-
     let (time) = get_move_block_time(Point(X, Y), CENTRAL_SQUARE_ID, TOWER_1_ID, ORDER_OF_FURY);
     %{ assert ids.time == 10 %}
 
@@ -479,20 +575,68 @@ func test_bastion_move_verify_moving_times{
     let (time) = get_move_block_time(Point(X, Y), CENTRAL_SQUARE_ID, TOWER_1_ID, ORDER_OF_GIANTS);
     %{ assert ids.time == 25 %}
 
+    // tower 1 gate to central square
+    // does not have current tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
+    // has opposite tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_3_ID]) %}
+    // if has one adjacent tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_2_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_4_ID]) %}
     let (time) = get_move_block_time(Point(X, Y), TOWER_1_ID, CENTRAL_SQUARE_ID, ORDER_OF_GIANTS);
-    %{ assert ids.time == 25 %}
+    %{ assert ids.time == 25 + 10 %}
+    // if has one adjacent tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_2_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_4_ID]) %}
+    let (time) = get_move_block_time(Point(X, Y), TOWER_1_ID, CENTRAL_SQUARE_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 + 10 %}
+    // if has two adjacent towers
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_4_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_2_ID]) %}
+    let (time) = get_move_block_time(Point(X, Y), TOWER_1_ID, CENTRAL_SQUARE_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 + 10 %}
+    // if has no adjacent tower so goes to opposite tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_4_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_2_ID]) %}
+    let (time) = get_move_block_time(Point(X, Y), TOWER_1_ID, CENTRAL_SQUARE_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 + 25 + 10 %}
+
+    // tower 2 gate to central square
+    // does not have current tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_2_ID]) %}
+    // has opposite tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_4_ID]) %}
+    // if has one adjacent tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_3_ID]) %}
+    let (time) = get_move_block_time(Point(X, Y), TOWER_2_ID, CENTRAL_SQUARE_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 + 10 %}
+    // if has one adjacent tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_3_ID]) %}
+    let (time) = get_move_block_time(Point(X, Y), TOWER_2_ID, CENTRAL_SQUARE_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 + 10 %}
+    // if has two adjacent towers
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_GIANTS], [ids.X, ids.Y, ids.TOWER_3_ID]) %}
+    let (time) = get_move_block_time(Point(X, Y), TOWER_2_ID, CENTRAL_SQUARE_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 + 10 %}
+    // if has no adjacent tower so goes to opposite tower
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
+    %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_3_ID]) %}
+    let (time) = get_move_block_time(Point(X, Y), TOWER_2_ID, CENTRAL_SQUARE_ID, ORDER_OF_GIANTS);
+    %{ assert ids.time == 25 + 25 + 10 %}
 
     // order of fury
-    let (time) = get_move_block_time(Point(X, Y), CENTRAL_SQUARE_ID, TOWER_1_ID, ORDER_OF_FURY);
-    %{ assert ids.time == 10 %}
-
-    // need to conquer all 4 to go from defending tower to attacking central square
+    // need to conquer all 4 to go from defending tower to attacking central square or to go out of central square
     %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_1_ID]) %}
     %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_2_ID]) %}
     %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_3_ID]) %}
     %{ store(context.self_address, "bastion_location_defending_order", [ids.ORDER_OF_FURY], [ids.X, ids.Y, ids.TOWER_4_ID]) %}
     let (time) = get_move_block_time(Point(X, Y), TOWER_1_ID, CENTRAL_SQUARE_ID, ORDER_OF_FURY);
-    %{ assert ids.time == 10 %}
+    %{ assert ids.time == 25 %}
+    let (time) = get_move_block_time(Point(X, Y), CENTRAL_SQUARE_ID, TOWER_1_ID, ORDER_OF_FURY);
+    %{ assert ids.time == 25 %}
 
     //
     // TOWER TO TOWER

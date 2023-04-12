@@ -73,7 +73,12 @@ struct ArmyLocationData {
 // Emited every time an army moves from one location to another
 @event
 func BastionArmyMoved(
-    point: Point, previous_location: felt, next_location: felt, realm_id: Uint256, army_id: felt
+    point: Point,
+    previous_location: felt,
+    next_location: felt,
+    arrival_block: felt,
+    realm_id: Uint256,
+    army_id: felt,
 ) {
 }
 
@@ -250,9 +255,11 @@ func bastion_take_location{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range
 
         // check that the defending order does not have any more troops there
         let (order_count) = bastion_location_order_count.read(point, location, defending_order);
-        let (max_moving_time) = bastion_moving_times.read(
-            MovingTimes.DistanceStagingAreaCentralSquare
-        );
+
+        // max moving time would be to go from tower gate to central square through an opposite tower
+        let (d1) = bastion_moving_times.read(MovingTimes.DistanceGateGate);
+        let (d2) = bastion_moving_times.read(MovingTimes.DistanceTowerCentralSquare);
+        let max_moving_time = 2 * d1 + 2;
 
         // verify if there is at least one settled army
         with_attr error_message("Bastions: There are still settled defenders in the location") {
@@ -376,6 +383,8 @@ func bastion_attack{
 
     // Does not verify that the owner is right and order is not the same because already done in combat module
     let (combat_address) = Module.get_module_address(ModuleIds.L06_Combat);
+
+    Module.ERC721_owner_check(attacking_realm_id, ExternalContractIds.S_Realms);
     ICombat.initiate_combat_approved_module(
         combat_address, attacking_army_id, attacking_realm_id, defending_army_id, defending_realm_id
     );
@@ -507,7 +516,10 @@ func bastion_move{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
     let (army_coordinates) = ITravel.get_coordinates(
         travel_address, ExternalContractIds.S_Realms, realm_id, army_id
     );
+
+    // assert travel
     Travel.assert_same_points(army_coordinates, point);
+    ITravel.assert_arrived(travel_address, ExternalContractIds.S_Realms, realm_id, army_id);
 
     // get army location data (arrival block and location)
     let (army_location_data) = bastion_army_location.read(realm_id, army_id);
@@ -549,8 +561,8 @@ func bastion_move{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
     // don't change previous location storage if they were on 0 location (staging area)
     let is_not_on_staging_area = is_not_zero(army_location_data.location);
     if (is_not_on_staging_area == TRUE) {
-        // if true, then army was not settled yet, remove one from there
         if (previous_loc_mover_data.arrival_block == army_location_data.arrival_block) {
+            // if true, then army was not settled yet, remove one from there
             current_movers.write(
                 point,
                 army_location_data.location,
@@ -631,13 +643,19 @@ func bastion_move{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
         }
     } else {
         // if they are going to staging area, remove the travel restrain from Travel module
+        // TODO: this allows armies to go out of the bastion before having to wait to arrive at staging area
         ITravel.allow_travel(travel_address, ExternalContractIds.S_Realms, realm_id, army_id);
         tempvar syscall_ptr = syscall_ptr;
         tempvar pedersen_ptr = pedersen_ptr;
         tempvar range_check_ptr = range_check_ptr;
     }
+    bastion_army_location.write(
+        realm_id, army_id, ArmyLocationData(next_arrival_block, next_location)
+    );
     // emit event
-    BastionArmyMoved.emit(point, army_location_data.location, next_location, realm_id, army_id);
+    BastionArmyMoved.emit(
+        point, army_location_data.location, next_location, next_arrival_block, realm_id, army_id
+    );
     return ();
 }
 
@@ -725,6 +743,15 @@ func update_storage_destroyed_army{syscall_ptr: felt*, pedersen_ptr: HashBuiltin
     // allow destroyed army_id to travel again because it is not in bastion anymore
     ITravel.allow_travel(
         travel_address, ExternalContractIds.S_Realms, destroyed_realm_id, destroyed_army_id
+    );
+
+    // DISCUSS: set the army back to its realm when dead
+    // set coordinates back to 0
+    ITravel.reset_coordinates(
+        contract_address=travel_address,
+        contract_id=ExternalContractIds.S_Realms,
+        token_id=destroyed_realm_id,
+        nested_id=destroyed_army_id,
     );
 
     return ();
@@ -829,20 +856,21 @@ func get_move_block_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
         point, current_location
     );
     let (next_location_defender) = bastion_location_defending_order.read(point, next_location);
+
+    let (tower_1_defending_order) = bastion_location_defending_order.read(point, 1);
+    let (tower_2_defending_order) = bastion_location_defending_order.read(point, 2);
+    let (tower_3_defending_order) = bastion_location_defending_order.read(point, 3);
+    let (tower_4_defending_order) = bastion_location_defending_order.read(point, 4);
+
+    let (local number_of_conquered_towers) = Bastions.number_of_conquered_towers(
+        mover_order,
+        tower_1_defending_order,
+        tower_2_defending_order,
+        tower_3_defending_order,
+        tower_4_defending_order,
+    );
     // location 5 = central square
     if (next_location == 5) {
-        let (tower_1_defending_order) = bastion_location_defending_order.read(point, 1);
-        let (tower_2_defending_order) = bastion_location_defending_order.read(point, 2);
-        let (tower_3_defending_order) = bastion_location_defending_order.read(point, 3);
-        let (tower_4_defending_order) = bastion_location_defending_order.read(point, 4);
-
-        let (number_of_conquered_towers) = Bastions.number_of_conquered_towers(
-            mover_order,
-            tower_1_defending_order,
-            tower_2_defending_order,
-            tower_3_defending_order,
-            tower_4_defending_order,
-        );
         // if mover order is the same as the central square defending order
         if (next_location_defender == mover_order) {
             with_attr error_message(
@@ -855,14 +883,29 @@ func get_move_block_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
                 );
             } else {
                 // towers
-                // if not 0, it has to be one of the towers because i already no hes not on location 5
+                // if not 0, it has to be one of the towers because i already know hes not on location 5
                 if (current_location_defender == mover_order) {
                     let (moving_time) = bastion_moving_times.read(
                         MovingTimes.DistanceTowerCentralSquare
                     );
                 } else {
-                    let (moving_time) = bastion_moving_times.read(
-                        MovingTimes.DistanceTowerGateCentralSquare
+                    let (distance_gate_tower) = bastion_moving_times.read(
+                        MovingTimes.DistanceGateTower
+                    );
+                    let (distance_tower_cs) = bastion_moving_times.read(
+                        MovingTimes.DistanceTowerCentralSquare
+                    );
+                    // if you are on a tower gate, you need to through the closest tower
+                    // you need to go through a tower to enter CS but you don't need to go through a tower to exit
+                    let (moving_time) = Bastions.find_shortest_path_from_tower_to_central_square(
+                        mover_order,
+                        current_location,
+                        tower_1_defending_order,
+                        tower_2_defending_order,
+                        tower_3_defending_order,
+                        tower_4_defending_order,
+                        distance_gate_tower,
+                        distance_tower_cs,
                     );
                 }
             }
@@ -886,9 +929,19 @@ func get_move_block_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
         if (next_location == 0) {
             // if you are on central square
             if (current_location == 5) {
-                let (moving_time) = bastion_moving_times.read(
-                    MovingTimes.DistanceStagingAreaCentralSquare
-                );
+                if (current_location_defender == mover_order) {
+                    let (moving_time) = bastion_moving_times.read(
+                        MovingTimes.DistanceStagingAreaCentralSquare
+                    );
+                } else {
+                    with_attr error_message(
+                            "Bastions: attacker cannot move out of inner gate if does not hold all 4 towers") {
+                        assert number_of_conquered_towers = 4;
+                    }
+                    let (moving_time) = bastion_moving_times.read(
+                        MovingTimes.DistanceStagingAreaCentralSquare
+                    );
+                }
             } else {
                 // you are on a tower
                 let (moving_time) = bastion_moving_times.read(MovingTimes.DistanceStagingAreaTower);
@@ -901,37 +954,42 @@ func get_move_block_time{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
             } else {
                 // you can only move to adjacent towers
                 if (current_location == 5) {
+                    // CS defender can move as he wants
                     if (next_location_defender == mover_order) {
                         if (current_location_defender == mover_order) {
                             let (moving_time) = bastion_moving_times.read(
                                 MovingTimes.DistanceTowerCentralSquare
                             );
                         } else {
+                            // attackers can only move from CS if all towers are taken
+                            with_attr error_message(
+                                    "Bastions: attacker cannot move out of inner gate if does not hold all 4 towers") {
+                                assert number_of_conquered_towers = 4;
+                            }
                             let (moving_time) = bastion_moving_times.read(
                                 MovingTimes.DistanceTowerInnerGate
                             );
                         }
                     } else {
-                        if (current_location_defender == mover_order) {
-                            let (moving_time) = bastion_moving_times.read(
-                                MovingTimes.DistanceTowerGateCentralSquare
-                            );
-                        } else {
-                            let (moving_time) = bastion_moving_times.read(
-                                MovingTimes.DistanceInnerGateTowerGate
-                            );
+                        with_attr error_message(
+                                "Bastions: attacker cannot move out of inner gate if does not hold all 4 towers") {
+                            assert current_location_defender = mover_order;
                         }
+                        let (moving_time) = bastion_moving_times.read(
+                            MovingTimes.DistanceTowerInnerGate
+                        );
                     }
                 } else {
+                    // going from tower to tower
                     let (is_adjacent_tower) = Bastions.is_adjacent_tower(
                         current_location, next_location
                     );
+                    // TODO: maybe in the future add a way to move to non adjacent tower
                     with_attr error_message(
                             "Bastions: Can only move from tower to adjacent tower") {
                         assert is_adjacent_tower = TRUE;
                     }
                     // if you move from your order tower to another of your order tower
-                    // if (is_not_zero(current_location_order_difference + next_location_order_difference) == 0) {
                     if (next_location_defender == mover_order) {
                         if (current_location_defender == mover_order) {
                             let (moving_time) = bastion_moving_times.read(
@@ -1036,7 +1094,7 @@ func set_bastion_moving_times{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, ra
 // Getters
 // -----------------------------------
 
-@external
+@view
 func get_bastion_location_defending_order{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 }(point: Point, location: felt) -> (defending_order: felt) {
@@ -1046,7 +1104,7 @@ func get_bastion_location_defending_order{
 
 // @dev You can use this to identify when an order has taken a Bastion so that you can
 // @dev distribute the bonus accordingly
-@external
+@view
 func get_bastion_location_cooldown_end{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 }(point: Point, location: felt) -> (cooldown_end: felt) {
@@ -1054,7 +1112,7 @@ func get_bastion_location_cooldown_end{
     return (cooldown_end,);
 }
 
-@external
+@view
 func get_bastion_bonus_type{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     point: Point
 ) -> (bonus_type: felt) {
