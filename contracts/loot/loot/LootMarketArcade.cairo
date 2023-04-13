@@ -338,6 +338,8 @@ func _mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
 
     item_adventurer_owner.write(next_item_id, adventurer_token_id, TRUE);
 
+    UpdateItemState.emit(next_item_id, _item);
+
     return (next_item_id,);
 }
 

@@ -147,21 +147,21 @@ async def run():
     #     arguments=[xoroshiro],
     # )
 
-    # # ---------------- MODULE IMPLEMENTATIONS  ----------------#
-    for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
-        await wrapped_declare(
-            config.ADMIN_ALIAS, contract.alias, config.nile_network, contract.alias
-        )
+    # # # ---------------- MODULE IMPLEMENTATIONS  ----------------#
+    # for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
+    #     await wrapped_declare(
+    #         config.ADMIN_ALIAS, contract.alias, config.nile_network, contract.alias
+    #     )
 
-        class_hash = get_class_hash(contract.alias)
+    #     class_hash = get_class_hash(contract.alias)
 
-        await logged_deploy(
-            config.nile_network,
-            config.ADMIN_ALIAS,
-            "PROXY_Logic",
-            alias="proxy_" + contract.alias,
-            calldata=[class_hash],
-        )
+    #     await logged_deploy(
+    #         config.nile_network,
+    #         config.ADMIN_ALIAS,
+    #         "PROXY_Logic",
+    #         alias="proxy_" + contract.alias,
+    #         calldata=[class_hash],
+    #     )
 
     # #---------------- TOKEN IMPLEMENTATIONS  ----------------#
     for contract in TOKEN_CONTRACT_IMPLEMENTATIONS:
