@@ -39,7 +39,7 @@ if file_does_not_exist "goerli.accounts.json"; then
 0x077d8cc306aee2bcf765026b995e17245e2afa95a52e53dee42f83b683c9b6f6:artifacts/abis/PROXY_Logic.json:proxy_Realms_ERC721_Mintable
 0x023b86be0b3da5c2fdbd80d1d57f1b54391588ba338acecdd014a208d47ba9ca:artifacts/abis/Lords_ERC20_Mintable.json:Lords_ERC20_Mintable" > goerli.deployments.txt
 
-    echo "${address}:$current_dir/survivorvenv/lib/python3.9/site-packages/nile/artifacts/abis/Account.json:STARKNET_PRIVATE_KEY
+    echo "${address}:/usr/local/lib/python3.9/site-packages/nile/artifacts/abis/Account.json:STARKNET_PRIVATE_KEY
 0x00a2f3fe1bc32233fe88d8f21d8de2d4832ebbcc8e26f86cab003f78518c9584:artifacts/abis/PROXY_Logic.json:proxy_Arbiter_Loot
 0x06d79d5eef719afc4c0ea2f1b13247f20b8d38132e2bba3d6be7dc31cec3c13e:artifacts/abis/PROXY_Logic.json:proxy_ModuleController_Loot
 0x05178e0b39b822fe3cf111408222aa564b9e250860715f186ac58357d8044312:artifacts/abis/xoroshiro128_starstar.json:xoroshiro128_starstar
