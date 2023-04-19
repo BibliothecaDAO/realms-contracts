@@ -361,6 +361,8 @@ func update_adventurer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     let updated_item = ItemLib.update_adventurer(item_, adventurerId);
 
     item.write(tokenId, updated_item);
+
+    UpdateItemState.emit(tokenId, updated_item);
     return ();
 }
 

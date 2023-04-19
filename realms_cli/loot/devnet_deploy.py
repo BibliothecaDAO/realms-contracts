@@ -73,7 +73,7 @@ async def run():
     config = Config(network)
 
     # await wrapped_declare(
-    #     config.ADMIN_ALIAS, "PROXY_Logic", config.nile_network, 'proxy'
+    #     config.ADMIN_ALIAS, "PROXY_Logic", config.nile_network, "proxy"
     # )
 
     # # # ---------------- CONTROLLERS  ----------------#
@@ -180,7 +180,10 @@ async def run():
         )
 
     await wrapped_declare(
-        config.ADMIN_ALIAS, "Lords_ERC20_Mintable", config.nile_network, "Lords_ERC20_Mintable"
+        config.ADMIN_ALIAS,
+        "Lords_ERC20_Mintable",
+        config.nile_network,
+        "Lords_ERC20_Mintable",
     )
 
     await logged_deploy(
@@ -211,7 +214,9 @@ async def run():
 
     # ---------------- INIT MODULES  ----------------#
 
-    deployment, _ = safe_load_deployment("proxy_ModuleController_Loot", config.nile_network)
+    deployment, _ = safe_load_deployment(
+        "proxy_ModuleController_Loot", config.nile_network
+    )
 
     await wrapped_send(
         network=config.nile_network,
@@ -268,7 +273,9 @@ async def run():
 
     module_contract_setup = []
     for module in MODULE_CONTRACT_IMPLEMENTATIONS:
-        deployment, _ = safe_load_deployment("proxy_" + module.alias, config.nile_network)
+        deployment, _ = safe_load_deployment(
+            "proxy_" + module.alias, config.nile_network
+        )
 
         module_contract_setup.append([deployment, module.id.value])
 
@@ -302,7 +309,9 @@ async def run():
 
     # ---------------- SET EXTERNAL CONTRACT ADDRESSES ----------------#
 
-    lords_deployment, _ = safe_load_deployment("Lords_ERC20_Mintable", config.nile_network)
+    lords_deployment, _ = safe_load_deployment(
+        "Lords_ERC20_Mintable", config.nile_network
+    )
 
     realms_deployment, _ = safe_load_deployment(
         "proxy_Realms_ERC721_Mintable", config.nile_network
@@ -319,6 +328,7 @@ async def run():
             [config.ADMIN_ADDRESS, ExternalContractIds.Treasury.value],
         ],
     )
+
 
 if __name__ == "__main__":
     asyncio.run(run())
