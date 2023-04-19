@@ -40,6 +40,10 @@ from openzeppelin.token.erc721.IERC721 import IERC721
 // -----------------------------------
 
 @event
+func MintItem(item_token_id: Uint256, to: felt, adventurer_token_id: Uint256) {
+}
+
+@event
 func UpdateItemState(item_token_id: Uint256, item: Item) {
 }
 
@@ -338,6 +342,7 @@ func _mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
 
     item_adventurer_owner.write(next_item_id, adventurer_token_id, TRUE);
 
+    MintItem.emit(next_item_id, to, adventurer_token_id);
     UpdateItemState.emit(next_item_id, _item);
 
     return (next_item_id,);

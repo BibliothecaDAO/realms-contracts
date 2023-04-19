@@ -29,7 +29,13 @@ from starkware.starknet.cli.starknet_cli import NETWORKS
 
 import logging
 
-from nile.common import get_class_hash, ABIS_DIRECTORY, is_alias, DECLARATIONS_FILENAME, parse_information
+from nile.common import (
+    get_class_hash,
+    ABIS_DIRECTORY,
+    is_alias,
+    DECLARATIONS_FILENAME,
+    parse_information,
+)
 from nile.deployments import class_hash_exists
 from nile.utils import hex_class_hash
 from nile.starknet_cli.deploy_account import (
@@ -62,6 +68,8 @@ async def send_multi(self, to, method, calldata, nonce=None):
     else:
         if nonce is None:
             nonce = await get_nonce(self.address, self.network)
+
+    print(calls)
 
     (execute_calldata, sig_r, sig_s) = self.signer.sign_invoke(
         sender=self.address,
@@ -368,7 +376,7 @@ async def wrapped_declare(account, contract_name, network, alias):
             signature=[sig_r, sig_s],
             max_fee=config.MAX_FEE,
             query_flag=None,
-            **type_specific_args
+            **type_specific_args,
         )
         class_hash, tx_hash = parse_information(output)
         padded_hash = hex_class_hash(class_hash)
@@ -388,6 +396,7 @@ async def wrapped_declare(account, contract_name, network, alias):
         )
     else:
         time.sleep(5)
+
 
 # async def wrapped_declare(account, contract_name, network, alias):
 #     if os.path.dirname(__file__).split("/")[1] == "Users":
@@ -607,6 +616,7 @@ async def capture_stdout(func):
     result = output.rstrip()
     return result
 
+
 async def _process_arguments(account, max_fee, nonce, calldata=None):
     if max_fee is not None:
         max_fee = int(max_fee)
@@ -619,13 +629,14 @@ async def _process_arguments(account, max_fee, nonce, calldata=None):
         )
         nonce = int(output_nonce)
 
-
     if calldata is not None:
         calldata = [normalize_number(x) for x in calldata]
 
     return max_fee, nonce, calldata
 
+
 _TransactionReceipt = namedtuple("TransactionReceipt", ["tx_hash", "status", "receipt"])
+
 
 async def status(
     tx_hash, network, watch_mode=None, contracts_file=None
@@ -655,6 +666,7 @@ async def status(
     print(f"🧾 Error message:\n{error_message}")
 
     return TransactionStatus(tx_hash, receipt.status, error_message)
+
 
 def _get_tx_receipt(tx_hash, raw_receipt, watch_mode) -> _TransactionReceipt:
     receipt = _TransactionReceipt(
