@@ -243,6 +243,7 @@ func attack{
 
     // if the beast is alive, it automatically counter attacks
     if (beast_is_alive == TRUE) {
+        BeastAttacked.emit(beast_token_id, adventurer_id, damage_dealt, updated_health_beast.Health, 0, 0);
         // get the location the beast attacks
         let (beast_attack_location) = BeastStats.get_attack_location_from_id(beast.Id);
 
