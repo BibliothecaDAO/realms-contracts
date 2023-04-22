@@ -73,7 +73,7 @@ func FledBeast(beast_token_id: Uint256, adventurer_token_id: Uint256) {
 }
 
 @event
-func AdventurerAmbushed(beast_token_id: Uint256, adventurer_token_id: Uint256, damage: felt) {
+func AdventurerAmbushed(beast_token_id: Uint256, adventurer_token_id: Uint256, damage: felt, adventurer_health: felt) {
 }
 
 @event 
@@ -460,10 +460,10 @@ func flee{
 
         // update adventurer health
         IAdventurer.deduct_health(adventurer_address, Uint256(beast.Adventurer, 0), damage_taken);
-        AdventurerAmbushed.emit(beast_token_id, Uint256(beast.Adventurer, 0), damage_taken);
 
         // check if beast counter attack killed adventurer
         let (updated_adventurer) = get_adventurer_from_beast(beast_token_id);
+        AdventurerAmbushed.emit(beast_token_id, Uint256(beast.Adventurer, 0), damage_taken, updated_adventurer.Health);
 
         // if the adventurer is dead
         if (updated_adventurer.Health == 0) {

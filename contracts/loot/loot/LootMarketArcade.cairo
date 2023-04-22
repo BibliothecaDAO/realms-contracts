@@ -35,6 +35,14 @@ from contracts.loot.utils.constants import ModuleIds, ExternalContractIds, START
 from contracts.loot.adventurer.interface import IAdventurer
 from openzeppelin.token.erc721.IERC721 import IERC721
 
+struct Bid {
+    price: felt,
+    expiry: felt,
+    bidder: felt,
+    status: felt,
+    item_id: felt,
+}
+
 // -----------------------------------
 // Events
 // -----------------------------------
@@ -45,6 +53,10 @@ func MintItem(item_token_id: Uint256, to: felt, adventurer_token_id: Uint256) {
 
 @event
 func UpdateItemState(item_token_id: Uint256, item: Item) {
+}
+
+@event
+func ItemMerchantUpdate(item: Item, market_item_id: felt, bid: Bid) {
 }
 
 @event
@@ -61,6 +73,10 @@ func ItemNamePrefixesAssigned(item_token_id: Uint256) {
 
 @event
 func ItemNameSuffixAssigned(item_token_id: Uint256) {
+}
+
+@event
+func MintDailyItems(caller: felt, items_number: felt) {
 }
 
 @event
@@ -848,14 +864,6 @@ namespace BidStatus {
     const open = 1;
 }
 
-struct Bid {
-    price: felt,
-    expiry: felt,
-    bidder: felt,
-    status: felt,
-    item_id: felt,
-}
-
 @storage_var
 func bid(market_item_id: Uint256) -> (bid: Bid) {
 }
@@ -885,10 +893,6 @@ const SEED_MULTI = 5846975;  // for psudeo randomness now
 const NUMBER_LOOT_ITEMS = 101;
 const MINIMUM_ITEMS_EMITTED = 20;
 const ITEMS_PER_EPOCH_PER_ADVENTUER = 3;
-
-@event
-func ItemMerchantUpdate(item: Item, market_item_id: felt, bid: Bid) {
-}
 
 // returns TRUE if item is owned
 @view
@@ -968,6 +972,10 @@ func mint_daily_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     // let (caller) = get_caller_address();
     // IBeast.add_to_balance(beast_address, Uint256(2, 0), 2);
 
+    let (caller) = get_caller_address();
+
+    MintDailyItems.emit(caller, _new_items);
+
     return ();
 }
 
@@ -981,7 +989,12 @@ func emit_new_items_loop{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
 
     let (new_item: Item) = _get_random_item_from_seed(item_start_index, daily_seed);
 
-    ItemMerchantUpdate.emit(new_item, item_start_index, Bid(BASE_PRICE, 0, 0, 0, new_item.Id));
+    bid.write(
+        Uint256(item_start_index, 0),
+        Bid(0, 0, 0, BidStatus.closed, new_item.Id),
+    );
+
+    ItemMerchantUpdate.emit(new_item, item_start_index, Bid(0, 0, 0, BidStatus.closed, new_item.Id));
 
     return emit_new_items_loop(daily_seed, item_start_index_len - 1, item_start_index + 1);
 }
@@ -1078,10 +1091,10 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
         assert higer_than_base_price = TRUE;
     }
 
-    let (item) = get_random_item_from_seed(market_item_id.low);
-
     // read current bid
     let (current_bid) = bid.read(market_item_id);
+
+    let (item: Item) = ItemLib.generate_item_by_id(current_bid.item_id);
 
     // subtract gold balance from buyer
     let (beast_address) = Module.get_module_address(ModuleIds.Beast);
@@ -1104,7 +1117,12 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     if (current_bid.expiry == FALSE) {
         bid.write(
             market_item_id,
-            Bid(price, current_time + BID_TIME, adventurer_id_as_felt, BidStatus.open, item.Id),
+            Bid(price, current_time + BID_TIME, adventurer_id_as_felt, BidStatus.open, current_bid.item_id),
+        );
+        ItemMerchantUpdate.emit(
+            item,
+            market_item_id.low,
+            Bid(price, current_time + BID_TIME, adventurer_id_as_felt, BidStatus.open, current_bid.item_id),
         );
         return ();
     }
@@ -1128,13 +1146,13 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     // update bid state
     bid.write(
         market_item_id,
-        Bid(price, current_bid.expiry, adventurer_id_as_felt, BidStatus.open, item.Id),
+        Bid(price, current_bid.expiry, adventurer_id_as_felt, BidStatus.open, current_bid.item_id),
     );
 
     ItemMerchantUpdate.emit(
         item,
         market_item_id.low,
-        Bid(price, current_bid.expiry, adventurer_id_as_felt, BidStatus.open, item.Id),
+        Bid(price, current_bid.expiry, adventurer_id_as_felt, BidStatus.open, current_bid.item_id),
     );
 
     return ();
