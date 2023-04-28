@@ -30,11 +30,11 @@ NEW_MODULES = [
     # Contracts("S_Realms_ERC721_Mintable"),
     # Contracts("Resources_ERC1155_Mintable_Burnable"),
     # Contracts("Exchange_ERC20_1155"),
-    # Contracts("Lords_ERC20_Mintable"),
+    Contracts("Lords_ERC20_Mintable"),
     # Contracts("Bastions"),
     # Contracts("Adventurer"),
     # Contracts("LootMarketArcade"),
-    Contracts("Beast"),
+    # Contracts("Beast"),
 ]
 
 
@@ -54,9 +54,7 @@ async def run():
 
         delete_existing_declaration(contract.name)
 
-        await wrapped_declare(
-            config.ADMIN_ALIAS, contract.name, network, contract.name
-        )
+        await wrapped_declare(config.ADMIN_ALIAS, contract.name, network, contract.name)
 
         class_hash = get_class_hash(contract.name)
 
@@ -67,6 +65,7 @@ async def run():
             function="upgrade",
             arguments=[class_hash],
         )
+
 
 if __name__ == "__main__":
     asyncio.run(run())

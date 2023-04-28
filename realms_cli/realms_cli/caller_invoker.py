@@ -323,6 +323,72 @@ def find_file(root_dir, file_name):
     return None
 
 
+async def declare_account(account, network, alias):
+    config = Config(nile_network=network)
+    if os.path.dirname(__file__).split("/")[1] == "Users":
+        path = "/" + os.path.join(
+            os.path.dirname(__file__).split("/")[1],
+            os.path.dirname(__file__).split("/")[2],
+            "Documents",
+            "realms",
+            "realms-contracts",
+        )
+    else:
+        path = "/workspaces/realms-contracts"
+    account = await Account(account, network)
+
+    # If devnet we need to write the call and check declerations manually
+    if network == "devnet":
+        print(f"🚀 Declaring Account")
+
+        if alias_exists(alias, network):
+            file = f"{network}.{DECLARATIONS_FILENAME}"
+            raise Exception(f"Alias {alias} already exists in {file}")
+        max_fee, nonce, _ = await _process_arguments(account, config.MAX_FEE, None)
+        # Create the transaction
+        transaction = DeclareTransaction(
+            account_address=account.address,
+            contract_to_submit="Account",
+            max_fee=max_fee or 0,
+            nonce=nonce,
+            network=network,
+            overriding_path=[
+                "/Users/supsam/cairo_venv/lib/python3.9/site-packages/nile/artifacts"
+            ],
+        )
+
+        sig_r, sig_s = account.signer.sign(message_hash=transaction._get_tx_hash())
+
+        type_specific_args = transaction._get_execute_call_args()
+
+        output = await execute_call(
+            "declare",
+            network,
+            signature=[sig_r, sig_s],
+            max_fee=config.MAX_FEE,
+            query_flag=None,
+            **type_specific_args,
+        )
+        class_hash, tx_hash = parse_information(output)
+        padded_hash = hex_class_hash(class_hash)
+
+        print(f"⏳ Successfully sent declaration of Account as {padded_hash}")
+        print(f"🧾 Transaction hash: {hex(tx_hash)}")
+
+        deployments.register_class_hash(class_hash, network, alias)
+    else:
+        tx_wrapper = await account.declare("Account", max_fee=4226601250467000)
+        tx_status, declared_hash = await tx_wrapper.execute(watch_mode="track")
+
+    if network != "devnet":
+        get_tx_status(
+            network,
+            str(tx_wrapper.hash),
+        )
+    else:
+        time.sleep(5)
+
+
 async def wrapped_declare(account, contract_name, network, alias):
     config = Config(nile_network=network)
     if os.path.dirname(__file__).split("/")[1] == "Users":

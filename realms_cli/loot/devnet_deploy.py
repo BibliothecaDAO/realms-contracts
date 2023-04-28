@@ -1,5 +1,10 @@
 from collections import namedtuple
-from realms_cli.caller_invoker import wrapped_declare, wrapped_send, compile
+from realms_cli.caller_invoker import (
+    wrapped_declare,
+    declare_account,
+    wrapped_send,
+    compile,
+)
 from realms_cli.config import Config, safe_load_deployment
 from realms_cli.deployer import logged_deploy
 from realms_cli.utils import str_to_felt, strhex_as_strfelt
@@ -72,96 +77,98 @@ async def run():
     network = args.network
     config = Config(network)
 
-    # await wrapped_declare(
-    #     config.ADMIN_ALIAS, "PROXY_Logic", config.nile_network, "proxy"
-    # )
+    await declare_account(config.ADMIN_ALIAS, config.nile_network, "Account")
 
-    # # # ---------------- CONTROLLERS  ----------------#
-    # for contract in CONTROLLER_CONTRACT_IMPLEMENTATIONS:
-    #     await wrapped_declare(
-    #         config.ADMIN_ALIAS, contract.name, config.nile_network, contract.alias
-    #     )
+    await wrapped_declare(
+        config.ADMIN_ALIAS, "PROXY_Logic", config.nile_network, "proxy"
+    )
 
-    #     class_hash = get_class_hash(contract.name)
+    # # ---------------- CONTROLLERS  ----------------#
+    for contract in CONTROLLER_CONTRACT_IMPLEMENTATIONS:
+        await wrapped_declare(
+            config.ADMIN_ALIAS, contract.name, config.nile_network, contract.alias
+        )
 
-    #     await logged_deploy(
-    #         config.nile_network,
-    #         config.ADMIN_ALIAS,
-    #         "PROXY_Logic",
-    #         alias="proxy_" + contract.alias,
-    #         calldata=[class_hash],
-    #     )
+        class_hash = get_class_hash(contract.name)
 
-    # await wrapped_declare(
-    #     config.ADMIN_ALIAS,
-    #     "xoroshiro128_starstar",
-    #     config.nile_network,
-    #     "xoroshiro128_starstar",
-    # )
+        await logged_deploy(
+            config.nile_network,
+            config.ADMIN_ALIAS,
+            "PROXY_Logic",
+            alias="proxy_" + contract.alias,
+            calldata=[class_hash],
+        )
 
-    # await logged_deploy(
-    #     config.nile_network,
-    #     config.ADMIN_ALIAS,
-    #     "xoroshiro128_starstar",
-    #     alias="xoroshiro128_starstar",
-    #     calldata=["123"],
-    # )
+    await wrapped_declare(
+        config.ADMIN_ALIAS,
+        "xoroshiro128_starstar",
+        config.nile_network,
+        "xoroshiro128_starstar",
+    )
 
-    # await wrapped_send(
-    #     network=config.nile_network,
-    #     signer_alias=config.ADMIN_ALIAS,
-    #     contract_alias="proxy_Arbiter_Loot",
-    #     function="initializer",
-    #     arguments=[config.ADMIN_ADDRESS],
-    # )
+    await logged_deploy(
+        config.nile_network,
+        config.ADMIN_ALIAS,
+        "xoroshiro128_starstar",
+        alias="xoroshiro128_starstar",
+        calldata=["123"],
+    )
 
-    # module, _ = safe_load_deployment("proxy_Arbiter_Loot", config.nile_network)
+    await wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="proxy_Arbiter_Loot",
+        function="initializer",
+        arguments=[config.ADMIN_ADDRESS],
+    )
 
-    # await wrapped_send(
-    #     network=config.nile_network,
-    #     signer_alias=config.ADMIN_ALIAS,
-    #     contract_alias="proxy_ModuleController_Loot",
-    #     function="initializer",
-    #     arguments=[module, config.ADMIN_ADDRESS],
-    # )
+    module, _ = safe_load_deployment("proxy_Arbiter_Loot", config.nile_network)
 
-    # module, _ = safe_load_deployment("proxy_ModuleController_Loot", config.nile_network)
+    await wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="proxy_ModuleController_Loot",
+        function="initializer",
+        arguments=[module, config.ADMIN_ADDRESS],
+    )
 
-    # await wrapped_send(
-    #     network=config.nile_network,
-    #     signer_alias=config.ADMIN_ALIAS,
-    #     contract_alias="proxy_Arbiter_Loot",
-    #     function="set_address_of_controller",
-    #     arguments=[
-    #         module,
-    #     ],
-    # )
+    module, _ = safe_load_deployment("proxy_ModuleController_Loot", config.nile_network)
 
-    # xoroshiro, _ = safe_load_deployment("xoroshiro128_starstar", config.nile_network)
+    await wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="proxy_Arbiter_Loot",
+        function="set_address_of_controller",
+        arguments=[
+            module,
+        ],
+    )
 
-    # await wrapped_send(
-    #     network=config.nile_network,
-    #     signer_alias=config.ADMIN_ALIAS,
-    #     contract_alias="proxy_Arbiter_Loot",
-    #     function="set_xoroshiro",
-    #     arguments=[xoroshiro],
-    # )
+    xoroshiro, _ = safe_load_deployment("xoroshiro128_starstar", config.nile_network)
 
-    # # # ---------------- MODULE IMPLEMENTATIONS  ----------------#
-    # for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
-    #     await wrapped_declare(
-    #         config.ADMIN_ALIAS, contract.alias, config.nile_network, contract.alias
-    #     )
+    await wrapped_send(
+        network=config.nile_network,
+        signer_alias=config.ADMIN_ALIAS,
+        contract_alias="proxy_Arbiter_Loot",
+        function="set_xoroshiro",
+        arguments=[xoroshiro],
+    )
 
-    #     class_hash = get_class_hash(contract.alias)
+    # # ---------------- MODULE IMPLEMENTATIONS  ----------------#
+    for contract in MODULE_CONTRACT_IMPLEMENTATIONS:
+        await wrapped_declare(
+            config.ADMIN_ALIAS, contract.alias, config.nile_network, contract.alias
+        )
 
-    #     await logged_deploy(
-    #         config.nile_network,
-    #         config.ADMIN_ALIAS,
-    #         "PROXY_Logic",
-    #         alias="proxy_" + contract.alias,
-    #         calldata=[class_hash],
-    #     )
+        class_hash = get_class_hash(contract.alias)
+
+        await logged_deploy(
+            config.nile_network,
+            config.ADMIN_ALIAS,
+            "PROXY_Logic",
+            alias="proxy_" + contract.alias,
+            calldata=[class_hash],
+        )
 
     # #---------------- TOKEN IMPLEMENTATIONS  ----------------#
     for contract in TOKEN_CONTRACT_IMPLEMENTATIONS:
@@ -200,17 +207,18 @@ async def run():
     )
 
     # give minting rights to the deployer
+    # NO LONGER NEEDED FOR NOW AS COMMENTED FOR TESTING
 
-    await wrapped_send(
-        network=config.nile_network,
-        signer_alias=config.ADMIN_ALIAS,
-        contract_alias="Lords_ERC20_Mintable",
-        function="grant_role",
-        arguments=[
-            MINT_ROLE,
-            config.USER_ADDRESS,
-        ],
-    )
+    # await wrapped_send(
+    #     network=config.nile_network,
+    #     signer_alias=config.ADMIN_ALIAS,
+    #     contract_alias="Lords_ERC20_Mintable",
+    #     function="grant_role",
+    #     arguments=[
+    #         MINT_ROLE,
+    #         config.USER_ADDRESS,
+    #     ],
+    # )
 
     # ---------------- INIT MODULES  ----------------#
 
