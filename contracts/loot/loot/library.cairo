@@ -81,7 +81,7 @@ namespace ItemLib {
         let (_, r) = unsigned_div_rem(rnd, 100);
 
         // set blank item
-        let Id = rnd + 1;
+        let Id = r + 1;
         let (Slot) = ItemStats.item_slot(Id);  // determined by Id
         let (Type) = ItemStats.item_type(Id);  // determined by Id
         let (Material) = ItemStats.item_material(Id);  // determined by Id

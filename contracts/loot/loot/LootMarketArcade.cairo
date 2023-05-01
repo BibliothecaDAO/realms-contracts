@@ -305,8 +305,7 @@ func mint{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
 
     // fetch new item with random Id
     let (rnd) = get_random_number();
-    let (ts) = get_block_timestamp();
-    let (new_item: Item) = ItemLib.generate_random_item(rnd * ts);
+    let (new_item: Item) = ItemLib.generate_random_item(rnd);
 
     let (id) = _mint(to, new_item, adventurer_token_id);
 
