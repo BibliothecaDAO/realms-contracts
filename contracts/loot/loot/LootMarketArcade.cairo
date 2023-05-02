@@ -638,9 +638,6 @@ func _increase_xp{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin
     // we still update item xp
     item.write(item_token_id, item_updated_xp);
 
-    // and emit an XP increase event
-    emit_item_xp_increase(item_token_id);
-
     // if greatness increased
     if (greatness_increased == TRUE) {
         // increase greatness
@@ -654,6 +651,7 @@ func _increase_xp{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin
         let below_greatness_fifteen = is_le(item_updated_greatness.Greatness, 14);
         if (below_greatness_fifteen == TRUE) {
             // it's not yet eligible for a special name so just return
+            UpdateItemState.emit(item_token_id, item_updated_greatness);
             return (item_updated_greatness,);
         }
 
@@ -668,6 +666,7 @@ func _increase_xp{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin
             // reduce cairo complexity by simply returning here
             // Should an item increase in greatness from 14->19 in a single
             // event (very unlikely), item won't get name suffix till greatness 20 - sorry friend your too 1337
+            UpdateItemState.emit(item_token_id, item_updated_suffix);
             return (item_updated_suffix,);
         }
 
@@ -681,21 +680,26 @@ func _increase_xp{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin
                 let (item_updated_prefixes) = _assign_name_prefixes(item_token_id);
 
                 // and return updated item
+                UpdateItemState.emit(item_token_id, item_updated_prefixes);
                 return (item_updated_prefixes,);
 
                 // if item already has suffiX
             } else {
                 // return the item with updated greatness
+                UpdateItemState.emit(item_token_id, item_updated_greatness);
                 return (item_updated_greatness,);
             }
             // if the item is not greatness 19+
         } else {
             // return the item with updated greatness
+            UpdateItemState.emit(item_token_id, item_updated_greatness);
             return (item_updated_greatness,);
         }
 
         // if greatness did not increase
-    } 
+    }
+
+    UpdateItemState.emit(item_token_id, item_updated_xp);
     
     return (item_updated_xp,);
 }
