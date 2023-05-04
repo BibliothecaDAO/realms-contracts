@@ -56,7 +56,6 @@ from contracts.loot.constants.adventurer import (
     AdventurerStatus,
     DiscoveryType,
     ItemDiscoveryType,
-    ThiefState,
     ItemShift,
 )
 from contracts.loot.constants.beast import Beast
@@ -70,12 +69,19 @@ from contracts.loot.utils.constants import (
     ModuleIds,
     ExternalContractIds,
     MINT_COST,
-    MINT_COST_INTERFACE,
+    FRONT_END_PROVIDER_REWARD,
+    FIRST_PLACE_REWARD,
+    SECOND_PLACE_REWARD,
+    THIRD_PLACE_REWARD,
     STARTING_GOLD,
-    KING_HIEST_REWARD_PERCENT,
-    KING_HIEST_DELAY,
 )
 from contracts.loot.constants.item import ITEM_XP_MULTIPLIER
+
+// Used to record top scores for distributing rewards
+struct TopScore {
+    address: felt,
+    xp: felt,
+}
 
 // -----------------------------------
 // Events
@@ -104,7 +110,7 @@ func Discovery(
 }
 
 @event
-func UpdateThiefState(thief_state: ThiefState) {
+func HighScoreReward(top_score_holders: TopScore) {
 }
 
 // -----------------------------------
@@ -119,9 +125,9 @@ func adventurer_static(adventurer_token_id: Uint256) -> (adventurer: AdventurerS
 func adventurer_dynamic(adventurer_token_id: Uint256) -> (adventurer: PackedAdventurerState) {
 }
 
-// balance of $LORDS
+// top scores used for rewarding top players
 @storage_var
-func adventurer_balance(adventurer_token_id: Uint256) -> (balance: Uint256) {
+func top_scores(index: felt) -> (top_score: TopScore) {
 }
 
 @storage_var
@@ -130,10 +136,6 @@ func treasury_address() -> (address: felt) {
 
 @storage_var
 func adventurer_image(tokenId: Uint256) -> (image: felt) {
-}
-
-@storage_var
-func thief() -> (thief: ThiefState) {
 }
 
 // -----------------------------------
@@ -154,6 +156,14 @@ func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     ERC721.initializer(name, symbol);
     ERC721Enumerable.initializer();
     Proxy.initializer(proxy_admin);
+
+    // initialize top three scores to treasury address
+    let (treasury) = Module.get_external_contract_address(ExternalContractIds.Treasury);
+    let default_top_score = TopScore(treasury, 0);
+    top_scores.write(0, default_top_score);
+    top_scores.write(1, default_top_score);
+    top_scores.write(2, default_top_score);
+
     return ();
 }
 
@@ -197,44 +207,37 @@ func mint{
     assert_not_zero(interface_address);
 
     let (controller) = Module.controller_address();
-    let (caller) = get_caller_address();
 
-    // birth
+    // create new adventurer based on provided parameters
     let (birth_time) = get_block_timestamp();
     let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.birth(
         race, home_realm, name, birth_time, order, image_hash_1, image_hash_2
     );
 
-    // pack
+    // pack adventurer for storage
     let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(adventurer_dynamic_);
 
-    // get current ID and add 1
+    // increment current id
     let (current_id: Uint256) = totalSupply();
-    let (next_adventurer_id, _) = uint256_add(current_id, Uint256(1, 0));
+    let (new_adventurer_id, _) = uint256_add(current_id, Uint256(1, 0));
 
-    // store
-    adventurer_static.write(next_adventurer_id, adventurer_static_);
-    adventurer_dynamic.write(next_adventurer_id, packed_new_adventurer);
+    // write adventurer to chain
+    adventurer_static.write(new_adventurer_id, adventurer_static_);
+    adventurer_dynamic.write(new_adventurer_id, packed_new_adventurer);
 
-    // mint
-    ERC721Enumerable._mint(to, next_adventurer_id);
+    // mint adventurer
+    ERC721Enumerable._mint(to, new_adventurer_id);
 
-    // lords
-    let (lords_address) = Module.get_external_contract_address(ExternalContractIds.Lords);
+    // distribute $lords rewards
+    _distribute_rewards(interface_address);
 
-    // send to Nexus
-    let (treasury) = Module.get_external_contract_address(ExternalContractIds.Treasury);
-    IERC20.transferFrom(lords_address, caller, treasury, Uint256(MINT_COST, 0));
+    // emit mint adventurer event and emit adventurer state
+    let (caller) = get_caller_address();
+    MintAdventurer.emit(new_adventurer_id, caller);
+    emit_adventurer_state(new_adventurer_id);
 
-    // send to interface provider
-    IERC20.transferFrom(lords_address, caller, interface_address, Uint256(MINT_COST_INTERFACE, 0));
-    // send to this contract and set Balance of Adventurer
-    let (this) = get_contract_address();
-    IERC20.transferFrom(lords_address, caller, this, Uint256(MINT_COST, 0));
-    MintAdventurer.emit(next_adventurer_id, caller);
-    emit_adventurer_state(next_adventurer_id);
-
-    return (next_adventurer_id,);
+    // return new adventurer token id
+    return (new_adventurer_id,);
 }
 
 @external
@@ -821,150 +824,6 @@ func explore{
     return (DiscoveryType.Nothing, 0);
 }
 
-// @notice Attempt to rob the king
-// @param adventurer_token_id: Id of adventurer
-// @return success: Value indicating success
-@external
-func rob_king{
-    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(adventurer_token_id: Uint256) -> (success: felt) {
-    alloc_locals;
-
-    // only adventurer owner can explore
-    ERC721.assert_only_token_owner(adventurer_token_id);
-
-    assert_not_dead(adventurer_token_id);
-
-    let (beast_address) = Module.get_module_address(ModuleIds.Beast);
-
-    // unpack adventurer
-    let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
-
-    let (gold_balance) = IBeast.balance_of(beast_address, adventurer_token_id);
-
-    let (thief_state) = thief.read();
-
-    let (king_balance) = IBeast.balance_of(beast_address, thief_state.AdventurerId);
-
-    // same as less than
-    let over_king_check = is_le(king_balance + 1, gold_balance);
-
-    with_attr error_message("Adventurer: Gold balance is not the highest.") {
-        assert over_king_check = TRUE;
-    }
-
-    let (current_time) = get_block_timestamp();
-
-    let new_thief = ThiefState(adventurer_token_id, current_time, gold_balance);
-
-    UpdateThiefState.emit(new_thief);
-
-    thief.write(new_thief);
-
-    return (TRUE,);
-}
-
-// @notice Kill the king
-// @param adventurer_token_id: Id of adventurer
-// @return success: Value indicating success
-@external
-func kill_thief{
-    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(adventurer_token_id: Uint256) -> (success: felt) {
-    alloc_locals;
-
-    // only adventurer owner can explore
-    ERC721.assert_only_token_owner(adventurer_token_id);
-
-    assert_not_dead(adventurer_token_id);
-
-    let (beast_address) = Module.get_module_address(ModuleIds.Beast);
-
-    // unpack adventurer
-    let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
-
-    let (gold_balance) = IBeast.balance_of(beast_address, adventurer_token_id);
-
-    let (thief_state) = thief.read();
-
-    let (king_balance) = IBeast.balance_of(beast_address, thief_state.AdventurerId);
-
-    with_attr error_message("Adventurer: There is no king to kill.") {
-        assert_not_zero(king_balance);
-    }
-
-    // same as less than
-    let over_king_check = is_le(king_balance + 1, gold_balance);
-
-    with_attr error_message("Adventurer: You do not have enough gold to kill the king.") {
-        assert over_king_check = TRUE;
-    }
-
-    // kill the thief
-    let (result) = _deduct_health(thief_state.AdventurerId, 1000);
-
-    let (adventurer) = get_adventurer_by_id(adventurer_token_id);
-
-    // emit event to capture adventurer dieing while trying to rob the king
-    UpdateAdventurerState.emit(adventurer_token_id, adventurer);
-
-    // clear thief state
-    let clear_thief_state = ThiefState(Uint256(0, 0), 0, 0);
-
-    // emit event to capture theif has now been reset
-    UpdateThiefState.emit(clear_thief_state);
-
-    // update blockchain
-    thief.write(clear_thief_state);
-
-    return (result,);
-}
-
-// @notice Pay tribute to the king
-// @return success: Value indicating success
-@external
-func claim_king_loot{
-    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}() -> (success: felt) {
-    alloc_locals;
-    // Anyone can call this function to check payout for robbing king (potential for keepers)
-    let (thief_state) = thief.read();
-
-    let (current_time) = get_block_timestamp();
-
-    let time_duration = current_time - thief_state.StartTime;
-
-    let check_over_duration = is_le(KING_HIEST_DELAY, time_duration);
-
-    with_attr error_message("Adventurer: King hiest still in progress") {
-        assert check_over_duration = TRUE;
-    }
-
-    // lords
-    let (lords_address) = Module.get_external_contract_address(ExternalContractIds.Lords);
-    let (this) = get_contract_address();
-
-    // calculate bounty from hiest
-    let (total_lords) = IERC20.balanceOf(lords_address, this);
-    let (pre_tribute, _) = uint256_mul(Uint256(KING_HIEST_REWARD_PERCENT, 0), total_lords);
-    let (king_tribute, _) = uint256_unsigned_div_rem(pre_tribute, Uint256(100, 0));
-
-    // send to the thief
-    let (owner: felt) = ERC721.owner_of(thief_state.AdventurerId);
-    IERC20.transfer(lords_address, owner, king_tribute);
-
-    // clear thief state so thief is no longer able to be assissnated
-    let clear_thief_state = ThiefState(Uint256(0, 0), 0, 0);
-
-    // emit event capturing an adventurer successfully robbing the king
-    UpdateThiefState.emit(clear_thief_state);
-
-    // update blockchain
-    thief.write(clear_thief_state);
-
-    return (TRUE,);
-}
-
 // -----------------------------
 // Internal Adventurer Specific
 // -----------------------------
@@ -1059,16 +918,6 @@ func get_adventurer_by_id{
     let (adventurer) = AdventurerLib.aggregate_data(adventurer_static_, unpacked_adventurer);
 
     return (adventurer,);
-}
-
-// @notice Get thief state
-// @return thief: State of the thief
-@view
-func get_thief{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}() -> (
-    thief_state: ThiefState
-) {
-    let (thief_state) = thief.read();
-    return (thief_state,);
 }
 
 // --------------------
@@ -1236,13 +1085,25 @@ func _deduct_health{
 
     // if the adventurer is dead
     if (new_adventurer.Health == 0) {
-        // transfer all their LORDS to the beast address
-        // TODO MILESTONE2: Figure out how to assign the LORDS tokens to the beast that killed the adventurer
-        let (lords_address) = Module.get_external_contract_address(ExternalContractIds.Lords);
-        let (beast_address) = Module.get_module_address(ModuleIds.Beast);
-        let (adventurer_balance_) = adventurer_balance.read(adventurer_token_id);
-        // IERC20.transfer(lords_address, beast_address, adventurer_balance_);
-        adventurer_balance.write(adventurer_token_id, Uint256(0, 0));
+        // check if the adventurer made it into the top three list
+        // by checking if their score is not less than or equal to third place
+        let (third_place_score) = top_scores.read(2);
+        let not_top_three_score = is_le(new_adventurer.XP, third_place_score.xp);
+        if (not_top_three_score == FALSE) {
+            // if they made the top three, we need to update the top three list
+            let (player_address) = owner_of(adventurer_token_id);
+            _update_top_scores(player_address, new_adventurer.XP);
+
+            tempvar syscall_ptr: felt* = syscall_ptr;
+            tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+            tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+        } else {
+            tempvar syscall_ptr: felt* = syscall_ptr;
+            tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+            tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+        }
 
         tempvar syscall_ptr: felt* = syscall_ptr;
         tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
@@ -1354,4 +1215,131 @@ func _set_upgradable{
     emit_adventurer_state(adventurer_token_id);
 
     return ();
+}
+
+// @title Reward Distribution Function
+// @notice Distributes $lords token rewards to the front-end provider, top 3 adventurers, and the treasury.
+// @dev This function transfers $lords tokens from the caller to specified recipients.
+// @param interface_address The address of the front-end provider receiving the reward.
+func _distribute_rewards{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(interface_address: felt) {
+    alloc_locals;
+
+    // get lords address
+    let (lords_address) = Module.get_external_contract_address(ExternalContractIds.Lords);
+    let (caller) = get_caller_address();
+
+    // send $lords reward to the front-end provider
+    IERC20.transferFrom(
+        lords_address, caller, interface_address, Uint256(FRONT_END_PROVIDER_REWARD, 0)
+    );
+
+    // send $lords rewards to the adventurer with the highest score
+    let (first_place) = top_scores.read(0);
+    IERC20.transferFrom(lords_address, caller, first_place.address, Uint256(FIRST_PLACE_REWARD, 0));
+    HighScoreReward.emit(first_place);
+
+    // send $lords rewards to the adventurer with the second highest score
+    let (second_place) = top_scores.read(1);
+    IERC20.transferFrom(
+        lords_address, caller, second_place.address, Uint256(SECOND_PLACE_REWARD, 0)
+    );
+    HighScoreReward.emit(second_place);
+
+    // send $lords rewards to the adventurer with the third highest score
+    let (third_place) = top_scores.read(2);
+    IERC20.transferFrom(lords_address, caller, third_place.address, Uint256(THIRD_PLACE_REWARD, 0));
+    HighScoreReward.emit(third_place);
+
+    // send the remainder of the $lords to treasury
+    let (treasury) = Module.get_external_contract_address(ExternalContractIds.Treasury);
+    let remaining_lords = MINT_COST - FRONT_END_PROVIDER_REWARD - FIRST_PLACE_REWARD -
+        SECOND_PLACE_REWARD - THIRD_PLACE_REWARD;
+    IERC20.transferFrom(lords_address, caller, treasury, Uint256(remaining_lords, 0));
+
+    return ();
+}
+
+// @title Update Top Three Scoreboard
+// @notice Updates the top 3 scores of adventurers based on the input address and experience points (xp).
+// @dev This function compares the input xp with existing top scores and updates the leaderboard accordingly.
+// @param address The address of the adventurer whose score is being updated.
+// @param xp The experience points of the adventurer.
+// @return score_board_updated Returns TRUE if the scoreboard was updated, otherwise returns FALSE.
+func _update_top_scores{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(address: felt, new_score_xp: felt) -> (score_board_updated: felt) {
+    alloc_locals;
+
+    let new_score = TopScore(address, new_score_xp);
+    let (current_first_place) = top_scores.read(0);
+    let (current_second_place) = top_scores.read(1);
+    let (current_third_place) = top_scores.read(2);
+
+    // if the score is equal to the current top score
+    if (current_first_place.xp == new_score_xp) {
+        // the original highscore stays in first
+
+        // move the second place into third (index 2)
+        top_scores.write(2, current_second_place);
+
+        // new score is second (index 1)
+        top_scores.write(1, new_score);
+
+        return (TRUE,);
+    }
+
+    // if the current high score is less than the new score (we checked equal above)
+    let new_high_score = is_le(current_first_place.xp, new_score_xp);
+    if (new_high_score == TRUE) {
+        // move second place to third place (index 2)
+        top_scores.write(2, current_second_place);
+
+        // move first place to second place (index 1)
+        top_scores.write(1, current_first_place);
+
+        // set new top score (index 0)
+        top_scores.write(0, new_score);
+
+        return (TRUE,);
+    }
+
+    // if the new score is equal to the current second place score
+    if (current_second_place.xp == new_score_xp) {
+        // original second place score keeps second
+
+        // new score is third (index 2)
+        top_scores.write(2, new_score);
+
+        return (TRUE,);
+    }
+
+    // if the current second place score is less than the new score (we checked equal above)
+    let higher_than_second_place = is_le(current_second_place.xp, new_score_xp);
+    if (higher_than_second_place == TRUE) {
+        // move second place to third place (index 2)
+        top_scores.write(2, current_second_place);
+
+        // new score is second (index 1)
+        top_scores.write(1, new_score);
+        return (TRUE,);
+    }
+
+    // if the current third place score is equal to the new score
+    if (current_third_place.xp == new_score_xp) {
+        // the original third place score stays in third
+        // nothing to do, return FALSE to indicate no change was made to scoreboard
+        return (FALSE,);
+    }
+
+    // if the current third place score is less than the new score (we checked equal above)
+    let higher_than_third_place = is_le(current_third_place.xp, new_score_xp);
+    if (higher_than_third_place == TRUE) {
+        // new score is now third (index 2)
+        top_scores.write(2, new_score);
+        return (TRUE,);
+    }
+
+    return (FALSE,);
 }

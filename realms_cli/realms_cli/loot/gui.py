@@ -18,7 +18,6 @@ from realms_cli.loot.getters import (
 
 
 async def get_adventurers(config):
-
     out = await wrapped_proxy_call(
         network=config.nile_network,
         contract_alias="proxy_Adventurer",
@@ -73,7 +72,6 @@ async def update_adventurer_list(config):
     dpg.configure_item("unequip_adventurer_id", items=adventurers)
     dpg.configure_item("upgrade_adventurer_id", items=adventurers)
     dpg.configure_item("potions_adventurer_id", items=adventurers)
-    dpg.configure_item("thief_adventurer_id", items=adventurers)
 
 
 def get_adventurer(config):
@@ -571,125 +569,6 @@ def upgrade_stat(config):
     dpg.delete_item("loader")
 
 
-def get_thief():
-    command = [
-        "nile",
-        "loot",
-        "get-thief",
-    ]
-    out = subprocess.check_output(command).strip().decode("utf-8")
-    return out
-
-
-def rob_king(config):
-    dpg.add_text(
-        "Attempt to rob the king",
-        tag="robbing_king_load",
-        pos=[700, 50],
-        parent="adventurers",
-    )
-    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
-    adventurer = dpg.get_value("thief_adventurer_id").split(" - ")[-1]
-    command = [
-        "nile",
-        "loot",
-        "rob-king",
-        "--adventurer_token_id",
-        adventurer,
-    ]
-    out = subprocess.check_output(command).strip().decode("utf-8")
-    print(out)
-    update_thief(config)
-    dpg.delete_item("robbing_king_load")
-    dpg.delete_item("loader")
-
-
-def kill_thief(config):
-    dpg.add_text(
-        "Kill the thief robbing the king",
-        tag="killing_thief_load",
-        pos=[700, 50],
-        parent="adventurers",
-    )
-    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
-    adventurer = dpg.get_value("thief_adventurer_id").split(" - ")[-1]
-    command = [
-        "nile",
-        "loot",
-        "kill-thief",
-        "--adventurer_token_id",
-        adventurer,
-    ]
-    out = subprocess.check_output(command).strip().decode("utf-8")
-    print(out)
-    update_thief(config)
-    dpg.delete_item("killing_thief_load")
-    dpg.delete_item("loader")
-
-
-def claim_king_loot():
-    dpg.add_text(
-        "Claim loot from robbing king",
-        tag="claiming_king_loot",
-        pos=[700, 50],
-        parent="adventurers",
-    )
-    dpg.add_loading_indicator(tag="loader", parent="adventurers", pos=[850, 50])
-    command = ["nile", "loot", "claim-king-loot"]
-    out = subprocess.check_output(command).strip().decode("utf-8")
-    print(out)
-    dpg.delete_item("claiming_king_loot")
-    dpg.delete_item("loader")
-
-
-def update_gold(config, adventurer_token_id):
-    gold_out = asyncio.run(_get_gold_balance(config.nile_network, adventurer_token_id))
-    print(f"💰 Gold balance is now {gold_out}")
-    dpg.set_value("gold", gold_out)
-    king_out = get_thief()
-    king_out = king_out.split(" ")
-    king_out = king_out[-3].split("\n")
-    if int(king_out[-1]) == int(adventurer_token_id):
-        dpg.set_value("your_gold", "You are the king!")
-        dpg.configure_item("your_gold", color=[0, 128, 0])
-    elif int(gold_out) > int(king_out[-1]):
-        dpg.set_value("your_gold", "You have enough gold to be king!")
-        dpg.configure_item("your_gold", color=[0, 128, 0])
-    else:
-        dpg.set_value("your_gold", "You don't have enough gold to be king.")
-        dpg.configure_item("your_gold", color=[178, 34, 34])
-
-
-def update_thief(config):
-    command = [
-        "nile",
-        "loot",
-        "get-thief",
-    ]
-    out = subprocess.check_output(command).strip().decode("utf-8")
-    out = out.split(" ")
-    king_out = out[-3].split("\n")
-    gold_out = asyncio.run(_get_gold_balance(config.nile_network, king_out[-1]))
-    if king_out[-1] != "0":
-        heist_time = datetime.datetime.fromtimestamp(int(out[-1]))
-        adventurer_out = asyncio.run(_get_adventurer(config.nile_network, king_out[-1]))
-        if adventurer_out[3].startswith("0x"):
-            adventurer_out = felt_to_str(int(adventurer_out[3], 16))
-        else:
-            adventurer_out = felt_to_str(int(adventurer_out[3]))
-        print(f"👑 King is {adventurer_out} - {king_out[-1]}")
-        print(f"⛳️ Reign started at {heist_time}")
-        print(f"💰 King's gold balance is now {gold_out}")
-        dpg.set_value("thief_adventurer", king_out[-1])
-        dpg.set_value("thieves_reign", heist_time)
-        dpg.set_value("thieves_gold", gold_out)
-    else:
-        print(f"🥷 There is no thief")
-        dpg.set_value("thief_adventurer", "-")
-        dpg.set_value("thieves_reign", "-")
-        dpg.set_value("thieves_gold", "-")
-
-
 def update_beast(config, beast_token_id):
     if beast_token_id != "0":
         beast_out = asyncio.run(_get_beast(beast_token_id, config.nile_network))
@@ -700,7 +579,9 @@ def update_beast(config, beast_token_id):
 
 
 def update_health(config, adventurer_token_id):
-    adventurer_out = asyncio.run(_get_adventurer(config.nile_network, adventurer_token_id))
+    adventurer_out = asyncio.run(
+        _get_adventurer(config.nile_network, adventurer_token_id)
+    )
     print(f"💚 Health is now {adventurer_out[7]}")
     dpg.set_value("health", adventurer_out[7])
 
@@ -1048,47 +929,6 @@ if __name__ == "__main__":
                     width=100,
                 )
                 dpg.add_button(label="Purchase Health", callback=purchase_health)
-        dpg.add_spacer(height=4)
-        dpg.add_separator()
-        dpg.add_spacer(height=4)
-        dpg.add_text("Kings")
-        dpg.add_spacer(height=4)
-        with dpg.group(horizontal=True):
-            with dpg.group():
-                dpg.add_text("Rob King")
-                dpg.add_combo(
-                    label="Adventurer ID",
-                    tag="thief_adventurer_id",
-                    items=adventurers,
-                    width=100,
-                )
-                dpg.add_button(label="Rob the King", callback=rob_king)
-            with dpg.group():
-                dpg.add_button(label="Pay King Tribue", callback=claim_king_loot)
-            with dpg.group():
-                dpg.add_text("King")
-                with dpg.group(horizontal=True):
-                    with dpg.group():
-                        dpg.add_text("Adventurer")
-                        dpg.add_text(
-                            tag="thief_adventurer",
-                            default_value="-",
-                            color=[205, 127, 50],
-                        )
-                    with dpg.group():
-                        dpg.add_text("Reign Since")
-                        dpg.add_text(tag="thieves_reign", default_value="-")
-                    with dpg.group():
-                        dpg.add_text("Gold")
-                        dpg.add_text(
-                            tag="thieves_gold", default_value="-", color=[255, 215, 0]
-                        )
-                    with dpg.group():
-                        dpg.add_text(
-                            "Please get adventurer data.",
-                            tag="your_gold",
-                        )
-        update_thief(config)
 
     dpg.show_viewport()
     dpg.start_dearpygui()

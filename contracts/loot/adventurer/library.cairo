@@ -671,11 +671,6 @@ namespace AdventurerLib {
         return (0,);
     }
 
-    func calculate_king_tribute{syscall_ptr: felt*, range_check_ptr}(
-        tribute_percent: felt, total_balance: Uint256
-    ) -> (king_tribute: Uint256) {
-    }
-
     func apply_item_stat_modifier{syscall_ptr: felt*, range_check_ptr}(
         item: Item, unpacked_adventurer: AdventurerDynamic
     ) -> (new_unpacked_adventurer: AdventurerDynamic) {
