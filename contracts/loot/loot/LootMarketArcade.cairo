@@ -80,7 +80,9 @@ func MintDailyItems(caller: felt, items_number: felt) {
 }
 
 @event
-func ClaimItem(market_token_id: Uint256, item_token_id: Uint256, adventurer_token_id: Uint256, owner: felt) {
+func ClaimItem(
+    market_token_id: Uint256, item_token_id: Uint256, adventurer_token_id: Uint256, owner: felt
+) {
 }
 
 // -----------------------------------
@@ -440,7 +442,9 @@ func increase_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 // @param xp The amount of XP to be granted to the equipped items.
 // @return success: Value indicating success
 @external
-func allocate_xp_to_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(adventurer: AdventurerState, amount: felt) {
+func allocate_xp_to_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    adventurer: AdventurerState, amount: felt
+) {
     alloc_locals;
 
     // Only approved modules can increase and items xp
@@ -449,7 +453,6 @@ func allocate_xp_to_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
     // If adventurer has a weapon
     let weapon_equipped = is_not_zero(adventurer.WeaponId);
     if (weapon_equipped == TRUE) {
-    
         _increase_xp(Uint256(adventurer.WeaponId, 0), amount);
 
         tempvar syscall_ptr: felt* = syscall_ptr;
@@ -700,7 +703,7 @@ func _increase_xp{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin
     }
 
     UpdateItemState.emit(item_token_id, item_updated_xp);
-    
+
     return (item_updated_xp,);
 }
 
@@ -992,12 +995,11 @@ func emit_new_items_loop{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
 
     let (new_item: Item) = _get_random_item_from_seed(item_start_index, daily_seed);
 
-    bid.write(
-        Uint256(item_start_index, 0),
-        Bid(0, 0, 0, BidStatus.closed, new_item.Id),
-    );
+    bid.write(Uint256(item_start_index, 0), Bid(0, 0, 0, BidStatus.closed, new_item.Id));
 
-    ItemMerchantUpdate.emit(new_item, item_start_index, Bid(0, 0, 0, BidStatus.closed, new_item.Id));
+    ItemMerchantUpdate.emit(
+        new_item, item_start_index, Bid(0, 0, 0, BidStatus.closed, new_item.Id)
+    );
 
     return emit_new_items_loop(daily_seed, item_start_index_len - 1, item_start_index + 1);
 }
@@ -1049,13 +1051,13 @@ func view_unminted_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_ch
 
 // @notice Allows a bidder to place a bid on an item. If no previous bids have been placed, the bid time will start from the current block timestamp plus the bid time duration. If a previous bid has been placed, the bidder must submit a higher bid within the bid time window of the previous bid.
 // @param tokenId The ID of the item being bid on.
-// @param price The amount of the bid.
-// @param expiry The expiration time of the bid, after which the bidder will no longer be able to claim the item.
+// @param original_bid The amount the adventurer is bidding on the item.
+// @param expiry The expiration time of the bid, after which the bidder will no longer be able to bid on the item.
 // @param bidder The address of the bidder.
 // @dev Requires the item to be owned by the market contract and for the bid to be higher than the base price. The function will update the bid price and expiry time for the item.
 @external
 func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    market_item_id: Uint256, adventurer_token_id: Uint256, price: felt
+    market_item_id: Uint256, adventurer_token_id: Uint256, original_bid: felt
 ) {
     alloc_locals;
 
@@ -1065,13 +1067,13 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 
     // store the id not the Unit in the struct
     let adventurer_id_as_felt = adventurer_token_id.low;
-
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
     let (owner) = IAdventurer.owner_of(adventurer_address, adventurer_token_id);
     with_attr error_message("Item Market: You do not own this Adventurer") {
         assert caller = owner;
     }
 
+    // get adventurer
     let (adventurer: AdventurerState) = IAdventurer.get_adventurer_by_id(
         adventurer_address, adventurer_token_id
     );
@@ -1083,30 +1085,57 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 
     // check adventurer is at least level 2
     let check_ge_2 = is_le(2, adventurer.Level);
-    with_attr error_message("Adventurer: Adventurer level not high enough.") {
+    with_attr error_message("Adventurer: Adventurer level not high enough") {
         assert check_ge_2 = TRUE;
     }
 
-
-    // check higher than the base price that is set
-    let higer_than_base_price = is_le(BASE_PRICE, price);
-    with_attr error_message("Item Market: Your bid is not high enough") {
-        assert higer_than_base_price = TRUE;
+    // check bid meets minimum bid criteria
+    let has_charisma = is_not_zero(adventurer.Charisma);
+    if (has_charisma == TRUE) {
+        // adventurers with charisma get a 1 gold discount on minimum bid
+        let charisma_minimum_bid = BASE_PRICE - 1;
+        let higer_than_base_price = is_le(charisma_minimum_bid, original_bid);
+        with_attr error_message("Item Market: Bid is lower than minimum with charisma discount") {
+            assert higer_than_base_price = TRUE;
+        }
+    } else {
+        // adventurers without charsima use BASE_PRICE (3 at the time of this writing)
+        let higer_than_base_price = is_le(BASE_PRICE, original_bid);
+        with_attr error_message("Item Market: Bid is lower than minimum") {
+            assert higer_than_base_price = TRUE;
+        }
     }
 
+    // adjust the original big for the adventurers charisma (schmoozing the shop keeper)
+    let (charisma_adjusted_bid) = get_charsima_adjusted_bid(adventurer.Charisma, original_bid);
+
     // read current bid
-    let (current_bid) = bid.read(market_item_id);
+    let (top_bid) = bid.read(market_item_id);
 
-    let (item: Item) = ItemLib.generate_item_by_id(current_bid.item_id);
+    // check higher than the last bid price
+    let higher_price = is_le(charisma_adjusted_bid, top_bid.price);
+    with_attr error_message("Item Market: Your bid is not high enough") {
+        assert higher_price = TRUE;
+    }
 
-    // subtract gold balance from buyer
+    // check bid time not expired
+    let not_expired = is_le(top_bid.expiry, current_time);
+    with_attr error_message("Item Market: Bid has expired") {
+        assert not_expired = TRUE;
+    }
+
+    let (item: Item) = ItemLib.generate_item_by_id(top_bid.item_id);
+    assert_can_purchase(market_item_id.low);
+
+    // subtract gold balance from buyer (use original bid not the charisma adjusted bid)
     let (beast_address) = Module.get_module_address(ModuleIds.Beast);
-    IBeast.subtract_from_balance(beast_address, adventurer_token_id, price);
+    IBeast.subtract_from_balance(beast_address, adventurer_token_id, original_bid);
 
-    let has_bid = is_not_zero(current_bid.bidder);
-
+    // if the item has a current bidder
+    let has_bid = is_not_zero(top_bid.bidder);
     if (has_bid == TRUE) {
-        IBeast.add_to_balance(beast_address, Uint256(current_bid.bidder, 0), current_bid.price);
+        // refund previous bid
+        IBeast.add_to_balance(beast_address, Uint256(top_bid.bidder, 0), top_bid.price);
         tempvar syscall_ptr: felt* = syscall_ptr;
         tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
         tempvar range_check_ptr = range_check_ptr;
@@ -1117,45 +1146,53 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     }
 
     // if current expiry = 0 means unbidded = set base time from now + BID_TIME
-    if (current_bid.expiry == FALSE) {
+    if (top_bid.expiry == FALSE) {
         bid.write(
             market_item_id,
-            Bid(price, current_time + BID_TIME, adventurer_id_as_felt, BidStatus.open, current_bid.item_id),
+            Bid(
+                charisma_adjusted_bid,
+                current_time + BID_TIME,
+                adventurer_id_as_felt,
+                BidStatus.open,
+                top_bid.item_id,
+            ),
         );
         ItemMerchantUpdate.emit(
             item,
             market_item_id.low,
-            Bid(price, current_time + BID_TIME, adventurer_id_as_felt, BidStatus.open, current_bid.item_id),
+            Bid(
+                charisma_adjusted_bid,
+                current_time + BID_TIME,
+                adventurer_id_as_felt,
+                BidStatus.open,
+                top_bid.item_id,
+            ),
         );
         return ();
     }
 
-    // check higher than the last bid price
-    let higher_price = is_le(price, current_bid.price);
-    with_attr error_message("Item Market: Your bid is not high enough") {
-        assert higher_price = TRUE;
-    }
-
-    // check bid time not expired
-    let not_expired = is_le(current_bid.expiry, current_time);
-    with_attr error_message("Item Market: Bid has expired") {
-        assert not_expired = TRUE;
-    }
-
-    assert_can_purchase(market_item_id.low);
-
-
-
     // update bid state
     bid.write(
         market_item_id,
-        Bid(price, current_bid.expiry, adventurer_id_as_felt, BidStatus.open, current_bid.item_id),
+        Bid(
+            charisma_adjusted_bid,
+            top_bid.expiry,
+            adventurer_id_as_felt,
+            BidStatus.open,
+            top_bid.item_id,
+        ),
     );
 
     ItemMerchantUpdate.emit(
         item,
         market_item_id.low,
-        Bid(price, current_bid.expiry, adventurer_id_as_felt, BidStatus.open, current_bid.item_id),
+        Bid(
+            charisma_adjusted_bid,
+            top_bid.expiry,
+            adventurer_id_as_felt,
+            BidStatus.open,
+            top_bid.item_id,
+        ),
     );
 
     return ();
@@ -1180,26 +1217,26 @@ func claim_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
 
     let (current_time) = get_block_timestamp();
 
-    let (current_bid) = bid.read(market_item_id);
+    let (top_bid) = bid.read(market_item_id);
 
     // check bid has expired + item is still available
-    let expired = is_le(current_bid.expiry, current_time);
+    let expired = is_le(top_bid.expiry, current_time);
     with_attr error_message("Item Market: Item not available") {
-        assert current_bid.status = BidStatus.open;
+        assert top_bid.status = BidStatus.open;
         assert expired = TRUE;
     }
 
     with_attr error_message("Item Market: Caller not bidder!") {
-        assert current_bid.bidder = adventurer_token_id.low;
+        assert top_bid.bidder = adventurer_token_id.low;
     }
 
-    // we pass in the current_bid.item_id
-    let (item_id) = mint_from_mart(caller, current_bid.item_id, adventurer_token_id);
+    // we pass in the top_bid.item_id
+    let (item_id) = mint_from_mart(caller, top_bid.item_id, adventurer_token_id);
 
     // this could be optimised
     bid.write(
         market_item_id,
-        Bid(current_bid.price, 0, adventurer_token_id.low, BidStatus.closed, current_bid.item_id),
+        Bid(top_bid.price, 0, adventurer_token_id.low, BidStatus.closed, top_bid.item_id),
     );
 
     ClaimItem.emit(market_item_id, item_id, adventurer_token_id, caller);
@@ -1224,6 +1261,20 @@ func assert_can_purchase{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_c
     }
 
     return ();
+}
+
+// @title Get Charisma Adjusted Bid
+// @notice Calculates the charisma adjusted bid by adding the charisma to the original bid.
+// @dev This function is used to compute the adjusted bid based on the adventurers charisma.
+// @param charisma The charisma value of a participant (felt).
+// @param original_bid The original bid amount made by the participant (felt).
+// @return charisma_adjusted_bid The charisma adjusted bid (felt).
+func get_charsima_adjusted_bid{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    charisma: felt, original_bid: felt
+) -> (charisma_adjusted_bid: felt) {
+    alloc_locals;
+    let charisma_adjusted_bid = charisma + original_bid;
+    return (charisma_adjusted_bid,);
 }
 
 // @notice Emits a greatness increase event for an item

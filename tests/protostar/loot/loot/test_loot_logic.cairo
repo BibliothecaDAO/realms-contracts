@@ -218,16 +218,29 @@ func test_bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     // mint item and adventurer
     ILoot.mint(loot_address, account_1_address, Uint256(1, 0));
     IAdventurer.mint_with_starting_weapon(
-        adventurer_address, account_1_address, 4, 13, 'Test', 8, 1, 1, ItemIds.Book, account_1_address
+        adventurer_address,
+        account_1_address,
+        4,
+        13,
+        'Test',
+        8,
+        1,
+        1,
+        ItemIds.Book,
+        account_1_address,
     );
 
     %{
         stop_prank_loot()
         stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
-        expect_revert(error_message="Adventurer: Adventurer level not high enough.")
+        expect_revert(error_message="Adventurer: Adventurer level not high enough")
     %}
 
     ILoot.bid_on_item(loot_address, Uint256(1, 0), Uint256(1, 0), 3);
+
+    %{ expect_revert(error_message="Item Market: Bid is lower than minimum") %}
+
+    ILoot.bid_on_item(loot_address, Uint256(1, 0), Uint256(1, 0), 2);
 
     %{
         from tests.protostar.loot.utils import utils
@@ -244,6 +257,27 @@ func test_bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     assert bid.expiry = 1800;
     assert bid.bidder = 1;
     assert bid.status = 1;
+
+    %{
+        from tests.protostar.loot.utils import utils
+        # increase adventurer charisma to 2
+        p1, p2, p3, p4 = utils.pack_adventurer(utils.build_adventurer_charisma(2))
+        store(ids.adventurer_address, "adventurer_dynamic", [p1, p2, p3, p4], key=[1,0])
+    %}
+
+    // even with charisma, minimum bid should be 2 so a bid of 1 should revert
+    %{ expect_revert(error_message="Item Market: Bid is lower than minimum with charisma discount") %}
+    ILoot.bid_on_item(loot_address, Uint256(1, 0), Uint256(1, 0), 1);
+
+    // they should now be able to bid 2 gold for an item (one less than minimum)
+    ILoot.bid_on_item(loot_address, Uint256(1, 0), Uint256(1, 0), 2);
+    let (charisma_bid) = ILoot.view_bid(loot_address, Uint256(1, 0));
+
+    // which should result in a top bid of 4 (original bid of 2 plus their 2 charisma)
+    assert charisma_bid.price = 4;
+    assert charisma_bid.expiry = 1800;
+    assert charisma_bid.bidder = 1;
+    assert charisma_bid.status = 1;
 
     return ();
 }
@@ -268,7 +302,16 @@ func test_claim_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
     // mint item and adventurer
     ILoot.mint(loot_address, account_1_address, Uint256(1, 0));
     IAdventurer.mint_with_starting_weapon(
-        adventurer_address, account_1_address, 4, 13, 'Test', 8, 1, 1, ItemIds.Book, account_1_address
+        adventurer_address,
+        account_1_address,
+        4,
+        13,
+        'Test',
+        8,
+        1,
+        1,
+        ItemIds.Book,
+        account_1_address,
     );
 
     %{
@@ -279,7 +322,7 @@ func test_claim_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check
         p1, p2, p3, p4 = utils.pack_adventurer(utils.build_adventurer_level(2))
         store(ids.adventurer_address, "adventurer_dynamic", [p1, p2, p3, p4], key=[1,0])
     %}
-    ILoot.bid_on_item(loot_address, Uint256(1, 0), Uint256(1, 0), 3);
+    ILoot.bid_on_item(loot_address, Uint256(1, 0), Uint256(1, 0), 10);
 
     %{ warp(1800, ids.loot_address) %}
 
@@ -313,7 +356,16 @@ func test_increase_greatness{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, ran
     let item_token_id = Uint256(1, 0);
     ILoot.mint(loot_address, account_1_address, item_token_id);
     IAdventurer.mint_with_starting_weapon(
-        adventurer_address, account_1_address, 4, 13, 'Test', 8, 1, 1, ItemIds.Book, account_1_address
+        adventurer_address,
+        account_1_address,
+        4,
+        13,
+        'Test',
+        8,
+        1,
+        1,
+        ItemIds.Book,
+        account_1_address,
     );
 
     ILoot.increase_xp(loot_address, item_token_id, 10);
