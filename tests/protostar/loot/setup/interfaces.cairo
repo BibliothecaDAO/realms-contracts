@@ -106,12 +106,6 @@ namespace IAdventurer {
     }
     func upgrade_stat(adventurer_token_id: Uint256, stat: felt) -> (success: felt) {
     }
-    func rob_king(adventurer_token_id: Uint256) -> (success: felt) {
-    }
-    func kill_thief(adventurer_token_id: Uint256) -> (success: felt) {
-    }
-    func claim_king_loot() -> (success: felt) {
-    }
 }
 
 @contract_interface
