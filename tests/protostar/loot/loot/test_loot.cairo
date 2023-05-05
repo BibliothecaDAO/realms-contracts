@@ -6,6 +6,7 @@ from starkware.cairo.common.math import assert_not_equal
 from contracts.loot.constants.item import ItemIds, ItemNamePrefixes, ItemNameSuffixes, ItemSuffixes
 from contracts.loot.loot.library import ItemLib
 from contracts.loot.loot.stats.item import ItemStats
+from contracts.loot.loot.LootMarketArcade import get_charsima_adjusted_bid
 
 @external
 func setup_generate_name_prefix{syscall_ptr: felt*, range_check_ptr}() {
@@ -283,6 +284,30 @@ func test_generate_item_suffix{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, r
     assert_not_equal(grimoire_suffix, ItemSuffixes.of_Vitriol);
     assert_not_equal(grimoire_suffix, ItemSuffixes.of_Detection);
     assert_not_equal(grimoire_suffix, ItemSuffixes.of_the_Twins);
+
+    return ();
+}
+
+@external
+func test_get_charsima_adjusted_bid{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+}() {
+    alloc_locals;
+
+    let no_charisma = 0;
+    let bid_two = 2;
+    let (charisma_adjusted_bid) = get_charsima_adjusted_bid(no_charisma, bid_two);
+    assert charisma_adjusted_bid = 2;
+
+    let one_charisma = 1;
+    let bid_five = 5;
+    let (charisma_adjusted_bid) = get_charsima_adjusted_bid(one_charisma, bid_five);
+    assert charisma_adjusted_bid = 6;
+
+    let ten_charisma = 10;
+    let ten_bid = 10;
+    let (charisma_adjusted_bid) = get_charsima_adjusted_bid(ten_charisma, ten_bid);
+    assert charisma_adjusted_bid = 20;
 
     return ();
 }
