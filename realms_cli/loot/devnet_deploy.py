@@ -79,7 +79,7 @@ async def run():
     config = Config(network)
 
     await declare_abi(
-        config.ADMIN_ALIAS, "ArgentPluginAccount", config.nile_network, "argent_account"
+        config.ADMIN_ALIAS, "ArgentAccount", config.nile_network, "argent_account"
     )
 
     # await declare_abi(
