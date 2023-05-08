@@ -899,6 +899,7 @@ const SEED_MULTI = 5846975;  // for psudeo randomness now
 const NUMBER_LOOT_ITEMS = 101;
 const MINIMUM_ITEMS_EMITTED = 20;
 const ITEMS_PER_EPOCH_PER_ADVENTUER = 3;
+const CHARISMA_FLOOR_DISCOUNT = 2;
 
 // returns TRUE if item is owned
 @view
@@ -1093,7 +1094,7 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     let has_charisma = is_not_zero(adventurer.Charisma);
     if (has_charisma == TRUE) {
         // adventurers with charisma get a 1 gold discount on minimum bid
-        let charisma_minimum_bid = BASE_PRICE - 1;
+        let charisma_minimum_bid = BASE_PRICE - CHARISMA_FLOOR_DISCOUNT;
         let higer_than_base_price = is_le(charisma_minimum_bid, original_bid);
         with_attr error_message("Item Market: Bid is lower than minimum with charisma discount") {
             assert higer_than_base_price = TRUE;
