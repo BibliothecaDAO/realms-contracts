@@ -892,8 +892,8 @@ func new_items() -> (number: felt) {
 }
 
 const HOUR = 3600;
-const BID_TIME = HOUR / 2;  // 2 hours
-const SHUFFLE_TIME = 3600 * 6;
+const BID_TIME = HOUR;  // 1 hour
+const SHUFFLE_TIME = 3600 * 3; // cycle market every 3hrs
 const BASE_PRICE = 3;
 const SEED_MULTI = 5846975;  // for psudeo randomness now
 const NUMBER_LOOT_ITEMS = 101;
