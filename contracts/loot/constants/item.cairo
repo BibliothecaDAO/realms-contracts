@@ -6,6 +6,8 @@
 
 %lang starknet
 
+const ITEM_XP_MULTIPLIER = 3;
+
 namespace State {
     const Bagged = 0;  // protected in a loot bag
     const Equipped = 1;  // equipped on an adventurer

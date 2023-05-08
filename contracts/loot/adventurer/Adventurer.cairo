@@ -75,6 +75,7 @@ from contracts.loot.utils.constants import (
     KING_HIEST_REWARD_PERCENT,
     KING_HIEST_DELAY,
 )
+from contracts.loot.constants.item import ITEM_XP_MULTIPLIER
 
 // -----------------------------------
 // Events
@@ -93,7 +94,13 @@ func AdventurerLeveledUp(adventurer_id: Uint256, level: felt) {
 }
 
 @event
-func Discovery(adventurer_id: Uint256, discovery_type: felt, sub_discovery_type: felt, entity_id: Uint256, output_amount: felt) {
+func Discovery(
+    adventurer_id: Uint256,
+    discovery_type: felt,
+    sub_discovery_type: felt,
+    entity_id: Uint256,
+    output_amount: felt,
+) {
 }
 
 @event
@@ -731,7 +738,7 @@ func explore{
         // if the adventurers intelligence
         let can_dodge = is_le(dodge_chance, unpacked_adventurer.Intelligence + 1);
         if (can_dodge == TRUE) {
-            Discovery.emit(token_id, DiscoveryType.Obstacle, obstacle.Id, Uint256(0,0), 0);
+            Discovery.emit(token_id, DiscoveryType.Obstacle, obstacle.Id, Uint256(0, 0), 0);
             return (DiscoveryType.Obstacle, obstacle.Id);
         } else {
             // @distracteddev: Should be get equipped item by slot not get item by Id
@@ -739,11 +746,20 @@ func explore{
                 obstacle.DamageLocation, adventurer_dynamic_
             );
             let (item_address) = Module.get_module_address(ModuleIds.Loot);
+
+            // calculate obstacle damage based on adventurer armor and obstacle stats
             let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(item_id, 0));
             let (obstacle_damage) = CombatStats.calculate_damage_from_obstacle(obstacle, armor);
             _deduct_health(token_id, obstacle_damage);
-            ILoot.allocate_xp_to_items(item_address, unpacked_adventurer, obstacle_damage);
-            Discovery.emit(token_id, DiscoveryType.Obstacle, obstacle.Id, Uint256(0,0), obstacle_damage);
+
+            // grant XP to items
+            let xp_gained_items = obstacle_damage * ITEM_XP_MULTIPLIER;
+            ILoot.allocate_xp_to_items(item_address, unpacked_adventurer, xp_gained_items);
+
+            // emit discovery event
+            Discovery.emit(
+                token_id, DiscoveryType.Obstacle, obstacle.Id, Uint256(0, 0), obstacle_damage
+            );
             return (DiscoveryType.Obstacle, obstacle.Id);
         }
     }
@@ -761,7 +777,9 @@ func explore{
             let (beast_address) = Module.get_module_address(ModuleIds.Beast);
             IBeast.add_to_balance(beast_address, token_id, gold_discovery);
             emit_adventurer_state(token_id);
-            Discovery.emit(token_id, DiscoveryType.Item, ItemDiscoveryType.Gold, Uint256(0,0), gold_discovery);
+            Discovery.emit(
+                token_id, DiscoveryType.Item, ItemDiscoveryType.Gold, Uint256(0, 0), gold_discovery
+            );
             return (DiscoveryType.Item, ItemDiscoveryType.Gold);
         }
 
@@ -780,7 +798,13 @@ func explore{
             let (rnd) = get_random_number();
             let (health_discovery) = AdventurerLib.calculate_health_discovery(rnd);
             _add_health(token_id, health_discovery);
-            Discovery.emit(token_id, DiscoveryType.Item, ItemDiscoveryType.Health, Uint256(0,0), health_discovery);
+            Discovery.emit(
+                token_id,
+                DiscoveryType.Item,
+                ItemDiscoveryType.Health,
+                Uint256(0, 0),
+                health_discovery,
+            );
             return (DiscoveryType.Item, ItemDiscoveryType.Health);
         }
 
@@ -792,7 +816,7 @@ func explore{
     let (rnd) = get_random_number();
     let (xp_discovery) = AdventurerLib.calculate_xp_discovery(rnd);
     _increase_xp(token_id, xp_discovery);
-    Discovery.emit(token_id, DiscoveryType.Nothing, 0, Uint256(0,0), xp_discovery);
+    Discovery.emit(token_id, DiscoveryType.Nothing, 0, Uint256(0, 0), xp_discovery);
 
     return (DiscoveryType.Nothing, 0);
 }

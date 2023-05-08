@@ -43,6 +43,7 @@ from contracts.loot.interfaces.imodules import IModuleController
 from contracts.loot.loot.ILoot import ILoot
 from contracts.loot.loot.stats.combat import CombatStats
 from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
+from contracts.loot.constants.item import ITEM_XP_MULTIPLIER
 
 // -----------------------------------
 // Events
@@ -61,11 +62,25 @@ func BeastLevelUp(beast_token_id: Uint256, beast_level: felt) {
 }
 
 @event
-func BeastAttacked(beast_token_id: Uint256, adventurer_token_id: Uint256, damage: felt, beast_health: felt, xp_gained: felt, gold_reward: felt) {
+func BeastAttacked(
+    beast_token_id: Uint256,
+    adventurer_token_id: Uint256,
+    damage: felt,
+    beast_health: felt,
+    xp_gained: felt,
+    gold_reward: felt,
+) {
 }
 
 @event
-func AdventurerAttacked(beast_token_id: Uint256, adventurer_token_id: Uint256, damage: felt, adventurer_health: felt, xp_gained: felt, gold_reward: felt) { 
+func AdventurerAttacked(
+    beast_token_id: Uint256,
+    adventurer_token_id: Uint256,
+    damage: felt,
+    adventurer_health: felt,
+    xp_gained: felt,
+    gold_reward: felt,
+) {
 }
 
 @event
@@ -73,10 +88,12 @@ func FledBeast(beast_token_id: Uint256, adventurer_token_id: Uint256) {
 }
 
 @event
-func AdventurerAmbushed(beast_token_id: Uint256, adventurer_token_id: Uint256, damage: felt, adventurer_health: felt) {
+func AdventurerAmbushed(
+    beast_token_id: Uint256, adventurer_token_id: Uint256, damage: felt, adventurer_health: felt
+) {
 }
 
-@event 
+@event
 func UpdateGoldBalance(adventurer_token_id: Uint256, balance: felt) {
 }
 
@@ -243,7 +260,9 @@ func attack{
 
     // if the beast is alive, it automatically counter attacks
     if (beast_is_alive == TRUE) {
-        BeastAttacked.emit(beast_token_id, adventurer_id, damage_dealt, updated_health_beast.Health, 0, 0);
+        BeastAttacked.emit(
+            beast_token_id, adventurer_id, damage_dealt, updated_health_beast.Health, 0, 0
+        );
         // get the location the beast attacks
         let (beast_attack_location) = BeastStats.get_attack_location_from_id(beast.Id);
 
@@ -270,13 +289,17 @@ func attack{
             let (xp_gained) = CombatStats.calculate_xp_earned(1, updated_adventurer.Level);
             // increase beast xp and writes
             _increase_xp(beast_token_id, updated_health_beast, xp_gained);
-            AdventurerAttacked.emit(beast_token_id, adventurer_id, damage_taken, updated_adventurer.Health, xp_gained, 0);
+            AdventurerAttacked.emit(
+                beast_token_id, adventurer_id, damage_taken, updated_adventurer.Health, xp_gained, 0
+            );
             tempvar syscall_ptr: felt* = syscall_ptr;
             tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
             tempvar range_check_ptr = range_check_ptr;
             tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
         } else {
-            AdventurerAttacked.emit(beast_token_id, adventurer_id, damage_taken, updated_adventurer.Health, 0, 0);
+            AdventurerAttacked.emit(
+                beast_token_id, adventurer_id, damage_taken, updated_adventurer.Health, 0, 0
+            );
             tempvar syscall_ptr: felt* = syscall_ptr;
             tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
             tempvar range_check_ptr = range_check_ptr;
@@ -317,20 +340,29 @@ func attack{
         tempvar range_check_ptr = range_check_ptr;
         tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
 
-        tempvar xp_gained = xp_gained;
+        tempvar xp_gained_adventurer = xp_gained;
         // give xp to adventurer
-        IAdventurer.increase_xp(adventurer_address, adventurer_id, xp_gained);
+        IAdventurer.increase_xp(adventurer_address, adventurer_id, xp_gained_adventurer);
 
         // and to items
-        ILoot.allocate_xp_to_items(item_address, unpacked_adventurer, xp_gained);
+        // items use a multplier of adventurer XP to allow them to level faster (3x at time of this writing)
+        tempvar xp_gained_items = xp_gained_adventurer * ITEM_XP_MULTIPLIER;
+        ILoot.allocate_xp_to_items(item_address, unpacked_adventurer, xp_gained_items);
 
         // drop gold
         // @distracteddev: add randomness to reward
         // formula: (xp_gained  - (xp_gained / 4)) + ((xp_gained / 4) * (rand % 4))
         let (rnd) = get_random_number();
-        let (gold_reward) = BeastLib.calculate_gold_reward(rnd, xp_gained);
+        let (gold_reward) = BeastLib.calculate_gold_reward(rnd, xp_gained_adventurer);
         _add_to_balance(adventurer_id, gold_reward);
-        BeastAttacked.emit(beast_token_id, adventurer_id, damage_dealt, updated_health_beast.Health, xp_gained, gold_reward);
+        BeastAttacked.emit(
+            beast_token_id,
+            adventurer_id,
+            damage_dealt,
+            updated_health_beast.Health,
+            xp_gained_adventurer,
+            gold_reward,
+        );
 
         IAdventurer.update_status(
             adventurer_address, Uint256(beast.Adventurer, 0), AdventurerStatus.Idle
@@ -397,13 +429,22 @@ func counter_attack{
         // increase beast xp and writes
         let (_, beast_dynamic_) = BeastLib.split_data(beast);
         _increase_xp(beast_token_id, beast_dynamic_, xp_gained);
-        AdventurerAttacked.emit(beast_token_id, adventurer_token_id, damage_taken, updated_adventurer.Health, xp_gained, 0);
+        AdventurerAttacked.emit(
+            beast_token_id,
+            adventurer_token_id,
+            damage_taken,
+            updated_adventurer.Health,
+            xp_gained,
+            0,
+        );
         tempvar syscall_ptr: felt* = syscall_ptr;
         tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
         tempvar range_check_ptr = range_check_ptr;
         tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
     } else {
-        AdventurerAttacked.emit(beast_token_id, adventurer_token_id, damage_taken, updated_adventurer.Health, 0, 0);
+        AdventurerAttacked.emit(
+            beast_token_id, adventurer_token_id, damage_taken, updated_adventurer.Health, 0, 0
+        );
         tempvar syscall_ptr: felt* = syscall_ptr;
         tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
         tempvar range_check_ptr = range_check_ptr;
@@ -463,7 +504,9 @@ func flee{
 
         // check if beast counter attack killed adventurer
         let (updated_adventurer) = get_adventurer_from_beast(beast_token_id);
-        AdventurerAmbushed.emit(beast_token_id, Uint256(beast.Adventurer, 0), damage_taken, updated_adventurer.Health);
+        AdventurerAmbushed.emit(
+            beast_token_id, Uint256(beast.Adventurer, 0), damage_taken, updated_adventurer.Health
+        );
 
         // if the adventurer is dead
         if (updated_adventurer.Health == 0) {
