@@ -83,7 +83,7 @@ func test_mint{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     );
     let (new_balance: Uint256) = ILords.balanceOf(lords_address, account_1_address);
 
-    assert new_balance = Uint256(120000000000000000000, 0);
+    assert new_balance = Uint256(160000000000000000000, 0);
 
     return ();
 }

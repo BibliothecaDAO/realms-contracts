@@ -68,7 +68,7 @@ class Config:
             "localhost": "http://127.0.0.1:5050/",
             "goerli2": "https://alpha4-2.starknet.io",
             "integration": "https://external.integration.starknet.io",
-            "devnet": "http://3.215.42.99:5050",
+            "devnet": "https://survivor-indexer.bibliothecadao.xyz",
         }
 
         self.MAX_FEE = 29999439013963000
