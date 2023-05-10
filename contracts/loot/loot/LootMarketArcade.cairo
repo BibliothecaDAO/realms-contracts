@@ -891,8 +891,8 @@ func mint_index() -> (number: felt) {
 func new_items() -> (number: felt) {
 }
 
-const HOUR = 3600;
-const BID_TIME = HOUR;  // 1 hour
+const HOUR = 3600; // 1 hour
+const BID_TIME = HOUR / 4;  // 15 minutes
 const SHUFFLE_TIME = 3600 * 3; // cycle market every 3hrs
 const BASE_PRICE = 3;
 const SEED_MULTI = 5846975;  // for psudeo randomness now

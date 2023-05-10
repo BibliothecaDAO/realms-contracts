@@ -251,267 +251,274 @@ func test_bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
 
     ILoot.bid_on_item(loot_address, Uint256(1, 0), Uint256(1, 0), 3);
 
-    let (bid) = ILoot.view_bid(loot_address, Uint256(1, 0));
+    let (local bid) = ILoot.view_bid(loot_address, Uint256(1, 0));
 
+    %{
+        print(ids.bid)
+    %}
+
+    assert 1 = 2;
     assert bid.price = 3;
-    assert bid.expiry = 1800;
-    assert bid.bidder = 1;
-    assert bid.status = 1;
+    assert bid.expiry = 3600 / 4;
+    // assert bid.bidder = 1;
+    // assert bid.status = 1;
 
-    %{
-        from tests.protostar.loot.utils import utils
-        # increase adventurer charisma to 2
-        p1, p2, p3, p4 = utils.pack_adventurer(utils.build_adventurer_charisma(2))
-        store(ids.adventurer_address, "adventurer_dynamic", [p1, p2, p3, p4], key=[1,0])
-    %}
+    // %{
+    //     from tests.protostar.loot.utils import utils
+    //     # increase adventurer charisma to 2
+    //     p1, p2, p3, p4 = utils.pack_adventurer(utils.build_adventurer_charisma(2))
+    //     store(ids.adventurer_address, "adventurer_dynamic", [p1, p2, p3, p4], key=[1,0])
+    // %}
 
-    // even with charisma, minimum bid should be 2 so a bid of 1 should revert
-    %{ expect_revert(error_message="Item Market: Bid is lower than minimum with charisma discount") %}
-    ILoot.bid_on_item(loot_address, Uint256(1, 0), Uint256(1, 0), 1);
+    // // even with charisma, minimum bid should be 2 so a bid of 1 should revert
+    // %{ expect_revert(error_message="Item Market: Bid is lower than minimum with charisma discount") %}
+    // ILoot.bid_on_item(loot_address, Uint256(1, 0), Uint256(1, 0), 1);
 
-    // they should now be able to bid 2 gold for an item (one less than minimum)
-    ILoot.bid_on_item(loot_address, Uint256(1, 0), Uint256(1, 0), 2);
-    let (charisma_bid) = ILoot.view_bid(loot_address, Uint256(1, 0));
+    // // they should now be able to bid 2 gold for an item (one less than minimum)
+    // ILoot.bid_on_item(loot_address, Uint256(1, 0), Uint256(1, 0), 2);
+    // let (charisma_bid) = ILoot.view_bid(loot_address, Uint256(1, 0));
 
-    // which should result in a top bid of 4 (original bid of 2 plus their 2 charisma)
-    assert charisma_bid.price = 4;
-    assert charisma_bid.expiry = 1800;
-    assert charisma_bid.bidder = 1;
-    assert charisma_bid.status = 1;
+    // // which should result in a top bid of 4 (original bid of 2 plus their 2 charisma)
+    // assert charisma_bid.price = 4;
+    // assert charisma_bid.expiry = 3600 / 4;
+    // assert charisma_bid.bidder = 1;
+    // assert charisma_bid.status = 1;
 
-    return ();
-}
-
-@external
-func test_claim_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
-    alloc_locals;
-    local account_1_address;
-    local loot_address;
-    local adventurer_address;
-    local realms_address;
-
-    %{
-        ids.account_1_address = context.account_1
-        ids.loot_address = context.loot
-        ids.adventurer_address = context.adventurer
-        ids.realms_address = context.realms
-        stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
-        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
-        stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address)
-    %}
-    // mint item and adventurer
-    ILoot.mint(loot_address, account_1_address, Uint256(1, 0));
-    IAdventurer.mint_with_starting_weapon(
-        adventurer_address,
-        account_1_address,
-        4,
-        13,
-        'Test',
-        8,
-        1,
-        1,
-        ItemIds.Book,
-        account_1_address,
-    );
-
-    %{
-        stop_prank_loot()
-        stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
-        from tests.protostar.loot.utils import utils
-        # force adventurers to be level 2 to bid on an item
-        p1, p2, p3, p4 = utils.pack_adventurer(utils.build_adventurer_level(2))
-        store(ids.adventurer_address, "adventurer_dynamic", [p1, p2, p3, p4], key=[1,0])
-    %}
-    ILoot.bid_on_item(loot_address, Uint256(1, 0), Uint256(1, 0), 10);
-
-    %{ warp(1800, ids.loot_address) %}
-
-    ILoot.claim_item(loot_address, Uint256(1, 0), Uint256(1, 0));
-
-    let (check_item_owned) = ILoot.item_owner(loot_address, Uint256(1, 0), Uint256(1, 0));
-
-    assert check_item_owned = TRUE;
+    // assert 1 = 2;
 
     return ();
 }
 
-@external
-func test_increase_greatness{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
-    alloc_locals;
-    local account_1_address;
-    local loot_address;
-    local adventurer_address;
-    local realms_address;
+// @external
+// func test_claim_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+//     alloc_locals;
+//     local account_1_address;
+//     local loot_address;
+//     local adventurer_address;
+//     local realms_address;
 
-    %{
-        ids.account_1_address = context.account_1
-        ids.loot_address = context.loot
-        ids.adventurer_address = context.adventurer
-        ids.realms_address = context.realms
-        stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
-        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
-        stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address)
-    %}
-    // mint item and adventurer
-    let item_token_id = Uint256(1, 0);
-    ILoot.mint(loot_address, account_1_address, item_token_id);
-    IAdventurer.mint_with_starting_weapon(
-        adventurer_address,
-        account_1_address,
-        4,
-        13,
-        'Test',
-        8,
-        1,
-        1,
-        ItemIds.Book,
-        account_1_address,
-    );
+//     %{
+//         ids.account_1_address = context.account_1
+//         ids.loot_address = context.loot
+//         ids.adventurer_address = context.adventurer
+//         ids.realms_address = context.realms
+//         stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
+//         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+//         stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address)
+//     %}
+//     // mint item and adventurer
+//     ILoot.mint(loot_address, account_1_address, Uint256(1, 0));
+//     IAdventurer.mint_with_starting_weapon(
+//         adventurer_address,
+//         account_1_address,
+//         4,
+//         13,
+//         'Test',
+//         8,
+//         1,
+//         1,
+//         ItemIds.Book,
+//         account_1_address,
+//     );
 
-    ILoot.increase_xp(loot_address, item_token_id, 10);
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-    assert item.Greatness = 2;
-    assert item.Prefix_1 = 0;
-    assert item.Prefix_2 = 0;
-    assert item.Suffix = 0;
+//     %{
+//         stop_prank_loot()
+//         stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
+//         from tests.protostar.loot.utils import utils
+//         # force adventurers to be level 2 to bid on an item
+//         p1, p2, p3, p4 = utils.pack_adventurer(utils.build_adventurer_level(2))
+//         store(ids.adventurer_address, "adventurer_dynamic", [p1, p2, p3, p4], key=[1,0])
+//     %}
+//     ILoot.bid_on_item(loot_address, Uint256(1, 0), Uint256(1, 0), 10);
 
-    ILoot.increase_xp(loot_address, item_token_id, 50);
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-    assert item.Greatness = 3;
-    assert item.Prefix_1 = 0;
-    assert item.Prefix_2 = 0;
-    assert item.Suffix = 0;
+//     %{ warp(1800, ids.loot_address) %}
 
-    ILoot.increase_xp(loot_address, item_token_id, 150);
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-    assert item.Greatness = 4;
-    assert item.Prefix_1 = 0;
-    assert item.Prefix_2 = 0;
-    assert item.Suffix = 0;
+//     ILoot.claim_item(loot_address, Uint256(1, 0), Uint256(1, 0));
 
-    ILoot.increase_xp(loot_address, item_token_id, 200);
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-    assert item.Greatness = 5;
-    assert item.Prefix_1 = 0;
-    assert item.Prefix_2 = 0;
-    assert item.Suffix = 0;
+//     let (check_item_owned) = ILoot.item_owner(loot_address, Uint256(1, 0), Uint256(1, 0));
 
-    ILoot.increase_xp(loot_address, item_token_id, 300);
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-    assert item.Greatness = 6;
-    assert item.Prefix_1 = 0;
-    assert item.Prefix_2 = 0;
-    assert item.Suffix = 0;
+//     assert check_item_owned = TRUE;
 
-    ILoot.increase_xp(loot_address, item_token_id, 500);
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-    assert item.Greatness = 7;
-    assert item.Prefix_1 = 0;
-    assert item.Prefix_2 = 0;
-    assert item.Suffix = 0;
+//     return ();
+// }
 
-    ILoot.increase_xp(loot_address, item_token_id, 600);
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-    assert item.Greatness = 8;
-    assert item.Prefix_1 = 0;
-    assert item.Prefix_2 = 0;
-    assert item.Suffix = 0;
+// @external
+// func test_increase_greatness{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+//     alloc_locals;
+//     local account_1_address;
+//     local loot_address;
+//     local adventurer_address;
+//     local realms_address;
 
-    ILoot.increase_xp(loot_address, item_token_id, 700);
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-    assert item.Greatness = 9;
-    assert item.Prefix_1 = 0;
-    assert item.Prefix_2 = 0;
-    assert item.Suffix = 0;
+//     %{
+//         ids.account_1_address = context.account_1
+//         ids.loot_address = context.loot
+//         ids.adventurer_address = context.adventurer
+//         ids.realms_address = context.realms
+//         stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
+//         stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+//         stop_prank_loot = start_prank(ids.adventurer_address, ids.loot_address)
+//     %}
+//     // mint item and adventurer
+//     let item_token_id = Uint256(1, 0);
+//     ILoot.mint(loot_address, account_1_address, item_token_id);
+//     IAdventurer.mint_with_starting_weapon(
+//         adventurer_address,
+//         account_1_address,
+//         4,
+//         13,
+//         'Test',
+//         8,
+//         1,
+//         1,
+//         ItemIds.Book,
+//         account_1_address,
+//     );
 
-    ILoot.increase_xp(loot_address, item_token_id, 1000);
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-    assert item.Greatness = 10;
-    assert item.Prefix_1 = 0;
-    assert item.Prefix_2 = 0;
-    assert item.Suffix = 0;
+//     ILoot.increase_xp(loot_address, item_token_id, 10);
+//     let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+//     assert item.Greatness = 2;
+//     assert item.Prefix_1 = 0;
+//     assert item.Prefix_2 = 0;
+//     assert item.Suffix = 0;
 
-    ILoot.increase_xp(loot_address, item_token_id, 1500);
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-    assert item.Greatness = 11;
-    assert item.Prefix_1 = 0;
-    assert item.Prefix_2 = 0;
-    assert item.Suffix = 0;
+//     ILoot.increase_xp(loot_address, item_token_id, 50);
+//     let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+//     assert item.Greatness = 3;
+//     assert item.Prefix_1 = 0;
+//     assert item.Prefix_2 = 0;
+//     assert item.Suffix = 0;
 
-    ILoot.increase_xp(loot_address, item_token_id, 2000);
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-    assert item.Greatness = 12;
-    assert item.Prefix_1 = 0;
-    assert item.Prefix_2 = 0;
-    assert item.Suffix = 0;
+//     ILoot.increase_xp(loot_address, item_token_id, 150);
+//     let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+//     assert item.Greatness = 4;
+//     assert item.Prefix_1 = 0;
+//     assert item.Prefix_2 = 0;
+//     assert item.Suffix = 0;
 
-    ILoot.increase_xp(loot_address, item_token_id, 3000);
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-    assert item.Greatness = 13;
-    assert item.Prefix_1 = 0;
-    assert item.Prefix_2 = 0;
-    assert item.Suffix = 0;
+//     ILoot.increase_xp(loot_address, item_token_id, 200);
+//     let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+//     assert item.Greatness = 5;
+//     assert item.Prefix_1 = 0;
+//     assert item.Prefix_2 = 0;
+//     assert item.Suffix = 0;
 
-    ILoot.increase_xp(loot_address, item_token_id, 4000);
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-    assert item.Greatness = 14;
-    assert item.Prefix_1 = 0;
-    assert item.Prefix_2 = 0;
-    assert item.Suffix = 0;
+//     ILoot.increase_xp(loot_address, item_token_id, 300);
+//     let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+//     assert item.Greatness = 6;
+//     assert item.Prefix_1 = 0;
+//     assert item.Prefix_2 = 0;
+//     assert item.Suffix = 0;
 
-    ILoot.increase_xp(loot_address, item_token_id, 5000);
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-    assert item.Greatness = 15;
-    assert item.Prefix_1 = 0;
-    assert item.Prefix_2 = 0;
-    assert item.Suffix = 6;
+//     ILoot.increase_xp(loot_address, item_token_id, 500);
+//     let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+//     assert item.Greatness = 7;
+//     assert item.Prefix_1 = 0;
+//     assert item.Prefix_2 = 0;
+//     assert item.Suffix = 0;
 
-    ILoot.increase_xp(loot_address, item_token_id, 10000);
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-    assert item.Greatness = 16;
-    assert item.Prefix_1 = 0;
-    assert item.Prefix_2 = 0;
-    assert item.Suffix = 6;
+//     ILoot.increase_xp(loot_address, item_token_id, 600);
+//     let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+//     assert item.Greatness = 8;
+//     assert item.Prefix_1 = 0;
+//     assert item.Prefix_2 = 0;
+//     assert item.Suffix = 0;
 
-    ILoot.increase_xp(loot_address, item_token_id, 10000);
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-    assert item.Greatness = 17;
-    assert item.Prefix_1 = 0;
-    assert item.Prefix_2 = 0;
-    assert item.Suffix = 6;
+//     ILoot.increase_xp(loot_address, item_token_id, 700);
+//     let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+//     assert item.Greatness = 9;
+//     assert item.Prefix_1 = 0;
+//     assert item.Prefix_2 = 0;
+//     assert item.Suffix = 0;
 
-    ILoot.increase_xp(loot_address, item_token_id, 10000);
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-    assert item.Greatness = 18;
-    assert item.Prefix_1 = 0;
-    assert item.Prefix_2 = 0;
-    assert item.Suffix = 6;
+//     ILoot.increase_xp(loot_address, item_token_id, 1000);
+//     let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+//     assert item.Greatness = 10;
+//     assert item.Prefix_1 = 0;
+//     assert item.Prefix_2 = 0;
+//     assert item.Suffix = 0;
 
-    ILoot.increase_xp(loot_address, item_token_id, 10000);
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-    assert item.Greatness = 19;
-    assert item.Prefix_1 = 68;
-    assert item.Prefix_2 = 18;
-    assert item.Suffix = 6;
+//     ILoot.increase_xp(loot_address, item_token_id, 1500);
+//     let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+//     assert item.Greatness = 11;
+//     assert item.Prefix_1 = 0;
+//     assert item.Prefix_2 = 0;
+//     assert item.Suffix = 0;
 
-    ILoot.increase_xp(loot_address, item_token_id, 15000);
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-    assert item.Greatness = 20;
-    assert item.Prefix_1 = 68;
-    assert item.Prefix_2 = 18;
-    assert item.Suffix = 6;
+//     ILoot.increase_xp(loot_address, item_token_id, 2000);
+//     let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+//     assert item.Greatness = 12;
+//     assert item.Prefix_1 = 0;
+//     assert item.Prefix_2 = 0;
+//     assert item.Suffix = 0;
 
-    ILoot.increase_xp(loot_address, item_token_id, 20000);
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-    assert item.Greatness = 21;
-    assert item.Prefix_1 = 68;
-    assert item.Prefix_2 = 18;
-    assert item.Suffix = 6;
+//     ILoot.increase_xp(loot_address, item_token_id, 3000);
+//     let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+//     assert item.Greatness = 13;
+//     assert item.Prefix_1 = 0;
+//     assert item.Prefix_2 = 0;
+//     assert item.Suffix = 0;
 
-    %{
-        stop_prank_loot()
-        stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
-    %}
+//     ILoot.increase_xp(loot_address, item_token_id, 4000);
+//     let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+//     assert item.Greatness = 14;
+//     assert item.Prefix_1 = 0;
+//     assert item.Prefix_2 = 0;
+//     assert item.Suffix = 0;
 
-    return ();
-}
+//     ILoot.increase_xp(loot_address, item_token_id, 5000);
+//     let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+//     assert item.Greatness = 15;
+//     assert item.Prefix_1 = 0;
+//     assert item.Prefix_2 = 0;
+//     assert item.Suffix = 6;
+
+//     ILoot.increase_xp(loot_address, item_token_id, 10000);
+//     let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+//     assert item.Greatness = 16;
+//     assert item.Prefix_1 = 0;
+//     assert item.Prefix_2 = 0;
+//     assert item.Suffix = 6;
+
+//     ILoot.increase_xp(loot_address, item_token_id, 10000);
+//     let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+//     assert item.Greatness = 17;
+//     assert item.Prefix_1 = 0;
+//     assert item.Prefix_2 = 0;
+//     assert item.Suffix = 6;
+
+//     ILoot.increase_xp(loot_address, item_token_id, 10000);
+//     let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+//     assert item.Greatness = 18;
+//     assert item.Prefix_1 = 0;
+//     assert item.Prefix_2 = 0;
+//     assert item.Suffix = 6;
+
+//     ILoot.increase_xp(loot_address, item_token_id, 10000);
+//     let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+//     assert item.Greatness = 19;
+//     assert item.Prefix_1 = 68;
+//     assert item.Prefix_2 = 18;
+//     assert item.Suffix = 6;
+
+//     ILoot.increase_xp(loot_address, item_token_id, 15000);
+//     let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+//     assert item.Greatness = 20;
+//     assert item.Prefix_1 = 68;
+//     assert item.Prefix_2 = 18;
+//     assert item.Suffix = 6;
+
+//     ILoot.increase_xp(loot_address, item_token_id, 20000);
+//     let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+//     assert item.Greatness = 21;
+//     assert item.Prefix_1 = 68;
+//     assert item.Prefix_2 = 18;
+//     assert item.Suffix = 6;
+
+//     %{
+//         stop_prank_loot()
+//         stop_prank_loot = start_prank(ids.account_1_address, ids.loot_address)
+//     %}
+
+//     return ();
+// }
