@@ -1114,7 +1114,7 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     let (top_bid) = bid.read(market_item_id);
 
     // check higher than the last bid price
-    let higher_price = is_le(charisma_adjusted_bid, top_bid.price);
+    let higher_price = is_le(top_bid.price, charisma_adjusted_bid);
     with_attr error_message("Item Market: Your bid is not high enough") {
         assert higher_price = TRUE;
     }
@@ -1248,13 +1248,15 @@ func claim_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
 func assert_can_purchase{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     market_item_id: felt
 ) {
-    let (start_index) = mint_index.read();
+    let (current_index) = mint_index.read();
 
     let (current_items) = new_items.read();
 
+    let start_index = current_index - current_items;
+
     let above_start_index = is_le(start_index, market_item_id);
 
-    let below_end_index = is_le(market_item_id, start_index + current_items);
+    let below_end_index = is_le(market_item_id, current_index);
 
     with_attr error_message("Item Market: Item not available anymore") {
         assert above_start_index = TRUE;

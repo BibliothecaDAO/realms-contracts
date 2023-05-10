@@ -81,6 +81,7 @@ from contracts.loot.constants.item import ITEM_XP_MULTIPLIER
 struct TopScore {
     address: felt,
     xp: felt,
+    adventurer_id: Uint256,
 }
 
 // -----------------------------------
@@ -159,7 +160,7 @@ func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 
     // initialize top three scores to treasury address
     let (treasury) = Module.get_external_contract_address(ExternalContractIds.Treasury);
-    let default_top_score = TopScore(treasury, 0);
+    let default_top_score = TopScore(treasury, 0, Uint256(0,0));
     top_scores.write(0, default_top_score);
     top_scores.write(1, default_top_score);
     top_scores.write(2, default_top_score);
@@ -1092,7 +1093,7 @@ func _deduct_health{
         if (not_top_three_score == FALSE) {
             // if they made the top three, we need to update the top three list
             let (player_address) = owner_of(adventurer_token_id);
-            _update_top_scores(player_address, new_adventurer.XP);
+            _update_top_scores(player_address, new_adventurer.XP, adventurer_token_id);
 
             tempvar syscall_ptr: felt* = syscall_ptr;
             tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
@@ -1269,10 +1270,10 @@ func _distribute_rewards{
 // @return score_board_updated Returns TRUE if the scoreboard was updated, otherwise returns FALSE.
 func _update_top_scores{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(address: felt, new_score_xp: felt) -> (score_board_updated: felt) {
+}(address: felt, new_score_xp: felt, adventurer_token_id: Uint256) -> (score_board_updated: felt) {
     alloc_locals;
 
-    let new_score = TopScore(address, new_score_xp);
+    let new_score = TopScore(address, new_score_xp, adventurer_token_id);
     let (current_first_place) = top_scores.read(0);
     let (current_second_place) = top_scores.read(1);
     let (current_third_place) = top_scores.read(2);
