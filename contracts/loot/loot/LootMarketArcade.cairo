@@ -1119,10 +1119,21 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
         assert higher_price = TRUE;
     }
 
-    // check bid time not expired
-    let not_expired = is_le(top_bid.expiry, current_time);
-    with_attr error_message("Item Market: Bid has expired") {
-        assert not_expired = TRUE;
+    let has_expiry = is_not_zero(top_bid.expiry);
+
+    if (has_expiry == TRUE) {
+        // check bid time not expired
+        let not_expired = is_le(current_time, top_bid.expiry);
+        with_attr error_message("Item Market: Bid has expired") {
+            assert not_expired = TRUE;
+        }   
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    } else {
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
     }
 
     let (item: Item) = ItemLib.generate_item_by_id(top_bid.item_id);
