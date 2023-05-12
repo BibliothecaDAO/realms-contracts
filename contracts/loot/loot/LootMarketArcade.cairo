@@ -631,7 +631,8 @@ func _increase_xp{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin
     let (_item) = get_item_by_token_id(item_token_id);
 
     // increase xp
-    let item_updated_xp = ItemLib.update_xp(_item, amount);
+    let new_xp = _item.XP + amount;
+    let item_updated_xp = ItemLib.update_xp(_item, new_xp);
 
     // check if item received a greatness increase
     let (greatness_increased) = CombatStats.check_for_level_increase(
@@ -891,9 +892,9 @@ func mint_index() -> (number: felt) {
 func new_items() -> (number: felt) {
 }
 
-const HOUR = 3600; // 1 hour
+const HOUR = 3600;  // 1 hour
 const BID_TIME = HOUR / 4;  // 15 minutes
-const SHUFFLE_TIME = 3600 * 3; // cycle market every 3hrs
+const SHUFFLE_TIME = 3600 * 3;  // cycle market every 3hrs
 const BASE_PRICE = 3;
 const SEED_MULTI = 5846975;  // for psudeo randomness now
 const NUMBER_LOOT_ITEMS = 101;
@@ -1126,7 +1127,7 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
         let not_expired = is_le(current_time, top_bid.expiry);
         with_attr error_message("Item Market: Bid has expired") {
             assert not_expired = TRUE;
-        }   
+        }
         tempvar syscall_ptr: felt* = syscall_ptr;
         tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
         tempvar range_check_ptr = range_check_ptr;
