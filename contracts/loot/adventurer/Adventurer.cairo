@@ -284,7 +284,7 @@ func mint_with_starting_weapon{
     return (adventurer_token_id, item_token_id);
 }
 
-// @notice Equip loot item to adventurer
+// @notice Equip loot item to adventurer. If an item is already equipped to that item slot, this functions as a swap
 // @param adventurer_token_id: Id of adventurer
 // @param item_token_id: Id of loot item
 @external
@@ -298,78 +298,15 @@ func equip_item{
 
     assert_not_dead(adventurer_token_id);
 
-    // unpack adventurer
-    let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
-    let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
+    // equip the item selected by the adventurer
+    // note if this function will perform a swap if the adventurer
+    // already has an item equipped to that item slot
+    let (adventurer) = _equip_item(adventurer_token_id, item_token_id);
 
-    // Get Item from Loot contract
-    let (loot_address) = Module.get_module_address(ModuleIds.Loot);
-
-    // Get Item from Loot contract
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-
-    assert item.Adventurer = 0;
-    assert item.Bag = 0;
-
-    // Check item owned by Adventurer
-    assert_adventurer_is_owner(adventurer_token_id, item_token_id);
-
-    // Check item is owned by caller
-    let (owner) = IERC721.ownerOf(loot_address, item_token_id);
-    let (caller) = get_caller_address();
-    assert owner = caller;
-
-    // Check the adventurer does not currently hold anything in slot
-    let (equipped_item) = AdventurerLib.get_item(item, adventurer_dynamic_);
-
-    let check_equipped_item = is_not_zero(equipped_item);
-
-    if (check_equipped_item == TRUE) {
-        unequip_item(adventurer_token_id, Uint256(equipped_item, 0));
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
-    } else {
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
-    }
-
-    tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
-
-    // Convert token to Felt
-    let (token_to_felt) = _uint_to_felt(item_token_id);
-
-    // Equip Item
-    let (equiped_adventurer) = AdventurerLib.equip_item(token_to_felt, item, adventurer_dynamic_);
-
-    // Add item stat boost
-    let (stat_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(
-        item, equiped_adventurer
-    );
-
-    // Pack adventurer and write to chain
-    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(
-        stat_boosted_adventurer
-    );
-    adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
-
-    let (adventurer_to_felt) = _uint_to_felt(adventurer_token_id);
-
-    // Update item
-    ILoot.update_adventurer(loot_address, item_token_id, adventurer_to_felt);
-
-    emit_adventurer_state(adventurer_token_id);
-
-    // After equipping your item
-    // if the adventurer is in battle (currently just beasts)
-    if (equiped_adventurer.Status == AdventurerStatus.Battle) {
-        // The beast will counter attack
-        let (beast_address) = Module.get_module_address(ModuleIds.Beast);
-        let beast_token_id = Uint256(equiped_adventurer.Beast, 0);
-        IBeast.counter_attack(beast_address, beast_token_id);
+    // if the adventurer is in a battle
+    if (adventurer.Status == AdventurerStatus.Battle) {
+        // equipping consumes a turn so process the beasts counter attack
+        _trigger_beast_counterattack(adventurer);
         return (TRUE,);
     }
 
@@ -390,51 +327,12 @@ func unequip_item{
 
     assert_not_dead(adventurer_token_id);
 
-    // unpack adventurer
-    let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
-    let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
+    let (adventurer) = _unequip_item(adventurer_token_id, item_token_id);
 
-    // Get Item from Loot contract
-    let (loot_address) = Module.get_module_address(ModuleIds.Loot);
-
-    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
-
-    assert item.Adventurer = adventurer_token_id.low;
-
-    // Check item is owned by caller
-    let (owner) = IERC721.ownerOf(loot_address, item_token_id);
-    let (caller) = get_caller_address();
-    assert owner = caller;
-
-    // Convert token to Felt
-    let (token_to_felt) = _uint_to_felt(item_token_id);
-
-    // Unequip Item
-    let (unequiped_adventurer) = AdventurerLib.unequip_item(item, adventurer_dynamic_);
-
-    // Remove item stat boost
-    let (stat_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(
-        item, unequiped_adventurer
-    );
-
-    // Pack adventurer
-    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(
-        stat_boosted_adventurer
-    );
-    adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
-
-    // Update item
-    ILoot.update_adventurer(loot_address, item_token_id, 0);
-
-    emit_adventurer_state(adventurer_token_id);
-
-    // After unequipping your item
-    // if the adventurer is in battle (currently just beasts)
-    if (unequiped_adventurer.Status == AdventurerStatus.Battle) {
-        // The beast will counter attack
-        let (beast_address) = Module.get_module_address(ModuleIds.Beast);
-        let beast_token_id = Uint256(unequiped_adventurer.Beast, 0);
-        IBeast.counter_attack(beast_address, beast_token_id);
+    // if the adventurer is in a battle
+    if (adventurer.Status == AdventurerStatus.Battle) {
+        // unequipping consumes a turn so process the beasts counter attack
+        _trigger_beast_counterattack(adventurer);
         return (TRUE,);
     }
 
@@ -1351,4 +1249,137 @@ func _update_top_scores{
     }
 
     return (FALSE,);
+}
+
+func _unequip_item{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(adventurer_token_id: Uint256, item_token_id: Uint256) -> (adventurer_dynamic: AdventurerDynamic) {
+    alloc_locals;
+
+    // unpack adventurer
+    let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
+    let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
+
+    // Get Item from Loot contract
+    let (loot_address) = Module.get_module_address(ModuleIds.Loot);
+
+    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+
+    assert item.Adventurer = adventurer_token_id.low;
+
+    // Check item is owned by caller
+    let (owner) = IERC721.ownerOf(loot_address, item_token_id);
+    let (caller) = get_caller_address();
+    assert owner = caller;
+
+    // Convert token to Felt
+    let (token_to_felt) = _uint_to_felt(item_token_id);
+
+    // Unequip Item
+    let (unequiped_adventurer) = AdventurerLib.unequip_item(item, adventurer_dynamic_);
+
+    // Remove item stat boost
+    let (stat_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(
+        item, unequiped_adventurer
+    );
+
+    // Pack adventurer
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(
+        stat_boosted_adventurer
+    );
+    adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
+
+    // Update item
+    ILoot.update_adventurer(loot_address, item_token_id, 0);
+
+    // Emit event
+    emit_adventurer_state(adventurer_token_id);
+
+    return (stat_boosted_adventurer,);
+}
+
+func _equip_item{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(adventurer_token_id: Uint256, item_token_id: Uint256) -> (adventurer_dynamic: AdventurerDynamic) {
+    alloc_locals;
+
+    // unpack adventurer
+    let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
+    let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
+
+    // Get Item from Loot contract
+    let (loot_address) = Module.get_module_address(ModuleIds.Loot);
+
+    // Get Item from Loot contract
+    let (item) = ILoot.get_item_by_token_id(loot_address, item_token_id);
+
+    assert item.Adventurer = 0;
+    assert item.Bag = 0;
+
+    // Check item owned by Adventurer
+    assert_adventurer_is_owner(adventurer_token_id, item_token_id);
+
+    // Check item is owned by caller
+    let (owner) = IERC721.ownerOf(loot_address, item_token_id);
+    let (caller) = get_caller_address();
+    assert owner = caller;
+
+    // Check the adventurer does not currently hold anything in slot
+    let (equipped_item) = AdventurerLib.get_item(item, adventurer_dynamic_);
+
+    let check_equipped_item = is_not_zero(equipped_item);
+
+    if (check_equipped_item == TRUE) {
+        _unequip_item(adventurer_token_id, Uint256(equipped_item, 0));
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+    } else {
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+    }
+
+    tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+
+    // Convert token to Felt
+    let (token_to_felt) = _uint_to_felt(item_token_id);
+
+    // Equip Item
+    let (equiped_adventurer) = AdventurerLib.equip_item(token_to_felt, item, adventurer_dynamic_);
+
+    // Add item stat boost
+    let (stat_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(
+        item, equiped_adventurer
+    );
+
+    // Pack adventurer and write to chain
+    let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(
+        stat_boosted_adventurer
+    );
+    adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
+
+    let (adventurer_to_felt) = _uint_to_felt(adventurer_token_id);
+
+    // Update item
+    ILoot.update_adventurer(loot_address, item_token_id, adventurer_to_felt);
+
+    // Emit event
+    emit_adventurer_state(adventurer_token_id);
+
+    return (stat_boosted_adventurer,);
+}
+
+func _trigger_beast_counterattack{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(adventurer: AdventurerDynamic) {
+    alloc_locals;
+
+    // equipping consumes a turn so process the beasts counter attack
+    let (beast_address) = Module.get_module_address(ModuleIds.Beast);
+    let beast_token_id = Uint256(adventurer.Beast, 0);
+    IBeast.counter_attack(beast_address, beast_token_id);
+    return ();
 }
