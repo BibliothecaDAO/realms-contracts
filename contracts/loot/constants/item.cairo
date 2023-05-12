@@ -832,6 +832,7 @@ namespace ItemNamePrefixes {
     const Lights = 67;
     const Shimmering = 68;
 }
+const ITEM_NAME_PREFIXES_COUNT = 68;
 
 namespace ItemNameSuffixes {
     const Bane = 1;
@@ -853,6 +854,7 @@ namespace ItemNameSuffixes {
     const Sun = 17;
     const Moon = 18;
 }
+const ITEM_NAME_SUFFIXES_COUNT = 18;
 
 namespace ItemSuffixes {
     const of_Power = 1;
@@ -872,3 +874,4 @@ namespace ItemSuffixes {
     const of_Reflection = 15;
     const of_the_Twins = 16;
 }
+const ITEM_SUFFIXES_COUNT = 16;

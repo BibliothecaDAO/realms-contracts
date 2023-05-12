@@ -43,7 +43,11 @@ from contracts.loot.interfaces.imodules import IModuleController
 from contracts.loot.loot.ILoot import ILoot
 from contracts.loot.loot.stats.combat import CombatStats
 from contracts.loot.utils.constants import ModuleIds, ExternalContractIds
-from contracts.loot.constants.item import ITEM_XP_MULTIPLIER
+from contracts.loot.constants.item import (
+    ITEM_XP_MULTIPLIER,
+    ITEM_NAME_SUFFIXES_COUNT,
+    ITEM_NAME_PREFIXES_COUNT,
+)
 
 // -----------------------------------
 // Events
@@ -163,9 +167,17 @@ func create{
     let (_, beast_level_boost) = unsigned_div_rem(random, 4);
     let (_, beast_health_boost) = unsigned_div_rem(random, 30);
     let (_, beast_id) = unsigned_div_rem(random, BeastIds.MAX_ID);
+    let (_, beast_name_prefix) = unsigned_div_rem(random, ITEM_NAME_PREFIXES_COUNT);
+    let (_, beast_name_suffix) = unsigned_div_rem(random, ITEM_NAME_SUFFIXES_COUNT);
 
     let (beast_static_, beast_dynamic_) = BeastLib.create(
-        beast_id, adventurer_id.low, adventurer_state, beast_level_boost, beast_health_boost
+        beast_id,
+        adventurer_id.low,
+        adventurer_state,
+        beast_level_boost,
+        beast_health_boost,
+        beast_name_prefix + 1,
+        beast_name_suffix + 1,
     );
 
     let (beast_token_id) = _create(beast_static_, beast_dynamic_);

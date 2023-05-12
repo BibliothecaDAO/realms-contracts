@@ -27,6 +27,8 @@ namespace BeastLib {
         adventurer_state: AdventurerState,
         rnd_level_boost: felt,
         rnd_health_boost: felt,
+        rnd_name_prefix: felt,
+        rnd_name_suffix: felt,
     ) -> (beast_static: BeastStatic, beast_dynamic: BeastDynamic) {
         alloc_locals;
 
@@ -44,8 +46,8 @@ namespace BeastLib {
         // Beast health is base + the provided rnd health boost
         let Health = BASE_BEAST_HEALTH + (rnd_health_boost + adventurer_state.Level);
         let BeastId = beast_id + 1;
-        let (Prefix_1) = ItemStats.item_name_prefix(1);
-        let (Prefix_2) = ItemStats.item_name_suffix(1);
+        let (Prefix_1) = ItemStats.item_name_prefix(rnd_name_prefix);
+        let (Prefix_2) = ItemStats.item_name_suffix(rnd_name_suffix);
         let Adventurer = adventurer_id;
         let XP = 0;
         let SlainOnDate = 0;
