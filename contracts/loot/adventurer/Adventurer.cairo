@@ -114,6 +114,10 @@ func Discovery(
 func HighScoreReward(top_score_holders: TopScore) {
 }
 
+@event
+func NewTopScore(top_score_holders: TopScore) {
+}
+
 // -----------------------------------
 // Storage
 // -----------------------------------
@@ -160,7 +164,7 @@ func initializer{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 
     // initialize top three scores to treasury address
     let (treasury) = Module.get_external_contract_address(ExternalContractIds.Treasury);
-    let default_top_score = TopScore(treasury, 0, Uint256(0,0));
+    let default_top_score = TopScore(treasury, 0, Uint256(0, 0));
     top_scores.write(0, default_top_score);
     top_scores.write(1, default_top_score);
     top_scores.write(2, default_top_score);
@@ -1239,19 +1243,16 @@ func _distribute_rewards{
     // send $lords rewards to the adventurer with the highest score
     let (first_place) = top_scores.read(0);
     IERC20.transferFrom(lords_address, caller, first_place.address, Uint256(FIRST_PLACE_REWARD, 0));
-    HighScoreReward.emit(first_place);
 
     // send $lords rewards to the adventurer with the second highest score
     let (second_place) = top_scores.read(1);
     IERC20.transferFrom(
         lords_address, caller, second_place.address, Uint256(SECOND_PLACE_REWARD, 0)
     );
-    HighScoreReward.emit(second_place);
 
     // send $lords rewards to the adventurer with the third highest score
     let (third_place) = top_scores.read(2);
     IERC20.transferFrom(lords_address, caller, third_place.address, Uint256(THIRD_PLACE_REWARD, 0));
-    HighScoreReward.emit(third_place);
 
     // send the remainder of the $lords to treasury
     let (treasury) = Module.get_external_contract_address(ExternalContractIds.Treasury);
@@ -1274,6 +1275,13 @@ func _update_top_scores{
     alloc_locals;
 
     let new_score = TopScore(address, new_score_xp, adventurer_token_id);
+
+    // this is a temporary event to prevent having to reindex during active alpha testing
+    // This can and should be removed as soon as it's conveinent to update our indexer
+    HighScoreReward.emit(new_score);
+    // "NewTopScore" is a more descriptive name for this event
+    NewTopScore.emit(new_score);
+
     let (current_first_place) = top_scores.read(0);
     let (current_second_place) = top_scores.read(1);
     let (current_third_place) = top_scores.read(2);
