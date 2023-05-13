@@ -164,8 +164,13 @@ func create{
     let (adventurer_state) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_id);
 
     let (random) = get_random_number();
-    let (_, beast_level_boost) = unsigned_div_rem(random, 4);
-    let (_, beast_health_boost) = unsigned_div_rem(random, 30);
+
+    let (beast_level_multi, _) = unsigned_div_rem(adventurer_state.Level, 5);
+    let beast_level_range = (1 + beast_level_multi) * 3;
+    let beast_health_range = (1 + beast_level_multi) * 10;
+
+    let (_, beast_level_boost) = unsigned_div_rem(random, beast_level_range);
+    let (_, beast_health_boost) = unsigned_div_rem(random, beast_health_range);
     let (_, beast_id) = unsigned_div_rem(random, BeastIds.MAX_ID);
     let (_, beast_name_prefix) = unsigned_div_rem(random, ITEM_NAME_PREFIXES_COUNT);
     let (_, beast_name_suffix) = unsigned_div_rem(random, ITEM_NAME_SUFFIXES_COUNT);
