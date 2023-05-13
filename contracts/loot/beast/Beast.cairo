@@ -399,78 +399,9 @@ func counter_attack{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(beast_token_id: Uint256) -> (damage: felt) {
     alloc_locals;
-
     Module.only_approved();
-
-    let ZERO = Uint256(0, 0);
-
-    with_attr error_message("Beast: Must provide non-zero beast token id") {
-        let (is_beast_token_zero) = uint256_eq(beast_token_id, ZERO);
-        assert is_beast_token_zero = FALSE;
-    }
-
-    // get address for Loot items
-    let (item_address) = Module.get_module_address(ModuleIds.Loot);
-    // get address for Adventurer
-    let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
-
-    // get beast from token id
-    let (beast) = get_beast_by_id(beast_token_id);
-    // get the location this beast attacks
-    let (beast_attack_location) = BeastStats.get_attack_location_from_id(beast.Id);
-
-    // get the adventurer token id associated with the beast
-    let adventurer_token_id = Uint256(beast.Adventurer, 0);
-
-    // verify adventurer is in battle mode
-    with_attr error_message("Beast: Adventurer token id is zero") {
-        let (is_adventurer_token_zero) = uint256_eq(adventurer_token_id, ZERO);
-        assert is_adventurer_token_zero = FALSE;
-    }
-
-    // retreive unpacked adventurer
-    let (unpacked_adventurer) = get_adventurer_from_beast(beast_token_id);
-
-    // get the armor the adventurer has at the armor slot the beast is attacking
-    let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(beast_attack_location, 0));
-    let (rnd) = get_random_number();
-    let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, armor, rnd);
-
-    // deduct heatlh from adventurer
-    IAdventurer.deduct_health(adventurer_address, adventurer_token_id, damage_taken);
-
-    // check if beast counter attack killed adventurer
-    let (updated_adventurer) = get_adventurer_from_beast(beast_token_id);
-    // if the adventurer is dead
-    if (updated_adventurer.Health == 0) {
-        // calculate xp earned from killing adventurer (adventurers are rank 1)
-        let (xp_gained) = CombatStats.calculate_xp_earned(1, updated_adventurer.Level);
-        // increase beast xp and writes
-        let (_, beast_dynamic_) = BeastLib.split_data(beast);
-        _increase_xp(beast_token_id, beast_dynamic_, xp_gained);
-        AdventurerAttacked.emit(
-            beast_token_id,
-            adventurer_token_id,
-            damage_taken,
-            updated_adventurer.Health,
-            xp_gained,
-            0,
-        );
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
-    } else {
-        AdventurerAttacked.emit(
-            beast_token_id, adventurer_token_id, damage_taken, updated_adventurer.Health, 0, 0
-        );
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
-    }
-
-    return (damage_taken,);
+    let (damage) = _counter_attack(beast_token_id);
+    return (damage,);
 }
 
 // @notice Flee adventurer from beast
@@ -525,6 +456,8 @@ func flee{
         FledBeast.emit(beast_token_id, Uint256(beast.Adventurer, 0));
         return (TRUE,);
     } else {
+        // failing to flee results in beast counter attacking
+        _counter_attack(beast_token_id);
         return (FALSE,);
     }
 }
@@ -606,6 +539,90 @@ func _increase_xp{
         // return the updated beast
         return (updated_xp_beast,);
     }
+}
+
+// @notice A function that simulates a beast's counter-attack against an adventurer.
+// @dev This function performs various checks and emits an event after the attack.//
+// @param pedersen_ptr Reference to the Pedersen Hashing Engine.
+// @param syscall_ptr Reference to the syscall interface.
+// @param range_check_ptr Reference for range checking.
+// @param bitwise_ptr Reference to the Bitwise operations interface.
+// @param beast_token_id The unique identifier of the beast performing the counter-attack.
+//
+// @return damage The amount of damage inflicted on the adventurer by the beast's counter-attack.
+func _counter_attack{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(beast_token_id: Uint256) -> (damage: felt) {
+    alloc_locals;
+
+    let ZERO = Uint256(0, 0);
+    with_attr error_message("Beast: Must provide non-zero beast token id") {
+        let (is_beast_token_zero) = uint256_eq(beast_token_id, ZERO);
+        assert is_beast_token_zero = FALSE;
+    }
+
+    // get address for Loot items
+    let (item_address) = Module.get_module_address(ModuleIds.Loot);
+    // get address for Adventurer
+    let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
+
+    // get beast from token id
+    let (beast) = get_beast_by_id(beast_token_id);
+    // get the location this beast attacks
+    let (beast_attack_location) = BeastStats.get_attack_location_from_id(beast.Id);
+
+    // get the adventurer token id associated with the beast
+    let adventurer_token_id = Uint256(beast.Adventurer, 0);
+
+    // verify adventurer is in battle mode
+    with_attr error_message("Beast: Adventurer token id is zero") {
+        let (is_adventurer_token_zero) = uint256_eq(adventurer_token_id, ZERO);
+        assert is_adventurer_token_zero = FALSE;
+    }
+
+    // retreive unpacked adventurer
+    let (unpacked_adventurer) = get_adventurer_from_beast(beast_token_id);
+
+    // get the armor the adventurer has at the armor slot the beast is attacking
+    let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(beast_attack_location, 0));
+    let (rnd) = get_random_number();
+    let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, armor, rnd);
+
+    // deduct heatlh from adventurer
+    IAdventurer.deduct_health(adventurer_address, adventurer_token_id, damage_taken);
+
+    // check if beast counter attack killed adventurer
+    let (updated_adventurer) = get_adventurer_from_beast(beast_token_id);
+    // if the adventurer is dead
+    if (updated_adventurer.Health == 0) {
+        // calculate xp earned from killing adventurer (adventurers are rank 1)
+        let (xp_gained) = CombatStats.calculate_xp_earned(1, updated_adventurer.Level);
+        // increase beast xp and writes
+        let (_, beast_dynamic_) = BeastLib.split_data(beast);
+        _increase_xp(beast_token_id, beast_dynamic_, xp_gained);
+        AdventurerAttacked.emit(
+            beast_token_id,
+            adventurer_token_id,
+            damage_taken,
+            updated_adventurer.Health,
+            xp_gained,
+            0,
+        );
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+    } else {
+        AdventurerAttacked.emit(
+            beast_token_id, adventurer_token_id, damage_taken, updated_adventurer.Health, 0, 0
+        );
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+    }
+
+    return (damage_taken,);
 }
 
 // @notice Get xiroshiro random number
