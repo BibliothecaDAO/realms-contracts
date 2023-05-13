@@ -182,6 +182,8 @@ func create{
 
     let (beast_token_id) = _create(beast_static_, beast_dynamic_);
 
+    process_ambush(adventurer_address, adventurer_state, beast_token_id);
+
     return (beast_token_id,);
 }
 
@@ -488,69 +490,6 @@ func flee{
         assert unpacked_adventurer.Status = AdventurerStatus.Battle;
     }
 
-    // Ambush rng is scoped between zero and (adventurers level -1)
-    let (ambush_rnd) = get_random_number();
-    let (_, ambush_chance) = unsigned_div_rem(ambush_rnd, unpacked_adventurer.Level);
-
-    // if the adventurers wisdom is higher than the ambush rnd, they avoid ambush
-    let avoided_ambush = is_le(ambush_chance, unpacked_adventurer.Wisdom + 1);
-
-    // if they do not avoid
-    if (avoided_ambush == FALSE) {
-        // they take damage
-
-        // get the location the beast attacks
-        let (beast_attack_location) = BeastStats.get_attack_location_from_id(beast.Id);
-
-        // get the armor the adventurer is wearing at the location the beast attacks
-        let (item_address) = Module.get_module_address(ModuleIds.Loot);
-        let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(beast_attack_location, 0));
-
-        let (damage_rnd) = get_random_number();
-
-        // calculate damage taken from beast
-        let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, armor, damage_rnd);
-
-        // update adventurer health
-        IAdventurer.deduct_health(adventurer_address, Uint256(beast.Adventurer, 0), damage_taken);
-
-        // check if beast counter attack killed adventurer
-        let (updated_adventurer) = get_adventurer_from_beast(beast_token_id);
-        AdventurerAmbushed.emit(
-            beast_token_id, Uint256(beast.Adventurer, 0), damage_taken, updated_adventurer.Health
-        );
-
-        // if the adventurer is dead
-        if (updated_adventurer.Health == 0) {
-            // calculate xp earned from killing adventurer (adventurers are rank 1)
-            let (xp_gained) = CombatStats.calculate_xp_earned(1, updated_adventurer.Level);
-            // increase beast xp and writes
-            let (_, beast_dynamic_) = BeastLib.split_data(beast);
-            _increase_xp(beast_token_id, beast_dynamic_, xp_gained);
-
-            tempvar syscall_ptr: felt* = syscall_ptr;
-            tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-            tempvar range_check_ptr = range_check_ptr;
-            tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
-        } else {
-            tempvar syscall_ptr: felt* = syscall_ptr;
-            tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-            tempvar range_check_ptr = range_check_ptr;
-            tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
-        }
-
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
-    } else {
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
-    }
-    tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
-
     //
     // Core Flee Logic
     //
@@ -715,6 +654,78 @@ func emit_beast_level_up{
     let (beast) = get_beast_by_id(beast_token_id);
     UpdateBeastState.emit(beast_token_id, beast);
     BeastLevelUp.emit(beast_token_id, beast.Level);
+    return ();
+}
+
+func process_ambush{
+    range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, bitwise_ptr: BitwiseBuiltin*
+}(adventurer_address: felt, unpacked_adventurer: AdventurerState, beast_token_id: Uint256) {
+    alloc_locals;
+    // Ambush rng is scoped between zero and (adventurers level -1)
+    let (ambush_rnd) = get_random_number();
+    let (_, ambush_chance) = unsigned_div_rem(ambush_rnd, unpacked_adventurer.Level);
+
+    // if the adventurers wisdom is higher than the ambush rnd, they avoid ambush
+    let avoided_ambush = is_le(ambush_chance, unpacked_adventurer.Wisdom + 1);
+
+    // if they do not avoid
+    if (avoided_ambush == FALSE) {
+        // they take damage
+
+        let (beast) = get_beast_by_id(beast_token_id);
+
+        // get the location the beast attacks
+        let (beast_attack_location) = BeastStats.get_attack_location_from_id(beast.Id);
+
+        // get the armor the adventurer is wearing at the location the beast attacks
+        let (item_address) = Module.get_module_address(ModuleIds.Loot);
+        let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(beast_attack_location, 0));
+
+        let (damage_rnd) = get_random_number();
+
+        // calculate damage taken from beast
+        let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, armor, damage_rnd);
+
+        // update adventurer health
+        IAdventurer.deduct_health(adventurer_address, Uint256(beast.Adventurer, 0), damage_taken);
+
+        // check if beast counter attack killed adventurer
+        let (updated_adventurer) = get_adventurer_from_beast(beast_token_id);
+        AdventurerAmbushed.emit(
+            beast_token_id, Uint256(beast.Adventurer, 0), damage_taken, updated_adventurer.Health
+        );
+
+        // if the adventurer is dead
+        if (updated_adventurer.Health == 0) {
+            // calculate xp earned from killing adventurer (adventurers are rank 1)
+            let (xp_gained) = CombatStats.calculate_xp_earned(1, updated_adventurer.Level);
+            // increase beast xp and writes
+            let (_, beast_dynamic_) = BeastLib.split_data(beast);
+            _increase_xp(beast_token_id, beast_dynamic_, xp_gained);
+
+            tempvar syscall_ptr: felt* = syscall_ptr;
+            tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+            tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+        } else {
+            tempvar syscall_ptr: felt* = syscall_ptr;
+            tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+            tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+        }
+
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+    } else {
+        tempvar syscall_ptr: felt* = syscall_ptr;
+        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+    }
+    tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+
     return ();
 }
 
