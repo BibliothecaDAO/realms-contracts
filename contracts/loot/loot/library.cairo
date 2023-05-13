@@ -310,34 +310,6 @@ namespace ItemLib {
         return (name_prefix,);
     }
 
-    // @notice Assigns a name suffix to a Loot item using the same schema as the OG Loot Contract
-    // @param item: The Loot Item you want to assign a name suffix to
-    // @param rnd: A random number
-    // @return updated_item: The provided item with a canoncially sound name suffix added
-    func assign_item_name_suffix{syscall_ptr: felt*, range_check_ptr}(item: Item, rnd: felt) -> (
-        return_item: Item
-    ) {
-        let (updated_name_suffix) = generate_name_suffix(item.Id, rnd);
-
-        let updated_item = Item(
-            Id=item.Id,
-            Slot=item.Slot,
-            Type=item.Type,
-            Material=item.Material,
-            Rank=item.Rank,
-            Prefix_1=item.Prefix_1,
-            Prefix_2=item.Prefix_2,
-            Suffix=updated_name_suffix,
-            Greatness=item.Greatness,
-            CreatedBlock=item.CreatedBlock,
-            XP=item.XP,
-            Adventurer=item.Adventurer,
-            Bag=item.Bag,
-        );
-
-        return (updated_item,);
-    }
-
     // @notice Returns a name suffix for the provided item that is consistent with the Loot Contract
     // @param item_id: The id of a Loot
     // @param rnd: A random number
@@ -383,6 +355,24 @@ namespace ItemLib {
 
         let (_, index) = unsigned_div_rem(new_rnd, NameSuffixLength);
         let (name_suffix) = ItemStats.item_name_suffix(index + 1);
+        return (name_suffix,);
+    }
+
+    // @notice Returns a suffix for the provided item that is consistent with the Loot Contract
+    // @param item_id: The id of a Loot
+    // @param rnd: A random number
+    // @return name_suffix for the item
+    func generate_suffix{syscall_ptr: felt*, range_check_ptr}(item_id: felt, rnd: felt) -> (
+        suffix: felt
+    ) {
+        let (item_slot) = ItemStats.item_slot(item_id);
+        let (loot_slot_length) = ItemStats.loot_slot_length(item_slot);
+        let (loot_item_index) = ItemStats.loot_item_index(item_id);
+        // find a new random number that respects Loot constraints
+        let new_rnd = rnd * loot_slot_length + loot_item_index;
+
+        let (_, index) = unsigned_div_rem(new_rnd, NameSuffixLength);
+        let (name_suffix) = ItemStats.item_suffix(index + 1);
         return (name_suffix,);
     }
 

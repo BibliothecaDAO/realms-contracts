@@ -665,7 +665,7 @@ func _increase_xp{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin
         let no_name_suffix = is_le(item_updated_greatness.Suffix, 0);
         if (no_name_suffix == TRUE) {
             // assign one
-            let (item_updated_suffix) = _assign_name_suffix(item_token_id);
+            let (item_updated_suffix) = _assign_suffix(item_token_id);
 
             // reduce cairo complexity by simply returning here
             // Should an item increase in greatness from 14->19 in a single
@@ -816,7 +816,7 @@ func _assign_name_prefixes{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: Ha
 // / - `emit_item_suffix_assigned`: An event that indicates that the item name suffix has been assigned.
 // /
 // / @exceptions None
-func _assign_name_suffix{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
+func _assign_suffix{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
     item_token_id: Uint256
 ) -> (updated_item: Item) {
     alloc_locals;
@@ -828,7 +828,7 @@ func _assign_name_suffix{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: Hash
     let (rnd) = get_random_number();
 
     // use it as seed to generate item name suffix
-    let (updated_item) = ItemLib.assign_item_name_suffix(_item, rnd);
+    let updated_item = ItemLib.assign_item_suffix(_item, rnd);
 
     // save update to blockchain
     item.write(item_token_id, updated_item);
