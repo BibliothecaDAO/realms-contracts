@@ -349,7 +349,7 @@ namespace CombatStats {
         let level_times_ten = level * 10;
 
         // divide current level by 3 and ignore the remainder
-        let (level_divided_by_x, _) = unsigned_div_rem(level_times_ten, 3);
+        let (level_divided_by_x, _) = unsigned_div_rem(level_times_ten, 5);
 
         // square the integer portion to get xp required for next level
         let (xp_required_for_next_level) = pow(level_divided_by_x, 2);
