@@ -157,12 +157,16 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 @external
 func create{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(adventurer_token_id: Uint256) -> (beast_token_id: Uint256, adventurer_dynamic: AdventurerDynamic) {
+}(adventurer_token_id: Uint256) -> (
+    beast_token_id: Uint256, adventurer_dynamic: AdventurerDynamic
+) {
     alloc_locals;
     Module.only_approved();
 
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
-    let (adventurer_state) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_token_id);
+    let (adventurer_state) = IAdventurer.get_adventurer_by_id(
+        adventurer_address, adventurer_token_id
+    );
 
     let (random) = get_random_number();
 
@@ -201,7 +205,9 @@ func create_starting_beast{
     Module.only_approved();
 
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
-    let (adventurer_state) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_token_id);
+    let (adventurer_state) = IAdventurer.get_adventurer_by_id(
+        adventurer_address, adventurer_token_id
+    );
 
     let (beast_static_, beast_dynamic_) = BeastLib.create_start_beast(
         beast_id, adventurer_token_id.low, adventurer_state
@@ -286,7 +292,7 @@ func attack{
         // get the location the beast attacks
         let (beast_attack_location) = BeastStats.get_attack_location_from_id(beast.Id);
 
-        let (rnd) = get_random_number();
+        let (critical_damage_rnd) = get_random_number();
 
         // get the armor the adventurer is wearing at the location the beast attacks
         // @distracteddev: Should be get equipped item by slot not get item by Id
@@ -297,7 +303,11 @@ func attack{
             beast_attack_location, adventurer_dynamic_
         );
         let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(item_id, 0));
-        let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, armor, rnd);
+
+        // adventurer level will be used for beast stats such as Luck
+        let (damage_taken) = CombatStats.calculate_damage_from_beast(
+            beast, armor, critical_damage_rnd, adventurer_dynamic_.Level
+        );
 
         IAdventurer.deduct_health(adventurer_address, adventurer_token_id, damage_taken);
 
@@ -310,7 +320,12 @@ func attack{
             // increase beast xp and writes
             _increase_xp(beast_token_id, updated_health_beast, xp_gained);
             AdventurerAttacked.emit(
-                beast_token_id, adventurer_token_id, damage_taken, updated_adventurer.Health, xp_gained, 0
+                beast_token_id,
+                adventurer_token_id,
+                damage_taken,
+                updated_adventurer.Health,
+                xp_gained,
+                0,
             );
             tempvar syscall_ptr: felt* = syscall_ptr;
             tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
@@ -589,7 +604,9 @@ func _counter_attack{
     let (item_id) = AdventurerLib.get_item_id_at_slot(beast_attack_location, adventurer_dynamic_);
     let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(item_id, 0));
     let (rnd) = get_random_number();
-    let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, armor, rnd);
+    let (damage_taken) = CombatStats.calculate_damage_from_beast(
+        beast, armor, rnd, adventurer_dynamic_.Level
+    );
 
     // deduct heatlh from adventurer
     IAdventurer.deduct_health(adventurer_address, adventurer_token_id, damage_taken);
@@ -717,7 +734,7 @@ func process_ambush{
 
         // calculate damage taken from beast
         let (damage_taken) = CombatStats.calculate_damage_from_beast(
-            beast, armor, critical_damage_rnd
+            beast, armor, critical_damage_rnd, adventurer_dynamic_.Level
         );
 
         // update adventurer health
@@ -791,7 +808,9 @@ func get_adventurer_from_beast{
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
     let (beast) = get_beast_by_id(beast_token_id);
     let adventurer_token_id = Uint256(beast.Adventurer, 0);
-    let (adventurer_state) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_token_id);
+    let (adventurer_state) = IAdventurer.get_adventurer_by_id(
+        adventurer_address, adventurer_token_id
+    );
     return (adventurer_state,);
 }
 

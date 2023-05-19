@@ -20,3 +20,4 @@ const STARTING_GOLD = 20;
 
 const VITALITY_HEALTH_BOOST = 20;
 const SUFFIX_STAT_BOOST = 3;
+const MAX_CRITICAL_HIT_CHANCE = 5; // this results in a 1/2 chance of critical hit

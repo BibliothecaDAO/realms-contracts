@@ -21,6 +21,7 @@ from contracts.loot.loot.stats.item import ItemStats
 from contracts.loot.constants.adventurer import AdventurerState
 from contracts.loot.constants.beast import Beast, BeastStatic, BeastDynamic
 from contracts.loot.constants.obstacle import Obstacle, ObstacleUtils
+from contracts.loot.utils.constants import MAX_CRITICAL_HIT_CHANCE
 
 namespace CombatStats {
     func weapon_vs_armor_efficacy{syscall_ptr: felt*, range_check_ptr}(
@@ -139,10 +140,24 @@ namespace CombatStats {
         let (total_weapon_damage) = get_attack_effectiveness(attack_effectiveness, weapon_damage);
 
         // @distracteddev: calculate whether hit is critical and add luck
-        // luck has a max of 46 (both jewellery fully powered)
         // 0-9 = 1 in 6, 10-19 = 1 in 5, 20-29 = 1 in 4, 30-39 = 1 in 3, 40-46 = 1 in 2
         // formula = damage * (1.5 * rand(6 - (luck/10))
+
         let (critical_hit_chance, _) = unsigned_div_rem(luck, 10);
+
+        // there is no implied cap on item greatness so luck is unbound
+        // but for purposes of critical damage calculation, the max critical hit chance is 5
+        let critical_hit_chance_within_range = is_le(critical_hit_chance, MAX_CRITICAL_HIT_CHANCE);
+        // if the critical hit chance is 5 or less
+        if (critical_hit_chance_within_range == TRUE) {
+            // use the unalterted critical hit chance
+            tempvar temp_critical_hit_chance = critical_hit_chance;
+        } else {
+            // if it is above 5, then set it to 5
+            tempvar temp_critical_hit_chance = MAX_CRITICAL_HIT_CHANCE;
+        }
+        let critical_hit_chance = temp_critical_hit_chance;
+
         let (_, critical_rand) = unsigned_div_rem(rnd, (6 - critical_hit_chance));
         let critical_hit = is_le(critical_rand, 0);
         // @distracteddev: provide some multi here with adventurer level: e.g. damage + (1 + ((1 - level) * 0.1))
@@ -150,7 +165,7 @@ namespace CombatStats {
             total_weapon_damage, entity_level + strength
         );
         let (critical_damage_dealt) = calculate_critical_damage(
-            adventurer_level_damage, critical_hit
+            adventurer_level_damage, critical_hit, rnd
         );
         return (critical_damage_dealt,);
     }
@@ -189,17 +204,19 @@ namespace CombatStats {
 
     // Calculates damage dealt from a beast by converting beast into a Loot weapon and calling calculate_damage_from_weapon
     func calculate_damage_from_beast{syscall_ptr: felt*, range_check_ptr}(
-        beast: Beast, armor: Item, rnd: felt
+        beast: Beast, armor: Item, critical_damage_rnd: felt, adventurer_level: felt
     ) -> (damage: felt) {
         alloc_locals;
 
         // Get beast attack type
         let (attack_type) = BeastStats.get_attack_type_from_id(beast.Id);
 
-        // Get armor type
-        // NOTE: @loothero if no armor then armor type is generic
+        // beast luck will scale with adventurer level
+        let beast_luck = adventurer_level;
+
+        // if adventurer doesn't have armor in the location being attacked
         if (armor.Id == 0) {
-            // force armor_type generic
+            // we use generic armor which will result in max damage for adventurer
             return calculate_damage(
                 attack_type,
                 beast.Rank,
@@ -209,8 +226,8 @@ namespace CombatStats {
                 armor.Greatness,
                 1,
                 0,
-                0,
-                rnd,
+                beast_luck,
+                critical_damage_rnd,
             );
         } else {
             let (armor_type) = ItemStats.item_type(armor.Id);
@@ -226,8 +243,8 @@ namespace CombatStats {
                 armor.Greatness,
                 1,
                 0,
-                0,
-                rnd,
+                beast_luck,
+                critical_damage_rnd,
             );
         }
     }
@@ -364,6 +381,11 @@ namespace CombatStats {
         }
     }
 
+    // @notice Calculates the damage boost based on the input damage and entity level.
+    // @dev This function is used to calculate the damage boost for an entity based on its level.
+    // @param damage The base damage.
+    // @param entity_level The level of the entity.
+    // @return entity_level_damage The calculated damage after applying the level boost.
     func calculate_entity_level_boost{syscall_ptr: felt*, range_check_ptr}(
         damage: felt, entity_level: felt
     ) -> (entity_level_damage: felt) {
@@ -372,15 +394,34 @@ namespace CombatStats {
         return (entity_level_damage,);
     }
 
+    // @notice Calculates the critical damage based on the original damage, critical hit flag, and random number.
+    // @dev This function is used to calculate the damage dealt when a critical hit occurs..
+    // @param original_damage The original damage dealt.
+    // @param critical_hit Flag indicating whether a critical hit occurred (TRUE for critical hit, FALSE otherwise).
+    // @param rnd Random number used to determine the damage boost multiplier.
+    // @return critical_damage The calculated critical damage.
     func calculate_critical_damage{syscall_ptr: felt*, range_check_ptr}(
-        damage: felt, critical: felt
+        original_damage: felt, critical_hit: felt, rnd: felt
     ) -> (crtical_damage: felt) {
-        if (critical == TRUE) {
-            let format_critical_damage = damage * 150;
-            let (critical_damage, _) = unsigned_div_rem(format_critical_damage, 100);
+        // if adventurer dealt critical hit
+        if (critical_hit == TRUE) {
+            // divide the damage by four to get base damage boost
+            let (damage_boost_base, _) = unsigned_div_rem(original_damage, 4);
+
+            // damage multplier is 1-4 which will equate to a 25-100% damage boost
+            let (_, damage_multplier) = unsigned_div_rem(rnd, 4);
+
+            // multiply base damage boost (25% of original damage) by damage multiplier (1-4)
+            let critical_hit_damage_bonus = damage_boost_base * (damage_multplier + 1);
+
+            // add damage multplier to original damage
+            let critical_damage = original_damage + critical_hit_damage_bonus;
+
+            // return critical damage
             return (critical_damage,);
         } else {
-            return (damage,);
+            // if no critical hit, return original damage
+            return (original_damage,);
         }
     }
 }
