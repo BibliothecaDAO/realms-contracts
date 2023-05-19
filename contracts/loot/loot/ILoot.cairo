@@ -22,8 +22,8 @@ namespace ILoot {
     }
     func get_adventurer_owner(tokenId: Uint256) -> (adventuer_token_id: Uint256) {
     }
-    func increase_xp(tokenId: Uint256, amount: felt) -> (updated_item: Item) {
+    func increase_xp(loot_token_id: Uint256, adventurer_token_id: Uint256, amount: felt) -> (updated_item: Item) {
     }
-    func allocate_xp_to_items(adventurer: AdventurerState, amount: felt) {
+    func allocate_xp_to_items(adventurer_token_id: Uint256, amount: felt) {
     }
 }

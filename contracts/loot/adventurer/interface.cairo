@@ -20,4 +20,6 @@ namespace IAdventurer {
     }
     func explore(tokenId: Uint256) -> (success: felt) {
     }
+    func update_adventurer(adventurer_token_id: Uint256, adventurer_dynamic: AdventurerDynamic) {
+    }
 }

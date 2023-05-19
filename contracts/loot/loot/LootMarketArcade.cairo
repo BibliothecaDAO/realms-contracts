@@ -13,7 +13,7 @@ from openzeppelin.token.erc721.library import ERC721
 from openzeppelin.token.erc721.enumerable.library import ERC721Enumerable
 from openzeppelin.upgrades.library import Proxy
 from starkware.cairo.common.bool import TRUE, FALSE
-from contracts.loot.constants.adventurer import AdventurerState
+from contracts.loot.constants.adventurer import AdventurerState, AdventurerDynamic
 from contracts.loot.constants.item import Item, ItemIds
 from contracts.loot.interfaces.imodules import IModuleController
 from contracts.loot.loot.library import ItemLib
@@ -34,6 +34,7 @@ from contracts.loot.loot.stats.item import ItemStats
 from contracts.loot.utils.constants import ModuleIds, ExternalContractIds, STARTING_GOLD
 from contracts.loot.adventurer.interface import IAdventurer
 from openzeppelin.token.erc721.IERC721 import IERC721
+from contracts.loot.adventurer.library import AdventurerLib
 
 struct Bid {
     price: felt,
@@ -419,7 +420,7 @@ func set_item_by_id{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_
 // @return success: Value indicating success
 @external
 func increase_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    item_token_id: Uint256, amount: felt
+    item_token_id: Uint256, adventurer_token_id: Uint256, amount: felt
 ) -> (updated_item: Item) {
     alloc_locals;
 
@@ -427,7 +428,7 @@ func increase_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     Module.only_approved();
 
     // call internal function for updating xp
-    let (updated_item) = _increase_xp(item_token_id, amount);
+    let (updated_item) = _increase_xp(item_token_id, adventurer_token_id, amount);
 
     // return result
     return (updated_item,);
@@ -443,17 +444,21 @@ func increase_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 // @return success: Value indicating success
 @external
 func allocate_xp_to_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    adventurer: AdventurerState, amount: felt
+    adventurer_token_id: Uint256, amount: felt
 ) {
     alloc_locals;
 
     // Only approved modules can increase and items xp
     Module.only_approved();
 
+    // get dynamic adventurer from adventurer token id
+    let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
+    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_token_id);
+
     // If adventurer has a weapon
     let weapon_equipped = is_not_zero(adventurer.WeaponId);
     if (weapon_equipped == TRUE) {
-        _increase_xp(Uint256(adventurer.WeaponId, 0), amount);
+        _increase_xp(Uint256(adventurer.WeaponId, 0), adventurer_token_id, amount);
 
         tempvar syscall_ptr: felt* = syscall_ptr;
         tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
@@ -469,7 +474,7 @@ func allocate_xp_to_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
     if (head_armor_equipped == TRUE) {
         // grant it xp
 
-        _increase_xp(Uint256(adventurer.HeadId, 0), amount);
+        _increase_xp(Uint256(adventurer.HeadId, 0), adventurer_token_id, amount);
 
         tempvar syscall_ptr: felt* = syscall_ptr;
         tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
@@ -484,7 +489,7 @@ func allocate_xp_to_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
     let chest_armor_equipped = is_not_zero(adventurer.ChestId);
     if (chest_armor_equipped == TRUE) {
         // grant it xp
-        _increase_xp(Uint256(adventurer.ChestId, 0), amount);
+        _increase_xp(Uint256(adventurer.ChestId, 0), adventurer_token_id, amount);
 
         tempvar syscall_ptr: felt* = syscall_ptr;
         tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
@@ -499,7 +504,7 @@ func allocate_xp_to_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
     let hand_armor_equipped = is_not_zero(adventurer.HandsId);
     if (hand_armor_equipped == TRUE) {
         // grant it xp
-        _increase_xp(Uint256(adventurer.HandsId, 0), amount);
+        _increase_xp(Uint256(adventurer.HandsId, 0), adventurer_token_id, amount);
 
         tempvar syscall_ptr: felt* = syscall_ptr;
         tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
@@ -514,7 +519,7 @@ func allocate_xp_to_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
     let foot_armor_equipped = is_not_zero(adventurer.FeetId);
     if (foot_armor_equipped == TRUE) {
         // grant it xp
-        _increase_xp(Uint256(adventurer.FeetId, 0), amount);
+        _increase_xp(Uint256(adventurer.FeetId, 0), adventurer_token_id, amount);
 
         tempvar syscall_ptr: felt* = syscall_ptr;
         tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
@@ -529,7 +534,7 @@ func allocate_xp_to_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
     let waist_armor_equipped = is_not_zero(adventurer.WaistId);
     if (waist_armor_equipped == TRUE) {
         // grant it xp
-        _increase_xp(Uint256(adventurer.WaistId, 0), amount);
+        _increase_xp(Uint256(adventurer.WaistId, 0), adventurer_token_id, amount);
 
         tempvar syscall_ptr: felt* = syscall_ptr;
         tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
@@ -544,7 +549,7 @@ func allocate_xp_to_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
     let ring_equipped = is_not_zero(adventurer.RingId);
     if (ring_equipped == TRUE) {
         // grant it xp
-        _increase_xp(Uint256(adventurer.RingId, 0), amount);
+        _increase_xp(Uint256(adventurer.RingId, 0), adventurer_token_id, amount);
 
         tempvar syscall_ptr: felt* = syscall_ptr;
         tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
@@ -559,7 +564,7 @@ func allocate_xp_to_items{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
     let necklace_equipped = is_not_zero(adventurer.NeckId);
     if (necklace_equipped == TRUE) {
         // grant it xp
-        _increase_xp(Uint256(adventurer.NeckId, 0), amount);
+        _increase_xp(Uint256(adventurer.NeckId, 0), adventurer_token_id, amount);
 
         tempvar syscall_ptr: felt* = syscall_ptr;
         tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
@@ -623,7 +628,7 @@ func assert_starter_weapon{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: Ha
 // @param amount The amount by which to increase the item's "XP" attribute.
 // @return success Boolean value indicating whether the function succeeded.
 func _increase_xp{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*}(
-    item_token_id: Uint256, amount: felt
+    item_token_id: Uint256, adventurer_token_id: Uint256, amount: felt
 ) -> (updated_item: Item) {
     alloc_locals;
 
@@ -644,13 +649,51 @@ func _increase_xp{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin
 
     // if greatness increased
     if (greatness_increased == TRUE) {
-        // increase greatness
+        // increase greatness of our local item
         let (item_updated_greatness) = _increase_greatness(
             item_token_id, item_updated_xp.Greatness + 1
         );
 
-        // check if we need to assign special name to the item (at greatness 15 and 19)
+        // check if the item greatness incr3ease impacts stat modifiers
+        let (increase_impacts_adventurer_stats) = AdventurerLib.impacts_stat_modifier(
+            item_updated_greatness
+        );
 
+        // if it does
+        if (increase_impacts_adventurer_stats == TRUE) {
+            // get dynamic adventurer from adventurer token id
+            let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
+            let (adventurer) = IAdventurer.get_adventurer_by_id(
+                adventurer_address, adventurer_token_id
+            );
+            let (adventurer_static, adventurer_dynamic) = AdventurerLib.split_data(adventurer);
+
+            // remove previous stat modifiers from that item (pre greatness increase)
+            let (
+                stat_modifier_removed_dynamic_adventurer
+            ) = AdventurerLib.remove_item_stat_modifier(_item, adventurer_dynamic);
+
+            // apply new stat modifier for the item (post greatness increase)
+            let (stat_modifier_added_dynamic_adventurer) = AdventurerLib.apply_item_stat_modifier(
+                item_updated_greatness, stat_modifier_removed_dynamic_adventurer
+            );
+
+            // update adventurer via Adventurer interface
+            let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
+            IAdventurer.update_adventurer(
+                adventurer_address, adventurer_token_id, stat_modifier_added_dynamic_adventurer
+            );
+
+            tempvar syscall_ptr: felt* = syscall_ptr;
+            tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+        } else {
+            tempvar syscall_ptr: felt* = syscall_ptr;
+            tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
+            tempvar range_check_ptr = range_check_ptr;
+        }
+
+        // check if we need to assign special name to the item (at greatness 15 and 19)
         // if the item is below greatness 15
         let below_greatness_fifteen = is_le(item_updated_greatness.Greatness, 14);
         if (below_greatness_fifteen == TRUE) {
@@ -659,11 +702,9 @@ func _increase_xp{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin
             return (item_updated_greatness,);
         }
 
-        // if execution makes it here, greatness is 15+
-
+        // if execution makes it here, item greatness is 15+
         // if item is greatness 15+ and doesn't have name suffix yet
-        let no_name_suffix = is_le(item_updated_greatness.Suffix, 0);
-        if (no_name_suffix == TRUE) {
+        if (item_updated_greatness.Suffix == 0) {
             // assign one
             let (item_updated_suffix) = _assign_suffix(item_token_id);
 
@@ -678,8 +719,7 @@ func _increase_xp{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin
         let below_greatness_eighteen = is_le(item_updated_greatness.Greatness, 18);
         if (below_greatness_eighteen == FALSE) {
             // and it does not have a name suffix
-            let no_name_prefixes = is_le(item_updated_greatness.Prefix_1, 0);
-            if (no_name_prefixes == TRUE) {
+            if (item_updated_greatness.Prefix_1 == 0) {
                 // assign one
                 let (item_updated_prefixes) = _assign_name_prefixes(item_token_id);
 

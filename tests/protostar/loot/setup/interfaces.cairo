@@ -2,7 +2,11 @@
 
 from starkware.cairo.common.uint256 import Uint256
 
-from contracts.loot.constants.adventurer import AdventurerState, PackedAdventurerState
+from contracts.loot.constants.adventurer import (
+    AdventurerState,
+    PackedAdventurerState,
+    AdventurerDynamic,
+)
 from contracts.loot.constants.beast import Beast, BeastStatic, BeastDynamic
 from contracts.loot.constants.item import Item, Bid
 
@@ -72,7 +76,7 @@ namespace IAdventurer {
         order: felt,
         image_hash_1: felt,
         image_hash_2: felt,
-        interface_address: felt
+        interface_address: felt,
     ) -> (adventurer_token_id: Uint256) {
     }
     func mint_with_starting_weapon(
@@ -84,7 +88,7 @@ namespace IAdventurer {
         image_hash_1: felt,
         image_hash_2: felt,
         weapon_id: felt,
-        interface_address: felt
+        interface_address: felt,
     ) -> (adventurer_token_id: Uint256, item_token_id: Uint256) {
     }
 
@@ -105,6 +109,8 @@ namespace IAdventurer {
     func purchase_health(tokenId: Uint256, number: felt) -> (success: felt) {
     }
     func upgrade_stat(adventurer_token_id: Uint256, stat: felt) -> (success: felt) {
+    }
+    func update_adventurer(adventurer_token_id: Uint256, adventurer_dynamic: AdventurerDynamic) {
     }
 }
 

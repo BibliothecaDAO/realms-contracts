@@ -434,6 +434,27 @@ func increase_xp{
     return (TRUE,);
 }
 
+// @notice Updates the state of an adventurer based on the provided adventurer.
+// @dev This function is external and can be called by any address.
+// @param adventurer_token_id The unique identifier of the adventurer token.
+// @param adventurer_dynamic The updated dynamic data of the adventurer.
+@external
+func update_adventurer{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(adventurer_token_id: Uint256, _adventurer_dynamic: AdventurerDynamic) {
+    alloc_locals;
+
+    // only approved modules can call this external function
+    Module.only_approved();
+
+    // pack adventurer
+    let (packed_adventurer: PackedAdventurerState) = AdventurerLib.pack(_adventurer_dynamic);
+
+    // write to chain
+    adventurer_dynamic.write(adventurer_token_id, packed_adventurer);
+    return ();
+}
+
 // @notice Upgrade stat of adventurer
 // @param adventurer_token_id: Id of adventurer
 // @param amount: Amount of xp to increase
@@ -680,7 +701,7 @@ func explore{
 
             // grant XP to items
             let xp_gained_items = obstacle_damage * ITEM_XP_MULTIPLIER;
-            ILoot.allocate_xp_to_items(item_address, unpacked_adventurer, xp_gained_items);
+            ILoot.allocate_xp_to_items(item_address, adventurer_token_id, xp_gained_items);
 
             // emit discovery event
             Discovery.emit(
@@ -1312,13 +1333,13 @@ func _unequip_item{
     let (unequiped_adventurer) = AdventurerLib.unequip_item(item, adventurer_dynamic_);
 
     // Remove item stat boost
-    let (stat_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(
+    let (stat_boost_removed_adventurer) = AdventurerLib.remove_item_stat_modifier(
         item, unequiped_adventurer
     );
 
     // Pack adventurer
     let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(
-        stat_boosted_adventurer
+        stat_boost_removed_adventurer
     );
     adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
 
@@ -1328,7 +1349,7 @@ func _unequip_item{
     // Emit event
     emit_adventurer_state(adventurer_token_id);
 
-    return (stat_boosted_adventurer,);
+    return (stat_boost_removed_adventurer,);
 }
 
 func _equip_item{

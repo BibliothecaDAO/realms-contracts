@@ -152,17 +152,17 @@ func upgrade{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 // -----------------------------
 
 // @notice Create a beast and attach to adventurer
-// @param adventurer_id: Id of adventurer
+// @param adventurer_token_id: Id of adventurer
 // @return beast_token_id: Id of beast
 @external
 func create{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(adventurer_id: Uint256) -> (beast_token_id: Uint256, adventurer_dynamic: AdventurerDynamic) {
+}(adventurer_token_id: Uint256) -> (beast_token_id: Uint256, adventurer_dynamic: AdventurerDynamic) {
     alloc_locals;
     Module.only_approved();
 
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
-    let (adventurer_state) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_id);
+    let (adventurer_state) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_token_id);
 
     let (random) = get_random_number();
 
@@ -178,7 +178,7 @@ func create{
 
     let (beast_static_, beast_dynamic_) = BeastLib.create(
         beast_id,
-        adventurer_id.low,
+        adventurer_token_id.low,
         adventurer_state,
         beast_level_boost,
         beast_health_boost,
@@ -196,15 +196,15 @@ func create{
 @external
 func create_starting_beast{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(adventurer_id: Uint256, beast_id: felt) -> (beast_token_id: Uint256) {
+}(adventurer_token_id: Uint256, beast_id: felt) -> (beast_token_id: Uint256) {
     alloc_locals;
     Module.only_approved();
 
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
-    let (adventurer_state) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_id);
+    let (adventurer_state) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_token_id);
 
     let (beast_static_, beast_dynamic_) = BeastLib.create_start_beast(
-        beast_id, adventurer_id.low, adventurer_state
+        beast_id, adventurer_token_id.low, adventurer_state
     );
 
     return _create(beast_static_, beast_dynamic_);
@@ -243,8 +243,8 @@ func attack{
     alloc_locals;
 
     let (beast) = get_beast_by_id(beast_token_id);
-    let adventurer_id = Uint256(beast.Adventurer, 0);
-    assert_adventurer_owner(adventurer_id);
+    let adventurer_token_id = Uint256(beast.Adventurer, 0);
+    assert_adventurer_owner(adventurer_token_id);
 
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
     let (unpacked_adventurer) = get_adventurer_from_beast(beast_token_id);
@@ -281,7 +281,7 @@ func attack{
     // if the beast is alive, it automatically counter attacks
     if (beast_is_alive == TRUE) {
         BeastAttacked.emit(
-            beast_token_id, adventurer_id, damage_dealt, updated_health_beast.Health, 0, 0
+            beast_token_id, adventurer_token_id, damage_dealt, updated_health_beast.Health, 0, 0
         );
         // get the location the beast attacks
         let (beast_attack_location) = BeastStats.get_attack_location_from_id(beast.Id);
@@ -299,7 +299,7 @@ func attack{
         let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(item_id, 0));
         let (damage_taken) = CombatStats.calculate_damage_from_beast(beast, armor, rnd);
 
-        IAdventurer.deduct_health(adventurer_address, adventurer_id, damage_taken);
+        IAdventurer.deduct_health(adventurer_address, adventurer_token_id, damage_taken);
 
         // check if beast counter attack killed adventurer
         let (updated_adventurer) = get_adventurer_from_beast(beast_token_id);
@@ -310,7 +310,7 @@ func attack{
             // increase beast xp and writes
             _increase_xp(beast_token_id, updated_health_beast, xp_gained);
             AdventurerAttacked.emit(
-                beast_token_id, adventurer_id, damage_taken, updated_adventurer.Health, xp_gained, 0
+                beast_token_id, adventurer_token_id, damage_taken, updated_adventurer.Health, xp_gained, 0
             );
             tempvar syscall_ptr: felt* = syscall_ptr;
             tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
@@ -318,7 +318,7 @@ func attack{
             tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
         } else {
             AdventurerAttacked.emit(
-                beast_token_id, adventurer_id, damage_taken, updated_adventurer.Health, 0, 0
+                beast_token_id, adventurer_token_id, damage_taken, updated_adventurer.Health, 0, 0
             );
             tempvar syscall_ptr: felt* = syscall_ptr;
             tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
@@ -362,22 +362,22 @@ func attack{
 
         tempvar xp_gained_adventurer = xp_gained;
         // give xp to adventurer
-        IAdventurer.increase_xp(adventurer_address, adventurer_id, xp_gained_adventurer);
+        IAdventurer.increase_xp(adventurer_address, adventurer_token_id, xp_gained_adventurer);
 
         // and to items
         // items use a multplier of adventurer XP to allow them to level faster (3x at time of this writing)
         tempvar xp_gained_items = xp_gained_adventurer * ITEM_XP_MULTIPLIER;
-        ILoot.allocate_xp_to_items(item_address, unpacked_adventurer, xp_gained_items);
+        ILoot.allocate_xp_to_items(item_address, adventurer_token_id, xp_gained_items);
 
         // drop gold
         // @distracteddev: add randomness to reward
         // formula: (xp_gained  - (xp_gained / 4)) + ((xp_gained / 4) * (rand % 4))
         let (rnd) = get_random_number();
         let (gold_reward) = BeastLib.calculate_gold_reward(rnd, xp_gained_adventurer);
-        _add_to_balance(adventurer_id, gold_reward);
+        _add_to_balance(adventurer_token_id, gold_reward);
         BeastAttacked.emit(
             beast_token_id,
-            adventurer_id,
+            adventurer_token_id,
             damage_dealt,
             updated_health_beast.Health,
             xp_gained_adventurer,
@@ -644,14 +644,14 @@ func get_random_number{range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBu
 }
 
 // @notice Revert if caller is not adventurer owner
-// @param: adventurer_id: Id of adventurer
+// @param: adventurer_token_id: Id of adventurer
 func assert_adventurer_owner{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(adventurer_id: Uint256) {
+}(adventurer_token_id: Uint256) {
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
 
     let (caller) = get_caller_address();
-    let (owner) = IAdventurer.owner_of(adventurer_address, adventurer_id);
+    let (owner) = IAdventurer.owner_of(adventurer_address, adventurer_token_id);
 
     with_attr error_message("Beast: Only adventurer owner can attack") {
         assert caller = owner;
@@ -790,8 +790,8 @@ func get_adventurer_from_beast{
 
     let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
     let (beast) = get_beast_by_id(beast_token_id);
-    let adventurer_id = Uint256(beast.Adventurer, 0);
-    let (adventurer_state) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_id);
+    let adventurer_token_id = Uint256(beast.Adventurer, 0);
+    let (adventurer_state) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_token_id);
     return (adventurer_state,);
 }
 
