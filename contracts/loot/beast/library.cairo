@@ -269,11 +269,18 @@ namespace BeastLib {
     func calculate_gold_reward{syscall_ptr: felt*, range_check_ptr}(rnd: felt, xp_gained: felt) -> (
         gold_reward: felt
     ) {
-        let (_, reward_multi) = unsigned_div_rem(rnd, 4);
-        let (xp_correction, xp_factor) = unsigned_div_rem(xp_gained, 4);
-        let xp_start = xp_gained - xp_correction;
+        // divide the amount of XP by 2 to get our base gold
+        let (gold_base, _) = unsigned_div_rem(xp_gained, 2);
 
-        let gold_reward = xp_start + (xp_correction * reward_multi);
+        // divide the base gold by four and store the whole
+        let (gold_boost, _) = unsigned_div_rem(gold_base, 4);
+
+        // subtract the correction from the gold base
+        let gold_minus_correction = gold_base - gold_boost;
+
+        // give gold a multiplier of 0-3 times the gold boost
+        let (_, reward_multi) = unsigned_div_rem(rnd, 4);
+        let gold_reward = gold_minus_correction + (gold_boost * reward_multi);
 
         return (gold_reward,);
     }

@@ -2,7 +2,7 @@
 
 from starkware.cairo.common.uint256 import Uint256
 
-from contracts.loot.constants.adventurer import AdventurerState
+from contracts.loot.constants.adventurer import AdventurerState, AdventurerDynamic
 
 @contract_interface
 namespace IAdventurer {
@@ -10,7 +10,7 @@ namespace IAdventurer {
     }
     func get_adventurer_by_id(tokenId: Uint256) -> (adventurer: AdventurerState) {
     }
-    func deduct_health(tokenId: Uint256, amount: felt) -> (success: felt) {
+    func deduct_health(tokenId: Uint256, amount: felt) -> (adventurer_dynamic: AdventurerDynamic) {
     }
     func increase_xp(tokenId: Uint256, amount: felt) -> (success: felt) {
     }

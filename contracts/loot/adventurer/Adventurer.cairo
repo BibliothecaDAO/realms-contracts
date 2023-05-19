@@ -74,6 +74,7 @@ from contracts.loot.utils.constants import (
     SECOND_PLACE_REWARD,
     THIRD_PLACE_REWARD,
     STARTING_GOLD,
+    VITALITY_HEALTH_BOOST,
 )
 from contracts.loot.constants.item import ITEM_XP_MULTIPLIER
 
@@ -394,12 +395,12 @@ func assign_beast{
 @external
 func deduct_health{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(adventurer_token_id: Uint256, amount: felt) -> (success: felt) {
+}(adventurer_token_id: Uint256, amount: felt) -> (adventurer_dynamic: AdventurerDynamic) {
     alloc_locals;
 
     Module.only_approved();
-    _deduct_health(adventurer_token_id, amount);
-    return (TRUE,);
+    let (updated_adventurer) = _deduct_health(adventurer_token_id, amount);
+    return (updated_adventurer,);
 }
 
 // @notice Add health to adventurer
@@ -463,8 +464,10 @@ func upgrade_stat{
     // if stat chosen to upgrade is vitality then increase current health and max health by 20
     if (stat == AdventurerSlotIds.Vitality) {
         // we get max health based on vitality
-        let max_health = 100 + (20 * updated_stat_adventurer.Vitality);
-        let check_health_over_cap = is_le(max_health, updated_stat_adventurer.Health + 20);
+        let max_health = 100 + (VITALITY_HEALTH_BOOST * updated_stat_adventurer.Vitality);
+        let check_health_over_cap = is_le(
+            max_health, updated_stat_adventurer.Health + VITALITY_HEALTH_BOOST
+        );
 
         // cap health at 100 + (20 * vitality)
         if (check_health_over_cap == TRUE) {
@@ -479,7 +482,9 @@ func upgrade_stat{
             emit_adventurer_state(adventurer_token_id);
             return (TRUE,);
         } else {
-            let (new_adventurer) = AdventurerLib.add_health(10, updated_stat_adventurer);
+            let (new_adventurer) = AdventurerLib.add_health(
+                VITALITY_HEALTH_BOOST, updated_stat_adventurer
+            );
             // reset upgrading param
             let (updated_upgrade_adventurer) = AdventurerLib.set_upgrading(FALSE, new_adventurer);
             let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(
@@ -541,17 +546,17 @@ func purchase_health{
 @external
 func explore{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(token_id: Uint256) -> (type: felt, id: felt) {
+}(adventurer_token_id: Uint256) -> (type: felt, id: felt) {
     alloc_locals;
 
     // only adventurer owner can explore
-    ERC721.assert_only_token_owner(token_id);
+    ERC721.assert_only_token_owner(adventurer_token_id);
 
     // unpack adventurer
-    let (unpacked_adventurer) = get_adventurer_by_id(token_id);
+    let (unpacked_adventurer) = get_adventurer_by_id(adventurer_token_id);
     let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
 
-    assert_not_dead(token_id);
+    assert_not_dead(adventurer_token_id);
 
     // Only idle explorers can explore
     with_attr error_message("Adventurer: Adventurer must be idle") {
@@ -589,17 +594,17 @@ func explore{
 
         // create beast according to the weapon the player has
         let (beast_id: Uint256) = IBeast.create_starting_beast(
-            beast_address, token_id, starting_beast_id
+            beast_address, adventurer_token_id, starting_beast_id
         );
         let (updated_adventurer) = AdventurerLib.assign_beast(
             beast_id.low, new_unpacked_adventurer
         );
         let (packed_adventurer) = AdventurerLib.pack(updated_adventurer);
 
-        adventurer_dynamic.write(token_id, packed_adventurer);
+        adventurer_dynamic.write(adventurer_token_id, packed_adventurer);
 
-        emit_adventurer_state(token_id);
-        Discovery.emit(token_id, DiscoveryType.Beast, 0, beast_id, 1);
+        emit_adventurer_state(adventurer_token_id);
+        Discovery.emit(adventurer_token_id, DiscoveryType.Beast, 0, beast_id, 1);
         return (DiscoveryType.Beast, beast_id.low);
     }
 
@@ -607,21 +612,34 @@ func explore{
     let (discovery) = AdventurerLib.get_random_discovery(rnd);
 
     if (discovery == DiscoveryType.Beast) {
+        // create beast which will process ambush and return a dynamic adventurer
+        let (
+            beast_id: Uint256, discovered_beast_adventurer_dynamic: AdventurerDynamic
+        ) = IBeast.create(beast_address, adventurer_token_id);
+
+        // assign the beast to the adventurer (this should probably be done as part of above)
+        let (assigned_beast_adventurer_dynamic) = AdventurerLib.assign_beast(
+            beast_id.low, discovered_beast_adventurer_dynamic
+        );
+
         // we set their status to battle
-        let (new_unpacked_adventurer) = AdventurerLib.update_status(
-            AdventurerStatus.Battle, adventurer_dynamic_
+        let (assigned_battle_status_dynamic_adventurer) = AdventurerLib.update_status(
+            AdventurerStatus.Battle, assigned_beast_adventurer_dynamic
         );
-        // create beast
-        let (beast_id: Uint256) = IBeast.create(beast_address, token_id);
-        let (updated_adventurer) = AdventurerLib.assign_beast(
-            beast_id.low, new_unpacked_adventurer
-        );
-        let (packed_adventurer) = AdventurerLib.pack(updated_adventurer);
 
-        adventurer_dynamic.write(token_id, packed_adventurer);
+        // pack adventurer
+        let (packed_adventurer) = AdventurerLib.pack(assigned_battle_status_dynamic_adventurer);
 
-        emit_adventurer_state(token_id);
-        Discovery.emit(token_id, DiscoveryType.Beast, 0, beast_id, 1);
+        // write to chain
+        adventurer_dynamic.write(adventurer_token_id, packed_adventurer);
+
+        // emit adventurer state (this will read adventurer state from chain)
+        emit_adventurer_state(adventurer_token_id);
+
+        // emit discovery event
+        Discovery.emit(adventurer_token_id, DiscoveryType.Beast, 0, beast_id, 1);
+
+        // return type beast with low id bits
         return (DiscoveryType.Beast, beast_id.low);
     }
 
@@ -635,7 +653,7 @@ func explore{
 
         // adventurer gets XP regardless of the outcome
         let (xp_gained) = CombatStats.calculate_xp_earned(obstacle.Rank, obstacle.Greatness);
-        _increase_xp(token_id, xp_gained);
+        _increase_xp(adventurer_token_id, xp_gained);
 
         // To see if adventurer can dodge, we roll a dice
         let (dodge_rnd) = get_random_number();
@@ -644,7 +662,9 @@ func explore{
         // if the adventurers intelligence
         let can_dodge = is_le(dodge_chance, unpacked_adventurer.Intelligence + 1);
         if (can_dodge == TRUE) {
-            Discovery.emit(token_id, DiscoveryType.Obstacle, obstacle.Id, Uint256(0, 0), 0);
+            Discovery.emit(
+                adventurer_token_id, DiscoveryType.Obstacle, obstacle.Id, Uint256(0, 0), 0
+            );
             return (DiscoveryType.Obstacle, obstacle.Id);
         } else {
             // @distracteddev: Should be get equipped item by slot not get item by Id
@@ -656,7 +676,7 @@ func explore{
             // calculate obstacle damage based on adventurer armor and obstacle stats
             let (armor) = ILoot.get_item_by_token_id(item_address, Uint256(item_id, 0));
             let (obstacle_damage) = CombatStats.calculate_damage_from_obstacle(obstacle, armor);
-            _deduct_health(token_id, obstacle_damage);
+            _deduct_health(adventurer_token_id, obstacle_damage);
 
             // grant XP to items
             let xp_gained_items = obstacle_damage * ITEM_XP_MULTIPLIER;
@@ -664,7 +684,11 @@ func explore{
 
             // emit discovery event
             Discovery.emit(
-                token_id, DiscoveryType.Obstacle, obstacle.Id, Uint256(0, 0), obstacle_damage
+                adventurer_token_id,
+                DiscoveryType.Obstacle,
+                obstacle.Id,
+                Uint256(0, 0),
+                obstacle_damage,
             );
             return (DiscoveryType.Obstacle, obstacle.Id);
         }
@@ -681,10 +705,14 @@ func explore{
             let (rnd) = get_random_number();
             let (gold_discovery) = AdventurerLib.calculate_gold_discovery(rnd);
             let (beast_address) = Module.get_module_address(ModuleIds.Beast);
-            IBeast.add_to_balance(beast_address, token_id, gold_discovery);
-            emit_adventurer_state(token_id);
+            IBeast.add_to_balance(beast_address, adventurer_token_id, gold_discovery);
+            emit_adventurer_state(adventurer_token_id);
             Discovery.emit(
-                token_id, DiscoveryType.Item, ItemDiscoveryType.Gold, Uint256(0, 0), gold_discovery
+                adventurer_token_id,
+                DiscoveryType.Item,
+                ItemDiscoveryType.Gold,
+                Uint256(0, 0),
+                gold_discovery,
             );
             return (DiscoveryType.Item, ItemDiscoveryType.Gold);
         }
@@ -692,10 +720,12 @@ func explore{
         if (discovery == ItemDiscoveryType.Loot) {
             // mint loot items
             let (loot_address) = Module.get_module_address(ModuleIds.Loot);
-            let (owner) = owner_of(token_id);
-            let (loot_token_id) = ILoot.mint(loot_address, owner, token_id);
-            emit_adventurer_state(token_id);
-            Discovery.emit(token_id, DiscoveryType.Item, ItemDiscoveryType.Loot, loot_token_id, 1);
+            let (owner) = owner_of(adventurer_token_id);
+            let (loot_token_id) = ILoot.mint(loot_address, owner, adventurer_token_id);
+            emit_adventurer_state(adventurer_token_id);
+            Discovery.emit(
+                adventurer_token_id, DiscoveryType.Item, ItemDiscoveryType.Loot, loot_token_id, 1
+            );
             return (DiscoveryType.Item, ItemDiscoveryType.Loot);
         }
         if (discovery == ItemDiscoveryType.Health) {
@@ -703,9 +733,9 @@ func explore{
             // @distracteddev: formula - 10 + (5 * (rnd % 4))
             let (rnd) = get_random_number();
             let (health_discovery) = AdventurerLib.calculate_health_discovery(rnd);
-            _add_health(token_id, health_discovery);
+            _add_health(adventurer_token_id, health_discovery);
             Discovery.emit(
-                token_id,
+                adventurer_token_id,
                 DiscoveryType.Item,
                 ItemDiscoveryType.Health,
                 Uint256(0, 0),
@@ -721,8 +751,8 @@ func explore{
     // Discover 1-10XP
     let (rnd) = get_random_number();
     let (xp_discovery) = AdventurerLib.calculate_xp_discovery(rnd);
-    _increase_xp(token_id, xp_discovery);
-    Discovery.emit(token_id, DiscoveryType.Nothing, 0, Uint256(0, 0), xp_discovery);
+    _increase_xp(adventurer_token_id, xp_discovery);
+    Discovery.emit(adventurer_token_id, DiscoveryType.Nothing, 0, Uint256(0, 0), xp_discovery);
 
     return (DiscoveryType.Nothing, 0);
 }
@@ -976,7 +1006,7 @@ func renounceOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 
 func _deduct_health{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
-}(adventurer_token_id: Uint256, amount: felt) -> (success: felt) {
+}(adventurer_token_id: Uint256, amount: felt) -> (adventurer_dynamic: AdventurerDynamic) {
     alloc_locals;
 
     // unpack adventurer
@@ -1019,12 +1049,15 @@ func _deduct_health{
         tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
     }
 
+    // pack and store updated adventurer
     let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
     adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
 
+    // emit adventurer state event
     emit_adventurer_state(adventurer_token_id);
 
-    return (TRUE,);
+    // return updated adventurer
+    return (new_adventurer,);
 }
 
 func _increase_xp{
@@ -1080,7 +1113,7 @@ func _add_health{
     let (adventurer_static_, adventurer_dynamic_) = AdventurerLib.split_data(unpacked_adventurer);
 
     // we get max health based on vitality
-    let max_health = 100 + (20 * adventurer_dynamic_.Vitality);
+    let max_health = 100 + (VITALITY_HEALTH_BOOST * adventurer_dynamic_.Vitality);
     let check_health_over_cap = is_le(max_health, adventurer_dynamic_.Health + amount);
 
     // cap health at 100 + (20 * vitality)

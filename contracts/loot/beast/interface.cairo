@@ -4,11 +4,17 @@ from starkware.cairo.common.uint256 import Uint256
 
 from contracts.loot.constants.beast import Beast, BeastDynamic
 
+from contracts.loot.constants.adventurer import AdventurerDynamic
+
 @contract_interface
 namespace IBeast {
-    func create(adventurer_token_id: Uint256) -> (beast_token_id: Uint256) {
+    func create(adventurer_token_id: Uint256) -> (
+        beast_token_id: Uint256, adventurer_dynamic: AdventurerDynamic
+    ) {
     }
-    func create_starting_beast(adventurer_token_id: Uint256, beast_id: felt) -> (beast_token_id: Uint256) {
+    func create_starting_beast(adventurer_token_id: Uint256, beast_id: felt) -> (
+        beast_token_id: Uint256
+    ) {
     }
     func attack(beast_token_id: Uint256) {
     }
