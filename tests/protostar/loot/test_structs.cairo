@@ -71,34 +71,34 @@ func get_adventurer_state{syscall_ptr: felt*, range_check_ptr}() -> (
 ) {
     return (
         AdventurerState(
-        TestAdventurerState.Race,
-        TestAdventurerState.HomeRealm,
-        TestAdventurerState.Birthdate,
-        TestAdventurerState.Name,
-        TestAdventurerState.Order,
-        TestAdventurerState.ImageHash1,
-        TestAdventurerState.ImageHash2,
-        TestAdventurerState.Health,
-        TestAdventurerState.Level,
-        TestAdventurerState.Strength,
-        TestAdventurerState.Dexterity,
-        TestAdventurerState.Vitality,
-        TestAdventurerState.Intelligence,
-        TestAdventurerState.Wisdom,
-        TestAdventurerState.Charisma,
-        TestAdventurerState.Luck,
-        TestAdventurerState.XP,
-        TestAdventurerState.WeaponId,
-        TestAdventurerState.ChestId,
-        TestAdventurerState.HeadId,
-        TestAdventurerState.WaistId,
-        TestAdventurerState.FeetId,
-        TestAdventurerState.HandsId,
-        TestAdventurerState.NeckId,
-        TestAdventurerState.RingId,
-        TestAdventurerState.Status,
-        TestAdventurerState.Beast,
-        TestAdventurerState.Upgrading,
+            TestAdventurerState.Race,
+            TestAdventurerState.HomeRealm,
+            TestAdventurerState.Birthdate,
+            TestAdventurerState.Name,
+            TestAdventurerState.Order,
+            TestAdventurerState.ImageHash1,
+            TestAdventurerState.ImageHash2,
+            TestAdventurerState.Health,
+            TestAdventurerState.Level,
+            TestAdventurerState.Strength,
+            TestAdventurerState.Dexterity,
+            TestAdventurerState.Vitality,
+            TestAdventurerState.Intelligence,
+            TestAdventurerState.Wisdom,
+            TestAdventurerState.Charisma,
+            TestAdventurerState.Luck,
+            TestAdventurerState.XP,
+            TestAdventurerState.WeaponId,
+            TestAdventurerState.ChestId,
+            TestAdventurerState.HeadId,
+            TestAdventurerState.WaistId,
+            TestAdventurerState.FeetId,
+            TestAdventurerState.HandsId,
+            TestAdventurerState.NeckId,
+            TestAdventurerState.RingId,
+            TestAdventurerState.Status,
+            TestAdventurerState.Beast,
+            TestAdventurerState.Upgrading,
         ),
     );
 }
@@ -108,34 +108,34 @@ func create_adventurer{syscall_ptr: felt*, range_check_ptr}(level: felt) -> (
 ) {
     return (
         AdventurerState(
-        TestAdventurerState.Race,
-        TestAdventurerState.HomeRealm,
-        TestAdventurerState.Birthdate,
-        TestAdventurerState.Name,
-        TestAdventurerState.Order,
-        TestAdventurerState.ImageHash1,
-        TestAdventurerState.ImageHash2,
-        TestAdventurerState.Health,
-        level,
-        TestAdventurerState.Strength,
-        TestAdventurerState.Dexterity,
-        TestAdventurerState.Vitality,
-        TestAdventurerState.Intelligence,
-        TestAdventurerState.Wisdom,
-        TestAdventurerState.Charisma,
-        TestAdventurerState.Luck,
-        TestAdventurerState.XP,
-        TestAdventurerState.WeaponId,
-        TestAdventurerState.ChestId,
-        TestAdventurerState.HeadId,
-        TestAdventurerState.WaistId,
-        TestAdventurerState.FeetId,
-        TestAdventurerState.HandsId,
-        TestAdventurerState.NeckId,
-        TestAdventurerState.RingId,
-        TestAdventurerState.Status,
-        TestAdventurerState.Beast,
-        TestAdventurerState.Upgrading,
+            TestAdventurerState.Race,
+            TestAdventurerState.HomeRealm,
+            TestAdventurerState.Birthdate,
+            TestAdventurerState.Name,
+            TestAdventurerState.Order,
+            TestAdventurerState.ImageHash1,
+            TestAdventurerState.ImageHash2,
+            TestAdventurerState.Health,
+            level,
+            TestAdventurerState.Strength,
+            TestAdventurerState.Dexterity,
+            TestAdventurerState.Vitality,
+            TestAdventurerState.Intelligence,
+            TestAdventurerState.Wisdom,
+            TestAdventurerState.Charisma,
+            TestAdventurerState.Luck,
+            TestAdventurerState.XP,
+            TestAdventurerState.WeaponId,
+            TestAdventurerState.ChestId,
+            TestAdventurerState.HeadId,
+            TestAdventurerState.WaistId,
+            TestAdventurerState.FeetId,
+            TestAdventurerState.HandsId,
+            TestAdventurerState.NeckId,
+            TestAdventurerState.RingId,
+            TestAdventurerState.Status,
+            TestAdventurerState.Beast,
+            TestAdventurerState.Upgrading,
         ),
     );
 }
@@ -163,31 +163,29 @@ namespace TestUtils {
 
         return (
             Item(
-            item_id,
-            slot,
-            type,
-            material,
-            rank,
-            prefix_1,
-            prefix_2,
-            suffix,
-            greatness,
-            created_block,
-            xp,
-            adventurer,
-            bag
+                item_id,
+                slot,
+                type,
+                material,
+                rank,
+                prefix_1,
+                prefix_2,
+                suffix,
+                greatness,
+                created_block,
+                xp,
+                adventurer,
+                bag,
             ),
         );
     }
-    
+
     // create_item_with_names returns an Item corresponding to the provided item_id, greatness, prefix_1, prefix_2, suffix
     // parameters: item_id, greatness, prefix_1, prefix_2, suffix
     // returns: An Item
     func create_item_with_names{syscall_ptr: felt*, range_check_ptr}(
         item_id: felt, greatness: felt, prefix_1: felt, prefix_2: felt, suffix: felt
-    ) -> (
-        item: Item
-    ) {
+    ) -> (item: Item) {
         alloc_locals;
 
         let (slot) = ItemStats.item_slot(item_id);
@@ -201,19 +199,19 @@ namespace TestUtils {
 
         return (
             Item(
-            item_id,
-            slot,
-            type,
-            material,
-            rank,
-            prefix_1,
-            prefix_2,
-            suffix,
-            greatness,
-            created_block,
-            xp,
-            adventurer,
-            bag
+                item_id,
+                slot,
+                type,
+                material,
+                rank,
+                prefix_1,
+                prefix_2,
+                suffix,
+                greatness,
+                created_block,
+                xp,
+                adventurer,
+                bag,
             ),
         );
     }
@@ -229,34 +227,32 @@ namespace TestUtils {
     // create_beast returns a Beast corresponding to the provided beast_id
     // parameters: beast_id
     // returns: A Beast
-    func create_beast{syscall_ptr: felt*, range_check_ptr}(beast_id: felt, level: felt) -> (
-        beast: Beast
-    ) {
+    func create_beast{syscall_ptr: felt*, range_check_ptr}(
+        beast_id: felt, level: felt, prefix1: felt, prefix2: felt
+    ) -> (beast: Beast) {
         alloc_locals;
 
         let (attack_type) = BeastStats.get_attack_type_from_id(beast_id);
         let (armor_type) = BeastStats.get_armor_type_from_id(beast_id);
         let (rank) = BeastStats.get_rank_from_id(beast_id);
         let health = 100;
-        let prefix_1 = 1;
-        let prefix_2 = 1;
         let adventurer = 0;
         let xp = 0;
         let level = level;
         let slain_on_date = 0;
         return (
             Beast(
-            beast_id,
-            attack_type,
-            armor_type,
-            rank,
-            prefix_1,
-            prefix_2,
-            health,
-            adventurer,
-            xp,
-            level,
-            slain_on_date
+                beast_id,
+                attack_type,
+                armor_type,
+                rank,
+                prefix1,
+                prefix2,
+                health,
+                adventurer,
+                xp,
+                level,
+                slain_on_date,
             ),
         );
     }
@@ -275,16 +271,6 @@ namespace TestUtils {
         let prefix_1 = 1;
         let prefix_2 = 1;
 
-        return (
-            Obstacle(
-            obstacle_id,
-            type,
-            rank,
-            prefix_1,
-            prefix_2,
-            greatness,
-            damage_location
-            ),
-        );
+        return (Obstacle(obstacle_id, type, rank, prefix_1, prefix_2, greatness, damage_location),);
     }
 }

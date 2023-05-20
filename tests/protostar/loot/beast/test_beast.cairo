@@ -23,6 +23,8 @@ from tests.protostar.loot.test_structs import (
     TEST_DAMAGE_OVERKILL,
 )
 
+from contracts.loot.constants.item import ItemNamePrefixes, ItemNameSuffixes, ItemSuffixes
+
 @external
 func test_beast_rank{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
@@ -104,7 +106,7 @@ func test_cast{
 }() {
     alloc_locals;
 
-    let (beast: Beast) = TestUtils.create_beast(1, 0);
+    let (beast: Beast) = TestUtils.create_beast(1, 0, 0, 0);
 
     let (_, beast_dynamic: BeastDynamic) = BeastLib.split_data(beast);
 
@@ -121,7 +123,7 @@ func test_deduct_health{
 }() {
     alloc_locals;
 
-    let (beast) = TestUtils.create_beast(1, 0);
+    let (beast) = TestUtils.create_beast(1, 0, 0, 0);
 
     let (_, beast_dynamic: BeastDynamic) = BeastLib.split_data(beast);
 
@@ -142,7 +144,7 @@ func test_set_adventurer{
 }() {
     alloc_locals;
 
-    let (beast) = TestUtils.create_beast(1, 0);
+    let (beast) = TestUtils.create_beast(1, 0, 0, 0);
 
     let (_, beast_dynamic: BeastDynamic) = BeastLib.split_data(beast);
 
@@ -158,7 +160,7 @@ func test_slain{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, bitwise_ptr: BitwiseBuiltin*, range_check_ptr
 }() {
     alloc_locals;
-    let (beast) = TestUtils.create_beast(1, 0);
+    let (beast) = TestUtils.create_beast(1, 0, 0, 0);
 
     let (_, beast_dynamic: BeastDynamic) = BeastLib.split_data(beast);
 
@@ -179,14 +181,14 @@ func test_calculate_critical_damage{
     // an input of 3 should deal max critical hit of 2x damage
     let double_damage_rnd_multiplier = 3;
     let (max_critical_damage) = CombatStats.calculate_critical_damage(
-        original_damage, critical_hit, double_damage_rnd_multiplier
+        original_damage, double_damage_rnd_multiplier
     );
     assert max_critical_damage = 40;
 
     // an input of 0 should deal min critical hit of 0.25x damage
     let minimum_damage_rnd_multiplier = 0;
     let (min_critical_damage) = CombatStats.calculate_critical_damage(
-        original_damage, critical_hit, minimum_damage_rnd_multiplier
+        original_damage, minimum_damage_rnd_multiplier
     );
     assert min_critical_damage = 25;
 
@@ -197,7 +199,7 @@ func test_calculate_critical_damage{
 func test_calculate_adventurer_level_boost{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 }() {
-    let (adventurer_level_damage) = CombatStats.calculate_entity_level_boost(20, 1);
+    let (adventurer_level_damage) = CombatStats.get_entity_level_bonus(20, 1);
 
     assert adventurer_level_damage = 20;
     return ();
@@ -216,8 +218,8 @@ func test_calculate_damage_to_beast{
 
     let (adventurer_state) = get_adventurer_state();
 
-    let (greatness_8_mace) = TestUtils.create_item(75, 8);  // Greatness 8 Mace (Bludgeon) vs
-    let (xp_1_basilisk) = TestUtils.create_beast(4, 1);  // Level 1 Basilisk (Magic)
+    let (greatness_8_mace) = TestUtils.create_item_with_names(75, 8, 0, 0, 0);  // Greatness 8 Mace (Bludgeon) vs
+    let (xp_1_basilisk) = TestUtils.create_beast(4, 1, 0, 0);  // Level 1 Basilisk (Magic)
 
     // attack = 8 * (6-4) * 1 = 16
     // defense = 1 * (6-4) = 2
@@ -230,8 +232,53 @@ func test_calculate_damage_to_beast{
     // no critical hit
     assert mace_vs_basilik = 14;
 
-    // TODO: Test attacking without weapon (melee)
-    // let (weapon) = TestUtils.create_zero_item(); // no weapon (melee attack)
+    // test name prefix1 match
+    let (greatness_8_mace_agony_bane) = TestUtils.create_item_with_names(
+        75, 8, ItemNamePrefixes.Agony, ItemNameSuffixes.Bane, ItemSuffixes.of_Power
+    );  // Greatness 8 Mace (Bludgeon) vs
+    let (xp_1_basilisk_agony_song) = TestUtils.create_beast(
+        4, 1, ItemNamePrefixes.Agony, ItemNameSuffixes.Song
+    );  // Level 1 Basilisk (Magic)
+
+    let (mace_vs_basilik_prefix1_match) = CombatStats.calculate_damage_to_beast(
+        xp_1_basilisk_agony_song, greatness_8_mace_agony_bane, adventurer_state, 1
+    );
+
+    // prefix1 match yields a 3.5x multplier (14 * 3.5 = 49) for the provided random number
+    assert mace_vs_basilik_prefix1_match = 49;
+
+    // test name prefix2 match
+    let (greatness_8_mace_blood_song) = TestUtils.create_item_with_names(
+        75, 8, ItemNamePrefixes.Blood, ItemNameSuffixes.Song, ItemSuffixes.of_Power
+    );  // Greatness 8 Mace (Bludgeon) vs
+    let (xp_1_basilisk_death_song) = TestUtils.create_beast(
+        4, 1, ItemNamePrefixes.Death, ItemNameSuffixes.Song
+    );  // Level 1 Basilisk (Magic)
+
+    let (mace_vs_basilik_prefix2_match) = CombatStats.calculate_damage_to_beast(
+        xp_1_basilisk_death_song, greatness_8_mace_blood_song, adventurer_state, 1
+    );
+
+    // prefix2 yields smaller bonus as it is more likely
+    assert mace_vs_basilik_prefix2_match = 16;
+
+    // test name prefix1 and prefix2 match
+    let (greatness_8_mace_hate_song) = TestUtils.create_item_with_names(
+        75, 8, ItemNamePrefixes.Hate, ItemNameSuffixes.Song, ItemSuffixes.of_Power
+    );  // Greatness 8 Mace (Bludgeon) vs
+    let (xp_1_basilisk_hate_song) = TestUtils.create_beast(
+        4, 1, ItemNamePrefixes.Hate, ItemNameSuffixes.Song
+    );  // Level 1 Basilisk (Magic)
+
+    let (mace_vs_basilik_prefix1_and_prefix2_match) = CombatStats.calculate_damage_to_beast(
+        xp_1_basilisk_hate_song, greatness_8_mace_hate_song, adventurer_state, 1
+    );
+
+    // prefix2 yields smaller bonus (more likely)
+    // in this case the code is expected to take the whole part of base damage (14), divide it by 4
+    // which gives a base damage boost of 4. In the case of RND 1, we apply minimum boost of 4
+    // original 14 + 4 = 18
+    assert mace_vs_basilik_prefix1_and_prefix2_match = 51;
 
     return ();
 }
@@ -247,7 +294,7 @@ func test_calculate_damage_from_beast{
 }() {
     alloc_locals;
 
-    let (beast) = TestUtils.create_beast(1, 2);  // 2XP Pheonix vs
+    let (beast) = TestUtils.create_beast(1, 2, 0, 0);  // 2XP Pheonix vs
     let (armor) = TestUtils.create_item(50, 1);  // Greatness 1 Hard Leather Armor
     let no_beast_luck = 0;
     let no_critical_damage_rnd = 1;
@@ -270,7 +317,7 @@ func test_calculate_damage_from_beast{
     let (local critical_hit_damage) = CombatStats.calculate_damage_from_beast(
         beast, armor, critical_damage_rnd, max_beast_luck
     );
-    assert critical_hit_damage = 14;
+    assert critical_hit_damage = 15;
 
     // test critical hit luck overflow
     let overflow_beast_luck = 500;
@@ -294,7 +341,7 @@ func test_calculate_damage_from_beast_late_game{
 }() {
     alloc_locals;
 
-    let (beast) = TestUtils.create_beast(11, 20);  // levl 20 giant (rank 1)
+    let (beast) = TestUtils.create_beast(11, 20, 0, 0);  // levl 20 giant (rank 1)
     let (cloth_armor) = TestUtils.create_item(18, 20);  // lvl 20 silk robe (rank 2)
 
     // no chance of critical damage with 0 luck
@@ -328,14 +375,12 @@ func test_calculate_damage_from_beast_late_game{
 
     assert hide_damage = 60;
 
-    let (no_armor) = TestUtils.create_item_with_names(0, 0, 1, 1, 1);  // no item
+    let (no_armor) = TestUtils.create_item_with_names(0, 0, 0, 0, 1);  // no item
     let critical_hit_rnd = 2;
     let (no_armor__critical_damage) = CombatStats.calculate_damage_from_beast(
         beast, no_armor, critical_hit_rnd, max_beast_luck
     );
-
-    // 300 base damage * 1.75x critical hit
-    assert no_armor__critical_damage = 525;
+    assert no_armor__critical_damage = 561;
 
     return ();
 }

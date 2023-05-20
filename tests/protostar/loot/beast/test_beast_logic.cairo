@@ -159,8 +159,7 @@ func test_not_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
 
     assert updated_beast.Id = 2;
     assert updated_beast.Level = 2;
-    // since we have overwritten adventurer (made level 2 and so removed wand) we will do no damage
-    assert updated_beast.Health = 10;
+    assert updated_beast.Health = 9;
 
     let (updated_adventurer) = IAdventurer.get_adventurer_by_id(
         adventurer_address, adventurer_token_id_1

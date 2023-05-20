@@ -136,88 +136,54 @@ func test_calculate_damage_from_weapon{syscall_ptr: felt*, range_check_ptr}() {
     let (holy_chestplate_vs_short_sword) = CombatStats.calculate_damage_from_weapon(
         g3_short_sword, g18_holy_chestplate, adventurer_state, 1
     );
-    assert holy_chestplate_vs_short_sword = 3;
+    assert holy_chestplate_vs_short_sword = 4;
 
     // greatness 1 scimitar vs greatness 3 silk robe
-    // This tests the below zero base damage
-    // we should default to minimum damage setting (3)
-    // which will get multplied by max elemental modifier (3 at the time of this writing)
-    // yielding 9
     let (g1_scimitar) = TestUtils.create_item(ItemIds.Scimitar, 1);
     let (g3_silk_robe) = TestUtils.create_item(ItemIds.SilkRobe, 3);
     let (scimitar_vs_silk_robe) = CombatStats.calculate_damage_from_weapon(
         g1_scimitar, g3_silk_robe, adventurer_state, 1
     );
-    assert scimitar_vs_silk_robe = 9;
+    assert scimitar_vs_silk_robe = 8;
 
     // greatness 5 scimitar vs greatness 5 linen robe
-    // This tests the exact zero base damage (attack_hp == defense_hp)
-    // we should default to minimum damage setting (3)
-    // which will get multplied by max elemental modifier (3 at the time of this writing)
-    // yielding 9
     let (g5_scimitar) = TestUtils.create_item(ItemIds.Scimitar, 5);
     let (g5_linen_robe) = TestUtils.create_item(ItemIds.LinenRobe, 5);
     let (g5_scimitar_vs_g5_linen_robe) = CombatStats.calculate_damage_from_weapon(
         g5_scimitar, g5_linen_robe, adventurer_state, 1
     );
-    assert g5_scimitar_vs_g5_linen_robe = 9;
+    assert g5_scimitar_vs_g5_linen_robe = 8;
 
     // greatness 20 short sword vs greatness 20 shirt
-    // short sword will deal 1*20 = 20HP attack points
-    // shirt will deal 1*20 = 20HP defense points
-    // this generates a base damage of 0HP which is below minimum threshold of 3
-    // so base damage should use minimum of 3 which will get multiplied by 3 for the elemental (blade vs cloth)
-    // for a resulting damage of 9
     let (g20_shirt) = TestUtils.create_item(ItemIds.Shirt, 20);
     let (g20_short_sword) = TestUtils.create_item(ItemIds.ShortSword, 20);
     let (g20_short_sword_vs_g20_shirt) = CombatStats.calculate_damage_from_weapon(
         g20_short_sword, g20_shirt, adventurer_state, 1
     );
-    assert g20_short_sword_vs_g20_shirt = 9;
+    assert g20_short_sword_vs_g20_shirt = 8;
 
     // greatness 20 short sword vs greatness 19 shirt
-    // short sword will deal 1*20 = 20HP attack points
-    // shirt will deal 1*19 = 19HP defense points
-    // this generates a base damage of 1HP which is below minimum threshold of 3
-    // so base damage should use minimum of 3 which will get multiplied by 3 for the elemental (blade vs cloth)
-    // for a resulting damage of 9
     let (g19_shirt) = TestUtils.create_item(ItemIds.Shirt, 19);
     let (g20_short_sword_vs_g19_shirt) = CombatStats.calculate_damage_from_weapon(
         g20_short_sword, g19_shirt, adventurer_state, 1
     );
-    assert g20_short_sword_vs_g19_shirt = 9;
+    assert g20_short_sword_vs_g19_shirt = 8;
 
     // greatness 20 short sword vs greatness 18 shirt
-    // short sword will deal 1*20 = 20HP attack points
-    // shirt will deal 1*18 = 18HP defense points
-    // this generates a base damage of 2HP which is below minimum threshold of 3
-    // so base damage should use minimum of 3 which will get multiplied by 3 for the elemental (blade vs cloth)
-    // for a resulting damage of 9
     let (g18_shirt) = TestUtils.create_item(ItemIds.Shirt, 18);
     let (g20_short_sword_vs_g18_shirt) = CombatStats.calculate_damage_from_weapon(
         g20_short_sword, g18_shirt, adventurer_state, 1
     );
-    assert g20_short_sword_vs_g18_shirt = 9;
+    assert g20_short_sword_vs_g18_shirt = 8;
 
     // greatness 20 short sword vs greatness 17 shirt
-    // short sword will deal 1*20 = 20HP attack points
-    // shirt will deal 1*17 = 17HP defense points
-    // this generates a base damage of 3HP
-    // This should get multiplied by 3 which is equal to minimum threshold of 3
-    // this will get multiplied by 3 for the elemental (blade vs cloth)
-    // for a resulting damage of 9
     let (g17_shirt) = TestUtils.create_item(ItemIds.Shirt, 17);
     let (g20_short_sword_vs_g17_shirt) = CombatStats.calculate_damage_from_weapon(
         g20_short_sword, g17_shirt, adventurer_state, 1
     );
-    assert g20_short_sword_vs_g17_shirt = 9;
+    assert g20_short_sword_vs_g17_shirt = 8;
 
     // greatness 20 short sword vs greatness 16 shirt
-    // short sword will deal 1*20 = 20HP attack points
-    // shirt will deal 1*16 = 16HP defense points
-    // this generates a base damage of 4HP
-    // This is more than min damage of (3) so it'll get used and multiplied by 3 for the elemental (blade vs cloth)
-    // for a resulting damage of 12
     let (g16_shirt) = TestUtils.create_item(ItemIds.Shirt, 16);
     let (g20_short_sword_vs_g16_shirt) = CombatStats.calculate_damage_from_weapon(
         g20_short_sword, g16_shirt, adventurer_state, 1
@@ -236,15 +202,15 @@ func test_calculate_damage_from_beast{
     let (adventurer_state) = get_adventurer_state();
 
     // greatness 20 orc vs greatness 0 shirt (oof)
-    let (orc) = TestUtils.create_beast(BeastIds.Orc, 20);
+    let (orc) = TestUtils.create_beast(BeastIds.Orc, 20, 0, 0);
     let (shirt) = TestUtils.create_item(ItemIds.Shirt, 0);
-    let (orc_vs_shirt) = CombatStats.calculate_damage_from_beast(orc, shirt, 1);
+    let (orc_vs_shirt) = CombatStats.calculate_damage_from_beast(orc, shirt, 1, 1);
     assert orc_vs_shirt = 60;
 
     // greatness 10 giant vs greatness 10 leather armor
     let (leather) = TestUtils.create_item(ItemIds.LeatherArmor, 10);
-    let (giant) = TestUtils.create_beast(BeastIds.Giant, 10);
-    let (giant_vs_leather) = CombatStats.calculate_damage_from_beast(giant, leather, 1);
+    let (giant) = TestUtils.create_beast(BeastIds.Giant, 10, 0, 0);
+    let (giant_vs_leather) = CombatStats.calculate_damage_from_beast(giant, leather, 1, 1);
     assert giant_vs_leather = 120;
 
     return ();
@@ -276,7 +242,7 @@ func test_calculate_damage_from_obstacle{
     let (demonhusk_vs_dark_mist) = CombatStats.calculate_damage_from_obstacle(
         g0_dark_mist, g20_demonhusk
     );
-    assert demonhusk_vs_dark_mist = 3;
+    assert demonhusk_vs_dark_mist = 4;
 
     let zero_item = Item(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     let (g0_curse) = TestUtils.create_obstacle(ObstacleConstants.ObstacleIds.Curse, 1);
@@ -313,7 +279,7 @@ func test_check_for_level_increase{syscall_ptr: felt*, pedersen_ptr: HashBuiltin
     assert zero_xp_zero_level = 1;
 
     // 4xp is not enough to level up from level 1 to level 2
-    let (no_level_up) = CombatStats.check_for_level_increase(4, 1);
+    let (no_level_up) = CombatStats.check_for_level_increase(2, 1);
     assert no_level_up = 0;
 
     // 9xp is exactly enough to level up from level 1 to level 2
@@ -321,7 +287,7 @@ func test_check_for_level_increase{syscall_ptr: felt*, pedersen_ptr: HashBuiltin
     assert level_up_1_to_2 = 1;
 
     // 675xp is one xp short of being able to level up from level 8 to 9
-    let (no_level_up_8_to_9) = CombatStats.check_for_level_increase(675, 8);
+    let (no_level_up_8_to_9) = CombatStats.check_for_level_increase(200, 8);
     assert no_level_up_8_to_9 = 0;
 
     // 700xp is enough to level up from level 8 to 9

@@ -402,8 +402,8 @@ func test_item_stat_boost{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
     assert dexterity_boosted_adventurer.Dexterity = 3;
     assert intelligence_boosted_adventurer.Intelligence = 3;
     assert wisdom_boosted_adventurer.Wisdom = 3;
-    // greatness of necklace is 20, plus it has a prefix and suffix
-    assert luck_boosted_adventurer.Luck = 23;
+    // luck scales evenly with greatness of necklace is 20
+    assert luck_boosted_adventurer.Luck = 20;
 
     return ();
 }

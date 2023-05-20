@@ -14,14 +14,18 @@ from starkware.cairo.common.registers import get_label_location
 from starkware.cairo.common.pow import pow
 
 from contracts.loot.constants.item import Item, Type, ItemIds, Slot
-from contracts.loot.constants.combat import WeaponEfficacy, WeaponEfficiacyDamageMultiplier
+from contracts.loot.constants.combat import WeaponEfficacy
 from contracts.loot.beast.stats.beast import BeastStats
 from contracts.loot.beast.library import BeastLib
 from contracts.loot.loot.stats.item import ItemStats
 from contracts.loot.constants.adventurer import AdventurerState
 from contracts.loot.constants.beast import Beast, BeastStatic, BeastDynamic
 from contracts.loot.constants.obstacle import Obstacle, ObstacleUtils
-from contracts.loot.utils.constants import MAX_CRITICAL_HIT_CHANCE
+from contracts.loot.utils.constants import (
+    MAX_CRITICAL_HIT_CHANCE,
+    ITEM_RANK_MAX,
+    MINIMUM_ATTACK_DAMGE,
+)
 
 namespace CombatStats {
     func weapon_vs_armor_efficacy{syscall_ptr: felt*, range_check_ptr}(
@@ -75,76 +79,168 @@ namespace CombatStats {
         dw WeaponEfficacy.Medium;
     }
 
-    func get_attack_effectiveness{syscall_ptr: felt*, range_check_ptr}(
-        attack_effectiveness: felt, base_weapon_damage: felt
+    // @title Get Elemental Bonus
+    // @dev Calculates the damage modifier based on the attack and armor types.
+    //
+    // @param attack_type The type of the attacking element.
+    // @param armor_type The type of the defending element.
+    // @param original_damage The original damage value.
+    // @return damage The modified damage value based on the attack and armor types.
+    func adjust_damage_for_elemental{syscall_ptr: felt*, range_check_ptr}(
+        attack_type: felt, armor_type: felt, original_damage: felt
     ) -> (damage: felt) {
         alloc_locals;
 
+        // Use 50% of the original damage as our damage modifier which will give us
+        // access to -50% (ineffective elemental), 100% (neutral), 150% (effective elemental)
+        let (damage_boost_base, _) = unsigned_div_rem(original_damage, 2);
+
+        // get attack effectiveness
+        let (attack_effectiveness) = weapon_vs_armor_efficacy(attack_type, armor_type);
+
+        // if weapon is ineffective against armor
         if (attack_effectiveness == WeaponEfficacy.Low) {
-            return (base_weapon_damage * WeaponEfficiacyDamageMultiplier.Low,);
+            // return half the damage
+            let half_damage = original_damage - damage_boost_base;
+            return (half_damage,);
         }
 
+        // if weapon is neutral against armor
         if (attack_effectiveness == WeaponEfficacy.Medium) {
-            return (base_weapon_damage * WeaponEfficiacyDamageMultiplier.Medium,);
+            // return original damage
+            return (original_damage,);
         }
 
+        // if weapon is effective against armor
         if (attack_effectiveness == WeaponEfficacy.High) {
-            return (base_weapon_damage * WeaponEfficiacyDamageMultiplier.High,);
+            // return damage + 50%
+            let one_and_a_half_damage = original_damage + damage_boost_base;
+            return (one_and_a_half_damage,);
         }
 
-        return (0,);
+        // fall through, return original damage
+        return (original_damage,);
     }
 
-    // calculate_damage_from_weapon calculates the damage a weapon inflicts against a specific piece of armor
-    // parameters: Item weapon, Item armor
-    // returns: damage
-    func calculate_damage{syscall_ptr: felt*, range_check_ptr}(
-        attack_type: felt,
-        attack_rank: felt,
-        attack_greatness: felt,
-        armor_type: felt,
-        armor_rank: felt,
-        armor_greatness: felt,
-        entity_level: felt,
-        strength: felt,
-        luck: felt,
-        rnd: felt,
-    ) -> (damage: felt) {
+    // @title Name Prefix_1 Match Bonus Calculation
+    // @dev Calculates the damage bonus based on a match between attack_name_prefix1 and armor_name_prefix1.
+    // @param original_damage The original damage value.
+    // @param damage_multiplier The damage multiplier.
+    // @param attack_name_prefix1 The name prefix 1 of the attack.
+    // @param armor_name_prefix1 The name prefix 1 of the armor.
+    // @return damage_bonus The calculated damage bonus.
+    func get_name_prefix1_match_bonus{syscall_ptr: felt*, range_check_ptr}(
+        original_damage: felt,
+        damage_multiplier: felt,
+        attack_name_prefix1: felt,
+        armor_name_prefix1: felt,
+    ) -> (damage_bonus: felt) {
         alloc_locals;
 
-        const rank_ceiling = 6;
-        const minimum_damage = 3;
-
-        // use weapon rank and greatness to give every item a damage rating of 0-100
-        // TODO: add item weight into damage calculation
-        let attack_hp = (rank_ceiling - attack_rank) * attack_greatness;
-
-        // use armor rank and greatness to give armor a defense rating of 0-100
-        // TODO: add item weight into strength calculation
-        let defense_hp = (rank_ceiling - armor_rank) * armor_greatness;
-
-        // if armor hitpoints is less than weapon hitpoints, then damage was dealt
-        let dealt_below_minimum_damage = is_le_felt(defense_hp + minimum_damage, attack_hp);
-        if (dealt_below_minimum_damage == TRUE) {
-            // then we use that for our weapon damage
-            tempvar temp_weapon_damage = attack_hp - defense_hp;
-        } else {
-            // if base damage is 0 or below, use minimum damage of 3
-            tempvar temp_weapon_damage = minimum_damage;
+        let no_damage_bonus = 0;
+        // if weapon doesn't have a prefix1
+        if (attack_name_prefix1 == 0) {
+            // return 0
+            return (no_damage_bonus,);
         }
 
-        let weapon_damage = temp_weapon_damage;
+        // Odds of a prefix1 (namePrefix) match is 1/68
+        if (attack_name_prefix1 == armor_name_prefix1) {
+            // Apply a significant damage boost of 4x, 5x, 6x, 7x
+            let name_prefix1_boost = original_damage * (damage_multiplier + 4);
+            return (name_prefix1_boost,);
+        }
 
-        // account for elemental effectiveness
-        let (attack_effectiveness) = weapon_vs_armor_efficacy(attack_type, armor_type);
-        let (total_weapon_damage) = get_attack_effectiveness(attack_effectiveness, weapon_damage);
+        return (no_damage_bonus,);
+    }
 
+    // @title Name Prefix_2 Match Bonus Calculation
+    // @dev Calculates the damage bonus based on a match between attack_name_prefix2 and armor_name_prefix2.
+    // @param original_damage The original damage value.
+    // @param damage_multiplier The damage multiplier.
+    // @param attack_name_prefix2 The name prefix 2 of the attack.
+    // @param armor_name_prefix2 The name prefix 2 of the armor.
+    // @return damage_bonus The calculated damage bonus.
+    func get_name_prefix2_match_bonus{syscall_ptr: felt*, range_check_ptr}(
+        original_damage: felt,
+        damage_multiplier: felt,
+        attack_name_prefix2: felt,
+        armor_name_prefix2: felt,
+    ) -> (damage_bonus: felt) {
+        alloc_locals;
+
+        let no_damage_bonus = 0;
+        // if weapon doesn't have a prefix2
+        if (attack_name_prefix2 == 0) {
+            // return 0
+            return (no_damage_bonus,);
+        }
+
+        // Odds of a prefix2 match (nameSuffix) match is 1/18
+        if (attack_name_prefix2 == armor_name_prefix2) {
+            // Apply a less significant damage boost of 1.25x, 1.5x, 1.75x, 2x
+
+            // Divide the original damage by 4 to get a 25% base boost
+            let (damage_boost_base, _) = unsigned_div_rem(original_damage, 4);
+
+            // Multiply the quarter of the original damage by a multiplier (1-4 inclusive)
+            let name_prefix2_bonus = damage_boost_base * (damage_multiplier + 1);
+
+            return (name_prefix2_bonus,);
+        }
+
+        return (no_damage_bonus,);
+    }
+
+    // @title Name Match Bonus Calculation
+    // @dev Calculates the total damage bonus based on matches between attack_name_prefix1, attack_name_prefix2,
+    // armor_name_prefix1, and armor_name_prefix2.
+    // @param original_damage The original damage value.
+    // @param attack_name_prefix1 The name prefix 1 of the attack.
+    // @param attack_name_prefix2 The name prefix 2 of the attack.
+    // @param armor_name_prefix1 The name prefix 1 of the armor.
+    // @param armor_name_prefix2 The name prefix 2 of the armor.
+    // @param rnd A random value used for calculations.
+    // @return damage_bonus The calculated total damage bonus.
+    func get_name_match_bonus{syscall_ptr: felt*, range_check_ptr}(
+        original_damage: felt,
+        attack_name_prefix1: felt,
+        attack_name_prefix2: felt,
+        armor_name_prefix1: felt,
+        armor_name_prefix2: felt,
+        rnd: felt,
+    ) -> (damage_bonus: felt) {
+        alloc_locals;
+
+        let (_, damage_multplier) = unsigned_div_rem(rnd, 4);
+
+        let (name_prefix1_bonus) = get_name_prefix1_match_bonus(
+            original_damage, damage_multplier, attack_name_prefix1, armor_name_prefix1
+        );
+
+        let (name_prefix2_bonus) = get_name_prefix2_match_bonus(
+            original_damage, damage_multplier, attack_name_prefix2, armor_name_prefix2
+        );
+
+        let total_name_bonus = name_prefix1_bonus + name_prefix2_bonus;
+
+        return (total_name_bonus,);
+    }
+
+    // @title Is Critical Hit
+    // @dev Determines whether a hit is a critical hit based on luck and random values.
+    // @param original_damage The original damage value.
+    // @param luck The luck attribute of the entity.
+    // @param rnd A random value used for calculations.
+    // @return is_critical_hit A boolean indicating whether the hit is a critical hit.
+    func is_critical_hit{syscall_ptr: felt*, range_check_ptr}(luck: felt, rnd: felt) -> (
+        is_critical_hit: felt
+    ) {
+        alloc_locals;
         // @distracteddev: calculate whether hit is critical and add luck
         // 0-9 = 1 in 6, 10-19 = 1 in 5, 20-29 = 1 in 4, 30-39 = 1 in 3, 40-46 = 1 in 2
         // formula = damage * (1.5 * rand(6 - (luck/10))
-
         let (critical_hit_chance, _) = unsigned_div_rem(luck, 10);
-
         // there is no implied cap on item greatness so luck is unbound
         // but for purposes of critical damage calculation, the max critical hit chance is 5
         let critical_hit_chance_within_range = is_le(critical_hit_chance, MAX_CRITICAL_HIT_CHANCE);
@@ -160,19 +256,137 @@ namespace CombatStats {
 
         let (_, critical_rand) = unsigned_div_rem(rnd, (6 - critical_hit_chance));
         let critical_hit = is_le(critical_rand, 0);
-        // @distracteddev: provide some multi here with adventurer level: e.g. damage + (1 + ((1 - level) * 0.1))
-        let (adventurer_level_damage) = calculate_entity_level_boost(
-            total_weapon_damage, entity_level + strength
-        );
-        let (critical_damage_dealt) = calculate_critical_damage(
-            adventurer_level_damage, critical_hit, rnd
-        );
-        return (critical_damage_dealt,);
+        return (critical_hit,);
     }
 
-    // calculate_damage_from_weapon calculates the damage a weapon inflicts against a specific piece of armor
-    // parameters: Item weapon, Item armor
-    // returns: damage
+    // @title Get Critical Hit Bonus
+    // @dev Calculates the damage bonus for a critical hit based on luck and random values.
+    // @param original_damage The original damage value.
+    // @param luck The luck attribute of the entity.
+    // @param rnd A random value used for calculations.
+    // @return damage_bonus The calculated damage bonus for a critical hit.
+    func get_critical_hit_bonus{syscall_ptr: felt*, range_check_ptr}(
+        original_damage: felt, luck: felt, rnd: felt
+    ) -> (damage_bonus: felt) {
+        alloc_locals;
+
+        let (is_critical_hit_) = is_critical_hit(luck, rnd);
+        if (is_critical_hit_ == TRUE) {
+            let (critical_damage_dealt) = calculate_critical_damage(original_damage, rnd);
+            return (critical_damage_dealt,);
+        }
+
+        return (0,);
+    }
+
+    // @title Get Base Damage
+    // @dev Calculates the base damage of an attack based on the ranks and greatness of the attacking and defending items.
+    // @param attack_rank The rank of the attacking item.
+    // @param attack_greatness The greatness of the attacking item.
+    // @param armor_rank The rank of the defending item.
+    // @param armor_greatness The greatness of the defending item.
+    // @return damage The calculated base damage of the attack.
+    func get_base_damage{syscall_ptr: felt*, range_check_ptr}(
+        attack_rank: felt, attack_greatness: felt, armor_rank: felt, armor_greatness: felt
+    ) -> (damage: felt) {
+        alloc_locals;
+
+        // use weapon rank and greatness to give every item a damage rating of 0-100
+        let attack_hp = (ITEM_RANK_MAX - attack_rank) * attack_greatness;
+
+        // use armor rank and greatness to give armor a defense rating of 0-100
+        let defense_hp = (ITEM_RANK_MAX - armor_rank) * armor_greatness;
+
+        // if armor hitpoints is less than weapon hitpoints, then damage was dealt
+        let dealt_below_minimum_damage = is_le_felt(defense_hp + MINIMUM_ATTACK_DAMGE, attack_hp);
+        if (dealt_below_minimum_damage == TRUE) {
+            // then we use that for our weapon damage
+            let damage_dealt = attack_hp - defense_hp;
+            return (damage_dealt,);
+        }
+
+        // fall through to minimum damage
+        return (MINIMUM_ATTACK_DAMGE,);
+    }
+
+    // @title Core damage calculation
+    // @dev Calculates the damage inflicted by an attack based on various parameters.
+    // @param attack_type The type of attack.
+    // @param attack_rank The rank of the attacking item.
+    // @param attack_greatness The greatness of the attacking item.
+    // @param attack_name_prefix1 The name prefix 1 of the attacking item.
+    // @param attack_name_prefix2 The name prefix 2 of the attacking item.
+    // @param armor_type The type of armor.
+    // @param armor_rank The rank of the armor.
+    // @param armor_greatness The greatness of the armor.
+    // @param armor_name_prefix1 The name prefix 1 of the armor.
+    // @param armor_name_prefix2 The name prefix 2 of the armor.
+    // @param entity_level The level of the entity.
+    // @param strength The strength of the entity.
+    // @param luck The luck of the entity.
+    // @param rnd A random value used for calculations.
+    // @return damage The calculated damage.
+    func calculate_damage{syscall_ptr: felt*, range_check_ptr}(
+        attack_type: felt,
+        attack_rank: felt,
+        attack_greatness: felt,
+        attack_name_prefix1: felt,
+        attack_name_prefix2: felt,
+        armor_type: felt,
+        armor_rank: felt,
+        armor_greatness: felt,
+        armor_name_prefix1: felt,
+        armor_name_prefix2: felt,
+        entity_level: felt,
+        strength: felt,
+        luck: felt,
+        rnd: felt,
+    ) -> (damage: felt) {
+        alloc_locals;
+
+        // get base damage based on rank and greatness of attack weapon and armor
+        let (base_damage) = get_base_damage(
+            attack_rank, attack_greatness, armor_rank, armor_greatness
+        );
+
+        // adjust base damage for elemental effect
+        let (base_damage_with_elemental) = adjust_damage_for_elemental(
+            attack_type, armor_type, base_damage
+        );
+
+        // get damage bonus based on item and armor names
+        let (name_damage_bonus) = get_name_match_bonus(
+            base_damage_with_elemental,
+            attack_name_prefix1,
+            attack_name_prefix2,
+            armor_name_prefix1,
+            armor_name_prefix2,
+            rnd,
+        );
+
+        // get damage bonus for critical hit
+        let (critical_hit_bonus) = get_critical_hit_bonus(base_damage_with_elemental, luck, rnd);
+
+        // get damage bonus for entity stats (level and strength)
+        let (entity_level_bonus) = get_entity_level_bonus(
+            base_damage_with_elemental, entity_level + strength
+        );
+
+        // add bonuses to base damage
+        let final_damage = base_damage_with_elemental + critical_hit_bonus + name_damage_bonus +
+            entity_level_bonus;
+
+        // return resulting damage
+        return (final_damage,);
+    }
+
+    // @title Calculate Damage from Weapon
+    // @dev Calculates the damage inflicted by a weapon against a specific piece of armor.
+    // @param weapon The attacking weapon.
+    // @param armor The defending armor.
+    // @param unpacked_adventurer The state of the adventurer.
+    // @param rnd A random value used for calculations.
+    // @return damage The calculated damage.
     func calculate_damage_from_weapon{syscall_ptr: felt*, range_check_ptr}(
         weapon: Item, armor: Item, unpacked_adventurer: AdventurerState, rnd: felt
     ) -> (damage: felt) {
@@ -189,9 +403,13 @@ namespace CombatStats {
             attack_type,
             weapon.Rank,
             weapon.Greatness,
+            weapon.Prefix_1,
+            weapon.Prefix_2,
             armor_type,
             armor.Rank,
             armor.Greatness,
+            armor.Prefix_1,
+            armor.Prefix_2,
             unpacked_adventurer.Level,
             unpacked_adventurer.Strength,
             unpacked_adventurer.Luck,
@@ -202,7 +420,13 @@ namespace CombatStats {
         return (damage_dealt,);
     }
 
-    // Calculates damage dealt from a beast by converting beast into a Loot weapon and calling calculate_damage_from_weapon
+    // @title Calculate Damage from Beast
+    // @dev Calculates the damage inflicted by a beast by converting it into a Loot weapon.
+    // @param beast The attacking beast.
+    // @param armor The defending armor.
+    // @param critical_damage_rnd A random value used for calculating critical damage.
+    // @param adventurer_level The level of the adventurer.
+    // @return damage The calculated damage.
     func calculate_damage_from_beast{syscall_ptr: felt*, range_check_ptr}(
         beast: Beast, armor: Item, critical_damage_rnd: felt, adventurer_level: felt
     ) -> (damage: felt) {
@@ -221,9 +445,13 @@ namespace CombatStats {
                 attack_type,
                 beast.Rank,
                 beast.Level,
+                beast.Prefix_1,
+                beast.Prefix_2,
                 Type.Armor.generic,
                 armor.Rank,
                 armor.Greatness,
+                armor.Prefix_1,
+                armor.Prefix_2,
                 1,
                 0,
                 beast_luck,
@@ -238,9 +466,13 @@ namespace CombatStats {
                 attack_type,
                 beast.Rank,
                 beast.Level,
+                beast.Prefix_1,
+                beast.Prefix_2,
                 armor_type,
                 armor.Rank,
                 armor.Greatness,
+                armor.Prefix_1,
+                armor.Prefix_2,
                 1,
                 0,
                 beast_luck,
@@ -249,7 +481,13 @@ namespace CombatStats {
         }
     }
 
-    // Calculates damage dealt to a beast by using equipped Loot weapon and calling calculate_damage_from_weapon
+    // @title Calculate Damage to Beast
+    // @dev Calculates the damage inflicted to a beast using an equipped Loot weapon.
+    // @param beast The defending beast.
+    // @param weapon The attacking weapon.
+    // @param unpacked_adventurer The state of the adventurer.
+    // @param rnd A random value used for calculations.
+    // @return damage The calculated damage.
     func calculate_damage_to_beast{syscall_ptr: felt*, range_check_ptr}(
         beast: Beast, weapon: Item, unpacked_adventurer: AdventurerState, rnd: felt
     ) -> (damage: felt) {
@@ -265,9 +503,13 @@ namespace CombatStats {
                 Type.Weapon.generic,
                 weapon.Rank,
                 1,
+                0,
+                0,
                 armor_type,
                 beast.Rank,
                 beast.Level,
+                beast.Prefix_1,
+                beast.Prefix_2,
                 unpacked_adventurer.Level,
                 unpacked_adventurer.Strength,
                 unpacked_adventurer.Luck,
@@ -279,9 +521,13 @@ namespace CombatStats {
                 weapon.Type,
                 weapon.Rank,
                 weapon.Greatness,
+                weapon.Prefix_1,
+                weapon.Prefix_2,
                 armor_type,
                 beast.Rank,
                 beast.Level,
+                beast.Prefix_1,
+                beast.Prefix_2,
                 unpacked_adventurer.Level,
                 unpacked_adventurer.Strength,
                 unpacked_adventurer.Luck,
@@ -290,7 +536,11 @@ namespace CombatStats {
         }
     }
 
-    // Calculate damage from an obstacle
+    // @title Calculate Damage from Obstacle
+    // @dev Calculates the damage inflicted by an obstacle against a specific piece of armor.
+    // @param obstacle The attacking obstacle.
+    // @param armor The defending armor.
+    // @return damage The calculated damage.
     func calculate_damage_from_obstacle{syscall_ptr: felt*, range_check_ptr}(
         obstacle: Obstacle, armor: Item
     ) -> (damage: felt) {
@@ -305,9 +555,13 @@ namespace CombatStats {
                 obstacle.Type,
                 obstacle.Rank,
                 obstacle.Greatness,
+                obstacle.Prefix_1,
+                obstacle.Prefix_2,
                 Type.Armor.generic,
                 armor.Rank,
                 armor.Greatness,
+                armor.Prefix_1,
+                armor.Prefix_2,
                 1,
                 0,
                 0,
@@ -319,9 +573,13 @@ namespace CombatStats {
                 obstacle.Type,
                 obstacle.Rank,
                 obstacle.Greatness,
+                obstacle.Prefix_1,
+                obstacle.Prefix_2,
                 armor_type,
                 armor.Rank,
                 armor.Greatness,
+                armor.Prefix_1,
+                armor.Prefix_2,
                 1,
                 0,
                 0,
@@ -330,6 +588,11 @@ namespace CombatStats {
         }
     }
 
+    // @title Calculate XP Earned
+    // @dev Calculates the amount of XP earned based on the rank and level.
+    // @param rank The rank of the entity.
+    // @param level The level of the entity.
+    // @return xp_earned The amount of XP earned.
     func calculate_xp_earned{syscall_ptr: felt*, range_check_ptr}(rank: felt, level: felt) -> (
         xp_earned: felt
     ) {
@@ -386,9 +649,10 @@ namespace CombatStats {
     // @param damage The base damage.
     // @param entity_level The level of the entity.
     // @return entity_level_damage The calculated damage after applying the level boost.
-    func calculate_entity_level_boost{syscall_ptr: felt*, range_check_ptr}(
+    func get_entity_level_bonus{syscall_ptr: felt*, range_check_ptr}(
         damage: felt, entity_level: felt
     ) -> (entity_level_damage: felt) {
+        // @distracteddev: provide some multi here with adventurer level: e.g. damage + (1 + ((1 - level) * 0.1))
         let format_level_boost = damage * (90 + (entity_level * 10));
         let (entity_level_damage, _) = unsigned_div_rem(format_level_boost, 100);
         return (entity_level_damage,);
@@ -401,27 +665,21 @@ namespace CombatStats {
     // @param rnd Random number used to determine the damage boost multiplier.
     // @return critical_damage The calculated critical damage.
     func calculate_critical_damage{syscall_ptr: felt*, range_check_ptr}(
-        original_damage: felt, critical_hit: felt, rnd: felt
-    ) -> (crtical_damage: felt) {
-        // if adventurer dealt critical hit
-        if (critical_hit == TRUE) {
-            // divide the damage by four to get base damage boost
-            let (damage_boost_base, _) = unsigned_div_rem(original_damage, 4);
+        original_damage: felt, rnd: felt
+    ) -> (crtical_damage_bonus: felt) {
+        // divide the damage by four to get base damage boost
+        let (damage_boost_base, _) = unsigned_div_rem(original_damage, 4);
 
-            // damage multplier is 1-4 which will equate to a 25-100% damage boost
-            let (_, damage_multplier) = unsigned_div_rem(rnd, 4);
+        // damage multplier is 1-4 which will equate to a 25-100% damage boost
+        let (_, damage_multplier) = unsigned_div_rem(rnd, 4);
 
-            // multiply base damage boost (25% of original damage) by damage multiplier (1-4)
-            let critical_hit_damage_bonus = damage_boost_base * (damage_multplier + 1);
+        // multiply base damage boost (25% of original damage) by damage multiplier (1-4)
+        let critical_hit_damage_bonus = damage_boost_base * (damage_multplier + 1);
 
-            // add damage multplier to original damage
-            let critical_damage = original_damage + critical_hit_damage_bonus;
+        // add damage multplier to original damage
+        let critical_damage = original_damage + critical_hit_damage_bonus;
 
-            // return critical damage
-            return (critical_damage,);
-        } else {
-            // if no critical hit, return original damage
-            return (original_damage,);
-        }
+        // return critical damage
+        return (critical_damage,);
     }
 }
