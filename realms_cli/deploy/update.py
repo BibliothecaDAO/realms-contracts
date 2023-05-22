@@ -31,8 +31,8 @@ NEW_MODULES = [
     # Contracts("Lords_ERC20_Mintable"),
     # Contracts("Bastions"),
     Contracts("Adventurer"),
-    # Contracts("LootMarketArcade"),
-    # Contracts("Beast"),
+    Contracts("LootMarketArcade"),
+    Contracts("Beast"),
 ]
 
 
