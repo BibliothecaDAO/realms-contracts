@@ -82,7 +82,7 @@ func test_create{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 
     let adventurer_token_id = Uint256(1, 0);
 
-    let (beast_id) = IBeast.create(beast_address, adventurer_token_id);
+    let (beast_id, adventurer) = IBeast.create(beast_address, adventurer_token_id);
 
     let (beast) = IBeast.get_beast_by_id(beast_address, beast_id);
 
@@ -344,7 +344,7 @@ func test_increase_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     %}
 
     let beast_token_id = Uint256(1, 0);
-    let (beast_id) = IBeast.create(beast_address, beast_token_id);
+    let (beast_id, adventurer) = IBeast.create(beast_address, beast_token_id);
     let (beast) = IBeast.get_beast_by_id(beast_address, beast_token_id);
     let (_, beast_dynamic) = BeastLib.split_data(beast);
 

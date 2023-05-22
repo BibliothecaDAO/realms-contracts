@@ -358,24 +358,6 @@ namespace ItemLib {
         return (name_suffix,);
     }
 
-    // @notice Returns a suffix for the provided item that is consistent with the Loot Contract
-    // @param item_id: The id of a Loot
-    // @param rnd: A random number
-    // @return name_suffix for the item
-    func generate_suffix{syscall_ptr: felt*, range_check_ptr}(item_id: felt, rnd: felt) -> (
-        suffix: felt
-    ) {
-        let (item_slot) = ItemStats.item_slot(item_id);
-        let (loot_slot_length) = ItemStats.loot_slot_length(item_slot);
-        let (loot_item_index) = ItemStats.loot_item_index(item_id);
-        // find a new random number that respects Loot constraints
-        let new_rnd = rnd * loot_slot_length + loot_item_index;
-
-        let (_, index) = unsigned_div_rem(new_rnd, NameSuffixLength);
-        let (name_suffix) = ItemStats.item_suffix(index + 1);
-        return (name_suffix,);
-    }
-
     // @notice Assigns a name prefix to a Loot item using the same schema as the OG Loot Contract
     // @param item: The Loot Item you want to assign a name prefix to
     // @param rnd: A random number

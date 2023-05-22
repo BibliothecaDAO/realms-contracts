@@ -229,11 +229,11 @@ func test_generate_name_suffix{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, r
     // Gold Rings can have any of the name suffixes except for {Bane, Instrument, Shadow, Growl, Form, Song}
     let (gold_ring_name_suffix) = ItemLib.generate_name_suffix(ItemIds.GoldRing, rnd);
     assert_not_equal(gold_ring_name_suffix, ItemNameSuffixes.Bane);
+    assert_not_equal(gold_ring_name_suffix, ItemNameSuffixes.Song);
     assert_not_equal(gold_ring_name_suffix, ItemNameSuffixes.Instrument);
     assert_not_equal(gold_ring_name_suffix, ItemNameSuffixes.Shadow);
     assert_not_equal(gold_ring_name_suffix, ItemNameSuffixes.Growl);
     assert_not_equal(gold_ring_name_suffix, ItemNameSuffixes.Form);
-    assert_not_equal(gold_ring_name_suffix, ItemNameSuffixes.Song);
 
     return ();
 }

@@ -96,7 +96,7 @@ namespace IAdventurer {
     }
     func unequip_item(tokenId: Uint256, itemTokenId: Uint256) -> (success: felt) {
     }
-    func deduct_health(tokenId: Uint256, amount: felt) -> (success: felt) {
+    func deduct_health(tokenId: Uint256, amount: felt) -> (adventurer_dynamic: AdventurerDynamic) {
     }
     func increase_xp(tokenId: Uint256, amount: felt) -> (success: felt) {
     }
@@ -118,7 +118,7 @@ namespace IAdventurer {
 namespace IBeast {
     func initializer(proxy_admin: felt, address_of_controller: felt) {
     }
-    func create(adventurer_token_id: Uint256) -> (beast_token_id: Uint256) {
+    func create(adventurer_token_id: Uint256) -> (beast_token_id: Uint256, adventurer_dynamic: AdventurerDynamic) {
     }
     func attack(beast_token_id: Uint256) {
     }

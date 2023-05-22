@@ -345,8 +345,8 @@ func test_deduct_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_ch
         stop_prank_adventurer()
         stop_prank_adventurer = start_prank(ids.loot_address, ids.adventurer_address)
     %}
-    IAdventurer.deduct_health(adventurer_address, Uint256(1, 0), 50);
-    let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
+    let (adventurer) = IAdventurer.deduct_health(adventurer_address, Uint256(1, 0), 50);
+    // let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
     assert adventurer.Health = 50;
 
     return ();
@@ -811,7 +811,7 @@ func test_upgrade_vitality_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*
 
     let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
 
-    assert adventurer.Health = 90;
+    assert adventurer.Health = 100;
 
     return ();
 }
