@@ -747,11 +747,14 @@ namespace AdventurerLib {
     // @dev This function is internal and should only be called by other functions in the contract
     // @param rnd The random number used to calculate the gold discovery
     // @return gold_discovery The calculated gold discovery value
-    func calculate_gold_discovery{syscall_ptr: felt*, range_check_ptr}(rnd: felt) -> (
+    func calculate_gold_discovery{syscall_ptr: felt*, range_check_ptr}(rnd: felt, adventurer_level: felt) -> (
         gold_discovery: felt
     ) {
-        // Calculate the remainder when dividing the random number by 4
-        let (_, discover_multi) = unsigned_div_rem(rnd, 4);
+        let (gold_multi, _) = unsigned_div_rem(adventurer_level, 5);
+        let gold_range = (1 + gold_multi) * 3;
+
+        // Calculate the remainder when dividing the random number by gold range
+        let (_, discover_multi) = unsigned_div_rem(rnd, gold_range);
 
         // Calculate the gold discovery value
         let gold_discovery = 1 + discover_multi;
@@ -781,11 +784,14 @@ namespace AdventurerLib {
     // @dev This function is internal and should only be called by other functions in the contract
     // @param rnd The random number used to calculate the XP discovery
     // @return xp_discovery The calculated XP discovery value
-    func calculate_xp_discovery{syscall_ptr: felt*, range_check_ptr}(rnd: felt) -> (
+    func calculate_xp_discovery{syscall_ptr: felt*, range_check_ptr}(rnd: felt, adventurer_level: felt) -> (
         xp_discovery: felt
     ) {
-        // Calculate the remainder when dividing the random number by 10
-        let (_, discover_multi) = unsigned_div_rem(rnd, 10);
+        let (xp_multi, _) = unsigned_div_rem(adventurer_level, 5);
+        let xp_range = (1 + xp_multi) * 10;
+
+        // Calculate the remainder when dividing the random number by xp range
+        let (_, discover_multi) = unsigned_div_rem(rnd, xp_range);
 
         // Calculate the XP discovery value
         let xp_discovery = 1 + discover_multi;

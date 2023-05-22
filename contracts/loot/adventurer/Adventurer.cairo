@@ -724,7 +724,7 @@ func explore{
             // add GOLD
             // @distracteddev: formula - 1 + (rnd % 4)
             let (rnd) = get_random_number();
-            let (gold_discovery) = AdventurerLib.calculate_gold_discovery(rnd);
+            let (gold_discovery) = AdventurerLib.calculate_gold_discovery(rnd, adventurer_dynamic_.Level);
             let (beast_address) = Module.get_module_address(ModuleIds.Beast);
             IBeast.add_to_balance(beast_address, adventurer_token_id, gold_discovery);
             emit_adventurer_state(adventurer_token_id);
@@ -771,7 +771,7 @@ func explore{
 
     // Discover 1-10XP
     let (rnd) = get_random_number();
-    let (xp_discovery) = AdventurerLib.calculate_xp_discovery(rnd);
+    let (xp_discovery) = AdventurerLib.calculate_xp_discovery(rnd, adventurer_dynamic_.Level);
     _increase_xp(adventurer_token_id, xp_discovery);
     Discovery.emit(adventurer_token_id, DiscoveryType.Nothing, 0, Uint256(0, 0), xp_discovery);
 

@@ -305,8 +305,7 @@ func test_upgrading{
 func test_calculate_gold_discovery{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     ) {
     alloc_locals;
-
-    let (gold_discovery) = AdventurerLib.calculate_gold_discovery(1);
+    let (gold_discovery) = AdventurerLib.calculate_gold_discovery(1, 1);
 
     assert gold_discovery = 2;
 
@@ -337,7 +336,7 @@ func test_calculate_xp_discovery{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*,
     ) {
     alloc_locals;
 
-    let (xp_discovery) = AdventurerLib.calculate_xp_discovery(0);
+    let (xp_discovery) = AdventurerLib.calculate_xp_discovery(0, 1);
 
     assert xp_discovery = 1;
 
