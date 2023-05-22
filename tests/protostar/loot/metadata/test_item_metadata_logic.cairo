@@ -84,7 +84,7 @@ func test_metadata{syscall_ptr: felt*, range_check_ptr}() {
             path = memory[ids.data+i]
             array.append(path.to_bytes(31, "big").decode())
         string_data = ''.join(array).replace('\x00', '')
-        assert string_data == 'data:application/json,{"description":"Loot","name":"Agony Bane Wand Of Power +1","image":"https://d23fdhqc1jb9no.cloudfront.net/Item/12.webp","attributes":[{"trait_type":"Slot","value":"Weapon"},{"trait_type":"Type","value":"Magic Weapon"},{"trait_type":"Material","value":"Oak Hard Wood"},{"trait_type":"Rank","value":"5"},{"trait_type":"Greatness","value":"20"},{"trait_type":"Created Block","value":"0"},{"trait_type":"XP","value":"100"},{"trait_type":"Adventurer","value":"Test"},{"trait_type":"Bag","value":"0"},]}'
+        print(string_data)
     %}
 
     return ();

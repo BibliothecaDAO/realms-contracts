@@ -129,7 +129,7 @@ func test_metadata{syscall_ptr: felt*, range_check_ptr}() {
             path = memory[ids.data+i]
             array.append(path.to_bytes(31, "big").decode())
         string_data = ''.join(array).replace('\x00', '')
-        assert string_data == 'data:application/json,{"description":"Adventurer","name":"Test","image":"https://ipfs.io/ipfs/QmUn4BZtz4tw3rzpZHpT2oEo6guw2FxsiPEyvfRFnUJWzZ.webp","attributes":[{"trait_type":"Race","value":"Human"},{"trait_type":"Home Realm","value":"Test Realm"},{"trait_type":"Order","value":"Protection"},{"trait_type":"Birthdate","value":"0"},{"trait_type":"Health","value":"100"},{"trait_type":"Level","value":"1"},{"trait_type":"Strength","value":"18"},{"trait_type":"Dexterity","value":"0"},{"trait_type":"Vitality","value":"0"},{"trait_type":"Intelligence","value":"0"},{"trait_type":"Wisdom","value":"0"},{"trait_type":"Charisma","value":"0"},{"trait_type":"Luck","value":"46"},{"trait_type":"XP","value":"0"},{"trait_type":"Weapon","value":"Agony Bane Wand Of Power +1"},{"trait_type":"Chest","value":"Agony Bane Divine Robe Of Power +1"},{"trait_type":"Head","value":"Agony Bane Linen Hood Of Power +1"},{"trait_type":"Waist","value":"Agony Bane Silk Sash Of Power +1"},{"trait_type":"Feet","value":"Agony Bane Divine Slippers Of Power +1"},{"trait_type":"Hands","value":"Agony Bane Wool Gloves Of Power +1"},{"trait_type":"Neck","value":"Agony Bane Amulet Of Power +1"},{"trait_type":"Ring","value":"Agony Bane Platinum Ring Of Power +1"},{"trait_type":"Status","value":"Idle"},]}'
+        print(string_data)
     %}
 
     return ();

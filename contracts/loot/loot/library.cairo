@@ -379,7 +379,8 @@ namespace ItemLib {
     func assign_item_name_prefixes{syscall_ptr: felt*, range_check_ptr}(item: Item, rnd: felt) -> (
         updated_item: Item
     ) {
-        let (updated_name_prefix) = generate_name_prefix(item.Id, rnd);
+        alloc_locals;
+        let (local updated_name_prefix) = generate_name_prefix(item.Id, rnd);
         let (updated_name_suffix) = generate_name_suffix(item.Id, rnd);
 
         let updated_item = Item(
