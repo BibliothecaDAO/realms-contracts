@@ -6,7 +6,7 @@ from starkware.cairo.common.math_cmp import is_le
 from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 
-from contracts.loot.constants.item import Item, NamePrefixLength, NameSuffixLength, ItemSuffixLength
+from contracts.loot.constants.item import Item, Slot, NamePrefixLength, NameSuffixLength, ItemSuffixLength
 from contracts.loot.loot.stats.item import ItemStats
 from contracts.settling_game.utils.general import unpack_data
 
@@ -355,7 +355,21 @@ namespace ItemLib {
 
         let (_, index) = unsigned_div_rem(new_rnd, NameSuffixLength);
         let (name_suffix) = ItemStats.item_name_suffix(index + 1);
-        return (name_suffix,);
+        let (is_banned) = ItemStats.loot_banned_name(name_suffix - 1);
+        if (item_slot == Slot.Ring) {
+            if (is_banned == 1) {
+                // if banned select the next suffix
+                let (_, increment_rnd) = unsigned_div_rem(rnd, 2);
+                let new_rnd = new_rnd + increment_rnd + 1;
+                let (_, index) = unsigned_div_rem(new_rnd, NameSuffixLength);
+                let (name_suffix) = ItemStats.item_name_suffix(index + 1);
+                return (name_suffix,);
+            } else {
+                return (name_suffix,);
+            }
+        } else {
+            return (name_suffix,);
+        }
     }
 
     // @notice Assigns a name prefix to a Loot item using the same schema as the OG Loot Contract
