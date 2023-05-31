@@ -354,23 +354,27 @@ func test_item_stat_boost{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
 
     // Strength
     let (strength_item) = TestUtils.create_item_with_names(
-        ItemIds.Katana, 20, 1, 1, ItemSuffixes.of_Power
+        ItemIds.Katana, 15, 1, 1, ItemSuffixes.of_Power
     );
     // Vitality
     let (vitality_item) = TestUtils.create_item_with_names(
-        ItemIds.Katana, 20, 1, 1, ItemSuffixes.of_Giant
+        ItemIds.Katana, 16, 1, 1, ItemSuffixes.of_Giant
     );
     // Dexterity
     let (dexterity_item) = TestUtils.create_item_with_names(
-        ItemIds.Katana, 20, 1, 1, ItemSuffixes.of_Titans
+        ItemIds.Katana, 17, 1, 1, ItemSuffixes.of_Titans
     );
     // Intelligence
     let (intelligence_item) = TestUtils.create_item_with_names(
-        ItemIds.Katana, 20, 1, 1, ItemSuffixes.of_Skill
+        ItemIds.Katana, 18, 1, 1, ItemSuffixes.of_Skill
     );
     // Wisdom
     let (wisdom_item) = TestUtils.create_item_with_names(
-        ItemIds.Katana, 20, 1, 1, ItemSuffixes.of_Enlightenment
+        ItemIds.Katana, 19, 1, 1, ItemSuffixes.of_Enlightenment
+    );
+    // Intelligence with +1 modifier
+    let (intelligence_item_g20) = TestUtils.create_item_with_names(
+        ItemIds.Katana, 20, 1, 1, ItemSuffixes.of_Skill
     );
     // Luck
     let (luck_item) = TestUtils.create_item_with_names(
@@ -403,6 +407,12 @@ func test_item_stat_boost{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
     assert wisdom_boosted_adventurer.Wisdom = 3;
     // luck scales evenly with greatness of necklace is 20
     assert luck_boosted_adventurer.Luck = 20;
+
+    // greatness 20 (+1) item should add an additional stat point
+    let (g20_intelligence_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(
+        intelligence_item_g20, adventurer_dynamic
+    );
+    assert g20_intelligence_boosted_adventurer.Intelligence = 4;
 
     return ();
 }

@@ -1143,10 +1143,22 @@ namespace AdventurerLib {
         if (item_above_greatness_15 == TRUE) {
             // lookup the stat associated with the item
             let (base_stat) = get_stat_for_item(item, original_adventurer);
-            // apply the stat boost to the base stat
+
+            // if the item is greatness 20 or higher
+            let item_above_greatness_20 = is_le(20, item.Greatness);
+            if (item_above_greatness_20 == TRUE) {
+                // add an additional +1 stat boost
+                let (updated_dynamic_adventurer) = update_non_jewelery_stat_modifier(
+                    item, original_adventurer, base_stat + SUFFIX_STAT_BOOST + 1
+                );
+                return (updated_dynamic_adventurer,);
+            }
+
+            // if item is not greatness 20 or higher, give it standard stat boost
             let (updated_dynamic_adventurer) = update_non_jewelery_stat_modifier(
                 item, original_adventurer, base_stat + SUFFIX_STAT_BOOST
             );
+
             return (updated_dynamic_adventurer,);
         }
 
