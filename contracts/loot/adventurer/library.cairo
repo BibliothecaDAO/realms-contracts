@@ -747,9 +747,9 @@ namespace AdventurerLib {
     // @dev This function is internal and should only be called by other functions in the contract
     // @param rnd The random number used to calculate the gold discovery
     // @return gold_discovery The calculated gold discovery value
-    func calculate_gold_discovery{syscall_ptr: felt*, range_check_ptr}(rnd: felt, adventurer_level: felt) -> (
-        gold_discovery: felt
-    ) {
+    func calculate_gold_discovery{syscall_ptr: felt*, range_check_ptr}(
+        rnd: felt, adventurer_level: felt
+    ) -> (gold_discovery: felt) {
         let (gold_multi, _) = unsigned_div_rem(adventurer_level, 5);
         let gold_range = (1 + gold_multi) * 3;
 
@@ -784,9 +784,9 @@ namespace AdventurerLib {
     // @dev This function is internal and should only be called by other functions in the contract
     // @param rnd The random number used to calculate the XP discovery
     // @return xp_discovery The calculated XP discovery value
-    func calculate_xp_discovery{syscall_ptr: felt*, range_check_ptr}(rnd: felt, adventurer_level: felt) -> (
-        xp_discovery: felt
-    ) {
+    func calculate_xp_discovery{syscall_ptr: felt*, range_check_ptr}(
+        rnd: felt, adventurer_level: felt
+    ) -> (xp_discovery: felt) {
         let (xp_multi, _) = unsigned_div_rem(adventurer_level, 5);
         let xp_range = (1 + xp_multi) * 10;
 
@@ -809,7 +809,7 @@ namespace AdventurerLib {
     ) {
         // Check which weapon is being used and return the associated starting beast ID
         if (weapon_id == ItemIds.ShortSword) {
-            return (BeastIds.Golem,);
+            return (BeastIds.Gnome,);
         }
         if (weapon_id == ItemIds.Book) {
             return (BeastIds.Ogre,);

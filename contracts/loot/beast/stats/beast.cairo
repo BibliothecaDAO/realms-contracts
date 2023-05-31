@@ -12,7 +12,12 @@ from starkware.cairo.common.bool import TRUE, FALSE
 from starkware.cairo.common.math_cmp import is_le, is_not_zero
 from starkware.cairo.common.registers import get_label_location
 
-from contracts.loot.constants.beast import BeastAttackType, BeastArmorType, BeastRank, BeastAttackLocation
+from contracts.loot.constants.beast import (
+    BeastAttackType,
+    BeastArmorType,
+    BeastRank,
+    BeastAttackLocation,
+)
 from contracts.loot.constants.rankings import ItemRank
 from contracts.loot.constants.physics import MaterialDensity
 
@@ -31,11 +36,6 @@ namespace BeastStats {
         dw BeastAttackType.Minotaur;
         dw BeastAttackType.Basilisk;
         dw BeastAttackType.Gnome;
-        dw BeastAttackType.Wraith;
-        dw BeastAttackType.Ghoul;
-        dw BeastAttackType.Goblin;
-        dw BeastAttackType.Skeleton;
-        dw BeastAttackType.Golem;
         dw BeastAttackType.Giant;
         dw BeastAttackType.Yeti;
         dw BeastAttackType.Orc;
@@ -62,11 +62,6 @@ namespace BeastStats {
         dw BeastArmorType.Minotaur;
         dw BeastArmorType.Basilisk;
         dw BeastArmorType.Gnome;
-        dw BeastArmorType.Wraith;
-        dw BeastArmorType.Ghoul;
-        dw BeastArmorType.Goblin;
-        dw BeastArmorType.Skeleton;
-        dw BeastArmorType.Golem;
         dw BeastArmorType.Giant;
         dw BeastArmorType.Yeti;
         dw BeastArmorType.Orc;
@@ -91,11 +86,6 @@ namespace BeastStats {
         dw BeastRank.Minotaur;
         dw BeastRank.Basilisk;
         dw BeastRank.Gnome;
-        dw BeastRank.Wraith;
-        dw BeastRank.Ghoul;
-        dw BeastRank.Goblin;
-        dw BeastRank.Skeleton;
-        dw BeastRank.Golem;
         dw BeastRank.Giant;
         dw BeastRank.Yeti;
         dw BeastRank.Orc;
@@ -122,11 +112,6 @@ namespace BeastStats {
         dw BeastAttackLocation.Minotaur;
         dw BeastAttackLocation.Basilisk;
         dw BeastAttackLocation.Gnome;
-        dw BeastAttackLocation.Wraith;
-        dw BeastAttackLocation.Ghoul;
-        dw BeastAttackLocation.Goblin;
-        dw BeastAttackLocation.Skeleton;
-        dw BeastAttackLocation.Golem;
         dw BeastAttackLocation.Giant;
         dw BeastAttackLocation.Yeti;
         dw BeastAttackLocation.Orc;
