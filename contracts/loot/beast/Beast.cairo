@@ -171,8 +171,8 @@ func create{
     let (random) = get_random_number();
 
     let (beast_level_multi, _) = unsigned_div_rem(adventurer_state.Level, 5);
-    let beast_level_range = (1 + beast_level_multi) * 3;
-    let beast_health_range = (1 + beast_level_multi) * 10;
+    let beast_level_range = (1 + beast_level_multi) * 4;
+    let beast_health_range = (1 + beast_level_multi) * 15;
 
     let (_, beast_level_boost) = unsigned_div_rem(random, beast_level_range);
     let (_, beast_health_boost) = unsigned_div_rem(random, beast_health_range);
