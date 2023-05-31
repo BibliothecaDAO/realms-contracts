@@ -84,11 +84,11 @@ namespace BeastRank {
     const Basilisk = 4;
     const Gnome = 5;
 
-    const Wraith = 1;
-    const Ghoul = 2;
-    const Goblin = 3;
-    const Skeleton = 4;
-    const Golem = 5;
+    const Wraith = 2;
+    const Ghoul = 3;
+    const Goblin = 2;
+    const Skeleton = 3;
+    const Golem = 1;
 
     const Giant = 1;
     const Yeti = 2;
@@ -112,9 +112,9 @@ namespace BeastAttackType {
 
     const Wraith = Type.Weapon.magic;
     const Ghoul = Type.Weapon.magic;
-    const Goblin = Type.Weapon.magic;
-    const Skeleton = Type.Weapon.magic;
-    const Golem = Type.Weapon.magic;
+    const Goblin = Type.Weapon.bludgeon;
+    const Skeleton = Type.Weapon.bludgeon;
+    const Golem = Type.Weapon.blade;
 
     const Giant = Type.Weapon.bludgeon;
     const Yeti = Type.Weapon.bludgeon;
@@ -138,9 +138,9 @@ namespace BeastArmorType {
 
     const Wraith = Type.Armor.cloth;
     const Ghoul = Type.Armor.cloth;
-    const Goblin = Type.Armor.cloth;
-    const Skeleton = Type.Armor.cloth;
-    const Golem = Type.Armor.cloth;
+    const Goblin = Type.Armor.metal;
+    const Skeleton = Type.Armor.metal;
+    const Golem = Type.Armor.hide;
 
     const Giant = Type.Armor.metal;
     const Yeti = Type.Armor.metal;
