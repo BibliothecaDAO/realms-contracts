@@ -1387,12 +1387,21 @@ func _equip_item{
     let check_equipped_item = is_not_zero(equipped_item);
 
     if (check_equipped_item == TRUE) {
-        _unequip_item(adventurer_token_id, Uint256(equipped_item, 0));
+        // unequipping the item will result in the stat modifiers being removed and the adventurer
+        // being updated on-chain. For the purposes of this function however, we still have more work
+        // to do so we'll take the returned dynamic adventurer and continue modifying it, eventually
+        // performing another write.
+        let (temp_unequipped_dynamic_adventurer: AdventurerDynamic) = _unequip_item(
+            adventurer_token_id, Uint256(equipped_item, 0)
+        );
+
+        tempvar temp_unequipped_dynamic_adventurer = temp_unequipped_dynamic_adventurer;
         tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
         tempvar syscall_ptr: felt* = syscall_ptr;
         tempvar range_check_ptr = range_check_ptr;
         tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
     } else {
+        tempvar temp_unequipped_dynamic_adventurer = adventurer_dynamic_;
         tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
         tempvar syscall_ptr: felt* = syscall_ptr;
         tempvar range_check_ptr = range_check_ptr;
@@ -1401,11 +1410,15 @@ func _equip_item{
 
     tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
 
+    tempvar unequipped_dynamic_adventurer = temp_unequipped_dynamic_adventurer;
+
     // Convert token to Felt
     let (token_to_felt) = _uint_to_felt(item_token_id);
 
     // Equip Item
-    let (equiped_adventurer) = AdventurerLib.equip_item(token_to_felt, item, adventurer_dynamic_);
+    let (equiped_adventurer) = AdventurerLib.equip_item(
+        token_to_felt, item, unequipped_dynamic_adventurer
+    );
 
     // Add item stat boost
     let (stat_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(
