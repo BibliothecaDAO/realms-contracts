@@ -55,20 +55,26 @@ namespace BeastIds {
     const Basilisk = 4;
     const Gnome = 5;
 
-    const Giant = 6;
-    const Yeti = 7;
-    const Orc = 8;
-    const Beserker = 9;
-    const Ogre = 10;
+    const Wraith = 6;
+    const Ghoul = 7;
+    const Goblin = 8;
+    const Skeleton = 9;
+    const Golem = 10;
 
-    const Dragon = 11;
-    const Vampire = 12;
-    const Werewolf = 13;
-    const Spider = 14;
-    const Rat = 15;
+    const Giant = 11;
+    const Yeti = 12;
+    const Orc = 13;
+    const Beserker = 14;
+    const Ogre = 15;
+
+    const Dragon = 16;
+    const Vampire = 17;
+    const Werewolf = 18;
+    const Spider = 19;
+    const Rat = 20;
 
     // If you add beasts, make sure to update MAX_ID below
-    const MAX_ID = 15;
+    const MAX_ID = 20;
 }
 
 namespace BeastRank {
@@ -77,6 +83,12 @@ namespace BeastRank {
     const Minotaur = 3;
     const Basilisk = 4;
     const Gnome = 5;
+
+    const Wraith = 1;
+    const Ghoul = 2;
+    const Goblin = 3;
+    const Skeleton = 4;
+    const Golem = 5;
 
     const Giant = 1;
     const Yeti = 2;
@@ -98,6 +110,12 @@ namespace BeastAttackType {
     const Basilisk = Type.Weapon.magic;
     const Gnome = Type.Weapon.magic;
 
+    const Wraith = Type.Weapon.magic;
+    const Ghoul = Type.Weapon.magic;
+    const Goblin = Type.Weapon.magic;
+    const Skeleton = Type.Weapon.magic;
+    const Golem = Type.Weapon.magic;
+
     const Giant = Type.Weapon.bludgeon;
     const Yeti = Type.Weapon.bludgeon;
     const Orc = Type.Weapon.bludgeon;
@@ -117,6 +135,12 @@ namespace BeastArmorType {
     const Minotaur = Type.Armor.cloth;
     const Basilisk = Type.Armor.cloth;
     const Gnome = Type.Armor.cloth;
+
+    const Wraith = Type.Armor.cloth;
+    const Ghoul = Type.Armor.cloth;
+    const Goblin = Type.Armor.cloth;
+    const Skeleton = Type.Armor.cloth;
+    const Golem = Type.Armor.cloth;
 
     const Giant = Type.Armor.metal;
     const Yeti = Type.Armor.metal;
@@ -145,6 +169,12 @@ namespace BeastAttackLocation {
     const Minotaur = Slot.Hand;
     const Basilisk = Slot.Waist;
     const Gnome = Slot.Foot;
+
+    const Wraith = Slot.Chest;
+    const Ghoul = Slot.Hand;
+    const Goblin = Slot.Waist;
+    const Skeleton = Slot.Foot;
+    const Golem = Slot.Head;
 
     const Giant = Slot.Hand;
     const Yeti = Slot.Waist;

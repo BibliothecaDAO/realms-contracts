@@ -4,16 +4,21 @@ BEASTS = {
     "3": "Minotaur",
     "4": "Basilisk",
     "5": "Gnome",
-    "6": "Giant",
-    "7": "Yeti",
-    "8": "Orc",
-    "9": "Beserker",
-    "10": "Ogre",
-    "11": "Dragon",
-    "12": "Vampire",
-    "13": "Werewolf",
-    "14": "Spider",
-    "15": "Rat",
+    "6": "Wraith",
+    "7": "Ghoul",
+    "8": "Goblin",
+    "9": "Skeleton",
+    "10": "Golem",
+    "11": "Giant",
+    "12": "Yeti",
+    "13": "Orc",
+    "14": "Beserker",
+    "15": "Ogre",
+    "16": "Dragon",
+    "17": "Vampire",
+    "18": "Werewolf",
+    "19": "Spider",
+    "20": "Rat",
 }
 
 ITEMS = {
@@ -180,7 +185,6 @@ OBSTACLES = {
     15: "Hidden Arrow",
 }
 
-DISCOVERY_TYPES = {0: "Nothing", 1: "Beast",
-                   2: "Obstacle", 3: "Item", 4: "Adventurer"}
+DISCOVERY_TYPES = {0: "Nothing", 1: "Beast", 2: "Obstacle", 3: "Item", 4: "Adventurer"}
 
 ITEM_DISCOVERY_TYPES = {0: "Gold", 1: "Loot", 2: "Health"}
