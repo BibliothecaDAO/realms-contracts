@@ -552,8 +552,9 @@ func purchase_health{
 
     let (beast_address) = Module.get_module_address(ModuleIds.Beast);
 
-    // health potion costs 5 gold
-    IBeast.subtract_from_balance(beast_address, adventurer_token_id, 5 * number);
+    // health potion costs 3 * adventurer level
+    let cost_of_potion = 3 * unpacked_adventurer.Level;
+    IBeast.subtract_from_balance(beast_address, adventurer_token_id, cost_of_potion * number);
 
     // health potion adds 10 health
     _add_health(adventurer_token_id, 10 * number);
@@ -724,7 +725,9 @@ func explore{
             // add GOLD
             // @distracteddev: formula - 1 + (rnd % 4)
             let (rnd) = get_random_number();
-            let (gold_discovery) = AdventurerLib.calculate_gold_discovery(rnd, adventurer_dynamic_.Level);
+            let (gold_discovery) = AdventurerLib.calculate_gold_discovery(
+                rnd, adventurer_dynamic_.Level
+            );
             let (beast_address) = Module.get_module_address(ModuleIds.Beast);
             IBeast.add_to_balance(beast_address, adventurer_token_id, gold_discovery);
             emit_adventurer_state(adventurer_token_id);
