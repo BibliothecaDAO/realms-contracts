@@ -461,6 +461,72 @@ func test_purchase_health{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_
 }
 
 @external
+func test_zero_out_gold_on_death{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    ) {
+    alloc_locals;
+
+    local account_1_address;
+    local xoroshiro_address;
+    local realms_address;
+    local adventurer_address;
+    local beast_address;
+    local loot_address;
+
+    %{
+        ids.account_1_address = context.account_1
+        ids.realms_address = context.realms
+        ids.adventurer_address = context.adventurer
+        ids.beast_address = context.beast
+        ids.loot_address = context.loot
+        stop_prank_realms = start_prank(ids.account_1_address, ids.realms_address)
+        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+    %}
+
+    IRealms.set_realm_data(realms_address, Uint256(13, 0), 'Test Realm', 1);
+    IAdventurer.mint(
+        adventurer_address, account_1_address, 4, 10, 'Test', 8, 1, 1, account_1_address
+    );
+
+    %{
+        stop_prank_beast = start_prank(ids.adventurer_address, ids.beast_address)
+        stop_prank_adventurer()
+        stop_prank_adventurer = start_prank(ids.beast_address, ids.adventurer_address)
+    %}
+
+    // store balance of 5 gold
+    let adventurer_token_id = Uint256(1, 0);
+
+    // give adventurer gold
+    IBeast.add_to_balance(beast_address, adventurer_token_id, 100);
+
+    %{
+        stop_prank_adventurer()
+        stop_prank_adventurer = start_prank(ids.beast_address, ids.adventurer_address)
+    %}
+
+    // kill adventurer
+    IAdventurer.deduct_health(adventurer_address, adventurer_token_id, 500);
+
+    %{
+        stop_prank_adventurer()
+        stop_prank_adventurer = start_prank(ids.account_1_address, ids.adventurer_address)
+    %}
+
+    let (new_adventurer) = IAdventurer.get_adventurer_by_id(
+        adventurer_address, adventurer_token_id
+    );
+
+    // verify adventurer is dead
+    assert new_adventurer.Health = 0;
+
+    // and has no gold
+    let (post_death_gold_balance) = IBeast.balance_of(beast_address, adventurer_token_id);
+    assert post_death_gold_balance = 0;
+
+    return ();
+}
+
+@external
 func test_upgrade_stat{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
     alloc_locals;
 

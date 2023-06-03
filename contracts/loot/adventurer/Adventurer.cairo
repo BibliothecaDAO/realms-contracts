@@ -1049,45 +1049,33 @@ func _deduct_health{
     // deduct health
     let (new_adventurer) = AdventurerLib.deduct_health(amount, adventurer_dynamic_);
 
-    // if the adventurer is dead
-    if (new_adventurer.Health == 0) {
-        // check if the adventurer made it into the top three list
-        // by checking if their score is not less than or equal to third place
-        let (third_place_score) = top_scores.read(2);
-        let not_top_three_score = is_le(new_adventurer.XP, third_place_score.xp);
-        if (not_top_three_score == FALSE) {
-            // if they made the top three, we need to update the top three list
-            let (player_address) = owner_of(adventurer_token_id);
-            _update_top_scores(player_address, new_adventurer.XP, adventurer_token_id);
-
-            tempvar syscall_ptr: felt* = syscall_ptr;
-            tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-            tempvar range_check_ptr = range_check_ptr;
-            tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
-        } else {
-            tempvar syscall_ptr: felt* = syscall_ptr;
-            tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-            tempvar range_check_ptr = range_check_ptr;
-            tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
-        }
-
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
-    } else {
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
-    }
-
     // pack and store updated adventurer
     let (packed_new_adventurer: PackedAdventurerState) = AdventurerLib.pack(new_adventurer);
     adventurer_dynamic.write(adventurer_token_id, packed_new_adventurer);
 
     // emit adventurer state event
     emit_adventurer_state(adventurer_token_id);
+
+    // if the adventurer is dead
+    if (new_adventurer.Health == 0) {
+        // zero out gold balance
+        let (beast_address) = Module.get_module_address(ModuleIds.Beast);
+        IBeast.zero_out_gold_balance(beast_address, adventurer_token_id);
+
+        // check if the adventurer scored a new top score
+        // by first checking if they are less than or equal to third place
+        let (third_place_score) = top_scores.read(2);
+        let not_top_three_score = is_le(new_adventurer.XP, third_place_score.xp);
+        if (not_top_three_score == FALSE) {
+            // if their score is not less than or equal to third place
+            // it's a new top score
+            let (player_address) = owner_of(adventurer_token_id);
+            _update_top_scores(player_address, new_adventurer.XP, adventurer_token_id);
+            return (new_adventurer,);
+        }
+
+        return (new_adventurer,);
+    }
 
     // return updated adventurer
     return (new_adventurer,);

@@ -39,6 +39,8 @@ namespace IBeast {
     }
     func add_to_balance(adventurer_token_id: Uint256, addition: felt) -> () {
     }
+    func zero_out_gold_balance(adventurer_token_id: Uint256) -> () {
+    }
     func get_world_supply() -> (balance: felt) {
     }
 }

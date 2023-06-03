@@ -192,7 +192,9 @@ func create{
 
     let (beast_token_id) = _create(beast_static_, beast_dynamic_);
 
-    let (return_adventurer) = process_ambush(adventurer_address, adventurer_state, beast_token_id);
+    let (return_adventurer) = process_ambush(
+        adventurer_address, adventurer_token_id, adventurer_state, beast_token_id
+    );
 
     return (beast_token_id, return_adventurer);
 }
@@ -309,24 +311,15 @@ func attack{
             beast, armor, critical_damage_rnd, adventurer_dynamic_.Level
         );
 
-        IAdventurer.deduct_health(adventurer_address, adventurer_token_id, damage_taken);
+        // deduct health from adventurer (this writes result to chain)
+        let (updated_adventurer) = IAdventurer.deduct_health(
+            adventurer_address, adventurer_token_id, damage_taken
+        );
 
-        // check if beast counter attack killed adventurer
-        let (updated_adventurer) = get_adventurer_from_beast(beast_token_id);
         // if the adventurer is dead
         if (updated_adventurer.Health == 0) {
-            // calculate xp earned from killing adventurer (adventurers are rank 1)
-            let (xp_gained) = CombatStats.calculate_xp_earned(1, updated_adventurer.Level);
-            // increase beast xp and writes
-            _increase_xp(beast_token_id, updated_health_beast, xp_gained);
-            AdventurerAttacked.emit(
-                beast_token_id,
-                adventurer_token_id,
-                damage_taken,
-                updated_adventurer.Health,
-                xp_gained,
-                0,
-            );
+            // grant xp to beast
+            grant_beast_xp(adventurer_token_id, beast_token_id, beast, damage_taken);
             tempvar syscall_ptr: felt* = syscall_ptr;
             tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
             tempvar range_check_ptr = range_check_ptr;
@@ -615,34 +608,49 @@ func _counter_attack{
     let (updated_adventurer) = get_adventurer_from_beast(beast_token_id);
     // if the adventurer is dead
     if (updated_adventurer.Health == 0) {
-        // calculate xp earned from killing adventurer (adventurers are rank 1)
-        let (xp_gained) = CombatStats.calculate_xp_earned(1, updated_adventurer.Level);
-        // increase beast xp and writes
-        let (_, beast_dynamic_) = BeastLib.split_data(beast);
-        _increase_xp(beast_token_id, beast_dynamic_, xp_gained);
-        AdventurerAttacked.emit(
-            beast_token_id,
-            adventurer_token_id,
-            damage_taken,
-            updated_adventurer.Health,
-            xp_gained,
-            0,
-        );
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+        // grant beast xp
+        grant_beast_xp(adventurer_token_id, beast_token_id, beast, damage_taken);
+        return (damage_taken,);
     } else {
         AdventurerAttacked.emit(
             beast_token_id, adventurer_token_id, damage_taken, updated_adventurer.Health, 0, 0
         );
-        tempvar syscall_ptr: felt* = syscall_ptr;
-        tempvar pedersen_ptr: HashBuiltin* = pedersen_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar bitwise_ptr: BitwiseBuiltin* = bitwise_ptr;
+        return (damage_taken,);
     }
+}
 
-    return (damage_taken,);
+ // @title Grant Beast Experience
+ // @param adventurer_token_id The token ID of the adventurer attacked by the beast.
+ // @param beast_token_id The token ID of the beast that attacked the adventurer.
+ // @param beast The Beast data structure containing the beast's information.
+ // @param damage_taken The amount of damage the adventurer took from the beast's attack.
+ // @return This function does not return a value.
+ // @dev The function first retrieves the adventurer state associated with the given adventurer token ID.
+ // It then calculates the experience gained by the beast for attacking the adventurer (considering adventurers as rank 1 entities).
+ // The beast's experience is then increased by the calculated amount using the `_increase_xp` function.
+ // Finally, an 'AdventurerAttacked' event is emitted, which includes the beast token ID, adventurer token ID, damage taken by the adventurer, the adventurer's remaining health, experience gained by the beast, and the amount of loot dropped (which is zero in this case).
+func grant_beast_xp{
+    pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+}(adventurer_token_id: Uint256, beast_token_id: Uint256, beast: Beast, damage_taken: felt) {
+    alloc_locals;
+
+    // get adventurer from token id
+    let (adventurer_address) = Module.get_module_address(ModuleIds.Adventurer);
+    let (adventurer_state) = IAdventurer.get_adventurer_by_id(
+        adventurer_address, adventurer_token_id
+    );
+
+    // grant beast xp for slaying adventurer (adventurers are rank 1)
+    let (xp_gained) = CombatStats.calculate_xp_earned(1, adventurer_state.Level);
+    let (_, beast_dynamic_) = BeastLib.split_data(beast);
+    _increase_xp(beast_token_id, beast_dynamic_, xp_gained);
+
+    // emit event
+    AdventurerAttacked.emit(
+        beast_token_id, adventurer_token_id, damage_taken, adventurer_state.Health, xp_gained, 0
+    );
+
+    return ();
 }
 
 // @notice Get xiroshiro random number
@@ -699,11 +707,29 @@ func emit_beast_level_up{
     return ();
 }
 
+// @title process_ambush
+// @notice This function processes an ambush between an adventurer and a beast.
+// @param adventurer_address The address of the adventurer.
+// @param adventurer_token_id The unique identifier of the adventurer.
+// @param unpacked_adventurer The adventurer's state.
+// @param beast_token_id The unique identifier of the beast.
+// @return adventurer_dynamic The dynamic state of the adventurer after processing the ambush.
+//
+// @dev This function fetches the beast and adventurer data, calculates the ambush chance,
+//      compares it with the adventurer's wisdom to see if they avoid the ambush, and if not,
+//      calculates the damage taken from the beast, updates the adventurer's health, and checks
+//      if the adventurer is dead. If the adventurer is dead, it performs the necessary tasks
+//      such as zeroing out gold balance. Then, it emits an Ambushed event with the relevant data.
+//      If the adventurer avoids the ambush, it emits an Ambushed event with no damage and returns
+//      the dynamic component of the adventurer.
 func process_ambush{
     range_check_ptr, syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, bitwise_ptr: BitwiseBuiltin*
-}(adventurer_address: felt, unpacked_adventurer: AdventurerState, beast_token_id: Uint256) -> (
-    adventurer_dynamic: AdventurerDynamic
-) {
+}(
+    adventurer_address: felt,
+    adventurer_token_id: Uint256,
+    unpacked_adventurer: AdventurerState,
+    beast_token_id: Uint256,
+) -> (adventurer_dynamic: AdventurerDynamic) {
     alloc_locals;
 
     // get beast and adventurer
@@ -742,7 +768,7 @@ func process_ambush{
             adventurer_address, Uint256(beast.Adventurer, 0), damage_taken
         );
 
-        // check if beast counter attack killed adventurer
+        // emit ambush event
         AdventurerAmbushed.emit(
             beast_token_id,
             Uint256(beast.Adventurer, 0),
@@ -752,18 +778,14 @@ func process_ambush{
 
         // if the adventurer is dead
         if (deducted_health_adventurer.Health == 0) {
-            // calculate xp earned from killing adventurer (adventurers are rank 1)
-            let (xp_gained) = CombatStats.calculate_xp_earned(1, deducted_health_adventurer.Level);
-            // increase beast xp and writes
-            let (_, beast_dynamic_) = BeastLib.split_data(beast);
-            _increase_xp(beast_token_id, beast_dynamic_, xp_gained);
+            // grant beast xp
+            grant_beast_xp(adventurer_token_id, beast_token_id, beast, damage_taken);
             return (deducted_health_adventurer,);
         }
 
         return (deducted_health_adventurer,);
     }
 
-    // check if beast counter attack killed adventurer
     AdventurerAmbushed.emit(
         beast_token_id, Uint256(beast.Adventurer, 0), 0, original_adventurer.Health
     );
@@ -888,6 +910,48 @@ func _subtract_from_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, rang
     let new_supply = supply - subtraction;
     assert_nn(new_supply);
     worldSupply.write(supply - subtraction);
+
+    return ();
+}
+
+@external
+func zero_out_gold_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    adventurer_token_id: Uint256
+) {
+    Module.only_approved();
+
+    _zero_out_gold_balance(adventurer_token_id);
+
+    return ();
+}
+
+// @title Zero Out Gold Balance
+// @dev This function zeros out the gold balance of a specified adventurer.
+// @notice This is an internal function, hence not directly callable by end-users.
+// @param adventurer_token_id The token ID of the adventurer whose gold balance is to be zeroed out.
+// @return This function does not return a value.
+// @dev This function first retrieves the current gold balance of the specified adventurer.
+// Then, it updates the gold balance of the adventurer to zero.
+// An event, 'UpdateGoldBalance', is then emitted with the adventurer's token ID and the new balance (which is zero).
+// Finally, the world supply of gold is updated to account for the reduction in gold, ensuring the total supply is always accurate.
+// If the new supply is a negative number, an error will be thrown, which should not occur in normal conditions as it would mean an adventurer has a negative gold balance.
+func _zero_out_gold_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    adventurer_token_id: Uint256
+) {
+    // get current gold balance
+    let (current_balance) = balance_of(adventurer_token_id);
+
+    // zero out balance
+    goldBalance.write(adventurer_token_id, 0);
+
+    // generate gold balance event
+    UpdateGoldBalance.emit(adventurer_token_id, 0);
+
+    // update world supply to account for this gold being removed from game
+    let (supply) = worldSupply.read();
+    let new_supply = supply - current_balance;
+    assert_nn(new_supply);
+    worldSupply.write(new_supply);
 
     return ();
 }
