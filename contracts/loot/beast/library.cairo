@@ -67,8 +67,8 @@ namespace BeastLib {
 
         let BeastId = beast_id;
         let Health = 10;
-        let (Prefix_1) = ItemStats.item_name_prefix(1);
-        let (Prefix_2) = ItemStats.item_name_suffix(1);
+        let (Prefix_1) = 0;
+        let (Prefix_2) = 0;
         let Adventurer = adventurer_id;
         let XP = 0;
         let Level = 1;
