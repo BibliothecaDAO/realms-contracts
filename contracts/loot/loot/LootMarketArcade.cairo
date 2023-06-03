@@ -1275,7 +1275,7 @@ func get_charsima_adjusted_bid{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, r
     charisma: felt, original_bid: felt
 ) -> (charisma_adjusted_bid: felt) {
     alloc_locals;
-    let charisma_adjusted_bid = charisma + original_bid;
+    let charisma_adjusted_bid = (charisma * 3) + original_bid;
     return (charisma_adjusted_bid,);
 }
 

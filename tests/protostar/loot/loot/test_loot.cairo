@@ -201,14 +201,56 @@ func test_generate_name_suffix{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, r
     // Katanas are always "X Grasp" Katana of Y
     let (katana_name_suffix) = ItemLib.generate_name_suffix(ItemIds.Katana, rnd);
     assert katana_name_suffix = ItemNameSuffixes.Grasp;
+    let (katana_name_suffix2) = ItemLib.generate_name_suffix(ItemIds.Katana, 2);
+    assert katana_name_suffix2 = ItemNameSuffixes.Grasp;
+    let (katana_name_suffix3) = ItemLib.generate_name_suffix(ItemIds.Katana, 3);
+    assert katana_name_suffix3 = ItemNameSuffixes.Grasp;
+    let (katana_name_suffix4) = ItemLib.generate_name_suffix(ItemIds.Katana, 4);
+    assert katana_name_suffix4 = ItemNameSuffixes.Grasp;
+    let (katana_name_suffix5) = ItemLib.generate_name_suffix(ItemIds.Katana, 5);
+    assert katana_name_suffix5 = ItemNameSuffixes.Grasp;
+    let (katana_name_suffix6) = ItemLib.generate_name_suffix(ItemIds.Katana, 6);
+    assert katana_name_suffix6 = ItemNameSuffixes.Grasp;
+    let (katana_name_suffix7) = ItemLib.generate_name_suffix(ItemIds.Katana, 7);
+    assert katana_name_suffix7 = ItemNameSuffixes.Grasp;
+    let (katana_name_suffix8) = ItemLib.generate_name_suffix(ItemIds.Katana, 8);
+    assert katana_name_suffix8 = ItemNameSuffixes.Grasp;
 
     // Grimoires are always "X Peak" Grimoire of Y
     let (grimoire_name_suffix) = ItemLib.generate_name_suffix(ItemIds.Grimoire, rnd);
     assert grimoire_name_suffix = ItemNameSuffixes.Peak;
+    let (grimoire_name_suffix2) = ItemLib.generate_name_suffix(ItemIds.Grimoire, 2);
+    assert grimoire_name_suffix2 = ItemNameSuffixes.Peak;
+    let (grimoire_name_suffix3) = ItemLib.generate_name_suffix(ItemIds.Grimoire, 3);
+    assert grimoire_name_suffix3 = ItemNameSuffixes.Peak;
+    let (grimoire_name_suffix4) = ItemLib.generate_name_suffix(ItemIds.Grimoire, 4);
+    assert grimoire_name_suffix4 = ItemNameSuffixes.Peak;
+    let (grimoire_name_suffix5) = ItemLib.generate_name_suffix(ItemIds.Grimoire, 5);
+    assert grimoire_name_suffix5 = ItemNameSuffixes.Peak;
 
     // Warhammers are always "X Bane" Warhammer of Y
     let (warhammer_name_suffix) = ItemLib.generate_name_suffix(ItemIds.Warhammer, rnd);
     assert warhammer_name_suffix = ItemNameSuffixes.Bane;
+    let (warhammer_name_suffix2) = ItemLib.generate_name_suffix(ItemIds.Warhammer, 2);
+    assert warhammer_name_suffix2 = ItemNameSuffixes.Bane;
+    let (warhammer_name_suffix3) = ItemLib.generate_name_suffix(ItemIds.Warhammer, 3);
+    assert warhammer_name_suffix3 = ItemNameSuffixes.Bane;
+    let (warhammer_name_suffix4) = ItemLib.generate_name_suffix(ItemIds.Warhammer, 4);
+    assert warhammer_name_suffix4 = ItemNameSuffixes.Bane;
+    let (warhammer_name_suffix5) = ItemLib.generate_name_suffix(ItemIds.Warhammer, 5);
+    assert warhammer_name_suffix5 = ItemNameSuffixes.Bane;
+
+    // Ghost Wands are always "X Whisper" Warhammer of Y
+    let (ghostwand_name_suffix) = ItemLib.generate_name_suffix(ItemIds.GhostWand, rnd);
+    assert ghostwand_name_suffix = ItemNameSuffixes.Whisper;
+    let (ghostwand_name_suffix2) = ItemLib.generate_name_suffix(ItemIds.GhostWand, 2);
+    assert ghostwand_name_suffix2 = ItemNameSuffixes.Whisper;
+    let (ghostwand_name_suffix3) = ItemLib.generate_name_suffix(ItemIds.GhostWand, 3);
+    assert ghostwand_name_suffix3 = ItemNameSuffixes.Whisper;
+    let (ghostwand_name_suffix4) = ItemLib.generate_name_suffix(ItemIds.GhostWand, 4);
+    assert ghostwand_name_suffix4 = ItemNameSuffixes.Whisper;
+    let (ghostwand_name_suffix5) = ItemLib.generate_name_suffix(ItemIds.GhostWand, 5);
+    assert ghostwand_name_suffix5 = ItemNameSuffixes.Whisper;
 
     // Divine Hoods can have {Bender, Grasp, Moon, Peak, Shout, Bite} for their name suffix
     // so we assert function does not return any of the other name suffixes
@@ -302,12 +344,12 @@ func test_get_charsima_adjusted_bid{
     let one_charisma = 1;
     let bid_five = 5;
     let (charisma_adjusted_bid) = get_charsima_adjusted_bid(one_charisma, bid_five);
-    assert charisma_adjusted_bid = 6;
+    assert charisma_adjusted_bid = 8;
 
     let ten_charisma = 10;
     let ten_bid = 10;
     let (charisma_adjusted_bid) = get_charsima_adjusted_bid(ten_charisma, ten_bid);
-    assert charisma_adjusted_bid = 20;
+    assert charisma_adjusted_bid = 40;
 
     return ();
 }
