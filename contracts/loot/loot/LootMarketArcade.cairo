@@ -880,7 +880,6 @@ const SEED_MULTI = 5846975;  // for psudeo randomness now
 const NUMBER_LOOT_ITEMS = 101;
 const MINIMUM_ITEMS_EMITTED = 20;
 const ITEMS_PER_EPOCH_PER_ADVENTUER = 3;
-const CHARISMA_FLOOR_DISCOUNT = 3;
 
 // returns TRUE if item is owned
 @view
@@ -1071,30 +1070,19 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
         assert check_ge_2 = TRUE;
     }
 
-    // check bid meets minimum bid criteria
-    let has_charisma = is_not_zero(adventurer.Charisma);
-
     // read current bid
     let (top_bid) = bid.read(market_item_id);
+
+    // get item tier for tier based pricing
     let (item: Item) = ItemLib.generate_item_by_id(top_bid.item_id);
-
     let item_rank = item.Rank;
-
     let base_price = BASE_PRICE * (6 - item_rank);
 
-    if (has_charisma == TRUE) {
-        // adventurers with charisma get a 1 gold discount on minimum bid
-        let charisma_minimum_bid = base_price - CHARISMA_FLOOR_DISCOUNT;
-        let higer_than_base_price = is_le(charisma_minimum_bid, original_bid);
-        with_attr error_message("Item Market: Bid is lower than minimum with charisma discount") {
-            assert higer_than_base_price = TRUE;
-        }
-    } else {
-        // adventurers without charsima use BASE_PRICE (3 at the time of this writing)
-        let higer_than_base_price = is_le(base_price, original_bid);
-        with_attr error_message("Item Market: Bid is lower than minimum") {
-            assert higer_than_base_price = TRUE;
-        }
+
+    // assert bid is higher than required minimum (3 at the time of this writing)
+    let higer_than_base_price = is_le(base_price, original_bid);
+    with_attr error_message("Item Market: Bid is lower than minimum") {
+        assert higer_than_base_price = TRUE;
     }
 
     // adjust the original big for the adventurers charisma (schmoozing the shop keeper)
