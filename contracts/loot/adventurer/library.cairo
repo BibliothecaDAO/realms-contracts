@@ -809,7 +809,7 @@ namespace AdventurerLib {
     ) {
         // Check which weapon is being used and return the associated starting beast ID
         if (weapon_id == ItemIds.ShortSword) {
-            return (BeastIds.Golem,);
+            return (BeastIds.Gnome,);
         }
         if (weapon_id == ItemIds.Book) {
             return (BeastIds.Ogre,);
