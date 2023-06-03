@@ -940,7 +940,7 @@ const SEED_MULTI = 5846975;  // for psudeo randomness now
 const NUMBER_LOOT_ITEMS = 101;
 const MINIMUM_ITEMS_EMITTED = 20;
 const ITEMS_PER_EPOCH_PER_ADVENTUER = 3;
-const CHARISMA_FLOOR_DISCOUNT = 2;
+const CHARISMA_FLOOR_DISCOUNT = 3;
 
 // returns TRUE if item is owned
 @view

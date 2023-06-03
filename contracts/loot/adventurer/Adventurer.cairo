@@ -553,7 +553,7 @@ func purchase_health{
     let (beast_address) = Module.get_module_address(ModuleIds.Beast);
 
     // health potion costs 3 * adventurer level
-    let cost_of_potion = 3 * unpacked_adventurer.Level;
+    let cost_of_potion = 3 * (adventurer.Level - adventurer.Charisma);
     IBeast.subtract_from_balance(beast_address, adventurer_token_id, cost_of_potion * number);
 
     // health potion adds 10 health
