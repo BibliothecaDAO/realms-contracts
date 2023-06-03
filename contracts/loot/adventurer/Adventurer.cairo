@@ -552,7 +552,7 @@ func purchase_health{
 
     let (beast_address) = Module.get_module_address(ModuleIds.Beast);
 
-    let discount = adventurer.Level - adventurer.Charisma;
+    let discount = unpacked_adventurer.Level - unpacked_adventurer.Charisma;
 
     let discount_below_floor = is_le(discount, 3);
 
@@ -993,31 +993,6 @@ func owner{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() ->
 //
 // Externals
 //
-
-@external
-func approve{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    to: felt, adventurer_token_id: Uint256
-) {
-    ERC721.approve(to, adventurer_token_id);
-    return ();
-}
-
-@external
-func setApprovalForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    operator: felt, approved: felt
-) {
-    ERC721.set_approval_for_all(operator, approved);
-    return ();
-}
-
-@external
-func burn{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    adventurer_token_id: Uint256
-) {
-    ERC721.assert_only_token_owner(adventurer_token_id);
-    ERC721Enumerable._burn(adventurer_token_id);
-    return ();
-}
 
 @external
 func transferOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(

@@ -189,22 +189,6 @@ func ownerOf{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(to
 }
 
 @view
-func getApproved{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    tokenId: Uint256
-) -> (approved: felt) {
-    let (approved: felt) = ERC721.get_approved(tokenId);
-    return (approved,);
-}
-
-@view
-func isApprovedForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    owner: felt, operator: felt
-) -> (isApproved: felt) {
-    let (isApproved: felt) = ERC721.is_approved_for_all(owner, operator);
-    return (isApproved,);
-}
-
-@view
 func tokenURI{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     tokenId: Uint256
 ) -> (tokenURI_len: felt, tokenURI: felt*) {
@@ -225,50 +209,6 @@ func owner{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() ->
 //
 // Externals
 //
-
-@external
-func approve{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    to: felt, tokenId: Uint256
-) {
-    ERC721.approve(to, tokenId);
-    return ();
-}
-
-@external
-func setApprovalForAll{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    operator: felt, approved: felt
-) {
-    ERC721.set_approval_for_all(operator, approved);
-    return ();
-}
-
-@external
-func transferFrom{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    from_: felt, to: felt, tokenId: Uint256
-) {
-    // can only be called by ItemContract/AdventurerContract/BeastContract
-    Module.only_approved();
-    ERC721Enumerable.transfer_from(from_, to, tokenId);
-    return ();
-}
-
-@external
-func safeTransferFrom{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(
-    from_: felt, to: felt, tokenId: Uint256, data_len: felt, data: felt*
-) {
-    // can only be called by ItemContract/AdventurerContract/BeastContract
-    Module.only_approved();
-    ERC721Enumerable.safe_transfer_from(from_, to, tokenId, data_len, data);
-    return ();
-}
-
-@external
-func burn{pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr}(tokenId: Uint256) {
-    // can only be called by ItemContract/AdventurerContract/BeastContract
-    Module.only_approved();
-    ERC721Enumerable._burn(tokenId);
-    return ();
-}
 
 @external
 func transferOwnership{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
