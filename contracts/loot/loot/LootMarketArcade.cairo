@@ -1074,6 +1074,8 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     // check bid meets minimum bid criteria
     let has_charisma = is_not_zero(adventurer.Charisma);
 
+    // read current bid
+    let (top_bid) = bid.read(market_item_id);
     let (item: Item) = ItemLib.generate_item_by_id(top_bid.item_id);
 
     let item_rank = item.Rank;
@@ -1097,9 +1099,6 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 
     // adjust the original big for the adventurers charisma (schmoozing the shop keeper)
     let (charisma_adjusted_bid) = get_charsima_adjusted_bid(adventurer.Charisma, original_bid);
-
-    // read current bid
-    let (top_bid) = bid.read(market_item_id);
 
     // check higher than the last bid price
     let higher_price = is_le(top_bid.price, charisma_adjusted_bid);
