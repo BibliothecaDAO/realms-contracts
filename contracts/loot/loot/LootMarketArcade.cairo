@@ -1133,16 +1133,23 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
 
     // check bid meets minimum bid criteria
     let has_charisma = is_not_zero(adventurer.Charisma);
+
+    let item = view_unminted_item(market_item_id);
+
+    let item_rank = item.Rank;
+
+    let base_price = BASE_PRICE * (6 - item_rank);
+
     if (has_charisma == TRUE) {
         // adventurers with charisma get a 1 gold discount on minimum bid
-        let charisma_minimum_bid = BASE_PRICE - CHARISMA_FLOOR_DISCOUNT;
+        let charisma_minimum_bid = base_price - CHARISMA_FLOOR_DISCOUNT;
         let higer_than_base_price = is_le(charisma_minimum_bid, original_bid);
         with_attr error_message("Item Market: Bid is lower than minimum with charisma discount") {
             assert higer_than_base_price = TRUE;
         }
     } else {
         // adventurers without charsima use BASE_PRICE (3 at the time of this writing)
-        let higer_than_base_price = is_le(BASE_PRICE, original_bid);
+        let higer_than_base_price = is_le(base_price, original_bid);
         with_attr error_message("Item Market: Bid is lower than minimum") {
             assert higer_than_base_price = TRUE;
         }
