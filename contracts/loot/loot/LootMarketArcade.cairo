@@ -31,7 +31,12 @@ from starkware.starknet.common.syscalls import (
 )
 
 from contracts.loot.loot.stats.item import ItemStats
-from contracts.loot.utils.constants import ModuleIds, ExternalContractIds, STARTING_GOLD
+from contracts.loot.utils.constants import (
+    ModuleIds,
+    ExternalContractIds,
+    STARTING_GOLD,
+    MINIMUM_MARKET_FLOOR_PRICE,
+)
 from contracts.loot.adventurer.interface import IAdventurer
 from openzeppelin.token.erc721.IERC721 import IERC721
 from contracts.loot.adventurer.library import AdventurerLib
@@ -1078,9 +1083,8 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     let item_rank = item.Rank;
     let base_price = BASE_PRICE * (6 - item_rank);
 
-
     // assert bid is higher than required minimum (3 at the time of this writing)
-    let higer_than_base_price = is_le(base_price, original_bid);
+    let higer_than_base_price = is_le(MINIMUM_MARKET_FLOOR_PRICE, original_bid);
     with_attr error_message("Item Market: Bid is lower than minimum") {
         assert higer_than_base_price = TRUE;
     }
