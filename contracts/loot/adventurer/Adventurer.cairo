@@ -691,7 +691,7 @@ func explore{
         // between zero and the adventurers level
         let (_, dodge_chance) = unsigned_div_rem(dodge_rnd, unpacked_adventurer.Level);
         // if the adventurers intelligence
-        let can_dodge = is_le(dodge_chance, unpacked_adventurer.Intelligence + 1);
+        let can_dodge = is_le(dodge_chance, unpacked_adventurer.Intelligence + 2);
         if (can_dodge == TRUE) {
             Discovery.emit(
                 adventurer_token_id, DiscoveryType.Obstacle, obstacle.Id, Uint256(0, 0), 0

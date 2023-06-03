@@ -453,7 +453,7 @@ func flee{
     let (_, flee_chance) = unsigned_div_rem(flee_rnd, unpacked_adventurer.Level);
 
     // if the adventurers speed is greater than the dice roll
-    let can_flee = is_le(flee_chance, adventurer_speed + 1);
+    let can_flee = is_le(flee_chance, adventurer_speed + 2);
     if (can_flee == TRUE) {
         // they get away so set their status back to idle
         IAdventurer.update_status(
@@ -619,16 +619,16 @@ func _counter_attack{
     }
 }
 
- // @title Grant Beast Experience
- // @param adventurer_token_id The token ID of the adventurer attacked by the beast.
- // @param beast_token_id The token ID of the beast that attacked the adventurer.
- // @param beast The Beast data structure containing the beast's information.
- // @param damage_taken The amount of damage the adventurer took from the beast's attack.
- // @return This function does not return a value.
- // @dev The function first retrieves the adventurer state associated with the given adventurer token ID.
- // It then calculates the experience gained by the beast for attacking the adventurer (considering adventurers as rank 1 entities).
- // The beast's experience is then increased by the calculated amount using the `_increase_xp` function.
- // Finally, an 'AdventurerAttacked' event is emitted, which includes the beast token ID, adventurer token ID, damage taken by the adventurer, the adventurer's remaining health, experience gained by the beast, and the amount of loot dropped (which is zero in this case).
+// @title Grant Beast Experience
+// @param adventurer_token_id The token ID of the adventurer attacked by the beast.
+// @param beast_token_id The token ID of the beast that attacked the adventurer.
+// @param beast The Beast data structure containing the beast's information.
+// @param damage_taken The amount of damage the adventurer took from the beast's attack.
+// @return This function does not return a value.
+// @dev The function first retrieves the adventurer state associated with the given adventurer token ID.
+// It then calculates the experience gained by the beast for attacking the adventurer (considering adventurers as rank 1 entities).
+// The beast's experience is then increased by the calculated amount using the `_increase_xp` function.
+// Finally, an 'AdventurerAttacked' event is emitted, which includes the beast token ID, adventurer token ID, damage taken by the adventurer, the adventurer's remaining health, experience gained by the beast, and the amount of loot dropped (which is zero in this case).
 func grant_beast_xp{
     pedersen_ptr: HashBuiltin*, syscall_ptr: felt*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }(adventurer_token_id: Uint256, beast_token_id: Uint256, beast: Beast, damage_taken: felt) {
@@ -742,7 +742,7 @@ func process_ambush{
     let (_, ambush_chance) = unsigned_div_rem(ambush_rnd, unpacked_adventurer.Level);
 
     // if the adventurers wisdom is higher than the ambush rnd, they avoid ambush
-    let avoided_ambush = is_le(ambush_chance, unpacked_adventurer.Wisdom + 1);
+    let avoided_ambush = is_le(ambush_chance, unpacked_adventurer.Wisdom + 2);
 
     // if they do not avoid, they take damage
     if (avoided_ambush == FALSE) {
