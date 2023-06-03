@@ -1134,7 +1134,7 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     // check bid meets minimum bid criteria
     let has_charisma = is_not_zero(adventurer.Charisma);
 
-    let item = view_unminted_item(market_item_id);
+    let (item, _) = view_unminted_item(market_item_id);
 
     let item_rank = item.Rank;
 
