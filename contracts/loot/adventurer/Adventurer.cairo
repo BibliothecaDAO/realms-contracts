@@ -75,6 +75,7 @@ from contracts.loot.utils.constants import (
     THIRD_PLACE_REWARD,
     STARTING_GOLD,
     VITALITY_HEALTH_BOOST,
+    DIFFICULTY_CLIFF,
 )
 from contracts.loot.constants.item import ITEM_XP_MULTIPLIER
 
@@ -691,7 +692,7 @@ func explore{
         // between zero and the adventurers level
         let (_, dodge_chance) = unsigned_div_rem(dodge_rnd, unpacked_adventurer.Level);
         // if the adventurers intelligence
-        let can_dodge = is_le(dodge_chance, unpacked_adventurer.Intelligence + 2);
+        let can_dodge = is_le(dodge_chance, unpacked_adventurer.Intelligence + DIFFICULTY_CLIFF);
         if (can_dodge == TRUE) {
             Discovery.emit(
                 adventurer_token_id, DiscoveryType.Obstacle, obstacle.Id, Uint256(0, 0), 0

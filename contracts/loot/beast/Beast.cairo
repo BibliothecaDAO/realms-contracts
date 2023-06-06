@@ -49,6 +49,7 @@ from contracts.loot.constants.item import (
     ITEM_NAME_SUFFIXES_COUNT,
     ITEM_NAME_PREFIXES_COUNT,
 )
+from contracts.loot.utils.constants import DIFFICULTY_CLIFF
 
 // -----------------------------------
 // Events
@@ -453,7 +454,7 @@ func flee{
     let (_, flee_chance) = unsigned_div_rem(flee_rnd, unpacked_adventurer.Level);
 
     // if the adventurers speed is greater than the dice roll
-    let can_flee = is_le(flee_chance, adventurer_speed + 2);
+    let can_flee = is_le(flee_chance, adventurer_speed + DIFFICULTY_CLIFF);
     if (can_flee == TRUE) {
         // they get away so set their status back to idle
         IAdventurer.update_status(
@@ -742,7 +743,7 @@ func process_ambush{
     let (_, ambush_chance) = unsigned_div_rem(ambush_rnd, unpacked_adventurer.Level);
 
     // if the adventurers wisdom is higher than the ambush rnd, they avoid ambush
-    let avoided_ambush = is_le(ambush_chance, unpacked_adventurer.Wisdom + 2);
+    let avoided_ambush = is_le(ambush_chance, unpacked_adventurer.Wisdom + DIFFICULTY_CLIFF);
 
     // if they do not avoid, they take damage
     if (avoided_ambush == FALSE) {
