@@ -24,7 +24,6 @@ from contracts.loot.constants.obstacle import Obstacle, ObstacleUtils
 from contracts.loot.utils.constants import (
     MAX_CRITICAL_HIT_CHANCE,
     ITEM_RANK_MAX,
-    MINIMUM_ATTACK_DAMGE,
 )
 
 namespace CombatStats {
@@ -279,34 +278,30 @@ namespace CombatStats {
         return (0,);
     }
 
-    // @title Get Base Damage
-    // @dev Calculates the base damage of an attack based on the ranks and greatness of the attacking and defending items.
-    // @param attack_rank The rank of the attacking item.
-    // @param attack_greatness The greatness of the attacking item.
-    // @param armor_rank The rank of the defending item.
-    // @param armor_greatness The greatness of the defending item.
-    // @return damage The calculated base damage of the attack.
-    func get_base_damage{syscall_ptr: felt*, range_check_ptr}(
-        attack_rank: felt, attack_greatness: felt, armor_rank: felt, armor_greatness: felt
+    // @title Attack Minus Defense
+    // @notice This function calculates the damage dealt in a combat scenario based on the attack and defense hit points (HP) of two entities.
+    // @dev If the defense HP is greater than the attack HP, this function uses adventurer level as the minimum damage dealt
+    // @param attack_hp The hit points of the attacking entity.
+    // @param defense_hp The hit points of the defending entity.
+    // @param adventurer_level The level of the adventurer.
+    // @return damage The amount of damage dealt in the combat scenario.
+    func attack_minus_defense{syscall_ptr: felt*, range_check_ptr}(
+        attack_hp: felt, defense_hp: felt, adventurer_level: felt
     ) -> (damage: felt) {
         alloc_locals;
 
-        // use weapon rank and greatness to give every item a damage rating of 0-100
-        let attack_hp = (ITEM_RANK_MAX - attack_rank) * attack_greatness;
-
-        // use armor rank and greatness to give armor a defense rating of 0-100
-        let defense_hp = (ITEM_RANK_MAX - armor_rank) * armor_greatness;
-
-        // if armor hitpoints is less than weapon hitpoints, then damage was dealt
-        let dealt_below_minimum_damage = is_le_felt(defense_hp + MINIMUM_ATTACK_DAMGE, attack_hp);
+        // if defense HP + adventurer level is less than or equal to attack hp
+        // the reason we add adventurer_level is to prevent a situation in which
+        // adventurer_level (minimum damage) would result in higher damage than attack minus defense
+        let dealt_below_minimum_damage = is_le_felt(defense_hp + adventurer_level, attack_hp);
         if (dealt_below_minimum_damage == TRUE) {
-            // then we use that for our weapon damage
+            // use the difference for damage dealt
             let damage_dealt = attack_hp - defense_hp;
             return (damage_dealt,);
         }
 
-        // fall through to minimum damage
-        return (MINIMUM_ATTACK_DAMGE,);
+        // if the attack HP is lower than the defense HP, use adventurer level as minimum
+        return (adventurer_level,);
     }
 
     // @title Core damage calculation
@@ -345,18 +340,26 @@ namespace CombatStats {
         alloc_locals;
 
         // get base damage based on rank and greatness of attack weapon and armor
-        let (base_damage) = get_base_damage(
-            attack_rank, attack_greatness, armor_rank, armor_greatness
-        );
 
-        // adjust base damage for elemental effect
+        // raw attack HP
+        let raw_attack_hp = (ITEM_RANK_MAX - attack_rank) * attack_greatness;
+
+        // raw defense HP
+        let raw_defense_hp = (ITEM_RANK_MAX - armor_rank) * armor_greatness;
+
+        // base damage is attack HP minus defense HP with a minimum of entity/adventurer level
+        let (base_damage) = attack_minus_defense(raw_attack_hp, raw_defense_hp, entity_level);
+
+        // apply elemental bonus to raw attack hp
+        // if we applied it to base_damage above, it significantly weaknes
+        // the elemental effect
         let (base_damage_with_elemental) = adjust_damage_for_elemental(
-            attack_type, armor_type, base_damage
+            attack_type, armor_type, raw_attack_hp
         );
 
         // get damage bonus based on item and armor names
         let (name_damage_bonus) = get_name_match_bonus(
-            base_damage_with_elemental,
+            raw_attack_hp,
             attack_name_prefix1,
             attack_name_prefix2,
             armor_name_prefix1,
@@ -365,12 +368,10 @@ namespace CombatStats {
         );
 
         // get damage bonus for critical hit
-        let (critical_hit_bonus) = get_critical_hit_bonus(base_damage_with_elemental, luck, rnd);
+        let (critical_hit_bonus) = get_critical_hit_bonus(raw_attack_hp, luck, rnd);
 
         // get damage bonus for entity stats (level and strength)
-        let (entity_level_bonus) = get_entity_level_bonus(
-            base_damage_with_elemental, entity_level + strength
-        );
+        let (entity_level_bonus) = get_entity_level_bonus(raw_attack_hp, entity_level + strength);
 
         // add bonuses to base damage
         let final_damage = base_damage_with_elemental + critical_hit_bonus + name_damage_bonus +
