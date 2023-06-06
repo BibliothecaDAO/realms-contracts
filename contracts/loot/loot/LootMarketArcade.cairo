@@ -1092,8 +1092,8 @@ func bid_on_item{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     // adjust the original big for the adventurers charisma (schmoozing the shop keeper)
     let (charisma_adjusted_bid) = get_charsima_adjusted_bid(adventurer.Charisma, original_bid);
 
-    // check higher than the last bid price
-    let higher_price = is_le(top_bid.price, charisma_adjusted_bid);
+    // assert charisma adjusted bid is higher than current top bid
+    let higher_price = is_le(top_bid.price + 1, charisma_adjusted_bid);
     with_attr error_message("Item Market: Your bid is not high enough") {
         assert higher_price = TRUE;
     }
