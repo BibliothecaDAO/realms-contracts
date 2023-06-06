@@ -10,7 +10,7 @@ from realms_cli.binary_converter import map_realm
 @click.command()
 @click.argument("quantity", nargs=1)
 @click.option("--network", default="goerli")
-def mint_realm(quantity, network):
+async def mint_realm(quantity, network):
     """
     Mint Realm
     """
@@ -21,7 +21,7 @@ def mint_realm(quantity, network):
         for id in enumerate(quantity)
     ]
 
-    wrapped_send(
+    await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias=config.Realms_ERC721_Mintable_alias,
@@ -32,13 +32,13 @@ def mint_realm(quantity, network):
 
 @click.command()
 @click.option("--network", default="goerli")
-def approve_realm(network):
+async def approve_realm(network):
     """
     Approve Realm for transfer into Settling contract
     """
     config = Config(nile_network=network)
 
-    wrapped_send(
+    await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias=config.Realms_ERC721_Mintable_alias,
@@ -53,7 +53,7 @@ def approve_realm(network):
 @click.command()
 @click.argument("realm_token_id", nargs=1)
 @click.option("--network", default="goerli")
-def settle(realm_token_id, network):
+async def settle(realm_token_id, network):
     """
     Settle Realm
     """
@@ -65,7 +65,7 @@ def settle(realm_token_id, network):
         for id in realm_token_ids
     ]
 
-    wrapped_send(
+    await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias=config.Settling_alias,
@@ -77,7 +77,7 @@ def settle(realm_token_id, network):
 @click.command()
 @click.argument("realm_token_id", nargs=1)
 @click.option("--network", default="goerli")
-def unsettle(realm_token_id, network):
+async def unsettle(realm_token_id, network):
     """
     Unsettle Realm
     """
@@ -89,7 +89,7 @@ def unsettle(realm_token_id, network):
         for id in realm_token_ids
     ]
 
-    wrapped_send(
+    await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias=config.Settling_alias,
@@ -101,7 +101,7 @@ def unsettle(realm_token_id, network):
 @click.command()
 @click.argument("realm_token_id", nargs=1)
 @click.option("--network", default="goerli")
-def set_realm_data(realm_token_id, network):
+async def set_realm_data(realm_token_id, network):
     """
     Set realm data
     """
@@ -121,7 +121,7 @@ def set_realm_data(realm_token_id, network):
     ]
     print(calldata)
 
-    wrapped_send(
+    await wrapped_send(
         network=config.nile_network,
         signer_alias=config.ADMIN_ALIAS,
         contract_alias=config.Realms_ERC721_Mintable_alias,
@@ -133,7 +133,7 @@ def set_realm_data(realm_token_id, network):
 @click.command()
 @click.option("--address", default="", help="Account address in hex format 0x...")
 @click.option("--network", default="goerli")
-def check_realms(address, network) -> str:
+async def check_realms(address, network) -> str:
     """
     Check Realms balance
     """
@@ -155,7 +155,7 @@ def check_realms(address, network) -> str:
 @click.command()
 @click.option("--address", default="", help="Account address in hex format 0x...")
 @click.option("--network", default="goerli")
-def check_s_realms(address, network):
+async def check_s_realms(address, network):
     """
     Check settled Realms balance
     """
@@ -177,7 +177,7 @@ def check_s_realms(address, network):
 @click.command()
 @click.argument("realm_token_id", nargs=1)
 @click.option("--network", default="goerli")
-def check_owner_of_realm(realm_token_id, network):
+async def check_owner_of_realm(realm_token_id, network):
     """
     Check realms balance
     """
@@ -195,7 +195,7 @@ def check_owner_of_realm(realm_token_id, network):
 @click.command()
 @click.argument("realm_token_id", nargs=1)
 @click.option("--network", default="goerli")
-def check_owner_of_s_realm(realm_token_id, network):
+async def check_owner_of_s_realm(realm_token_id, network):
     """
     Check owner of S Realm
     """
@@ -213,7 +213,7 @@ def check_owner_of_s_realm(realm_token_id, network):
 @click.command()
 @click.argument("realm_token_id", nargs=1)
 @click.option("--network", default="goerli")
-def get_realm_data(realm_token_id, network):
+async def get_realm_data(realm_token_id, network):
     """
     Check settled Realms balance
     """
@@ -231,7 +231,7 @@ def get_realm_data(realm_token_id, network):
 @click.command()
 @click.option("--address", default="", help="Account address in hex format 0x...")
 @click.option("--network", default="goerli")
-def get_owned(address, network):
+async def get_owned(address, network):
     """
     Get owned realms and owned settled realms.
     """
@@ -301,12 +301,12 @@ def get_owned(address, network):
 @click.command()
 @click.argument("realm_token_id", nargs=1)
 @click.option("--network", default="goerli")
-def claim_lords(realm_token_id, network):
+async def claim_lords(realm_token_id, network):
     """
     Transfer Lords  2391140167327979619938051357136306508268704638528932947906243138584057924271
     """
     config = Config(nile_network=network)
-    wrapped_send(
+    await wrapped_send(
         network=config.nile_network,
         signer_alias=config.USER_ALIAS,
         contract_alias=config.GoblinTown_alias,

@@ -124,17 +124,71 @@ func test_calculate_damage_from_weapon{syscall_ptr: felt*, range_check_ptr}() {
     // max damage - gg
     let (g20_katana) = TestUtils.create_item(ItemIds.Katana, 20);
     let (g0_shirt) = TestUtils.create_item(ItemIds.Shirt, 0);
-    let (katana_vs_shirt) = CombatStats.calculate_damage_from_weapon(g20_katana, g0_shirt, adventurer_state, 1);
+    let (katana_vs_shirt) = CombatStats.calculate_damage_from_weapon(
+        g20_katana, g0_shirt, adventurer_state, 1
+    );
     assert katana_vs_shirt = 300;
 
     // greatness 3 short sword vs greatness 18 holy chestplate
-    // zero damage - "Tis but a scratch"
+    // minimum damage - "Tis but a scratch"
     let (g3_short_sword) = TestUtils.create_item(ItemIds.ShortSword, 3);
     let (g18_holy_chestplate) = TestUtils.create_item(ItemIds.HolyChestplate, 18);
     let (holy_chestplate_vs_short_sword) = CombatStats.calculate_damage_from_weapon(
         g3_short_sword, g18_holy_chestplate, adventurer_state, 1
     );
-    assert holy_chestplate_vs_short_sword = 0;
+    assert holy_chestplate_vs_short_sword = 4;
+
+    // greatness 1 scimitar vs greatness 3 silk robe
+    let (g1_scimitar) = TestUtils.create_item(ItemIds.Scimitar, 1);
+    let (g3_silk_robe) = TestUtils.create_item(ItemIds.SilkRobe, 3);
+    let (scimitar_vs_silk_robe) = CombatStats.calculate_damage_from_weapon(
+        g1_scimitar, g3_silk_robe, adventurer_state, 1
+    );
+    assert scimitar_vs_silk_robe = 8;
+
+    // greatness 5 scimitar vs greatness 5 linen robe
+    let (g5_scimitar) = TestUtils.create_item(ItemIds.Scimitar, 5);
+    let (g5_linen_robe) = TestUtils.create_item(ItemIds.LinenRobe, 5);
+    let (g5_scimitar_vs_g5_linen_robe) = CombatStats.calculate_damage_from_weapon(
+        g5_scimitar, g5_linen_robe, adventurer_state, 1
+    );
+    assert g5_scimitar_vs_g5_linen_robe = 8;
+
+    // greatness 20 short sword vs greatness 20 shirt
+    let (g20_shirt) = TestUtils.create_item(ItemIds.Shirt, 20);
+    let (g20_short_sword) = TestUtils.create_item(ItemIds.ShortSword, 20);
+    let (g20_short_sword_vs_g20_shirt) = CombatStats.calculate_damage_from_weapon(
+        g20_short_sword, g20_shirt, adventurer_state, 1
+    );
+    assert g20_short_sword_vs_g20_shirt = 8;
+
+    // greatness 20 short sword vs greatness 19 shirt
+    let (g19_shirt) = TestUtils.create_item(ItemIds.Shirt, 19);
+    let (g20_short_sword_vs_g19_shirt) = CombatStats.calculate_damage_from_weapon(
+        g20_short_sword, g19_shirt, adventurer_state, 1
+    );
+    assert g20_short_sword_vs_g19_shirt = 8;
+
+    // greatness 20 short sword vs greatness 18 shirt
+    let (g18_shirt) = TestUtils.create_item(ItemIds.Shirt, 18);
+    let (g20_short_sword_vs_g18_shirt) = CombatStats.calculate_damage_from_weapon(
+        g20_short_sword, g18_shirt, adventurer_state, 1
+    );
+    assert g20_short_sword_vs_g18_shirt = 8;
+
+    // greatness 20 short sword vs greatness 17 shirt
+    let (g17_shirt) = TestUtils.create_item(ItemIds.Shirt, 17);
+    let (g20_short_sword_vs_g17_shirt) = CombatStats.calculate_damage_from_weapon(
+        g20_short_sword, g17_shirt, adventurer_state, 1
+    );
+    assert g20_short_sword_vs_g17_shirt = 8;
+
+    // greatness 20 short sword vs greatness 16 shirt
+    let (g16_shirt) = TestUtils.create_item(ItemIds.Shirt, 16);
+    let (g20_short_sword_vs_g16_shirt) = CombatStats.calculate_damage_from_weapon(
+        g20_short_sword, g16_shirt, adventurer_state, 1
+    );
+    assert g20_short_sword_vs_g16_shirt = 12;
 
     return ();
 }
@@ -148,15 +202,15 @@ func test_calculate_damage_from_beast{
     let (adventurer_state) = get_adventurer_state();
 
     // greatness 20 orc vs greatness 0 shirt (oof)
-    let (orc) = TestUtils.create_beast(BeastIds.Orc, 20);
+    let (orc) = TestUtils.create_beast(BeastIds.Orc, 20, 0, 0);
     let (shirt) = TestUtils.create_item(ItemIds.Shirt, 0);
-    let (orc_vs_shirt) = CombatStats.calculate_damage_from_beast(orc, shirt, 1);
+    let (orc_vs_shirt) = CombatStats.calculate_damage_from_beast(orc, shirt, 1, 1);
     assert orc_vs_shirt = 60;
 
     // greatness 10 giant vs greatness 10 leather armor
     let (leather) = TestUtils.create_item(ItemIds.LeatherArmor, 10);
-    let (giant) = TestUtils.create_beast(BeastIds.Giant, 10);
-    let (giant_vs_leather) = CombatStats.calculate_damage_from_beast(giant, leather, 1);
+    let (giant) = TestUtils.create_beast(BeastIds.Giant, 10, 0, 0);
+    let (giant_vs_leather) = CombatStats.calculate_damage_from_beast(giant, leather, 1, 1);
     assert giant_vs_leather = 120;
 
     return ();
@@ -173,7 +227,9 @@ func test_calculate_damage_from_obstacle{
     // greatness 0 ring mail vs greatness 20 demonic alter
     // max damage - gg
     let (g0_ring_mail) = TestUtils.create_item(ItemIds.RingMail, 0);
-    let (g20_demonic_alter) = TestUtils.create_obstacle(ObstacleConstants.ObstacleIds.DemonicAlter, 20);
+    let (g20_demonic_alter) = TestUtils.create_obstacle(
+        ObstacleConstants.ObstacleIds.DemonicAlter, 20
+    );
     let (ring_mail_vs_demonic_alter) = CombatStats.calculate_damage_from_obstacle(
         g20_demonic_alter, g0_ring_mail
     );
@@ -186,13 +242,11 @@ func test_calculate_damage_from_obstacle{
     let (demonhusk_vs_dark_mist) = CombatStats.calculate_damage_from_obstacle(
         g0_dark_mist, g20_demonhusk
     );
-    assert demonhusk_vs_dark_mist = 0;
+    assert demonhusk_vs_dark_mist = 4;
 
-    let zero_item = Item(0,0,0,0,0,0,0,0,0,0,0,0,0);
+    let zero_item = Item(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     let (g0_curse) = TestUtils.create_obstacle(ObstacleConstants.ObstacleIds.Curse, 1);
-    let (zero_vs_curse) = CombatStats.calculate_damage_from_obstacle(
-        g0_curse, zero_item
-    );
+    let (zero_vs_curse) = CombatStats.calculate_damage_from_obstacle(g0_curse, zero_item);
     assert zero_vs_curse = 12;
 
     return ();
@@ -202,7 +256,6 @@ func test_calculate_damage_from_obstacle{
 //          XP = (6-rank) * level
 @external
 func test_calculate_xp_earned{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
-
     // rank 1 on level 1 should yield 5 XP
     let (xp_earned_rank1_level1) = CombatStats.calculate_xp_earned(1, 1);
     assert xp_earned_rank1_level1 = 5;
@@ -219,14 +272,14 @@ func test_calculate_xp_earned{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, ra
 }
 
 @external
-func test_check_for_level_increase{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
-
+func test_check_for_level_increase{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    ) {
     // 0 xp is enough to level up off of level 0
     let (zero_xp_zero_level) = CombatStats.check_for_level_increase(0, 0);
     assert zero_xp_zero_level = 1;
 
     // 4xp is not enough to level up from level 1 to level 2
-    let (no_level_up) = CombatStats.check_for_level_increase(4, 1);
+    let (no_level_up) = CombatStats.check_for_level_increase(2, 1);
     assert no_level_up = 0;
 
     // 9xp is exactly enough to level up from level 1 to level 2
@@ -234,7 +287,7 @@ func test_check_for_level_increase{syscall_ptr: felt*, pedersen_ptr: HashBuiltin
     assert level_up_1_to_2 = 1;
 
     // 675xp is one xp short of being able to level up from level 8 to 9
-    let (no_level_up_8_to_9) = CombatStats.check_for_level_increase(675, 8);
+    let (no_level_up_8_to_9) = CombatStats.check_for_level_increase(200, 8);
     assert no_level_up_8_to_9 = 0;
 
     // 700xp is enough to level up from level 8 to 9

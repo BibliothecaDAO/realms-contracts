@@ -164,11 +164,6 @@ struct AdventurerDynamic {
     Upgrading: felt,
 }
 
-struct KingState {
-    AdventurerId: Uint256,
-    StartTime: felt,
-}
-
 struct PackedAdventurerState {
     p1: felt,
     p2: felt,
@@ -253,9 +248,8 @@ namespace DiscoveryType {
 
 namespace ItemDiscoveryType {
     const Gold = 0;
-    const XP = 1;
-    const Loot = 2;
-    const Health = 3;
+    const Loot = 1;
+    const Health = 2;
 }
 
 // index for items - used in cast function to set values

@@ -196,11 +196,6 @@ cairo-nile = "^0.13.0"
 "attack_beast" = "realms_cli.loot.beast.attack_beast"
 "flee_beast" = "realms_cli.loot.beast.flee_beast"
 
-#-----------KING
-"get_king" = "realms_cli.loot.loot.get_king"
-"become_king" = "realms_cli.loot.loot.become_king"
-"pay_king_tribute" = "realms_cli.loot.loot.pay_king_tribute"
-
 #-----------TRAVEL
 "set_coordinates" = "realms_cli.player.travel.set_coordinates"
 "travel" = "realms_cli.player.travel.travel"

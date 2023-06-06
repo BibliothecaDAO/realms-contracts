@@ -62,7 +62,16 @@ class Config:
     def __init__(self, nile_network: str):
         self.nile_network = "127.0.0.1" if nile_network == "localhost" else nile_network
 
-        self.MAX_FEE = 99999439013963000
+        self.NETWORKS = ["localhost", "goerli2", "devnet", "integration"]
+
+        self.GATEWAYS = {
+            "localhost": "http://127.0.0.1:5050/",
+            "goerli2": "https://alpha4-2.starknet.io",
+            "integration": "https://external.integration.starknet.io",
+            "devnet": "https://survivor-indexer.bibliothecadao.xyz",
+        }
+
+        self.MAX_FEE = 29999439013963000
 
         self.Arbiter_alias = "proxy_" + ContractAlias.Arbiter
         self.Module_Controller_alias = "proxy_" + ContractAlias.ModuleController
@@ -77,7 +86,7 @@ class Config:
         self.GoblinTown_alias = "proxy_" + ContractAlias.GoblinTown
 
         # @distracteddev to change back
-        self.Lords_ERC20_Mintable_alias = "proxy_" + ContractAlias.Lords_ERC20_Mintable
+        self.Lords_ERC20_Mintable_alias = ContractAlias.Lords_ERC20_Mintable
         self.Realms_ERC721_Mintable_alias = (
             "proxy_" + ContractAlias.Realms_ERC721_Mintable
         )

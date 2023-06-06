@@ -187,4 +187,4 @@ OBSTACLES = {
 
 DISCOVERY_TYPES = {0: "Nothing", 1: "Beast", 2: "Obstacle", 3: "Item", 4: "Adventurer"}
 
-ITEM_DISCOVERY_TYPES = {0: "Gold", 1: "XP", 2: "Loot", 3: "Health"}
+ITEM_DISCOVERY_TYPES = {0: "Gold", 1: "Loot", 2: "Health"}

@@ -3,6 +3,8 @@ from nile.common import get_class_hash
 from realms_cli.caller_invoker import wrapped_send, compile, wrapped_declare
 from realms_cli.config import Config
 from realms_cli.utils import delete_existing_deployment, delete_existing_declaration
+import argparse
+import asyncio
 
 Contracts = namedtuple("Contracts", "name")
 
@@ -30,14 +32,20 @@ NEW_MODULES = [
     # Contracts("Exchange_ERC20_1155"),
     # Contracts("Lords_ERC20_Mintable"),
     # Contracts("Bastions"),
-    Contracts("Adventurer"),
+    # Contracts("Adventurer"),
     Contracts("LootMarketArcade"),
-    Contracts("Beast"),
+    # Contracts("Beast"),
 ]
 
 
-async def run(nre):
-    config = Config(nre.network)
+async def run():
+    parser = argparse.ArgumentParser(
+        description="Gui accepts a network param to switch between"
+    )
+    parser.add_argument("network", help="Network of Starknet to interact the gui with.")
+    args = parser.parse_args()
+    network = args.network
+    config = Config(network)
 
     # ---------------- SET MODULES  ----------------#
 
@@ -46,9 +54,7 @@ async def run(nre):
 
         delete_existing_declaration(contract.name)
 
-        await wrapped_declare(
-            config.ADMIN_ALIAS, contract.name, nre.network, contract.name
-        )
+        await wrapped_declare(config.ADMIN_ALIAS, contract.name, network, contract.name)
 
         class_hash = get_class_hash(contract.name)
 
@@ -59,3 +65,7 @@ async def run(nre):
             function="upgrade",
             arguments=[class_hash],
         )
+
+
+if __name__ == "__main__":
+    asyncio.run(run())

@@ -2,7 +2,11 @@
 
 from starkware.cairo.common.uint256 import Uint256
 
-from contracts.loot.constants.adventurer import AdventurerState, PackedAdventurerState
+from contracts.loot.constants.adventurer import (
+    AdventurerState,
+    PackedAdventurerState,
+    AdventurerDynamic,
+)
 from contracts.loot.constants.beast import Beast, BeastStatic, BeastDynamic
 from contracts.loot.constants.item import Item, Bid
 
@@ -56,6 +60,8 @@ namespace ILoot {
     }
     func view_bid(market_item_id: Uint256) -> (bid: Bid) {
     }
+    func increase_xp(tokenId: Uint256, amount: felt) -> (updated_item: Item) {
+    }
 }
 
 @contract_interface
@@ -70,6 +76,7 @@ namespace IAdventurer {
         order: felt,
         image_hash_1: felt,
         image_hash_2: felt,
+        interface_address: felt,
     ) -> (adventurer_token_id: Uint256) {
     }
     func mint_with_starting_weapon(
@@ -81,6 +88,7 @@ namespace IAdventurer {
         image_hash_1: felt,
         image_hash_2: felt,
         weapon_id: felt,
+        interface_address: felt,
     ) -> (adventurer_token_id: Uint256, item_token_id: Uint256) {
     }
 
@@ -88,7 +96,7 @@ namespace IAdventurer {
     }
     func unequip_item(tokenId: Uint256, itemTokenId: Uint256) -> (success: felt) {
     }
-    func deduct_health(tokenId: Uint256, amount: felt) -> (success: felt) {
+    func deduct_health(tokenId: Uint256, amount: felt) -> (adventurer_dynamic: AdventurerDynamic) {
     }
     func increase_xp(tokenId: Uint256, amount: felt) -> (success: felt) {
     }
@@ -102,9 +110,7 @@ namespace IAdventurer {
     }
     func upgrade_stat(adventurer_token_id: Uint256, stat: felt) -> (success: felt) {
     }
-    func become_king(adventurer_token_id: Uint256) -> (success: felt) {
-    }
-    func pay_king_tribute() -> (success: felt) {
+    func update_adventurer(adventurer_token_id: Uint256, adventurer_dynamic: AdventurerDynamic) {
     }
 }
 
@@ -112,7 +118,7 @@ namespace IAdventurer {
 namespace IBeast {
     func initializer(proxy_admin: felt, address_of_controller: felt) {
     }
-    func create(adventurer_token_id: Uint256) -> (beast_token_id: Uint256) {
+    func create(adventurer_token_id: Uint256) -> (beast_token_id: Uint256, adventurer_dynamic: AdventurerDynamic) {
     }
     func attack(beast_token_id: Uint256) {
     }
@@ -133,7 +139,7 @@ namespace IBeast {
     func balance_of(adventurer_token_id: Uint256) -> (res: felt) {
     }
     func add_to_balance(adventurer_token_id: Uint256, addition: felt) {
-    } 
+    }
 }
 
 @contract_interface
@@ -147,5 +153,11 @@ namespace ILords {
     func mint(to: felt, amount: Uint256) {
     }
     func grant_role(role: felt, to: felt) {
+    }
+}
+
+@contract_interface
+namespace IXoroshiro {
+    func next() -> (rnd: felt) {
     }
 }

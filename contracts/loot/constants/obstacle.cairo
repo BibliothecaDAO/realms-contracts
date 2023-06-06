@@ -91,23 +91,23 @@ namespace ObstacleConstants {
     }
 
     namespace ObstacleDamageLocation {
-        const DemonicAlter = Slot.Head;
+        const DemonicAlter = Slot.Chest;
         const Curse = Slot.Head;
         const Hex = Slot.Hand;
-        const MagicLock = Slot.Hand;
-        const DarkMist = Slot.Chest;
+        const MagicLock = Slot.Waist;
+        const DarkMist = Slot.Foot;
 
         const CollapsingCeiling = Slot.Head;
-        const CrushingWalls = Slot.Waist;
-        const Rockslide = Slot.Foot;
+        const CrushingWalls = Slot.Chest;
+        const Rockslide = Slot.Waist;
         const TumblingBoulders = Slot.Foot;
-        const SwingingLogs = Slot.Chest;
+        const SwingingLogs = Slot.Hand;
 
-        const PendulumBlades = Slot.Hand;
-        const FlameJet = Slot.Waist;
-        const PoisonDart = Slot.Chest;
-        const SpikedPit = Slot.Foot;
-        const HiddenArrow = Slot.Waist;
+        const PendulumBlades = Slot.Waist;
+        const FlameJet = Slot.Foot;
+        const PoisonDart = Slot.Hand;
+        const SpikedPit = Slot.Chest;
+        const HiddenArrow = Slot.Head;
     }
 }
 
@@ -122,18 +122,20 @@ namespace ObstacleUtils {
         let (_, r) = unsigned_div_rem(rnd, ObstacleConstants.ObstacleIds.MAX);
         let obstacle_id = r + 1;
 
-        // We then determine the greatness/level of the obstacle
-        let is_less_than_base_level = is_le(adventurer_state.Level, BASE_OBSTACLE_LEVEL);
+        // Calculate a random obstacle level boost based on the adventurer level
+        let (obstacle_level_multi, _) = unsigned_div_rem(adventurer_state.Level, 5);
+        let obstacle_level_range = (1 + obstacle_level_multi) * 4;
+        let (_, obstacle_level_boost) = unsigned_div_rem(rnd, obstacle_level_range);
 
-        let (_, obstacle_level_base) = unsigned_div_rem(rnd, 6);
         // If the adventurer is less than the obstacle base level
+        let is_less_than_base_level = is_le(adventurer_state.Level, BASE_OBSTACLE_LEVEL);
         if (is_less_than_base_level == TRUE) {
-            // the obstacle level is always equal to the adventurer level
+            // use the adventurer level for the obstacle level
             tempvar obstacle_level = adventurer_state.Level;
         } else {
-            // if the adventurer's level is higher than the obstacle base level
-            // the level will be plus or minus 3 levels from their level (based on current base obstacle level of 3)
-            tempvar obstacle_level = obstacle_level_base + (
+            // if the adventurer's has made it past easy mode
+            // apply a random level boost to the obstacle which will increase with adventurers level
+            tempvar obstacle_level = obstacle_level_boost + (
                 adventurer_state.Level - BASE_OBSTACLE_LEVEL
             );
         }

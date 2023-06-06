@@ -24,6 +24,8 @@ class ModuleId(IntEnum):
     S_Crypts_Token = 1005
     S_Realms_Token = 1006
     Labor = 16
+    Bastions = 17
+
 
 # 1. Appoint new contract as Module
 # 2. Give write access to specific modules
@@ -36,7 +38,11 @@ async def run(nre):
     write_list = [
         [ModuleId.Combat.value, ModuleId.Labor.value],
         [ModuleId.Combat.value, ModuleId.Relics.value],
-        [ModuleId.Labor.value, ModuleId.Relics.value]
+        [ModuleId.Labor.value, ModuleId.Relics.value],
+        [ModuleId.Bastions.value, ModuleId.Travel.value],
+        [ModuleId.Bastions.value, ModuleId.Combat.value],
+        [ModuleId.Travel.value, ModuleId.Bastions.value],
+        [ModuleId.Combat.value, ModuleId.Bastions.value]
     ]
 
     await wrapped_send(

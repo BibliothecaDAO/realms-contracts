@@ -113,7 +113,7 @@ func decreaseAllowance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
 func mint{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     to: felt, amount: Uint256
 ) {
-    AccessControl.assert_only_role(MINT_ROLE);
+    // AccessControl.assert_only_role(MINT_ROLE);
     ERC20._mint(to, amount);
     return ();
 }

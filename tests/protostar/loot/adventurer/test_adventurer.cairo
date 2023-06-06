@@ -7,7 +7,17 @@ from starkware.cairo.common.math_cmp import is_nn, is_le
 from starkware.cairo.common.math import unsigned_div_rem, signed_div_rem
 from starkware.cairo.common.pow import pow
 
-from contracts.loot.constants.item import Item, ItemIds, ItemSlot, ItemType, ItemMaterial, Material
+from contracts.loot.constants.item import (
+    Item,
+    ItemIds,
+    ItemSlot,
+    ItemType,
+    ItemMaterial,
+    Material,
+    ItemNamePrefixes,
+    ItemNameSuffixes,
+    ItemSuffixes,
+)
 from contracts.loot.constants.rankings import ItemRank
 from contracts.loot.loot.stats.item import ItemStats
 from contracts.loot.constants.physics import MaterialDensity
@@ -17,9 +27,9 @@ from contracts.loot.constants.adventurer import (
     AdventurerState,
     AdventurerStatic,
     AdventurerDynamic,
-    PackedAdventurerState, 
+    PackedAdventurerState,
     AdventurerStatus,
-    DiscoveryType
+    DiscoveryType,
 )
 from contracts.loot.adventurer.library import AdventurerLib
 
@@ -45,7 +55,7 @@ func test_birth{
         TestAdventurerState.Birthdate,
         TestAdventurerState.Order,
         TestAdventurerState.ImageHash1,
-        TestAdventurerState.ImageHash2
+        TestAdventurerState.ImageHash2,
     );
 
     let (adventurer) = AdventurerLib.aggregate_data(adventurer_static, adventurer_dynamic);
@@ -143,6 +153,22 @@ func test_cast{
 }
 
 @external
+func test_get_state{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+
+    let (state) = get_adventurer_state();
+
+    let (adventurer_static, adventurer_dynamic) = AdventurerLib.split_data(state);
+
+    let (c) = AdventurerLib.get_state(0, adventurer_dynamic);
+
+    // Get 100 health
+    assert c = 100;
+
+    return ();
+}
+
+@external
 func test_equip{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }() {
@@ -188,7 +214,7 @@ func test_unequip{
     let (new_c) = AdventurerLib.unequip_item(item, c);
 
     assert new_c.WeaponId = 0;
-    
+
     return ();
 }
 
@@ -222,7 +248,7 @@ func test_assign_beast{
     syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }() {
     alloc_locals;
-    
+
     let (state) = get_adventurer_state();
 
     let (adventurer_static, adventurer_dynamic) = AdventurerLib.split_data(state);
@@ -240,7 +266,6 @@ func test_assign_beast{
 
 @external
 func test_discovery{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
-
     let (r) = AdventurerLib.get_random_discovery(1);
 
     assert r = DiscoveryType.Beast;
@@ -249,7 +274,8 @@ func test_discovery{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_
 }
 
 @external
-func test_upgrading{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
+func test_upgrading{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*
 }() {
     alloc_locals;
 
@@ -276,10 +302,10 @@ func test_upgrading{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_
 // Gold calculation is:
 // 1 + (rnd % 4)
 @external
-func test_calculate_gold_discovery{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+func test_calculate_gold_discovery{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    ) {
     alloc_locals;
-
-    let (gold_discovery) = AdventurerLib.calculate_gold_discovery(1);
+    let (gold_discovery) = AdventurerLib.calculate_gold_discovery(1, 1);
 
     assert gold_discovery = 2;
 
@@ -290,7 +316,9 @@ func test_calculate_gold_discovery{syscall_ptr: felt*, pedersen_ptr: HashBuiltin
 // Health calculation is:
 // 10 + (5 * (rnd % 4))
 @external
-func test_calculate_health_discovery{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+func test_calculate_health_discovery{
+    syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
+}() {
     alloc_locals;
 
     let (health_discovery) = AdventurerLib.calculate_health_discovery(0);
@@ -304,12 +332,87 @@ func test_calculate_health_discovery{syscall_ptr: felt*, pedersen_ptr: HashBuilt
 // Xp calculation is:
 // 10 + (5 * (rnd % 4))
 @external
-func test_calculate_xp_discovery{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+func test_calculate_xp_discovery{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    ) {
     alloc_locals;
 
-    let (xp_discovery) = AdventurerLib.calculate_xp_discovery(0);
+    let (xp_discovery) = AdventurerLib.calculate_xp_discovery(0, 1);
 
-    assert xp_discovery = 10;
+    assert xp_discovery = 1;
+
+    return ();
+}
+
+// @notice Tests apply item stat boost calculation
+@external
+func test_item_stat_boost{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
+    alloc_locals;
+
+    let (state) = get_adventurer_state();
+
+    let (adventurer_static, adventurer_dynamic) = AdventurerLib.split_data(state);
+
+    // Strength
+    let (strength_item) = TestUtils.create_item_with_names(
+        ItemIds.Katana, 15, 1, 1, ItemSuffixes.of_Power
+    );
+    // Vitality
+    let (vitality_item) = TestUtils.create_item_with_names(
+        ItemIds.Katana, 16, 1, 1, ItemSuffixes.of_Giant
+    );
+    // Dexterity
+    let (dexterity_item) = TestUtils.create_item_with_names(
+        ItemIds.Katana, 17, 1, 1, ItemSuffixes.of_Titans
+    );
+    // Intelligence
+    let (intelligence_item) = TestUtils.create_item_with_names(
+        ItemIds.Katana, 18, 1, 1, ItemSuffixes.of_Skill
+    );
+    // Wisdom
+    let (wisdom_item) = TestUtils.create_item_with_names(
+        ItemIds.Katana, 19, 1, 1, ItemSuffixes.of_Enlightenment
+    );
+    // Intelligence with +1 modifier
+    let (intelligence_item_g20) = TestUtils.create_item_with_names(
+        ItemIds.Katana, 20, 1, 1, ItemSuffixes.of_Skill
+    );
+    // Luck
+    let (luck_item) = TestUtils.create_item_with_names(
+        ItemIds.Necklace, 20, 1, 1, ItemSuffixes.of_Enlightenment
+    );
+
+    let (strength_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(
+        strength_item, adventurer_dynamic
+    );
+    let (vitality_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(
+        vitality_item, adventurer_dynamic
+    );
+    let (dexterity_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(
+        dexterity_item, adventurer_dynamic
+    );
+    let (intelligence_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(
+        intelligence_item, adventurer_dynamic
+    );
+    let (wisdom_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(
+        wisdom_item, adventurer_dynamic
+    );
+    let (luck_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(
+        luck_item, adventurer_dynamic
+    );
+
+    assert strength_boosted_adventurer.Strength = 3;
+    assert vitality_boosted_adventurer.Vitality = 3;
+    assert dexterity_boosted_adventurer.Dexterity = 3;
+    assert intelligence_boosted_adventurer.Intelligence = 3;
+    assert wisdom_boosted_adventurer.Wisdom = 3;
+    // luck scales evenly with greatness of necklace is 20
+    assert luck_boosted_adventurer.Luck = 20;
+
+    // greatness 20 (+1) item should add an additional stat point
+    let (g20_intelligence_boosted_adventurer) = AdventurerLib.apply_item_stat_modifier(
+        intelligence_item_g20, adventurer_dynamic
+    );
+    assert g20_intelligence_boosted_adventurer.Intelligence = 4;
 
     return ();
 }

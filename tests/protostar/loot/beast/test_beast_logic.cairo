@@ -43,7 +43,9 @@ func __setup__{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     IRealms.set_realm_data(addresses.realms, Uint256(13, 0), 'Test Realm', 1);
 
     %{ stop_prank_lords() %}
-    IAdventurer.mint(addresses.adventurer, addresses.account_1, 4, 10, 'Test', 8, 1, 1);
+    IAdventurer.mint(
+        addresses.adventurer, addresses.account_1, 4, 10, 'Test', 8, 1, 1, addresses.account_1
+    );
     ILoot.mint(addresses.loot, addresses.account_1, Uint256(1, 0));
     %{
         stop_prank_loot()
@@ -78,7 +80,9 @@ func test_create{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
         stop_mock = mock_call(ids.xoroshiro_address, 'next', [0])
     %}
 
-    let (beast_id) = IBeast.create(beast_address, Uint256(1, 0));
+    let adventurer_token_id = Uint256(1, 0);
+
+    let (beast_id, adventurer) = IBeast.create(beast_address, adventurer_token_id);
 
     let (beast) = IBeast.get_beast_by_id(beast_address, beast_id);
 
@@ -93,6 +97,12 @@ func test_create{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr
     assert beast.XP = 0;
     assert beast.Level = 1;
     assert beast.SlainOnDate = 0;
+
+    // @loothero TODO: Need to verify ambush is working following via:
+    // using proper xoroshiro cheat to stage the RNG - should do an ambush and non-ambush
+    // Adventurer must be higher than level 1 for ambush to be possible
+    // let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, adventurer_token_id);
+    // assert adventurer.Health = 76;
 
     return ();
 }
@@ -149,8 +159,7 @@ func test_not_kill{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
 
     assert updated_beast.Id = 2;
     assert updated_beast.Level = 2;
-    // since we have overwritten adventurer (made level 2 and so removed wand) we will do no damage
-    assert updated_beast.Health = original_beast.Health;
+    assert updated_beast.Health = 9;
 
     let (updated_adventurer) = IAdventurer.get_adventurer_by_id(
         adventurer_address, adventurer_token_id_1
@@ -267,7 +276,7 @@ func test_ambushed{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_p
 
     let (adventurer) = IAdventurer.get_adventurer_by_id(adventurer_address, Uint256(1, 0));
 
-    assert adventurer.Status = AdventurerStatus.Battle;
+    assert adventurer.Status = AdventurerStatus.Idle;
 
     return ();
 }
@@ -335,7 +344,7 @@ func test_increase_xp{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     %}
 
     let beast_token_id = Uint256(1, 0);
-    let (beast_id) = IBeast.create(beast_address, beast_token_id);
+    let (beast_id, adventurer) = IBeast.create(beast_address, beast_token_id);
     let (beast) = IBeast.get_beast_by_id(beast_address, beast_token_id);
     let (_, beast_dynamic) = BeastLib.split_data(beast);
 

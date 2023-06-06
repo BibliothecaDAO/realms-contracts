@@ -12,7 +12,7 @@ total = 8000
 total_sets = 160
 
 
-def run(nre):
+async def run(nre):
 
     config = Config(nre.network)
 
@@ -23,7 +23,7 @@ def run(nre):
 
     for set, i in enumerate(range(total_sets)):
 
-        myList = list(range((i * per_set), (per_set * (i + 1))))
+        myList = list(range(((4+i) * per_set), (per_set * ((4+i) + 1))))
 
         calldata = [
             [id + 1, 0, str_to_felt(realms[str(id + 1)]['name']), map_realm(realms[str(id + 1)],
@@ -32,7 +32,7 @@ def run(nre):
         ]
         print(calldata)
 
-        wrapped_send(
+        await wrapped_send(
             network=config.nile_network,
             signer_alias=config.ADMIN_ALIAS,
             contract_alias=config.Realms_ERC721_Mintable_alias,

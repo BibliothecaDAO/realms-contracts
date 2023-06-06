@@ -6,7 +6,7 @@ from starkware.cairo.common.math_cmp import is_le
 from starkware.starknet.common.syscalls import get_block_timestamp
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 
-from contracts.loot.constants.item import Item, NamePrefixLength, NameSuffixLength, ItemSuffixLength
+from contracts.loot.constants.item import Item, Slot, NamePrefixLength, NameSuffixLength, ItemSuffixLength
 from contracts.loot.loot.stats.item import ItemStats
 from contracts.settling_game.utils.general import unpack_data
 
@@ -81,7 +81,7 @@ namespace ItemLib {
         let (_, r) = unsigned_div_rem(rnd, 100);
 
         // set blank item
-        let Id = rnd + 1;
+        let Id = r + 1;
         let (Slot) = ItemStats.item_slot(Id);  // determined by Id
         let (Type) = ItemStats.item_type(Id);  // determined by Id
         let (Material) = ItemStats.item_material(Id);  // determined by Id
@@ -307,47 +307,7 @@ namespace ItemLib {
 
         let (_, index) = unsigned_div_rem(new_rnd, NamePrefixLength);
         let (name_prefix) = ItemStats.item_name_prefix(index + 1);
-        // verify if the prefix can be selected
-        // banned prefixes are the ones that will never be selected due to
-        // the greatness >= 19 condition in the original Loot
-        let (is_banned) = ItemStats.loot_banned_name(name_prefix - 1);
-        if (is_banned == 1) {
-            // if banned select the next prefix
-            let new_rnd = new_rnd + 1;
-            let (_, index) = unsigned_div_rem(new_rnd, NamePrefixLength);
-            let (name_prefix) = ItemStats.item_name_prefix(index + 1);
-            return (name_prefix,);
-        } else {
-            return (name_prefix,);
-        }
-    }
-
-    // @notice Assigns a name suffix to a Loot item using the same schema as the OG Loot Contract
-    // @param item: The Loot Item you want to assign a name suffix to
-    // @param rnd: A random number
-    // @return updated_item: The provided item with a canoncially sound name suffix added
-    func assign_item_name_suffix{syscall_ptr: felt*, range_check_ptr}(item: Item, rnd: felt) -> (
-        updated_item: Item
-    ) {
-        let (updated_name_suffix) = generate_name_suffix(item.id, rnd);
-
-        let updated_item = Item(
-            Id=item.Id,
-            Slot=item.Slot,
-            Type=item.Type,
-            Material=item.Material,
-            Rank=item.Rank,
-            Prefix_1=item.Prefix_1,
-            Prefix_2=updated_name_suffix,
-            Suffix=item.Suffix,
-            Greatness=item.Greatness,
-            CreatedBlock=item.CreatedBlock,
-            XP=item.XP,
-            Adventurer=item.Adventurer,
-            Bag=item.Bag,
-        );
-
-        return updated_item;
+        return (name_prefix,);
     }
 
     // @notice Returns a name suffix for the provided item that is consistent with the Loot Contract
@@ -395,19 +355,51 @@ namespace ItemLib {
 
         let (_, index) = unsigned_div_rem(new_rnd, NameSuffixLength);
         let (name_suffix) = ItemStats.item_name_suffix(index + 1);
-        // verify if the suffix can be selected
-        // banned suffixes are the ones that will never be selected due to
-        // the greatness > 14 condition in the original Loot
         let (is_banned) = ItemStats.loot_banned_name(name_suffix - 1);
-        if (is_banned == 1) {
-            // if banned select the next suffix
-            let new_rnd = new_rnd + 1;
-            let (_, index) = unsigned_div_rem(new_rnd, NameSuffixLength);
-            let (name_suffix) = ItemStats.item_name_suffix(index + 1);
-            return (name_suffix,);
+        if (item_slot == Slot.Ring) {
+            if (is_banned == 1) {
+                // if banned select the next suffix
+                let (_, increment_rnd) = unsigned_div_rem(rnd, 2);
+                let new_rnd = new_rnd + increment_rnd + 1;
+                let (_, index) = unsigned_div_rem(new_rnd, NameSuffixLength);
+                let (name_suffix) = ItemStats.item_name_suffix(index + 1);
+                return (name_suffix,);
+            } else {
+                return (name_suffix,);
+            }
         } else {
             return (name_suffix,);
         }
+    }
+
+    // @notice Assigns a name prefix to a Loot item using the same schema as the OG Loot Contract
+    // @param item: The Loot Item you want to assign a name prefix to
+    // @param rnd: A random number
+    // @return updated_item: The provided item with a canoncially sound name prefix added
+    func assign_item_name_prefixes{syscall_ptr: felt*, range_check_ptr}(item: Item, rnd: felt) -> (
+        updated_item: Item
+    ) {
+        alloc_locals;
+        let (local updated_name_prefix) = generate_name_prefix(item.Id, rnd);
+        let (updated_name_suffix) = generate_name_suffix(item.Id, rnd);
+
+        let updated_item = Item(
+            Id=item.Id,
+            Slot=item.Slot,
+            Type=item.Type,
+            Material=item.Material,
+            Rank=item.Rank,
+            Prefix_1=updated_name_prefix,
+            Prefix_2=updated_name_suffix,
+            Suffix=item.Suffix,
+            Greatness=item.Greatness,
+            CreatedBlock=item.CreatedBlock,
+            XP=item.XP,
+            Adventurer=item.Adventurer,
+            Bag=item.Bag,
+        );
+
+        return (updated_item,);
     }
 
     // @notice Assigns a suffix to a Loot item using the same schema as the OG Loot Contract

@@ -6,6 +6,8 @@
 
 %lang starknet
 
+const ITEM_XP_MULTIPLIER = 3;
+
 namespace State {
     const Bagged = 0;  // protected in a loot bag
     const Equipped = 1;  // equipped on an adventurer
@@ -812,24 +814,25 @@ namespace ItemNamePrefixes {
     const Plague = 50;
     const Rage = 51;
     const Rapture = 52;
-    const Rune = 52;
-    const Skull = 53;
-    const Sol = 54;
-    const Soul = 55;
-    const Sorrow = 56;
-    const Spirit = 57;
-    const Storm = 58;
-    const Tempest = 59;
-    const Torment = 60;
-    const Vengeance = 61;
-    const Victory = 62;
-    const Viper = 63;
-    const Vortex = 64;
-    const Woe = 65;
-    const Wrath = 66;
-    const Lights = 67;
-    const Shimmering = 68;
+    const Rune = 53;
+    const Skull = 54;
+    const Sol = 55;
+    const Soul = 56;
+    const Sorrow = 57;
+    const Spirit = 58;
+    const Storm = 59;
+    const Tempest = 60;
+    const Torment = 61;
+    const Vengeance = 62;
+    const Victory = 63;
+    const Viper = 64;
+    const Vortex = 65;
+    const Woe = 66;
+    const Wrath = 67;
+    const Lights = 68;
+    const Shimmering = 69;
 }
+const ITEM_NAME_PREFIXES_COUNT = 69;
 
 namespace ItemNameSuffixes {
     const Bane = 1;
@@ -852,6 +855,8 @@ namespace ItemNameSuffixes {
     const Moon = 18;
 }
 
+const ITEM_NAME_SUFFIXES_COUNT = 18;
+
 namespace ItemSuffixes {
     const of_Power = 1;
     const of_Giant = 2;
@@ -870,3 +875,4 @@ namespace ItemSuffixes {
     const of_Reflection = 15;
     const of_the_Twins = 16;
 }
+const ITEM_SUFFIXES_COUNT = 16;
